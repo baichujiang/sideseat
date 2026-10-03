@@ -2,7 +2,6 @@ import { v1Success } from "@/lib/api/v1/http";
 import { isStoreKitSupportEnabled } from "@/lib/api/v1/storekit-catalog";
 import { DEFAULT_DISCOVER_SERVED_CITY } from "@/lib/discover/discover-city-name-keys";
 import { DISCOVER_SERVED_CITIES } from "@/lib/discover/discover-served-cities";
-import { isDashScopeConfigured } from "@/lib/llm/dashscope";
 import { nativeClientApnsFeatures } from "@/lib/push/apns-env";
 import { v2ClientFeatures } from "@/lib/v2/feature-flags";
 
@@ -20,7 +19,7 @@ export function GET(request: Request) {
       },
       features: {
         nativeAuthentication: true,
-        naturalLanguageSchedule: isDashScopeConfigured(),
+        naturalLanguageSchedule: true,
         storeKitSupport: isStoreKitSupportEnabled(),
         ...nativeClientApnsFeatures(),
         ...v2ClientFeatures(),

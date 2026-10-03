@@ -40,6 +40,8 @@ targets:
       - path: SideSeat
         excludes:
           - Resources/Preview Content
+      - path: ../lib/calendar/CalendarSmartInputPolicy.json
+        buildPhase: resources
     info:
       path: SideSeat/Resources/Info.plist
       properties:

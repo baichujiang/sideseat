@@ -21,7 +21,6 @@ struct CalendarSmartAddView: View {
     @State private var showsSourceImage = false
     @State private var voicePrefix = ""
     @State private var voiceStartTask: Task<Void, Never>?
-    @State private var showWarningDetails = false
     @State private var editingDraft: NativeCalendarNaturalDraft?
     @State private var selectedPresentationDetent = SSSheetPresentation.adaptiveInput
     @FocusState private var isInputFocused: Bool
@@ -366,11 +365,6 @@ struct CalendarSmartAddView: View {
                 eventCount: store.drafts.count,
                 dateRange: previewDateRange
             )
-
-            if !store.warnings.isEmpty {
-                Divider()
-                warningDisclosure
-            }
         }
         .padding(SideSeatTheme.spaceLG)
         .background(
@@ -381,7 +375,7 @@ struct CalendarSmartAddView: View {
         ForEach(previewDayGroups) { group in
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 HStack {
-                    Text(group.day.formatted(.dateTime.weekday(.wide).month(.wide).day()))
+                    Text(group.day.formatted(smartInputDateStyle.weekday(.wide).month(.wide).day()))
                         .font(.headline)
                         .foregroundStyle(SideSeatTheme.textPrimary)
                     Spacer()
@@ -413,42 +407,6 @@ struct CalendarSmartAddView: View {
                 )
             }
         }
-    }
-
-    private var warningDisclosure: some View {
-        DisclosureGroup(isExpanded: $showWarningDetails) {
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(Array(store.warnings.enumerated()), id: \.offset) { _, warning in
-                    HStack(alignment: .top, spacing: 8) {
-                        Circle()
-                            .fill(SideSeatTheme.warning)
-                            .frame(width: 5, height: 5)
-                            .padding(.top, 7)
-                        Text(warning)
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-            .padding(.top, 8)
-        } label: {
-            Label {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(reviewDetailCountLabel)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                    Text("Smart add made a few assumptions.")
-                        .font(.caption)
-                        .foregroundStyle(SideSeatTheme.textSecondary)
-                }
-            } icon: {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(SideSeatTheme.warning)
-            }
-        }
-        .tint(SideSeatTheme.textSecondary)
-        .accessibilityIdentifier("smart-schedule-warning-summary")
     }
 
     @ViewBuilder
@@ -626,18 +584,11 @@ struct CalendarSmartAddView: View {
         let dates = store.drafts.compactMap { CalendarSmartDateParser.parse($0.startAt) }
         guard let first = dates.min(), let last = dates.max() else { return "" }
         if Calendar.sideSeatBerlin.isDate(first, inSameDayAs: last) {
-            return first.formatted(.dateTime.year().month(.abbreviated).day())
+            return first.formatted(smartInputDateStyle.year().month(.abbreviated).day())
         }
-        return first.formatted(.dateTime.month(.abbreviated).day())
+        return first.formatted(smartInputDateStyle.year().month(.abbreviated).day())
             + " – "
-            + last.formatted(.dateTime.month(.abbreviated).day())
-    }
-
-    private var reviewDetailCountLabel: String {
-        String.localizedStringWithFormat(
-            AppLocalization.string( "%lld details to review"),
-            store.warnings.count
-        )
+            + last.formatted(smartInputDateStyle.year().month(.abbreviated).day())
     }
 
     private var addEventsLabel: String {
@@ -648,7 +599,6 @@ struct CalendarSmartAddView: View {
     }
 
     private func startOver() {
-        showWarningDetails = false
         store = CalendarSmartAddStore()
         isInputFocused = false
         selectedPresentationDetent = SSSheetPresentation.adaptiveInput
@@ -673,7 +623,6 @@ struct CalendarSmartAddView: View {
     }
 
     private func parse() async {
-        showWarningDetails = false
         let language = Locale.current.language.languageCode?.identifier == "zh" ? "zh-CN" : "en"
         await store.parse(text: text, locale: language, using: session)
     }
@@ -738,10 +687,10 @@ private struct CalendarSmartDraftRow: View {
                    let end = CalendarSmartDateParser.parse(draft.endAt)
                 {
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text(start.formatted(date: .omitted, time: .shortened))
+                        Text(start.formatted(smartInputDateStyle.hour().minute()))
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textPrimary)
-                        Text(end.formatted(date: .omitted, time: .shortened))
+                        Text(end.formatted(smartInputDateStyle.hour().minute()))
                             .font(.caption)
                             .foregroundStyle(SideSeatTheme.textSecondary)
                     }
@@ -758,6 +707,14 @@ private struct CalendarSmartDraftRow: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .lineLimit(2)
+
+                    if let start = CalendarSmartDateParser.parse(draft.startAt),
+                       let end = CalendarSmartDateParser.parse(draft.endAt),
+                       !Calendar.sideSeatBerlin.isDate(start, inSameDayAs: end) {
+                        Text(end.formatted(smartInputDateStyle.month(.abbreviated).day().weekday(.abbreviated).hour().minute()))
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondary)
+                    }
 
                     if !draft.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Label(draft.location, systemImage: "mappin.and.ellipse")
@@ -840,7 +797,7 @@ private struct CalendarSmartDraftEditorView: View {
         let now = CalendarEventTiming.snappedUpToSelectionStep(Date())
         let start = CalendarSmartDateParser.parse(draft.startAt) ?? now
         let end = CalendarSmartDateParser.parse(draft.endAt)
-            ?? start.addingTimeInterval(CalendarEventTiming.defaultDuration)
+            ?? start.addingTimeInterval(TimeInterval(CalendarSmartInputDefaults.shared.defaultMinutes * 60))
         let rule = NativeCalendarRepeatRule(rawValue: draft.repeatRule) ?? .none
         let repeatEnd = CalendarSmartDateParser.parse(draft.repeatUntil)
             ?? Calendar.sideSeatBerlin.date(byAdding: .month, value: 1, to: start)
@@ -871,7 +828,7 @@ private struct CalendarSmartDraftEditorView: View {
                     repeatUntil: $repeatUntil,
                     repeatHasEnd: $repeatHasEnd,
                     categories: categories,
-                    preservesLegacyOffGridTimes: false,
+                    preservesLegacyOffGridTimes: true,
                     focusedField: $focusedField,
                     companionIDs: .constant([])
                 )
@@ -969,4 +926,8 @@ private enum CalendarSmartDateParser {
     static func isEarlier(_ lhs: NativeCalendarNaturalDraft, _ rhs: NativeCalendarNaturalDraft) -> Bool {
         (parse(lhs.startAt) ?? .distantPast) < (parse(rhs.startAt) ?? .distantPast)
     }
+}
+
+private var smartInputDateStyle: Date.FormatStyle {
+    Date.FormatStyle(date: .omitted, time: .omitted, calendar: .sideSeatBerlin, timeZone: Calendar.sideSeatBerlin.timeZone)
 }

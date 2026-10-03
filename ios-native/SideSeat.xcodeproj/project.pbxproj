@@ -23,6 +23,7 @@
 		0F1FAE755407EA1853941117 /* ProfileStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CFEC8F4D75CC777D4FBDF5 /* ProfileStores.swift */; };
 		0F9BCBBA4EF93D497D1320BC /* CalendarChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF0D8FA9E2DF899C1CA0A97D /* CalendarChrome.swift */; };
 		0FEDAAF7A0206801D67A34EC /* StoreKitModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5989ECB14FAD6FA2713CB01F /* StoreKitModels.swift */; };
+		102EA4E8A5B005C808FF533C /* CalendarSmartInputDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C04483F7C4A1007527A63A2 /* CalendarSmartInputDefaults.swift */; };
 		145ADCC10075B97BBD3230EF /* ExploreIntentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4ED838F558F56B6675F212F /* ExploreIntentStore.swift */; };
 		14D3749C8502D1C21E10F618 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 51286BDBA9A1C5477AB47C37 /* Sentry */; };
 		156332781A11E1CFD326469D /* SmartTimeSuggestionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F41614CFB80329D132C73F /* SmartTimeSuggestionSheet.swift */; };
@@ -172,6 +173,7 @@
 		CA31652EA2F547F5808E0401 /* HomeWeekTimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFBE1FE825C1633DB8C3E2D /* HomeWeekTimetableView.swift */; };
 		CED0E87BF207BC73E506B34D /* SideSeatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D3411983EFB3808E94B856 /* SideSeatApp.swift */; };
 		CF1995B97F5C7776EEB67C50 /* CalendarDayTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AEF74EA0D86C379B0C1ECD6 /* CalendarDayTimelineView.swift */; };
+		D08954EB796596A5D2E6AB92 /* CalendarSmartInputPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = AF002FFED2B34C2454F5F507 /* CalendarSmartInputPolicy.json */; };
 		D32D66E98FDB83D7E182442B /* SSPlusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF3A0E7F015CCE6FC2772477 /* SSPlusBadge.swift */; };
 		D3C60E94F11E57B4E3A907D5 /* CalendarTransferStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 799A8270E2BCDE41A83A57B8 /* CalendarTransferStore.swift */; };
 		D3F1A79AEA6DD5DCE3BB330F /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E4F9ED145119860B00693A89 /* PrivacyInfo.xcprivacy */; };
@@ -246,6 +248,7 @@
 		28B11CE999B48C0D30C39E10 /* SessionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStoreTests.swift; sourceTree = "<group>"; };
 		28D4377A9632FA4FF3206223 /* CalendarCategoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCategoryListView.swift; sourceTree = "<group>"; };
 		2994C3E92F406A2707D7361E /* CoursesLiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesLiveUITests.swift; sourceTree = "<group>"; };
+		2C04483F7C4A1007527A63A2 /* CalendarSmartInputDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSmartInputDefaults.swift; sourceTree = "<group>"; };
 		2C6045F7F931B6BBCE7736F0 /* MembershipStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MembershipStore.swift; sourceTree = "<group>"; };
 		2DCA9EDEBD8EB96EB222260F /* GroupChatManageModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupChatManageModels.swift; sourceTree = "<group>"; };
 		2DFBE1FE825C1633DB8C3E2D /* HomeWeekTimetableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWeekTimetableView.swift; sourceTree = "<group>"; };
@@ -355,6 +358,7 @@
 		A7DB4CDB43D47ECF6D2D4BAE /* CalendarAgendaListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAgendaListView.swift; sourceTree = "<group>"; };
 		A9E5DAE668D58722F5C01566 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		A9F262109DEABEB86CBB96C5 /* CourseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailView.swift; sourceTree = "<group>"; };
+		AF002FFED2B34C2454F5F507 /* CalendarSmartInputPolicy.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = CalendarSmartInputPolicy.json; sourceTree = "<group>"; };
 		AF63124AA170A11C705B9D6B /* CourseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseListView.swift; sourceTree = "<group>"; };
 		AF7DEEFE1BFFD55F7F04FD8B /* SSShareComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSShareComponents.swift; sourceTree = "<group>"; };
 		AFEC8CC429F52B57F4CF3F85 /* ProductTutorialController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductTutorialController.swift; sourceTree = "<group>"; };
@@ -526,6 +530,7 @@
 				7CCB06D77347B4207E25CF13 /* CalendarSmartAddModels.swift */,
 				F2F9B1D8217108C54A294505 /* CalendarSmartAddStore.swift */,
 				82E40DE4CD91068AA6B73C09 /* CalendarSmartAddView.swift */,
+				2C04483F7C4A1007527A63A2 /* CalendarSmartInputDefaults.swift */,
 				A02567893D80FDF128456D3C /* CalendarTimelineScrollAnchor.swift */,
 				48D6461C672158775F8E93A2 /* CalendarTransferModels.swift */,
 				799A8270E2BCDE41A83A57B8 /* CalendarTransferStore.swift */,
@@ -615,6 +620,7 @@
 			children = (
 				B007603B6036D39E060E1C0C /* Configuration */,
 				4CAFBE5D980943DD354849DC /* SideSeat */,
+				A274E6093FC35164A5491F28 /* Sideseat-ios-uxui */,
 				0C31CEC0CBC9584FBEEF82B5 /* SideSeatTests */,
 				3AB1867B6EDA9A02D6D2D8F1 /* SideSeatUITests */,
 				347F631F72D4FDA3E3E12ABB /* Products */,
@@ -689,6 +695,14 @@
 			path = Features;
 			sourceTree = "<group>";
 		};
+		8B3C138149CBDAE47DB307E8 /* calendar */ = {
+			isa = PBXGroup;
+			children = (
+				AF002FFED2B34C2454F5F507 /* CalendarSmartInputPolicy.json */,
+			);
+			path = calendar;
+			sourceTree = "<group>";
+		};
 		8BC7E6A01377F7D4AF1934E3 /* Auth */ = {
 			isa = PBXGroup;
 			children = (
@@ -714,6 +728,15 @@
 				3C2047C3A354B99FCC0B518C /* SideSeatAppDelegate.swift */,
 			);
 			path = Push;
+			sourceTree = "<group>";
+		};
+		A274E6093FC35164A5491F28 /* Sideseat-ios-uxui */ = {
+			isa = PBXGroup;
+			children = (
+				DEFDAB9ECBC2E3CD4C7DBCCA /* lib */,
+			);
+			name = "Sideseat-ios-uxui";
+			path = ..;
 			sourceTree = "<group>";
 		};
 		A2E3C0C84892EC4E2CEB0803 /* Profile */ = {
@@ -843,6 +866,14 @@
 				125E4B37FD7D44B65F061093 /* ClientConfigurationStore.swift */,
 			);
 			path = Configuration;
+			sourceTree = "<group>";
+		};
+		DEFDAB9ECBC2E3CD4C7DBCCA /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				8B3C138149CBDAE47DB307E8 /* calendar */,
+			);
+			path = lib;
 			sourceTree = "<group>";
 		};
 		F0EB82FDE2009A6859166FBC /* Courses */ = {
@@ -999,6 +1030,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FDDCFDAB395C12F9BFA90219 /* Assets.xcassets in Resources */,
+				D08954EB796596A5D2E6AB92 /* CalendarSmartInputPolicy.json in Resources */,
 				0A2F26B54A0C6AE985BC285C /* InfoPlist.strings in Resources */,
 				76C7AB994F965F1115771AED /* Localizable.strings in Resources */,
 				D3F1A79AEA6DD5DCE3BB330F /* PrivacyInfo.xcprivacy in Resources */,
@@ -1088,6 +1120,7 @@
 				1ECC26E920DE0A1F88DC73EB /* CalendarSmartAddModels.swift in Sources */,
 				B60DC1B70CCCB2115A605C52 /* CalendarSmartAddStore.swift in Sources */,
 				4551268BD3F3306EE05F11F7 /* CalendarSmartAddView.swift in Sources */,
+				102EA4E8A5B005C808FF533C /* CalendarSmartInputDefaults.swift in Sources */,
 				420811ECC1989B461B3F676B /* CalendarTimelineScrollAnchor.swift in Sources */,
 				744825C1623226FC9702C827 /* CalendarTransferModels.swift in Sources */,
 				D3C60E94F11E57B4E3A907D5 /* CalendarTransferStore.swift in Sources */,

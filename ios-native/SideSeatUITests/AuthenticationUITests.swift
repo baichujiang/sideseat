@@ -3513,11 +3513,12 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["smart-schedule-view"].exists)
     }
 
-    func testSmartScheduleDensePreviewIsGroupedAndKeepsWarningsCollapsed() {
+    func testSmartScheduleDensePreviewIsGroupedWithoutInferenceWarnings() {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-authenticated",
             "--ui-testing-smart-schedule-dense",
+            "--ui-testing-smart-schedule",
         ]
         app.launch()
 
@@ -3537,8 +3538,7 @@ final class AuthenticationUITests: XCTestCase {
         let summary = app.descendants(matching: .any)["smart-schedule-result-summary"]
         XCTAssertTrue(summary.waitForExistence(timeout: 3))
         let warning = app.descendants(matching: .any)["smart-schedule-warning-summary"]
-        XCTAssertTrue(warning.waitForExistence(timeout: 3))
-        XCTAssertLessThan(warning.frame.height, 90)
+        XCTAssertFalse(warning.exists)
         XCTAssertFalse(app.staticTexts["The title may need review."].exists)
 
         let save = app.buttons["smart-schedule-save"]

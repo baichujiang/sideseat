@@ -1,0 +1,15 @@
+{
+  "version": "1.1",
+  "timeZone": "Europe/Berlin",
+  "defaultMinutes": 30,
+  "shortErrandMinutes": 15,
+  "activityMinutes": 60,
+  "roundingMinutes": 30,
+  "morningHour": 9,
+  "noonHour": 12,
+  "afternoonHour": 14,
+  "eveningHour": 19,
+  "colloquialTomorrowBeforeHour": 4,
+  "shortErrandPattern": "取(?:充电线|快递|包裹)|拿(?:充电线|快递|包裹)|还书|(?:pick up|collect) (?:a |the |my )?(?:cable|charger|parcel|package)|return (?:a |the |my )?books?",
+  "activityPattern": "开会|会议|学习|自习|运动|健身|跑步|游泳|打球|吃饭|午餐|晚餐|早餐|聚餐|meeting|study|studying|workout|exercise|swimming|running|lunch|dinner|breakfast|meal"
+}

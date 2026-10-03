@@ -159,10 +159,12 @@ struct CalendarSmartAddStoreTests {
         #expect(await transport.parseText == "Tomorrow at 3")
         #expect(await transport.parseLocale == "en")
         #expect(draft.title == "Library study")
-        #expect(store.warnings == ["Check time"])
+        #expect(store.originalText == "Tomorrow at 3")
+        #expect(await transport.savedTitles.isEmpty)
 
         var editedDraft = draft
         editedDraft.title = "Updated library study"
+        editedDraft.endAt = "2026-07-18T15:20:00.000Z"
         editedDraft.location = "Quiet room"
         editedDraft.note = "Bring notes"
         editedDraft.repeatRule = "WEEKLY"
@@ -174,12 +176,50 @@ struct CalendarSmartAddStoreTests {
         #expect(store.drafts.first?.repeatRule == "WEEKLY")
         #expect(await store.save(using: session))
         #expect(await transport.savedTitles == ["Updated library study"])
+        #expect(await transport.savedEnds == ["2026-07-18T15:20:00.000Z"], "EX-13: explicit edits outrank defaults")
         #expect(await transport.savedCategoryIDs == ["category-2"])
         #expect(await transport.idempotencyKey?.isEmpty == false)
 
         store.removeDraft(withID: draft.id)
         #expect(store.drafts.isEmpty)
-        #expect(store.warnings.isEmpty)
+    }
+
+    @Test("SI-08: offline parse yields a basic editable draft; failed save preserves it and the full input")
+    @MainActor
+    func offlineDraftAndFailedSave() async throws {
+        let transport = CalendarSmartAddTestTransport(parseUnavailable: true, saveUnavailable: true)
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let store = CalendarSmartAddStore()
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-03T12:12:00Z"))
+        let source = String(repeating: "办事", count: 100)
+        await store.parse(text: source, locale: "zh-CN", using: session, referenceTime: now)
+        let draft = try #require(store.drafts.first)
+        #expect(store.issue == nil)
+        #expect(store.originalText == source)
+        #expect(draft.title.utf16.count == 120)
+        #expect(draft.startAt == "2026-10-03T12:30:00Z")
+        #expect(draft.endAt == "2026-10-03T13:00:00Z")
+        #expect(draft.location.isEmpty && draft.note.isEmpty)
+        #expect(await transport.savedTitles.isEmpty)
+        #expect(await store.save(using: session) == false)
+        #expect(store.issue != nil)
+        #expect(store.drafts.first?.id == draft.id)
+        #expect(store.originalText == source)
+    }
+
+    @Test("SI-04/SI-05: shared fallback durations and strict next boundary")
+    func sharedFallbackPolicy() throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-10-03T21:50:00Z"))
+        for (text, minutes) in [("取充电线", 15), ("开会", 60), ("学习", 60), ("办事", 30)] {
+            let draft = CalendarSmartInputDefaults.shared.basicDraft(text: text, referenceTime: now)
+            #expect(draft.startAt == "2026-10-03T22:00:00Z")
+            let start = try #require(ISO8601DateFormatter().date(from: draft.startAt))
+            let end = try #require(ISO8601DateFormatter().date(from: draft.endAt))
+            #expect(end.timeIntervalSince(start) == Double(minutes * 60))
+        }
+        let boundary = try #require(ISO8601DateFormatter().date(from: "2026-10-03T12:30:00Z"))
+        #expect(CalendarSmartInputDefaults.shared.basicDraft(text: "办事", referenceTime: boundary).startAt == "2026-10-03T13:00:00Z")
     }
 
     @Test("Image OCR preserves event titles and times, and only reviewed text reaches parsing")
@@ -340,6 +380,14 @@ private actor CalendarSmartAddTestTransport: APITransport {
     private(set) var parseBodyKeys: [String] = []
     private(set) var savedTitles: [String] = []
     private(set) var savedCategoryIDs: [String?] = []
+    private(set) var savedEnds: [String] = []
+    private let parseUnavailable: Bool
+    private let saveUnavailable: Bool
+
+    init(parseUnavailable: Bool = false, saveUnavailable: Bool = false) {
+        self.parseUnavailable = parseUnavailable
+        self.saveUnavailable = saveUnavailable
+    }
     private(set) var idempotencyKey: String?
 
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
@@ -351,6 +399,7 @@ private actor CalendarSmartAddTestTransport: APITransport {
                 body: #"{"data":{"user":{"id":"user-1","username":"test_001","nickname":"Test User","gender":"UNSPECIFIED","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"access-token","accessExpiresIn":900,"refreshToken":"refresh-token","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}"#
             )
         case "/api/v1/calendar/parse-natural":
+            if parseUnavailable { throw URLError(.notConnectedToInternet) }
             let body = try #require(request.httpBody)
             let json = try #require(JSONSerialization.jsonObject(with: body) as? [String: String])
             parseBodyKeys = json.keys.sorted()
@@ -362,10 +411,12 @@ private actor CalendarSmartAddTestTransport: APITransport {
                 body: #"{"data":{"events":[{"title":"Library study","location":"Main Library","note":"","startAt":"2026-07-18T15:00:00.000Z","endAt":"2026-07-18T16:00:00.000Z","repeat":"NONE","repeatUntil":"","categoryId":"category-1","categoryPreset":"study"}],"warnings":["Check time"]}}"#
             )
         case "/api/v1/calendar/events/batch":
+            if saveUnavailable { throw URLError(.notConnectedToInternet) }
             let body = try #require(request.httpBody)
             let json = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
             let events = try #require(json["events"] as? [[String: Any]])
             savedTitles = events.compactMap { $0["title"] as? String }
+            savedEnds = events.compactMap { $0["endAt"] as? String }
             savedCategoryIDs = events.map { $0["categoryId"] as? String }
             idempotencyKey = request.value(forHTTPHeaderField: "Idempotency-Key")
             return response(

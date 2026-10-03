@@ -353,9 +353,9 @@ correction of date/time associations.
 The current smart-fill design uses one editable preview for all drafts, with no
 inference badges or extra confirmation step. Missing information is completed
 before preview, and the user chooses when to save. The authoritative completion
-tree, duration rules, examples and implementation gaps live in
-[Calendar smart input](./CALENDAR_SMART_INPUT.md). This design is not yet fully
-implemented or released; the linked document distinguishes it from current code.
+tree, duration rules, examples and verification boundaries live in
+[Calendar smart input](./CALENDAR_SMART_INPUT.md). The policy is implemented and
+locally verified; production and device release status is tracked separately.
 
 ## 9. Failure and terminal paths
 

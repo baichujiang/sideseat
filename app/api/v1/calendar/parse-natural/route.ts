@@ -51,31 +51,6 @@ export async function POST(request: Request) {
       categories,
     });
 
-    if (!result.ok) {
-      if (result.code === "NOT_CONFIGURED") {
-        return v1Error(request, {
-          code: "FEATURE_UNAVAILABLE",
-          message: "Smart schedule is not available right now.",
-          status: 503,
-          retryable: true,
-        });
-      }
-      if (result.code === "PARSE_FAILED") {
-        return v1Error(request, {
-          code: "FEATURE_UNAVAILABLE",
-          message: "Smart schedule is temporarily unavailable. Try again shortly.",
-          status: 503,
-          retryable: true,
-        });
-      }
-      return v1Error(request, {
-        code: "INVALID_REQUEST",
-        message: result.error,
-        status: 422,
-        field: "text",
-      });
-    }
-
     return v1Success(result.data, { request });
   } catch (cause) {
     console.error("POST /api/v1/calendar/parse-natural", cause);

@@ -886,7 +886,7 @@ test.describe.serial("API v1 Calendar events", () => {
 });
 
 test.describe.serial("API v1 Calendar smart batch creation", () => {
-  test("requires authentication, validates input and reflects provider availability", async ({
+  test("requires authentication and produces editable drafts without provider availability", async ({
     request,
   }) => {
     expect(
@@ -917,20 +917,36 @@ test.describe.serial("API v1 Calendar smart batch creation", () => {
         locale: "en",
       },
     });
-    if (configPayload.data.features.naturalLanguageSchedule) {
-      expect(parsed.status()).toBe(200);
-      const payload = (await parsed.json()) as {
-        data: { events: Array<{ title: string; startAt: string; endAt: string }>; warnings: string[] };
-      };
-      expect(payload.data.events).toHaveLength(1);
-      expect(new Date(payload.data.events[0]!.endAt).getTime()).toBeGreaterThan(
-        new Date(payload.data.events[0]!.startAt).getTime(),
-      );
-      expect(Array.isArray(payload.data.warnings)).toBe(true);
-    } else {
-      expect(parsed.status()).toBe(503);
-      expect((await parsed.json()).error.code).toBe("FEATURE_UNAVAILABLE");
-    }
+    expect(configPayload.data.features.naturalLanguageSchedule).toBe(true);
+    expect(parsed.status()).toBe(200);
+    const payload = (await parsed.json()) as {
+      data: { events: Array<{ title: string; startAt: string; endAt: string }>; warnings: string[] };
+    };
+    expect(payload.data.events).toHaveLength(1);
+    expect(new Date(payload.data.events[0]!.endAt).getTime() - new Date(payload.data.events[0]!.startAt).getTime()).toBe(60 * 60 * 1000);
+    expect(payload.data.warnings).toEqual([]);
+
+    // EX-01/EX-13: the repaired draft is editable, and the batch persists
+    // the user's chosen end rather than applying the default a second time.
+    const beforeParse = await prisma.calendarEntry.count({ where: { userId } });
+    const pickup = await request.post("/api/v1/calendar/parse-natural", {
+      headers: auth, data: { text: "明天上午10:00取充电线", locale: "zh-CN" },
+    });
+    expect(pickup.status()).toBe(200);
+    expect(await prisma.calendarEntry.count({ where: { userId } })).toBe(beforeParse);
+    const pickupData = (await pickup.json()).data;
+    const draft = pickupData.events[0];
+    expect(new Date(draft.endAt).getTime() - new Date(draft.startAt).getTime()).toBe(15 * 60 * 1000);
+    expect(pickupData.warnings).toEqual([]);
+    const editedEnd = new Date(new Date(draft.startAt).getTime() + 20 * 60 * 1000).toISOString();
+    const savedTitle = `${TEST_TITLE} smart input edited pickup`;
+    const save = await request.post("/api/v1/calendar/events/batch", {
+      headers: { ...auth, "Idempotency-Key": crypto.randomUUID() },
+      data: { events: [{ ...draft, title: savedTitle, endAt: editedEnd }] },
+    });
+    expect(save.status()).toBe(201);
+    const saved = await prisma.calendarEntry.findFirstOrThrow({ where: { userId, title: savedTitle } });
+    expect(saved.endAt.toISOString()).toBe(editedEnd);
   });
 
   test("creates a validated batch exactly once", async ({ request }) => {

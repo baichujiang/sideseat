@@ -5,12 +5,12 @@ import Observation
 @Observable
 final class CalendarSmartAddStore {
     private(set) var drafts: [NativeCalendarNaturalDraft] = []
-    private(set) var warnings: [String] = []
+    private(set) var originalText = ""
     private(set) var isParsing = false
     private(set) var isSaving = false
     private(set) var issue: String?
 
-    func parse(text: String, locale: String, using session: SessionStore) async {
+    func parse(text: String, locale: String, using session: SessionStore, referenceTime: Date = Date()) async {
         guard !isParsing, !isSaving else { return }
         let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else {
@@ -26,24 +26,18 @@ final class CalendarSmartAddStore {
         isParsing = true
         issue = nil
         drafts = []
-        warnings = []
+        originalText = normalized
         defer { isParsing = false }
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule-dense") {
             drafts = NativeCalendarNaturalDraft.uiTestingDenseFixtures
-            warnings = [
-                "The title may need review.",
-                "The date range was inferred from the next three days.",
-                "Two study blocks were created for each day.",
-            ]
             return
         }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-schedule")
             || ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
         {
             drafts = [.uiTestingFixture]
-            warnings = [AppLocalization.string( "Check the date before saving.")]
             return
         }
         #endif
@@ -56,9 +50,16 @@ final class CalendarSmartAddStore {
                 idempotencyKey: UUID().uuidString
             )
             drafts = response.data.events
-            warnings = response.data.warnings
+            if drafts.isEmpty {
+                drafts = [CalendarSmartInputDefaults.shared.basicDraft(text: normalized, referenceTime: referenceTime)]
+            }
         } catch {
-            issue = Self.friendlyIssue(from: error)
+            let message = Self.friendlyIssue(from: error)
+            if Self.isAuthenticationIssue(message) {
+                issue = message
+            } else if !Task.isCancelled {
+                drafts = [CalendarSmartInputDefaults.shared.basicDraft(text: normalized, referenceTime: referenceTime)]
+            }
         }
     }
 
@@ -74,9 +75,6 @@ final class CalendarSmartAddStore {
 
     func removeDraft(withID draftID: UUID) {
         drafts.removeAll { $0.id == draftID }
-        if drafts.isEmpty {
-            warnings = []
-        }
     }
 
     func save(using session: SessionStore) async -> Bool {

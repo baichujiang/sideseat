@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 
 const timeZones = ["UTC", "Europe/Berlin", "America/Los_Angeles"];
 const tests = [
+  "tests/calendar/natural-language-schema.test.ts",
   "tests/calendar/ical-subscription.test.ts",
   "tests/calendar/ical-import-export.test.ts",
 ];

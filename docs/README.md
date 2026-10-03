@@ -33,6 +33,7 @@ Historical build evidence never certifies a newer build.
 | --- | --- |
 | [Product](./PRODUCT.md) | Positioning, product objects, navigation, invariants and non-goals |
 | [User Flow](./USER_FLOW.md) | Current user-visible Intent → Opportunity → Plan flow and repeat boundary |
+| [Calendar smart input](./CALENDAR_SMART_INPUT.md) | Event extraction, missing-information completion, duration defaults, uniform preview and acceptance examples; implemented policy, shared defaults and verification boundaries |
 | [Roadmap](./ROADMAP.md) | Current implementation order and decision gates |
 | [Together Contract](./TOGETHER_CONTRACT.md) | Weekly Intent, matching session and Mutual Opportunity engineering rules |
 | [Safety](./SAFETY.md) | Pair-wide Block, Plan/Calendar cleanup, privacy and concurrency |
