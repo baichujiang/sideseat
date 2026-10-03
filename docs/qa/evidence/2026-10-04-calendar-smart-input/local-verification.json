@@ -1,0 +1,22 @@
+{
+  "parserTests": 32,
+  "parserAndIcalTestsPerTimezone": 40,
+  "runtimeTimezones": [
+    "UTC",
+    "Europe/Berlin",
+    "America/Los_Angeles"
+  ],
+  "calendarTests": 65,
+  "nativeUnitTests": 12,
+  "nativeUITests": 2,
+  "nativeDarkLargestTypeUITests": 1,
+  "localAuthenticatedApiTests": 2,
+  "openapiContractTests": 13,
+  "implementedOpenapiOperations": 182,
+  "typecheck": "passed",
+  "targetedEslint": "passed",
+  "isolatedProductionBuild": "passed",
+  "physicalDeviceChecks": "Signed Preview 89 installed over 88; version readback and launch succeeded. Full smart-input interaction verified with simulator UI plus production HTTP, not manual phone interaction.",
+  "realProviderChecks": "Candidate and production checks passed using two temporary QA accounts; accounts and test calendar data were removed.",
+  "databaseForLocalTests": "sideseat_smart_input_test on localhost only"
+}

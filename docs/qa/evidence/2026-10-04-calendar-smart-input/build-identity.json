@@ -1,0 +1,14 @@
+{
+  "CFBundleIdentifier": "app.sideseat.mobile.preview",
+  "CFBundleVersion": "89",
+  "CFBundleShortVersionString": "1.0.0",
+  "SideSeatAPIBaseURL": "https://api.sideseat.de",
+  "CFBundleDisplayName": "SideSeat Preview",
+  "executableSHA256": "cb1be2d465703130fa6122947b5c0121468454377ee20e7f71e3c01d032b2610",
+  "signatureVerified": true,
+  "deviceProvisioningVerified": true,
+  "sourceManifestVerified": true,
+  "sourceFileCount": 294,
+  "sharedPolicyResourceVerified": true,
+  "appPath": "/tmp/sideseat-smart-input-preview89-20261004/DerivedData/Build/Products/Preview-iphoneos/SideSeat Preview.app"
+}

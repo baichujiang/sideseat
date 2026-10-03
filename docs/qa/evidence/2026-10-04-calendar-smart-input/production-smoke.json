@@ -1,0 +1,18 @@
+{
+  "mode": "production",
+  "origin": "https://api.sideseat.de",
+  "checks": [
+    "anonymous parsing still requires authentication",
+    "account 1: live extraction, 15-minute end and colloquial date 2026-10-04",
+    "account 1: parsing creates no calendar event",
+    "account 1: generic default is 30 minutes",
+    "account 1: 20-minute edit persisted without inviting anyone",
+    "account 2: live extraction, 15-minute end and colloquial date 2026-10-04",
+    "account 2: parsing creates no calendar event",
+    "account 2: generic default is 30 minutes",
+    "account 2: 20-minute edit persisted without inviting anyone"
+  ],
+  "completed": true,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-03T22:18:10.197Z"
+}

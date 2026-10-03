@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/privacy",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/support",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/.well-known/apple-app-site-association",
+      "status": 200
+    }
+  ],
+  "at": "2026-10-03T22:18:43.672Z"
+}

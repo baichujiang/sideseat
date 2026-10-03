@@ -112,7 +112,7 @@ test("SI-01/SI-07: model only supplies evidenced facts, independent of calendar 
   assert.equal(event.note, "");
   assert.equal(event.categoryId, null);
   assert.deepEqual(times("明天10点办事", normal, { events: [{ categoryPreset: "study" }] }), [["10-04 10:00", "10-04 10:30"]]);
-  // Actual Qwen candidate regression: generic errands were labeled short_errand.
+  // Live Qwen candidate regression: generic errands received 15m; broad types must not override 30m.
   assert.deepEqual(times("明天10点办事", normal, { events: [{ eventType: "short_errand" }] }), [["10-04 10:00", "10-04 10:30"]]);
   assert.deepEqual(times("明天10点开会", normal, { events: [{ eventType: "short_errand" }] }), [["10-04 10:00", "10-04 11:00"]]);
 });

@@ -1,0 +1,3 @@
+Production build checked Prisma migration status: 146 migrations, database schema up to date.
+SKIP_DATABASE_MIGRATIONS=1; no migrations executed.
+Final candidate build passed and was promoted only after authenticated smoke checks.

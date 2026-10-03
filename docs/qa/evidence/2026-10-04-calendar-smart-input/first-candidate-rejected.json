@@ -1,0 +1,13 @@
+{
+  "mode": "candidate",
+  "origin": "https://sideseat-1xnoaslkh-baichus-projects.vercel.app",
+  "checks": [
+    "two temporary QA accounts authenticated and hidden",
+    "anonymous parsing still requires authentication",
+    "account 1: live extraction, 15-minute end and colloquial date 2026-10-04",
+    "account 1: parsing creates no calendar event"
+  ],
+  "completed": false,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-03T22:08:43.267Z"
+}

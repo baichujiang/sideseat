@@ -1,0 +1,17 @@
+{
+  "baselineDeployment": "dpl_7eTKXSMpLAiJSzN6LU1UNS115f5k",
+  "overlayCommit": "0f721360566058d50179b552e4e7dd6ddaae39a0",
+  "overlayFiles": {
+    "lib/calendar/natural-language-schema.ts": "a6d0f1571cdf0c450add8cffa74254ea28ad76fd07ffc6569c2d2814f926ec43",
+    "lib/calendar/parse-natural-language.ts": "eb97d5270705d8d2de535f84b4c198f983b6a6e0b742992c809381897ae5ab71",
+    "lib/calendar/smart-input-policy.ts": "fb8d494514fde944d686745af803dd36c24851f0cad78a9723aee3e2bc15a810",
+    "lib/calendar/CalendarSmartInputPolicy.json": "c5ea26274843bac8f97a6231adc4388b9640dad53c152ea5caa869138be1edc9",
+    "app/api/calendar/parse-natural/route.ts": "1f57ec091c191064009da54e5cd9f8781ff0cf562529456ecb1c62da739e27e5",
+    "app/api/v1/calendar/parse-natural/route.ts": "f643c4a4f6ec558082105cbc9f3c745d9a206b7f2560f42a083a10da1e19030c",
+    "app/api/v1/client-config/route.ts": "1903f2673790da4cc79bec39343cca6e0e83fdb0ee6b302bcabf47d255e0d968"
+  },
+  "databaseMigrations": false,
+  "baselineFilesVerified": 1853,
+  "backupBranch": "br-square-king-ap1ow7vt",
+  "correctiveCommit": "ce306d518d74d354d8d62d2f4f04c7719fa1dcea"
+}
