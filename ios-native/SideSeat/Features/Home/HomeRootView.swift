@@ -118,6 +118,7 @@ struct HomeRootView: View {
                     onPasteAtSlot: { slot in
                         Task { await pasteCopiedEvent(at: slot) }
                     },
+                    onJumpToToday: jumpToToday,
                     scrollAnchorToken: timelineScrollToken
                 )
                 .refreshable {
@@ -232,12 +233,20 @@ struct HomeRootView: View {
         .overlay {
             calendarFeedbackLayer
         }
-        .overlay(alignment: .bottomTrailing) {
-            if showsNewEventFloatingButton {
-                newEventFloatingButton
-                    .padding(.trailing, 16)
-                    .padding(.bottom, newEventButtonBottomPadding)
-                    .transition(.scale(scale: 0.9).combined(with: .opacity))
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if calendarMode != .week {
+                HStack {
+                    Spacer(minLength: 0)
+                    CalendarTodayButton(action: jumpToToday)
+                }
+                .frame(maxWidth: 300)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 7)
+                .background(.bar)
+                .overlay(alignment: .top) { Divider().opacity(0.35) }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("calendar-bottom-actions")
             }
         }
         .overlay(alignment: .bottomLeading) {
@@ -245,7 +254,6 @@ struct HomeRootView: View {
                 .padding(.leading, SideSeatTheme.spaceMD)
                 .padding(.bottom, 72)
         }
-        .animation(.snappy(duration: 0.2), value: showsNewEventFloatingButton)
         .ssActionPrompt(
             isPresented: operationIssueBinding,
             title: AppLocalization.string("Calendar update failed"),
@@ -371,18 +379,11 @@ struct HomeRootView: View {
             .accessibilityIdentifier("calendar-month-title")
     }
 
-    @ViewBuilder
     private var calendarViewControls: some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            VStack(alignment: .trailing, spacing: 8) {
-                calendarModePicker
-                calendarTodayButton
-            }
-        } else {
-            HStack(spacing: 10) {
-                calendarModePicker
-                calendarTodayButton
-            }
+        HStack(spacing: 10) {
+            calendarModePicker
+            CalendarAddEventButton(isEnabled: store.schedule != nil && showsNewEventButton,
+                action: createEventFromToolbar)
         }
     }
 
@@ -409,35 +410,6 @@ struct HomeRootView: View {
         }
         .pickerStyle(.segmented)
         .accessibilityIdentifier("calendar-view-mode")
-    }
-
-    private var calendarTodayButton: some View {
-        Button {
-            jumpToToday()
-        } label: {
-            Text("Today")
-                .font(
-                    dynamicTypeSize.isAccessibilitySize
-                        ? .subheadline.weight(.semibold)
-                        : .caption.weight(.semibold)
-                )
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .padding(.horizontal, dynamicTypeSize.isAccessibilitySize ? 12 : 9)
-                .frame(
-                    minWidth: dynamicTypeSize.isAccessibilitySize ? 70 : 54,
-                    minHeight: dynamicTypeSize.isAccessibilitySize ? 44 : 34
-                )
-                .background(CalendarChrome.todayControlFill, in: Capsule())
-                .overlay {
-                    Capsule()
-                        .strokeBorder(SideSeatTheme.separator.opacity(0.32), lineWidth: 0.5)
-                }
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(CalendarHeaderActionButtonStyle())
-        .fixedSize(horizontal: true, vertical: false)
-        .accessibilityIdentifier("home-jump-today")
     }
 
     private var calendarUtilityActions: some View {
@@ -542,42 +514,11 @@ struct HomeRootView: View {
         return configured ?? Color(hex: "#7C3AED") ?? SideSeatTheme.utilityAction
     }
 
-    private var newEventFloatingButton: some View {
-        Button {
-            performCalendarSelection {
-                openNewEvent(on: selectedDate)
-            }
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(CalendarChrome.createActionForeground)
-                .frame(width: 40, height: 40)
-                .background(CalendarChrome.createActionFill, in: Circle())
-                .overlay {
-                    Circle()
-                        .strokeBorder(CalendarChrome.createActionBorder, lineWidth: 0.75)
-                }
-                .shadow(color: .black.opacity(0.16), radius: 8, y: 3)
-                .frame(width: 44, height: 44)
-                .contentShape(Circle())
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .accessibilityLabel("New event")
-        .accessibilityIdentifier("new-event")
-        .disabled(store.schedule == nil)
+    private func createEventFromToolbar() {
+        performCalendarSelection { openNewEvent(on: selectedDate) }
     }
 
-    private var newEventButtonBottomPadding: CGFloat {
-        calendarMode == .week
-            ? weekNewEventButtonBottomPadding
-            : SideSeatTheme.spaceMD
-    }
-
-    private var weekNewEventButtonBottomPadding: CGFloat {
-        dynamicTypeSize.isAccessibilitySize ? 70 : 58
-    }
-
-    private var showsNewEventFloatingButton: Bool {
+    private var showsNewEventButton: Bool {
         pendingMove == nil
             && !isMovingEvent
             && pendingDeleteEvent == nil

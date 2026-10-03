@@ -17,7 +17,9 @@ struct PublicProfileView: View {
                             avatarUrl: payload.profile.avatarUrl,
                             tagline: payload.profile.tagline,
                             schoolSummary: payload.profile.schoolSummary,
-                            verifiedStudent: payload.profile.verifiedStudent
+                            verifiedStudent: payload.profile.verifiedStudent,
+                            isPlus: payload.profile.isPlus == true,
+                            appearance: (payload.profile.appearance ?? .standard).effective(isPlus: payload.profile.isPlus == true)
                         )
                         if let metVia = payload.metVia {
                             Label(metVia, systemImage: "link")
@@ -92,21 +94,16 @@ private struct ProfileHeader: View {
     let tagline: String?
     let schoolSummary: NativeProfileSchoolSummary
     let verifiedStudent: Bool
+    var isPlus = false
+    var appearance = NativeProfileAppearance.standard
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 14) {
                 ProfileAvatar(url: avatarUrl, name: displayName, size: 56)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: 6) {
-                        Text(displayName)
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(1)
-                        if verifiedStudent {
-                            VerifiedSchoolMark(school: schoolSummary.schoolShort, compact: false)
-                        }
-                    }
+                    identity
                     Text("@\(username)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -116,12 +113,31 @@ private struct ProfileHeader: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             if let tagline, !tagline.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text(tagline)
-                    .font(.body)
+                Text(tagline).font(.body)
             }
         }
-        .padding(.vertical, 6)
+        .padding(12)
+        .modifier(ProfileAppearanceSurface(appearance: appearance))
         .accessibilityElement(children: .combine)
+    }
+
+    private var identity: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(displayName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+                : AnyLayout(HStackLayout(spacing: 6))
+            layout {
+                if isPlus && appearance.showMembershipBadge { SSPlusBadge() }
+                ProfileDecorationIcon(appearance: appearance)
+                if verifiedStudent {
+                    VerifiedSchoolMark(school: schoolSummary.schoolShort, compact: false)
+                }
+            }
+        }
     }
 }
 

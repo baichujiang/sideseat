@@ -20,7 +20,8 @@ import SwiftUI
 /// - **Product surface** (no full-bleed brand gradients): Home, Discover, Chats, Me / Settings
 ///   (Me hero may keep a light wash stroke only).
 ///
-/// Interactive accent is always Rose via `AccentColor` / ``accent`` — never reuse accent for
+/// Routine controls use neutral ink and selection fills. Rose is reserved for rare emphasis.
+/// Never reuse the brand accent for
 /// calendar “now”, errors, or success. See `docs/DESIGN_SYSTEM.md`.
 enum SideSeatTheme {
     // MARK: - Brand palette
@@ -33,7 +34,7 @@ enum SideSeatTheme {
     static let magenta = Color(red: 0.875, green: 0.145, blue: 0.631) // #DF25A1
     /// Bottom-right orchid. Decorative only.
     static let orchid = Color(red: 0.816, green: 0.388, blue: 0.922) // #D063EB
-    /// Mid rose — single interactive accent (matches AccentColor asset). Do not change.
+    /// Brand Rose (matches AccentColor asset); not the default control color.
     static let rose = Color(red: 0.984, green: 0.255, blue: 0.522) // #FB4185
     /// Soft cream pulled from the wordmark center.
     static let cream = Color(red: 1.0, green: 0.937, blue: 0.922) // #FFEFEB
@@ -42,7 +43,7 @@ enum SideSeatTheme {
     /// Foreground on the bright product accent. Pure black leaves room for icon antialiasing.
     static let onAccent = Color.black
 
-    /// Selected controls and key brand interactions. Product CTAs use `ProductAction`.
+    /// Rare brand emphasis. Routine controls use `utilityAction` and `ControlSelection`.
     /// Attention badges and semantic state must never reuse the brand accent.
     /// Body text, captions, dates, display names, and status labels use text or semantic colors.
     /// Resolve the product accent independently from SwiftUI's environment tint. The
@@ -63,6 +64,12 @@ enum SideSeatTheme {
                 : UIColor(red: 0.65, green: 0.03, blue: 0.27, alpha: 1)
         }
     )
+
+    // User-selected profile decoration; these colors never replace product action tokens.
+    enum ProfilePalette {
+        static let ocean = Color(uiColor: .systemBlue)
+        static let forest = Color(uiColor: .systemGreen)
+    }
 
     // MARK: - Semantic (product)
 
@@ -116,7 +123,22 @@ enum SideSeatTheme {
                 : UIColor(red: 0.65, green: 0.08, blue: 0.06, alpha: 1)
         }
     )
-    /// Calendar today / current-time marker. Light mode uses a readable mid Rose instead of the
+    /// Today's date has a solid blue marker, distinct from Rose date selection.
+    static let calendarToday = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.50, green: 0.71, blue: 1.0, alpha: 1)
+                : UIColor(red: 0.08, green: 0.30, blue: 0.72, alpha: 1)
+        }
+    )
+    static let onCalendarToday = Color(
+        uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.03, green: 0.08, blue: 0.17, alpha: 1)
+                : .white
+        }
+    )
+    /// Calendar current-time marker. Light mode uses a readable mid Rose instead of the
     /// former burgundy; dark mode uses the same bright Rose as the product accent.
     static let calendarNow = Color(
         uiColor: UIColor { traits in
@@ -131,7 +153,7 @@ enum SideSeatTheme {
             traits.userInterfaceStyle == .dark ? .black : .white
         }
     )
-    /// The current-time badge uses the same Rose as the line and today labels.
+    /// The current-time badge uses the same Rose as the line.
     static let calendarNowFill = calendarNow
     /// Course tiles without a custom hex — distinct from accent (not system `.blue`).
     static let courseFallback = Color(red: 0.20, green: 0.52, blue: 0.86)
@@ -167,6 +189,22 @@ enum SideSeatTheme {
         })
     }
 
+    /// Neutral selected surfaces keep filters, tabs and private saves readable without a pink wash.
+    enum ControlSelection {
+        static let fill = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.22, green: 0.23, blue: 0.23, alpha: 1)
+                : UIColor(red: 0.89, green: 0.90, blue: 0.90, alpha: 1)
+        })
+        static let border = SideSeatTheme.textSecondaryStrong.opacity(0.45)
+    }
+
+    /// Opt-in primary emphasis: deep Rose with white text in both appearances.
+    enum BrandAction {
+        static let fill = Color(red: 0.65, green: 0.03, blue: 0.27)
+        static let foreground = Color.white
+    }
+
     /// Warm, low-chroma inset for activity context; not a selection or status color.
     static let activityInset = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
@@ -196,17 +234,17 @@ enum SideSeatTheme {
         static let privacyChat = neutral
     }
 
-    /// Warm paper surfaces with Rose reserved for selection and interest.
+    /// Warm paper surfaces with neutral navigation and private-save controls.
     enum Together {
         static let decisionWell = adaptive(light: 0xF4EAE5, dark: 0x342830)
-        /// Muted gold is scoped to the interest knob; navigation keeps the brand Rose.
+        /// Muted gold is scoped to the legacy interest knob.
         static let decisionHandle = adaptive(light: 0xEBDDCA, dark: 0x514635)
         static let decisionHandleInk = adaptive(light: 0x72562D, dark: 0xF2DBAF)
         static let decisionHandleBorder = adaptive(light: 0xC7B58F, dark: 0x8D7B5A)
         static let canvas = adaptive(light: 0xFAF3EC, dark: 0x1C171A)
-        static let selectedTab = adaptive(light: 0xFBE5EA, dark: 0x41252F)
-        /// Dusty Rose gives the pinned navigation a distinct, soft selection surface.
-        static let navigationSelection = adaptive(light: 0xF2CCD8, dark: 0x4C2A39)
+        static let selectedTab = ControlSelection.fill
+        /// Selection is neutral; weight and the accessibility state reinforce the active page.
+        static let navigationSelection = ControlSelection.fill
         static let ink = adaptive(light: 0x35262E, dark: 0xF7EDE9)
         static let border = adaptive(light: 0xE9DDD5, dark: 0x493A42)
         static let shadow = Color(red: 0.30, green: 0.15, blue: 0.20)
@@ -275,11 +313,27 @@ enum SideSeatTheme {
 
     /// Chat bubble / composer chrome (product surface).
     enum Chat {
+        static let inboxReadAction = Color(uiColor: .systemBlue)
         static let bubbleRadius: CGFloat = 16
         static let composerRadius: CGFloat = 20
         /// A quiet canvas behind conversation content. Keeping this token beside the message
         /// surfaces prevents the page and bubbles from drifting into the same tonal band.
         static var canvas: Color { SideSeatTheme.bgGrouped }
+        /// Pinned conversations have a quiet, distinct surface in both appearances.
+        static var pinnedRow: Color {
+            adaptiveBubbleColor(light: 0xEDF3F8, dark: 0x1D2935)
+        }
+        /// A low-contrast hairline between inbox rows, drawn at one physical pixel.
+        static var inboxSeparator: Color {
+            adaptiveBubbleColor(light: 0xEAEAEA, dark: 0x2C2C2C)
+        }
+        /// Color is scoped to the compact greeting shortcut requested for Messages.
+        static var greetingTile: Color {
+            adaptiveBubbleColor(light: 0xEAF1FF, dark: 0x1C2F4A)
+        }
+        static var greetingIcon: Color {
+            adaptiveBubbleColor(light: 0x3A72CA, dark: 0x9FC4FF)
+        }
         /// A muted berry-clay brand surface for long-form reading. It is intentionally darker
         /// than the canvas without returning to the high-saturation interaction Rose.
         static var ownBubble: Color {
@@ -301,7 +355,7 @@ enum SideSeatTheme {
         /// A subtle inset surface for quoted content inside or immediately above a message.
         static var quoteSurface: Color { Color.primary.opacity(0.06) }
         static var controlFill: Color { SideSeatTheme.fillSubtle }
-        static var selectedChipFill: Color { SideSeatTheme.accent.opacity(0.12) }
+        static var selectedChipFill: Color { SideSeatTheme.ControlSelection.fill }
 
         private static func adaptiveBubbleColor(light: UInt32, dark: UInt32) -> Color {
             return Color(
@@ -476,7 +530,7 @@ enum SideSeatTheme {
 
     @MainActor
     static func configureChrome() {
-        let accent = UIColor(red: 0.984, green: 0.255, blue: 0.522, alpha: 1)
+        let accent = UIColor.label
         UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = .label
 
         let tab = UITabBarAppearance()

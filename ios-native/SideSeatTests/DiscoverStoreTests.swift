@@ -12,8 +12,35 @@ struct DiscoverStoreTests {
             "peer": ["displayName": "Mia", "verifiedStudent": true, "sharedLanguages": ["ENGLISH"]],
         ]
         wire.merge(fields) { _, next in next }
-        return try JSONDecoder().decode(NativeMutualOpportunity.self,
-                                        from: JSONSerialization.data(withJSONObject: wire))
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(NativeMutualOpportunity.self,
+                                  from: JSONSerialization.data(withJSONObject: wire))
+    }
+
+    @Test("Message requests retain the target intention and count only incoming attention")
+    @MainActor
+    func messageRequestContextAndInbox() throws {
+        let incoming = try compactOpportunity([
+            "isBookmarked": true,
+            "messageRequest": ["body": "Can I join tomorrow?", "direction": "INCOMING", "status": "PENDING",
+                "createdAt": "2026-09-26T10:00:00Z",
+                "intention": ["activity": ["topic": "SPORTS", "sportTag": "BADMINTON"], "timeWindows": []]],
+        ])
+        #expect(incoming.messageRequest?.isIncoming == true)
+        #expect(incoming.messageActivityTitle == NativeSportTag.badminton.title)
+        #expect(incoming.isBookmarked == true)
+        var outgoing = incoming
+        outgoing.messageRequest = NativeOpportunityMessageRequest(body: "Hello", direction: "OUTGOING", status: "PENDING", createdAt: "2026-09-26T10:00:00Z")
+        let payload = NativeInboxPayload(conversations: [], unreadTotal: 0, plansNeedingYourAction: 0,
+            messageRequests: [incoming, outgoing])
+        let cached = try JSONDecoder().decode(NativeInboxPayload.self, from: JSONEncoder().encode(payload))
+        #expect(cached.messageRequests.count == 2)
+        #expect(cached.messageRequests.first?.messageRequest?.body == "Can I join tomorrow?")
+        #expect(InboxStore.attentionCount(in: cached) == 1)
+        let legacy = try JSONDecoder().decode(NativeInboxPayload.self,
+            from: Data(#"{"conversations":[],"unreadTotal":0,"plansNeedingYourAction":0}"#.utf8))
+        #expect(legacy.messageRequests.isEmpty)
     }
 
     private func compactFit(_ fields: [String: Any] = [:]) -> [String: Any] {
@@ -86,6 +113,44 @@ struct DiscoverStoreTests {
             AppLocalization.string("Different or unlisted schools"), AppLocalization.string("Course to agree")])
         let missingPeer = try compactOpportunity(["matchFit": compactFit(["basis": "DIFFERENT_ACTIVITY", "peerActivity": NSNull()])])
         #expect(missingPeer.shortActivitySummary.contains(AppLocalization.string("Activity to agree")))
+    }
+
+    @Test("Recommendation content uses only the peer's activity and declared time")
+    @MainActor
+    func peerIntentionPresentation() throws {
+        let ownStart = "2026-09-13T08:00:00Z"
+        let peerStart = "2026-09-14T15:00:00Z"
+        let peerEnd = "2026-09-14T17:00:00Z"
+        let intention: [String: Any] = [
+            "activity": ["topic": "SPORTS", "sportTag": "BASKETBALL"],
+            "timePreference": ["kind": "EXACT"],
+            "timeWindows": [["startAt": peerStart, "endAt": peerEnd]],
+        ]
+        let value = try compactOpportunity([
+            "startsAt": ownStart, "endsAt": "2026-09-13T09:00:00Z",
+            "matchFit": compactFit(["differences": ["ACTIVITY", "TIME"]]),
+            "peerIntention": intention,
+        ])
+        #expect(value.peerActivityTopic == .sports)
+        #expect(value.peerActivityTitle == NativeSportTag.basketball.title)
+        #expect(!value.peerActivityTitle.contains("Coffee"))
+        let expectedStart = Date.sideSeatChatISO8601(peerStart)!.formatted(
+            .dateTime.month(.abbreviated).day().hour().minute().locale(AppLocalization.selectedLanguage.locale))
+        #expect(value.peerTimeSummary.hasPrefix(expectedStart))
+        #expect(!value.peerTimeSummary.contains(AppLocalization.string("Find another time")))
+        #expect(!value.peerTimeSummary.contains(AppLocalization.string("Shared time")))
+
+        var undecided = intention
+        undecided["timePreference"] = ["kind": "UNDECIDED"]
+        let unknown = try compactOpportunity(["peerIntention": undecided])
+        #expect(unknown.peerTimeSummary == AppLocalization.string("Time to discuss"))
+        let olderAPI = try compactOpportunity(["matchFit": compactFit([
+            "basis": "DIFFERENT_ACTIVITY", "peerActivity": ["topic": "EXPLORE", "activityText": "Walk"]])])
+        #expect(olderAPI.peerActivityTitle == "Walk")
+        #expect(olderAPI.peerTimeSummary == AppLocalization.string("Time to discuss"))
+        let parallel = try compactOpportunity(["topic": "STUDY", "matchKind": "SHARED_CONTEXT",
+            "viewerStudyGoal": "Algorithms", "peerStudyGoal": "Probability"])
+        #expect(parallel.peerActivityTitle == "Probability")
     }
 
     @Test("Intention card state distinguishes participation from a stored ACTIVE row")

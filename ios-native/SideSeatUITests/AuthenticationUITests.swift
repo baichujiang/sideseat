@@ -1069,7 +1069,7 @@ final class AuthenticationUITests: XCTestCase {
 
         app.swipeUp()
         XCTAssertTrue(app.buttons["profile-privacy-settings"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.buttons["me-blocked"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["me-blocked"].exists)
         XCTAssertTrue(app.buttons["me-settings"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.descendants(matching: .any)["me-contacts"].exists)
         XCTAssertFalse(app.buttons["me-social-preferences"].exists)
@@ -2649,6 +2649,8 @@ final class AuthenticationUITests: XCTestCase {
             "--ui-testing-dense-calendar",
             "--ui-testing-expose-scroll-anchors",
             "--ui-testing-offscreen-event-cues",
+            "--ui-testing-language=zh-Hans",
+            "--ui-testing-skip-tutorial",
         ]
         app.launch()
 
@@ -2656,14 +2658,13 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(timetable.waitForExistence(timeout: 8))
         RunLoop.current.run(until: Date().addingTimeInterval(0.5))
 
-        let todayID = todayWeekHeaderIdentifier().replacingOccurrences(
-            of: "home-week-day-",
-            with: ""
-        )
-        let weekTop = app.buttons["calendar-week-offscreen-event-top-\(todayID)"]
-        let weekBottom = app.buttons["calendar-week-offscreen-event-bottom-\(todayID)"]
+        let weekTop = app.buttons["calendar-week-offscreen-event-top"]
+        let weekBottom = app.buttons["calendar-week-offscreen-event-bottom"]
         XCTAssertTrue(weekTop.waitForExistence(timeout: 5))
         XCTAssertTrue(weekBottom.waitForExistence(timeout: 5))
+        XCTAssertTrue(weekTop.label.contains("上方还有"))
+        XCTAssertTrue(weekBottom.label.contains("下方还有"))
+        XCTAssertTrue(weekTop.label.contains("项日程"))
         XCTAssertTrue(weekTop.isHittable)
         XCTAssertTrue(weekBottom.isHittable)
         XCTAssertGreaterThanOrEqual(weekTop.frame.height, 44)
@@ -2680,6 +2681,11 @@ final class AuthenticationUITests: XCTestCase {
         weekBottom.tap()
         RunLoop.current.run(until: Date().addingTimeInterval(0.5))
         XCTAssertLessThan(weekMidnight.frame.minY, weekMidnightBeforeJump - 10)
+        let weekAfterDown = weekMidnight.frame.minY
+        XCTAssertTrue(weekTop.isHittable)
+        weekTop.tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+        XCTAssertGreaterThan(weekMidnight.frame.minY, weekAfterDown + 10)
 
         app.terminate()
         app.launch()
@@ -2701,6 +2707,9 @@ final class AuthenticationUITests: XCTestCase {
             "Day timeline state: \(String(describing: timeline.value))"
         )
         XCTAssertTrue(dayBottom.waitForExistence(timeout: 5))
+        XCTAssertTrue(dayTop.label.contains("上方还有"))
+        XCTAssertTrue(dayBottom.label.contains("下方还有"))
+        XCTAssertTrue(dayTop.label.contains("项日程"))
         XCTAssertTrue(dayTop.isHittable)
         XCTAssertTrue(dayBottom.isHittable)
         XCTAssertGreaterThanOrEqual(dayTop.frame.height, 44)
@@ -2717,6 +2726,11 @@ final class AuthenticationUITests: XCTestCase {
         dayBottom.tap()
         RunLoop.current.run(until: Date().addingTimeInterval(0.5))
         XCTAssertLessThan(dayMidnight.frame.minY, dayMidnightBeforeJump - 10)
+        let dayAfterDown = dayMidnight.frame.minY
+        XCTAssertTrue(dayTop.isHittable)
+        dayTop.tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+        XCTAssertGreaterThan(dayMidnight.frame.minY, dayAfterDown + 10)
     }
 
     func testDayTimelineEndsAt24WithoutTrailingBlankSpace() {
@@ -2799,11 +2813,12 @@ final class AuthenticationUITests: XCTestCase {
         let title = app.textFields["event-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         let windowFrame = app.windows.firstMatch.frame
-        XCTAssertGreaterThan(
-            title.frame.minY,
-            windowFrame.minY + windowFrame.height * 0.40,
-            "The new-event sheet should open below the top chrome instead of at the large detent."
+        XCTAssertLessThan(
+            app.buttons["event-save"].frame.minY,
+            windowFrame.minY + windowFrame.height * 0.20,
+            "The new-event sheet should open at its stable large detent."
         )
+        XCTAssertGreaterThan(title.frame.minY, app.buttons["event-save"].frame.maxY)
         XCTAssertLessThan(
             title.frame.minY,
             windowFrame.minY + windowFrame.height * 0.72,
@@ -2824,30 +2839,13 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(endPicker.waitForExistence(timeout: 3))
         XCTAssertTrue(repeatPicker.waitForExistence(timeout: 3))
         XCTAssertTrue(notes.waitForExistence(timeout: 3))
-        XCTAssertLessThan(title.frame.midY, location.frame.midY)
-        XCTAssertLessThan(location.frame.midY, startPicker.frame.midY)
+        XCTAssertLessThan(title.frame.midY, startPicker.frame.midY)
         XCTAssertLessThan(startPicker.frame.midY, endPicker.frame.midY)
         XCTAssertLessThan(endPicker.frame.midY, repeatPicker.frame.midY)
-        let primaryRowSteps = [
-            location.frame.midY - title.frame.midY,
-            startPicker.frame.midY - location.frame.midY,
-            endPicker.frame.midY - startPicker.frame.midY,
-            repeatPicker.frame.midY - endPicker.frame.midY,
-        ]
-        let primaryRowStep = primaryRowSteps.reduce(0, +) / CGFloat(primaryRowSteps.count)
-        for step in primaryRowSteps {
-            XCTAssertEqual(
-                step,
-                primaryRowStep,
-                accuracy: 1.5,
-                "Title, location, start, end and repeat must use equal row spacing."
-            )
-        }
-        XCTAssertGreaterThan(
-            notes.frame.midY - repeatPicker.frame.midY,
-            (primaryRowSteps.max() ?? 0) + 4,
-            "Title, location, start, end and repeat must remain in one visual module."
-        )
+        XCTAssertLessThan(repeatPicker.frame.midY, location.frame.midY)
+        XCTAssertEqual(endPicker.frame.midY - startPicker.frame.midY,
+            repeatPicker.frame.midY - endPicker.frame.midY, accuracy: 1.5)
+        XCTAssertFalse(app.descendants(matching: .any)["event-repeat-end-mode"].exists)
         XCTAssertTrue(startPicker.isHittable || startPicker.buttons.firstMatch.isHittable)
         XCTAssertTrue(endPicker.isHittable || endPicker.buttons.firstMatch.isHittable)
         XCTAssertGreaterThanOrEqual(startPicker.frame.height, 40)
@@ -2890,6 +2888,35 @@ final class AuthenticationUITests: XCTestCase {
         selectedCalendar.lifetime = .keepAlways
         add(selectedCalendar)
 
+        let companions = app.buttons["event-companions"]
+        for _ in 0..<4 where !companions.isHittable { app.swipeUp() }
+        XCTAssertTrue(companions.isHittable)
+        XCTAssertLessThan(calendarPicker.frame.midY, companions.frame.midY)
+        XCTAssertLessThan(companions.frame.midY, notes.frame.midY)
+        XCTAssertFalse(app.buttons["event-companion-ui-test-peer"].exists)
+        companions.tap()
+        let peer = app.buttons["event-companion-ui-test-peer"]
+        XCTAssertTrue(peer.waitForExistence(timeout: 3))
+        peer.tap()
+        XCTAssertTrue(peer.isSelected)
+        let selection = XCTAttachment(screenshot: app.screenshot())
+        selection.name = "Event companion selection"
+        selection.lifetime = .keepAlways
+        add(selection)
+        app.buttons["event-companions-done"].tap()
+        XCTAssertTrue(companions.waitForExistence(timeout: 3))
+        XCTAssertTrue((companions.value as? String)?.contains("1") == true)
+        XCTAssertEqual(calendarPicker.value as? String, "Study")
+        companions.tap()
+        XCTAssertTrue(peer.isSelected)
+        peer.tap()
+        app.buttons["event-companions-done"].tap()
+        XCTAssertFalse((companions.value as? String)?.contains("1") == true)
+        let details = XCTAttachment(screenshot: app.screenshot())
+        details.name = "New event grouped details and optional notes"
+        details.lifetime = .keepAlways
+        add(details)
+
         for _ in 0..<4 where !title.isHittable {
             app.swipeDown()
         }
@@ -2907,50 +2934,78 @@ final class AuthenticationUITests: XCTestCase {
     }
 
     func testNewEventKeyboardDismissesOnBackgroundTapAndScroll() {
-        let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated"]
-        app.launch()
+        for appearance in ["light", "dark"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-appearance=\(appearance)"]
+            app.launch()
 
-        let addEvent = app.buttons["new-event"]
-        XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
-        addEvent.tap()
+            let addEvent = app.buttons["new-event"]
+            XCTAssertTrue(addEvent.waitForExistence(timeout: 5))
+            addEvent.tap()
 
-        let form = app.collectionViews["event-editor-form"]
-        let title = app.textFields["event-title"]
-        let location = app.textFields["event-location"]
-        XCTAssertTrue(form.waitForExistence(timeout: 3))
-        XCTAssertTrue(title.waitForExistence(timeout: 3))
-        XCTAssertTrue(location.waitForExistence(timeout: 3))
+            let form = app.collectionViews["event-editor-form"]
+            let title = app.textFields["event-title"]
+            let location = app.textFields["event-location"]
+            XCTAssertTrue(form.waitForExistence(timeout: 3))
+            XCTAssertTrue(title.waitForExistence(timeout: 3))
+            XCTAssertTrue(location.waitForExistence(timeout: 3))
 
-        title.tap()
-        title.typeText("Keyboard draft")
-        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+            let initialSaveY = app.buttons["event-save"].frame.minY
+            func capture(_ state: String) {
+                let attachment = XCTAttachment(screenshot: app.screenshot())
+                attachment.name = "Stable event sheet \(appearance) \(state)"
+                attachment.lifetime = .keepAlways
+                add(attachment)
+            }
+            capture("before keyboard")
+            title.tap()
+            title.typeText("Keyboard draft")
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
 
-        location.tap()
-        XCTAssertTrue(
-            app.keyboards.firstMatch.exists,
-            "Switching between text fields should keep text entry active."
-        )
-        location.typeText("Munich")
+            XCTAssertEqual(app.buttons["event-save"].frame.minY, initialSaveY, accuracy: 2)
+            XCTAssertLessThan(title.frame.maxY, app.keyboards.firstMatch.frame.minY)
+            capture("title keyboard")
+            location.tap()
+            XCTAssertTrue(
+                app.keyboards.firstMatch.exists,
+                "Switching between text fields should keep text entry active."
+            )
+            location.typeText("Munich")
 
-        let navigationBar = app.navigationBars.firstMatch
-        XCTAssertTrue(navigationBar.exists)
-        navigationBar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+            let navigationBar = app.navigationBars.firstMatch
+            XCTAssertTrue(navigationBar.exists)
+            navigationBar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
 
-        XCTAssertTrue(
-            app.keyboards.firstMatch.waitForNonExistence(timeout: 3),
-            "Tapping the form background should dismiss the keyboard."
-        )
-        XCTAssertEqual(title.value as? String, "Keyboard draft")
-        XCTAssertEqual(location.value as? String, "Munich")
+            XCTAssertTrue(
+                app.keyboards.firstMatch.waitForNonExistence(timeout: 3),
+                "Tapping the form background should dismiss the keyboard."
+            )
+            XCTAssertEqual(app.buttons["event-save"].frame.minY, initialSaveY, accuracy: 2)
+            capture("keyboard dismissed")
+            XCTAssertEqual(title.value as? String, "Keyboard draft")
+            XCTAssertEqual(location.value as? String, "Munich")
 
-        title.tap()
-        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
-        form.swipeUp()
-        XCTAssertTrue(
-            app.keyboards.firstMatch.waitForNonExistence(timeout: 3),
-            "Dragging the form should interactively dismiss the keyboard and continue scrolling."
-        )
+            title.tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+            form.swipeUp()
+            XCTAssertTrue(
+                app.keyboards.firstMatch.waitForNonExistence(timeout: 3),
+                "Dragging the form should interactively dismiss the keyboard and continue scrolling."
+            )
+            let notes = app.textFields["event-notes"]
+            for _ in 0..<3 where !notes.isHittable { form.swipeUp() }
+            XCTAssertTrue(notes.isHittable)
+            notes.tap()
+            notes.typeText("Bring a notebook")
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 3))
+            XCTAssertLessThan(notes.frame.minY, app.keyboards.firstMatch.frame.minY)
+            XCTAssertEqual(app.buttons["event-save"].frame.minY, initialSaveY, accuracy: 2)
+            capture("notes keyboard")
+            app.buttons["event-keyboard-done"].tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 3))
+            XCTAssertEqual(app.buttons["event-save"].frame.minY, initialSaveY, accuracy: 2)
+            app.terminate()
+        }
     }
 
     func testCalendarHeaderUsesConnectionsAndAvailabilityLivesInChat() {
@@ -2984,6 +3039,8 @@ final class AuthenticationUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = [
             "--ui-testing-authenticated",
+            "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans",
             "-UIPreferredContentSizeCategoryName",
             "UICTContentSizeCategoryL",
         ]
@@ -3023,27 +3080,30 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertLessThanOrEqual(search.frame.maxX, connections.frame.minX)
         XCTAssertLessThanOrEqual(connections.frame.maxX, calendars.frame.minX)
         XCTAssertLessThan(abs(calendars.frame.midY - connections.frame.midY), 4)
-        XCTAssertLessThanOrEqual(viewMode.frame.maxX, today.frame.minX)
-        XCTAssertLessThan(abs(viewMode.frame.midY - today.frame.midY), 4)
         XCTAssertLessThanOrEqual(calendars.frame.maxY, viewMode.frame.minY)
         let windowFrame = app.windows.firstMatch.frame
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.exists)
         XCTAssertGreaterThan(add.frame.midX, windowFrame.midX)
-        XCTAssertGreaterThan(add.frame.minY, viewMode.frame.maxY)
-        XCTAssertEqual(
-            windowFrame.maxX - add.frame.maxX,
-            16,
-            accuracy: 2
-        )
+        XCTAssertLessThanOrEqual(viewMode.frame.maxX, add.frame.minX)
+        XCTAssertEqual(viewMode.frame.midY, add.frame.midY, accuracy: 3)
+        XCTAssertEqual(add.frame.width, search.frame.width, accuracy: 1)
+        XCTAssertEqual(add.frame.height, search.frame.height, accuracy: 1)
+        XCTAssertEqual(add.frame.width, add.frame.height, accuracy: 2)
         let widthControlBar = app.descendants(matching: .any)["home-week-visible-day-count"]
         XCTAssertTrue(widthControlBar.exists)
-        XCTAssertEqual(
-            widthControlBar.frame.minY - add.frame.maxY,
-            12,
-            accuracy: 3,
-            "The create action belongs to the calendar canvas and must sit above, not overlap, the width controls."
-        )
+        XCTAssertLessThanOrEqual(widthControlBar.frame.maxX, today.frame.minX)
+        XCTAssertEqual(widthControlBar.frame.midY, today.frame.midY, accuracy: 3)
+        XCTAssertGreaterThan(widthControlBar.frame.minX, windowFrame.minX + 28)
+        XCTAssertLessThan(today.frame.maxX, windowFrame.maxX - 28)
+        XCTAssertLessThan(today.frame.minX - widthControlBar.frame.maxX, 28)
+        XCTAssertGreaterThan(today.frame.minY, viewMode.frame.maxY)
+        XCTAssertLessThan(today.frame.maxY, tabBar.frame.minY)
+        XCTAssertEqual(add.label, "添加日程")
+        let weekButtonLayout = XCTAttachment(screenshot: app.screenshot())
+        weekButtonLayout.name = "Calendar neutral add beside mode and centered bottom controls"
+        weekButtonLayout.lifetime = .keepAlways
+        self.add(weekButtonLayout)
         XCTAssertLessThan(add.frame.maxY, tabBar.frame.minY)
         for element in [month, today, search, connections, calendars, viewMode, add] {
             XCTAssertTrue(windowFrame.contains(element.frame))
@@ -3061,8 +3121,10 @@ final class AuthenticationUITests: XCTestCase {
         dayButtonLayout.name = "Calendar new-event button in day view"
         dayButtonLayout.lifetime = .keepAlways
         self.add(dayButtonLayout)
-        XCTAssertEqual(windowFrame.maxX - add.frame.maxX, 16, accuracy: 2)
-        XCTAssertEqual(tabBar.frame.minY - add.frame.maxY, 12, accuracy: 3)
+        XCTAssertLessThanOrEqual(viewMode.frame.maxX, add.frame.minX)
+        XCTAssertEqual(viewMode.frame.midY, add.frame.midY, accuracy: 3)
+        XCTAssertLessThan(today.frame.maxY, tabBar.frame.minY)
+        XCTAssertTrue(app.descendants(matching: .any)["calendar-bottom-actions"].frame.contains(today.frame))
 
         let monthMode = app.buttons.matching(
             NSPredicate(format: "label IN %@", ["Month", "月", "Monat"])
@@ -3072,8 +3134,10 @@ final class AuthenticationUITests: XCTestCase {
             app.descendants(matching: .any)["calendar-month-view"]
                 .waitForExistence(timeout: 3)
         )
-        XCTAssertEqual(windowFrame.maxX - add.frame.maxX, 16, accuracy: 2)
-        XCTAssertEqual(tabBar.frame.minY - add.frame.maxY, 12, accuracy: 3)
+        XCTAssertLessThanOrEqual(viewMode.frame.maxX, add.frame.minX)
+        XCTAssertEqual(viewMode.frame.midY, add.frame.midY, accuracy: 3)
+        XCTAssertLessThan(today.frame.maxY, tabBar.frame.minY)
+        XCTAssertTrue(app.descendants(matching: .any)["calendar-bottom-actions"].frame.contains(today.frame))
     }
 
     func retiredCalendarOffersLinkAndImageScheduleSharing() {
@@ -3342,6 +3406,10 @@ final class AuthenticationUITests: XCTestCase {
         addEvent.tap()
         let smartFill = app.buttons["event-smart-fill"]
         XCTAssertTrue(smartFill.waitForExistence(timeout: 3))
+        let compactAI = XCTAttachment(screenshot: app.screenshot())
+        compactAI.name = "New event compact Plus smart fill"
+        compactAI.lifetime = .keepAlways
+        add(compactAI)
         smartFill.tap()
 
         let smartSchedule = app.descendants(matching: .any)["smart-schedule-view"]
@@ -3366,23 +3434,24 @@ final class AuthenticationUITests: XCTestCase {
             app.descendants(matching: .any)["smart-schedule-draft-editor"]
                 .waitForExistence(timeout: 3)
         )
-        let sharedTitle = app.textFields["event-title"]
-        let sharedLocation = app.textFields["event-location"]
-        let sharedStart = app.descendants(matching: .any)["event-start"]
-        let sharedEnd = app.descendants(matching: .any)["event-end"]
-        let sharedRepeat = app.descendants(matching: .any)["event-repeat"]
+        let draftEditor = app.collectionViews["smart-schedule-draft-editor"]
+        let sharedTitle = draftEditor.textFields["event-title"]
+        let sharedLocation = draftEditor.textFields["event-location"]
+        let sharedStart = draftEditor.descendants(matching: .any)["event-start"]
+        let sharedEnd = draftEditor.descendants(matching: .any)["event-end"]
+        let sharedRepeat = draftEditor.descendants(matching: .any)["event-repeat"]
         XCTAssertTrue(sharedTitle.waitForExistence(timeout: 3))
         XCTAssertTrue(sharedLocation.exists)
         XCTAssertTrue(sharedStart.exists)
         XCTAssertTrue(sharedEnd.exists)
         XCTAssertTrue(sharedRepeat.exists)
         XCTAssertEqual(sharedStart.elementType, sharedEnd.elementType)
-        XCTAssertLessThan(sharedTitle.frame.midY, sharedLocation.frame.midY)
-        XCTAssertLessThan(sharedLocation.frame.midY, sharedStart.frame.midY)
+        XCTAssertLessThan(sharedTitle.frame.midY, sharedStart.frame.midY)
+        XCTAssertLessThan(sharedRepeat.frame.midY, sharedLocation.frame.midY)
         XCTAssertLessThan(sharedStart.frame.midY, sharedEnd.frame.midY)
         XCTAssertLessThan(sharedEnd.frame.midY, sharedRepeat.frame.midY)
-        XCTAssertTrue(app.descendants(matching: .any)["event-notes"].exists)
-        XCTAssertTrue(app.buttons["event-calendar-picker"].exists)
+        XCTAssertTrue(draftEditor.descendants(matching: .any)["event-notes"].exists)
+        XCTAssertTrue(draftEditor.buttons["event-calendar-picker"].exists)
         XCTAssertTrue(app.buttons["smart-draft-apply"].exists)
         app.buttons["smart-draft-apply"].tap()
         XCTAssertTrue(
@@ -3487,13 +3556,7 @@ final class AuthenticationUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-authenticated"]
         app.launch()
 
-        let month = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Month", "月", "Monat"])
-        ).firstMatch
-        XCTAssertTrue(month.waitForExistence(timeout: 5))
-        month.tap()
-
-        let event = app.buttons["month-event-ui-recurring-event"]
+        let event = app.buttons["home-week-event-ui-recurring-event"]
         XCTAssertTrue(event.waitForExistence(timeout: 5))
         event.tap()
 
@@ -3503,6 +3566,12 @@ final class AuthenticationUITests: XCTestCase {
 
         let save = app.buttons["event-save"]
         XCTAssertTrue(save.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars.matching(NSPredicate(format: "identifier IN %@",
+            ["Edit event", "编辑日程", "Termin bearbeiten"])).firstMatch.exists)
+        let editing = XCTAttachment(screenshot: app.screenshot())
+        editing.name = "Edit event grouped time and recurrence"
+        editing.lifetime = .keepAlways
+        add(editing)
         save.tap()
 
         let thisEvent = app.buttons.matching(
@@ -4871,7 +4940,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertFalse(app.descendants(matching: .any)["plans-row-status-ui-plan-accepted"].exists)
 
         let waitingTab = app.buttons.matching(
-            NSPredicate(format: "label IN %@", ["Waiting", "等待回应", "Ausstehend"])
+            NSPredicate(format: "label IN %@", ["Overview", "总览", "Übersicht"])
         ).firstMatch
         XCTAssertTrue(waitingTab.waitForExistence(timeout: 3))
         waitingTab.tap()
@@ -4919,7 +4988,7 @@ final class AuthenticationUITests: XCTestCase {
 
     func testScheduleShareRecipientSelectsAndSubmitsAConcreteTime() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats", "--ui-testing-smart-time"]
         app.launch()
 
         XCTAssertTrue(app.descendants(matching: .any)["inbox-list"].waitForExistence(timeout: 5))
@@ -4939,7 +5008,7 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(app.buttons["schedule-share-full-availability"].exists)
 
         let candidate = app.buttons.matching(
-            NSPredicate(format: "identifier BEGINSWITH %@", "schedule-share-candidate-")
+            NSPredicate(format: "identifier BEGINSWITH %@", "smart-time-candidate-")
         ).firstMatch
         XCTAssertTrue(candidate.waitForExistence(timeout: 3))
         XCTAssertTrue(candidate.isHittable)
@@ -5135,9 +5204,13 @@ final class AuthenticationUITests: XCTestCase {
             let me = app.tabBars.buttons[meTitle]
             XCTAssertTrue(me.waitForExistence(timeout: 5))
             me.tap()
-            let blocked = app.buttons["me-blocked"]
+            let settings = app.buttons["me-settings"]
             let profile = app.scrollViews["me-profile"]
-            for _ in 0..<6 where !blocked.isHittable { profile.swipeUp() }
+            for _ in 0..<6 where !settings.isHittable { profile.swipeUp() }
+            settings.tap()
+            let blocked = app.buttons["settings-blocked-users"]
+            for _ in 0..<6 where !blocked.exists || !blocked.isHittable { app.swipeUp() }
+            XCTAssertTrue(blocked.waitForExistence(timeout: 3))
             blocked.tap()
             let failure = app.descendants(matching: .any)["blocked-users-load-error"]
             XCTAssertTrue(failure.waitForExistence(timeout: 3))
@@ -5182,9 +5255,11 @@ final class AuthenticationUITests: XCTestCase {
         app.launch()
 
         app.tabBars.buttons["我"].tap()
+        XCTAssertFalse(app.buttons["me-blocked"].exists)
         let settings = app.descendants(matching: .any)["me-settings"]
         XCTAssertTrue(settings.waitForExistence(timeout: 5))
         settings.tap()
+        XCTAssertTrue(app.staticTexts["隐私与安全"].waitForExistence(timeout: 3))
         let blocked = app.descendants(matching: .any)["settings-blocked-users"]
         for _ in 0..<5 where !blocked.isHittable { app.swipeUp() }
         blocked.tap()

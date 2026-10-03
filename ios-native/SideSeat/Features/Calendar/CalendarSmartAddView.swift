@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 struct CalendarSmartAddView: View {
@@ -11,6 +12,13 @@ struct CalendarSmartAddView: View {
     @State private var store = CalendarSmartAddStore()
     @State private var voiceInput = CalendarVoiceInput.forCurrentProcess()
     @State private var text = ""
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var showsPhotoPicker = false
+    @State private var isReadingImage = false
+    @State private var imageReadTask: Task<Void, Never>?
+    @State private var imagePreviewData: Data?
+    @State private var imageIssue: String?
+    @State private var showsSourceImage = false
     @State private var voicePrefix = ""
     @State private var voiceStartTask: Task<Void, Never>?
     @State private var showWarningDetails = false
@@ -76,7 +84,30 @@ struct CalendarSmartAddView: View {
                     onRemove: { store.removeDraft(withID: draft.id) }
                 )
             }
+            .photosPicker(isPresented: $showsPhotoPicker, selection: $selectedPhoto, matching: .images)
+            .sheet(isPresented: $showsSourceImage) {
+                NavigationStack {
+                    if let data = imagePreviewData, let image = UIImage(data: data) {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .padding()
+                            .navigationTitle("Source image")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .confirmationAction) {
+                                    Button("Done") { showsSourceImage = false }
+                                }
+                            }
+                    }
+                }
+            }
+            .onChange(of: selectedPhoto) { _, item in
+                guard let item else { return }
+                readImage(item)
+            }
             .onChange(of: voiceInput.transcript) { _, transcript in
+                guard !isReadingImage, !showsPhotoPicker else { return }
                 text = CalendarVoiceTranscript.merge(prefix: voicePrefix, transcript: transcript)
             }
             .onChange(of: isInputFocused) { _, isFocused in
@@ -91,6 +122,8 @@ struct CalendarSmartAddView: View {
                 voiceStartTask?.cancel()
                 voiceStartTask = nil
                 voiceInput.stop()
+                imageReadTask?.cancel()
+                imageReadTask = nil
             }
         }
         .presentationDetents(
@@ -106,7 +139,7 @@ struct CalendarSmartAddView: View {
             HStack(spacing: 7) {
                 Image(systemName: "sparkles")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accentText)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
 
                 Text("Smart fill")
                     .font(.headline)
@@ -174,6 +207,46 @@ struct CalendarSmartAddView: View {
                         )
                         .focused($isInputFocused)
                         .accessibilityIdentifier("smart-schedule-input")
+                        .disabled(isReadingImage || store.isParsing)
+                }
+
+                if let data = imagePreviewData, let image = UIImage(data: data) {
+                    Button { showsSourceImage = true } label: {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 44, height: 44)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                Text("Image text added")
+                                    .font(.subheadline.weight(.medium))
+                                Text("Review the dates and times, or tap to check the image.")
+                                    .font(.caption)
+                                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            }
+                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                .font(.caption)
+                                .accessibilityHidden(true)
+                        }
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("smart-schedule-source-image")
+                }
+                if inputIsTooLong {
+                    Text("Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image.")
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.danger)
+                        .accessibilityIdentifier("smart-schedule-input-limit")
+                }
+                if let imageIssue {
+                    Text(imageIssue)
+                        .font(.footnote)
+                        .foregroundStyle(SideSeatTheme.danger)
+                        .accessibilityIdentifier("smart-schedule-image-error")
                 }
             }
             .padding(SideSeatTheme.spaceLG)
@@ -214,6 +287,47 @@ struct CalendarSmartAddView: View {
             .accessibilityLabel(voiceInput.isActive ? "Stop dictation" : "Dictate event")
             .accessibilityValue(voiceButtonTitle)
             .accessibilityIdentifier("smart-schedule-voice")
+            .disabled(isReadingImage || store.isParsing)
+
+            Divider()
+                .padding(.leading, SideSeatTheme.spaceLG)
+
+            Button {
+                voiceStartTask?.cancel()
+                voiceStartTask = nil
+                voiceInput.stop()
+                isInputFocused = false
+                selectedPhoto = nil
+                showsPhotoPicker = true
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Text(isReadingImage ? "Reading image" : "Add from image")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+                    Group {
+                        if isReadingImage { ProgressView() }
+                        else { Image(systemName: "photo").font(.body.weight(.semibold)) }
+                    }
+                    .frame(width: 36, height: 36)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .background(SideSeatTheme.fillSubtle, in: Circle())
+                    .accessibilityHidden(true)
+                }
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(SSPressButtonStyle())
+            .disabled(isReadingImage || store.isParsing)
+            .accessibilityIdentifier("smart-schedule-image")
+
+            Text("Read text from an event poster or schedule screenshot. The image stays on your device; only the reviewed text is sent when you preview events.")
+                .font(.caption)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .padding(.bottom, SideSeatTheme.spaceMD)
 
             if let voiceIssue = voiceInput.issue {
                 Divider()
@@ -349,7 +463,7 @@ struct CalendarSmartAddView: View {
             ) {
                 previewEvents()
             }
-            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.isParsing)
+            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.isParsing || isReadingImage || inputIsTooLong)
             .padding(.horizontal, SideSeatTheme.spaceLG)
             .padding(.vertical, 10)
             .background(.bar)
@@ -413,7 +527,38 @@ struct CalendarSmartAddView: View {
         )
     }
 
+    private var inputIsTooLong: Bool {
+        text.trimmingCharacters(in: .whitespacesAndNewlines).utf16.count > CalendarImageInput.maximumTextLength
+    }
+
+    private func readImage(_ item: PhotosPickerItem) {
+        imageReadTask?.cancel()
+        imageIssue = nil
+        isReadingImage = true
+        selectedPresentationDetent = .large
+        imageReadTask = Task { @MainActor in
+            defer { isReadingImage = false }
+            do {
+                guard let data = try await item.loadTransferable(type: Data.self) else {
+                    throw CalendarImageInputError.unreadable
+                }
+                try Task.checkCancellation()
+                let result = try await CalendarImageInput.recognize(in: data)
+                try Task.checkCancellation()
+                text = CalendarImageInput.appending(result.text, to: text)
+                imagePreviewData = result.previewData
+            } catch is CancellationError {
+                // Closing the sheet must never insert a late OCR result.
+            } catch {
+                guard !Task.isCancelled else { return }
+                imageIssue = (error as? CalendarImageInputError)?.localizedDescription
+                    ?? AppLocalization.string("The selected image could not be read.")
+            }
+        }
+    }
+
     private func previewEvents() {
+        guard !isReadingImage, !inputIsTooLong else { return }
         voiceStartTask?.cancel()
         voiceInput.stop()
         isInputFocused = false
@@ -432,9 +577,9 @@ struct CalendarSmartAddView: View {
             return SideSeatTheme.danger
         }
         if voiceInput.isStarting {
-            return SideSeatTheme.accent
+            return SideSeatTheme.ProductAction.fill
         }
-        return SideSeatTheme.accent.opacity(0.12)
+        return SideSeatTheme.fillSubtle
     }
 
     private var voiceButtonIconColor: Color {
@@ -442,9 +587,9 @@ struct CalendarSmartAddView: View {
             return .white
         }
         if voiceInput.isStarting {
-            return SideSeatTheme.onAccent
+            return SideSeatTheme.ProductAction.foreground
         }
-        return SideSeatTheme.accentText
+        return SideSeatTheme.utilityAction
     }
 
     private var voiceButtonTitle: LocalizedStringKey {
@@ -727,7 +872,8 @@ private struct CalendarSmartDraftEditorView: View {
                     repeatHasEnd: $repeatHasEnd,
                     categories: categories,
                     preservesLegacyOffGridTimes: false,
-                    focusedField: $focusedField
+                    focusedField: $focusedField,
+                    companionIDs: .constant([])
                 )
 
                 if let issue {
@@ -756,6 +902,7 @@ private struct CalendarSmartDraftEditorView: View {
                     focusedField = nil
                 }
             )
+            .listSectionSpacing(16)
             .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Edit event details")
             .navigationBarTitleDisplayMode(.inline)

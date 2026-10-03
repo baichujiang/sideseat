@@ -956,7 +956,7 @@ struct ScheduleShareComposeSheet: View {
                     Spacer(minLength: SideSeatTheme.spaceSM)
                     HStack(spacing: SideSeatTheme.spaceXS) {
                         Image(systemName: isIncluded ? "checkmark.circle.fill" : "eye.slash")
-                            .foregroundStyle(isIncluded ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
+                            .foregroundStyle(isIncluded ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondary)
                         Text(isIncluded ? "Shared" : "Not shared")
                             .foregroundStyle(isIncluded ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
                     }
@@ -1041,7 +1041,7 @@ struct ScheduleShareComposeSheet: View {
                 Divider()
 
                 Toggle("Allow time suggestions", isOn: $allowGuestProposals)
-                    .tint(SideSeatTheme.accentText)
+                    .tint(SideSeatTheme.utilityAction)
                     .accessibilityIdentifier("schedule-share-allow-proposals")
 
                 Picker("Link use", selection: $usageLimit) {
@@ -1376,10 +1376,10 @@ struct ScheduleShareComposeSheet: View {
         } label: {
             Text(title)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(isActive ? Color.white : SideSeatTheme.textPrimary)
+                .foregroundStyle(isActive ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
                 .padding(.horizontal, 12)
                 .frame(height: 34)
-                .background(isActive ? SideSeatTheme.accent : SideSeatTheme.fillTertiary, in: Capsule())
+                .background(isActive ? SideSeatTheme.ProductAction.fill : SideSeatTheme.fillTertiary, in: Capsule())
         }
         .buttonStyle(SSPressButtonStyle())
     }
@@ -1415,21 +1415,21 @@ struct ScheduleShareComposeSheet: View {
                 .frame(minWidth: 14, minHeight: 13)
                 .background(
                     eventCount > 0
-                        ? (isSelected ? Color.white.opacity(0.2) : SideSeatTheme.fillTertiary)
+                        ? (isSelected ? SideSeatTheme.ProductAction.foreground.opacity(0.2) : SideSeatTheme.fillTertiary)
                         : Color.clear,
                     in: Capsule()
                 )
             }
-            .foregroundStyle(isSelected ? Color.white : SideSeatTheme.textPrimary)
+            .foregroundStyle(isSelected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
             .frame(maxWidth: .infinity, minHeight: 62)
             .background(
-                isSelected ? AnyShapeStyle(SideSeatTheme.accent) : AnyShapeStyle(SideSeatTheme.surface),
+                isSelected ? AnyShapeStyle(SideSeatTheme.ProductAction.fill) : AnyShapeStyle(SideSeatTheme.surface),
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
             .overlay {
                 RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     .stroke(
-                        isFocused ? SideSeatTheme.accent : Color.primary.opacity(0.08),
+                        isFocused ? SideSeatTheme.ProductAction.fill : Color.primary.opacity(0.08),
                         lineWidth: isFocused ? 1.5 : 0.75
                     )
             }
@@ -1498,7 +1498,7 @@ struct ScheduleShareComposeSheet: View {
                     .foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary)
                 Image(systemName: isSelected ? "checkmark" : "eye.slash")
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(isSelected ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
+                    .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondary)
             }
             .padding(.horizontal, 12)
             .frame(height: 36)
@@ -2620,7 +2620,8 @@ private struct ScheduleShareImagePreviewView: View {
                     .multilineTextAlignment(.center)
                 Button("Try again", action: onRetry)
                     .buttonStyle(.borderedProminent)
-                    .tint(SideSeatTheme.accent)
+                    .tint(SideSeatTheme.ProductAction.fill)
+                    .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                     .accessibilityIdentifier("schedule-share-image-preview-retry")
             }
             .padding(SideSeatTheme.spaceXL)
@@ -2685,16 +2686,16 @@ private struct ScheduleShareImagePreviewView: View {
                     Button(action: onCancelSave) {
                         HStack(spacing: SideSeatTheme.spaceSM) {
                             ProgressView()
-                                .tint(SideSeatTheme.onAccent)
+                                .tint(SideSeatTheme.ProductAction.foreground)
                                 .accessibilityIdentifier("schedule-share-image-saving")
                             Text("Cancel")
                         }
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.onAccent)
+                        .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(
-                            SideSeatTheme.accent,
+                            SideSeatTheme.ProductAction.fill,
                             in: RoundedRectangle(
                                 cornerRadius: SideSeatTheme.controlRadius,
                                 style: .continuous
@@ -2707,11 +2708,11 @@ private struct ScheduleShareImagePreviewView: View {
                     Button(action: onSave) {
                         Label("Save to Photos", systemImage: "photo.badge.arrow.down")
                             .font(.body.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.onAccent)
+                            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .background(
-                                SideSeatTheme.accent,
+                                SideSeatTheme.ProductAction.fill,
                                 in: RoundedRectangle(
                                     cornerRadius: SideSeatTheme.controlRadius,
                                     style: .continuous

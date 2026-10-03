@@ -37,6 +37,7 @@ struct DirectChatView: View {
     @State private var isAttachmentTrayVisible = false
     @State private var openedScheduleShareToken: ScheduleShareNavToken?
     @State private var counterPlan: NativePlanRequest?
+    @State private var cancelingPlan: NativePlanRequest?
     @State private var actionPlanDraft: ActionPlanPresentation?
     @State private var scrollToMessageID: String?
     @State private var initialFocusMessageID: String?
@@ -309,6 +310,11 @@ struct DirectChatView: View {
                     return sent
                 }
             }
+            .sheet(item: $cancelingPlan) { plan in
+                PlanCancellationSheet(plan: plan, issue: store.planIssue) { reason, note in
+                    await store.cancelPlan(plan, reasonCode: reason, note: note, using: session)
+                }
+            }
             .sheet(item: $counterPlan) { plan in
                 PlanCreateSheet(
                     target: .counter(for: plan),
@@ -344,7 +350,7 @@ struct DirectChatView: View {
                 }
             }
             .navigationDestination(item: $openedScheduleShareToken) { item in
-                ScheduleShareRecipientView(token: item.id)
+                ScheduleShareRecipientView(token: item.id, onReturnToChat: { openedScheduleShareToken = nil })
             }
             .navigationDestination(isPresented: $showChatInfo) {
                 DirectChatInfoView(
@@ -489,7 +495,7 @@ struct DirectChatView: View {
                                         Task { _ = await store.declinePlan(plan, using: session) }
                                     },
                                     onWithdrawPlan: { plan in
-                                        Task { _ = await store.withdrawPlan(plan, using: session) }
+                                        cancelingPlan = plan
                                     },
                                     onCounterPlan: { plan in
                                         counterPlan = plan
@@ -727,9 +733,9 @@ struct DirectChatView: View {
                 } label: {
                     Image(systemName: "calendar.badge.plus")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(SideSeatTheme.accentText)
+                        .foregroundStyle(SideSeatTheme.utilityAction)
                         .frame(width: 34, height: 34)
-                        .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+                        .background(SideSeatTheme.fillSubtle, in: Circle())
                         .ssIconButtonHitTarget()
                 }
                 .buttonStyle(SSPressButtonStyle())
@@ -881,10 +887,13 @@ struct DirectChatView: View {
                         size: 28
                     )
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(conversation.displayName)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(1)
+                        HStack(spacing: 5) {
+                            Text(conversation.displayName)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(1)
+                            if !conversation.isSelfNotes && conversation.peer.isPlus == true { SSPlusBadge() }
+                        }
                         if !conversation.isSelfNotes {
                             Text("@\(conversation.peer.username)")
                                 .font(.caption2)
@@ -1853,7 +1862,7 @@ private struct ActionInterestCard: View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
             HStack(spacing: SideSeatTheme.spaceSM) {
                 Image(systemName: context.sourceKind == "COURSE_ACTION" ? "book.closed.fill" : "person.2.fill")
-                    .foregroundStyle(SideSeatTheme.accentText)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
                 Text(AppLocalization.string(context.sourceKind == "COURSE_ACTION" ? "Course action" : "Buddy action"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -1891,8 +1900,8 @@ private struct ActionInterestCard: View {
             }
             .buttonStyle(.borderedProminent)
             .buttonBorderShape(.capsule)
-            .tint(SideSeatTheme.accent)
-            .foregroundStyle(SideSeatTheme.onAccent)
+            .tint(SideSeatTheme.ProductAction.fill)
+            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
             .disabled(!canProposePlan)
             .accessibilityIdentifier("action-interest-propose-plan-\(interest.id)")
         }
@@ -1920,7 +1929,7 @@ private struct MutualOpportunitySourceCard: View {
         SSFlowCard {
             SSFlowCardHeader(
                 title: context.localizedTitle,
-                subtitle: AppLocalization.string("You both showed interest"),
+                subtitle: AppLocalization.string("About this intention"),
                 systemImage: "person.2.fill",
                 tint: SideSeatTheme.statusSuccessText
             )

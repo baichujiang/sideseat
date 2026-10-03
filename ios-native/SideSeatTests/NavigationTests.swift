@@ -23,7 +23,7 @@ struct NavigationTests {
 
     @Test("Together task tabs have a stable order and a useful first section")
     func togetherTaskNavigation() {
-        #expect(TogetherSection.allCases == [.recommendations, .intentions, .explore])
+        #expect(TogetherSection.allCases == [.intentions, .recommendations, .bookmarks])
         #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: false, hasLegacySession: false) == .intentions)
         #expect(TogetherSection.initial(hasIntentions: true, hasOpportunities: false, hasLegacySession: false) == .recommendations)
         #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: true, hasLegacySession: false) == .recommendations)
@@ -42,6 +42,12 @@ struct NavigationTests {
         #expect(titles == ["Together", "Plans", "Calendar", "Messages", "Me"])
         #expect(!titles.contains("Discover"))
         #expect(!titles.contains("Chats"))
+    }
+
+    @Test("Message requests stay in the Messages navigation stack")
+    func messageRequestsRoute() {
+        #expect(MVPRoutePolicy.disposition(for: .messageRequests) == .allowed)
+        #expect(MVPRoutePolicy.tab(for: .messageRequests) == .chats)
     }
 
     @Test("Focused plan chat routes remain distinct from ordinary chat routes")

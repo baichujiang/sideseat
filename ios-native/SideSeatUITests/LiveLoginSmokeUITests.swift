@@ -323,7 +323,7 @@ final class SocialLiveUITests: XCTestCase {
         let planEvent = app.descendants(matching: .any)["home-week-event-\(calendarEntryID)"]
         XCTAssertTrue(planEvent.waitForExistence(timeout: 10))
         let earlierEventCue = app.buttons.matching(
-            NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-offscreen-event-top-")
+            NSPredicate(format: "identifier BEGINSWITH %@", "calendar-week-offscreen-event-top")
         ).firstMatch
         if earlierEventCue.waitForExistence(timeout: 2) {
             earlierEventCue.tap()
@@ -386,6 +386,223 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertFalse(app.descendants(matching: .any)["plan-outcome-saved-\(planID)"].exists)
     }
 
+    // Run 01, scripts/qa-closed-loop.ts advance, then 02 against the dedicated local DB.
+    func testClosedLoop01IntentBookmarkGreetingPlanAndCalendars() {
+        let a = loopLogin("loopqa_a")
+        loopCreateIntent("[loop-qa] Campus coffee", in: a)
+        loopCapture(a, "01-intention")
+        a.terminate()
+
+        let b = loopLogin("loopqa_b")
+        loopCreateIntent("[loop-qa] Campus coffee", in: b)
+        b.buttons["together-tab-recommendations"].tap()
+        let bookmark = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-bookmark-")).firstMatch
+        XCTAssertTrue(bookmark.waitForExistence(timeout: 20))
+        loopReveal(bookmark, in: b)
+        let opportunityID = String(bookmark.identifier.dropFirst("mutual-opportunity-bookmark-".count))
+        loopCapture(b, "02-recommendation")
+        bookmark.tap()
+        XCTAssertTrue(bookmark.waitForNonExistence(timeout: 10))
+        b.buttons["together-tab-bookmarks"].tap()
+        XCTAssertTrue(bookmark.waitForExistence(timeout: 10))
+        loopCapture(b, "03-saved")
+        let greeting = b.buttons["mutual-opportunity-message-\(opportunityID)"]
+        loopReveal(greeting, in: b)
+        greeting.tap()
+        let body = b.textFields["opportunity-message-body"]
+        XCTAssertTrue(body.waitForExistence(timeout: 8))
+        body.tap(); body.typeText("[loop-qa] Hello, may I join?")
+        b.buttons["opportunity-message-submit"].tap()
+        XCTAssertTrue(b.staticTexts["intention-chat-first-message"].waitForExistence(timeout: 15))
+        XCTAssertFalse(b.buttons["chat-composer-send"].exists)
+        loopCapture(b, "04-first-message")
+        b.terminate()
+
+        let receiver = loopLogin("loopqa_a")
+        tabButton(in: receiver, labels: ["Messages"]).tap()
+        receiver.buttons["inbox-message-requests"].tap()
+        let request = receiver.buttons["message-request-\(opportunityID)"]
+        XCTAssertTrue(request.waitForExistence(timeout: 15))
+        request.tap()
+        let reply = receiver.textViews["chat-composer-field"]
+        XCTAssertTrue(reply.waitForExistence(timeout: 8))
+        reply.tap(); reply.typeText("[loop-qa] Yes, let's meet!")
+        receiver.buttons["chat-composer-send"].tap()
+        XCTAssertTrue(receiver.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 15))
+        XCTAssertTrue(receiver.staticTexts["[loop-qa] Hello, may I join?"].exists)
+        XCTAssertTrue(receiver.staticTexts["[loop-qa] Yes, let's meet!"].exists)
+        loopCapture(receiver, "05-replied-chat")
+        receiver.buttons["conversation-context-bar"].tap()
+        let makePlan = receiver.buttons["conversation-context-make-plan"]
+        XCTAssertTrue(makePlan.waitForExistence(timeout: 8))
+        loopCapture(receiver, "06-intention-in-chat")
+        makePlan.tap()
+        XCTAssertTrue(receiver.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+        XCTAssertEqual(receiver.textFields["plan-create-title"].value as? String, "[loop-qa] Campus coffee")
+        let submit = receiver.buttons["plan-create-submit"]
+        XCTAssertFalse(submit.isEnabled, "Undecided intention requires explicit plan timing")
+        let timing = receiver.switches["plan-confirm-timing"]
+        loopReveal(timing, in: receiver)
+        timing.tap()
+        XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
+        loopCapture(receiver, "07-plan-proposal")
+        submit.tap()
+        XCTAssertTrue(receiver.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 15))
+        receiver.terminate()
+
+        let accepter = loopLogin("loopqa_b")
+        openDirectChat(in: accepter, peerName: "Loop Alex")
+        let accept = accepter.buttons["Accept"].firstMatch
+        XCTAssertTrue(accept.waitForExistence(timeout: 12))
+        loopReveal(accept, in: accepter)
+        accept.tap()
+        let calendar = accepter.buttons["View calendar"].firstMatch
+        XCTAssertTrue(calendar.waitForExistence(timeout: 15))
+        loopCapture(accepter, "08-plan-confirmed")
+        calendar.tap()
+        XCTAssertTrue(accepter.staticTexts["[loop-qa] Campus coffee"].waitForExistence(timeout: 15))
+        loopCapture(accepter, "09-calendar-mia")
+        accepter.terminate()
+
+        let proposer = loopLogin("loopqa_a")
+        tabButton(in: proposer, labels: ["Calendar"]).tap()
+        XCTAssertTrue(proposer.staticTexts["[loop-qa] Campus coffee"].waitForExistence(timeout: 15))
+        loopCapture(proposer, "10-calendar-alex")
+        proposer.terminate()
+    }
+
+    func testClosedLoop02OutcomesContinueChatAndFindNewCompany() {
+        for (username, peer, text) in [
+            ("loopqa_a", "Loop Mia", "[loop-qa] Thanks for today!"),
+            ("loopqa_b", "Loop Alex", "[loop-qa] Great to meet you!")
+        ] {
+            let app = loopLogin(username)
+            tabButton(in: app, labels: ["Plans"]).tap()
+            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
+            XCTAssertTrue(occurred.waitForExistence(timeout: 12))
+            loopReveal(occurred, in: app)
+            occurred.tap()
+            let saved = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-saved-")).firstMatch
+            XCTAssertTrue(saved.waitForExistence(timeout: 12))
+            loopCapture(app, "11-outcome-\(username)")
+            openDirectChat(in: app, peerName: peer)
+            sendMessage(text, in: app)
+            loopCapture(app, "12-continued-chat-\(username)")
+            app.terminate()
+        }
+        let c = loopLogin("loopqa_c")
+        loopCreateIntent("[loop-qa] Meet someone new", in: c)
+        c.terminate()
+        let a = loopLogin("loopqa_a")
+        openDirectChat(in: a, peerName: "Loop Mia")
+        XCTAssertTrue(a.staticTexts["[loop-qa] Great to meet you!"].waitForExistence(timeout: 10))
+        a.navigationBars.buttons.firstMatch.tap()
+        loopCreateIntent("[loop-qa] Meet someone new", in: a)
+        a.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(a.staticTexts["Loop Lee"].waitForExistence(timeout: 20))
+        XCTAssertFalse(a.staticTexts["Loop Mia"].exists)
+        loopCapture(a, "13-new-company")
+        a.buttons["together-tab-bookmarks"].tap()
+        let oldChat = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
+        // The bookmark belongs to Mia, not Alex: check privacy across accounts.
+        XCTAssertFalse(oldChat.exists)
+        a.terminate()
+        let b = loopLogin("loopqa_b")
+        b.buttons["together-tab-bookmarks"].tap()
+        let chat = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
+        XCTAssertTrue(chat.waitForExistence(timeout: 12))
+        loopReveal(chat, in: b); chat.tap()
+        XCTAssertTrue(b.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+        XCTAssertTrue(b.staticTexts["[loop-qa] Thanks for today!"].waitForExistence(timeout: 8))
+        loopCapture(b, "14-saved-history-chat")
+        b.terminate()
+    }
+
+    func testMembershipInviteRedemption() throws {
+        let env = ProcessInfo.processInfo.environment
+        let username = try XCTUnwrap(env["SIDESEAT_MEMBERSHIP_USER"])
+        let peer = try XCTUnwrap(env["SIDESEAT_MEMBERSHIP_PEER"])
+        let code = try XCTUnwrap(env["SIDESEAT_MEMBERSHIP_CODE"])
+        func openMembership(_ app: XCUIApplication) {
+            tabButton(in: app, labels: ["Me"]).tap()
+            let entry = app.buttons["me-membership"]
+            XCTAssertTrue(entry.waitForExistence(timeout: 12))
+            entry.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["membership-code"].waitForExistence(timeout: 10))
+        }
+        func redeem(_ code: String, in app: XCUIApplication) {
+            let field = app.descendants(matching: .any)["membership-code"].firstMatch
+            field.tap(); field.typeText(code)
+            app.buttons["membership-redeem"].tap()
+        }
+        let a = loopLogin(username)
+        openMembership(a)
+        XCTAssertTrue(a.descendants(matching: .any)["membership-free"].waitForExistence(timeout: 10))
+        redeem(code.lowercased(), in: a)
+        XCTAssertTrue(a.descendants(matching: .any)["membership-plus"].waitForExistence(timeout: 12))
+        XCTAssertTrue(a.descendants(matching: .any)["membership-expiry"].exists)
+        XCTAssertTrue(a.descendants(matching: .any)["membership-confirmation"].exists)
+        redeem(code, in: a)
+        XCTAssertTrue(a.staticTexts["You have already redeemed this invitation code."].waitForExistence(timeout: 10))
+        loopCapture(a, "membership-plus-redeemed")
+        a.terminate()
+
+        let b = loopLogin(peer)
+        openMembership(b)
+        XCTAssertTrue(b.descendants(matching: .any)["membership-free"].waitForExistence(timeout: 10))
+        redeem(code, in: b)
+        XCTAssertTrue(b.descendants(matching: .any)["membership-error"].waitForExistence(timeout: 10))
+        XCTAssertTrue(b.descendants(matching: .any)["membership-free"].exists)
+        XCTAssertFalse(b.descendants(matching: .any)["membership-plus"].exists)
+        loopCapture(b, "membership-capacity-exhausted")
+        b.terminate()
+
+        let reloaded = loopLogin(username)
+        openMembership(reloaded)
+        XCTAssertTrue(reloaded.descendants(matching: .any)["membership-plus"].waitForExistence(timeout: 10))
+        reloaded.terminate()
+    }
+
+    private func loopLogin(_ username: String) -> XCUIApplication {
+        launchAndLogin(username: username, additionalLaunchArguments: [
+            "--ui-testing-discover", "--ui-testing-language=en", "--ui-testing-appearance=light",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"
+        ])
+    }
+
+    private func loopCreateIntent(_ text: String, in app: XCUIApplication) {
+        tabButton(in: app, labels: ["Together"]).tap()
+        XCTAssertTrue(app.buttons["together-tab-intentions"].waitForExistence(timeout: 12))
+        app.buttons["together-tab-intentions"].tap()
+        app.buttons.matching(NSPredicate(format: "identifier IN %@", ["together-add-intent", "together-add-first-intent"])).firstMatch.tap()
+        XCTAssertTrue(app.buttons["intent-topic-coffee"].waitForExistence(timeout: 8))
+        app.buttons["intent-topic-coffee"].tap()
+        let field = app.textFields["intent-editor-activity"]
+        loopReveal(field, in: app)
+        field.tap(); field.typeText(text)
+        app.buttons["intent-editor-save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts[text].firstMatch.waitForExistence(timeout: 8))
+        XCTAssertFalse(app.buttons["Start matching"].exists)
+    }
+
+    private func loopReveal(_ element: XCUIElement, in app: XCUIApplication) {
+        for _ in 0..<8 {
+            if element.isHittable && element.frame.midY < app.frame.maxY - 110 { return }
+            app.swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(element.isHittable)
+    }
+
+    private func loopCapture(_ app: XCUIApplication, _ name: String) {
+        let shot = app.screenshot()
+        let attachment = XCTAttachment(screenshot: shot)
+        attachment.name = "closed-loop-\(name)"; attachment.lifetime = .keepAlways; add(attachment)
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        try? shot.pngRepresentation.write(to: root.appendingPathComponent("docs/visual-qa/closed-loop-\(name).png"))
+    }
+
     func testTogetherIntentToMutualPlanAddsBothCalendars() {
         runTogetherIntentToPlan(relatedActivities: false)
     }
@@ -421,49 +638,35 @@ final class SocialLiveUITests: XCTestCase {
             additionalLaunchArguments: togetherArguments
         )
         createCoffeeIntentAndStartMatching(peerActivity, in: secondParticipant)
-        let secondDecision = togetherDecisionBar(in: secondParticipant)
+        let secondDecision = togetherContactActions(in: secondParticipant)
         if relatedActivities {
             let summary = secondParticipant.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-activity-")
             ).firstMatch
             XCTAssertTrue(summary.exists)
             XCTAssertTrue(summary.label.contains(activity))
-            XCTAssertTrue(summary.label.contains(peerActivity))
+            XCTAssertFalse(summary.label.contains(peerActivity))
             XCTAssertFalse(secondParticipant.descendants(matching: .any).matching(
                 NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-fit-details-")
             ).firstMatch.exists)
         }
         XCTAssertFalse(secondParticipant.buttons["Chat about the details"].exists)
         XCTAssertTrue(secondDecision.exists)
-        swipeTogetherInterest(in: secondParticipant)
-        XCTAssertTrue(
-            secondParticipant.staticTexts["Your choice is saved privately"]
-                .waitForExistence(timeout: 12)
-        )
-        XCTAssertFalse(secondParticipant.staticTexts["You both showed interest"].exists)
+        sendTogetherMessage("Hi, I'd like to join you.", in: secondParticipant)
+        XCTAssertTrue(secondParticipant.descendants(matching: .any).matching(
+            NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-sent-")
+        ).firstMatch.waitForExistence(timeout: 12))
         secondParticipant.terminate()
 
         let firstReturn = launchAndLogin(
             username: "test_001",
             additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=\(planLanguage)"]
         )
-        let recoveredCountdown = firstReturn.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS[c] %@", chinesePlan ? "剩余" : "remaining")
-        ).firstMatch
-        XCTAssertTrue(recoveredCountdown.waitForExistence(timeout: 12))
-        let firstDecision = togetherDecisionBar(in: firstReturn)
-        XCTAssertFalse(firstReturn.staticTexts[chinesePlan ? "你的选择已私密保存" : "Your choice is saved privately"].exists)
+        let firstDecision = togetherContactActions(in: firstReturn)
         XCTAssertTrue(firstDecision.exists)
-        swipeTogetherInterest(in: firstReturn)
-        let startPlanning = firstReturn.buttons[chinesePlan ? "聊聊细节" : "Chat about the details"]
-        XCTAssertTrue(startPlanning.waitForExistence(timeout: 12))
-        startPlanning.tap()
-
+        sendTogetherMessage("Yes, let's arrange the details.", in: firstReturn)
         XCTAssertTrue(firstReturn.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
-        XCTAssertTrue(
-            firstReturn.staticTexts[chinesePlan ? "你们都有兴趣" : "You both showed interest"]
-                .waitForExistence(timeout: 12)
-        )
+        XCTAssertTrue(firstReturn.staticTexts[chinesePlan ? "关于这条意愿" : "About this intention"].waitForExistence(timeout: 12))
         XCTAssertTrue(firstReturn.staticTexts[contextTitle].waitForExistence(timeout: 8))
         let makePlan = firstReturn.buttons[chinesePlan ? "制定计划" : "Make a plan"]
         XCTAssertTrue(makePlan.waitForExistence(timeout: 8))
@@ -655,7 +858,11 @@ final class SocialLiveUITests: XCTestCase {
         passwordField.tap()
         passwordField.typeText(password)
         app.buttons["login-submit"].tap()
-        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 15))
+        let system = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let denyNotifications = system.buttons.matching(NSPredicate(format: "label IN %@",
+            ["Don’t Allow", "Don't Allow", "不允许", "Nicht erlauben"])).firstMatch
+        if denyNotifications.waitForExistence(timeout: 4) { denyNotifications.tap() }
+        XCTAssertTrue(tabButton(in: app, labels: ["Calendar", "日历"]).waitForExistence(timeout: 20))
         return app
     }
 
@@ -736,7 +943,7 @@ final class SocialLiveUITests: XCTestCase {
         let intentions = app.buttons["together-tab-intentions"].firstMatch
         XCTAssertTrue(intentions.waitForExistence(timeout: 8))
         intentions.tap()
-        let setIntent = app.buttons["together-add-intent"]
+        let setIntent = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["together-add-intent", "together-add-first-intent"])).firstMatch
         XCTAssertTrue(setIntent.waitForExistence(timeout: 8))
         setIntent.tap()
         XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
@@ -745,9 +952,6 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(activityField.waitForExistence(timeout: 5))
         activityField.tap()
         activityField.typeText(activity)
-        let next = app.buttons["intent-editor-next"]
-        XCTAssertTrue(waitUntilEnabled(next, timeout: 5))
-        next.tap()
         let save = app.buttons["intent-editor-save"]
         XCTAssertTrue(waitUntilEnabled(save, timeout: 5))
         save.tap()
@@ -774,30 +978,23 @@ final class SocialLiveUITests: XCTestCase {
         ).firstMatch.exists)
     }
 
-    private func togetherDecisionBar(in app: XCUIApplication) -> XCUIElement {
+    private func togetherContactActions(in app: XCUIApplication) -> XCUIElement {
         let decision = app.descendants(matching: .any).matching(
-            NSPredicate(
-                format: "identifier BEGINSWITH %@ AND NOT identifier BEGINSWITH %@",
-                "mutual-opportunity-swipe-",
-                "mutual-opportunity-swipe-handle-"
-            )
+            NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-actions-")
         ).firstMatch
-        for _ in 0..<8 where !decision.isHittable {
-            app.swipeUp()
-        }
+        for _ in 0..<8 where !decision.isHittable { app.swipeUp() }
         XCTAssertTrue(decision.waitForExistence(timeout: 15))
         return decision
     }
 
-    private func swipeTogetherInterest(in app: XCUIApplication) {
-        let bar = togetherDecisionBar(in: app)
-        let prefix = "mutual-opportunity-swipe-"
-        let id = String(bar.identifier.dropFirst(prefix.count))
-        let handle = app.descendants(matching: .any)["mutual-opportunity-swipe-handle-\(id)"].firstMatch
-        XCTAssertTrue(handle.waitForExistence(timeout: 5))
-        let start = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let end = start.withOffset(CGVector(dx: max(120, bar.frame.width * 0.40), dy: 0))
-        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.4)
+    private func sendTogetherMessage(_ text: String, in app: XCUIApplication) {
+        let actions = togetherContactActions(in: app)
+        let id = String(actions.identifier.dropFirst("mutual-opportunity-actions-".count))
+        app.buttons["mutual-opportunity-message-\(id)"].tap()
+        let input = app.textFields["opportunity-message-body"]
+        XCTAssertTrue(input.waitForExistence(timeout: 8))
+        input.tap(); input.typeText(text)
+        app.buttons["opportunity-message-submit"].tap()
     }
 
     private func openProfileEditor(in app: XCUIApplication, selectMeTab: Bool = true) {

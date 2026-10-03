@@ -123,6 +123,14 @@ struct WeeklyIntentModelsTests {
         )
         #expect(legacy.intents.map(\.id) == ["intent-2"])
         #expect(legacy.intent?.id == "intent-2")
+        #expect(legacy.expiredIntents.isEmpty)
+        let expired = second.replacingOccurrences(of: "ACTIVE", with: "EXPIRED")
+        let history = try decoder.decode(NativeWeeklyIntentPayload.self,
+            from: Data(#"{"intents":[\#(first)],"expiredIntents":[\#(expired)]}"#.utf8))
+        #expect(history.intents.map(\.id) == ["intent-1"])
+        #expect(history.expiredIntents.map(\.id) == ["intent-2"])
+        #expect(history.expiredIntents.first?.status == "EXPIRED")
+
     }
 
     @Test("Persistent intentions decode and remain available after 30 days")
@@ -313,6 +321,14 @@ struct WeeklyIntentModelsTests {
         #expect(limitedMatches.allSatisfy { $0 != .other })
     }
 
+    @Test("Intention text lengths match the API for emoji and Chinese text", arguments: [60, 80, 160])
+    func intentTextLengthMatchesAPI(limit: Int) {
+        let emojiAtLimit = String(repeating: "📚", count: limit / 2)
+        #expect(NativeWeeklyIntentSubmissionRules.normalizedTextLength(" \n\(emojiAtLimit)\n ") == limit)
+        #expect(NativeWeeklyIntentSubmissionRules.normalizedTextLength(emojiAtLimit + "📚") == limit + 2)
+        #expect(NativeWeeklyIntentSubmissionRules.normalizedTextLength(String(repeating: "学", count: limit)) == limit)
+    }
+
     @Test("Only study intentions retain a normalized course ID")
     func normalizesCourseScopeByTopic() {
         #expect(
@@ -420,6 +436,63 @@ struct WeeklyIntentModelsTests {
         #expect(
             NativeWeeklyIntentTimeRules.minimumEnd(after: expectedStart) == expectedEnd
         )
+    }
+
+    @Test("Repeat an intention next week at its original local time, including older history and clock changes", arguments: [
+        ("2026-09-30T16:00:00Z", "2026-10-02T08:00:00Z", "2026-10-07T16:00:00Z"),
+        ("2026-09-11T09:00:00Z", "2026-10-02T08:00:00Z", "2026-10-09T09:00:00Z"),
+        ("2026-12-30T17:00:00Z", "2027-01-01T10:00:00Z", "2027-01-06T17:00:00Z"),
+        ("2026-03-25T17:00:00Z", "2026-03-27T10:00:00Z", "2026-04-01T16:00:00Z"),
+        ("2026-10-21T16:00:00Z", "2026-10-23T08:00:00Z", "2026-10-28T17:00:00Z"),
+    ])
+    func repeatsIntentionNextWeek(_ dates: (String, String, String)) throws {
+        let formatter = ISO8601DateFormatter()
+        let start = try #require(formatter.date(from: dates.0))
+        let now = try #require(formatter.date(from: dates.1))
+        let expected = try #require(formatter.date(from: dates.2))
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        calendar.firstWeekday = 2
+
+        let repeated = NativeWeeklyIntentTimeRules.repeatedWindows(
+            from: [.init(startAt: start, endAt: start.addingTimeInterval(90 * 60))],
+            now: now, calendar: calendar
+        )
+
+        #expect(repeated == [.init(startAt: expected, endAt: expected.addingTimeInterval(90 * 60))])
+    }
+
+    @Test("Repeating multiple intention times retains their order, spacing and durations")
+    func repeatsAllIntentionTimes() throws {
+        let formatter = ISO8601DateFormatter()
+        let first = try #require(formatter.date(from: "2026-09-30T16:00:00Z"))
+        let second = try #require(formatter.date(from: "2026-10-02T17:00:00Z"))
+        let now = try #require(formatter.date(from: "2026-10-03T08:00:00Z"))
+        let nextFirst = try #require(formatter.date(from: "2026-10-07T16:00:00Z"))
+        let nextSecond = try #require(formatter.date(from: "2026-10-09T17:00:00Z"))
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        calendar.firstWeekday = 2
+
+        let repeated = NativeWeeklyIntentTimeRules.repeatedWindows(from: [
+            .init(startAt: second, endAt: second.addingTimeInterval(120 * 60)),
+            .init(startAt: first, endAt: first.addingTimeInterval(45 * 60)),
+        ], now: now, calendar: calendar)
+
+        #expect(repeated == [
+            .init(startAt: nextFirst, endAt: nextFirst.addingTimeInterval(45 * 60)),
+            .init(startAt: nextSecond, endAt: nextSecond.addingTimeInterval(120 * 60)),
+        ])
+    }
+
+    @Test("Repeating an intention without exact times still defaults to next week")
+    func repeatsWithoutAnOriginalTime() throws {
+        let formatter = ISO8601DateFormatter()
+        let now = try #require(formatter.date(from: "2026-10-02T08:00:00Z"))
+        let expected = try #require(formatter.date(from: "2026-10-09T08:30:00Z"))
+        let repeated = NativeWeeklyIntentTimeRules.repeatedWindows(from: [], now: now)
+
+        #expect(repeated == [.init(startAt: expected, endAt: expected.addingTimeInterval(30 * 60))])
     }
 
     @Test("A single YES is saved privately and does not reveal the other decision")

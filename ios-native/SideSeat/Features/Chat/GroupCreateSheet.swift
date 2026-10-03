@@ -39,7 +39,7 @@ struct GroupCreateSheet: View {
                                     Spacer()
                                     if selectedIDs.contains(row.id) {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(SideSeatTheme.accentText)
+                                            .foregroundStyle(SideSeatTheme.utilityAction)
                                     }
                                 }
                             }

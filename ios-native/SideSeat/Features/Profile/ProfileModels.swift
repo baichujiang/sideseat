@@ -124,6 +124,7 @@ enum StudentIdentityDisplay {
 }
 
 struct NativeCurrentProfile: Decodable, Identifiable, Sendable {
+    var appearance: NativeProfileAppearance? = nil
     let id: String
     let username: String
     let nickname: String?
@@ -218,6 +219,7 @@ struct NativeProfileContacts: Decodable, Hashable, Sendable {
 }
 
 struct NativeProfileUpdateRequest: Encodable, Sendable {
+    var appearance: NativeProfileAppearance? = nil
     var nickname: String?
     var bio: String?
     var gender: String?
@@ -266,6 +268,8 @@ struct NativePublicProfile: Decodable, Sendable {
 }
 
 struct NativePublicProfileUser: Decodable, Sendable {
+    var appearance: NativeProfileAppearance? = nil
+    var isPlus: Bool? = nil
     let id: String
     let username: String
     let displayName: String
@@ -453,6 +457,7 @@ extension NativeCurrentProfile {
         let changedSchool = StudentIdentityDisplay.schoolCode(nextSchool) != StudentIdentityDisplay.schoolCode(school)
 
         return NativeCurrentProfile(
+            appearance: request.appearance ?? appearance,
             id: id,
             username: username,
             nickname: request.nickname ?? nickname,
@@ -519,6 +524,7 @@ extension NativeCurrentProfile {
             : nil
 
         return NativeCurrentProfile(
+            appearance: appearance,
             id: id,
             username: nextUsername,
             nickname: nickname,
@@ -562,6 +568,7 @@ extension NativeCurrentProfile {
 
     func applyingVerification(status: String, verifiedStudent: Bool) -> NativeCurrentProfile {
         NativeCurrentProfile(
+            appearance: appearance,
             id: id,
             username: username,
             nickname: nickname,
@@ -596,6 +603,7 @@ extension NativeCurrentProfile {
 
     func applyingAvatar(url: String) -> NativeCurrentProfile {
         NativeCurrentProfile(
+            appearance: appearance,
             id: id,
             username: username,
             nickname: nickname,

@@ -23,6 +23,8 @@ struct PlanCreateSheet: View {
     @State private var hasConfirmedTiming = false
     @State private var idempotencyKey: String?
     @State private var submissionSignature: String?
+    @State private var showSmartTime = false
+    @State private var suggestedTime: SmartTimeWindow?
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -35,6 +37,7 @@ struct PlanCreateSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
+                    smartTimeEntry
                     recipientSummary
                     if counterOf != nil {
                         timing
@@ -90,8 +93,44 @@ struct PlanCreateSheet: View {
                 let previousDuration = max(end.timeIntervalSince(oldValue), 30 * 60)
                 end = newValue.addingTimeInterval(previousDuration)
             }
+            .sheet(isPresented: $showSmartTime) {
+                SmartTimeSuggestionSheet(activityTitle: title) { window in
+                    start = window.start
+                    end = window.end
+                    suggestedTime = window
+                    hasConfirmedTiming = true
+                    showSmartTime = false
+                }
+            }
         }
         .ssFlowSheet(isSaving: isCreating)
+    }
+
+    private var smartTimeEntry: some View {
+        SSFlowCard(contentPadding: 0) {
+            Button {
+                focusedField = nil
+                showSmartTime = true
+            } label: {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(SideSeatTheme.HubTint.plans)
+                    Text("Find a time together")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .frame(minHeight: 52)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(SSPressButtonStyle())
+            .disabled(isCreating)
+            .accessibilityIdentifier("plan-smart-time")
+        }
     }
 
     private var recipientSummary: some View {
@@ -110,6 +149,10 @@ struct PlanCreateSheet: View {
                 )
                 .font(.subheadline)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else if suggestedTime != nil {
+                Text("Your chosen free time is filled in. The other person still needs to confirm.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             } else if needsExplicitTiming {
                 Text("Your activity is filled in. Choose the time you want to propose.")
                     .font(.footnote)
@@ -227,6 +270,7 @@ struct PlanCreateSheet: View {
                 .labelsHidden()
                 .datePickerStyle(.compact)
                 .environment(\.locale, AppLocalization.selectedLanguage.locale)
+                .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
                 .accessibilityIdentifier(
                     label == AppLocalization.string("Starts") ? "plan-create-start" : "plan-create-end")
         }
@@ -282,7 +326,7 @@ struct PlanCreateSheet: View {
     }
 
     private var needsExplicitTiming: Bool {
-        counterOf == nil && draft?.needsTimeSelection == true
+        counterOf == nil && suggestedTime == nil && draft?.needsTimeSelection == true
     }
 
     private func create() async {

@@ -1874,6 +1874,7 @@
 "Keep for 14 more days" = "Weitere 14 Tage behalten";
 "Active until %@" = "Aktiv bis %@";
 "Add an intention" = "Vorhaben hinzufügen";
+"Add your first intention" = "Erstes Vorhaben hinzufügen";
 "Recent intentions" = "Aktuelle Vorhaben";
 "Add something you would like to do. Your intention stays private." = "Füge etwas hinzu, das du gern machen möchtest. Dein Vorhaben bleibt privat.";
 "Choose timing preference" = "Zeitwunsch auswählen";
@@ -2003,6 +2004,8 @@
 "Activity to agree" = "Aktivität offen";
 "Find another time" = "Andere Zeit finden";
 "Time undecided" = "Zeit noch offen";
+"Clear time" = "Zeit entfernen";
+"This publishes a new intention; previous conversations stay with the original." = "Es entsteht ein neuer Wunsch; bisherige Chats bleiben beim ursprünglichen Wunsch.";
 "%@ · Shared time" = "%@ · Gemeinsam frei";
 "Similar timing" = "Ähnliche Zeit";
 "Check language" = "Sprache klären";
@@ -2025,3 +2028,294 @@
 "Next input" = "Nächstes Eingabefeld";
 
 "Use up to 500 characters." = "Max. 500 Zeichen.";
+
+"Confirm the time together after matching." = "Die genaue Zeit könnt ihr nach dem Match gemeinsam vereinbaren.";
+"Activity details (optional)" = "Details (optional)";
+"Describe what you'd like to do…" = "Beschreibe, was du machen möchtest…";
+
+"Delete intention" = "Vorhaben löschen";
+
+"Delete this intention?" = "Dieses Vorhaben löschen?";
+
+"SideSeat is using this intention to find company." = "SideSeat sucht anhand dieses Vorhabens nach Begleitung.";
+
+// Intention bookmarks and first messages
+"All recommendations" = "Alle Empfehlungen";
+"Saved intentions" = "Gespeicherte Vorhaben";
+"No saved intentions" = "Noch keine gespeicherten Vorhaben";
+"Save an intention to find it here later." = "Speichere ein Vorhaben, um es später hier wiederzufinden.";
+"Intention ended" = "Vorhaben beendet";
+"Request ignored" = "Anfrage ignoriert";
+"Sent · waiting for reply" = "Eine Nachricht gesendet · Antwort ausstehend";
+"Message requests" = "Nachrichtenanfragen";
+"Write a reply…" = "Schreibe eine Antwort…";
+"Say hello and share what you have in mind…" = "Sag Hallo und erzähle, was du vorhast…";
+"Replying opens a chat with this person." = "Mit deiner Antwort beginnt der Chat.";
+"Your message includes this intention. You can send more after they reply." = "Deine Nachricht enthält dieses Vorhaben. Nach einer Antwort könnt ihr weiter chatten.";
+"Message could not be sent. Your text is saved here; try again." = "Senden fehlgeschlagen. Dein Text bleibt hier erhalten; versuche es erneut.";
+"Send a message about an intention to start a conversation." = "Sende eine Nachricht zu einem Vorhaben, um ein Gespräch zu beginnen.";
+"Hi! I'd like to join you. Would tomorrow afternoon work?" = "Hi! Ich wäre gerne dabei. Passt morgen Nachmittag?";
+"Bookmark intention" = "Vorhaben merken";
+"Intention unavailable" = "Vorhaben nicht mehr verfügbar";
+"About this intention" = "Zu diesem Vorhaben";
+"Say hello" = "Sag Hallo";
+"More intentions" = "Weitere Vorhaben";
+
+"Save an intention privately or say hello with a message." = "Speichere ein Vorhaben privat oder sag mit einer Nachricht Hallo.";
+"Plus can unlock more Explore results, richer activity context, search and filters." = "Plus bietet mehr Ergebnisse, Aktivitätsdetails, Suche und Filter.";
+
+"You can send one message before they reply." = "Bis zur Antwort kannst du eine Nachricht senden.";
+"Introduce yourself and what you'd like to do together. You can keep chatting once they reply." = "Stell dich kurz vor und beschreibe, was du gemeinsam machen möchtest. Nach einer Antwort könnt ihr weiterchatten.";
+"Your message includes this intention." = "Deine Nachricht enthält dieses Vorhaben.";
+
+"View chat" = "Chat ansehen";
+"Reply to continue chatting" = "Antworten und weiterchatten";
+"Your message has been sent. You can continue chatting after they reply." = "Deine Nachricht wurde gesendet. Nach einer Antwort könnt ihr weiterchatten.";
+"Keep your message within 500 characters." = "Deine Nachricht darf höchstens 500 Zeichen enthalten.";
+
+"Waiting for reply" = "Wartet auf Antwort";
+
+"View intention details" = "Wunschdetails ansehen";
+
+"Intention details" = "Wunschdetails";
+
+"Added to saved intentions" = "Zu gespeicherten Vorhaben hinzugefügt";
+
+"Find more recommendations" = "Weitere Vorschläge finden";
+
+"Search again" = "Erneut suchen";
+
+"No new recommendations right now." = "Im Moment gibt es keine neuen Vorschläge.";
+
+/* Membership and invitation redemption */
+"Free membership" = "Kostenlose Mitgliedschaft";
+"Valid until" = "Gültig bis";
+"Membership expired" = "Mitgliedschaft abgelaufen";
+"Loading membership" = "Mitgliedschaft wird geladen";
+"Your membership" = "Deine Mitgliedschaft";
+"Invitation code" = "Einladungscode";
+"Redeem Plus" = "Plus freischalten";
+"Redeem invitation" = "Einladung einlösen";
+"Membership" = "Mitgliedschaft";
+"Each code can be redeemed once per account. If you already have Plus, the added days extend your current membership." = "Jeder Code kann pro Konto einmal eingelöst werden. Wenn du bereits Plus hast, verlängern die zusätzlichen Tage deine Mitgliedschaft.";
+"You have already redeemed this invitation code." = "Du hast diesen Einladungscode bereits eingelöst.";
+"Invitation redeemed. Your Plus membership is active." = "Code eingelöst. Deine Plus-Mitgliedschaft ist aktiv.";
+"This invitation code is invalid, expired, or fully redeemed." = "Dieser Einladungscode ist ungültig, abgelaufen oder vollständig eingelöst.";
+"Too many redemption attempts. Please try again later." = "Zu viele Einlöseversuche. Bitte versuche es später erneut.";
+"Membership could not be loaded. Please try again." = "Die Mitgliedschaft konnte nicht geladen werden. Bitte versuche es erneut.";
+"The invitation code could not be redeemed. Please try again." = "Der Einladungscode konnte nicht eingelöst werden. Bitte versuche es erneut.";
+
+"Plus member" = "Plus-Mitglied";
+
+/* Intention history and republishing */
+"Plan again" = "Erneut verabreden";
+"Publish new intention" = "Neuen Wunsch veröffentlichen";
+"Add an activity and choose when to find company." = "Füge eine Aktivität und Zeit hinzu, um Begleitung zu finden.";
+"Next week's time is prefilled. You can adjust it before publishing; previous conversations stay with the original." = "Die Zeit für nächste Woche ist vorausgefüllt. Du kannst sie vor dem Veröffentlichen anpassen; bisherige Chats bleiben beim ursprünglichen Wunsch.";
+"Show in recommendations" = "In Empfehlungen anzeigen";
+"This older intention was not public. Turn this on to include it in more recommendations." = "Dieser ältere Wunsch war nicht öffentlich. Aktiviere dies, um ihn auch in weiteren Empfehlungen anzuzeigen.";
+"Your activity, time and description will appear in recommendations." = "Aktivität, Zeit und Beschreibung erscheinen in Empfehlungen.";
+
+"Respond to plan" = "Auf Vorschlag antworten";
+
+"Review and respond" = "Ansehen und antworten";
+
+"Your confirmation needed" = "Bitte bestätigen";
+
+"Awaiting my response" = "Meine Antwort steht aus";
+
+"Awaiting their response" = "Antwort der anderen Person steht aus";
+
+"Confirm cancellation" = "Absage bestätigen";
+
+"Confirm withdrawal" = "Zurückziehen bestätigen";
+
+"Plan options" = "Planoptionen";
+
+"This removes the plan from both calendars and notifies the other person. Your chat stays available." = "Der Plan wird aus beiden Kalendern entfernt und die andere Person benachrichtigt. Euer Chat bleibt verfügbar.";
+
+"The other person will be notified. Any previously confirmed time stays unchanged." = "Die andere Person wird benachrichtigt. Eine zuvor bestätigte Zeit bleibt bestehen.";
+
+"They may already be preparing or on their way. Please choose a reason." = "Es sind weniger als 2 Stunden bis zum Beginn. Die andere Person ist vielleicht schon unterwegs. Bitte wähle einen Grund.";
+
+"Reason (required)" = "Grund (erforderlich)";
+
+"Reason (optional)" = "Grund (optional)";
+
+"Choose a reason" = "Grund auswählen";
+
+"Schedule changed" = "Terminänderung";
+
+"Not feeling well" = "Unwohlsein";
+
+"Not comfortable meeting" = "Möchte mich nicht treffen";
+
+"Other reason" = "Anderer Grund";
+
+"Add a note (optional)" = "Nachricht ergänzen (optional)";
+
+"Your reason and note are shared with the other person." = "Grund und Nachricht werden der anderen Person angezeigt.";
+
+"Find other company" = "Andere Begleitung finden";
+
+"Plan update" = "Planänderung";
+
+"canceled the plan" = "hat den Plan abgesagt";
+
+"withdrew the proposal" = "hat den Vorschlag zurückgezogen";
+
+"Got it" = "Verstanden";
+
+"Canceled by you" = "Von dir abgesagt";
+
+"Canceled by the other person" = "Von der anderen Person abgesagt";
+
+"Review the time before publishing. This creates a new intention without changing your previous plan." = "Prüfe die Zeit vor dem Veröffentlichen. Eine neue Absicht wird erstellt, ohne den bisherigen Plan zu ändern.";
+
+"Withdrawn by you" = "Von dir zurückgezogen";
+
+"Withdrawn by the other person" = "Von der anderen Person zurückgezogen";
+
+"Loading recommendations…" = "Empfehlungen werden geladen…";
+
+"Recommendations could not be loaded." = "Empfehlungen konnten nicht geladen werden.";
+
+"%lld events above" = "%lld Termine weiter oben";
+
+"%lld events below" = "%lld Termine weiter unten";
+
+"Scrolls to the nearest hidden event" = "Zum nächsten nicht sichtbaren Termin scrollen";
+
+"1 event above" = "1 Termin weiter oben";
+
+"1 event below" = "1 Termin weiter unten";
+
+"Companions" = "Begleitung";
+
+"Add companions" = "Begleitung hinzufügen";
+
+"Notes (optional)" = "Notizen (optional)";
+
+"Plus feature" = "Plus-Funktion";
+
+"Time undecided · Tap to set" = "Noch offen · Zeit wählen";
+"Not sure yet" = "Noch nicht sicher";
+
+/* Intention time overview */
+"%lld time options" = "%lld Zeitoptionen";
+"Modify times" = "Ändern";
+"Show %lld more times" = "%lld weitere Zeiten anzeigen";
+"Show fewer times" = "Weniger Zeiten anzeigen";
+
+/* Smart schedule image input */
+"Add from image" = "Aus Bild hinzufügen";
+"Reading image" = "Bild wird gelesen";
+"Source image" = "Originalbild";
+"Image text added" = "Bildtext hinzugefügt";
+"Review the dates and times, or tap to check the image." = "Prüfe Datum und Uhrzeit. Tippe zum Vergleich auf das Bild.";
+"Read text from an event poster or schedule screenshot. The image stays on your device; only the reviewed text is sent when you preview events." = "Lies Text aus Veranstaltungsplakaten oder Termin-Screenshots. Das Bild bleibt auf deinem Gerät. Erst für die Vorschau wird der geprüfte Text gesendet.";
+"Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image." = "Maximal 2.000 Zeichen. Kürze den Text oder importiere einen kleineren Bildausschnitt.";
+"Choose an image smaller than 20 MB, or crop it first." = "Wähle ein Bild unter 20 MB oder schneide es zuerst zu.";
+"No readable text was found. Try a clearer image or type the event details." = "Kein lesbarer Text gefunden. Wähle ein klareres Bild oder gib die Termindetails ein.";
+
+// Smart time coordination
+"Find a time together" = "Gemeinsame Zeit finden";
+"Any daytime" = "Tagsüber";
+"Preferred time" = "Bevorzugte Tageszeit";
+"Based on your synced calendars. Check any plans you have not added. Times are in Berlin time." = "Vorschläge anhand eurer synchronisierten Kalender. Prüfe auch nicht eingetragene Termine. Alle Zeiten gelten für Berlin.";
+"Checking both calendars" = "Gemeinsame freie Zeiten werden gesucht";
+"Your calendar could not be checked. Try again." = "Dein Kalender konnte nicht geprüft werden. Versuche es erneut.";
+"No common time in this range. Try a shorter duration or another time of day." = "Keine gemeinsame freie Zeit. Versuche eine kürzere Dauer oder eine andere Tageszeit.";
+"Other suggestions" = "Weitere Vorschläge";
+"%lld min" = "%lld Min.";
+"Share when you could meet. The other person can find times that also fit their calendar and propose a plan." = "Teile, wann du Zeit hast. Die andere Person kann passende Zeiten mit ihrem Kalender abgleichen und einen Plan vorschlagen.";
+"Find times in their shared availability" = "Geteilte Verfügbarkeit abgleichen";
+"When could you meet?" = "Wann hättest du Zeit?";
+"Date range" = "Zeitraum";
+"Only availability for these dates is shared, without event titles or locations. You can stop sharing from the card. Times are in Berlin time." = "Geteilt wird nur deine Verfügbarkeit an diesen Tagen, ohne Titel oder Orte. Du kannst die Freigabe über die Karte beenden. Alle Zeiten gelten für Berlin.";
+"Choosing a time sends a proposal. Both calendars change only after acceptance." = "Die Zeitwahl ist ein Vorschlag. Erst nach Annahme wird der Plan in beide Kalender eingetragen.";
+"Send my availability" = "Meine Verfügbarkeit senden";
+"This time is no longer free for both of you. Choose another suggestion." = "Diese Zeit ist nicht mehr für euch beide frei. Wähle einen anderen Vorschlag.";
+"Find common times" = "Gemeinsame Zeiten finden";
+"Back to chat" = "Zurück zum Chat";
+
+/* Direct free-time recommendations */
+"Pick a free time" = "Wähle eine freie Zeit";
+"Your free windows over the next 7 days. The other person still needs to confirm." = "Deine freien Zeiten in den nächsten 7 Tagen. Die andere Person muss noch zustimmen.";
+"Finding free times…" = "Freie Zeiten werden gesucht …";
+"No suitable free windows in the next 7 days" = "Keine passenden freien Zeiten in den nächsten 7 Tagen";
+"You can still choose a time when proposing a plan in the chat." = "Du kannst beim Planvorschlag im Chat weiterhin eine Zeit selbst wählen.";
+"Use this time in a plan" = "Diese Zeit für einen Plan verwenden";
+"Show other times" = "Andere Zeiten anzeigen";
+"Based on your synced calendar · Berlin time" = "Basierend auf deinem synchronisierten Kalender · Berliner Zeit";
+"Your chosen free time is filled in. The other person still needs to confirm." = "Deine gewählte freie Zeit ist eingetragen. Nach dem Senden bestätigt die andere Person.";
+
+/* Smart time chooser UI */
+"%@ free" = "%@ frei";
+"Tap a time to fill your plan. You can still adjust it." = "Tippe auf eine Zeit, um sie in deinen Plan zu übernehmen. Du kannst sie noch anpassen.";
+"Return to your plan to choose a time yourself." = "Gehe zum Plan zurück und wähle selbst eine Zeit.";
+"Choose time manually" = "Zeit selbst wählen";
+
+/* Relative plan timing */
+"In %lld days" = "In %lld Tagen";
+"In about an hour" = "In etwa einer Stunde";
+"In about %lld hours" = "In etwa %lld Stunden";
+"Within an hour" = "Innerhalb einer Stunde";
+"Starting soon" = "Beginnt gleich";
+"In progress" = "Läuft gerade";
+
+// Profile personalization
+"Classic" = "Klassisch";
+"Rose" = "Rosé";
+"Ocean" = "Ozean";
+"Forest" = "Wald";
+"Moon" = "Mond";
+"Leaf" = "Blatt";
+"Sparkles" = "Sternenglanz";
+"Outline" = "Kontur";
+"Spotlight" = "Akzentfläche";
+"Profile preview" = "Profilvorschau";
+"App theme" = "App-Design";
+"Light" = "Hell";
+"Dark" = "Dunkel";
+"App theme applies immediately on this device." = "Das App-Design gilt sofort auf diesem Gerät.";
+"Profile theme" = "Profilfarbe";
+"Profile icon" = "Profilsymbol";
+"Display style" = "Darstellung";
+"Show Plus badge" = "Plus-Abzeichen anzeigen";
+"Explore Plus membership" = "Plus-Mitgliedschaft ansehen";
+"Reset profile style" = "Profilstil zurücksetzen";
+"Plus styles can be previewed by everyone. An active membership is required to save them. After expiry, your profile uses free styles and keeps your saved choices." = "Alle können Plus-Stile ausprobieren. Zum Speichern ist Plus erforderlich. Nach Ablauf werden kostenlose Stile angezeigt; deine Auswahl bleibt gespeichert.";
+"This selection requires Plus" = "Diese Auswahl erfordert Plus";
+"Personalization" = "Personalisierung";
+"Themes, icons & profile style" = "Design, Symbole & Profilstil";
+"Could not save your style. Check your connection and membership, then try again." = "Der Stil konnte nicht gespeichert werden. Prüfe Verbindung und Mitgliedschaft und versuche es erneut.";
+"Avatar" = "Profilbild";
+"Discard changes?" = "Änderungen verwerfen?";
+
+/* Message request inbox */
+"Waiting for your reply" = "Wartet auf deine Antwort";
+"New greetings will appear here." = "Neue Anfragen erscheinen hier.";
+
+/* Compact greeting shortcut */
+"New greetings" = "Neue Grüße";
+"No new greetings" = "Keine neuen Grüße";
+"Your greetings are in New greetings." = "Deine gesendeten und empfangenen Grüße findest du unter „Neue Grüße“.";
+
+"Mark as unread" = "Als ungelesen markieren";
+"Mark as read" = "Als gelesen markieren";
+"Marked as unread" = "Als ungelesen markiert";
+
+/* Plans overview */
+"Overview" = "Übersicht";
+"Next meet-up" = "Nächstes Treffen";
+"View all invitations" = "Alle Einladungen ansehen";
+"No confirmed meet-ups yet" = "Noch keine bestätigten Treffen";
+"Once an invitation is accepted, your next meet-up appears here." = "Sobald eine Einladung angenommen wurde, erscheint hier dein nächstes Treffen.";
+"Invitations and your next confirmed meet-up will appear here." = "Hier erscheinen Einladungen und dein nächstes bestätigtes Treffen.";
+"%@ invited you" = "%@ hat dich eingeladen";
+"You invited %@" = "Du hast %@ eingeladen";
+"View and respond" = "Ansehen und antworten";
+"No current plans" = "Keine aktuellen Pläne";
+
+"Share intention" = "Vorhaben teilen";

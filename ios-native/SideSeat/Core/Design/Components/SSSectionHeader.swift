@@ -38,7 +38,7 @@ struct SSProductSectionHeader: View {
             if let actionTitle, let onAction {
                 Button(actionTitle, action: onAction)
                     .font(.subheadline.weight(.medium))
-                    .foregroundStyle(SideSeatTheme.accentText)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
                     .frame(minWidth: 44, minHeight: 44)
                     .contentShape(Rectangle())
                     .buttonStyle(.plain)

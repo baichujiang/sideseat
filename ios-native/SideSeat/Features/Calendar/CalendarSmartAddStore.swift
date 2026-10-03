@@ -18,6 +18,11 @@ final class CalendarSmartAddStore {
             return
         }
 
+        guard normalized.utf16.count <= CalendarImageInput.maximumTextLength else {
+            issue = AppLocalization.string("Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image.")
+            return
+        }
+
         isParsing = true
         issue = nil
         drafts = []

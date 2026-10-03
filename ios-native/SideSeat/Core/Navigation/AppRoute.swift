@@ -39,6 +39,8 @@ enum AppRoute: Hashable, Sendable {
     case feedbackDetail(feedbackID: String)
     case scheduleShare(token: String)
     case eventShare(token: String)
+    case messageRequests
+    case intentionChat(opportunity: NativeMutualOpportunity)
     case directChat(connectionID: String, focus: DirectChatFocus? = nil)
     case courseChat(courseID: String)
     case groupChat(groupChatID: String)
@@ -81,6 +83,8 @@ enum MVPRoutePolicy {
              .feedbackDetail,
              .scheduleShare,
              .eventShare,
+             .messageRequests,
+             .intentionChat,
              .directChat,
              .course:
             return .allowed
@@ -107,7 +111,7 @@ enum MVPRoutePolicy {
             return .me
         case .plans:
             return .plans
-        case .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare,
+        case .messageRequests, .intentionChat, .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare,
              .actionResponses, .coordinationShell:
             return .chats
         case .eventShare:

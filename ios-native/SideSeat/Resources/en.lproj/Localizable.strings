@@ -1875,6 +1875,7 @@
 "Keep for 14 more days" = "Keep for 14 more days";
 "Active until %@" = "Active until %@";
 "Add an intention" = "Add an intention";
+"Add your first intention" = "Add your first intention";
 "Recent intentions" = "Recent intentions";
 "Add something you would like to do. Your intention stays private." = "Add something you would like to do. Your intention stays private.";
 "Choose timing preference" = "Choose timing preference";
@@ -2004,6 +2005,8 @@
 "Activity to agree" = "Activity to agree";
 "Find another time" = "Find another time";
 "Time undecided" = "Time undecided";
+"Clear time" = "Clear time";
+"This publishes a new intention; previous conversations stay with the original." = "This publishes a new intention; previous conversations stay with the original.";
 "%@ · Shared time" = "%@ · Shared time";
 "Similar timing" = "Similar timing";
 "Check language" = "Check language";
@@ -2026,3 +2029,294 @@
 "Next input" = "Next input";
 
 "Use up to 500 characters." = "Use up to 500 characters.";
+
+"Confirm the time together after matching." = "Confirm the time together after matching.";
+"Activity details (optional)" = "Add details (optional)";
+"Describe what you'd like to do…" = "Describe what you'd like to do…";
+
+"Delete intention" = "Delete intention";
+
+"Delete this intention?" = "Delete this intention?";
+
+"SideSeat is using this intention to find company." = "SideSeat is using this intention to find company.";
+
+// Intention bookmarks and first messages
+"All recommendations" = "All recommendations";
+"Saved intentions" = "Saved intentions";
+"No saved intentions" = "No saved intentions";
+"Save an intention to find it here later." = "Save an intention to find it here later.";
+"Intention ended" = "Intention ended";
+"Request ignored" = "Request ignored";
+"Sent · waiting for reply" = "One message sent · waiting for reply";
+"Message requests" = "Message requests";
+"Write a reply…" = "Write a reply…";
+"Say hello and share what you have in mind…" = "Say hello and share what you have in mind…";
+"Replying opens a chat with this person." = "Replying opens a chat with this person.";
+"Your message includes this intention. You can send more after they reply." = "Your message includes this intention. You can send more after they reply.";
+"Message could not be sent. Your text is saved here; try again." = "Message could not be sent. Your text is saved here; try again.";
+"Send a message about an intention to start a conversation." = "Send a message about an intention to start a conversation.";
+"Hi! I'd like to join you. Would tomorrow afternoon work?" = "Hi! I'd like to join you. Would tomorrow afternoon work?";
+"Bookmark intention" = "Bookmark intention";
+"Intention unavailable" = "Intention unavailable";
+"About this intention" = "About this intention";
+"Say hello" = "Say hello";
+"More intentions" = "More intentions";
+
+"Save an intention privately or say hello with a message." = "Save an intention privately or say hello with a message.";
+"Plus can unlock more Explore results, richer activity context, search and filters." = "Plus can unlock more Explore results, richer activity context, search and filters.";
+
+"You can send one message before they reply." = "You can send one message before they reply.";
+"Introduce yourself and what you'd like to do together. You can keep chatting once they reply." = "Introduce yourself and what you'd like to do together. You can keep chatting once they reply.";
+"Your message includes this intention." = "Your message includes this intention.";
+
+"View chat" = "View chat";
+"Reply to continue chatting" = "Reply to continue chatting";
+"Your message has been sent. You can continue chatting after they reply." = "Your message has been sent. You can continue chatting after they reply.";
+"Keep your message within 500 characters." = "Keep your message within 500 characters.";
+
+"Waiting for reply" = "Waiting for reply";
+
+"View intention details" = "View intention details";
+
+"Intention details" = "Intention details";
+
+"Added to saved intentions" = "Added to saved intentions";
+
+"Find more recommendations" = "Find more recommendations";
+
+"Search again" = "Search again";
+
+"No new recommendations right now." = "No new recommendations right now.";
+
+/* Membership and invitation redemption */
+"Free membership" = "Free membership";
+"Valid until" = "Valid until";
+"Membership expired" = "Membership expired";
+"Loading membership" = "Loading membership";
+"Your membership" = "Your membership";
+"Invitation code" = "Invitation code";
+"Redeem Plus" = "Redeem Plus";
+"Redeem invitation" = "Redeem invitation";
+"Membership" = "Membership";
+"Each code can be redeemed once per account. If you already have Plus, the added days extend your current membership." = "Each code can be redeemed once per account. If you already have Plus, the added days extend your current membership.";
+"You have already redeemed this invitation code." = "You have already redeemed this invitation code.";
+"Invitation redeemed. Your Plus membership is active." = "Invitation redeemed. Your Plus membership is active.";
+"This invitation code is invalid, expired, or fully redeemed." = "This invitation code is invalid, expired, or fully redeemed.";
+"Too many redemption attempts. Please try again later." = "Too many redemption attempts. Please try again later.";
+"Membership could not be loaded. Please try again." = "Membership could not be loaded. Please try again.";
+"The invitation code could not be redeemed. Please try again." = "The invitation code could not be redeemed. Please try again.";
+
+"Plus member" = "Plus member";
+
+/* Intention history and republishing */
+"Plan again" = "Plan again";
+"Publish new intention" = "Publish new intention";
+"Add an activity and choose when to find company." = "Add an activity and choose when to find company.";
+"Next week's time is prefilled. You can adjust it before publishing; previous conversations stay with the original." = "Next week's time is prefilled. You can adjust it before publishing; previous conversations stay with the original.";
+"Show in recommendations" = "Show in recommendations";
+"This older intention was not public. Turn this on to include it in more recommendations." = "This older intention was not public. Turn this on to include it in more recommendations.";
+"Your activity, time and description will appear in recommendations." = "Your activity, time and description will appear in recommendations.";
+
+"Respond to plan" = "Respond to plan";
+
+"Review and respond" = "Review and respond";
+
+"Your confirmation needed" = "Your confirmation needed";
+
+"Awaiting my response" = "Awaiting my response";
+
+"Awaiting their response" = "Awaiting their response";
+
+"Confirm cancellation" = "Confirm cancellation";
+
+"Confirm withdrawal" = "Confirm withdrawal";
+
+"Plan options" = "Plan options";
+
+"This removes the plan from both calendars and notifies the other person. Your chat stays available." = "This removes the plan from both calendars and notifies the other person. Your chat stays available.";
+
+"The other person will be notified. Any previously confirmed time stays unchanged." = "The other person will be notified. Any previously confirmed time stays unchanged.";
+
+"They may already be preparing or on their way. Please choose a reason." = "They may already be preparing or on their way. Please choose a reason.";
+
+"Reason (required)" = "Reason (required)";
+
+"Reason (optional)" = "Reason (optional)";
+
+"Choose a reason" = "Choose a reason";
+
+"Schedule changed" = "Schedule changed";
+
+"Not feeling well" = "Not feeling well";
+
+"Not comfortable meeting" = "Not comfortable meeting";
+
+"Other reason" = "Other reason";
+
+"Add a note (optional)" = "Add a note (optional)";
+
+"Your reason and note are shared with the other person." = "Your reason and note are shared with the other person.";
+
+"Find other company" = "Find other company";
+
+"Plan update" = "Plan update";
+
+"canceled the plan" = "canceled the plan";
+
+"withdrew the proposal" = "withdrew the proposal";
+
+"Got it" = "Got it";
+
+"Canceled by you" = "Canceled by you";
+
+"Canceled by the other person" = "Canceled by the other person";
+
+"Review the time before publishing. This creates a new intention without changing your previous plan." = "Review the time before publishing. This creates a new intention without changing your previous plan.";
+
+"Withdrawn by you" = "Withdrawn by you";
+
+"Withdrawn by the other person" = "Withdrawn by the other person";
+
+"Loading recommendations…" = "Loading recommendations…";
+
+"Recommendations could not be loaded." = "Recommendations could not be loaded.";
+
+"%lld events above" = "%lld events above";
+
+"%lld events below" = "%lld events below";
+
+"Scrolls to the nearest hidden event" = "Scrolls to the nearest hidden event";
+
+"1 event above" = "1 event above";
+
+"1 event below" = "1 event below";
+
+"Companions" = "Companions";
+
+"Add companions" = "Add companions";
+
+"Notes (optional)" = "Notes (optional)";
+
+"Plus feature" = "Plus feature";
+
+"Time undecided · Tap to set" = "Time undecided · Tap to set";
+"Not sure yet" = "Not sure yet";
+
+/* Intention time overview */
+"%lld time options" = "%lld time options";
+"Modify times" = "Modify";
+"Show %lld more times" = "Show %lld more times";
+"Show fewer times" = "Show fewer times";
+
+/* Smart schedule image input */
+"Add from image" = "Add from image";
+"Reading image" = "Reading image";
+"Source image" = "Source image";
+"Image text added" = "Image text added";
+"Review the dates and times, or tap to check the image." = "Review the dates and times, or tap to check the image.";
+"Read text from an event poster or schedule screenshot. The image stays on your device; only the reviewed text is sent when you preview events." = "Read text from an event poster or schedule screenshot. The image stays on your device; only the reviewed text is sent when you preview events.";
+"Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image." = "Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image.";
+"Choose an image smaller than 20 MB, or crop it first." = "Choose an image smaller than 20 MB, or crop it first.";
+"No readable text was found. Try a clearer image or type the event details." = "No readable text was found. Try a clearer image or type the event details.";
+
+// Smart time coordination
+"Find a time together" = "Find a time together";
+"Any daytime" = "Any daytime";
+"Preferred time" = "Preferred time";
+"Based on your synced calendars. Check any plans you have not added. Times are in Berlin time." = "Based on your synced calendars. Check any plans you have not added. Times are in Berlin time.";
+"Checking both calendars" = "Checking both calendars";
+"Your calendar could not be checked. Try again." = "Your calendar could not be checked. Try again.";
+"No common time in this range. Try a shorter duration or another time of day." = "No common time in this range. Try a shorter duration or another time of day.";
+"Other suggestions" = "Other suggestions";
+"%lld min" = "%lld min";
+"Share when you could meet. The other person can find times that also fit their calendar and propose a plan." = "Share when you could meet. The other person can find times that also fit their calendar and propose a plan.";
+"Find times in their shared availability" = "Find times in their shared availability";
+"When could you meet?" = "When could you meet?";
+"Date range" = "Date range";
+"Only availability for these dates is shared, without event titles or locations. You can stop sharing from the card. Times are in Berlin time." = "Only availability for these dates is shared, without event titles or locations. You can stop sharing from the card. Times are in Berlin time.";
+"Choosing a time sends a proposal. Both calendars change only after acceptance." = "Choosing a time sends a proposal. Both calendars change only after acceptance.";
+"Send my availability" = "Send my availability";
+"This time is no longer free for both of you. Choose another suggestion." = "This time is no longer free for both of you. Choose another suggestion.";
+"Find common times" = "Find common times";
+"Back to chat" = "Back to chat";
+
+/* Direct free-time recommendations */
+"Pick a free time" = "Pick a free time";
+"Your free windows over the next 7 days. The other person still needs to confirm." = "Your free windows over the next 7 days. The other person still needs to confirm.";
+"Finding free times…" = "Finding free times…";
+"No suitable free windows in the next 7 days" = "No suitable free windows in the next 7 days";
+"You can still choose a time when proposing a plan in the chat." = "You can still choose a time when proposing a plan in the chat.";
+"Use this time in a plan" = "Use this time in a plan";
+"Show other times" = "Show other times";
+"Based on your synced calendar · Berlin time" = "Based on your synced calendar · Berlin time";
+"Your chosen free time is filled in. The other person still needs to confirm." = "Your chosen free time is filled in. The other person still needs to confirm.";
+
+/* Smart time chooser UI */
+"%@ free" = "%@ free";
+"Tap a time to fill your plan. You can still adjust it." = "Tap a time to fill your plan. You can still adjust it.";
+"Return to your plan to choose a time yourself." = "Return to your plan to choose a time yourself.";
+"Choose time manually" = "Choose time manually";
+
+/* Relative plan timing */
+"In %lld days" = "In %lld days";
+"In about an hour" = "In about an hour";
+"In about %lld hours" = "In about %lld hours";
+"Within an hour" = "Within an hour";
+"Starting soon" = "Starting soon";
+"In progress" = "In progress";
+
+// Profile personalization
+"Classic" = "Classic";
+"Rose" = "Rose";
+"Ocean" = "Ocean";
+"Forest" = "Forest";
+"Moon" = "Moon";
+"Leaf" = "Leaf";
+"Sparkles" = "Sparkles";
+"Outline" = "Outline";
+"Spotlight" = "Spotlight";
+"Profile preview" = "Profile preview";
+"App theme" = "App theme";
+"Light" = "Light";
+"Dark" = "Dark";
+"App theme applies immediately on this device." = "App theme applies immediately on this device.";
+"Profile theme" = "Profile theme";
+"Profile icon" = "Profile icon";
+"Display style" = "Display style";
+"Show Plus badge" = "Show Plus badge";
+"Explore Plus membership" = "Explore Plus membership";
+"Reset profile style" = "Reset profile style";
+"Plus styles can be previewed by everyone. An active membership is required to save them. After expiry, your profile uses free styles and keeps your saved choices." = "Plus styles can be previewed by everyone. An active membership is required to save them. After expiry, your profile uses free styles and keeps your saved choices.";
+"This selection requires Plus" = "This selection requires Plus";
+"Personalization" = "Personalization";
+"Themes, icons & profile style" = "Themes, icons & profile style";
+"Could not save your style. Check your connection and membership, then try again." = "Could not save your style. Check your connection and membership, then try again.";
+"Avatar" = "Avatar";
+"Discard changes?" = "Discard changes?";
+
+/* Message request inbox */
+"Waiting for your reply" = "Waiting for your reply";
+"New greetings will appear here." = "New greetings will appear here.";
+
+/* Compact greeting shortcut */
+"New greetings" = "New greetings";
+"No new greetings" = "No new greetings";
+"Your greetings are in New greetings." = "Your greetings are in New greetings.";
+
+"Mark as unread" = "Mark as unread";
+"Mark as read" = "Mark as read";
+"Marked as unread" = "Marked as unread";
+
+/* Plans overview */
+"Overview" = "Overview";
+"Next meet-up" = "Next meet-up";
+"View all invitations" = "View all invitations";
+"No confirmed meet-ups yet" = "No confirmed meet-ups yet";
+"Once an invitation is accepted, your next meet-up appears here." = "Once an invitation is accepted, your next meet-up appears here.";
+"Invitations and your next confirmed meet-up will appear here." = "Invitations and your next confirmed meet-up will appear here.";
+"%@ invited you" = "%@ invited you";
+"You invited %@" = "You invited %@";
+"View and respond" = "View and respond";
+"No current plans" = "No current plans";
+
+"Share intention" = "Share intention";

@@ -20,6 +20,7 @@ export function GET() {
         {
           appIDs: [appID],
           components: [
+            { "/": "/xhs/*", comment: "Xiaohongshu SDK callback" },
             { "/": "/users/*", comment: "Public profiles" },
             { "/": "/connections/*", comment: "Direct chats" },
             { "/": "/courses/*", comment: "Courses and course chat" },
@@ -34,6 +35,12 @@ export function GET() {
             { "/": "/profile/verification", comment: "Verification handoff" },
             { "/": "/profile/account", comment: "Account settings handoff" },
             { "/": "/profile/blocked", comment: "Blocked users handoff" },
+          ],
+        },
+        {
+          appIDs: [`${teamId}.app.sideseat.mobile.preview`],
+          components: [
+            { "/": "/xhs/*", comment: "Xiaohongshu SDK callback in Preview" },
           ],
         },
       ],

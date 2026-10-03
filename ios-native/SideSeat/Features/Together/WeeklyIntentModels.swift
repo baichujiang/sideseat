@@ -214,9 +214,52 @@ enum NativeWeeklyIntentTimeRules {
         )
         return NativeWeeklyIntentTimeWindow(startAt: start, endAt: minimumEnd(after: start))
     }
+
+    /// Shared by the time picker and publication, so both accept the same schedule.
+    static func hasValidExactWindows(_ windows: [NativeWeeklyIntentTimeWindow], now: Date = Date()) -> Bool {
+        guard !windows.isEmpty, windows.count <= 7 else { return false }
+        let ordered = windows.sorted { $0.startAt < $1.startAt }
+        for window in ordered {
+            let duration = window.endAt.timeIntervalSince(window.startAt)
+            guard window.startAt > now, duration >= minimumDuration,
+                  duration <= 12 * 60 * 60, window.endAt <= .distantFuture else { return false }
+        }
+        return ordered.indices.dropFirst().allSatisfy { ordered[$0].startAt >= ordered[$0 - 1].endAt }
+    }
+
+    /// Start the repeated schedule next week, retaining weekdays, local times and durations.
+    static func repeatedWindows(
+        from windows: [NativeWeeklyIntentTimeWindow],
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> [NativeWeeklyIntentTimeWindow] {
+        let nextWeek = calendar.date(byAdding: .weekOfYear, value: 1, to: now) ?? now
+        let ordered = windows.sorted { $0.startAt < $1.startAt }
+        guard let first = ordered.first,
+              let originalWeek = calendar.dateInterval(of: .weekOfYear, for: first.startAt),
+              let targetWeek = calendar.dateInterval(of: .weekOfYear, for: nextWeek),
+              let weeks = calendar.dateComponents(
+                [.weekOfYear], from: originalWeek.start, to: targetWeek.start
+              ).weekOfYear
+        else {
+            return [defaultWindow(startingAt: nextWeek)]
+        }
+        return ordered.map { window in
+            let start = calendar.date(byAdding: .weekOfYear, value: weeks, to: window.startAt) ?? nextWeek
+            return NativeWeeklyIntentTimeWindow(
+                startAt: start,
+                endAt: start.addingTimeInterval(window.endAt.timeIntervalSince(window.startAt))
+            )
+        }
+    }
 }
 
 enum NativeWeeklyIntentSubmissionRules {
+    static func normalizedTextLength(_ text: String) -> Int {
+        // The API's Zod string limits use JavaScript UTF-16 length.
+        text.trimmingCharacters(in: .whitespacesAndNewlines).utf16.count
+    }
+
     static func normalizedCourseID(
         topic: NativeWeeklyIntentTopic,
         courseID: String?
@@ -338,10 +381,12 @@ struct NativeWeeklyIntent: Codable, Identifiable, Hashable, Sendable {
 
 struct NativeWeeklyIntentPayload: Decodable, Sendable {
     let intents: [NativeWeeklyIntent]
+    let expiredIntents: [NativeWeeklyIntent]
     let intent: NativeWeeklyIntent?
 
     private enum CodingKeys: String, CodingKey {
         case intents
+        case expiredIntents
         case intent
     }
 
@@ -355,6 +400,7 @@ struct NativeWeeklyIntentPayload: Decodable, Sendable {
             [NativeWeeklyIntent].self,
             forKey: .intents
         )
+        expiredIntents = try container.decodeIfPresent([NativeWeeklyIntent].self, forKey: .expiredIntents) ?? []
         intents = collection ?? legacyIntent.map { [$0] } ?? []
         intent = legacyIntent ?? intents.first
     }
@@ -638,7 +684,7 @@ enum TogetherIntentStatus: String, Equatable, Sendable {
     }
     var detail: String {
         switch self {
-        case .finding: AppLocalization.string("SideSeat is using this intention to find company. You can pause anytime.")
+        case .finding: AppLocalization.string("SideSeat is using this intention to find company.")
         case .paused: AppLocalization.string("This intention is paused and is not used for new suggestions.")
         case .unpublished: AppLocalization.string("This saved intention is not participating in finding company.")
         case .unavailable: AppLocalization.string("Finding company is unavailable right now. Your intention is saved.")

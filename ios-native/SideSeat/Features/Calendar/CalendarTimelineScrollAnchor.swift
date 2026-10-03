@@ -52,6 +52,7 @@ struct CalendarOffscreenEventHint: Equatable, Sendable {
     let item: HomeAgendaItem
     let startMinute: Int
     let endMinute: Int
+    let hiddenCount: Int
 }
 
 /// Finds the nearest timed event that sits fully outside the vertical viewport.
@@ -68,41 +69,49 @@ enum CalendarOffscreenEventHints {
         edge: CalendarOffscreenEventEdge,
         calendar: Calendar = .sideSeatBerlin
     ) -> CalendarOffscreenEventHint? {
+        nearest(items: items, across: [date], viewportStartMinute: viewportStartMinute,
+            viewportEndMinute: viewportEndMinute, edge: edge, calendar: calendar)
+    }
+
+    /// Summarizes only the currently visible dates, while retaining the closest scroll target.
+    static func nearest(
+        items: [HomeAgendaItem],
+        across dates: [Date],
+        viewportStartMinute: Int,
+        viewportEndMinute: Int,
+        edge: CalendarOffscreenEventEdge,
+        calendar: Calendar = .sideSeatBerlin
+    ) -> CalendarOffscreenEventHint? {
         let visibleStart = min(max(viewportStartMinute, 0), 24 * 60)
         let visibleEnd = min(max(viewportEndMinute, visibleStart), 24 * 60)
-        let placements = CalendarDayLayout.placements(
-            items: items.filter { !$0.isAllDayStyle(on: date, calendar: calendar) },
-            on: date,
-            calendar: calendar
-        )
-
+        let placements = dates.flatMap { date in
+            CalendarDayLayout.placements(
+                items: items.filter { !$0.isAllDayStyle(on: date, calendar: calendar) },
+                on: date, calendar: calendar
+            )
+        }
+        let hidden = placements.filter {
+            edge == .top ? $0.endMinute <= visibleStart : $0.startMinute >= visibleEnd
+        }
         let placement: CalendarDayPlacement?
         switch edge {
         case .top:
-            placement = placements
-                .filter { $0.endMinute <= visibleStart }
-                .max {
-                    if $0.endMinute == $1.endMinute {
-                        return $0.startMinute < $1.startMinute
-                    }
-                    return $0.endMinute < $1.endMinute
-                }
+            placement = hidden.max {
+                if $0.endMinute == $1.endMinute { return $0.startMinute < $1.startMinute }
+                return $0.endMinute < $1.endMinute
+            }
         case .bottom:
-            placement = placements
-                .filter { $0.startMinute >= visibleEnd }
-                .min {
-                    if $0.startMinute == $1.startMinute {
-                        return $0.endMinute < $1.endMinute
-                    }
-                    return $0.startMinute < $1.startMinute
-                }
+            placement = hidden.min {
+                if $0.startMinute == $1.startMinute { return $0.endMinute < $1.endMinute }
+                return $0.startMinute < $1.startMinute
+            }
         }
-
         guard let placement else { return nil }
         return CalendarOffscreenEventHint(
             item: placement.item,
             startMinute: placement.startMinute,
-            endMinute: placement.endMinute
+            endMinute: placement.endMinute,
+            hiddenCount: Set(hidden.map { $0.item.id }).count
         )
     }
 

@@ -6,7 +6,7 @@ import XCTest
 final class ThemeContrastTests: XCTestCase {
     func testActivityChoiceContrastInLightAndDarkAppearances() {
         for style in [UIUserInterfaceStyle.light, .dark] {
-            for foreground in [SideSeatTheme.textPrimary, SideSeatTheme.accentText] {
+            for foreground in [SideSeatTheme.textPrimary, SideSeatTheme.utilityAction] {
                 assertContrast(foreground: UIColor(foreground), background: UIColor(SideSeatTheme.surface),
                     style: style, minimum: 4.5)
             }
@@ -40,12 +40,21 @@ final class ThemeContrastTests: XCTestCase {
     func testTogetherSectionNavigationContrastInLightAndDarkAppearances() {
         for style in [UIUserInterfaceStyle.light, .dark] {
             for (foreground, background) in [
-                (SideSeatTheme.accentText, SideSeatTheme.Together.navigationSelection),
+                (SideSeatTheme.utilityAction, SideSeatTheme.Together.navigationSelection),
                 (SideSeatTheme.Together.ink, SideSeatTheme.Together.decisionWell),
             ] {
                 assertContrast(foreground: UIColor(foreground), background: UIColor(background),
                     style: style, minimum: 4.5)
             }
+        }
+    }
+
+    func testNeutralSelectionAndEmphasizedActionContrastInLightAndDarkAppearances() {
+        for style in [UIUserInterfaceStyle.light, .dark] {
+            assertContrast(foreground: UIColor(SideSeatTheme.utilityAction),
+                background: UIColor(SideSeatTheme.ControlSelection.fill), style: style, minimum: 7)
+            assertContrast(foreground: UIColor(SideSeatTheme.BrandAction.foreground),
+                background: UIColor(SideSeatTheme.BrandAction.fill), style: style, minimum: 7)
         }
     }
 
@@ -100,28 +109,13 @@ final class ThemeContrastTests: XCTestCase {
         }
     }
 
-    func testCalendarCreateActionSeparatesFromCanvasInLightAndDarkAppearances() {
+    func testCalendarCreateIconHasReadableContrastInLightAndDarkAppearances() {
         for style in [UIUserInterfaceStyle.light, .dark] {
-            let traits = UITraitCollection(userInterfaceStyle: style)
-            let canvas: UIColor = style == .dark ? .black : .white
-            let fill = composite(
-                UIColor(CalendarChrome.createActionFill).resolvedColor(with: traits),
-                over: canvas
-            )
-            let foreground = composite(
-                UIColor(CalendarChrome.createActionForeground).resolvedColor(with: traits),
-                over: fill
-            )
-
-            XCTAssertGreaterThanOrEqual(
-                contrastRatio(fill, canvas),
-                1.4,
-                "The floating create action must remain distinct from the calendar canvas."
-            )
-            XCTAssertGreaterThanOrEqual(
-                contrastRatio(foreground, fill),
-                4.5,
-                "The create symbol must remain readable in both appearances."
+            assertContrast(
+                foreground: UIColor(SideSeatTheme.textPrimary),
+                background: UIColor(SideSeatTheme.fillTertiary),
+                style: style,
+                minimum: 4.5
             )
         }
     }

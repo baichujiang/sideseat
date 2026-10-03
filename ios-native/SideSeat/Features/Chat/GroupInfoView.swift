@@ -81,7 +81,7 @@ struct GroupInfoView: View {
                                 Spacer()
                                 if addSelected.contains(row.id) {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(SideSeatTheme.accentText)
+                                        .foregroundStyle(SideSeatTheme.utilityAction)
                                 }
                             }
                         }

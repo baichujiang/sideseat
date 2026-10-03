@@ -589,6 +589,16 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /api/v1/me/plan-cancellations/{noticeId}`.
     /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)`.
     func acknowledgePlanCancellation(_ input: Operations.AcknowledgePlanCancellation.Input) async throws -> Operations.AcknowledgePlanCancellation.Output
+    /// Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)`.
+    func createWeeklyIntentShare(_ input: Operations.CreateWeeklyIntentShare.Input) async throws -> Operations.CreateWeeklyIntentShare.Output
+    /// Revoke the public link. Existing registered conversations remain in the inbox.
+    ///
+    /// - Remark: HTTP `DELETE /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)`.
+    func revokeWeeklyIntentShare(_ input: Operations.RevokeWeeklyIntentShare.Input) async throws -> Operations.RevokeWeeklyIntentShare.Output
 }
 
 /// Convenience overloads for operation inputs.
@@ -2547,6 +2557,32 @@ extension APIProtocol {
         headers: Operations.AcknowledgePlanCancellation.Input.Headers = .init()
     ) async throws -> Operations.AcknowledgePlanCancellation.Output {
         try await acknowledgePlanCancellation(Operations.AcknowledgePlanCancellation.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)`.
+    internal func createWeeklyIntentShare(
+        path: Operations.CreateWeeklyIntentShare.Input.Path,
+        headers: Operations.CreateWeeklyIntentShare.Input.Headers = .init()
+    ) async throws -> Operations.CreateWeeklyIntentShare.Output {
+        try await createWeeklyIntentShare(Operations.CreateWeeklyIntentShare.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Revoke the public link. Existing registered conversations remain in the inbox.
+    ///
+    /// - Remark: HTTP `DELETE /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)`.
+    internal func revokeWeeklyIntentShare(
+        path: Operations.RevokeWeeklyIntentShare.Input.Path,
+        headers: Operations.RevokeWeeklyIntentShare.Input.Headers = .init()
+    ) async throws -> Operations.RevokeWeeklyIntentShare.Output {
+        try await revokeWeeklyIntentShare(Operations.RevokeWeeklyIntentShare.Input(
             path: path,
             headers: headers
         ))
@@ -16723,6 +16759,8 @@ internal enum Components {
             internal var hideFromDiscovery: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/hideFromRecommendations`.
             internal var hideFromRecommendations: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/ProfileUpdateRequest/appearance`.
+            internal var appearance: Components.Schemas.ProfileAppearance?
             /// Creates a new `ProfileUpdateRequest`.
             ///
             /// - Parameters:
@@ -16747,6 +16785,7 @@ internal enum Components {
             ///   - hideFromCourseMembers:
             ///   - hideFromDiscovery:
             ///   - hideFromRecommendations:
+            ///   - appearance:
             internal init(
                 nickname: Swift.String? = nil,
                 bio: Swift.String? = nil,
@@ -16768,7 +16807,8 @@ internal enum Components {
                 contactInfoOptIn: Swift.Bool? = nil,
                 hideFromCourseMembers: Swift.Bool? = nil,
                 hideFromDiscovery: Swift.Bool? = nil,
-                hideFromRecommendations: Swift.Bool? = nil
+                hideFromRecommendations: Swift.Bool? = nil,
+                appearance: Components.Schemas.ProfileAppearance? = nil
             ) {
                 self.nickname = nickname
                 self.bio = bio
@@ -16791,6 +16831,7 @@ internal enum Components {
                 self.hideFromCourseMembers = hideFromCourseMembers
                 self.hideFromDiscovery = hideFromDiscovery
                 self.hideFromRecommendations = hideFromRecommendations
+                self.appearance = appearance
             }
             internal enum CodingKeys: String, CodingKey {
                 case nickname
@@ -16814,6 +16855,7 @@ internal enum Components {
                 case hideFromCourseMembers
                 case hideFromDiscovery
                 case hideFromRecommendations
+                case appearance
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -16901,6 +16943,10 @@ internal enum Components {
                     Swift.Bool.self,
                     forKey: .hideFromRecommendations
                 )
+                self.appearance = try container.decodeIfPresent(
+                    Components.Schemas.ProfileAppearance.self,
+                    forKey: .appearance
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "nickname",
                     "bio",
@@ -16922,7 +16968,8 @@ internal enum Components {
                     "contactInfoOptIn",
                     "hideFromCourseMembers",
                     "hideFromDiscovery",
-                    "hideFromRecommendations"
+                    "hideFromRecommendations",
+                    "appearance"
                 ])
             }
         }
@@ -17273,6 +17320,8 @@ internal enum Components {
                 }
                 /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/counts`.
                 internal var counts: Components.Schemas.CurrentProfile.Value2Payload.CountsPayload
+                /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2/appearance`.
+                internal var appearance: Components.Schemas.ProfileAppearance?
                 /// Creates a new `Value2Payload`.
                 ///
                 /// - Parameters:
@@ -17285,6 +17334,7 @@ internal enum Components {
                 ///   - privacy:
                 ///   - usernameChangePolicy:
                 ///   - counts:
+                ///   - appearance:
                 internal init(
                     displayName: Swift.String,
                     schoolSummary: Components.Schemas.ProfileSchoolSummary,
@@ -17294,7 +17344,8 @@ internal enum Components {
                     contacts: Components.Schemas.CurrentProfile.Value2Payload.ContactsPayload,
                     privacy: Components.Schemas.CurrentProfile.Value2Payload.PrivacyPayload,
                     usernameChangePolicy: Components.Schemas.UsernameChangePolicy,
-                    counts: Components.Schemas.CurrentProfile.Value2Payload.CountsPayload
+                    counts: Components.Schemas.CurrentProfile.Value2Payload.CountsPayload,
+                    appearance: Components.Schemas.ProfileAppearance? = nil
                 ) {
                     self.displayName = displayName
                     self.schoolSummary = schoolSummary
@@ -17305,6 +17356,7 @@ internal enum Components {
                     self.privacy = privacy
                     self.usernameChangePolicy = usernameChangePolicy
                     self.counts = counts
+                    self.appearance = appearance
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case displayName
@@ -17316,6 +17368,7 @@ internal enum Components {
                     case privacy
                     case usernameChangePolicy
                     case counts
+                    case appearance
                 }
             }
             /// - Remark: Generated from `#/components/schemas/CurrentProfile/value2`.
@@ -17658,6 +17711,8 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/PublicProfileUser/isPlus`.
             internal var isPlus: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/PublicProfileUser/appearance`.
+            internal var appearance: Components.Schemas.ProfileAppearance?
             /// Creates a new `PublicProfileUser`.
             ///
             /// - Parameters:
@@ -17679,6 +17734,7 @@ internal enum Components {
             ///   - schoolSummary:
             ///   - lifePhotos:
             ///   - isPlus: Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details.
+            ///   - appearance:
             internal init(
                 id: Swift.String,
                 username: Swift.String,
@@ -17697,7 +17753,8 @@ internal enum Components {
                 studentVerificationStatus: Swift.String,
                 schoolSummary: Components.Schemas.ProfileSchoolSummary,
                 lifePhotos: [Components.Schemas.ProfileLifePhoto],
-                isPlus: Swift.Bool? = nil
+                isPlus: Swift.Bool? = nil,
+                appearance: Components.Schemas.ProfileAppearance? = nil
             ) {
                 self.id = id
                 self.username = username
@@ -17717,6 +17774,7 @@ internal enum Components {
                 self.schoolSummary = schoolSummary
                 self.lifePhotos = lifePhotos
                 self.isPlus = isPlus
+                self.appearance = appearance
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -17737,6 +17795,7 @@ internal enum Components {
                 case schoolSummary
                 case lifePhotos
                 case isPlus
+                case appearance
             }
         }
         /// - Remark: Generated from `#/components/schemas/PublicProfile`.
@@ -20797,6 +20856,87 @@ internal enum Components {
             }
             internal enum CodingKeys: String, CodingKey {
                 case data
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ProfileAppearance`.
+        internal struct ProfileAppearance: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/theme`.
+            internal enum ThemePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case classic = "classic"
+                case rose = "rose"
+                case ocean = "ocean"
+                case forest = "forest"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/theme`.
+            internal var theme: Components.Schemas.ProfileAppearance.ThemePayload
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/icon`.
+            internal enum IconPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case none = "none"
+                case sun = "sun"
+                case moon = "moon"
+                case leaf = "leaf"
+                case sparkles = "sparkles"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/icon`.
+            internal var icon: Components.Schemas.ProfileAppearance.IconPayload
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/style`.
+            internal enum StylePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case classic = "classic"
+                case outline = "outline"
+                case spotlight = "spotlight"
+            }
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/style`.
+            internal var style: Components.Schemas.ProfileAppearance.StylePayload
+            /// - Remark: Generated from `#/components/schemas/ProfileAppearance/showMembershipBadge`.
+            internal var showMembershipBadge: Swift.Bool
+            /// Creates a new `ProfileAppearance`.
+            ///
+            /// - Parameters:
+            ///   - theme:
+            ///   - icon:
+            ///   - style:
+            ///   - showMembershipBadge:
+            internal init(
+                theme: Components.Schemas.ProfileAppearance.ThemePayload,
+                icon: Components.Schemas.ProfileAppearance.IconPayload,
+                style: Components.Schemas.ProfileAppearance.StylePayload,
+                showMembershipBadge: Swift.Bool
+            ) {
+                self.theme = theme
+                self.icon = icon
+                self.style = style
+                self.showMembershipBadge = showMembershipBadge
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case theme
+                case icon
+                case style
+                case showMembershipBadge
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.theme = try container.decode(
+                    Components.Schemas.ProfileAppearance.ThemePayload.self,
+                    forKey: .theme
+                )
+                self.icon = try container.decode(
+                    Components.Schemas.ProfileAppearance.IconPayload.self,
+                    forKey: .icon
+                )
+                self.style = try container.decode(
+                    Components.Schemas.ProfileAppearance.StylePayload.self,
+                    forKey: .style
+                )
+                self.showMembershipBadge = try container.decode(
+                    Swift.Bool.self,
+                    forKey: .showMembershipBadge
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "theme",
+                    "icon",
+                    "style",
+                    "showMembershipBadge"
+                ])
             }
         }
     }
@@ -24141,17 +24281,45 @@ internal enum Operations {
                     }
                 }
             }
-            /// Stable API error.
+            internal struct Forbidden: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/profile/PATCH/responses/403/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/profile/PATCH/responses/403/content/application\/json`.
+                    case json(Components.Schemas.ErrorEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.ErrorEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.UpdateCurrentProfile.Output.Forbidden.Body
+                /// Creates a new `Forbidden`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.UpdateCurrentProfile.Output.Forbidden.Body) {
+                    self.body = body
+                }
+            }
+            /// Saving Plus profile styles requires an active Plus membership. Error code: PLUS_REQUIRED.
             ///
             /// - Remark: Generated from `#/paths//api/v1/me/profile/patch(updateCurrentProfile)/responses/403`.
             ///
             /// HTTP response code: `403 forbidden`.
-            case forbidden(Components.Responses._Error)
+            case forbidden(Operations.UpdateCurrentProfile.Output.Forbidden)
             /// The associated value of the enum case if `self` is `.forbidden`.
             ///
             /// - Throws: An error if `self` is not `.forbidden`.
             /// - SeeAlso: `.forbidden`.
-            internal var forbidden: Components.Responses._Error {
+            internal var forbidden: Operations.UpdateCurrentProfile.Output.Forbidden {
                 get throws {
                     switch self {
                     case let .forbidden(response):
@@ -65934,6 +66102,506 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/me/plan-cancellations/{noticeId}/patch(acknowledgePlanCancellation)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.
+    ///
+    /// - Remark: HTTP `POST /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)`.
+    internal enum CreateWeeklyIntentShare {
+        internal static let id: Swift.String = "createWeeklyIntentShare"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/path/intentId`.
+                internal var intentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - intentId:
+                internal init(intentId: Swift.String) {
+                    self.intentId = intentId
+                }
+            }
+            internal var path: Operations.CreateWeeklyIntentShare.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateWeeklyIntentShare.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateWeeklyIntentShare.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.CreateWeeklyIntentShare.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.CreateWeeklyIntentShare.Input.Path,
+                headers: Operations.CreateWeeklyIntentShare.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content/json`.
+                    internal struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content/json/data`.
+                        internal struct DataPayload: Codable, Hashable, Sendable {
+                            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content/json/data/url`.
+                            internal var url: Swift.String
+                            /// Creates a new `DataPayload`.
+                            ///
+                            /// - Parameters:
+                            ///   - url:
+                            internal init(url: Swift.String) {
+                                self.url = url
+                            }
+                            internal enum CodingKeys: String, CodingKey {
+                                case url
+                            }
+                        }
+                        /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content/json/data`.
+                        internal var data: Operations.CreateWeeklyIntentShare.Output.Ok.Body.JsonPayload.DataPayload
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - data:
+                        internal init(data: Operations.CreateWeeklyIntentShare.Output.Ok.Body.JsonPayload.DataPayload) {
+                            self.data = data
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case data
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/POST/responses/200/content/application\/json`.
+                    case json(Operations.CreateWeeklyIntentShare.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Operations.CreateWeeklyIntentShare.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.CreateWeeklyIntentShare.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.CreateWeeklyIntentShare.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.CreateWeeklyIntentShare.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.CreateWeeklyIntentShare.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/post(createWeeklyIntentShare)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Revoke the public link. Existing registered conversations remain in the inbox.
+    ///
+    /// - Remark: HTTP `DELETE /api/v1/me/weekly-intents/{intentId}/share`.
+    /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)`.
+    internal enum RevokeWeeklyIntentShare {
+        internal static let id: Swift.String = "revokeWeeklyIntentShare"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/path/intentId`.
+                internal var intentId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - intentId:
+                internal init(intentId: Swift.String) {
+                    self.intentId = intentId
+                }
+            }
+            internal var path: Operations.RevokeWeeklyIntentShare.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeWeeklyIntentShare.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeWeeklyIntentShare.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RevokeWeeklyIntentShare.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            internal init(
+                path: Operations.RevokeWeeklyIntentShare.Input.Path,
+                headers: Operations.RevokeWeeklyIntentShare.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content/json`.
+                    internal struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content/json/data`.
+                        internal struct DataPayload: Codable, Hashable, Sendable {
+                            /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content/json/data/disabled`.
+                            internal var disabled: Swift.Bool
+                            /// Creates a new `DataPayload`.
+                            ///
+                            /// - Parameters:
+                            ///   - disabled:
+                            internal init(disabled: Swift.Bool) {
+                                self.disabled = disabled
+                            }
+                            internal enum CodingKeys: String, CodingKey {
+                                case disabled
+                            }
+                        }
+                        /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content/json/data`.
+                        internal var data: Operations.RevokeWeeklyIntentShare.Output.Ok.Body.JsonPayload.DataPayload
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - data:
+                        internal init(data: Operations.RevokeWeeklyIntentShare.Output.Ok.Body.JsonPayload.DataPayload) {
+                            self.data = data
+                        }
+                        internal enum CodingKeys: String, CodingKey {
+                            case data
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/api/v1/me/weekly-intents/{intentId}/share/DELETE/responses/200/content/application\/json`.
+                    case json(Operations.RevokeWeeklyIntentShare.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Operations.RevokeWeeklyIntentShare.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RevokeWeeklyIntentShare.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RevokeWeeklyIntentShare.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Revoke the public link. Existing registered conversations remain in the inbox.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RevokeWeeklyIntentShare.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RevokeWeeklyIntentShare.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/me/weekly-intents/{intentId}/share/delete(revokeWeeklyIntentShare)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

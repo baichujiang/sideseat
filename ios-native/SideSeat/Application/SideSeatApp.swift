@@ -147,6 +147,7 @@ struct SideSeatApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var container = AppContainer.bootstrap()
     @State private var appLanguage = AppLanguageStore()
+    @AppStorage("sideseat.settings.colorScheme") private var colorScheme = "system"
 
     var body: some Scene {
         WindowGroup {
@@ -158,7 +159,7 @@ struct SideSeatApp: App {
                 .environment(appLanguage)
                 .environment(\.locale, appLanguage.locale)
                 .tint(SideSeatTheme.utilityAction)
-                .preferredColorScheme(Self.uiTestingPreferredColorScheme)
+                .preferredColorScheme(Self.uiTestingPreferredColorScheme ?? (colorScheme == "dark" ? .dark : colorScheme == "light" ? .light : nil))
                 .modifier(UITestingDynamicTypeModifier(size: Self.uiTestingDynamicTypeSize))
                 .task {
                     SideSeatTheme.configureChrome()

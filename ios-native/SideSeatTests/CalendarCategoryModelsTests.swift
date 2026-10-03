@@ -6,7 +6,12 @@ import Testing
 @Suite("Calendar categories")
 struct CalendarCategoryModelsTests {
     @Test("Starter identity and localized display follow the server preset key")
+    @MainActor
     func presetIdentity() {
+        let defaults = UserDefaults.standard
+        let originalLanguage = defaults.object(forKey: AppLocalization.preferenceKey)
+        defer { defaults.set(originalLanguage, forKey: AppLocalization.preferenceKey) }
+
         let preset = NativeCalendarCategory(
             id: "personal",
             name: "Personal",
@@ -25,9 +30,16 @@ struct CalendarCategoryModelsTests {
         )
 
         #expect(preset.isPreset)
-        #expect(preset.displayName == String(localized: "Personal"))
         #expect(!custom.isPreset)
-        #expect(custom.displayName == "Project")
+        for (language, expectedName) in [
+            (AppLanguage.english, "Personal"),
+            (.german, "Persönlich"),
+            (.simplifiedChinese, "个人日程"),
+        ] {
+            defaults.set(language.rawValue, forKey: AppLocalization.preferenceKey)
+            #expect(preset.displayName == expectedName)
+            #expect(custom.displayName == "Project")
+        }
     }
 
     @Test("Custom updates encode an explicit null to remove a subscription")

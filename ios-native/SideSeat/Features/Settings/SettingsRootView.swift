@@ -11,6 +11,7 @@ struct SettingsRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
+    @AppStorage("sideseat.settings.colorScheme") private var colorScheme = "system"
     @State private var cityPreference = DiscoverCityPreferenceStore.shared
     @State private var showDeleteAccount = false
     @State private var showAppShare = false
@@ -27,6 +28,13 @@ struct SettingsRootView: View {
     var body: some View {
         List {
             Section("Preferences") {
+                Picker("App theme", selection: $colorScheme) {
+                    Text("Follow iPhone").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
+                }
+                .accessibilityIdentifier("settings-app-theme")
+
                 if cityPreference.servedCities.count > 1 {
                     Picker("City", selection: Binding(
                         get: { cityPreference.selectedCity },
@@ -90,6 +98,15 @@ struct SettingsRootView: View {
                 .accessibilityIdentifier("settings-replay-tutorial")
             }
 
+            Section("Privacy & Safety") {
+                Button {
+                    router.navigate(to: .blockedUsers)
+                } label: {
+                    Label("Blocked users", systemImage: "person.crop.circle.badge.xmark")
+                }
+                .accessibilityIdentifier("settings-blocked-users")
+            }
+
             Section("Support") {
                 Button {
                     router.navigate(to: .feedback)
@@ -133,13 +150,6 @@ struct SettingsRootView: View {
             }
 
             Section("Account") {
-                Button {
-                    router.navigate(to: .blockedUsers)
-                } label: {
-                    Label("Blocked users", systemImage: "hand.raised")
-                }
-                .accessibilityIdentifier("settings-blocked-users")
-
                 Button("Delete account", role: .destructive) {
                     showDeleteAccount = true
                 }

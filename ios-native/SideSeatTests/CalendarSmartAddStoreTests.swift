@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import UIKit
 @testable import SideSeat
 
 @Suite("Calendar smart add")
@@ -181,6 +182,74 @@ struct CalendarSmartAddStoreTests {
         #expect(store.warnings.isEmpty)
     }
 
+    @Test("Image OCR preserves event titles and times, and only reviewed text reaches parsing")
+    @MainActor
+    func imageTextFlowsThroughExistingParser() async throws {
+        let image = makeTextImage("Library study\nOctober 9, 2026 14:00-16:00\nMain Library\nYoga\nOctober 10, 2026 18:00-19:00")
+        let result = try await CalendarImageInput.recognize(in: image)
+        #expect(result.text.contains("Library study"))
+        #expect(result.text.contains("14:00"))
+        #expect(result.text.contains("Yoga"))
+        #expect(result.text.contains("18:00"))
+        #expect(UIImage(data: result.previewData) != nil)
+        let combined = CalendarImageInput.appending(result.text, to: "Bring my notes")
+        #expect(combined.hasPrefix("Bring my notes\n\n"))
+
+        let transport = CalendarSmartAddTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let store = CalendarSmartAddStore()
+        #expect(await transport.parseText == nil, "Recognizing an image does not call the model")
+        await store.parse(text: combined, locale: "en", using: session)
+        #expect(await transport.parseText == combined)
+        #expect(await transport.parseBodyKeys == ["locale", "text"], "The source image never leaves the device")
+        #expect(store.drafts.count == 1)
+        #expect(await transport.savedTitles.isEmpty)
+        #expect(await store.save(using: session))
+        #expect(await transport.savedTitles == ["Library study"])
+    }
+
+    @Test("Blank and invalid images cannot silently become event text")
+    @MainActor
+    func imageWithoutText() async {
+        for data in [makeTextImage(""), Data("not an image".utf8)] {
+            do {
+                _ = try await CalendarImageInput.recognize(in: data)
+                Issue.record("Invalid or blank image should not produce text")
+            } catch {
+                #expect(error is CalendarImageInputError)
+            }
+        }
+    }
+
+    @Test("Oversized recognized input is preserved but cannot spend an AI request")
+    @MainActor
+    func longImageTextDoesNotCallParser() async {
+        let transport = CalendarSmartAddTestTransport()
+        let session = makeSession(transport: transport)
+        await session.login(identifier: "test_001", password: "Password123")
+        let store = CalendarSmartAddStore()
+        let text = CalendarImageInput.appending(String(repeating: "📅", count: 1_001), to: "My original text")
+        #expect(text.hasPrefix("My original text"))
+        await store.parse(text: text, locale: "en", using: session)
+        #expect(store.issue != nil)
+        #expect(store.drafts.isEmpty)
+        #expect(await transport.parseText == nil)
+    }
+
+    @MainActor
+    private func makeTextImage(_ text: String) -> Data {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: CGSize(width: 1_200, height: 900), format: format).pngData { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1_200, height: 900))
+            (text as NSString).draw(in: CGRect(x: 60, y: 60, width: 1_080, height: 780), withAttributes: [
+                .font: UIFont.systemFont(ofSize: 46), .foregroundColor: UIColor.black,
+            ])
+        }
+    }
+
     @MainActor
     private func makeSession(transport: CalendarSmartAddTestTransport) -> SessionStore {
         SessionStore(
@@ -268,6 +337,7 @@ private actor CalendarSmartAddMemoryCredentialStore: CredentialStore {
 private actor CalendarSmartAddTestTransport: APITransport {
     private(set) var parseText: String?
     private(set) var parseLocale: String?
+    private(set) var parseBodyKeys: [String] = []
     private(set) var savedTitles: [String] = []
     private(set) var savedCategoryIDs: [String?] = []
     private(set) var idempotencyKey: String?
@@ -283,6 +353,7 @@ private actor CalendarSmartAddTestTransport: APITransport {
         case "/api/v1/calendar/parse-natural":
             let body = try #require(request.httpBody)
             let json = try #require(JSONSerialization.jsonObject(with: body) as? [String: String])
+            parseBodyKeys = json.keys.sorted()
             parseText = json["text"]
             parseLocale = json["locale"]
             return response(

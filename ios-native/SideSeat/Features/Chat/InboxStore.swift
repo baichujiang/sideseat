@@ -12,8 +12,11 @@ struct NativeInboxPreferenceResult: Decodable, Sendable {
 final class InboxStore {
     private(set) var payload: NativeInboxPayload? {
         didSet {
-            PushBadgeController.update(Self.attentionCount(in: payload))
+            updateAttentionBadge()
         }
+    }
+    private(set) var manuallyUnreadIDs: Set<String> = [] {
+        didSet { updateAttentionBadge() }
     }
     private(set) var isLoading = false
     private(set) var isMutating = false
@@ -22,12 +25,15 @@ final class InboxStore {
     private var latestRequestID: UUID?
     private var accountID = ""
     private var cacheWriteTask: Task<Void, Never>?
+    private var handledFixtureRequests: Set<String> = []
     private let cache: InboxCache
+    private let defaults: UserDefaults
     private var locallyReadMessageIDs: [String: String] = [:]
     private static var outboundPreviews: [String: (lastMessage: NativeInboxLastMessage, lastActivityAt: String)] = [:]
 
-    init(cache: InboxCache = .shared) {
+    init(cache: InboxCache = .shared, defaults: UserDefaults = .standard) {
         self.cache = cache
+        self.defaults = defaults
     }
 
     nonisolated static func isMVPVisibleConversationKind(_ kind: NativeInboxConversation.Kind) -> Bool {
@@ -48,6 +54,16 @@ final class InboxStore {
         }
     }
 
+    var messageRequests: [NativeMutualOpportunity] {
+        payload?.messageRequests ?? []
+    }
+
+    func removeMessageRequest(_ id: String) {
+        handledFixtureRequests.insert(id)
+        payload?.messageRequests.removeAll { $0.id == id }
+        scheduleCachePersist()
+    }
+
     var pinned: [NativeInboxConversation] {
         filteredConversations.filter(\.pinned)
     }
@@ -64,11 +80,32 @@ final class InboxStore {
     }
 
     var attentionBadgeLabel: String? {
-        Self.badgeLabel(for: Self.attentionCount(in: payload))
+        Self.badgeLabel(for: Self.attentionCount(in: payload) + manualUnreadAttentionCount)
     }
 
     var messageBadgeLabel: String? {
-        Self.badgeLabel(for: Self.visibleUnreadCount(in: payload))
+        Self.badgeLabel(for: Self.visibleUnreadCount(in: payload) + manualUnreadAttentionCount)
+    }
+
+    func isUnread(_ conversation: NativeInboxConversation) -> Bool {
+        conversation.unreadCount > 0 || manuallyUnreadIDs.contains(conversation.id)
+    }
+
+    private var manualUnreadAttentionCount: Int {
+        visibleConversations.filter {
+            $0.unreadCount == 0 && manuallyUnreadIDs.contains($0.id)
+        }.count
+    }
+
+    private func updateAttentionBadge() {
+        PushBadgeController.update(Self.attentionCount(in: payload) + manualUnreadAttentionCount)
+    }
+
+    private var manualUnreadKey: String { "sideseat.inbox.manualUnread.\(accountID)" }
+
+    private func persistManualUnread() {
+        guard !accountID.isEmpty else { return }
+        defaults.set(Array(manuallyUnreadIDs), forKey: manualUnreadKey)
     }
 
     var planBadgeLabel: String? {
@@ -76,9 +113,10 @@ final class InboxStore {
     }
 
     private nonisolated static func visibleUnreadCount(in payload: NativeInboxPayload?) -> Int {
-        payload?.conversations
+        let unread = payload?.conversations
             .filter { isMVPVisibleConversationKind($0.kind) }
             .reduce(0) { $0 + $1.unreadCount } ?? 0
+        return unread + (payload?.messageRequests.filter { $0.messageRequest?.isIncoming == true }.count ?? 0)
     }
 
     nonisolated static func planAttentionCount(in payload: NativeInboxPayload?) -> Int {
@@ -104,7 +142,9 @@ final class InboxStore {
         issue = nil
         searchQuery = ""
         accountID = ""
+        manuallyUnreadIDs = []
         locallyReadMessageIDs = [:]
+        handledFixtureRequests = []
     }
 
     func load(using session: SessionStore) async {
@@ -114,6 +154,14 @@ final class InboxStore {
         if accountID != nextAccountID {
             payload = nil
             locallyReadMessageIDs = [:]
+            accountID = nextAccountID
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated"),
+               ProcessInfo.processInfo.arguments.contains("--ui-testing-reset-inbox-unread") {
+                defaults.removeObject(forKey: manualUnreadKey)
+            }
+            #endif
+            manuallyUnreadIDs = Set(defaults.stringArray(forKey: manualUnreadKey) ?? [])
         }
         accountID = nextAccountID
         isLoading = true
@@ -132,6 +180,19 @@ final class InboxStore {
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-inbox-empty") {
                 payload = NativeInboxPayload(conversations: [], unreadTotal: 0, plansNeedingYourAction: 0)
             }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-message-request") {
+                var request = NativeMutualOpportunity.uiTestingFixture(id: "cmutualui0000000000000001")
+                request.messageRequest = NativeOpportunityMessageRequest(
+                    body: AppLocalization.string("Hi! I'd like to join you. Would tomorrow afternoon work?"),
+                    direction: "INCOMING", status: "PENDING", createdAt: Date().ISO8601Format())
+                if MutualOpportunityStore.fixtureConversations[request.id] == nil {
+                    MutualOpportunityStore.fixtureConversations[request.id] = request
+                }
+            }
+            payload?.messageRequests = MutualOpportunityStore.fixtureConversations.values.filter {
+                !$0.isReadyToCoordinate && !handledFixtureRequests.contains($0.id)
+                    && ($0.messageRequest?.isIncoming == false || $0.messageRequest?.status == "PENDING")
+            }.sorted { ($0.messageRequest?.createdAt ?? "") > ($1.messageRequest?.createdAt ?? "") }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-inbox-refresh-error") {
                 issue = AppLocalization.string("Messages unavailable")
             }
@@ -168,6 +229,7 @@ final class InboxStore {
     }
 
     func clearUnread(conversationID: String) {
+        if manuallyUnreadIDs.remove(conversationID) != nil { persistManualUnread() }
         if let row = payload?.conversations.first(where: { $0.id == conversationID }) {
             locallyReadMessageIDs[conversationID] = row.lastMessage?.id ?? ""
         }
@@ -175,6 +237,51 @@ final class InboxStore {
             rows.map { row in
                 row.id == conversationID ? row.withUnreadCount(0) : row
             }
+        }
+    }
+
+    /// Manual unread is a device-local reminder, separate from the server's read cursor.
+    @discardableResult
+    func toggleUnread(_ conversation: NativeInboxConversation, using session: SessionStore) async -> Bool {
+        guard !isMutating, !accountID.isEmpty, accountID == session.currentUser?.id,
+              let current = payload?.conversations.first(where: { $0.id == conversation.id }) else { return false }
+        issue = nil
+        if !isUnread(current) {
+            manuallyUnreadIDs.insert(current.id)
+            persistManualUnread()
+            return true
+        }
+        if current.unreadCount == 0 {
+            clearUnread(conversationID: current.id)
+            return true
+        }
+
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            clearUnread(conversationID: current.id)
+            return true
+        }
+        #endif
+
+        isMutating = true
+        let activeAccountID = accountID
+        defer { if accountID == activeAccountID { isMutating = false } }
+        struct ReadBody: Encodable, Sendable {}
+        struct ReadResult: Decodable, Sendable { let readAt: String }
+        let path: String
+        switch current.kind {
+        case .direct: path = "api/v1/connections/\(current.id)/read"
+        case .course: path = "api/v1/courses/\(current.id)/read"
+        case .group: path = "api/v1/group-chats/\(current.id)/read"
+        }
+        do {
+            let _: APIEnvelope<ReadResult> = try await session.sendAuthorized(path, method: .post, body: ReadBody())
+            guard accountID == activeAccountID else { return false }
+            clearUnread(conversationID: current.id)
+            return true
+        } catch {
+            if accountID == activeAccountID { issue = error.localizedDescription }
+            return false
         }
     }
 
@@ -337,7 +444,8 @@ final class InboxStore {
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: current.plansNeedingYourAction,
             planOutcomesNeedingYourResponse: current.planOutcomesNeedingYourResponse,
-            actionResponseSummary: current.actionResponseSummary
+            actionResponseSummary: current.actionResponseSummary,
+            messageRequests: current.messageRequests
         )
         scheduleCachePersist()
     }
@@ -386,7 +494,8 @@ final class InboxStore {
             unreadTotal: conversations.reduce(0) { $0 + $1.unreadCount },
             plansNeedingYourAction: payload.plansNeedingYourAction,
             planOutcomesNeedingYourResponse: payload.planOutcomesNeedingYourResponse,
-            actionResponseSummary: payload.actionResponseSummary
+            actionResponseSummary: payload.actionResponseSummary,
+            messageRequests: payload.messageRequests
         )
     }
 

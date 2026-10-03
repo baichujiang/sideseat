@@ -22,7 +22,7 @@ struct ForegroundPushNotice: Equatable, Sendable {
     }
 
     var updatesCalendar: Bool {
-        kind == "plan_accepted"
+        kind == "plan_accepted" || kind == "plan_canceled"
     }
 
     var isMutualOpportunity: Bool {
@@ -199,7 +199,7 @@ extension SideSeatAppDelegate: UNUserNotificationCenterDelegate {
     nonisolated static func refreshAppState(for notice: ForegroundPushNotice) {
         let rawURL = notice.navigationURL ?? ""
         let path = URL(string: rawURL)?.path ?? rawURL
-        let isChat = path.hasPrefix("/connections/")
+        let isChat = path == "/inbox" || path.hasPrefix("/connections/")
             || (path.hasPrefix("/courses/") && path.hasSuffix("/chat"))
             || path.hasPrefix("/groups/")
         let isDiscover = path.hasPrefix("/discover/posts/")

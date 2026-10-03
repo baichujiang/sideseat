@@ -48,18 +48,18 @@ struct SSShareActionBar: View {
                     HStack(spacing: SideSeatTheme.spaceSM) {
                         if isPreparing {
                             ProgressView()
-                                .tint(SideSeatTheme.onAccent)
+                                .tint(SideSeatTheme.ProductAction.foreground)
                         } else {
                             Image(systemName: "square.and.arrow.up")
                             Text("Share poster")
                         }
                     }
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.onAccent)
+                    .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
                     .background(
-                        SideSeatTheme.accent,
+                        SideSeatTheme.ProductAction.fill,
                         in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     )
                 }

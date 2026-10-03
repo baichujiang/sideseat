@@ -1,4 +1,4 @@
 #include "Development.xcconfig"
 
 PRODUCT_BUNDLE_IDENTIFIER = app.sideseat.mobile.preview
-CURRENT_PROJECT_VERSION = 56
+CURRENT_PROJECT_VERSION = 85

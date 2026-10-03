@@ -5,6 +5,7 @@ import Observation
 @Observable
 final class WeeklyIntentStore {
     private(set) var intents: [NativeWeeklyIntent] = []
+    private(set) var expiredIntents: [NativeWeeklyIntent] = []
     private(set) var isLoading = false
     private(set) var hasLoaded = false
     private(set) var isCreating = false
@@ -12,9 +13,12 @@ final class WeeklyIntentStore {
     private(set) var issue: String?
 
     #if DEBUG
-    private var hasInstalledCardFixtures = false
-    private var usesCardFixtures: Bool {
-        ProcessInfo.processInfo.arguments.contains("--ui-testing-intent-card-states")
+    private var hasInstalledFixtures = false
+    private var createdFixtureCount = 0
+    private var usesLocalFixtures: Bool {
+        let arguments = ProcessInfo.processInfo.arguments
+        return arguments.contains("--ui-testing-intent-card-states")
+            || arguments.contains("--ui-testing-weekly-intent")
     }
     #endif
 
@@ -27,29 +31,28 @@ final class WeeklyIntentStore {
         defer { isLoading = false }
 
         #if DEBUG
-        if usesCardFixtures {
-            if !hasInstalledCardFixtures {
-                hasInstalledCardFixtures = true
-                intents = [
-                    Self.cardFixture(id: "ui-intent-coffee", topic: .coffee, title: "Coffee after class", published: true),
-                    Self.cardFixture(id: "ui-intent-sports", topic: .sports, title: "", status: "PAUSED", published: true),
-                    Self.cardFixture(id: "ui-intent-study", topic: .study, title: "Library study", published: false),
-                ]
+        if usesLocalFixtures {
+            if !hasInstalledFixtures {
+                hasInstalledFixtures = true
+                if ProcessInfo.processInfo.arguments.contains("--ui-testing-expired-intention") {
+                    expiredIntents = [Self.cardFixture(id: "ui-intent-expired", topic: .coffee,
+                        title: "Coffee after class", status: "EXPIRED", published: true)]
+                } else if ProcessInfo.processInfo.arguments.contains("--ui-testing-intent-card-states") {
+                    intents = [
+                        Self.cardFixture(id: "ui-intent-coffee", topic: .coffee, title: "Coffee after class", published: true),
+                        Self.cardFixture(id: "ui-intent-sports", topic: .sports, title: "", status: "PAUSED", published: true),
+                        Self.cardFixture(id: "ui-intent-study", topic: .study, title: "Library study", published: false),
+                    ]
+                } else if ProcessInfo.processInfo.arguments.contains("--ui-testing-discovery-published") {
+                    intents = [NativeWeeklyIntent(id: "ui-published-intent", topic: .coffee, activityText: AppLocalization.string("Coffee"),
+                        sportTag: nil, sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil,
+                        courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
+                        status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: nil,
+                        pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
+                        timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true, exploreVisible: true)]
+                }
             }
             hasLoaded = true
-            return
-        }
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-weekly-intent") {
-            hasLoaded = true
-            intents = []
-            if ProcessInfo.processInfo.arguments.contains("--ui-testing-discovery-published") {
-                intents = [NativeWeeklyIntent(id: "ui-published-intent", topic: .coffee, activityText: AppLocalization.string("Coffee"),
-                    sportTag: nil, sportOtherNote: nil, togetherMode: .sameActivity, studyGoal: nil,
-                    courseId: nil, course: nil, timeWindows: [], timeZone: "Europe/Berlin", note: nil,
-                    status: "ACTIVE", policyVersion: 1, version: 1, expiresAt: nil,
-                    pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
-                    timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true, exploreVisible: true)]
-            }
             return
         }
         #endif
@@ -59,6 +62,7 @@ final class WeeklyIntentStore {
                 "api/v1/me/weekly-intents"
             )
             intents = response.data.intents
+            expiredIntents = response.data.expiredIntents
             hasLoaded = true
         } catch is CancellationError {
             return
@@ -99,17 +103,6 @@ final class WeeklyIntentStore {
             }
         }
 
-        #if DEBUG
-        if usesCardFixtures {
-            let value = Self.cardFixture(id: existingIntent?.id ?? "ui-intent-created", topic: topic,
-                title: topic == .study ? studyGoal : activityText,
-                status: existingIntent?.status ?? "ACTIVE", published: automaticMatching,
-                exploreVisible: exploreVisible ?? false)
-            upsert(value)
-            return true
-        }
-        #endif
-
         let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedActivityText = activityText.trimmingCharacters(in: .whitespacesAndNewlines)
         let submittedActivityText: String? = topic == .study || topic == .sports
@@ -129,6 +122,42 @@ final class WeeklyIntentStore {
             topic: topic,
             courseID: courseId
         )
+
+        #if DEBUG
+        if usesLocalFixtures {
+            let id: String
+            if let existingIntent {
+                id = existingIntent.id
+            } else {
+                createdFixtureCount += 1
+                id = createdFixtureCount == 1 ? "ui-intent-created" : "ui-intent-created-\(createdFixtureCount)"
+            }
+            let now = Date()
+            let existingCourse = existingIntent?.courseId == submittedCourseID ? existingIntent?.course : nil
+            let fixtureCourse = NativeCourseList.uiTestingFixture.courses.first { $0.id == submittedCourseID }
+            let submittedCourse = existingCourse ?? fixtureCourse.map {
+                NativeWeeklyIntentCourse(id: $0.id, code: $0.code, name: $0.name)
+            }
+            upsert(NativeWeeklyIntent(
+                id: id, topic: topic, activityText: submittedActivityText,
+                sportTag: submittedSportTag, sportOtherNote: submittedSportOtherNote,
+                togetherMode: submittedTogetherDetails.togetherMode, studyGoal: submittedTogetherDetails.studyGoal,
+                courseId: submittedCourseID,
+                course: submittedCourse,
+                timeWindows: timeWindows, timeZone: TimeZone.current.identifier,
+                note: trimmedNote.isEmpty ? nil : trimmedNote,
+                status: existingIntent?.status ?? "ACTIVE", policyVersion: existingIntent?.policyVersion ?? 1,
+                version: (existingIntent?.version ?? 0) + 1, expiresAt: existingIntent?.expiresAt,
+                pausedAt: existingIntent?.pausedAt, endedAt: existingIntent?.endedAt,
+                createdAt: existingIntent?.createdAt ?? now, updatedAt: now,
+                timePreference: timePreference,
+                automaticMatching: automaticMatching || existingIntent?.automaticMatching == true,
+                exploreVisible: exploreVisible ?? existingIntent?.exploreVisible ?? false
+            ))
+            return true
+        }
+        #endif
+
         do {
             let response: APIEnvelope<NativeWeeklyIntentPayload>
             if let existingIntent {
@@ -197,11 +226,21 @@ final class WeeklyIntentStore {
         issue = nil
         defer { mutatingIDs.remove(intent.id) }
         #if DEBUG
-        if usesCardFixtures {
-            upsert(Self.cardFixture(id: intent.id, topic: intent.topic, title: intent.activityTitle,
-                status: paused ? "PAUSED" : "ACTIVE",
-                published: automaticMatching || intent.automaticMatching == true,
-                exploreVisible: intent.exploreVisible == true))
+        if usesLocalFixtures {
+            let now = Date()
+            upsert(NativeWeeklyIntent(
+                id: intent.id, topic: intent.topic, activityText: intent.activityText,
+                sportTag: intent.sportTag, sportOtherNote: intent.sportOtherNote,
+                togetherMode: intent.togetherMode, studyGoal: intent.studyGoal,
+                courseId: intent.courseId, course: intent.course,
+                timeWindows: intent.timeWindows, timeZone: intent.timeZone, note: intent.note,
+                status: paused ? "PAUSED" : "ACTIVE", policyVersion: intent.policyVersion,
+                version: intent.version + 1, expiresAt: intent.expiresAt,
+                pausedAt: paused ? now : nil, endedAt: intent.endedAt,
+                createdAt: intent.createdAt, updatedAt: now, timePreference: intent.timePreference,
+                automaticMatching: (!paused && automaticMatching) || intent.automaticMatching == true,
+                exploreVisible: intent.exploreVisible
+            ))
             return true
         }
         #endif
@@ -236,7 +275,7 @@ final class WeeklyIntentStore {
         issue = nil
         defer { mutatingIDs.remove(intent.id) }
         #if DEBUG
-        if usesCardFixtures {
+        if usesLocalFixtures {
             intents.removeAll { $0.id == intent.id }
             return true
         }
@@ -269,7 +308,7 @@ final class WeeklyIntentStore {
             sportTag: topic == .sports ? .badminton : nil, sportOtherNote: nil,
             togetherMode: .sameActivity, studyGoal: topic == .study ? title : nil,
             courseId: nil, course: nil,
-            timeWindows: topic == .coffee ? [NativeWeeklyIntentTimeWindow(startAt: now.addingTimeInterval(86400), endAt: now.addingTimeInterval(93600))] : [],
+            timeWindows: topic == .coffee ? [NativeWeeklyIntentTimeWindow(startAt: now.addingTimeInterval(status == "EXPIRED" ? -93600 : 86400), endAt: now.addingTimeInterval(status == "EXPIRED" ? -86400 : 93600))] : [],
             timeZone: "Europe/Berlin", note: nil, status: status, policyVersion: 1, version: 1,
             expiresAt: nil, pausedAt: status == "PAUSED" ? now : nil,
             endedAt: nil, createdAt: now, updatedAt: now,

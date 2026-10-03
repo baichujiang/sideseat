@@ -22,6 +22,17 @@ struct NativeMutualOpportunityPeer: Codable, Hashable, Sendable {
     let major: String?
     let semester: Int?
     let sharedLanguages: [String]
+    var isPlus: Bool? = nil
+    var campus: String? = nil
+    var languages: [String]? = nil
+
+    var primaryLanguageTitle: String? {
+        guard let language = languages?.first else { return nil }
+        return AppLocalization.string(String.LocalizationValue([
+            "CHINESE": "Chinese", "ENGLISH": "English", "GERMAN": "German",
+            "FRENCH": "French", "HINDI": "Hindi", "SPANISH": "Spanish", "OTHER": "Other"
+        ][language] ?? "Other"))
+    }
 }
 
 struct NativeMutualOpportunityCoordination: Codable, Hashable, Sendable {
@@ -41,6 +52,14 @@ struct NativeDiscoveryActivity: Codable, Hashable, Sendable {
         }
         return (topic == .study ? studyGoal : activityText) ?? topic.title
     }
+}
+
+struct NativeOpportunityIntention: Codable, Hashable, Sendable {
+    let activity: NativeDiscoveryActivity
+    let timePreference: NativeIntentTimePreference?
+    let timeWindows: [NativeWeeklyIntentTimeWindow]
+    var course: NativeExploreIntentCourse? = nil
+    var descriptionPreview: String? = nil
 }
 
 struct NativeActivityFit: Codable, Hashable, Sendable {
@@ -139,6 +158,21 @@ struct NativeActivityFit: Codable, Hashable, Sendable {
     }
 }
 
+struct NativeOpportunityMessageRequest: Codable, Hashable, Sendable {
+    let body: String
+    let direction: String
+    let status: String
+    let createdAt: String
+    var intention: NativeOpportunityIntention? = nil
+
+    var isIncoming: Bool { direction == "INCOMING" }
+}
+
+struct NativeOpportunityInteraction: Encodable, Sendable {
+    let action: String
+    var body: String? = nil
+}
+
 struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let policyVersion: String
@@ -165,6 +199,22 @@ struct NativeMutualOpportunity: Codable, Identifiable, Hashable, Sendable {
     var isRepeat: Bool? = nil
     var matchFit: NativeActivityFit? = nil
     var timeContext: NativeIntentTimePreference? = nil
+    var peerIntention: NativeOpportunityIntention? = nil
+    var isExpired: Bool? = nil
+    var isBookmarked: Bool? = nil
+    var messageRequest: NativeOpportunityMessageRequest? = nil
+
+    var hasConversation: Bool { messageRequest != nil || coordination != nil }
+
+    var conversationRoute: AppRoute {
+        if let connectionID = coordination?.connectionId { return .directChat(connectionID: connectionID) }
+        return .intentionChat(opportunity: self)
+    }
+
+    var isUnavailable: Bool {
+        ["UNAVAILABLE", "CLOSED", "EXPIRED"].contains(state)
+            || (!isReadyToCoordinate && (Date.sideSeatChatISO8601(expiresAt).map { $0 <= Date() } ?? false))
+    }
 
     var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
     var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
@@ -349,5 +399,46 @@ extension NativeMutualOpportunity {
     private func nonemptyActivity(_ value: String?) -> String? {
         guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
         return trimmed
+    }
+}
+
+// Recommendation cards describe the peer's intention, not a comparison or a Plan.
+extension NativeMutualOpportunity {
+    var peerActivityTopic: NativeWeeklyIntentTopic {
+        peerIntention?.activity.topic ?? matchFit?.peerActivity?.topic ?? topic
+    }
+
+    var peerActivityTitle: String {
+        if let activity = peerIntention?.activity ?? matchFit?.peerActivity {
+            return nonemptyActivity(activity.title) ?? activity.topic.title
+        }
+        if let text = nonemptyActivity(matchFit?.peerActivityText) { return text }
+        if topic == .study { return peerStudyGoalTitle }
+        // Older exact-activity snapshots describe both participants. Different
+        // activity snapshots cannot safely substitute the viewer's activity.
+        if activityCueTone == .shared { return activityTitle }
+        return AppLocalization.string("Activity to agree")
+    }
+
+    var messageActivityTitle: String { messageRequest?.intention?.activity.title ?? peerActivityTitle }
+    var messageTimeSummary: String { Self.intentionTimeSummary(messageRequest?.intention ?? peerIntention) }
+
+    var peerTimeSummary: String { Self.intentionTimeSummary(peerIntention) }
+
+    private static func intentionTimeSummary(_ intention: NativeOpportunityIntention?) -> String {
+        // Old APIs expose overlap only. Never label it as the peer's own timing.
+        guard let intention else { return AppLocalization.string("Time to discuss") }
+        if let preference = intention.timePreference, preference.kind != "EXACT" {
+            return preference.summary
+        }
+        let locale = AppLocalization.selectedLanguage.locale
+        let windows = intention.timeWindows.sorted { $0.startAt < $1.startAt }
+        guard !windows.isEmpty else { return AppLocalization.string("Time to discuss") }
+        return windows.map { window in
+            let start = window.startAt.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(locale))
+            let endStyle: Date.FormatStyle = Calendar.current.isDate(window.startAt, inSameDayAs: window.endAt)
+                ? .dateTime.hour().minute() : .dateTime.month(.abbreviated).day().hour().minute()
+            return "\(start)–\(window.endAt.formatted(endStyle.locale(locale)))"
+        }.joined(separator: "\n")
     }
 }

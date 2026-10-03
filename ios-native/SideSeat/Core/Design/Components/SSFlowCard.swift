@@ -123,33 +123,40 @@ struct SSActivityChoice: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                if !dynamicTypeSize.isAccessibilitySize {
-                    SSActivityArtwork(topic: topic, size: 28)
-                }
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS))
+            layout {
+                SSActivityArtwork(topic: topic, size: 28)
                 Text(topic.title)
-                    .font(.subheadline.weight(.semibold))
-                    .multilineTextAlignment(.leading)
+                    .font(dynamicTypeSize.isAccessibilitySize ? .body.weight(.medium) : .caption.weight(.semibold))
+                    .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.accentText)
-                    .opacity(isSelected ? 1 : 0)
-                    .accessibilityHidden(true)
+                    .frame(maxWidth: .infinity, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .center)
+                    .padding(.trailing, dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceLG : 0)
             }
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceSM)
-            .frame(maxWidth: .infinity, minHeight: 56)
+            .frame(maxWidth: .infinity, minHeight: 72)
             .foregroundStyle(SideSeatTheme.textPrimary)
             .background(
-                SideSeatTheme.surface,
+                isSelected ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.surface,
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
             .overlay {
                 RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .strokeBorder(isSelected ? SideSeatTheme.textPrimary.opacity(0.6)
-                                  : SideSeatTheme.separator.opacity(0.2), lineWidth: isSelected ? 1.5 : 0.5)
+                    .strokeBorder(isSelected ? SideSeatTheme.ControlSelection.border
+                                  : SideSeatTheme.separator.opacity(0.3), lineWidth: 1)
+            }
+            .overlay(alignment: .topTrailing) {
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption2.weight(.semibold))
+                        .dynamicTypeSize(...DynamicTypeSize.large)
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .padding(SideSeatTheme.spaceXS)
+                        .accessibilityHidden(true)
+                }
             }
             .contentShape(Rectangle())
         }
@@ -159,24 +166,12 @@ struct SSActivityChoice: View {
     }
 }
 
-enum SSOpportunitySwipeChoice: Equatable {
-    case skip
-    case interested
-
-    static func releasedChoice(translation: CGSize, travel: CGFloat) -> Self? {
-        guard travel > 0,
-              abs(translation.width) >= travel * 0.68,
-              abs(translation.width) > abs(translation.height) * 1.5
-        else { return nil }
-        return translation.width > 0 ? .interested : .skip
-    }
-}
-
-/// The committed position of the interest control. It is a status, not a reversible slider.
+/// Saved interest with a separate withdrawal action.
 struct SSOpportunityInterestStatus: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let id: String
     var accessibilityPrefix = "mutual-opportunity"
+    var compact = false
     let isWorking: Bool
     let onWithdraw: () -> Void
 
@@ -188,28 +183,36 @@ struct SSOpportunityInterestStatus: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Text(AppLocalization.string("Interest shown"))
+            if compact {
+                Label(AppLocalization.string("Interest shown"), systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accentText)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.leading, SideSeatTheme.spaceMD)
-                Spacer(minLength: 0)
-                Image(systemName: "star.fill")
-                    .font(.system(size: 19, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.Together.decisionHandleInk)
-                    .frame(width: 52, height: 52)
-                    .background(SideSeatTheme.Together.decisionHandle, in: Circle())
-                    .overlay { Circle().strokeBorder(SideSeatTheme.Together.decisionHandleBorder, lineWidth: 0.75) }
-                    .accessibilityHidden(true)
+                    .accessibilityIdentifier("\(accessibilityPrefix)-saved-\(id)")
+            } else {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Text(AppLocalization.string("Interest shown"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.leading, SideSeatTheme.spaceMD)
+                    Spacer(minLength: 0)
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 19, weight: .semibold))
+                        .foregroundStyle(SideSeatTheme.Together.decisionHandleInk)
+                        .frame(width: 52, height: 52)
+                        .background(SideSeatTheme.Together.decisionHandle, in: Circle())
+                        .overlay { Circle().strokeBorder(SideSeatTheme.Together.decisionHandleBorder, lineWidth: 0.75) }
+                        .accessibilityHidden(true)
+                }
+                .padding(6)
+                .frame(maxWidth: .infinity, minHeight: dynamicTypeSize.isAccessibilitySize ? 72 : 64)
+                .background(SideSeatTheme.Together.selectedTab, in: Capsule())
+                .overlay { Capsule().strokeBorder(SideSeatTheme.ControlSelection.border, lineWidth: 0.5) }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(AppLocalization.string("Interest shown"))
+                .accessibilityIdentifier("\(accessibilityPrefix)-saved-\(id)")
             }
-            .padding(6)
-            .frame(maxWidth: .infinity, minHeight: dynamicTypeSize.isAccessibilitySize ? 72 : 64)
-            .background(SideSeatTheme.Together.selectedTab, in: Capsule())
-            .overlay { Capsule().strokeBorder(SideSeatTheme.accent.opacity(0.25), lineWidth: 0.5) }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(AppLocalization.string("Interest shown"))
-            .accessibilityIdentifier("\(accessibilityPrefix)-saved-\(id)")
 
             footerLayout {
                 Text(AppLocalization.string("Waiting for a response"))
@@ -236,13 +239,10 @@ struct SSOpportunityInterestStatus: View {
     }
 }
 
-/// A bilateral decision control that retains its selected appearance after interest is saved.
-struct SSOpportunityDecisionBar: View {
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+/// Two direct choices; only the submitted action shows progress.
+struct SSOpportunityDecisionButtons: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var translation: CGSize = .zero
-    @State private var trackWidth: CGFloat = 0
-    @State private var committedChoice: SSOpportunitySwipeChoice?
+    @State private var submittingInterest: Bool?
 
     let opportunityID: String
     let isInterested: Bool
@@ -251,335 +251,67 @@ struct SSOpportunityDecisionBar: View {
     let onSkip: () async -> Void
     let onWithdraw: () -> Void
 
-    private let thumbSize: CGFloat = 52
-    private let trackInset: CGFloat = 6
-    private var trackHeight: CGFloat { dynamicTypeSize.isAccessibilitySize ? 72 : 64 }
-
-    private var reduceMotion: Bool {
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-reduce-motion") { return true }
-        #endif
-        return systemReduceMotion
-    }
-
-    private var centerOffset: CGFloat { max(0, (trackWidth - thumbSize) / 2) }
-    private var travel: CGFloat { max(0, centerOffset - trackInset) }
-    private var offset: CGFloat { min(travel, max(-travel, translation.width)) }
-    private var armedChoice: SSOpportunitySwipeChoice? {
-        SSOpportunitySwipeChoice.releasedChoice(translation: translation, travel: travel)
-    }
-    private var isDragging: Bool { translation != .zero && committedChoice == nil }
-    private var isSubmitting: Bool { committedChoice != nil || isWorking }
-    private var activeChoice: SSOpportunitySwipeChoice? {
-        if let committedChoice { return committedChoice }
-        guard abs(offset) > 3 else { return nil }
-        return offset > 0 ? .interested : .skip
-    }
-    private var progress: CGFloat { travel > 0 ? abs(offset) / travel : 0 }
-    private var feedbackText: String {
-        if isSubmitting { return AppLocalization.string("Saving…") }
-        return AppLocalization.string(armedChoice == nil ? "Keep sliding" : "Release to confirm")
-    }
-    private var returnAnimation: Animation? {
-        reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.74)
+    private var isSubmitting: Bool { submittingInterest != nil || isWorking }
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
     }
 
     var body: some View {
         Group {
             if isInterested {
-                SSOpportunityInterestStatus(id: opportunityID, isWorking: isWorking, onWithdraw: onWithdraw)
+                SSOpportunityInterestStatus(id: opportunityID, compact: true,
+                    isWorking: isWorking, onWithdraw: onWithdraw)
             } else {
-                VStack(spacing: SideSeatTheme.spaceSM) {
-                    decisionLabels
-                    accessibleTrack
+                layout {
+                    Button { submit(interested: false) } label: {
+                        choiceLabel("Ignore", interested: false)
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .background(SideSeatTheme.fillTertiary,
+                                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    }
+                    .accessibilityIdentifier("mutual-opportunity-skip-action-\(opportunityID)")
+                    Button { submit(interested: true) } label: {
+                        choiceLabel("Interested", interested: true)
+                            .foregroundStyle(.white)
+                            .background(SideSeatTheme.BrandAction.fill,
+                                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    }
+                    .accessibilityIdentifier("mutual-opportunity-interest-action-\(opportunityID)")
                 }
+                .buttonStyle(.plain)
+                .disabled(isSubmitting)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(AppLocalization.string("Choose interest"))
+                .accessibilityIdentifier("mutual-opportunity-actions-\(opportunityID)")
             }
         }
         .background(SSPageSwipeExclusion())
     }
 
-    private var feedbackTrack: some View {
-        decisionTrack
-            .sensoryFeedback(.impact(weight: .light, intensity: 0.55), trigger: armedChoice) { old, new in
-                old == nil && new != nil && !isSubmitting
+    private func choiceLabel(_ title: String.LocalizationValue, interested: Bool) -> some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            if submittingInterest == interested {
+                ProgressView().tint(interested ? .white : SideSeatTheme.textSecondaryStrong)
             }
-            .sensoryFeedback(.impact(weight: .medium, intensity: 0.75), trigger: committedChoice) { _, choice in
-                choice != nil
-            }
-    }
-
-    private var accessibleTrack: some View {
-        feedbackTrack
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(AppLocalization.string("Choose interest"))
-            .accessibilityHint(AppLocalization.string("Swipe left for Not interested or right for Interested"))
-            .accessibilityValue(isSubmitting ? AppLocalization.string("Saving…") : AppLocalization.string("Not selected"))
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment: submit(.interested)
-                case .decrement: submit(.skip)
-                @unknown default: break
-                }
-            }
-            .accessibilityAction(named: AppLocalization.string("Interested")) { submit(.interested) }
-            .accessibilityAction(named: AppLocalization.string("Not interested")) { submit(.skip) }
-            .accessibilityIdentifier("mutual-opportunity-swipe-\(opportunityID)")
-    }
-
-    private var decisionTrack: some View {
-        ZStack(alignment: .leading) {
-            Capsule()
-                .fill(SideSeatTheme.Together.decisionWell)
-
-            // The wash follows actual distance; it never advances on its own.
-            Capsule()
-                .fill(activeChoice == .interested ? SideSeatTheme.accent.opacity(0.16) : SideSeatTheme.Together.ink.opacity(0.07))
-                .frame(width: thumbSize + abs(offset), height: trackHeight - trackInset * 2)
-                .offset(x: centerOffset + min(0, offset))
-                .opacity(Double(min(1, progress * 4)))
-                .allowsHitTesting(false)
-
-            HStack {
-                Image(systemName: "minus")
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                Spacer()
-                Image(systemName: "star")
-                    .foregroundStyle(SideSeatTheme.Together.decisionHandleInk)
-            }
-            .font(.system(size: 16, weight: .medium))
-            .padding(.horizontal, 22)
-            .opacity(activeChoice == nil ? 1 : 0)
-            .accessibilityHidden(true)
-
-            dragFeedback
-
-            Capsule()
-                .strokeBorder(trackStroke, lineWidth: armedChoice == nil ? 0.5 : 1)
-                .allowsHitTesting(false)
-
-            thumb
-                .offset(x: centerOffset + offset)
+            Text(AppLocalization.string(title))
+                .font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
         }
-        .frame(height: trackHeight)
-        .background(trackWidthReader)
+        .padding(.horizontal, SideSeatTheme.spaceMD)
+        .padding(.vertical, SideSeatTheme.spaceSM)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .contentShape(Rectangle())
     }
 
-    private var decisionLabels: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceLG) {
-            Button { submit(.skip) } label: {
-                Text(AppLocalization.string("Not interested"))
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .opacity(activeChoice == .interested ? 0.5 : 1)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .contentShape(Rectangle())
-            }
-            .accessibilityIdentifier("mutual-opportunity-skip-action-\(opportunityID)")
-
-            Button { submit(.interested) } label: {
-                Text(AppLocalization.string("Interested"))
-                    .foregroundStyle(SideSeatTheme.accentText)
-                    .opacity(activeChoice == .skip ? 0.5 : 1)
-                    .multilineTextAlignment(.trailing)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .trailing)
-                    .contentShape(Rectangle())
-            }
-            .accessibilityIdentifier("mutual-opportunity-interest-action-\(opportunityID)")
-        }
-        .buttonStyle(.plain)
-        .disabled(isSubmitting)
-        .font(.caption.weight(.medium))
-        .fixedSize(horizontal: false, vertical: true)
-        .padding(.horizontal, 4)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: activeChoice)
-    }
-
-    private var dragFeedback: some View {
-        let isRight = offset >= 0
-        let availableWidth = max(0, centerOffset + abs(offset) - 24)
-        return Text(feedbackText)
-            .font(.caption.weight(armedChoice == nil ? .medium : .semibold))
-            .foregroundStyle(SideSeatTheme.Together.ink)
-            .multilineTextAlignment(.center)
-            .lineLimit(2)
-            .minimumScaleFactor(0.85)
-            .frame(width: availableWidth, height: trackHeight - 12)
-            .offset(x: isRight ? 12 : centerOffset + offset + thumbSize + 12)
-            .opacity(Double(min(1, max(0, (progress - 0.12) / 0.25))))
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-    }
-
-    private var trackWidthReader: some View {
-        GeometryReader { proxy in
-            Color.clear
-                .onAppear { trackWidth = proxy.size.width }
-                .onChange(of: proxy.size.width) { _, width in trackWidth = width }
-        }
-    }
-
-    private var trackStroke: Color {
-        switch armedChoice ?? committedChoice {
-        case .interested: return SideSeatTheme.accent.opacity(0.45)
-        case .skip: return SideSeatTheme.Together.ink.opacity(0.25)
-        case nil: return SideSeatTheme.Together.border
-        }
-    }
-
-    private var thumb: some View {
-        ZStack {
-            Circle().fill(thumbFill)
-            Circle().strokeBorder(thumbStroke, lineWidth: 0.75)
-            if isSubmitting {
-                ProgressView().tint(thumbForeground)
-            } else if let choice = armedChoice {
-                Image(systemName: choice == .interested ? "star.fill" : "minus")
-                    .font(.system(size: 19, weight: .semibold))
-                    .foregroundStyle(thumbForeground)
-            } else {
-                HStack(spacing: 3) {
-                    Image(systemName: "chevron.left").font(.system(size: 8, weight: .semibold))
-                    Image(systemName: "star").font(.system(size: 19, weight: .semibold))
-                    Image(systemName: "chevron.right").font(.system(size: 8, weight: .semibold))
-                }
-                .foregroundStyle(thumbForeground)
-            }
-        }
-        .frame(width: thumbSize, height: thumbSize)
-        .contentShape(Circle())
-        .shadow(color: SideSeatTheme.Together.shadow.opacity(isDragging ? 0.16 : 0.10), radius: isDragging ? 8 : 4, y: isDragging ? 3 : 2)
-        .scaleEffect(reduceMotion || !isDragging ? 1 : 1.04)
-        .animation(reduceMotion ? nil : .spring(response: 0.24, dampingFraction: 0.8), value: isDragging)
-        .overlay(dragSurface)
-        .allowsHitTesting(!isSubmitting)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(AppLocalization.string("Choose interest"))
-        .accessibilityHint(AppLocalization.string("Swipe left for Not interested or right for Interested"))
-        .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: submit(.interested)
-            case .decrement: submit(.skip)
-            @unknown default: break
-            }
-        }
-        .accessibilityIdentifier("mutual-opportunity-swipe-handle-\(opportunityID)")
-    }
-
-    private var dragSurface: some View {
-        SSHorizontalDecisionDragSurface(
-            isEnabled: !isSubmitting,
-            onChange: { movement in
-                guard committedChoice == nil else { return }
-                if movement == .zero {
-                    withAnimation(returnAnimation) { translation = .zero }
-                } else {
-                    translation = movement
-                }
-            },
-            onEnd: { movement in
-                if let choice = SSOpportunitySwipeChoice.releasedChoice(
-                    translation: movement,
-                    travel: travel
-                ) {
-                    submit(choice)
-                }
-            }
-        )
-        .accessibilityHidden(true)
-    }
-
-    private var thumbFill: Color {
-        switch armedChoice ?? committedChoice {
-        case .interested: return SideSeatTheme.Together.decisionHandle
-        case .skip: return SideSeatTheme.Together.ink
-        case nil: return SideSeatTheme.Together.decisionHandle
-        }
-    }
-
-    private var thumbStroke: Color {
-        switch armedChoice {
-        case .interested: return SideSeatTheme.Together.decisionHandleBorder
-        case .skip: return SideSeatTheme.Together.ink
-        case nil: return SideSeatTheme.Together.decisionHandleBorder
-        }
-    }
-
-    private var thumbForeground: Color {
-        switch armedChoice ?? committedChoice {
-        case .interested: return SideSeatTheme.Together.decisionHandleInk
-        case .skip: return SideSeatTheme.Together.canvas
-        case nil: return SideSeatTheme.Together.decisionHandleInk
-        }
-    }
-
-    private func submit(_ choice: SSOpportunitySwipeChoice) {
+    private func submit(interested: Bool) {
         guard !isInterested, !isSubmitting else { return }
-        committedChoice = choice
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
-            translation = CGSize(width: choice == .interested ? travel : -travel, height: 0)
-        }
+        submittingInterest = interested
         Task {
-            if choice == .interested { await onInterested() } else { await onSkip() }
-            withAnimation(returnAnimation) {
-                committedChoice = nil
-                translation = .zero
-            }
-        }
-    }
-}
-
-/// SwiftUI DragGesture consumed vertical drags in the Together ScrollView on iOS 26.5.
-/// Reject vertical movement before recognition so the parent can keep scrolling.
-private struct SSHorizontalDecisionDragSurface: UIViewRepresentable {
-    let isEnabled: Bool
-    let onChange: (CGSize) -> Void
-    let onEnd: (CGSize) -> Void
-
-    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
-
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.drag(_:)))
-        pan.maximumNumberOfTouches = 1
-        pan.delegate = context.coordinator
-        pan.isEnabled = isEnabled
-        view.addGestureRecognizer(pan)
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.parent = self
-        if let pan = uiView.gestureRecognizers?.first, pan.isEnabled != isEnabled {
-            pan.isEnabled = isEnabled
-        }
-    }
-
-    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-        var parent: SSHorizontalDecisionDragSurface
-        init(parent: SSHorizontalDecisionDragSurface) { self.parent = parent }
-
-        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return false }
-            let velocity = pan.velocity(in: pan.view?.window)
-            return abs(velocity.x) > abs(velocity.y) * 1.5
-        }
-
-        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                               shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
-            other.view is UIScrollView
-        }
-
-        @objc func drag(_ pan: UIPanGestureRecognizer) {
-            // Window coordinates remain stable while the handle follows the finger.
-            let point = pan.translation(in: pan.view?.window)
-            let movement = CGSize(width: point.x, height: point.y)
-            switch pan.state {
-            case .began, .changed: parent.onChange(movement)
-            case .ended:
-                parent.onEnd(movement)
-                parent.onChange(.zero)
-            case .cancelled, .failed: parent.onChange(.zero)
-            default: break
-            }
+            defer { submittingInterest = nil }
+            if interested { await onInterested() } else { await onSkip() }
         }
     }
 }
@@ -655,7 +387,7 @@ struct SSFlowChoice: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(SideSeatTheme.accentText)
+                        .foregroundStyle(SideSeatTheme.utilityAction)
                         .accessibilityHidden(true)
                 }
             }
@@ -664,12 +396,12 @@ struct SSFlowChoice: View {
             .padding(.vertical, SideSeatTheme.spaceSM)
             .frame(minHeight: 48)
             .background(
-                isSelected ? SideSeatTheme.accent.opacity(0.08) : SideSeatTheme.fillTertiary,
+                isSelected ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillTertiary,
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
             .overlay {
                 RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .strokeBorder(isSelected ? SideSeatTheme.accent : .clear, lineWidth: 1)
+                    .strokeBorder(isSelected ? SideSeatTheme.ControlSelection.border : .clear, lineWidth: 1)
             }
             .contentShape(Rectangle())
         }
@@ -686,5 +418,154 @@ extension View {
             .presentationCornerRadius(SideSeatTheme.cardRadius)
             .presentationBackground(SideSeatTheme.bgGrouped)
             .interactiveDismissDisabled(isSaving)
+    }
+}
+
+/// Private save and first contact use the same controls in recommendations and exploration.
+struct SSIntentionActionRow<Contact: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let isBookmarked: Bool
+    let isDisabled: Bool
+    let bookmarkIdentifier: String
+    let onBookmark: () -> Void
+    @ViewBuilder var contact: () -> Contact
+
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+    }
+
+    var body: some View {
+        layout {
+            Button(action: onBookmark) {
+                SSIntentionActionLabel(
+                    title: AppLocalization.string(isBookmarked ? "Interest shown" : "Interested"),
+                    icon: isBookmarked ? "heart.fill" : "heart"
+                )
+                .foregroundStyle(SideSeatTheme.utilityAction)
+                .background(isBookmarked ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillSubtle,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .overlay {
+                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                        .strokeBorder(isBookmarked ? SideSeatTheme.ControlSelection.border : SideSeatTheme.separator, lineWidth: 1)
+                }
+            }
+            .buttonStyle(SSPressButtonStyle())
+            .disabled(isDisabled)
+            .accessibilityLabel(AppLocalization.string(isBookmarked ? "Remove bookmark" : "Bookmark intention"))
+            .accessibilityIdentifier(bookmarkIdentifier)
+            contact()
+        }
+    }
+}
+
+struct SSIntentionContactButton: View {
+    let title: String
+    let identifier: String
+    let isDisabled: Bool
+    let action: () -> Void
+    var opensConversation = false
+
+    var body: some View {
+        Button(action: action) {
+            SSIntentionActionLabel(title: title,
+                icon: opensConversation ? "bubble.left.and.bubble.right.fill" : "hand.wave.fill")
+                .foregroundStyle(opensConversation ? SideSeatTheme.statusSuccessText : SideSeatTheme.BrandAction.foreground)
+                .background(
+                    opensConversation ? SideSeatTheme.statusSuccessText.opacity(0.12) : SideSeatTheme.BrandAction.fill,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                )
+                .overlay {
+                    if opensConversation {
+                        RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                            .strokeBorder(SideSeatTheme.statusSuccessText.opacity(0.35), lineWidth: 1)
+                    }
+                }
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .disabled(isDisabled)
+        .accessibilityIdentifier(identifier)
+    }
+}
+
+private struct SSIntentionActionLabel: View {
+    let title: String
+    let icon: String
+
+    var body: some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            Image(systemName: icon).accessibilityHidden(true)
+            Text(title)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.center)
+        }
+        .font(.subheadline.weight(.semibold))
+        .padding(.horizontal, SideSeatTheme.spaceSM)
+        .padding(.vertical, SideSeatTheme.spaceSM)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .contentShape(Rectangle())
+    }
+}
+
+
+struct BookmarkFlightFrames: PreferenceKey {
+    static let defaultValue: [String: CGRect] = [:]
+    static func reduce(value: inout [String: CGRect], nextValue: () -> [String: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { _, new in new })
+    }
+}
+
+extension View {
+    func bookmarkFlightFrame(_ id: String) -> some View {
+        background {
+            GeometryReader { geometry in
+                Color.clear.preference(key: BookmarkFlightFrames.self,
+                    value: [id: geometry.frame(in: .named("bookmark-flight-space"))])
+            }
+        }
+    }
+}
+
+struct BookmarkFlight: Identifiable {
+    let id = UUID()
+    let title: String
+    let start: CGPoint
+    let end: CGPoint
+}
+
+struct BookmarkFlightCard: View {
+    let flight: BookmarkFlight
+    let onArrival: () -> Void
+    @State private var arrived = false
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "heart.fill").font(.title3).foregroundStyle(SideSeatTheme.utilityAction)
+            Text(flight.title).font(.caption.weight(.semibold)).lineLimit(1)
+                .foregroundStyle(SideSeatTheme.textPrimary)
+        }
+        .padding(10)
+        .frame(width: 112, height: 76)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                .strokeBorder(SideSeatTheme.utilityAction.opacity(0.35), lineWidth: 1)
+        }
+        .shadow(color: SideSeatTheme.accent.opacity(0.2), radius: 10, y: 4)
+        .rotationEffect(.degrees(arrived ? 8 : -6))
+        .scaleEffect(arrived ? 0.15 : 1)
+        .opacity(arrived ? 0 : 1)
+        .position(arrived ? flight.end : flight.start)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .task {
+            do {
+                try await Task.sleep(for: .milliseconds(30))
+                withAnimation(.easeInOut(duration: 0.65)) { arrived = true }
+                try await Task.sleep(for: .milliseconds(650))
+                onArrival()
+            } catch { }
+        }
     }
 }

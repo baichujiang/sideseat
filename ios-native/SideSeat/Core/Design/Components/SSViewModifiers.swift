@@ -426,7 +426,7 @@ private struct SSAnchoredActionPopover: View {
                     .foregroundStyle(
                         action.role == .destructive
                             ? SideSeatTheme.danger
-                            : SideSeatTheme.accentText
+                            : SideSeatTheme.utilityAction
                     )
                     .frame(width: 22)
                     .accessibilityHidden(true)
@@ -619,7 +619,7 @@ private struct SSLongPressActionMenuSheet: View {
     }
 
     private func actionButton(_ action: SSLongPressAction) -> some View {
-        let tint = action.role == .destructive ? SideSeatTheme.danger : SideSeatTheme.accentText
+        let tint = action.role == .destructive ? SideSeatTheme.danger : SideSeatTheme.utilityAction
         return Button(role: action.role == .destructive ? .destructive : nil) {
             isPresented = false
             Task { @MainActor in
@@ -1018,7 +1018,7 @@ private struct SSActionPrompt: View {
     private func actionForeground(_ role: SSActionPromptAction.Role) -> Color {
         switch role {
         case .standard:
-            SideSeatTheme.accentText
+            SideSeatTheme.utilityAction
         case .cancel:
             SideSeatTheme.textPrimary
         case .destructive:
@@ -1029,7 +1029,7 @@ private struct SSActionPrompt: View {
     private func actionBackground(_ role: SSActionPromptAction.Role) -> Color {
         switch role {
         case .standard:
-            SideSeatTheme.accent.opacity(colorScheme == .dark ? 0.18 : 0.1)
+            SideSeatTheme.ControlSelection.fill
         case .cancel:
             SideSeatTheme.fillTertiary
         case .destructive:
@@ -1040,7 +1040,7 @@ private struct SSActionPrompt: View {
     private func actionBorder(_ role: SSActionPromptAction.Role) -> Color {
         switch role {
         case .standard:
-            SideSeatTheme.accent.opacity(0.24)
+            SideSeatTheme.ControlSelection.border
         case .cancel:
             SideSeatTheme.separator.opacity(0.38)
         case .destructive:
@@ -1068,7 +1068,7 @@ extension View {
         title: String,
         message: String? = nil,
         systemImage: String = "questionmark",
-        tint: Color = SideSeatTheme.accentText,
+        tint: Color = SideSeatTheme.utilityAction,
         dismissOnTapOutside: Bool = false,
         onDismiss: @escaping () -> Void = {},
         accessibilityIdentifier: String = "ss-action-prompt",

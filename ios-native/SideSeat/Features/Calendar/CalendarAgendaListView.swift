@@ -119,7 +119,7 @@ struct CalendarAgendaListView: View {
                                     .font(.headline)
                                     .foregroundStyle(
                                         calendar.isDateInToday(section.day)
-                                            ? CalendarChrome.nowAccent
+                                            ? CalendarChrome.todayAccent
                                             : SideSeatTheme.textPrimary
                                     )
                                 Spacer(minLength: 0)

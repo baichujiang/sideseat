@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Compact date navigator for Day. Week and Month provide their own date chrome.
-/// Selection uses a filled accent; today / now markers reuse the Rose family with a different shape.
+/// Today's blue marker remains visible independently of the selected date.
 struct HomeDateStripView: View {
     @Binding var selectedDate: Date
     let itemsByDay: [Date: [HomeAgendaItem]]
@@ -209,20 +209,14 @@ struct HomeMonthCalendarView: View {
                 Text(CalendarChrome.dayNumber(day, calendar: calendar))
                     .font(.subheadline.weight(selected || isToday ? .bold : .medium))
                     .monospacedDigit()
-                    .foregroundStyle(dayNumberColor(selected: selected, isToday: isToday))
+                    .foregroundStyle(CalendarChrome.dayNumberForeground(selected: selected, isToday: isToday))
                     .frame(width: 32, height: 32)
-                    .background {
-                        if selected {
-                            Circle().fill(SideSeatTheme.accent)
-                        } else if isToday {
-                            Circle().fill(CalendarChrome.nowAccent.opacity(0.12))
-                        }
-                    }
+                    .background(CalendarDateHighlight(selected: selected, isToday: isToday))
 
                 CalendarEventDots(items: items)
             }
             .frame(maxWidth: .infinity, minHeight: 44)
-            .opacity(inDisplayedMonth ? 1 : 0.38)
+            .opacity(inDisplayedMonth || isToday ? 1 : 0.38)
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -243,7 +237,7 @@ struct HomeMonthCalendarView: View {
                     .font(.headline)
                     .foregroundStyle(
                         calendar.isDateInToday(day)
-                            ? CalendarChrome.nowAccent
+                            ? CalendarChrome.todayAccent
                             : SideSeatTheme.textPrimary
                     )
 
@@ -344,12 +338,6 @@ struct HomeMonthCalendarView: View {
                     )
                 }
             }
-    }
-
-    private func dayNumberColor(selected: Bool, isToday: Bool) -> Color {
-        if selected { return SideSeatTheme.onAccent }
-        if isToday { return CalendarChrome.nowAccent }
-        return SideSeatTheme.textPrimary
     }
 
     private func eventCountLabel(_ count: Int) -> String {

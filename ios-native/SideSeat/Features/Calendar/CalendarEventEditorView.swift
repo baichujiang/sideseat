@@ -202,6 +202,8 @@ struct CalendarEventFormFields: View {
     let categories: [NativeHomeCalendarCategory]
     let preservesLegacyOffGridTimes: Bool
     let focusedField: FocusState<CalendarEventFormField?>.Binding
+    var companions: [NativeHomeCompanionOption] = []
+    @Binding var companionIDs: Set<String>
 
     var body: some View {
         Group {
@@ -209,16 +211,14 @@ struct CalendarEventFormFields: View {
                 TextField("Title", text: $title)
                     .textInputAutocapitalization(.sentences)
                     .focused(focusedField, equals: .title)
-                    .submitLabel(.next)
-                    .onSubmit { focusedField.wrappedValue = .location }
+                    .font(.title3.weight(.semibold))
+                    .submitLabel(.done)
+                    .onSubmit { focusedField.wrappedValue = nil }
                     .accessibilityIdentifier("event-title")
                     .calendarEventPrimaryRow()
-                TextField("Location", text: $location)
-                    .focused(focusedField, equals: .location)
-                    .submitLabel(.next)
-                    .onSubmit { focusedField.wrappedValue = .notes }
-                    .accessibilityIdentifier("event-location")
-                    .calendarEventPrimaryRow()
+            }
+
+            Section {
                 startTimePicker
                     .calendarEventPrimaryRow()
                 endTimePicker
@@ -253,16 +253,43 @@ struct CalendarEventFormFields: View {
             }
 
             Section {
-                TextField("Notes", text: $note, axis: .vertical)
+                TextField("Location", text: $location)
+                    .focused(focusedField, equals: .location)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField.wrappedValue = .notes }
+                    .accessibilityIdentifier("event-location")
+                    .calendarEventPrimaryRow()
+                calendarCategoryPicker
+                if !companions.isEmpty {
+                    NavigationLink {
+                        CalendarEventCompanionPicker(companions: companions, selectedIDs: $companionIDs)
+                    } label: {
+                        HStack {
+                            Text("Companions")
+                            Spacer()
+                            Text(companionSummary(companionIDs))
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                        }
+                    }
+                    .calendarEventPrimaryRow()
+                    .accessibilityLabel("Companions")
+                    .accessibilityValue(companionSummary(companionIDs))
+                    .accessibilityIdentifier("event-companions")
+                }
+            }
+
+            Section {
+                TextField("Notes (optional)", text: $note, axis: .vertical)
                     .lineLimit(2...5)
                     .focused(focusedField, equals: .notes)
                     .accessibilityIdentifier("event-notes")
             }
-
-            Section {
-                calendarCategoryPicker
-            }
         }
+    }
+
+    private func companionSummary(_ ids: Set<String>) -> String {
+        ids.isEmpty ? AppLocalization.string("Add companions")
+            : String(format: AppLocalization.string("%lld selected"), Int64(ids.count))
     }
 
     private var calendarCategoryPicker: some View {
@@ -498,9 +525,48 @@ struct CalendarEventFormFields: View {
     }
 }
 
+private struct CalendarEventCompanionPicker: View {
+    @Environment(\.dismiss) private var dismiss
+    let companions: [NativeHomeCompanionOption]
+    @Binding var selectedIDs: Set<String>
+
+    var body: some View {
+        List(companions) { companion in
+            let isSelected = selectedIDs.contains(companion.id)
+            Button {
+                if isSelected { selectedIDs.remove(companion.id) }
+                else { selectedIDs.insert(companion.id) }
+            } label: {
+                HStack {
+                    Text(companion.name).foregroundStyle(SideSeatTheme.textPrimary)
+                    Spacer()
+                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                        .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondary)
+                        .font(.title3)
+                        .accessibilityHidden(true)
+                }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(companion.name)
+            .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .accessibilityIdentifier("event-companion-\(companion.id)")
+        }
+        .navigationTitle("Companions")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { dismiss() }
+                    .accessibilityIdentifier("event-companions-done")
+            }
+        }
+        .accessibilityIdentifier("event-companion-picker")
+    }
+}
+
 struct CalendarEventEditorView: View {
     // Keep enough calendar context visible when creating, while leaving the primary fields above the fold.
-    private static let creationDetent = SSSheetPresentation.creationForm
 
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
@@ -527,7 +593,6 @@ struct CalendarEventEditorView: View {
     @State private var pendingSaveRequest: NativeCalendarEventRequest?
     @State private var showsSmartFill = false
     @State private var smartFillDidSave = false
-    @State private var selectedPresentationDetent: PresentationDetent
     @FocusState private var focusedTextField: CalendarEventFormField?
 
     init(
@@ -569,9 +634,6 @@ struct CalendarEventEditorView: View {
         _companionIDs = State(
             initialValue: Set(context.event?.eventParticipants.compactMap(\.userId) ?? [])
         )
-        _selectedPresentationDetent = State(
-            initialValue: context.event == nil ? Self.creationDetent : .large
-        )
     }
 
     var body: some View {
@@ -585,19 +647,13 @@ struct CalendarEventEditorView: View {
                         } label: {
                             HStack(spacing: SideSeatTheme.spaceMD) {
                                 Image(systemName: "sparkles")
-                                    .font(.body.weight(.semibold))
                                     .foregroundStyle(SideSeatTheme.HubTint.plans)
-                                    .frame(width: 38, height: 38)
-                                    .background(SideSeatTheme.HubTint.plans.opacity(0.12), in: Circle())
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Smart fill")
-                                        .font(.body.weight(.semibold))
-                                        .foregroundStyle(SideSeatTheme.textPrimary)
-                                    Text("Describe or dictate your schedule")
-                                        .font(.footnote)
-                                        .foregroundStyle(SideSeatTheme.textSecondary)
-                                }
+                                Text("Smart fill")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(SideSeatTheme.textPrimary)
+                                SSPlusBadge()
+                                    .accessibilityLabel("Plus feature")
+                                    .accessibilityIdentifier("event-smart-fill-plus-badge")
 
                                 Spacer(minLength: SideSeatTheme.spaceSM)
 
@@ -606,10 +662,13 @@ struct CalendarEventEditorView: View {
                                     .foregroundStyle(.tertiary)
                             }
                             .contentShape(Rectangle())
-                            .padding(.vertical, 2)
+                            .frame(minHeight: 44)
                         }
                         .buttonStyle(SSPressButtonStyle())
+                        .listRowInsets(EdgeInsets(top: 0, leading: SideSeatTheme.spaceLG,
+                            bottom: 0, trailing: SideSeatTheme.spaceLG))
                         .accessibilityIdentifier("event-smart-fill")
+                        .listRowBackground(SideSeatTheme.surface)
                     }
                 }
 
@@ -625,17 +684,11 @@ struct CalendarEventEditorView: View {
                     repeatHasEnd: $repeatHasEnd,
                     categories: context.categories,
                     preservesLegacyOffGridTimes: context.event != nil,
-                    focusedField: $focusedTextField
+                    focusedField: $focusedTextField,
+                    companions: context.companions,
+                    companionIDs: $companionIDs
                 )
-
-                if !context.companions.isEmpty {
-                    Section("With") {
-                        ForEach(context.companions) { companion in
-                            Toggle(companion.name, isOn: companionBinding(companion.id))
-                                .tint(SideSeatTheme.accentText)
-                        }
-                    }
-                }
+                .listRowBackground(SideSeatTheme.surface)
 
                 if context.event != nil {
                     Section {
@@ -645,9 +698,14 @@ struct CalendarEventEditorView: View {
                             showConfirmation = true
                         }
                         .disabled(isSaving)
+                        .listRowBackground(SideSeatTheme.surface)
                     }
                 }
             }
+            .listSectionSpacing(16)
+            .contentMargins(.top, 16, for: .scrollContent)
+            .scrollContentBackground(.hidden)
+            .background(SideSeatTheme.bgGrouped)
             .background(
                 CalendarEventKeyboardDismissBridge {
                     focusedTextField = nil
@@ -675,7 +733,9 @@ struct CalendarEventEditorView: View {
                         .accessibilityIdentifier("event-editor-issue")
                 }
             }
-            .navigationTitle("Event")
+            .toolbarBackground(SideSeatTheme.bgGrouped, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationTitle(context.event == nil ? "Add event" : "Edit event")
             .navigationBarTitleDisplayMode(.inline)
             .interactiveDismissDisabled(isSaving)
             .toolbar {
@@ -701,7 +761,7 @@ struct CalendarEventEditorView: View {
                 isPresented: $showConfirmation,
                 title: eventConfirmationTitle,
                 systemImage: confirmation == .update ? "arrow.triangle.2.circlepath" : "trash.fill",
-                tint: confirmation == .update ? SideSeatTheme.accentText : SideSeatTheme.danger,
+                tint: confirmation == .update ? SideSeatTheme.utilityAction : SideSeatTheme.danger,
                 onDismiss: clearEventConfirmation,
                 accessibilityIdentifier: "event-action-prompt",
                 actions: { eventConfirmationActions }
@@ -713,7 +773,8 @@ struct CalendarEventEditorView: View {
                 }
             }
         }
-        .presentationDetents(presentationDetents, selection: $selectedPresentationDetent)
+        .presentationDetents([.large])
+        .presentationBackground(SideSeatTheme.bgGrouped)
         .presentationDragIndicator(.visible)
         .presentationContentInteraction(.scrolls)
     }
@@ -731,10 +792,6 @@ struct CalendarEventEditorView: View {
 
     private var displayedIssue: String? {
         (hasAttemptedSave ? currentInputIssue : nil) ?? issue
-    }
-
-    private var presentationDetents: Set<PresentationDetent> {
-        context.event == nil ? [Self.creationDetent, .large] : [.large]
     }
 
     private var eventConfirmationTitle: String {
@@ -841,19 +898,6 @@ struct CalendarEventEditorView: View {
         guard smartFillDidSave else { return }
         smartFillDidSave = false
         dismiss()
-    }
-
-    private func companionBinding(_ id: String) -> Binding<Bool> {
-        Binding(
-            get: { companionIDs.contains(id) },
-            set: { selected in
-                if selected {
-                    companionIDs.insert(id)
-                } else {
-                    companionIDs.remove(id)
-                }
-            }
-        )
     }
 
     @MainActor

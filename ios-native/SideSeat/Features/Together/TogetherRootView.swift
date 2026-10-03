@@ -40,6 +40,12 @@ private struct TogetherAssignmentLoadID: Equatable {
 private struct WeeklyIntentEditorPresentation: Identifiable {
     let id: String
     let intent: NativeWeeklyIntent?
+    var template: NativeWeeklyIntent? = nil
+    var rebookingPlan: NativePlanRequest? = nil
+
+    static func repeatIntent(_ intent: NativeWeeklyIntent) -> Self {
+        Self(id: "repeat-" + intent.id, intent: nil, template: intent)
+    }
 
     static func create() -> Self {
         Self(id: "create", intent: nil)
@@ -157,14 +163,14 @@ private struct TogetherAssignmentFailureView: View {
 }
 
 enum TogetherSection: String, CaseIterable, Identifiable, Sendable {
-    case recommendations, intentions, explore
+    case intentions, recommendations, bookmarks
     var id: Self { self }
 
     var title: String {
         switch self {
         case .recommendations: AppLocalization.string("Together recommendations")
         case .intentions: AppLocalization.string("My intentions")
-        case .explore: AppLocalization.string("Together explore")
+        case .bookmarks: AppLocalization.string("Saved intentions")
         }
     }
 
@@ -183,9 +189,15 @@ private struct TogetherHomeView: View {
     @State private var opportunityStore = MutualOpportunityStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
+    @State private var showsExpiredIntentions = false
     @State private var selectedSection: TogetherSection = .recommendations
     @State private var resolvedInitialSection = false
     @State private var createdIntentionRevision = 0
+    @State private var exploreStore = ExploreIntentStore()
+    @State private var hasRequestedMoreRecommendations = false
+    @State private var messageOpportunity: NativeMutualOpportunity?
+    @State private var savedWhileBrowsingIDs: Set<String> = []
+    @State private var savedFeedbackID: UUID?
 
     private var automaticMatchingEnabled: Bool {
         v2Store.isMutualOpportunityEnabled && clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
@@ -200,6 +212,13 @@ private struct TogetherHomeView: View {
         })
     }
 
+    private func consumeRebooking() {
+        guard let plan = PlanRebookingLaunch.shared.plan else { return }
+        PlanRebookingLaunch.shared.plan = nil
+        sectionSelection.wrappedValue = .intentions
+        presentedEditor = .init(id: "rebook-" + plan.id, intent: nil, rebookingPlan: plan)
+    }
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             VStack(spacing: 0) {
@@ -212,63 +231,67 @@ private struct TogetherHomeView: View {
                 Divider()
 
                 SSSectionPager(sections: TogetherSection.allCases, selection: sectionSelection) { section in
-                    if section == .explore {
-                        ExploreIntentListView(embeddedInTogether: true, isPageActive: selectedSection == .explore,
-                            onOpportunityChange: { opportunity in opportunityStore.upsert(opportunity) },
-                            onShowRecommendations: { sectionSelection.wrappedValue = .recommendations })
-                    } else {
-                        ScrollViewReader { scrollProxy in
-                            ScrollView {
-                                LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                                    if section == .intentions {
-                                        intentSection(at: context.date)
-                                    } else {
-                                        recommendationsSection(at: context.date)
-                                    }
+                    ScrollViewReader { scrollProxy in
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+                                switch section {
+                                case .intentions: intentSection(at: context.date)
+                                case .recommendations: recommendationsSection(at: context.date)
+                                case .bookmarks: savedOpportunitySection
                                 }
-                                .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                                .padding(.top, SideSeatTheme.spaceMD)
-                                .padding(.bottom, SideSeatTheme.spaceXL)
                             }
-                            .accessibilityIdentifier("together-section-\(section.rawValue)")
-                            .refreshable { await loadContent() }
-                            .onChange(of: createdIntentionRevision) { _, _ in
-                                if section == .intentions {
-                                    scrollProxy.scrollTo("together-intentions-top", anchor: .top)
-                                }
+                            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                            .padding(.top, SideSeatTheme.spaceMD)
+                            .padding(.bottom, SideSeatTheme.spaceXL)
+                        }
+                        .accessibilityIdentifier("together-section-\(section.rawValue)")
+                        .refreshable {
+                            savedWhileBrowsingIDs.removeAll()
+                            await loadContent()
+                        }
+                        .onChange(of: createdIntentionRevision) { _, _ in
+                            if section == .intentions {
+                                scrollProxy.scrollTo("together-intentions-top", anchor: .top)
                             }
                         }
                     }
                 }
             }
+        }
+        .overlay(alignment: .bottom) {
+            if savedFeedbackID != nil {
+                Label("Added to saved intentions", systemImage: "heart.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .padding(SideSeatTheme.spaceMD)
+                    .background(SideSeatTheme.surface, in: Capsule())
+                    .padding(.bottom, SideSeatTheme.spaceMD)
+                    .allowsHitTesting(false)
+                    .accessibilityIdentifier("bookmark-saved-feedback")
+            }
+        }
+        .task(id: savedFeedbackID) {
+            guard savedFeedbackID != nil else { return }
+            do { try await Task.sleep(for: .seconds(1.8)) } catch { return }
+            savedFeedbackID = nil
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { presentedEditor = .create() } label: {
-                    ViewThatFits(in: .horizontal) {
-                        if !dynamicTypeSize.isAccessibilitySize {
-                            Label(AppLocalization.string("Add"), systemImage: "plus")
-                                .labelStyle(.titleAndIcon)
-                                .fixedSize()
-                        }
-                        Image(systemName: "plus")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                }
-                .tint(SideSeatTheme.utilityAction)
-                .accessibilityLabel(AppLocalization.string("Add an intention"))
-                .accessibilityIdentifier("together-add-intent")
-                .disabled(store.isCreating || !v2Store.isWeeklyIntentEnabled)
-            }
-        }
-        .task { if !store.hasLoaded { await loadContent() } }
+        .task { await loadContent(); consumeRebooking() }
+        .onChange(of: PlanRebookingLaunch.shared.plan?.id) { consumeRebooking() }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatTogetherNeedsRefresh)) { _ in
             Task { await loadContent() }
         }
+        .sheet(item: $messageOpportunity) { opportunity in
+            OpportunityMessageComposer(opportunity: opportunity) { body in
+                await opportunityStore.interact(opportunity.messageRequest?.isIncoming == true ? "REPLY" : "SEND",
+                    opportunity: opportunity, body: body, using: session)
+            } onConversation: { updated in
+                router.navigate(to: updated.conversationRoute)
+            }
+        }
         .sheet(item: $presentedEditor) { presentation in
-            WeeklyIntentEditorView(intent: presentation.intent, saveIssue: store.issue) {
+            WeeklyIntentEditorView(intent: presentation.intent, template: presentation.template, rebookingPlan: presentation.rebookingPlan, saveIssue: store.issue) {
                 topic, activityText, sportTag, sportOtherNote, togetherMode, studyGoal,
                 courseId, timeWindows, timePreference, exploreVisible, note in
                 let saved = await store.save(
@@ -331,7 +354,7 @@ private struct TogetherHomeView: View {
                     }
                 }
             }
-            .foregroundStyle(isSelected ? SideSeatTheme.accentText : SideSeatTheme.Together.ink)
+            .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.Together.ink)
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceXS)
             .frame(maxWidth: .infinity, minHeight: 44)
@@ -360,47 +383,80 @@ private struct TogetherHomeView: View {
         store.intents.filter { status(for: $0, at: now) == .finding }.count
     }
 
+    private var addIntentionButton: some View {
+        Button { presentedEditor = .create() } label: {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: "plus")
+                    .accessibilityHidden(true)
+                Text("Add")
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .padding(.vertical, SideSeatTheme.spaceSM)
+            .frame(minWidth: 44, maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil,
+                minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+            .contentShape(Rectangle())
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityLabel(AppLocalization.string("Add an intention"))
+        .accessibilityIdentifier("together-add-intent")
+        .disabled(store.isCreating || store.isLoading)
+    }
+
     @ViewBuilder
     private func intentSection(at now: Date) -> some View {
         if !v2Store.isWeeklyIntentEnabled {
             unavailableSection
         } else {
-            Text(AppLocalization.string("What I want to do"))
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.Together.ink)
-                .accessibilityAddTraits(.isHeader)
+            let current = store.intents.filter { status(for: $0, at: now) != .expired }
+            let expired = store.expiredIntents + store.intents.filter { candidate in
+                status(for: candidate, at: now) == .expired && !store.expiredIntents.contains(where: { $0.id == candidate.id })
+            }
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                let headingLayout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+                    : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+                headingLayout {
+                    Text(AppLocalization.string("What I want to do"))
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.Together.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("together-intentions-heading")
+                    if !current.isEmpty { addIntentionButton }
+                }
+                Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
+                    .font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             .id("together-intentions-top")
-            Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
-                .font(.subheadline)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
 
-            if !store.hasLoaded && store.issue == nil && store.intents.isEmpty {
+            if !store.hasLoaded && store.issue == nil && current.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, minHeight: 120)
             } else if let issue = store.issue, store.intents.isEmpty {
                 loadFailure(issue: issue)
-            } else if store.intents.isEmpty {
+            } else if current.isEmpty {
                 SSEmptyState(
                     title: "What would you like to do?", systemImage: "sparkles",
-                    description: "Add an activity and choose when. You stay in control of finding company and Explore visibility.",
-                    actionTitle: AppLocalization.string("Add an intention"),
+                    description: "Add an activity and choose when to find company.",
+                    actionTitle: AppLocalization.string("Add your first intention"),
+                    actionAccessibilityID: "together-add-first-intent",
                     action: { presentedEditor = .create() }
                 )
+                .disabled(store.isCreating)
+                .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("together-set-intent")
             } else {
-                ForEach(store.intents) { intent in
+                ForEach(current) { intent in
                     WeeklyIntentCard(
                         intent: intent, status: status(for: intent, at: now),
-                        exploreEnabled: exploreEnabled, isWorking: store.mutatingIDs.contains(intent.id),
+                        isWorking: store.mutatingIDs.contains(intent.id),
                         onEdit: { presentedEditor = .edit(intent) },
-                        onPause: {
-                            Task {
-                                let changed = await store.setPaused(!intent.isPaused, intent: intent,
-                                    automaticMatching: automaticMatchingEnabled, using: session)
-                                if changed { await refreshOpportunitiesAfterIntentChange() }
-                            }
-                        },
-                        onEnd: {
+                        onDelete: {
                             Task {
                                 let changed = await store.end(intent, using: session)
                                 if changed { await refreshOpportunitiesAfterIntentChange() }
@@ -410,42 +466,115 @@ private struct TogetherHomeView: View {
                 }
                 if let issue = store.issue { loadFailure(issue: issue) }
             }
+            if !expired.isEmpty {
+                Button {
+                    withAnimation { showsExpiredIntentions.toggle() }
+                } label: {
+                    HStack {
+                        Text("\(AppLocalization.string("Expired")) · \(expired.count)")
+                        Spacer()
+                        Image(systemName: showsExpiredIntentions ? "chevron.up" : "chevron.down")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("weekly-intent-expired-history")
+                if showsExpiredIntentions {
+                    ForEach(expired) { intent in
+                        WeeklyIntentCard(intent: intent, status: .expired, isWorking: false,
+                            onEdit: {}, onDelete: {},
+                            onRepeat: { presentedEditor = .repeatIntent(intent) })
+                            .padding(.top, SideSeatTheme.spaceSM)
+                    }
+                }
+            }
         }
     }
 
     @ViewBuilder
     private func recommendationsSection(at now: Date) -> some View {
         if v2Store.isMutualOpportunityEnabled {
-            let count = findingCount(at: now)
-            if count > 0, opportunityStore.opportunities.isEmpty,
-               !opportunityStore.isLoading, opportunityStore.issue == nil {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    Label(AppLocalization.string("Finding company for you"), systemImage: "sparkle.magnifyingglass")
-                        .font(.subheadline.weight(.semibold))
-                    Text(String(format: AppLocalization.string("Based on %lld intentions finding company"), Int64(count)))
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            if !opportunityStore.hasLoaded && opportunityStore.issue == nil {
+                recommendationSkeletons
+            } else {
+                if !automaticMatchingEnabled,
+                   !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
+                    matchingSessionSection
                 }
-                .accessibilityElement(children: .combine)
-                .accessibilityIdentifier("together-finding-summary")
+                opportunitySection
+                if exploreEnabled && opportunityStore.hasLoaded {
+                    if hasRequestedMoreRecommendations {
+                        ExploreIntentListView(embeddedInTogether: true,
+                            isPageActive: selectedSection == .recommendations,
+                            onOpportunityChange: { opportunity in opportunityStore.upsert(opportunity) },
+                            onBookmarkSaved: { bookmarkDidSave($0) },
+                            onShowRecommendations: nil,
+                            inlineInRecommendations: true,
+                            opportunities: opportunityStore.opportunities,
+                            renderOpportunity: { AnyView(opportunityCard($0)) }, store: exploreStore)
+                    }
+                    if !hasRequestedMoreRecommendations || exploreStore.isLoading || exploreStore.issue != nil || exploreStore.hasMore {
+                        Button {
+                            savedWhileBrowsingIDs.removeAll()
+                            hasRequestedMoreRecommendations = true
+                            Task { await loadExploration() }
+                        } label: {
+                            HStack(spacing: SideSeatTheme.spaceSM) {
+                                if exploreStore.isLoading { ProgressView() }
+                                else { Image(systemName: "sparkle.magnifyingglass") }
+                                Text(AppLocalization.string(exploreStore.isLoading ? "Loading recommendations…" : exploreStore.issue != nil ? "Try again" : hasRequestedMoreRecommendations ? "Search again" : "Find more recommendations"))
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .foregroundStyle(SideSeatTheme.utilityAction)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(SideSeatTheme.fillSubtle,
+                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        }
+                        .buttonStyle(SSPressButtonStyle())
+                        .disabled(exploreStore.isLoading)
+                        .accessibilityIdentifier("together-find-more")
+                    }
+                }
             }
-            if !automaticMatchingEnabled,
-               !store.intents.isEmpty || matchingSessionStore.session.state != .idle {
-                matchingSessionSection
-            }
-            opportunitySection
         } else {
             unavailableSection
         }
     }
 
+    private var recommendationSkeletons: some View {
+        VStack(spacing: SideSeatTheme.spaceMD) {
+            ForEach(0..<3) { _ in
+                SSFlowCard {
+                    HStack(spacing: 12) {
+                        Circle().fill(SideSeatTheme.fillTertiary).frame(width: 36, height: 36)
+                        RoundedRectangle(cornerRadius: 4).fill(SideSeatTheme.fillTertiary).frame(width: 120, height: 16)
+                        Spacer()
+                    }
+                    RoundedRectangle(cornerRadius: 4).fill(SideSeatTheme.fillTertiary).frame(height: 24)
+                    RoundedRectangle(cornerRadius: 4).fill(SideSeatTheme.fillTertiary).frame(height: 56)
+                    HStack {
+                        RoundedRectangle(cornerRadius: 8).fill(SideSeatTheme.fillTertiary).frame(height: 44)
+                        RoundedRectangle(cornerRadius: 8).fill(SideSeatTheme.fillTertiary).frame(height: 44)
+                    }
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Loading recommendations…")
+        .accessibilityIdentifier("recommendation-loading")
+    }
+
     private func loadFailure(issue: String) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Label(issue, systemImage: "wifi.exclamationmark")
+            Label(AppLocalization.string(String.LocalizationValue(issue)), systemImage: "wifi.exclamationmark")
                 .font(.footnote).foregroundStyle(SideSeatTheme.danger)
                 .fixedSize(horizontal: false, vertical: true)
             Button(AppLocalization.string("Try again")) { Task { await loadContent() } }
                 .buttonStyle(.bordered).frame(minHeight: 44)
+                .accessibilityIdentifier("recommendation-retry")
         }
     }
 
@@ -621,24 +750,49 @@ private struct TogetherHomeView: View {
     }
 
 
-    @ViewBuilder
-    private var opportunitySection: some View {
+    private var displayedOpportunities: [NativeMutualOpportunity] {
+        let explorationIDs = Set(exploreStore.intents.compactMap { $0.interest?.opportunityId })
+        return opportunityStore.opportunities.filter {
+            !$0.isUnavailable && !$0.hasConversation
+                && ($0.isBookmarked != true || savedWhileBrowsingIDs.contains($0.id))
+                && !explorationIDs.contains($0.id)
+        }
+    }
+
+    private var savedOpportunities: [NativeMutualOpportunity] {
+        opportunityStore.opportunities.filter { $0.isBookmarked == true }
+    }
+
+    private var savedOpportunitySection: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            if (opportunityStore.isLoading || (!store.hasLoaded && store.issue == nil)), opportunityStore.opportunities.isEmpty {
+            if opportunityStore.isLoading, savedOpportunities.isEmpty {
                 ProgressView().frame(maxWidth: .infinity, minHeight: 120)
-            } else if let issue = opportunityStore.issue, opportunityStore.opportunities.isEmpty {
+            } else if let issue = opportunityStore.issue, savedOpportunities.isEmpty {
                 loadFailure(issue: issue)
-            } else if opportunityStore.opportunities.isEmpty {
-                emptyOpportunityState
+            } else if savedOpportunities.isEmpty {
+                ContentUnavailableView(AppLocalization.string("No saved intentions"), systemImage: "heart",
+                    description: Text("Save an intention to find it here later."))
             } else {
-                ForEach(opportunityStore.opportunities) { opportunity in
-                    opportunityCard(opportunity)
-                }
+                ForEach(savedOpportunities) { opportunity in opportunityCard(opportunity, inRecommendations: false) }
                 if let issue = opportunityStore.issue { loadFailure(issue: issue) }
             }
         }
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("together-bookmarks")
+    }
 
+    private var opportunitySection: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            if let issue = opportunityStore.issue, displayedOpportunities.isEmpty {
+                loadFailure(issue: issue)
+            } else if displayedOpportunities.isEmpty {
+                if !hasRequestedMoreRecommendations { emptyOpportunityState }
+            } else {
+                ForEach(displayedOpportunities) { opportunity in opportunityCard(opportunity) }
+                if let issue = opportunityStore.issue { loadFailure(issue: issue) }
+            }
+        }
+        .accessibilityElement(children: .contain)
     }
 
     private var emptyOpportunityState: some View {
@@ -664,44 +818,35 @@ private struct TogetherHomeView: View {
         .accessibilityIdentifier("together-opportunities-empty")
     }
 
-    private func opportunityCard(_ opportunity: NativeMutualOpportunity) -> some View {
+    private func opportunityCard(_ opportunity: NativeMutualOpportunity, inRecommendations: Bool = true) -> some View {
         MutualOpportunityCard(
             opportunity: opportunity,
             isWorking: opportunityStore.mutatingIDs.contains(opportunity.id),
-            onYes: {
-                await opportunityStore.decide(
-                    "YES",
-                    opportunity: opportunity,
-                    using: session
-                )
-                await store.load(using: session)
-            },
-            onNo: {
-                await opportunityStore.decide(
-                    "NO",
-                    opportunity: opportunity,
-                    using: session
-                )
-                await store.load(using: session)
-            },
-            onWithdraw: {
+            onBookmark: {
                 Task {
-                    await opportunityStore.withdraw(
-                        opportunity: opportunity,
-                        using: session
-                    )
-                    await store.load(using: session)
+                    if let updated = await opportunityStore.interact(opportunity.isBookmarked == true ? "UNBOOKMARK" : "BOOKMARK",
+                        opportunity: opportunity, using: session) {
+                        if updated.isBookmarked == true && inRecommendations {
+                            bookmarkDidSave(updated)
+                        }
+                    }
                 }
             },
+            onMessage: { messageOpportunity = opportunity },
             onOpenConversation: {
-                guard let connectionID = opportunity.coordination?.connectionId else { return }
-                router.navigate(to: .directChat(connectionID: connectionID))
+                router.navigate(to: opportunity.conversationRoute)
             }
         )
     }
 
+    private func bookmarkDidSave(_ opportunity: NativeMutualOpportunity) {
+        savedWhileBrowsingIDs.insert(opportunity.id)
+        savedFeedbackID = UUID()
+        UIAccessibility.post(notification: .announcement, argument: AppLocalization.string("Added to saved intentions"))
+    }
 
     private func loadContent() async {
+        async let exploration: Void = loadExploration()
         if v2Store.isWeeklyIntentEnabled {
             async let intents: Void = store.load(using: session)
             async let matching: Void = loadLegacyMatchingSession()
@@ -710,11 +855,18 @@ private struct TogetherHomeView: View {
         } else {
             await refreshOpportunitiesAfterIntentChange()
         }
+        await exploration
         if !resolvedInitialSection, store.hasLoaded, store.issue == nil, opportunityStore.issue == nil {
             selectedSection = TogetherSection.initial(hasIntentions: !store.intents.isEmpty,
-                hasOpportunities: !opportunityStore.opportunities.isEmpty,
+                hasOpportunities: !opportunityStore.opportunities.isEmpty || !exploreStore.intents.isEmpty,
                 hasLegacySession: matchingSessionStore.session.isMatching(at: Date()))
             resolvedInitialSection = true
+        }
+    }
+
+    private func loadExploration() async {
+        if exploreEnabled && hasRequestedMoreRecommendations {
+            await exploreStore.load(using: session, limit: ExploreAccessTier.current.resultLimit)
         }
     }
 
@@ -733,24 +885,21 @@ private struct TogetherHomeView: View {
     }
 }
 
-private struct MutualOpportunityCard: View {
+struct MutualOpportunityCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .subheadline) private var cueIconWidth: CGFloat = 24
 
     let opportunity: NativeMutualOpportunity
     let isWorking: Bool
-    let onYes: () async -> Void
-    let onNo: () async -> Void
-    let onWithdraw: () -> Void
+    let onBookmark: () -> Void
+    let onMessage: () -> Void
     let onOpenConversation: () -> Void
-
-    private var presentationState: TogetherOpportunityPresentationState {
-        TogetherOpportunityPresentationState(opportunity)
-    }
+    var showsActions = true
 
     var body: some View {
-        SSFlowCard(contentPadding: 0, activityTopic: opportunity.topic) {
+        SSFlowCard(contentPadding: 0, activityTopic: opportunity.peerActivityTopic) {
             VStack(alignment: .leading, spacing: 0) {
-                SSActivityHeaderBand(topic: opportunity.topic) {
+                SSActivityHeaderBand(topic: opportunity.peerActivityTopic) {
                     peerRow
                 }
                 .accessibilityIdentifier("mutual-opportunity-peer-\(opportunity.id)")
@@ -758,11 +907,15 @@ private struct MutualOpportunityCard: View {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     activityHeader
                     availabilityRow
-                    Rectangle()
-                        .fill(SideSeatTheme.Together.border.opacity(0.6))
-                        .frame(height: 0.5)
-                        .accessibilityHidden(true)
-                    decisionArea
+                    peerDetails
+                    if opportunity.isExpired == true && opportunity.hasConversation {
+                        Label(AppLocalization.string("Expired"), systemImage: "clock")
+                            .font(.caption)
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                    if showsActions {
+                        decisionArea.padding(.top, SideSeatTheme.spaceSM)
+                    }
                 }
                 .padding(.horizontal, SideSeatTheme.Together.cardPadding)
                 .padding(.vertical, SideSeatTheme.spaceMD)
@@ -774,10 +927,8 @@ private struct MutualOpportunityCard: View {
 
     private var activityHeader: some View {
         cueRow(
-            text: opportunity.shortActivitySummary,
-            systemImage: opportunity.activityCueTone == .discuss ? "arrow.left.arrow.right"
-                : (opportunity.matchFit?.viewerActivity?.topic ?? opportunity.topic).systemImage,
-            tone: opportunity.activityCueTone,
+            text: opportunity.peerActivityTitle,
+            systemImage: opportunity.peerActivityTopic.systemImage,
             font: .title3.weight(.semibold),
             identifier: "mutual-opportunity-activity-\(opportunity.id)"
         )
@@ -788,47 +939,99 @@ private struct MutualOpportunityCard: View {
             InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 36)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+                (dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 5))
+                    : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS))) {
                     Text(opportunity.peer.displayName)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                        .lineLimit(1)
-                    if opportunity.peer.verifiedStudent {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.caption)
-                            .foregroundStyle(SideSeatTheme.verifiedSeal)
-                            .accessibilityLabel(AppLocalization.string("Verified student"))
-                            .accessibilityIdentifier("mutual-opportunity-verified-\(opportunity.id)")
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    HStack(spacing: 6) {
+                        if opportunity.peer.isPlus == true { SSPlusBadge() }
+                        if opportunity.peer.verifiedStudent {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.verifiedSeal)
+                                .accessibilityLabel(AppLocalization.string("Verified student"))
+                                .accessibilityIdentifier("mutual-opportunity-verified-\(opportunity.id)")
+                        }
                     }
                 }
-                if !peerContext.isEmpty {
-                    Text(peerContext)
-                        .font(.caption)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            SSActivityArtwork(topic: opportunity.topic, size: 36)
         }
+    }
+
+    @ViewBuilder
+    private var contactButton: some View {
+        if opportunity.isReadyToCoordinate || opportunity.messageRequest != nil {
+            contactAction(title: AppLocalization.string("View chat"),
+                identifier: "mutual-opportunity-open-\(opportunity.id)", opensConversation: true, action: onOpenConversation)
+        } else if !opportunity.isUnavailable,
+                  opportunity.messageRequest == nil || (opportunity.messageRequest?.isIncoming == true && opportunity.messageRequest?.status == "PENDING") {
+            contactAction(title: AppLocalization.string(opportunity.messageRequest?.isIncoming == true ? "Reply" : "Say hello"),
+                identifier: "mutual-opportunity-message-\(opportunity.id)", action: onMessage)
+        }
+    }
+
+    private func contactAction(title: String, identifier: String, opensConversation: Bool = false, action: @escaping () -> Void) -> some View {
+        SSIntentionContactButton(title: title, identifier: identifier, isDisabled: isWorking, action: action,
+            opensConversation: opensConversation)
     }
 
     private var availabilityRow: some View {
         cueRow(
-            text: opportunity.shortTimeSummary,
-            systemImage: opportunity.timeCueTone == .discuss ? "clock.arrow.circlepath" : "clock",
-            tone: opportunity.timeCueTone,
+            text: opportunity.peerTimeSummary,
+            systemImage: "clock",
             font: .subheadline,
             identifier: "mutual-opportunity-time-\(opportunity.id)"
         )
     }
 
-    private func cueRow(text: String, systemImage: String, tone: NativeOpportunityCueTone,
+    private var peerDetails: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            if let campus = opportunity.peer.campus, !campus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                detailRow(campus, icon: "building.columns", identifier: "campus")
+            }
+            if let language = opportunity.peer.primaryLanguageTitle {
+                detailRow(language, icon: "character.bubble", identifier: "language")
+            }
+            if let course = opportunity.peerIntention?.course, !course.title.isEmpty {
+                detailRow(course.title, icon: "book.closed", identifier: "course")
+            }
+            if let description = opportunity.peerIntention?.descriptionPreview,
+               !description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, SideSeatTheme.spaceXS)
+                    .accessibilityIdentifier("mutual-opportunity-description-\(opportunity.id)")
+            }
+        }
+    }
+
+    private func detailRow(_ text: String, icon: String, identifier: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+            Image(systemName: icon)
+                .frame(width: cueIconWidth)
+                .accessibilityHidden(true)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.footnote)
+        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("mutual-opportunity-\(identifier)-\(opportunity.id)")
+    }
+
+    private func cueRow(text: String, systemImage: String,
                         font: Font, identifier: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
             Image(systemName: systemImage)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(cueColor(tone))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .frame(width: cueIconWidth)
                 .accessibilityHidden(true)
             Text(text)
@@ -843,131 +1046,230 @@ private struct MutualOpportunityCard: View {
         .accessibilityIdentifier(identifier)
     }
 
-    private func cueColor(_ tone: NativeOpportunityCueTone) -> Color {
-        switch tone {
-        case .shared: SideSeatTheme.statusSuccessText
-        case .discuss: SideSeatTheme.statusWarningText
-        case .unspecified: SideSeatTheme.textSecondaryStrong
-        }
-    }
-
-    @ViewBuilder
     private var decisionArea: some View {
-        switch presentationState {
-        case .mutual:
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                SSInlineStatus(
-                    text: AppLocalization.string("You both showed interest"),
-                    systemImage: "checkmark.circle.fill",
-                    tone: .success,
-                    accessibilityID: "mutual-opportunity-mutual-\(opportunity.id)"
-                )
-                SSPrimaryButton(
-                    title: AppLocalization.string("Chat about the details"),
-                    fill: .product,
-                    height: 48,
-                    accessibilityID: "mutual-opportunity-open-\(opportunity.id)"
-                ) { onOpenConversation() }
+        SSIntentionActionRow(
+            isBookmarked: opportunity.isBookmarked == true,
+            isDisabled: isWorking || (opportunity.isUnavailable && opportunity.isBookmarked != true),
+            bookmarkIdentifier: "mutual-opportunity-bookmark-\(opportunity.id)", onBookmark: onBookmark
+        ) {
+            if opportunity.messageRequest != nil || opportunity.isReadyToCoordinate {
+                contactButton
+            } else if opportunity.isUnavailable {
+                Text(AppLocalization.string(opportunity.isExpired == true ? "Expired" : "Intention unavailable")).font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .frame(maxWidth: .infinity, minHeight: 48)
+            } else {
+                contactButton
             }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("mutual-opportunity-actions-\(opportunity.id)")
+    }
+}
 
-        case .privateYes, .undecided:
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                SSOpportunityDecisionBar(
-                    opportunityID: opportunity.id,
-                    isInterested: presentationState == .privateYes,
-                    isWorking: isWorking,
-                    onInterested: onYes,
-                    onSkip: onNo,
-                    onWithdraw: onWithdraw
-                )
-                if presentationState == .undecided {
-                    Label(AppLocalization.string("Mutual interest opens chat, not a plan."), systemImage: "lock")
-                        .font(.caption2)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+/// The same sheet introduces a first contact and accepts it with a written reply.
+struct OpportunityMessageComposer: View {
+    @Environment(\.dismiss) private var dismiss
+    let opportunity: NativeMutualOpportunity
+    let onSend: (String) async -> NativeMutualOpportunity?
+    let onConversation: (NativeMutualOpportunity) -> Void
+    @State private var bodyText = ""
+    @State private var isSending = false
+    @State private var failed = false
+    @FocusState private var isFocused: Bool
+
+    private var isReply: Bool { opportunity.messageRequest?.isIncoming == true }
+    private var trimmedText: String { bodyText.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 40)
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text(opportunity.peer.displayName).font(.headline)
+                                if opportunity.peer.isPlus == true { SSPlusBadge() }
+                            }
+                            Text(opportunity.messageActivityTitle).font(.subheadline)
+                            Text(opportunity.messageTimeSummary).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    if isReply, let request = opportunity.messageRequest {
+                        Text(request.body).textSelection(.enabled)
+                    }
+                }
+                Section {
+                    if !isReply {
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                            Label(AppLocalization.string("You can send one message before they reply."), systemImage: "info.circle")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text(AppLocalization.string("Introduce yourself and what you'd like to do together. You can keep chatting once they reply."))
+                                .font(.footnote)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, SideSeatTheme.spaceXS)
+                        .padding(.vertical, SideSeatTheme.spaceXS)
+                        .listRowBackground(SideSeatTheme.fillSubtle)
                         .accessibilityElement(children: .combine)
-                        .accessibilityIdentifier("mutual-opportunity-privacy-\(opportunity.id)")
+                        .accessibilityIdentifier("opportunity-message-limit-notice")
+                    }
+                    TextField(isReply ? "Write a reply…" : "Say hello and share what you have in mind…", text: $bodyText, axis: .vertical)
+                        .lineLimit(4...8)
+                        .focused($isFocused)
+                        .accessibilityIdentifier("opportunity-message-body")
+                    HStack {
+                        Spacer()
+                        Text("\(bodyText.count)/500").font(.caption).foregroundStyle(bodyText.count > 500 ? .red : .secondary)
+                    }
+                } footer: {
+                    Text(isReply ? "Replying opens a chat with this person." : "Your message includes this intention.")
+                }
+                if failed {
+                    Text("Message could not be sent. Your text is saved here; try again.")
+                        .foregroundStyle(SideSeatTheme.danger)
+                        .accessibilityIdentifier("opportunity-message-error")
                 }
             }
-
-        case .expired:
-            SSInlineStatus(
-                text: AppLocalization.string("Expired"),
-                systemImage: "clock",
-                tone: .warning,
-                accessibilityID: "mutual-opportunity-expired-\(opportunity.id)"
-            )
-
-        case .unavailable:
-            SSInlineStatus(
-                text: AppLocalization.string("Details are no longer available."),
-                systemImage: "minus.circle",
-                tone: .neutral,
-                accessibilityID: "mutual-opportunity-unavailable-\(opportunity.id)"
-            )
-        }
-    }
-
-    private var peerContext: String {
-        let language = opportunity.peer.sharedLanguages.first.map(languageTitle)
-        let context = [opportunity.peer.major, language].compactMap { $0 }.filter { !$0.isEmpty }
-        return (context + opportunity.shortContextDifferences).joined(separator: " · ")
-    }
-
-    private func languageTitle(_ tag: String) -> String {
-        switch tag {
-        case "CHINESE": AppLocalization.string("Chinese")
-        case "ENGLISH": AppLocalization.string("English")
-        case "GERMAN": AppLocalization.string("German")
-        case "FRENCH": AppLocalization.string("French")
-        case "HINDI": AppLocalization.string("Hindi")
-        case "SPANISH": AppLocalization.string("Spanish")
-        default: AppLocalization.string("Other")
+            .navigationTitle(isReply ? AppLocalization.string("Reply") : AppLocalization.string("Send message"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }.disabled(isSending)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        isSending = true
+                        failed = false
+                        Task {
+                            let result = await onSend(trimmedText)
+                            isSending = false
+                            if let result {
+                                dismiss()
+                                onConversation(result)
+                            } else { failed = true }
+                        }
+                    } label: {
+                        if isSending { ProgressView() } else { Text("Send") }
+                    }
+                    .disabled(isSending || trimmedText.isEmpty || bodyText.count > 500)
+                    .accessibilityIdentifier("opportunity-message-submit")
+                }
+            }
+            .interactiveDismissDisabled(isSending)
         }
     }
 }
 
+private struct IntentionShareLink: Decodable { let url: URL }
+
 private struct WeeklyIntentCard: View {
-    @Environment(ClientConfigurationStore.self) private var clientConfiguration
+    @Environment(SessionStore.self) private var session
+    @State private var sharePayload: SSSharePayload?
+    @State private var preparingShare = false
+    @State private var shareIssue: String?
+
+    @State private var confirmsDelete = false
+    @State private var showsAllTimes = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var confirmsEnd = false
     let intent: NativeWeeklyIntent
     let status: TogetherIntentStatus
-    let exploreEnabled: Bool
     let isWorking: Bool
     let onEdit: () -> Void
-    let onPause: () -> Void
-    let onEnd: () -> Void
+    let onDelete: () -> Void
+    var onRepeat: (() -> Void)? = nil
 
     private var isTerminal: Bool { status == .ended || status == .expired }
-    private var visibleInExplore: Bool {
-        exploreEnabled && intent.exploreVisible == true && !intent.isPaused && !isTerminal
-    }
 
     var body: some View {
-        SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: intent.topic) {
-            SSActivityHeaderBand(topic: intent.topic) {
-                header
+        ZStack(alignment: .topTrailing) {
+            cardContent
+                .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
+                .onTapGesture {
+                    if !isTerminal { onEdit() }
+                }
+
+            if !isTerminal {
+                HStack(spacing: 0) {
+                    if intent.status == "ACTIVE" {
+                        Button {
+                            Task { await shareIntention() }
+                        } label: {
+                            Group {
+                                if preparingShare { ProgressView() }
+                                else { Image(systemName: "square.and.arrow.up").font(.subheadline.weight(.semibold)) }
+                            }
+                            .foregroundStyle(SideSeatTheme.utilityAction)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(preparingShare)
+                        .accessibilityLabel(AppLocalization.string("Share intention"))
+                        .accessibilityIdentifier("weekly-intent-share-\(intent.id)")
+                    }
+                Button(role: .destructive) { confirmsDelete = true } label: {
+                    Image(systemName: "xmark")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(AppLocalization.string("Delete intention"))
+                .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
+                }
+                .padding(.trailing, SideSeatTheme.Together.cardPadding)
+                .padding(.top, SideSeatTheme.spaceMD)
             }
-            .accessibilityIdentifier("weekly-intent-header-\(intent.id)")
-            details
-                .padding(SideSeatTheme.Together.cardPadding)
         }
-        .tint(SideSeatTheme.accentText)
+        .tint(SideSeatTheme.utilityAction)
         .disabled(isWorking)
-        .confirmationDialog(AppLocalization.string("End this intention?"), isPresented: $confirmsEnd, titleVisibility: .visible) {
-            Button(AppLocalization.string("End"), role: .destructive, action: onEnd)
+        .confirmationDialog(AppLocalization.string("Delete this intention?"), isPresented: $confirmsDelete, titleVisibility: .visible) {
+            Button(AppLocalization.string("Delete"), role: .destructive, action: onDelete)
             Button(AppLocalization.string("Cancel"), role: .cancel) {}
         } message: {
             Text(AppLocalization.string("This intention will stop finding company. Existing conversations and confirmed plans stay unchanged."))
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("weekly-intent-\(intent.id)")
+        .sheet(item: $sharePayload) { SSActivityView(items: $0.items) }
+        .alert(AppLocalization.string("Share intention"), isPresented: Binding(
+            get: { shareIssue != nil }, set: { if !$0 { shareIssue = nil } }
+        )) {
+            Button(AppLocalization.string("OK"), role: .cancel) { shareIssue = nil }
+        } message: { Text(shareIssue ?? "") }
     }
 
-    private var header: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+    private func shareIntention() async {
+        preparingShare = true
+        defer { preparingShare = false }
+        do {
+            let response: APIEnvelope<IntentionShareLink> = try await session.sendAuthorized(
+                "api/v1/me/weekly-intents/\(intent.id)/share", method: .post
+            )
+            sharePayload = SSSharePayload(items: [response.data.url])
+        } catch { shareIssue = error.localizedDescription }
+    }
+
+    private var cardContent: some View {
+        SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: intent.topic) {
+            if isTerminal {
+                cardHeader
+            } else {
+                Button(action: onEdit) { cardHeader }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(AppLocalization.string("Edit intention"))
+                    .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
+            }
+            details
+                .padding(SideSeatTheme.Together.cardPadding)
+        }
+    }
+
+    private var cardHeader: some View {
+        SSActivityHeaderBand(topic: intent.topic) {
             SSFlowCardHeader(
                 title: intent.activityTitle,
                 subtitle: intent.topic == .study ? intent.effectiveTogetherMode.studyTitle : intent.topic.title,
@@ -975,46 +1277,66 @@ private struct WeeklyIntentCard: View {
                 tint: SideSeatTheme.Together.categoryInk(for: intent.topic),
                 activityTopic: intent.topic
             )
-            if !isTerminal {
-                Menu {
-                    Button("End", systemImage: "stop.circle", role: .destructive) { confirmsEnd = true }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(AppLocalization.string("More"))
-                .accessibilityIdentifier("weekly-intent-more-\(intent.id)")
-            }
+            .padding(.trailing, isTerminal ? 0 : (intent.status == "ACTIVE" ? 88 : 44) + SideSeatTheme.spaceSM)
         }
+        .accessibilityIdentifier("weekly-intent-header-\(intent.id)")
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label(status.title, systemImage: status.symbol)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(status == .finding ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
-                .padding(.horizontal, SideSeatTheme.spaceSM)
-                .padding(.vertical, SideSeatTheme.spaceXS)
-                .background(status == .finding ? SideSeatTheme.statusSuccessText.opacity(0.08) : SideSeatTheme.fillTertiary,
-                            in: Capsule())
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("weekly-intent-status-\(intent.id)")
+            if let onRepeat {
+                (dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))) {
+                    statusBadge
+                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: SideSeatTheme.spaceSM) }
+                    Button(action: onRepeat) {
+                        Label(AppLocalization.string("Plan again"), systemImage: "arrow.clockwise")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.utilityAction)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, SideSeatTheme.spaceMD)
+                            .frame(minHeight: 44)
+                            .background(SideSeatTheme.fillTertiary, in: Capsule())
+                            .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("weekly-intent-repeat-\(intent.id)")
+                }
+            } else {
+                statusBadge
+            }
 
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if let timing = intent.timePreference, timing.kind != "EXACT" {
                     timeLabel(timing.summary)
                 } else {
-                    let windows = intent.relevantTimeWindows()
+                    let windows = (isTerminal ? intent.timeWindows : intent.relevantTimeWindows())
+                        .sorted { $0.startAt < $1.startAt }
                     if windows.isEmpty { timeLabel(AppLocalization.string("Time to discuss")) }
-                    ForEach(Array(windows.prefix(2).enumerated()), id: \.offset) { _, window in
+                    ForEach(Array(windows.prefix(showsAllTimes ? windows.count : 2).enumerated()), id: \.offset) { index, window in
                         timeLabel(windowSummary(window))
+                            .accessibilityIdentifier("weekly-intent-time-\(intent.id)-\(index)")
                     }
                     if windows.count > 2 {
-                        Text(String(format: AppLocalization.string("%lld more times"), Int64(windows.count - 2)))
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Button {
+                            showsAllTimes.toggle()
+                        } label: {
+                            HStack(spacing: SideSeatTheme.spaceXS) {
+                                Text(showsAllTimes ? AppLocalization.string("Show fewer times")
+                                    : String(format: AppLocalization.string("Show %lld more times"), Int64(windows.count - 2)))
+                                Image(systemName: showsAllTimes ? "chevron.up" : "chevron.down")
+                                    .font(.caption.weight(.semibold))
+                            }
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(SideSeatTheme.utilityAction)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityValue(AppLocalization.string(showsAllTimes ? "Expanded" : "Collapsed"))
+                        .accessibilityIdentifier("weekly-intent-times-toggle-\(intent.id)")
                     }
                 }
                 // Only show a real course context, never invent a meeting location from the user's school.
@@ -1025,6 +1347,7 @@ private struct WeeklyIntentCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("weekly-intent-timing-\(intent.id)")
 
             if let note = intent.note, !note.isEmpty {
@@ -1037,50 +1360,19 @@ private struct WeeklyIntentCard: View {
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
-            if !isTerminal {
-                Label(AppLocalization.string(visibleInExplore ? "Also visible in Explore" : "Not visible in Explore"),
-                      systemImage: visibleInExplore ? "sparkle.magnifyingglass" : "lock")
-                    .font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("weekly-intent-visibility-\(intent.id)")
-            }
-
-            if !isTerminal {
-                Divider()
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-                layout {
-                    if status == .finding || status == .paused {
-                        Button(action: onPause) {
-                            Label(AppLocalization.string(intent.isPaused
-                                ? (clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true ? "Resume finding company" : "Resume")
-                                : "Pause finding company"), systemImage: intent.isPaused ? "play.fill" : "pause")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(SideSeatTheme.accentText)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .frame(minHeight: 44)
-                                .padding(.horizontal, SideSeatTheme.spaceMD)
-                                .background(SideSeatTheme.Together.selectedTab,
-                                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                                .contentShape(Rectangle())
-                        }
-                        .buttonStyle(SSPressButtonStyle())
-                        .accessibilityIdentifier("weekly-intent-pause-\(intent.id)")
-                    }
-                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                    Button(action: onEdit) {
-                        Label(AppLocalization.string("Edit"), systemImage: "pencil")
-                            .font(.subheadline.weight(.medium))
-                            .frame(minWidth: 68, minHeight: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
-                }
-            }
         }
+    }
+
+    private var statusBadge: some View {
+        Label(status.title, systemImage: status.symbol)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(status == .finding ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .padding(.vertical, SideSeatTheme.spaceXS)
+            .background(status == .finding ? SideSeatTheme.statusSuccessText.opacity(0.08) : SideSeatTheme.fillTertiary,
+                        in: Capsule())
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("weekly-intent-status-\(intent.id)")
     }
 
     private func timeLabel(_ text: String) -> some View {
@@ -1128,6 +1420,7 @@ private struct WeeklyIntentDateTimePicker: UIViewRepresentable {
     @Binding var selection: Date
     let range: ClosedRange<Date>
     let accessibilityLabel: String
+    let accessibilityIdentifier: String
 
     func makeCoordinator() -> Coordinator {
         Coordinator(selection: $selection)
@@ -1165,6 +1458,7 @@ private struct WeeklyIntentDateTimePicker: UIViewRepresentable {
         picker.timeZone = .current
         picker.locale = AppLocalization.selectedLanguage.locale
         picker.accessibilityLabel = accessibilityLabel
+        picker.accessibilityIdentifier = accessibilityIdentifier
         if abs(picker.date.timeIntervalSince(selection)) > 0.5 {
             picker.setDate(selection, animated: false)
         }
@@ -1184,49 +1478,28 @@ private struct WeeklyIntentDateTimePicker: UIViewRepresentable {
     }
 }
 
-private struct WeeklyIntentCourseOption: Identifiable, Hashable {
-    let id: String
-    let code: String?
-    let name: String
-
-    var title: String {
-        [code, name]
-            .compactMap { $0 }
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
-    }
-}
-
 private struct WeeklyIntentEditorView: View {
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(\.dismiss) private var dismiss
-    @Environment(SessionStore.self) private var session
-    @State private var courseStore = CourseListStore()
     @State private var topic: NativeWeeklyIntentTopic
     @State private var activityText: String
-    @State private var sportText: String
-    @State private var togetherMode: NativeTogetherMode
-    @State private var studyGoal: String
-    @State private var selectedCourseID: String?
     @State private var timeWindows: [WeeklyIntentWindowDraft]
-    @State private var timingKind: String
+    @State private var preservedTimePreference: NativeIntentTimePreference?
     @State private var timeIsUndecided: Bool
-    @State private var flexibleStart: Date
-    @State private var flexibleEnd: Date
-    @State private var period: String
     @State private var exploreVisible: Bool
     @State private var note: String
     @State private var isSaving = false
-    @State private var editorStep = 0
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var showingTimePicker = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var focusedInput: InputField?
 
     private enum InputField: Hashable {
-        case activity, sport, studyGoal, note
+        case activity
     }
 
     let intent: NativeWeeklyIntent?
+    let template: NativeWeeklyIntent?
+    let rebookingPlan: NativePlanRequest?
     let saveIssue: String?
     let onSave:
         (
@@ -1245,6 +1518,8 @@ private struct WeeklyIntentEditorView: View {
 
     init(
         intent: NativeWeeklyIntent?,
+        template: NativeWeeklyIntent? = nil,
+        rebookingPlan: NativePlanRequest? = nil,
         saveIssue: String?,
         onSave:
             @escaping (
@@ -1262,66 +1537,84 @@ private struct WeeklyIntentEditorView: View {
             ) async -> Bool
     ) {
         self.intent = intent
+        self.template = template
+        self.rebookingPlan = rebookingPlan
         self.saveIssue = saveIssue
         self.onSave = onSave
-        let proposed = Self.defaultWindows(intent: intent)
-        _topic = State(initialValue: intent?.topic ?? .coffee)
-        _activityText = State(initialValue: intent?.activityText ?? "")
-        _sportText = State(
-            initialValue: NativeSportInput.displayText(
-                tag: intent?.sportTag,
-                otherNote: intent?.sportOtherNote
-            )
-        )
-        _togetherMode = State(initialValue: intent?.effectiveTogetherMode ?? .sameActivity)
-        _studyGoal = State(initialValue: intent?.studyGoal ?? "")
-        _selectedCourseID = State(initialValue: intent?.courseId)
+        let proposed: [NativeWeeklyIntentTimeWindow]
+        if let rebookingPlan, let start = rebookingPlan.startDate, let end = rebookingPlan.endDate, start > Date() {
+            proposed = [.init(startAt: start, endAt: end)]
+        } else if let template {
+            proposed = NativeWeeklyIntentTimeRules.repeatedWindows(from: template.timeWindows)
+        } else { proposed = Self.defaultWindows(intent: intent) }
+        let source = intent ?? template
+        _topic = State(initialValue: source?.topic ?? (rebookingPlan.map { ["MEAL": NativeWeeklyIntentTopic.food, "STUDY": .study, "LANGUAGE": .study, "SPORTS": .sports][$0.planType] ?? .events } ?? .coffee))
+        _exploreVisible = State(initialValue: intent == nil || intent?.exploreVisible == true)
+        _note = State(initialValue: source?.note ?? "")
+        let initialActivity: String
+        switch source?.topic {
+        case .study: initialActivity = source?.studyGoal ?? source?.activityText ?? ""
+        case .sports: initialActivity = NativeSportInput.displayText(tag: source?.sportTag, otherNote: source?.sportOtherNote)
+        default: initialActivity = source?.activityText ?? ""
+        }
+        _activityText = State(initialValue: rebookingPlan?.title ?? initialActivity)
         _timeWindows = State(
             initialValue: proposed.map {
                 WeeklyIntentWindowDraft(startAt: $0.startAt, endAt: $0.endAt)
             }
         )
-        _exploreVisible = State(initialValue: intent?.exploreVisible ?? false)
-        _note = State(initialValue: intent?.note ?? "")
-        let initialTimingKind = intent?.timePreference?.kind ?? (intent == nil ? "UNDECIDED" : "EXACT")
-        _timeIsUndecided = State(initialValue: initialTimingKind == "UNDECIDED")
-        _timingKind = State(initialValue: initialTimingKind == "UNDECIDED" ? "FLEXIBLE" : initialTimingKind)
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-        _flexibleStart = State(initialValue: NativeIntentTimePreference.date(intent?.timePreference?.startDate) ?? tomorrow)
-        _flexibleEnd = State(initialValue: NativeIntentTimePreference.date(intent?.timePreference?.endDate) ?? tomorrow)
-        _period = State(initialValue: intent?.timePreference?.period ?? "ANY")
+        let initialTimingKind = template != nil ? "EXACT" : intent?.timePreference?.kind ?? (intent == nil ? "UNDECIDED" : "EXACT")
+        _timeIsUndecided = State(initialValue: rebookingPlan == nil && initialTimingKind == "UNDECIDED")
+        // Retain an existing date range until the user explicitly changes the time choice.
+        _preservedTimePreference = State(initialValue: initialTimingKind == "FLEXIBLE" ? intent?.timePreference : nil)
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                if !dynamicTypeSize.isAccessibilitySize { editorProgress }
                 ScrollViewReader { scroll in
                     Form {
-                        if dynamicTypeSize.isAccessibilitySize {
-                            Section { editorProgress }
-                                .listRowBackground(Color.clear)
-                                .listRowInsets(EdgeInsets())
-                        }
-                        if editorStep == 0 {
-                            activityFields
-                        } else {
-                            timeFields
-                        }
-                        if dynamicTypeSize.isAccessibilitySize {
-                            Section {
-                                Text(editorActionDetail)
-                                    .font(.caption)
-                                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                    .fixedSize(horizontal: false, vertical: true)
+                        activityFields
+                        if !((intent ?? template)?.note ?? "").isEmpty {
+                            Section("Description") {
+                                TextField(AppLocalization.string("Description"), text: $note, axis: .vertical)
+                                    .accessibilityIdentifier("intent-editor-note")
                             }
-                            .listRowBackground(Color.clear)
+                        }
+                        timeFields
+                        if rebookingPlan != nil {
+                            Text("Review the time before publishing. This creates a new intention without changing your previous plan.")
+                                .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                        if template != nil {
+                            Section {
+                                Text(timeIsUndecided
+                                    ? "This publishes a new intention; previous conversations stay with the original."
+                                    : "Next week's time is prefilled. You can adjust it before publishing; previous conversations stay with the original.")
+                                    .font(.footnote)
+                                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            }
+                        }
+                        if intent != nil && intent?.exploreVisible != true {
+                            Section {
+                                Toggle("Show in recommendations", isOn: $exploreVisible)
+                                    .accessibilityIdentifier("intent-editor-visibility")
+                            } footer: {
+                                Text("This older intention was not public. Turn this on to include it in more recommendations.")
+                            }
+                        } else if intent == nil {
+                            Section {
+                                Text("Your activity, time and description will appear in recommendations.")
+                                    .font(.footnote)
+                                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            }
                         }
                     }
                     .scrollContentBackground(.hidden)
-                    .scrollDismissesKeyboard(.interactively)
+                    .contentMargins(.top, SideSeatTheme.spaceLG, for: .scrollContent)
+                    .listSectionSpacing(SideSeatTheme.spaceXL)
+                    .scrollDismissesKeyboard(.immediately)
                     .accessibilityIdentifier("intent-editor-fields")
-                    .id(editorStep)
                     .disabled(isSaving)
                     .onChange(of: focusedInput) { _, field in
                         if let field { scroll.scrollTo(field, anchor: .center) }
@@ -1333,70 +1626,69 @@ private struct WeeklyIntentEditorView: View {
                         if let focusedInput { scroll.scrollTo(focusedInput, anchor: .center) }
                     }
                 }
-            }
-            .background(SideSeatTheme.bgGrouped)
-            .navigationTitle(AppLocalization.string(intent == nil ? "Add an intention" : "Edit intention"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    if editorStep == 0 {
-                        Button("Cancel") { dismiss() }
-                            .disabled(isSaving)
-                    } else {
-                        Button("Back") { changeStep(0) }
-                            .disabled(isSaving)
-                            .accessibilityIdentifier("intent-editor-back")
-                    }
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(spacing: 0) {
-                    if let saveIssue {
-                        Text(saveIssue)
+                    if let issue = inputLengthIssue ?? saveIssue {
+                        Text(issue)
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.danger)
                             .padding(.horizontal, SideSeatTheme.screenHorizontal)
                             .padding(.top, SideSeatTheme.spaceSM)
+                            .padding(.bottom, focusedInput == nil ? 0 : SideSeatTheme.spaceSM)
                             .accessibilityIdentifier("intent-editor-issue")
                     }
-                    SSFlowActionDock(
-                        title: editorActionTitle,
-                        detail: inputLengthIssue ?? (dynamicTypeSize.isAccessibilitySize ? "" : editorActionDetail),
-                        isLoading: isSaving,
-                        isEnabled: editorStep == 0
-                            ? hasValidActivity : hasValidActivity && hasValidTimeWindows && normalizedNoteCount <= 160,
-                        accessibilityID: editorStep == 0 ? "intent-editor-next" : "intent-editor-save"
-                    ) {
-                        if editorStep == 0 {
-                            changeStep(1)
-                        } else {
+                    if focusedInput == nil {
+                        SSFlowActionDock(
+                            title: editorActionTitle,
+                            detail: "",
+                            isLoading: isSaving,
+                            isEnabled: hasValidDetails && hasValidTimeWindows,
+                            accessibilityID: "intent-editor-save"
+                        ) {
                             Task { await save() }
                         }
                     }
                 }
-                .background(SideSeatTheme.surface)
+                .frame(maxWidth: .infinity)
+                .background(focusedInput == nil ? SideSeatTheme.surface : SideSeatTheme.bgGrouped)
+            }
+            .background(SideSeatTheme.bgGrouped)
+            .navigationTitle(AppLocalization.string(template != nil ? "Plan again" : intent == nil ? "Add an intention" : "Edit intention"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(isSaving)
+                }
+                if focusedInput != nil {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(editorActionTitle) {
+                            Task { await save() }
+                        }
+                        .disabled(isSaving || !hasValidDetails || !hasValidTimeWindows)
+                        .accessibilityIdentifier("intent-editor-save")
+                    }
+                }
             }
         }
         .ssFlowSheet(isSaving: isSaving)
         .accessibilityIdentifier("intent-editor")
-        .task(id: topic) {
-            guard topic == .study, courseStore.payload == nil else { return }
-            await courseStore.load(
-                using: session,
-                scope: .enrolled,
-                school: session.currentUser?.school,
-                query: ""
+        .sheet(isPresented: $showingTimePicker) {
+            WeeklyIntentTimePickerSheet(
+                windows: timeWindows,
+                timePreference: effectiveTimingKind == "FLEXIBLE" ? preservedTimePreference : nil,
+                allowsUndecided: supportsFlexibleTiming && rebookingPlan == nil,
+                onSave: { windows, preference in
+                    timeWindows = windows
+                    preservedTimePreference = preference
+                    timeIsUndecided = false
+                },
+                onClear: {
+                    preservedTimePreference = nil
+                    timeIsUndecided = true
+                }
             )
+            .dynamicTypeSize(dynamicTypeSize)
         }
-    }
-
-    private var editorActionDetail: String {
-        AppLocalization.string(editorStep == 0
-            ? "One activity at a time. You can add more later."
-            : automaticMatchingEnabled
-                ? (intent?.isPaused == true ? "This intention stays paused until you resume it."
-                    : "Saving starts finding company automatically. Pause anytime.")
-                : "Saved privately. Start matching separately when you're ready.")
     }
 
     private var automaticMatchingEnabled: Bool {
@@ -1405,230 +1697,311 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var editorActionTitle: String {
-        if editorStep == 0 {
-            return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Next" : "Choose timing preference")
-        }
+        if template != nil { return AppLocalization.string("Publish new intention") }
+        let useShortTitle = focusedInput != nil || dynamicTypeSize.isAccessibilitySize
         if automaticMatchingEnabled, intent?.isPaused != true {
             if intent?.automaticMatching == true {
-                return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Save" : "Save changes")
+                return AppLocalization.string(useShortTitle ? "Save" : "Save changes")
             }
-            return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Publish intention (short)" : "Publish intention")
+            return AppLocalization.string(useShortTitle ? "Publish intention (short)" : "Publish intention")
         }
-        return AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Save" : "Save intention")
-    }
-
-    private var editorProgress: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                ForEach(0..<2) { step in
-                    Capsule()
-                        .fill(step <= editorStep ? SideSeatTheme.accent : SideSeatTheme.fillTertiary)
-                        .frame(height: 3)
-                }
-            }
-            .accessibilityHidden(true)
-            Text(AppLocalization.string(editorStep == 0 ? "1 · What would you like to do?" : "2 · When would you like to go?"))
-                .font(.headline)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityAddTraits(.isHeader)
-        }
-        .padding(.horizontal, SideSeatTheme.screenHorizontal)
-        .padding(.top, SideSeatTheme.spaceMD)
-        .padding(.bottom, SideSeatTheme.spaceSM)
+        return AppLocalization.string(useShortTitle ? "Save" : "Save intention")
     }
 
     private var activityFields: some View {
         Group {
-            Section("Activity") {
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 260 : 130))],
-                    spacing: SideSeatTheme.spaceMD
-                ) {
-                    ForEach(NativeWeeklyIntentTopic.allCases) { option in
-                        SSActivityChoice(
-                            topic: option,
-                            isSelected: topic == option
-                        ) {
-                            topic = option
-                        }
-                        .accessibilityIdentifier("intent-topic-\(option.rawValue.lowercased())")
-                    }
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
-            }
-            if topic == .sports {
-                Section("Sport") {
-                    TextField("Which sport?", text: $sportText)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.done)
-                        .focused($focusedInput, equals: .sport)
-                        .id(InputField.sport)
-                        .onSubmit { focusedInput = nil }
-                        .accessibilityIdentifier("intent-editor-sport")
-
-                    if !sportSuggestions.isEmpty {
-                        ScrollView(.horizontal) {
-                            HStack(spacing: SideSeatTheme.spaceSM) {
-                                ForEach(sportSuggestions) { sport in
-                                    Button(sport.title) {
-                                        sportText = sport.title
-                                        focusedInput = nil
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .controlSize(.small)
+            Section {
+                let columns = dynamicTypeSize.isAccessibilitySize ? 1 : 3
+                Grid(horizontalSpacing: SideSeatTheme.spaceSM, verticalSpacing: SideSeatTheme.spaceSM) {
+                    ForEach(0..<(NativeWeeklyIntentTopic.allCases.count / columns), id: \.self) { row in
+                        GridRow {
+                            ForEach(0..<columns, id: \.self) { column in
+                                let option = NativeWeeklyIntentTopic.allCases[row * columns + column]
+                                SSActivityChoice(topic: option, isSelected: topic == option) {
+                                    focusedInput = nil
+                                    topic = option
                                 }
+                                .accessibilityIdentifier("intent-topic-\(option.rawValue.lowercased())")
                             }
                         }
-                        .scrollIndicators(.hidden)
-                    }
-                    if !hasValidSportSelection, inputLengthIssue == nil {
-                        Text("Enter the sport you want to do.")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .accessibilityIdentifier("intent-editor-sport-guidance")
                     }
                 }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(AppLocalization.string("Activity"))
+                .accessibilityValue(topic.title)
+                .accessibilityIdentifier("intent-editor-topic")
+                .listRowInsets(EdgeInsets(top: SideSeatTheme.spaceMD, leading: SideSeatTheme.spaceMD,
+                                         bottom: SideSeatTheme.spaceMD, trailing: SideSeatTheme.spaceMD))
+                .listRowSeparator(.hidden)
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+                    Divider()
+                    TextField("Activity details (optional)", text: $activityText,
+                        prompt: Text(AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Optional" : "Describe what you'd like to do…")),
+                        axis: .vertical)
+                        .lineLimit(1...3)
+                        .frame(minHeight: 64, alignment: .topLeading)
+                        .textInputAutocapitalization(.sentences)
+                        .focused($focusedInput, equals: .activity)
+                        .accessibilityIdentifier("intent-editor-activity")
+                }
+                .id(InputField.activity)
+                .listRowInsets(EdgeInsets(top: 0, leading: SideSeatTheme.spaceLG,
+                                         bottom: SideSeatTheme.spaceLG, trailing: SideSeatTheme.spaceLG))
+                .listRowSeparator(.hidden)
             }
-
-            if usesGeneralActivityText {
-                Section("What exactly?") {
-                    TextField(
-                        generalActivityPlaceholder,
-                        text: $activityText,
-                        axis: .vertical
-                    )
-                    .lineLimit(1...3)
-                    .textInputAutocapitalization(.sentences)
-                    .focused($focusedInput, equals: .activity)
-                    .id(InputField.activity)
-                    .accessibilityIdentifier("intent-editor-activity")
-
-                    if !hasValidActivityText, inputLengthIssue == nil {
-                        Text("Describe the specific thing you want to do.")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .accessibilityIdentifier("intent-editor-activity-guidance")
-                    }
-                }
-            }
-
-            if topic == .study {
-                Section("What are you working on?") {
-                    TextField(
-                        "For example: write a thesis or review for an exam",
-                        text: $studyGoal,
-                        axis: .vertical
-                    )
-                    .lineLimit(1...3)
-                    .textInputAutocapitalization(.sentences)
-                    .focused($focusedInput, equals: .studyGoal)
-                    .id(InputField.studyGoal)
-                    .accessibilityIdentifier("intent-editor-study-goal")
-
-                    if !hasValidStudyGoal, inputLengthIssue == nil {
-                        Text("Add a short study goal so SideSeat can find a useful match.")
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .accessibilityIdentifier("intent-editor-study-guidance")
-                    }
-                }
-
-                Section("How would you like to study?") {
-                    ForEach(NativeTogetherMode.allCases) { mode in
-                        Button {
-                            togetherMode = mode
-                        } label: {
-                            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-                                Text(mode.studyTitle)
-                                    .foregroundStyle(SideSeatTheme.textPrimary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                Image(
-                                    systemName: togetherMode == mode
-                                        ? "checkmark.circle.fill"
-                                        : "circle"
-                                )
-                                .foregroundStyle(
-                                    togetherMode == mode
-                                        ? SideSeatTheme.accent
-                                        : SideSeatTheme.textSecondary
-                                )
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(togetherMode == mode ? .isSelected : [])
-                    }
-                }
-            }
-
-            if topic == .study {
-                Section("Course") {
-                    if courseStore.isLoading, courseStore.payload == nil {
-                        HStack(spacing: SideSeatTheme.spaceSM) {
-                            ProgressView()
-                            Text("Loading courses")
-                                .foregroundStyle(SideSeatTheme.textSecondary)
-                        }
-                    } else {
-                        Picker("Course", selection: $selectedCourseID) {
-                            Text("None").tag(String?.none)
-                            ForEach(courseOptions) { course in
-                                Text(course.title).tag(Optional(course.id))
-                            }
-                        }
-                        if courseOptions.isEmpty {
-                            Text("No current courses")
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.textSecondary)
-                        }
-                    }
-                    if let issue = courseStore.issue, courseStore.payload == nil {
-                        Text(issue)
-                            .font(.footnote)
-                            .foregroundStyle(SideSeatTheme.danger)
-                    }
-                }
-            }
-
         }
     }
 
     private var timeFields: some View {
-        Group {
-            Section {
-                SSFlowCardHeader(
-                    title: activitySummary,
-                    subtitle: topic.title,
-                    systemImage: topic.systemImage,
-                    activityTopic: topic
-                )
+        Section {
+            Button {
+                focusedInput = nil
+                showingTimePicker = true
+            } label: {
+                timeRowLayout {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Text("Time")
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                        if effectiveTimingKind == "EXACT", timeWindows.count > 1 {
+                            Text("\(timeWindows.count) time options")
+                                .font(.subheadline)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                    }
+                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: SideSeatTheme.spaceMD) }
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        if effectiveTimingKind == "UNDECIDED" {
+                            Text("Time undecided · Tap to set")
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        } else {
+                            Text("Modify times")
+                                .foregroundStyle(SideSeatTheme.utilityAction)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityHidden(true)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            if supportsFlexibleTiming { timingPreferences }
-            if effectiveTimingKind != "UNDECIDED" {
-                Section("Choose a time") {
-                    if supportsFlexibleTiming { timingDetailPicker }
-                    if effectiveTimingKind == "FLEXIBLE" {
-                        flexibleTimeFields
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("intent-timing-choose")
+            .listRowInsets(EdgeInsets(top: SideSeatTheme.spaceXS, leading: SideSeatTheme.spaceMD,
+                                     bottom: SideSeatTheme.spaceXS, trailing: SideSeatTheme.spaceMD))
+            .listRowSeparator(.hidden)
+
+            if let preference = preservedTimePreference, effectiveTimingKind == "FLEXIBLE" {
+                Text(preference.summary)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if effectiveTimingKind == "EXACT" {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    ForEach(timeWindows.sorted { $0.startAt < $1.startAt }) { window in
+                        selectedTimeRow(window)
+                    }
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: SideSeatTheme.spaceMD,
+                                         bottom: SideSeatTheme.spaceMD, trailing: SideSeatTheme.spaceMD))
+                .listRowSeparator(.hidden)
+            }
+        }
+    }
+
+    private func selectedTimeRow(_ window: WeeklyIntentWindowDraft) -> some View {
+        let date = window.startAt.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated)
+            .locale(AppLocalization.selectedLanguage.locale))
+        return ViewThatFits(in: .horizontal) {
+            if !dynamicTypeSize.isAccessibilitySize {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Text(date).fixedSize()
+                    Spacer(minLength: 0)
+                    Text(timeRange(for: window))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize()
+                }
+            }
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                Text(date)
+                Text(timeRange(for: window))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.subheadline)
+        .foregroundStyle(SideSeatTheme.textPrimary)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("intent-selected-time-\(window.id)")
+    }
+
+    private func timeRange(for window: WeeklyIntentWindowDraft) -> String {
+        let locale = AppLocalization.selectedLanguage.locale
+        let start = window.startAt.formatted(.dateTime.hour().minute().locale(locale))
+        let end = Calendar.current.isDate(window.startAt, inSameDayAs: window.endAt)
+            ? window.endAt.formatted(.dateTime.hour().minute().locale(locale))
+            : window.endAt.formatted(.dateTime.month(.abbreviated).day().hour().minute().locale(locale))
+        return "\(start)–\(end)"
+    }
+
+    private var supportsFlexibleTiming: Bool {
+        clientConfiguration.configuration?.isFeatureEnabled("v2FlexibleTiming") == true || intent?.timePreference != nil
+    }
+
+    private var effectiveTimingKind: String {
+        guard supportsFlexibleTiming else { return "EXACT" }
+        return timeIsUndecided ? "UNDECIDED" : preservedTimePreference?.kind ?? "EXACT"
+    }
+
+    private var submittedTiming: NativeIntentTimePreference? {
+        guard supportsFlexibleTiming else { return nil }
+        return timeIsUndecided ? NativeIntentTimePreference(kind: "UNDECIDED")
+            : preservedTimePreference ?? NativeIntentTimePreference(kind: "EXACT")
+    }
+
+    private var timeRowLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+    }
+
+    private var hasValidDetails: Bool { inputLengthIssue == nil }
+
+    private var inputLengthIssue: String? {
+        if NativeWeeklyIntentSubmissionRules.normalizedTextLength(note) > 160 {
+            return AppLocalization.string("Use up to 160 characters.")
+        }
+        let limit = topic == .sports ? 60 : 80
+        guard NativeWeeklyIntentSubmissionRules.normalizedTextLength(activityText) > limit else { return nil }
+        return AppLocalization.string(topic == .sports ? "Use up to 60 characters." : "Use up to 80 characters.")
+    }
+
+    private func save() async {
+        guard hasValidDetails, hasValidTimeWindows, !isSaving else { return }
+        focusedInput = nil
+        isSaving = true
+        defer { isSaving = false }
+        let sportSelection = NativeSportInput.normalized(activityText)
+        // The editor shares one description; the existing API still uses topic-specific fields.
+        _ = await onSave(
+            topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
+            (intent ?? template)?.effectiveTogetherMode ?? .sameActivity, activityText, intent?.courseId,
+            normalizedTimeWindows, submittedTiming, exploreVisible, note
+        )
+    }
+
+    private var normalizedTimeWindows: [NativeWeeklyIntentTimeWindow] {
+        guard effectiveTimingKind == "EXACT" else { return [] }
+        return timeWindows
+            .map(\.value)
+            .sorted {
+                $0.startAt == $1.startAt
+                    ? $0.endAt < $1.endAt
+                    : $0.startAt < $1.startAt
+            }
+    }
+
+    private var hasValidTimeWindows: Bool {
+        if effectiveTimingKind == "UNDECIDED" { return rebookingPlan == nil }
+        if let preservedTimePreference, effectiveTimingKind == "FLEXIBLE" {
+            guard let start = NativeIntentTimePreference.date(preservedTimePreference.startDate),
+                  let end = NativeIntentTimePreference.date(preservedTimePreference.endDate) else { return false }
+            return start <= end && start >= Calendar.current.startOfDay(for: Date())
+        }
+        return NativeWeeklyIntentTimeRules.hasValidExactWindows(normalizedTimeWindows)
+    }
+
+    private static func defaultWindows(intent: NativeWeeklyIntent?) -> [NativeWeeklyIntentTimeWindow] {
+        if let intent {
+            let future = intent.timeWindows
+                .filter { $0.startAt > Date() }
+                .sorted { $0.startAt < $1.startAt }
+            if !future.isEmpty {
+                return future
+            }
+        }
+        return [NativeWeeklyIntentTimeRules.defaultWindow(startingAt: Date())]
+    }
+}
+
+/// Owns a temporary copy: dismissing the sheet never changes the intention form.
+private struct WeeklyIntentTimePickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var timeWindows: [WeeklyIntentWindowDraft]
+    @State private var preservedTimePreference: NativeIntentTimePreference?
+    let allowsUndecided: Bool
+    let onSave: ([WeeklyIntentWindowDraft], NativeIntentTimePreference?) -> Void
+    let onClear: () -> Void
+
+    init(windows: [WeeklyIntentWindowDraft], timePreference: NativeIntentTimePreference?,
+         allowsUndecided: Bool,
+         onSave: @escaping ([WeeklyIntentWindowDraft], NativeIntentTimePreference?) -> Void,
+         onClear: @escaping () -> Void) {
+        _timeWindows = State(initialValue: windows)
+        _preservedTimePreference = State(initialValue: timePreference)
+        self.allowsUndecided = allowsUndecided
+        self.onSave = onSave
+        self.onClear = onClear
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    if let preference = preservedTimePreference {
+                        Text(preference.summary)
+                        Button("Choose a time") { preservedTimePreference = nil }
+                            .accessibilityIdentifier("intent-time-replace-range")
                     } else {
                         exactTimeFields
                     }
                 }
-                .environment(\.locale, AppLocalization.selectedLanguage.locale)
+                if allowsUndecided {
+                    Section {
+                        Button("Not sure yet") {
+                            onClear()
+                            dismiss()
+                        }
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .accessibilityIdentifier("intent-time-clear")
+                    } footer: {
+                        Text("Confirm the time together after matching.")
+                    }
+                }
             }
-            Section("Optional") {
-                TextField("A short clarification", text: $note, axis: .vertical)
-                    .lineLimit(2...4)
-                    .focused($focusedInput, equals: .note)
-                    .id(InputField.note)
-                    .accessibilityIdentifier("intent-editor-note")
-                Text(AppLocalization.string(exploreVisible
-                    ? "This note may appear as a short Explore activity preview."
-                    : "This note stays private while Explore visibility is off."))
-                    .font(.footnote)
-                    .foregroundStyle(SideSeatTheme.textSecondary)
+            .accessibilityIdentifier("intent-time-picker-fields")
+            .scrollContentBackground(.hidden)
+            .background(SideSeatTheme.bgGrouped)
+            .navigationTitle(AppLocalization.string(dynamicTypeSize.isAccessibilitySize ? "Time" : "Choose a time"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .accessibilityIdentifier("intent-time-picker-cancel")
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        onSave(timeWindows, preservedTimePreference)
+                        dismiss()
+                    }
+                    .disabled(!hasValidTimeWindows)
+                    .accessibilityIdentifier("intent-time-picker-done")
+                }
             }
         }
+        .environment(\.locale, AppLocalization.selectedLanguage.locale)
+        .ssFlowSheet()
+    }
+
+    private var hasValidTimeWindows: Bool {
+        if let preference = preservedTimePreference {
+            guard let start = NativeIntentTimePreference.date(preference.startDate),
+                  let end = NativeIntentTimePreference.date(preference.endDate) else { return false }
+            return start <= end && start >= Calendar.current.startOfDay(for: Date())
+        }
+        return NativeWeeklyIntentTimeRules.hasValidExactWindows(timeWindows.map(\.value))
     }
 
     private var exactTimeFields: some View {
@@ -1659,7 +2032,8 @@ private struct WeeklyIntentEditorView: View {
                                 }
                             ),
                             range: pickerLowerBound...pickerUpperBound,
-                            accessibilityLabel: AppLocalization.string("Start")
+                            accessibilityLabel: AppLocalization.string("Start"),
+                            accessibilityIdentifier: "intent-time-start-\(window.id)"
                         )
                         .frame(minHeight: 44)
                         .layoutPriority(1)
@@ -1685,7 +2059,8 @@ private struct WeeklyIntentEditorView: View {
                             range:
                                 NativeWeeklyIntentTimeRules
                                 .minimumEnd(after: window.startAt)...latestSelectableDate,
-                            accessibilityLabel: AppLocalization.string("End")
+                            accessibilityLabel: AppLocalization.string("End"),
+                            accessibilityIdentifier: "intent-time-end-\(window.id)"
                         )
                         .frame(minHeight: 44)
                         .layoutPriority(1)
@@ -1694,12 +2069,14 @@ private struct WeeklyIntentEditorView: View {
                         Button("Remove time", systemImage: "minus.circle", role: .destructive) {
                             timeWindows.removeAll { $0.id == window.id }
                         }
+                        .accessibilityIdentifier("intent-time-remove-\(window.id)")
                     }
                 }
             }
             Button("Add another time", systemImage: "plus.circle") {
                 addTimeWindow()
             }
+            .accessibilityIdentifier("intent-time-add")
             .disabled(nextTimeWindow == nil || timeWindows.count >= 7)
 
             if !hasValidTimeWindows {
@@ -1710,226 +2087,10 @@ private struct WeeklyIntentEditorView: View {
         }
     }
 
-    private var supportsFlexibleTiming: Bool {
-        clientConfiguration.configuration?.isFeatureEnabled("v2FlexibleTiming") == true || intent?.timePreference != nil
-    }
-
-    private var effectiveTimingKind: String {
-        supportsFlexibleTiming ? (timeIsUndecided ? "UNDECIDED" : timingKind) : "EXACT"
-    }
-
-    private var submittedTiming: NativeIntentTimePreference? {
-        guard supportsFlexibleTiming else { return nil }
-        if effectiveTimingKind == "FLEXIBLE" {
-            return NativeIntentTimePreference(kind: effectiveTimingKind,
-                startDate: NativeIntentTimePreference.dateKey(flexibleStart),
-                endDate: NativeIntentTimePreference.dateKey(flexibleEnd), period: period)
-        }
-        return NativeIntentTimePreference(kind: effectiveTimingKind)
-    }
-
-    private var lastFlexibleDay: Date {
-        Calendar.current.startOfDay(for: latestSelectableDate)
-    }
-
-    private var timingPreferences: some View {
-        Section {
-            timingChoice(undecided: true, title: "Time undecided", detail: "Just an intention for now. Find someone first.", icon: "bubble.left.and.bubble.right")
-            timingChoice(undecided: false, title: "Choose a time", detail: "Choose a day, a date range, or specific times.", icon: "calendar")
-        } header: {
-            Text("Timing preference")
-        } footer: {
-            Text("This is a preference, not an appointment. Agree on the exact time in chat.")
-        }
-    }
-
-    private var timingDetailPicker: some View {
-        Group {
-            if dynamicTypeSize.isAccessibilitySize {
-                Picker("Choose a time", selection: $timingKind) {
-                    Text("A day or date range").tag("FLEXIBLE")
-                    Text("Specific times").tag("EXACT")
-                }
-                .pickerStyle(.menu)
-            } else {
-                Picker("Choose a time", selection: $timingKind) {
-                    Text("A day or date range").tag("FLEXIBLE")
-                    Text("Specific times").tag("EXACT")
-                }
-                .pickerStyle(.segmented)
-            }
-        }
-        .accessibilityIdentifier("intent-timing-detail")
-        .onChange(of: timingKind) { _, kind in
-            if kind == "FLEXIBLE" { normalizeFlexibleDates() }
-        }
-    }
-
-    private var flexibleTimeFields: some View {
-        Group {
-            let quickLayout =
-                dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-            quickLayout { quickDateButtons }
-            DatePicker(
-                "From", selection: $flexibleStart,
-                in: Calendar.current.startOfDay(for: Date())...lastFlexibleDay,
-                displayedComponents: .date
-            )
-            .accessibilityIdentifier("intent-flexible-start")
-            .onChange(of: flexibleStart) { _, value in
-                if flexibleEnd < value { flexibleEnd = value }
-            }
-            DatePicker(
-                "Through", selection: $flexibleEnd,
-                in: min(flexibleStart, lastFlexibleDay)...lastFlexibleDay,
-                displayedComponents: .date
-            )
-            .accessibilityIdentifier("intent-flexible-end")
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text("Part of the day")
-                    Menu {
-                        ForEach(["ANY", "MORNING", "AFTERNOON", "EVENING"], id: \.self) { part in
-                            Button(NativeIntentTimePreference.periodTitle(part)) { period = part }
-                        }
-                    } label: {
-                        HStack(alignment: .top) {
-                            Text(NativeIntentTimePreference.periodTitle(period))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Image(systemName: "chevron.up.chevron.down").font(.caption)
-                        }
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                    }
-                    .accessibilityIdentifier("intent-period-picker")
-                }
-            } else {
-                Picker("Part of the day", selection: $period) {
-                    ForEach(["ANY", "MORNING", "AFTERNOON", "EVENING"], id: \.self) { part in
-                        Text(NativeIntentTimePreference.periodTitle(part)).tag(part)
-                    }
-                }
-            }
-            Text(submittedTiming?.summary ?? "")
-                .font(.footnote)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("intent-timing-summary")
-        }
-    }
-
-    private func normalizeFlexibleDates() {
-        flexibleStart = min(max(Calendar.current.startOfDay(for: flexibleStart), Calendar.current.startOfDay(for: Date())), lastFlexibleDay)
-        flexibleEnd = min(max(Calendar.current.startOfDay(for: flexibleEnd), flexibleStart), lastFlexibleDay)
-    }
-
-    private func timingChoice(undecided: Bool, title: String, detail: String, icon: String) -> some View {
-        let isSelected = timeIsUndecided == undecided
-        return Button {
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
-                timeIsUndecided = undecided
-                if !undecided && timingKind == "FLEXIBLE" { normalizeFlexibleDates() }
-            }
-        } label: {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .frame(width: 24).padding(.top, 3)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(AppLocalization.string(String.LocalizationValue(title))).font(.subheadline.weight(.semibold))
-                    Text(AppLocalization.string(String.LocalizationValue(detail))).font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 22))
-                    .padding(.top, 3)
-                    .accessibilityHidden(true)
-            }
-            .foregroundStyle(isSelected ? SideSeatTheme.accent : SideSeatTheme.textPrimary)
-            .padding(.vertical, SideSeatTheme.spaceSM)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier(undecided ? "intent-timing-undecided" : "intent-timing-choose")
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-
-    @ViewBuilder private var quickDateButtons: some View {
-        ForEach(["Tomorrow", "This weekend", "Next week"], id: \.self) { title in
-            let range = quickDateRange(title)
-            Button(AppLocalization.string(String.LocalizationValue(title))) {
-                flexibleStart = range.0
-                flexibleEnd = range.1
-            }
-            .buttonStyle(.bordered)
-            .fixedSize(horizontal: false, vertical: true)
-            .tint(SideSeatTheme.accent)
-            .disabled(range.1 > lastFlexibleDay)
-            .accessibilityIdentifier("intent-quick-\(title)")
-        }
-    }
-
-    private func quickDateRange(_ title: String) -> (Date, Date) {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today)
-        let offset = title == "Tomorrow" ? 1 : title == "This weekend" ? (weekday == 1 ? 0 : (7 - weekday)) : (9 - weekday) % 7 == 0 ? 7 : (9 - weekday) % 7
-        let start = calendar.date(byAdding: .day, value: offset, to: today)!
-        let count = title == "Next week" ? 6 : title == "This weekend" && weekday != 1 ? 1 : 0
-        return (start, calendar.date(byAdding: .day, value: count, to: start)!)
-    }
-
     private var timeRowLayout: AnyLayout {
         dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
             : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-    }
-
-    private var activitySummary: String {
-        switch topic {
-        case .study: studyGoal.trimmingCharacters(in: .whitespacesAndNewlines)
-        case .sports: sportText.trimmingCharacters(in: .whitespacesAndNewlines)
-        default: activityText.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-    }
-
-    private var hasValidActivity: Bool {
-        hasValidActivityText && hasValidSportSelection && hasValidStudyGoal
-    }
-
-    private var normalizedNoteCount: Int {
-        note.trimmingCharacters(in: .whitespacesAndNewlines).count
-    }
-
-    private var inputLengthIssue: String? {
-        if editorStep == 1 {
-            return normalizedNoteCount > 160 ? AppLocalization.string("Use up to 160 characters.") : nil
-        }
-        let limit = topic == .sports ? 60 : 80
-        guard activitySummary.count > limit else { return nil }
-        return AppLocalization.string(topic == .sports ? "Use up to 60 characters." : "Use up to 80 characters.")
-    }
-
-    private func changeStep(_ step: Int) {
-        focusedInput = nil
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
-            editorStep = step
-        }
-    }
-
-    private func save() async {
-        isSaving = true
-        defer { isSaving = false }
-        let sportSelection = NativeSportInput.normalized(sportText)
-        _ = await onSave(
-            topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
-            togetherMode, studyGoal, selectedCourseID, normalizedTimeWindows, submittedTiming, exploreVisible, note
-        )
     }
 
     // UIKit requires a picker bound; this is never stored as an intention deadline.
@@ -1953,101 +2114,6 @@ private struct WeeklyIntentEditorView: View {
         )
     }
 
-    private var courseOptions: [WeeklyIntentCourseOption] {
-        var options = courseStore.payload?.courses.map {
-            WeeklyIntentCourseOption(id: $0.id, code: $0.code, name: $0.name)
-        } ?? []
-        if let course = intent?.course,
-           !options.contains(where: { $0.id == course.id })
-        {
-            options.insert(
-                WeeklyIntentCourseOption(
-                    id: course.id,
-                    code: course.code,
-                    name: course.name
-                ),
-                at: 0
-            )
-        }
-        return options
-    }
-
-    private var normalizedTimeWindows: [NativeWeeklyIntentTimeWindow] {
-        guard effectiveTimingKind == "EXACT" else { return [] }
-        return timeWindows
-            .map(\.value)
-            .sorted {
-                $0.startAt == $1.startAt
-                    ? $0.endAt < $1.endAt
-                    : $0.startAt < $1.startAt
-            }
-    }
-
-    private var hasValidTimeWindows: Bool {
-        if effectiveTimingKind == "UNDECIDED" { return true }
-        if effectiveTimingKind == "FLEXIBLE" {
-            return flexibleStart <= flexibleEnd && Calendar.current.startOfDay(for: flexibleStart) >= Calendar.current.startOfDay(for: Date()) && flexibleEnd <= lastFlexibleDay
-        }
-        let now = Date()
-        let windows = normalizedTimeWindows
-        guard !windows.isEmpty, windows.count <= 7 else { return false }
-        for window in windows {
-            let duration = window.endAt.timeIntervalSince(window.startAt)
-            guard window.startAt > now,
-                  duration >= NativeWeeklyIntentTimeRules.minimumDuration,
-                  duration <= 12 * 60 * 60,
-                  window.endAt <= latestSelectableDate
-            else {
-                return false
-            }
-        }
-        for index in windows.indices.dropFirst() {
-            guard windows[index].startAt >= windows[index - 1].endAt else {
-                return false
-            }
-        }
-        return true
-    }
-
-    private var hasValidSportSelection: Bool {
-        guard topic == .sports else { return true }
-        let normalized = sportText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !normalized.isEmpty && normalized.count <= 60
-    }
-
-    private var usesGeneralActivityText: Bool {
-        topic != .study && topic != .sports
-    }
-
-    private var hasValidActivityText: Bool {
-        guard usesGeneralActivityText else { return true }
-        let normalized = activityText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !normalized.isEmpty && normalized.count <= 80
-    }
-
-    private var generalActivityPlaceholder: LocalizedStringKey {
-        switch topic {
-        case .coffee: "For example: coffee and a short walk"
-        case .explore: "For example: walk through the English Garden"
-        case .food: "For example: eat hotpot"
-        case .events: "For example: campus concert"
-        case .study, .sports: "Describe the activity"
-        }
-    }
-
-    private var sportSuggestions: [NativeSportTag] {
-        guard focusedInput == .sport else { return [] }
-        let selection = NativeSportInput.normalized(sportText)
-        guard selection.tag == .other else { return [] }
-        return NativeSportInput.suggestions(matching: sportText)
-    }
-
-    private var hasValidStudyGoal: Bool {
-        guard topic == .study else { return true }
-        let normalized = studyGoal.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !normalized.isEmpty && normalized.count <= 80
-    }
-
     private var nextTimeWindow: NativeWeeklyIntentTimeWindow? {
         guard timeWindows.count < 7 else { return nil }
         let latestEnd = timeWindows.map(\.endAt).max() ?? Date()
@@ -2068,15 +2134,4 @@ private struct WeeklyIntentEditorView: View {
         )
     }
 
-    private static func defaultWindows(intent: NativeWeeklyIntent?) -> [NativeWeeklyIntentTimeWindow] {
-        if let intent {
-            let future = intent.timeWindows
-                .filter { $0.startAt > Date() }
-                .sorted { $0.startAt < $1.startAt }
-            if !future.isEmpty {
-                return future
-            }
-        }
-        return [NativeWeeklyIntentTimeRules.defaultWindow(startingAt: Date())]
-    }
 }

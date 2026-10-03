@@ -30,6 +30,7 @@ struct HomeWeekTimetableView: View {
     let canPaste: Bool
     let onCreateAtSlot: (Date) -> Void
     let onPasteAtSlot: (Date) -> Void
+    let onJumpToToday: () -> Void
     /// Bumped by Home "Today" to re-anchor near now without chasing the clock.
     var scrollAnchorToken: Int = 0
 
@@ -49,6 +50,7 @@ struct HomeWeekTimetableView: View {
     /// The binding continuously records the user's viewport so a density change
     /// can restore that exact clock-time anchor without returning near `focusDate`.
     @State private var verticalScrollPositionID: String?
+    @State private var verticalViewportStartMinute: Int?
     @State private var liveTimelineScale: CGFloat?
     @State private var pinchStartTimelineScale: CGFloat?
     @State private var pinchAnchorMinute: CGFloat?
@@ -62,6 +64,7 @@ struct HomeWeekTimetableView: View {
     private let timeGutter = CalendarChrome.weekTimeGutter
     private let headerHeight = CalendarChrome.weekHeaderHeight
     private static let verticalScrollPositionStepMinutes = 5
+    private static let scrollCoordinateSpace = "calendar-week-scroll-coordinate-space"
     private static let denseCalendarStressTestEnabled =
         ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-calendar")
     private static let exposesScrollAnchorsForUITesting =
@@ -190,6 +193,16 @@ struct HomeWeekTimetableView: View {
                                 height: contentHeight,
                                 alignment: .topLeading
                             )
+                            .background {
+                                if #unavailable(iOS 18.0) {
+                                    GeometryReader { geometry in
+                                        Color.clear.preference(
+                                            key: CalendarTimelineScrollOffsetPreferenceKey.self,
+                                            value: geometry.frame(in: .named(Self.scrollCoordinateSpace)).minY
+                                        )
+                                    }
+                                }
+                            }
                             .contentShape(Rectangle())
                         }
                         .contentShape(Rectangle())
@@ -204,6 +217,19 @@ struct HomeWeekTimetableView: View {
                         )
                         .scrollIndicators(.hidden)
                         .scrollPosition(id: $verticalScrollPositionID, anchor: .top)
+                        .coordinateSpace(name: Self.scrollCoordinateSpace)
+                        .onPreferenceChange(CalendarTimelineScrollOffsetPreferenceKey.self) { contentMinY in
+                            if #unavailable(iOS 18.0) {
+                                let step = CGFloat(Self.verticalScrollPositionStepMinutes)
+                                let minute = floor(max(0, -contentMinY / minuteHeight) / step) * step
+                                verticalViewportStartMinute = Int(min(24 * 60 - step, minute))
+                            }
+                        }
+                        .modifier(CalendarTimelineViewportTrackingModifier(
+                            minuteHeight: minuteHeight,
+                            stepMinutes: Self.verticalScrollPositionStepMinutes,
+                            viewportStartMinute: $verticalViewportStartMinute
+                        ))
                         .background {
                             GeometryReader { scrollGeometry in
                                 Color.clear
@@ -260,7 +286,7 @@ struct HomeWeekTimetableView: View {
             }
         }
         .frame(
-            minHeight: dynamicTypeSize.isAccessibilitySize ? 0 : 420,
+            minHeight: 0,
             maxHeight: .infinity
         )
         .background(SideSeatTheme.bg)
@@ -1326,66 +1352,54 @@ struct HomeWeekTimetableView: View {
            abs(panOffset) < 0.5,
            !showsTimelineZoomHint,
            verticalViewportHeight >= 80,
-           let viewportStart = verticalScrollMinute(from: verticalScrollPositionID)
+           let viewportStart = verticalViewportStartMinute.map({ CGFloat($0) })
+                ?? verticalScrollMinute(from: verticalScrollPositionID)
         {
             let viewportStartMinute = Int(floor(viewportStart))
             let viewportEndMinute = min(
                 24 * 60,
                 viewportStartMinute + Int(ceil(verticalViewportHeight / minuteHeight))
             )
-            let indicatorWidth = min(44, max(1, dayWidth))
+            let visibleItems = days.flatMap { items(on: $0) }
+            let topHint = CalendarOffscreenEventHints.nearest(
+                items: visibleItems, across: days,
+                viewportStartMinute: viewportStartMinute, viewportEndMinute: viewportEndMinute,
+                edge: .top, calendar: calendar
+            )
+            let bottomHint = CalendarOffscreenEventHints.nearest(
+                items: visibleItems, across: days,
+                viewportStartMinute: viewportStartMinute, viewportEndMinute: viewportEndMinute,
+                edge: .bottom, calendar: calendar
+            )
+            let indicatorWidth = max(1, dayWidth * CGFloat(days.count) - 12)
 
-            ZStack(alignment: .topLeading) {
-                Color.clear
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-
-                ForEach(days.indices, id: \.self) { index in
-                    let day = days[index]
-                    let dayItems = items(on: day)
-                    let topHint = CalendarOffscreenEventHints.nearest(
-                        items: dayItems,
-                        on: day,
-                        viewportStartMinute: viewportStartMinute,
-                        viewportEndMinute: viewportEndMinute,
+            VStack(spacing: 0) {
+                if let topHint {
+                    CalendarOffscreenEventButton(
                         edge: .top,
-                        calendar: calendar
+                        count: topHint.hiddenCount,
+                        availableWidth: indicatorWidth,
+                        accessibilityIdentifier: "calendar-week-offscreen-event-top",
+                        action: { scrollToOffscreenEvent(topHint, proxy: proxy) }
                     )
-                    let bottomHint = CalendarOffscreenEventHints.nearest(
-                        items: dayItems,
-                        on: day,
-                        viewportStartMinute: viewportStartMinute,
-                        viewportEndMinute: viewportEndMinute,
+                    .transition(.opacity)
+                }
+                Spacer(minLength: 0)
+                if let bottomHint {
+                    CalendarOffscreenEventButton(
                         edge: .bottom,
-                        calendar: calendar
+                        count: bottomHint.hiddenCount,
+                        availableWidth: indicatorWidth,
+                        accessibilityIdentifier: "calendar-week-offscreen-event-bottom",
+                        action: { scrollToOffscreenEvent(bottomHint, proxy: proxy) }
                     )
-                    let indicatorX = timeGutter + (CGFloat(index) + 0.5) * dayWidth
-
-                    if let topHint {
-                        CalendarOffscreenEventBar(
-                            edge: .top,
-                            color: CalendarChrome.eventColor(for: topHint.item),
-                            availableWidth: indicatorWidth,
-                            accessibilityIdentifier: "calendar-week-offscreen-event-top-\(dayID(day))",
-                            action: { scrollToOffscreenEvent(topHint, proxy: proxy) }
-                        )
-                        .position(x: indicatorX, y: 22)
-                        .transition(.opacity)
-                    }
-
-                    if let bottomHint {
-                        CalendarOffscreenEventBar(
-                            edge: .bottom,
-                            color: CalendarChrome.eventColor(for: bottomHint.item),
-                            availableWidth: indicatorWidth,
-                            accessibilityIdentifier: "calendar-week-offscreen-event-bottom-\(dayID(day))",
-                            action: { scrollToOffscreenEvent(bottomHint, proxy: proxy) }
-                        )
-                        .position(x: indicatorX, y: verticalViewportHeight - 22)
-                        .transition(.opacity)
-                    }
+                    .transition(.opacity)
                 }
             }
+            .padding(.leading, timeGutter)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(
                 accessibilityReduceMotion ? nil : .easeOut(duration: 0.14),
                 value: viewportStartMinute
@@ -1684,6 +1698,24 @@ struct HomeWeekTimetableView: View {
     }
 
     private var weekDisplayBar: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .trailing, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceMD))
+        return layout {
+            weekWidthControl
+            CalendarTodayButton(action: onJumpToToday)
+        }
+        .frame(maxWidth: 300)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 7)
+        .background(.bar)
+        .overlay(alignment: .top) { Divider().opacity(0.35) }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("calendar-bottom-actions")
+    }
+
+    private var weekWidthControl: some View {
         HStack(spacing: SideSeatTheme.spaceSM) {
             Image(systemName: "rectangle.split.3x1")
                 .font(.subheadline.weight(.semibold))
@@ -1709,14 +1741,7 @@ struct HomeWeekTimetableView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(maxWidth: 180)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, SideSeatTheme.screenHorizontal)
-        .padding(.vertical, 7)
-        .background(.bar)
-        .overlay(alignment: .top) {
-            Divider().opacity(0.35)
+            .frame(minWidth: 100, maxWidth: 180)
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home-week-visible-day-count")

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Shared visual tokens so Week / Day surfaces stay Apple Calendar–grade and consistent.
 ///
-/// Selection uses a bright Rose fill; today / current-time markers use the adaptive
-/// ``SideSeatTheme/calendarNow`` Rose. The grid itself stays neutral.
+/// Today uses a solid blue marker; other selected dates and current-time markers
+/// use Rose. The grid itself stays neutral.
 enum CalendarChrome {
     struct EventHitTargetLayout: Equatable {
         let top: CGFloat
@@ -43,35 +43,18 @@ enum CalendarChrome {
 
     // MARK: - Washes & lines
 
-    /// Today controls stay on a neutral semantic surface; the Rose foreground carries meaning.
+    /// The jump-to-today control stays on a neutral semantic surface.
     static let todayControlFill = SideSeatTheme.fillTertiary
-    /// The floating create action uses one restrained Rose family in both appearances instead
-    /// of combining a neutral gray surface with an unrelated Rose symbol. The dark fill remains
-    /// low-luminance so it reads as an elevated control without becoming a glowing color block.
-    static let createActionFill = Color(
-        uiColor: UIColor { traits in
-            return UIColor(SideSeatTheme.accent)
-                .resolvedColor(with: traits)
-                .withAlphaComponent(traits.userInterfaceStyle == .dark ? 0.26 : 0.28)
-        }
-    )
-    static let createActionBorder = Color(
-        uiColor: UIColor { traits in
-            return UIColor(SideSeatTheme.accentText)
-                .resolvedColor(with: traits)
-                .withAlphaComponent(traits.userInterfaceStyle == .dark ? 0.30 : 0.24)
-        }
-    )
-    static let createActionForeground = SideSeatTheme.accentText
-    /// Focused day column in week grid — accent, not now-red.
-    static let selectedWash = SideSeatTheme.accent.opacity(0.045)
+    static let todayAccent = SideSeatTheme.calendarToday
+    /// Focused day column uses a neutral wash; today and now retain their own markers.
+    static let selectedWash = SideSeatTheme.utilityAction.opacity(0.045)
     /// Calendar structure uses the adaptive system separator so the grid remains
     /// legible on both white and black canvases without competing with event cards.
     static let hourLine = SideSeatTheme.separator.opacity(0.82)
     static let halfHourLine = SideSeatTheme.separator.opacity(0.58)
     static let columnDivider = SideSeatTheme.separator.opacity(0.65)
     static let headerDivider = SideSeatTheme.separator.opacity(0.96)
-    /// Readable brand Rose for today labels and the current-time line.
+    /// Readable brand Rose for the current-time line.
     static let nowAccent = SideSeatTheme.calendarNow
     /// A quieter continuation of the current-time line across non-today columns.
     static let nowGuideLine = SideSeatTheme.calendarNow.opacity(0.32)
@@ -95,14 +78,14 @@ enum CalendarChrome {
     // MARK: - Selection vs today colors
 
     static func weekdayForeground(selected: Bool, isToday: Bool) -> Color {
+        if isToday { return todayAccent }
         if selected { return SideSeatTheme.textPrimary }
-        if isToday { return nowAccent }
         return SideSeatTheme.textSecondaryStrong
     }
 
     static func dayNumberForeground(selected: Bool, isToday: Bool) -> Color {
-        if selected { return .white }
-        if isToday { return nowAccent }
+        if isToday { return SideSeatTheme.onCalendarToday }
+        if selected { return SideSeatTheme.ProductAction.foreground }
         return SideSeatTheme.textPrimary
     }
 
@@ -197,50 +180,48 @@ enum CalendarChrome {
     }
 }
 
-/// A quiet, category-colored edge cue for a timed event outside the viewport.
-/// The visible bar stays small while its button keeps a full 44-point hit target.
-struct CalendarOffscreenEventBar: View {
+/// Explicit direction and count for timed events outside the viewport.
+struct CalendarOffscreenEventButton: View {
     let edge: CalendarOffscreenEventEdge
-    let color: Color
+    let count: Int
     let availableWidth: CGFloat
     let accessibilityIdentifier: String
     let action: () -> Void
 
-    private var barWidth: CGFloat {
-        min(36, max(20, availableWidth - 12))
-    }
-
-    private var barAlignment: Alignment {
-        edge == .top ? .top : .bottom
-    }
-
-    private var accessibilityLabel: LocalizedStringKey {
-        switch edge {
-        case .top: "An earlier event is outside the visible timeline"
-        case .bottom: "A later event is outside the visible timeline"
+    private var title: String {
+        if count == 1 {
+            return AppLocalization.string(edge == .top ? "1 event above" : "1 event below")
         }
+        let key: String.LocalizationValue = edge == .top
+            ? "%lld events above" : "%lld events below"
+        return String(format: AppLocalization.string(key), Int64(count))
     }
 
     var body: some View {
         Button(action: action) {
-            Capsule(style: .continuous)
-                .fill(color)
-                .frame(width: barWidth, height: 3)
-                .overlay {
-                    Capsule(style: .continuous)
-                        .stroke(SideSeatTheme.textPrimary.opacity(0.2), lineWidth: 0.5)
-                }
-                .shadow(color: SideSeatTheme.bg.opacity(0.9), radius: 1.5)
-                .frame(
-                    width: max(1, availableWidth),
-                    height: 44,
-                    alignment: barAlignment
-                )
-                .contentShape(Rectangle())
+            HStack(spacing: 6) {
+                Image(systemName: edge == .top ? "arrow.up" : "arrow.down")
+                    .accessibilityHidden(true)
+                Text(title)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(SideSeatTheme.surface, in: Capsule())
+            .overlay {
+                Capsule().strokeBorder(SideSeatTheme.utilityAction.opacity(0.22), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.08), radius: 4, y: 1)
+            .frame(maxWidth: availableWidth)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
-        .accessibilityLabel(Text(accessibilityLabel))
-        .accessibilityHint("Scrolls to the event")
+        .accessibilityLabel(title)
+        .accessibilityHint("Scrolls to the nearest hidden event")
         .accessibilityIdentifier(accessibilityIdentifier)
     }
 }
@@ -281,13 +262,7 @@ struct CalendarDayChipLabel: View {
                     width: CalendarChrome.dayChipDiameter,
                     height: CalendarChrome.dayChipDiameter
                 )
-                .background {
-                    if selected {
-                        Circle().fill(SideSeatTheme.accent)
-                    } else if isToday {
-                        Circle().fill(CalendarChrome.nowAccent.opacity(0.12))
-                    }
-                }
+                .background(CalendarDateHighlight(selected: selected, isToday: isToday))
                 .accessibilityIdentifier("calendar-day-number-visual")
                 .accessibilityHidden(true)
         }
@@ -299,6 +274,17 @@ struct CalendarDayChipLabel: View {
         case .strip: CalendarChrome.Typography.stripDayNumber
         case .weekHeader: CalendarChrome.Typography.weekDayNumber
         }
+    }
+}
+
+/// Used by Month, Week and Day so today stays visible when another date is selected.
+struct CalendarDateHighlight: View {
+    let selected: Bool
+    let isToday: Bool
+
+    var body: some View {
+        Circle()
+            .fill(isToday ? CalendarChrome.todayAccent : selected ? SideSeatTheme.ProductAction.fill : .clear)
     }
 }
 
@@ -411,5 +397,61 @@ struct CalendarEventBlockLabel: View {
                     .accessibilityHidden(true)
             }
         }
+    }
+}
+
+
+/// Shared bottom-toolbar navigation action for all calendar modes.
+struct CalendarTodayButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("Today")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .padding(.horizontal, 16)
+                .frame(minWidth: 64, minHeight: 36)
+                .background(CalendarChrome.todayControlFill, in: Capsule())
+                .overlay {
+                    Capsule().strokeBorder(SideSeatTheme.separator.opacity(0.32), lineWidth: 0.5)
+                }
+                .frame(minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .fixedSize(horizontal: true, vertical: false)
+        .accessibilityIdentifier("home-jump-today")
+    }
+}
+
+/// Neutral utility icon beside the calendar mode selector.
+struct CalendarAddEventButton: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let isEnabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "plus")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(SideSeatTheme.textPrimary)
+                .frame(width: 44, height: 44)
+                .background {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .fill(SideSeatTheme.fillTertiary)
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 44 : 34)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .strokeBorder(SideSeatTheme.separator.opacity(0.22), lineWidth: 0.5)
+                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 44 : 34)
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityLabel("Add event")
+        .accessibilityIdentifier("new-event")
+        .disabled(!isEnabled)
     }
 }

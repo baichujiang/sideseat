@@ -203,31 +203,6 @@ struct TogetherPresentationTests {
     }
 }
 
-@Suite("Opportunity swipe decision")
-struct OpportunitySwipeDecisionTests {
-    @Test("Deliberate horizontal releases choose interest in either direction")
-    func choosesBothDirections() {
-        #expect(SSOpportunitySwipeChoice.releasedChoice(
-            translation: CGSize(width: 100, height: 4), travel: 120
-        ) == .interested)
-        #expect(SSOpportunitySwipeChoice.releasedChoice(
-            translation: CGSize(width: -100, height: 4), travel: 120
-        ) == .skip)
-    }
-
-    @Test("Short, returned and vertical drags do not submit a decision")
-    func leavesChoiceOpen() {
-        for translation in [
-            CGSize(width: 30, height: 0),
-            CGSize(width: -30, height: 0),
-            .zero,
-            CGSize(width: 30, height: 120),
-        ] {
-            #expect(SSOpportunitySwipeChoice.releasedChoice(translation: translation, travel: 120) == nil)
-        }
-    }
-}
-
 @Suite("MVP conversation info")
 struct MVPConversationInfoTests {
     @Test("Keeps participant, context, search, and safety as the bounded info surface")
@@ -256,7 +231,7 @@ struct MVPPlanPresentationTests {
     func keepsSectionOrder() {
         #expect(MVPPlanSection.ordered == [.waitingResponse, .upcoming, .ended])
         #expect(MVPPlanSection.ordered.map(\.title) == [
-            "Waiting",
+            "Overview",
             "Upcoming",
             "Ended",
         ].map { AppLocalization.string($0) })

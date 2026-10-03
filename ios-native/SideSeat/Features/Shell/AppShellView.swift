@@ -61,12 +61,14 @@ struct AppShellView: View {
     @State private var inboxStore = InboxStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var productTutorial = ProductTutorialController()
+    @State private var cancellationNotices = PlanCancellationNoticeStore()
     @State private var foregroundPushNotice: ForegroundPushNotice?
     @State private var foregroundPushDismissTask: Task<Void, Never>?
 
     init() {
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--ui-testing-reset-cancellation-ack") { UserDefaults.standard.removeObject(forKey: "ui-cancel-notice-ack") }
         let initialTab: AppTab =
             if arguments.contains("--ui-testing-chats")
                 || arguments.contains("--ui-testing-unread-jump")
@@ -81,8 +83,26 @@ struct AppShellView: View {
         #endif
     }
 
-    var body: some View {
+    private var cancellationAwareSurface: some View {
         shellSurface
+        .task(id: "\(session.currentUser?.id ?? ""):\(scenePhase == .active):\(session.canMakeAuthenticatedRequests)") {
+            guard scenePhase == .active else { return }
+            while !Task.isCancelled {
+                await cancellationNotices.refresh(using: session)
+                do { try await Task.sleep(for: .seconds(15)) } catch { break }
+            }
+        }
+        .alert("Plan update", isPresented: Binding(get: { cancellationNotices.current != nil }, set: { _ in }), presenting: cancellationNotices.current) { notice in
+            Button("View details") {
+                deepLinkRouter.handleAppRoute(.directChat(connectionID: notice.plan.connectionId, focus: .plan(commitmentID: notice.plan.commitmentId ?? notice.plan.id, revisionID: notice.plan.id)))
+                cancellationNotices.acknowledge(using: session)
+            }
+            Button("Got it", role: .cancel) { cancellationNotices.acknowledge(using: session) }
+        } message: { notice in Text(notice.summary) }
+    }
+
+    var body: some View {
+        cancellationAwareSurface
         .task {
             routePendingDeepLink()
         }
@@ -94,6 +114,7 @@ struct AppShellView: View {
         }
         .onChange(of: session.phase) {
             if session.phase == .signedOut {
+                cancellationNotices.reset()
                 dismissForegroundPush()
                 inboxStore.reset()
                 v2Store.resetAssignment()
@@ -132,6 +153,10 @@ struct AppShellView: View {
             Task { await inboxStore.load(using: session) }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatForegroundPushReceived)) { note in
+            if let notice = note.object as? ForegroundPushNotice, notice.kind == "plan_canceled" {
+                Task { await cancellationNotices.refresh(using: session) }
+                return
+            }
             guard let notice = note.object as? ForegroundPushNotice,
                   !ActiveChatPresentation.isDisplaying(notice)
             else { return }
@@ -331,7 +356,7 @@ struct AppShellView: View {
     ) -> some View {
         NavigationStack(path: routers.binding(for: tab)) {
             content()
-                .withAppDestinations()
+                .withAppDestinations(inboxStore: inboxStore)
         }
         .environment(routers.router(for: tab))
         .tabItem {
@@ -365,7 +390,7 @@ struct AppShellView: View {
 }
 
 private extension View {
-    func withAppDestinations() -> some View {
+    func withAppDestinations(inboxStore: InboxStore) -> some View {
         navigationDestination(for: AppRoute.self) { route in
             switch MVPRoutePolicy.disposition(for: route) {
             case .legacyUnavailable:
@@ -392,6 +417,11 @@ private extension View {
                     ScheduleShareRecipientView(token: token)
                 case .eventShare(let token):
                     CalendarEventShareRecipientView(token: token)
+                case .messageRequests:
+                    MessageRequestsView(store: inboxStore)
+                case .intentionChat(let opportunity):
+                    IntentionChatView(opportunity: opportunity)
+                        .toolbar(.hidden, for: .tabBar)
                 case .directChat(let id, let focus):
                     DirectChatView(connectionID: id, initialFocus: focus)
                         .toolbar(.hidden, for: .tabBar)

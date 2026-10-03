@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-private struct CalendarDayScrollOffsetPreferenceKey: PreferenceKey {
+struct CalendarTimelineScrollOffsetPreferenceKey: PreferenceKey {
     static let defaultValue: CGFloat = 0
 
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -9,7 +9,7 @@ private struct CalendarDayScrollOffsetPreferenceKey: PreferenceKey {
     }
 }
 
-private struct CalendarDayViewportTrackingModifier: ViewModifier {
+struct CalendarTimelineViewportTrackingModifier: ViewModifier {
     let minuteHeight: CGFloat
     let stepMinutes: Int
     @Binding var viewportStartMinute: Int?
@@ -142,7 +142,7 @@ struct CalendarDayTimelineView: View {
                         .background {
                             GeometryReader { contentGeometry in
                                 Color.clear.preference(
-                                    key: CalendarDayScrollOffsetPreferenceKey.self,
+                                    key: CalendarTimelineScrollOffsetPreferenceKey.self,
                                     value: contentGeometry.frame(
                                         in: .named(Self.scrollCoordinateSpace)
                                     ).minY
@@ -154,11 +154,11 @@ struct CalendarDayTimelineView: View {
                     .scrollPosition(id: $verticalScrollPositionID, anchor: .top)
                     .accessibilityIdentifier("calendar-day-timeline")
                     .coordinateSpace(name: Self.scrollCoordinateSpace)
-                    .onPreferenceChange(CalendarDayScrollOffsetPreferenceKey.self) { contentMinY in
+                    .onPreferenceChange(CalendarTimelineScrollOffsetPreferenceKey.self) { contentMinY in
                         updateViewportStartMinute(forContentMinY: contentMinY)
                     }
                     .modifier(
-                        CalendarDayViewportTrackingModifier(
+                        CalendarTimelineViewportTrackingModifier(
                             minuteHeight: minuteHeight,
                             stepMinutes: Self.verticalScrollPositionStepMinutes,
                             viewportStartMinute: $verticalViewportStartMinute
@@ -195,7 +195,7 @@ struct CalendarDayTimelineView: View {
             }
         }
         .frame(
-            minHeight: dynamicTypeSize.isAccessibilitySize ? 0 : 420,
+            minHeight: 0,
             maxHeight: .infinity
         )
         .background(SideSeatTheme.bg)
@@ -412,38 +412,33 @@ struct CalendarDayTimelineView: View {
                 calendar: calendar
             )
             let canvasWidth = max(1, width - timeGutter)
-            let indicatorWidth = min(44, canvasWidth)
-            let indicatorX = timeGutter + canvasWidth / 2
-
-            ZStack(alignment: .topLeading) {
-                Color.clear
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-
+            VStack(spacing: 0) {
                 if let topHint {
-                    CalendarOffscreenEventBar(
+                    CalendarOffscreenEventButton(
                         edge: .top,
-                        color: CalendarChrome.eventColor(for: topHint.item),
-                        availableWidth: indicatorWidth,
+                        count: topHint.hiddenCount,
+                        availableWidth: max(1, canvasWidth - 12),
                         accessibilityIdentifier: "calendar-day-offscreen-event-top",
                         action: { scrollToOffscreenEvent(topHint, reader: reader) }
                     )
-                    .position(x: indicatorX, y: 22)
                     .transition(.opacity)
                 }
-
+                Spacer(minLength: 0)
                 if let bottomHint {
-                    CalendarOffscreenEventBar(
+                    CalendarOffscreenEventButton(
                         edge: .bottom,
-                        color: CalendarChrome.eventColor(for: bottomHint.item),
-                        availableWidth: indicatorWidth,
+                        count: bottomHint.hiddenCount,
+                        availableWidth: max(1, canvasWidth - 12),
                         accessibilityIdentifier: "calendar-day-offscreen-event-bottom",
                         action: { scrollToOffscreenEvent(bottomHint, reader: reader) }
                     )
-                    .position(x: indicatorX, y: verticalViewportHeight - 22)
                     .transition(.opacity)
                 }
             }
+            .padding(.leading, timeGutter)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .animation(
                 accessibilityReduceMotion ? nil : .easeOut(duration: 0.14),
                 value: topHint?.item.id

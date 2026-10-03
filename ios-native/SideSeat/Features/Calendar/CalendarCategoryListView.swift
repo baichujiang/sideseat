@@ -851,7 +851,7 @@ private struct CalendarExportYearSheet: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isDisabled ? SideSeatTheme.textSecondary : SideSeatTheme.accent)
+        .foregroundStyle(isDisabled ? SideSeatTheme.textSecondary : SideSeatTheme.utilityAction)
         .disabled(isDisabled)
         .buttonRepeatBehavior(.enabled)
         .accessibilityLabel(accessibilityLabel)

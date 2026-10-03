@@ -183,7 +183,7 @@ struct CourseScreenshotImportView: View {
 
     private func selectionColor(for match: CourseScreenshotMatch) -> Color {
         if match.course.viewer.enrolled { return SideSeatTheme.success }
-        return store.selectedCourseIDs.contains(match.id) ? SideSeatTheme.accentText : .secondary
+        return store.selectedCourseIDs.contains(match.id) ? SideSeatTheme.utilityAction : .secondary
     }
 
     private func load(_ item: PhotosPickerItem) async {

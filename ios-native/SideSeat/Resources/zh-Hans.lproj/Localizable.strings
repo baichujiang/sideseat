@@ -1662,7 +1662,7 @@
 "Interest shown" = "已感兴趣";
 "Withdraw" = "撤回";
 "Your choice was withdrawn." = "你的选择已撤回。";
-"What exactly?" = "具体想做什么？";
+"What exactly?" = "具体做什么？";
 "Describe the specific thing you want to do." = "写下你具体想做的事。";
 "For example: coffee and a short walk" = "例如：喝咖啡后散步";
 "For example: walk through the English Garden" = "例如：逛英国花园";
@@ -1777,7 +1777,7 @@
 "Details from your conversation are already filled in." = "已为你填好对话中的计划信息。";
 "Choose a future start time." = "请选择尚未开始的时间。";
 "Choose available times" = "选择空闲时间";
-"Save intention" = "保存想做的事";
+"Save intention" = "保存意愿";
 "One activity at a time. You can add more later." = "每次添加一件想做的事，之后可以继续添加。";
 "Saved privately. Start matching separately when you're ready." = "仅自己可见，准备好后再开始匹配。";
 "1 · What would you like to do?" = "1 · 你想做什么？";
@@ -1874,7 +1874,8 @@
 "Time is not agreed yet. Start a conversation to work it out." = "还未约定时间，先聊聊再一起商量。";
 "Keep for 14 more days" = "继续保留 14 天";
 "Active until %@" = "有效至 %@";
-"Add an intention" = "添加活动意愿";
+"Add an intention" = "添加意愿";
+"Add your first intention" = "添加第一个意愿";
 "Recent intentions" = "近期意愿";
 "Add something you would like to do. Your intention stays private." = "记下近期想做的事，意愿仅自己可见。";
 "Choose timing preference" = "选择时间偏好";
@@ -1903,7 +1904,7 @@
 "Review and publish for automatic matching" = "查看并发布，自动寻找同行";
 "This intention stays paused until you resume it." = "这条意向仍保持暂停，恢复后才会继续寻找同行。";
 "Automatically find company until this intention expires. Pause anytime." = "有效期内自动寻找同行，可随时暂停。";
-"Publish intention" = "发布意向";
+"Publish intention" = "发布意愿";
 "Publish intention (short)" = "发布";
 "Resume finding company" = "恢复寻找同行";
 
@@ -2004,6 +2005,8 @@
 "Activity to agree" = "活动待商量";
 "Find another time" = "另约时间";
 "Time undecided" = "时间待定";
+"Clear time" = "清除时间";
+"This publishes a new intention; previous conversations stay with the original." = "发布后将创建新意愿，原来的聊天仍保留在旧意愿中。";
 "%@ · Shared time" = "%@ · 共同空闲";
 "Similar timing" = "时段相近";
 "Check language" = "沟通待确认";
@@ -2026,3 +2029,294 @@
 "Next input" = "下一个输入项";
 
 "Use up to 500 characters." = "最多输入 500 个字符。";
+
+"Confirm the time together after matching." = "匹配后再一起商量具体时间。";
+"Activity details (optional)" = "意愿说明（选填）";
+"Describe what you'd like to do…" = "详细说说你想做什么…";
+
+"Delete intention" = "删除意愿";
+
+"Delete this intention?" = "删除这个意愿？";
+
+"SideSeat is using this intention to find company." = "SideSeat 正在根据这个意愿寻找同行。";
+
+// Intention bookmarks and first messages
+"All recommendations" = "全部推荐";
+"Saved intentions" = "我的收藏";
+"No saved intentions" = "还没有收藏";
+"Save an intention to find it here later." = "收藏感兴趣的意愿，之后可以在这里找到。";
+"Intention ended" = "意愿已结束";
+"Request ignored" = "已忽略";
+"Sent · waiting for reply" = "已发送 1 条，等待对方回复";
+"Message requests" = "消息请求";
+"Write a reply…" = "写下你的回复…";
+"Say hello and share what you have in mind…" = "打个招呼，说说你的想法…";
+"Replying opens a chat with this person." = "回复后即可继续聊天。";
+"Your message includes this intention. You can send more after they reply." = "消息会附上这条意愿。对方回复后，你们就可以继续聊天。";
+"Message could not be sent. Your text is saved here; try again." = "发送失败，内容已保留，请重试。";
+"Send a message about an intention to start a conversation." = "从感兴趣的意愿发一条消息，开始认识对方。";
+"Hi! I'd like to join you. Would tomorrow afternoon work?" = "你好！我也想一起去，明天下午方便吗？";
+"Bookmark intention" = "收藏意愿";
+"Intention unavailable" = "意愿已失效";
+"About this intention" = "关于这条意愿";
+"Say hello" = "打个招呼";
+"More intentions" = "更多意愿";
+
+"Save an intention privately or say hello with a message." = "收藏你感兴趣的意愿，或发条消息打个招呼。";
+"Plus can unlock more Explore results, richer activity context, search and filters." = "Plus 可解锁更多探索结果、活动信息、搜索和筛选。";
+
+"You can send one message before they reply." = "对方回复前，你只能发送一条消息。";
+"Introduce yourself and what you'd like to do together. You can keep chatting once they reply." = "可以简单介绍自己和想一起做的事，对方回复后就能继续聊天。";
+"Your message includes this intention." = "消息会附上这条意愿。";
+
+"View chat" = "查看聊天";
+"Reply to continue chatting" = "回复后即可继续聊天";
+"Your message has been sent. You can continue chatting after they reply." = "消息已发送，对方回复后即可继续聊天。";
+"Keep your message within 500 characters." = "消息请控制在 500 字以内。";
+
+"Waiting for reply" = "等待回复";
+
+"View intention details" = "查看意愿详情";
+
+"Intention details" = "意愿详情";
+
+"Added to saved intentions" = "已加入我的收藏";
+
+"Find more recommendations" = "寻找更多推荐";
+
+"Search again" = "重新寻找";
+
+"No new recommendations right now." = "暂时没有新的推荐";
+
+/* Membership and invitation redemption */
+"Free membership" = "免费会员";
+"Valid until" = "有效期至";
+"Membership expired" = "会员已到期";
+"Loading membership" = "正在加载会员信息";
+"Your membership" = "我的会员";
+"Invitation code" = "邀请码";
+"Redeem Plus" = "兑换 Plus 会员";
+"Redeem invitation" = "邀请码兑换";
+"Membership" = "会员";
+"Each code can be redeemed once per account. If you already have Plus, the added days extend your current membership." = "每个账号对同一个邀请码只能兑换一次。已有 Plus 会员时，赠送天数会顺延至原有效期之后。";
+"You have already redeemed this invitation code." = "你已兑换过此邀请码，不会重复扣除次数。";
+"Invitation redeemed. Your Plus membership is active." = "兑换成功，Plus 会员已生效。";
+"This invitation code is invalid, expired, or fully redeemed." = "邀请码无效、已过期或兑换次数已用完。";
+"Too many redemption attempts. Please try again later." = "兑换尝试过于频繁，请稍后再试。";
+"Membership could not be loaded. Please try again." = "会员信息加载失败，请重试。";
+"The invitation code could not be redeemed. Please try again." = "邀请码兑换失败，请重试。";
+
+"Plus member" = "Plus 会员";
+
+/* Intention history and republishing */
+"Plan again" = "再约一次";
+"Publish new intention" = "发布新意愿";
+"Add an activity and choose when to find company." = "添加想做的事情和时间，寻找同行。";
+"Next week's time is prefilled. You can adjust it before publishing; previous conversations stay with the original." = "已预填下周的时间，可直接发布或调整。原来的聊天仍保留在旧意愿中。";
+"Show in recommendations" = "加入推荐";
+"This older intention was not public. Turn this on to include it in more recommendations." = "这条旧意愿尚未公开。开启后，它也会出现在更多推荐中。";
+"Your activity, time and description will appear in recommendations." = "活动、时间和描述会展示在推荐卡片中。";
+
+"Respond to plan" = "回应邀约";
+
+"Review and respond" = "查看并回应";
+
+"Your confirmation needed" = "待你确认";
+
+"Awaiting my response" = "待我回应";
+
+"Awaiting their response" = "等待对方";
+
+"Confirm cancellation" = "确认取消";
+
+"Confirm withdrawal" = "确认撤回";
+
+"Plan options" = "计划选项";
+
+"This removes the plan from both calendars and notifies the other person. Your chat stays available." = "取消后将从双方日历中移除，并通知对方。你们仍然可以继续聊天。";
+
+"The other person will be notified. Any previously confirmed time stays unchanged." = "撤回后会通知对方。如果此前已确认过时间，原计划保持不变。";
+
+"They may already be preparing or on their way. Please choose a reason." = "距离开始不足 2 小时，对方可能已在准备或路上。请选择取消原因。";
+
+"Reason (required)" = "取消原因（必选）";
+
+"Reason (optional)" = "原因（选填）";
+
+"Choose a reason" = "选择原因";
+
+"Schedule changed" = "时间有变";
+
+"Not feeling well" = "身体不适";
+
+"Not comfortable meeting" = "暂时不想见面";
+
+"Other reason" = "其他原因";
+
+"Add a note (optional)" = "补充说明（选填）";
+
+"Your reason and note are shared with the other person." = "原因和说明会展示给对方。";
+
+"Find other company" = "寻找其他同行";
+
+"Plan update" = "计划变更";
+
+"canceled the plan" = "取消了计划";
+
+"withdrew the proposal" = "撤回了提议";
+
+"Got it" = "知道了";
+
+"Canceled by you" = "由你取消";
+
+"Canceled by the other person" = "由对方取消";
+
+"Review the time before publishing. This creates a new intention without changing your previous plan." = "发布前请确认时间。这会创建新意愿，不会改变此前的计划。";
+
+"Withdrawn by you" = "由你撤回";
+
+"Withdrawn by the other person" = "由对方撤回";
+
+"Loading recommendations…" = "正在加载推荐…";
+
+"Recommendations could not be loaded." = "推荐暂时加载失败，请重试。";
+
+"%lld events above" = "上方还有 %lld 项日程";
+
+"%lld events below" = "下方还有 %lld 项日程";
+
+"Scrolls to the nearest hidden event" = "滚动到最近一项未显示的日程";
+
+"1 event above" = "上方还有 1 项日程";
+
+"1 event below" = "下方还有 1 项日程";
+
+"Companions" = "同行者";
+
+"Add companions" = "添加同行者";
+
+"Notes (optional)" = "备注（选填）";
+
+"Plus feature" = "Plus 专属功能";
+
+"Time undecided · Tap to set" = "待定 · 点击设置";
+"Not sure yet" = "暂不确定";
+
+/* Intention time overview */
+"%lld time options" = "%lld 个可选时段";
+"Modify times" = "修改";
+"Show %lld more times" = "展开其余 %lld 个时段";
+"Show fewer times" = "收起时间";
+
+/* Smart schedule image input */
+"Add from image" = "从图片添加";
+"Reading image" = "正在识别图片";
+"Source image" = "原始图片";
+"Image text added" = "已填入图片文字";
+"Review the dates and times, or tap to check the image." = "请核对日期和时间，点此对照原图。";
+"Read text from an event poster or schedule screenshot. The image stays on your device; only the reviewed text is sent when you preview events." = "支持活动海报、日程截图。图片仅在手机上识别，点击预览时才会发送你核对后的文字。";
+"Keep the input within 2,000 characters. Shorten the text or import a smaller part of the image." = "输入内容最多 2,000 字符，请精简文字或分块导入图片。";
+"Choose an image smaller than 20 MB, or crop it first." = "请选择小于 20 MB 的图片，或先裁剪图片。";
+"No readable text was found. Try a clearer image or type the event details." = "没有识别到清晰文字，请换一张更清楚的图片，或直接填写日程。";
+
+// Smart time coordination
+"Find a time together" = "智能约时间";
+"Any daytime" = "9–21 点均可";
+"Preferred time" = "偏好时段";
+"Based on your synced calendars. Check any plans you have not added. Times are in Berlin time." = "根据双方已同步的日程推荐，请自行确认尚未记录的安排。时间均为柏林时间。";
+"Checking both calendars" = "正在查找共同空闲时间";
+"Your calendar could not be checked. Try again." = "暂时无法核对你的日程，请重试。";
+"No common time in this range. Try a shorter duration or another time of day." = "暂时没有共同空闲时间，试试缩短时长或更换时段。";
+"Other suggestions" = "换一组时间";
+"%lld min" = "%lld 分钟";
+"Share when you could meet. The other person can find times that also fit their calendar and propose a plan." = "分享你愿意见面的日期，对方打开后会自动匹配自己的空闲时间，再向你发起计划。";
+"Find times in their shared availability" = "用对方分享的空闲时间来匹配";
+"When could you meet?" = "哪几天方便见面？";
+"Date range" = "日期范围";
+"Only availability for these dates is shared, without event titles or locations. You can stop sharing from the card. Times are in Berlin time." = "只分享所选日期的忙闲，不含日程标题和地点。可在卡片中随时停止分享。时间均为柏林时间。";
+"Choosing a time sends a proposal. Both calendars change only after acceptance." = "选时间只是发出提议，对方接受后才会加入双方日历。";
+"Send my availability" = "发送我的空闲时间";
+"This time is no longer free for both of you. Choose another suggestion." = "这个时间已不再是双方共同空闲，请重新选择。";
+"Find common times" = "查找共同空闲";
+"Back to chat" = "返回聊天";
+
+/* Direct free-time recommendations */
+"Pick a free time" = "选一个空闲时段";
+"Your free windows over the next 7 days. The other person still needs to confirm." = "未来 7 天你有空的时段，选好后再邀请对方确认。";
+"Finding free times…" = "正在查找空闲时段…";
+"No suitable free windows in the next 7 days" = "未来 7 天暂无合适的空闲时段";
+"You can still choose a time when proposing a plan in the chat." = "可以返回聊天，在发起计划时手动选时间。";
+"Use this time in a plan" = "将这个时段带入计划";
+"Show other times" = "换一组";
+"Based on your synced calendar · Berlin time" = "根据已同步日程推荐 · 柏林时间";
+"Your chosen free time is filled in. The other person still needs to confirm." = "已填入你选的空闲时段，发送后由对方确认。";
+
+/* Smart time chooser UI */
+"%@ free" = "空闲 %@";
+"Tap a time to fill your plan. You can still adjust it." = "点选时段填入计划，之后仍可调整。";
+"Return to your plan to choose a time yourself." = "返回计划，直接填写你希望的时间。";
+"Choose time manually" = "手动填写时间";
+
+/* Relative plan timing */
+"In %lld days" = "%lld 天后";
+"In about an hour" = "约 1 小时后";
+"In about %lld hours" = "约 %lld 小时后";
+"Within an hour" = "1 小时内";
+"Starting soon" = "即将开始";
+"In progress" = "进行中";
+
+// Profile personalization
+"Classic" = "经典";
+"Rose" = "玫瑰";
+"Ocean" = "海洋";
+"Forest" = "森林";
+"Moon" = "月亮";
+"Leaf" = "绿叶";
+"Sparkles" = "星光";
+"Outline" = "描边";
+"Spotlight" = "聚光";
+"Profile preview" = "个人资料预览";
+"App theme" = "应用主题";
+"Light" = "浅色";
+"Dark" = "深色";
+"App theme applies immediately on this device." = "应用主题会立即生效，仅保存在此设备。";
+"Profile theme" = "个人配色";
+"Profile icon" = "个人图标";
+"Display style" = "展示样式";
+"Show Plus badge" = "展示 Plus 会员标识";
+"Explore Plus membership" = "查看 Plus 会员";
+"Reset profile style" = "恢复默认样式";
+"Plus styles can be previewed by everyone. An active membership is required to save them. After expiry, your profile uses free styles and keeps your saved choices." = "所有人都可预览 Plus 样式，有效会员可保存使用。到期后展示免费样式，并保留原有选择。";
+"This selection requires Plus" = "当前样式需要 Plus 会员";
+"Personalization" = "个性化";
+"Themes, icons & profile style" = "主题、图标与展示样式";
+"Could not save your style. Check your connection and membership, then try again." = "样式保存失败，请检查网络及会员状态后重试。";
+"Avatar" = "头像";
+"Discard changes?" = "放弃更改？";
+
+/* Message request inbox */
+"Waiting for your reply" = "待我回复";
+"New greetings will appear here." = "收到或发出的新招呼会显示在这里。";
+
+/* Compact greeting shortcut */
+"New greetings" = "新招呼";
+"No new greetings" = "暂无新招呼";
+"Your greetings are in New greetings." = "你收到或发出的招呼在“新招呼”中。";
+
+"Mark as unread" = "标为未读";
+"Mark as read" = "标为已读";
+"Marked as unread" = "已标为未读";
+
+/* Plans overview */
+"Overview" = "总览";
+"Next meet-up" = "下一次见面";
+"View all invitations" = "查看全部邀请";
+"No confirmed meet-ups yet" = "还没有确定的安排";
+"Once an invitation is accepted, your next meet-up appears here." = "邀请确认后，下一次见面会显示在这里。";
+"Invitations and your next confirmed meet-up will appear here." = "收到的邀请和确定的见面安排，都会显示在这里。";
+"%@ invited you" = "%@ 邀请你";
+"You invited %@" = "你邀请了 %@";
+"View and respond" = "查看并回应";
+"No current plans" = "目前没有待办计划";
+
+"Share intention" = "分享意愿";

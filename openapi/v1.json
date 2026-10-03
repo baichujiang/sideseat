@@ -85,7 +85,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -151,7 +151,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -728,7 +728,14 @@
             "$ref": "#/components/responses/Error"
           },
           "403": {
-            "$ref": "#/components/responses/Error"
+            "description": "Saving Plus profile styles requires an active Plus membership. Error code: PLUS_REQUIRED.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            }
           },
           "404": {
             "$ref": "#/components/responses/Error"
@@ -7892,7 +7899,7 @@
               "type": "integer",
               "default": 3
             },
-            "description": "Requested count, clamped to 1\u20135."
+            "description": "Requested count, clamped to 1–5."
           }
         ],
         "responses": {
@@ -10650,6 +10657,117 @@
           }
         ]
       }
+    },
+    "/api/v1/me/weekly-intents/{intentId}/share": {
+      "parameters": [
+        {
+          "name": "intentId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "createWeeklyIntentShare",
+        "description": "Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create or reuse an unlisted public link to this active intention. Anyone with the link can view its activity, note and declared availability and send a guest greeting.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "url"
+                      ],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "revokeWeeklyIntentShare",
+        "description": "Revoke the public link. Existing registered conversations remain in the inbox.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revoke the public link. Existing registered conversations remain in the inbox.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "disabled"
+                      ],
+                      "properties": {
+                        "disabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -12882,7 +13000,7 @@
         ]
       },
       "IntentTimePreference": {
-        "description": "EXACT requires 1\u20137 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
+        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
         "oneOf": [
           {
             "type": "object",
@@ -19153,6 +19271,9 @@
           },
           "hideFromRecommendations": {
             "type": "boolean"
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/ProfileAppearance"
           }
         }
       },
@@ -19399,6 +19520,9 @@
                 "required": [
                   "blocked"
                 ]
+              },
+              "appearance": {
+                "$ref": "#/components/schemas/ProfileAppearance"
               }
             },
             "required": [
@@ -19691,6 +19815,9 @@
           "isPlus": {
             "type": "boolean",
             "description": "Whether this person currently has an active Plus membership. Omitted by older servers; clients default to false. Does not expose expiry, payment, or invitation details."
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/ProfileAppearance"
           }
         },
         "required": [
@@ -21785,6 +21912,48 @@
             }
           }
         }
+      },
+      "ProfileAppearance": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "theme": {
+            "type": "string",
+            "enum": [
+              "classic",
+              "rose",
+              "ocean",
+              "forest"
+            ]
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "none",
+              "sun",
+              "moon",
+              "leaf",
+              "sparkles"
+            ]
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "classic",
+              "outline",
+              "spotlight"
+            ]
+          },
+          "showMembershipBadge": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "theme",
+          "icon",
+          "style",
+          "showMembershipBadge"
+        ]
       }
     }
   }

@@ -44,6 +44,7 @@ struct NativeExploreIntent: Codable, Identifiable, Hashable, Sendable {
     let languages: [String]
     let expiresAt: Date?
     let createdAt: Date
+    var isPlus: Bool? = nil
     var isExample: Bool? = nil
     var interest: NativeExploreInterest? = nil
 

@@ -7,8 +7,17 @@ struct ExploreIntentListView: View {
     var embeddedInTogether = false
     var isPageActive = true
     var onOpportunityChange: ((NativeMutualOpportunity) -> Void)? = nil
+    var onBookmarkSaved: ((NativeMutualOpportunity) -> Void)? = nil
     var onShowRecommendations: (() -> Void)? = nil
-    @State private var store = ExploreIntentStore()
+    var inlineInRecommendations = false
+    var resultLimit: Int? = nil
+    var opportunities: [NativeMutualOpportunity] = []
+    var renderOpportunity: ((NativeMutualOpportunity) -> AnyView)? = nil
+    @State var store = ExploreIntentStore()
+    @State private var interactionStore = MutualOpportunityStore()
+    @State private var messageOpportunity: NativeMutualOpportunity?
+
+    private var effectiveLimit: Int { resultLimit ?? access.resultLimit }
     @State private var searchText = ""
     @State private var selectedTopic: NativeWeeklyIntentTopic? = nil
     @FocusState private var searchIsFocused: Bool
@@ -20,20 +29,29 @@ struct ExploreIntentListView: View {
 
     var body: some View {
         Group {
-            if embeddedInTogether { content }
+            if inlineInRecommendations { cardsContent }
+            else if embeddedInTogether { content }
             else {
                 content.navigationTitle(AppLocalization.string("Explore intentions"))
                     .navigationBarTitleDisplayMode(.inline)
             }
         }
         .background(SideSeatTheme.bgGrouped)
-        .tint(SideSeatTheme.accentText)
+        .tint(SideSeatTheme.utilityAction)
         .task(id: isEnabled && isPageActive) {
-            if isEnabled && isPageActive {
-                await store.load(using: session, limit: access.resultLimit)
+            if isEnabled && isPageActive && !inlineInRecommendations {
+                await store.load(using: session, limit: effectiveLimit)
             }
         }
-        .refreshable { if isEnabled { await store.load(using: session, limit: access.resultLimit) } }
+        .refreshable { if isEnabled { await store.load(using: session, limit: effectiveLimit) } }
+        .sheet(item: $messageOpportunity) { opportunity in
+            OpportunityMessageComposer(opportunity: opportunity, onSend: { body in
+                let action = opportunity.messageRequest?.isIncoming == true ? "REPLY" : "SEND"
+                let result = await interactionStore.interact(action, opportunity: opportunity, body: body, using: session)
+                if let result { onOpportunityChange?(result) }
+                return result
+            }, onConversation: { router.navigate(to: $0.conversationRoute) })
+        }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("explore-intents-list")
     }
@@ -49,18 +67,29 @@ struct ExploreIntentListView: View {
             .accessibilityIdentifier("explore-unavailable")
         } else {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            cardsContent
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, SideSeatTheme.spaceMD)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        }
+    }
+
+    private var cardsContent: some View {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                if !inlineInRecommendations {
                 Text(AppLocalization.string("Explore what people around campus want to do"))
                     .font(.headline)
                     .foregroundStyle(SideSeatTheme.Together.ink)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text(AppLocalization.string("Show interest in an activity. Your choice stays private until you both show interest."))
+                Text(AppLocalization.string("Save an intention privately or say hello with a message."))
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if access.showsAdvancedContext {
+                }
+                if access.showsAdvancedContext && !inlineInRecommendations {
                     Label(AppLocalization.string("SideSeat Plus exploration"), systemImage: "sparkles")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -107,14 +136,26 @@ struct ExploreIntentListView: View {
                     .background(SSPageSwipeExclusion())
                 }
 
-                if store.isLoading, store.intents.isEmpty {
+                if inlineInRecommendations, store.intents.isEmpty {
+                    if let issue = store.issue {
+                        Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
+                    } else if store.hasLoaded && !store.isLoading {
+                        Text("No new recommendations right now.")
+                            .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .frame(maxWidth: .infinity)
+                            .accessibilityIdentifier("explore-intents-empty")
+                        Button(AppLocalization.string("Try again")) {
+                            Task { await store.load(using: session, limit: effectiveLimit) }
+                        }.buttonStyle(.bordered)
+                    }
+                } else if store.isLoading, store.intents.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 120)
                 } else if let issue = store.issue, store.intents.isEmpty {
                     ContentUnavailableView {
                         Label(AppLocalization.string("Explore couldn't load"), systemImage: "wifi.exclamationmark")
                     } description: { Text(issue) } actions: {
                         Button(AppLocalization.string("Try again")) {
-                            Task { await store.load(using: session, limit: access.resultLimit) }
+                            Task { await store.load(using: session, limit: effectiveLimit) }
                         }
                         .buttonStyle(.bordered)
                     }
@@ -128,30 +169,26 @@ struct ExploreIntentListView: View {
                     .accessibilityIdentifier("explore-intents-empty")
                 } else {
                     ForEach(visibleIntents) { intent in
-                        ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext,
-                            isWorking: store.mutatingIDs.contains(intent.id),
-                            onInterested: {
-                                Task {
-                                    if let opportunity = await store.expressInterest(in: intent, using: session) {
-                                        onOpportunityChange?(opportunity)
-                                    }
-                                }
-                            },
-                            onWithdraw: {
-                                Task {
-                                    if let opportunity = await store.withdrawInterest(in: intent, using: session) {
-                                        onOpportunityChange?(opportunity)
-                                    }
-                                }
-                            },
-                            onShowRecommendations: onShowRecommendations,
-                            onOpenConversation: {
-                                if let connectionID = intent.interest?.coordination?.connectionId {
-                                    router.navigate(to: .directChat(connectionID: connectionID))
-                                }
-                            })
+                        if let opportunity = (opportunities + interactionStore.opportunities).first(where: { $0.id == intent.interest?.opportunityId }) {
+                            if let renderOpportunity {
+                                renderOpportunity(opportunity)
+                            } else {
+                                MutualOpportunityCard(opportunity: opportunity,
+                                    isWorking: interactionStore.mutatingIDs.contains(opportunity.id),
+                                    onBookmark: { Task { await toggleBookmark(opportunity) } },
+                                    onMessage: { messageOpportunity = opportunity },
+                                    onOpenConversation: {
+                                        router.navigate(to: opportunity.conversationRoute)
+                                    })
+                            }
+                        } else {
+                            ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext && !inlineInRecommendations,
+                                isWorking: store.mutatingIDs.contains(intent.id),
+                                onBookmark: { Task { await startInteraction(intent, bookmark: true) } },
+                                onMessage: { Task { await startInteraction(intent, bookmark: false) } })
+                        }
                     }
-                    if visibleIntents.isEmpty {
+                    if visibleIntents.isEmpty && !inlineInRecommendations {
                         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                             Text(AppLocalization.string("No Explore results match these filters"))
                                 .font(.subheadline)
@@ -173,11 +210,11 @@ struct ExploreIntentListView: View {
                     }
                 }
 
-                if access == .free, store.hasMore {
+                if !inlineInRecommendations, access == .free, store.hasMore {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                         Label(AppLocalization.string("Explore more with SideSeat Plus"), systemImage: "sparkles")
                             .font(.headline)
-                        Text(AppLocalization.string("Plus can unlock more Explore results, richer activity context, search and filters. Identity stays hidden until mutual interest."))
+                        Text(AppLocalization.string("Plus can unlock more Explore results, richer activity context, search and filters."))
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                             .fixedSize(horizontal: false, vertical: true)
@@ -186,14 +223,30 @@ struct ExploreIntentListView: View {
                     .accessibilityIdentifier("explore-plus-preview")
                 }
 
-                if let issue = store.issue, !store.intents.isEmpty {
+                if let issue = interactionStore.issue ?? store.issue, !store.intents.isEmpty {
                     Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
                 }
             }
-            .padding(.horizontal, SideSeatTheme.screenHorizontal)
-            .padding(.vertical, SideSeatTheme.spaceMD)
+    }
+
+    private func startInteraction(_ intent: NativeExploreIntent, bookmark: Bool) async {
+        guard let opportunity = await store.prepareContact(in: intent, using: session) else { return }
+        interactionStore.upsert(opportunity)
+        onOpportunityChange?(opportunity)
+        if bookmark {
+            await toggleBookmark(opportunity)
+        } else if opportunity.coordination != nil || opportunity.messageRequest != nil {
+            router.navigate(to: opportunity.conversationRoute)
+        } else if opportunity.messageRequest == nil || opportunity.messageRequest?.isIncoming == true {
+            messageOpportunity = opportunity
         }
-        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private func toggleBookmark(_ opportunity: NativeMutualOpportunity) async {
+        if let updated = await interactionStore.interact(opportunity.isBookmarked == true ? "UNBOOKMARK" : "BOOKMARK",
+            opportunity: opportunity, using: session) {
+            onOpportunityChange?(updated)
+            if updated.isBookmarked == true { onBookmarkSaved?(updated) }
         }
     }
 
@@ -211,7 +264,7 @@ struct ExploreIntentListView: View {
                 Text(title)
             }
             .font(.subheadline.weight(isSelected ? .semibold : .regular))
-            .foregroundStyle(isSelected ? SideSeatTheme.accentText : SideSeatTheme.textPrimary)
+            .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.textPrimary)
             .padding(.horizontal, SideSeatTheme.spaceMD)
             .frame(minHeight: 44)
             .background(isSelected ? SideSeatTheme.Together.navigationSelection : SideSeatTheme.fillTertiary,
@@ -224,10 +277,16 @@ struct ExploreIntentListView: View {
     }
 
     private var visibleIntents: [NativeExploreIntent] {
-        guard access == .plus else { return store.intents }
+        let candidates = store.intents.filter { intent in
+            guard let interest = intent.interest else { return true }
+            // The parent holds newer changes made from Saved intentions.
+            let opportunity = (opportunities + interactionStore.opportunities).first { $0.id == interest.opportunityId }
+            return interest.coordination == nil && opportunity?.hasConversation != true
+        }
+        guard access == .plus && !inlineInRecommendations else { return Array(candidates.prefix(effectiveLimit)) }
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        return store.intents.filter { intent in
+        return candidates.filter { intent in
             if let selectedTopic, intent.topic != selectedTopic { return false }
             guard !query.isEmpty else { return true }
             let haystack = [intent.activityTitle, intent.descriptionPreview ?? "", intent.course?.title ?? ""]
@@ -244,10 +303,8 @@ struct ExploreIntentCard: View {
     let compact: Bool
     let showsPlusContext: Bool
     var isWorking = false
-    var onInterested: (() -> Void)? = nil
-    var onWithdraw: (() -> Void)? = nil
-    var onShowRecommendations: (() -> Void)? = nil
-    var onOpenConversation: (() -> Void)? = nil
+    var onBookmark: (() -> Void)? = nil
+    var onMessage: (() -> Void)? = nil
 
     var body: some View {
         SSFlowCard(
@@ -295,6 +352,8 @@ struct ExploreIntentCard: View {
                 .fixedSize(horizontal: false, vertical: !compact)
                 .padding(.vertical, SideSeatTheme.spaceXS)
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+            if intent.isPlus == true { SSPlusBadge() }
 
             if compact {
                 Label(compactContext, systemImage: "building.columns")
@@ -348,52 +407,14 @@ struct ExploreIntentCard: View {
         }
     }
 
-    @ViewBuilder
     private var interestAction: some View {
-        if intent.interest?.state == "READY_TO_COORDINATE" {
-            Label(AppLocalization.string("You both showed interest"), systemImage: "checkmark.circle.fill")
-                .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.statusSuccessText)
-            if let onOpenConversation {
-                actionButton("Chat about the details", icon: "bubble.left.and.bubble.right", identifier: "explore-chat-\(intent.id)", action: onOpenConversation)
-            }
-        } else if intent.interest?.state == "DECIDED" {
-            if let onWithdraw {
-                SSOpportunityInterestStatus(id: intent.id, accessibilityPrefix: "explore-interest",
-                    isWorking: isWorking, onWithdraw: onWithdraw)
-            }
-            if let onShowRecommendations {
-                Button(AppLocalization.string("View in recommendations"), action: onShowRecommendations)
-                    .font(.footnote.weight(.medium)).frame(minHeight: 44)
-                    .accessibilityIdentifier("explore-view-recommendations-\(intent.id)")
-            }
-        } else if intent.interest?.state == "UNAVAILABLE" {
-            Label(AppLocalization.string("Details are no longer available."), systemImage: "minus.circle")
-                .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-        } else if let onInterested {
-            actionButton("Interested", icon: "heart", identifier: "explore-interest-\(intent.id)", action: onInterested)
-                .accessibilityHint(AppLocalization.string("Show interest in an activity. Your choice stays private until you both show interest."))
+        SSIntentionActionRow(isBookmarked: false, isDisabled: isWorking || intent.isExample == true,
+            bookmarkIdentifier: "explore-bookmark-\(intent.id)", onBookmark: { onBookmark?() }) {
+            SSIntentionContactButton(title: AppLocalization.string("Say hello"),
+                identifier: "explore-message-\(intent.id)", isDisabled: isWorking || intent.isExample == true,
+                action: { onMessage?() })
         }
-    }
-
-    private func actionButton(_ title: String.LocalizationValue, icon: String, identifier: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                if isWorking { ProgressView().tint(SideSeatTheme.accentText) }
-                else { Image(systemName: icon) }
-                Text(AppLocalization.string(title))
-            }
-            .font(.subheadline.weight(.semibold))
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: .infinity, minHeight: 48)
-            .foregroundStyle(SideSeatTheme.accentText)
-            .padding(.horizontal, SideSeatTheme.spaceSM)
-            .background(SideSeatTheme.Together.selectedTab,
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .disabled(isWorking)
-        .accessibilityIdentifier(identifier)
+        .padding(.top, SideSeatTheme.spaceXS)
     }
 
     private var compactContext: String {

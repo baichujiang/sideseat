@@ -210,6 +210,9 @@ final class DirectChatStore {
                             author: NativeActionContextAuthor(id: fixture.connection.peer.id, displayName: "Peer"), course: nil,
                             timeContext: NativeIntentTimePreference(kind: "UNDECIDED")))))
             }
+            if let introduction = MutualOpportunityStore.fixtureChatMessages[connectionID] {
+                messages = introduction
+            }
             hasMoreOlder = false
             nextCursor = nil
             realtimeCursor = "ui-cursor"
@@ -1294,6 +1297,36 @@ final class DirectChatStore {
     @discardableResult
     func declinePlan(_ plan: NativePlanRequest, using session: SessionStore) async -> Bool {
         await mutatePlan(plan, action: "decline", method: .post, using: session)
+    }
+
+    @discardableResult
+    func cancelPlan(_ plan: NativePlanRequest, reasonCode: String?, note: String, using session: SessionStore) async -> Bool {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return await mutatePlan(plan, action: "withdraw", method: .delete, using: session)
+        }
+        #endif
+        guard !isActingOnPlan else { return false }
+        isActingOnPlan = true
+        planIssue = nil
+        defer { isActingOnPlan = false }
+        struct Input: Encodable { let reasonCode: String?; let note: String }
+        let key = "cancel:\(plan.id):\(reasonCode ?? ""):\(note)"
+        let token = planMutationKeys[key] ?? UUID().uuidString
+        planMutationKeys[key] = token
+        do {
+            let _: APIEnvelope<NativePlanEnvelopePayload> = try await session.sendAuthorized(
+                "api/v1/plans/\(plan.id)/cancel", method: .post,
+                body: Input(reasonCode: reasonCode, note: note), idempotencyKey: token)
+            await reloadHistory(using: session)
+            await publishPlanMutationEffects(didAccept: true)
+            planMutationKeys[key] = nil
+            return true
+        } catch {
+            if let error = error as? APIClientError, !error.shouldPreserveIdempotencyKey { planMutationKeys[key] = nil }
+            planIssue = error.localizedDescription
+            return false
+        }
     }
 
     @discardableResult

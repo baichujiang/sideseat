@@ -421,6 +421,7 @@ private extension NativeCurrentProfile {
         verificationStatus nextVerificationStatus: String? = nil
     ) -> NativeCurrentProfile {
         NativeCurrentProfile(
+            appearance: appearance,
             id: id,
             username: username,
             nickname: nickname,

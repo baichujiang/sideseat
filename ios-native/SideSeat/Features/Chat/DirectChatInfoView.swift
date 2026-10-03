@@ -146,9 +146,9 @@ struct ConversationContextBar: View {
             HStack(spacing: SideSeatTheme.spaceMD) {
                 Image(systemName: "sparkles")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.accentText)
+                    .foregroundStyle(SideSeatTheme.utilityAction)
                     .frame(width: 32, height: 32)
-                    .background(SideSeatTheme.accent.opacity(0.10), in: Circle())
+                    .background(SideSeatTheme.fillSubtle, in: Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(selection.sourceTitle)
@@ -183,6 +183,9 @@ struct ConversationContextBar: View {
 }
 
 struct ConversationContextSheet: View {
+    @Environment(SessionStore.self) private var session
+    @State private var opportunity: NativeMutualOpportunity?
+    @State private var opportunityStore = MutualOpportunityStore()
     @Environment(\.dismiss) private var dismiss
 
     let selection: ConversationContextSelection
@@ -192,54 +195,61 @@ struct ConversationContextSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                        Text(selection.sourceTitle)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        Text(selection.context.localizedTitle)
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.vertical, SideSeatTheme.spaceXS)
-                }
-
-                if let course = selection.context.course {
+                if let opportunity {
+                    MutualOpportunityCard(opportunity: opportunity, isWorking: false,
+                        onBookmark: {}, onMessage: {}, onOpenConversation: {}, showsActions: false)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                } else {
                     Section {
-                        contextRow(
-                            title: AppLocalization.string("Course"),
-                            value: [course.code, course.name]
-                                .compactMap { $0 }
-                                .filter { !$0.isEmpty }
-                                .joined(separator: " "),
-                            systemImage: "graduationcap"
-                        )
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                            Text(selection.sourceTitle)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            Text(selection.context.localizedTitle)
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, SideSeatTheme.spaceXS)
                     }
-                }
 
-                Section {
-                    if let start = selection.context.startDate {
-                        contextRow(
-                            title: AppLocalization.string("Starts"),
-                            value: start.formatted(date: .abbreviated, time: .shortened),
-                            systemImage: "calendar"
-                        )
+                    if let course = selection.context.course {
+                        Section {
+                            contextRow(
+                                title: AppLocalization.string("Course"),
+                                value: [course.code, course.name]
+                                    .compactMap { $0 }
+                                    .filter { !$0.isEmpty }
+                                    .joined(separator: " "),
+                                systemImage: "graduationcap"
+                            )
+                        }
                     }
-                    if let end = selection.context.endDate {
-                        contextRow(
-                            title: AppLocalization.string("Ends"),
-                            value: end.formatted(date: .abbreviated, time: .shortened),
-                            systemImage: "clock"
-                        )
-                    }
-                    if let location = selection.context.location?.trimmingCharacters(in: .whitespacesAndNewlines),
-                       !location.isEmpty {
-                        contextRow(
-                            title: AppLocalization.string("Location"),
-                            value: location,
-                            systemImage: "mappin.and.ellipse"
-                        )
+
+                    Section {
+                        if let start = selection.context.startDate {
+                            contextRow(
+                                title: AppLocalization.string("Starts"),
+                                value: start.formatted(date: .abbreviated, time: .shortened),
+                                systemImage: "calendar"
+                            )
+                        }
+                        if let end = selection.context.endDate {
+                            contextRow(
+                                title: AppLocalization.string("Ends"),
+                                value: end.formatted(date: .abbreviated, time: .shortened),
+                                systemImage: "clock"
+                            )
+                        }
+                        if let location = selection.context.location?.trimmingCharacters(in: .whitespacesAndNewlines),
+                           !location.isEmpty {
+                            contextRow(
+                                title: AppLocalization.string("Location"),
+                                value: location,
+                                systemImage: "mappin.and.ellipse"
+                            )
+                        }
                     }
                 }
             }
@@ -265,6 +275,11 @@ struct ConversationContextSheet: View {
                     .padding(.vertical, SideSeatTheme.spaceSM)
                     .background(.bar)
                 }
+            }
+        }
+        .task {
+            if case .mutualOpportunity(let id) = selection.source {
+                opportunity = await opportunityStore.loadConversation(id: id, using: session)
             }
         }
         .presentationDetents([.medium, .large])
@@ -504,9 +519,12 @@ struct DirectChatInfoView: View {
                         size: 46
                     )
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(conversation.displayName)
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
+                        HStack(spacing: 6) {
+                            Text(conversation.displayName)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            if conversation.peer.isPlus == true { SSPlusBadge() }
+                        }
                         Text("@\(conversation.peer.username)")
                             .font(.footnote)
                             .foregroundStyle(SideSeatTheme.textSecondary)

@@ -305,7 +305,7 @@ private struct ChatMessageActionPopover: View {
     }
 
     private func actionTint(_ action: SSLongPressAction) -> Color {
-        action.role == .destructive ? SideSeatTheme.danger : SideSeatTheme.accentText
+        action.role == .destructive ? SideSeatTheme.danger : SideSeatTheme.utilityAction
     }
 }
 
@@ -402,6 +402,7 @@ enum ChatComposerReturnKey {
 }
 
 struct NativeInboxPayload: Codable, Sendable {
+    var messageRequests: [NativeMutualOpportunity]
     let conversations: [NativeInboxConversation]
     let unreadTotal: Int
     let plansNeedingYourAction: Int
@@ -409,6 +410,7 @@ struct NativeInboxPayload: Codable, Sendable {
     let actionResponseSummary: Components.Schemas.ActionResponseSummary?
 
     private enum CodingKeys: String, CodingKey {
+        case messageRequests
         case conversations
         case unreadTotal
         case plansNeedingYourAction
@@ -421,8 +423,10 @@ struct NativeInboxPayload: Codable, Sendable {
         unreadTotal: Int,
         plansNeedingYourAction: Int,
         planOutcomesNeedingYourResponse: Int = 0,
-        actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil
+        actionResponseSummary: Components.Schemas.ActionResponseSummary? = nil,
+        messageRequests: [NativeMutualOpportunity] = []
     ) {
+        self.messageRequests = messageRequests
         self.conversations = conversations
         self.unreadTotal = unreadTotal
         self.plansNeedingYourAction = plansNeedingYourAction
@@ -432,6 +436,7 @@ struct NativeInboxPayload: Codable, Sendable {
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        messageRequests = try container.decodeIfPresent([NativeMutualOpportunity].self, forKey: .messageRequests) ?? []
         conversations = try container.decode([NativeInboxConversation].self, forKey: .conversations)
         unreadTotal = try container.decode(Int.self, forKey: .unreadTotal)
         plansNeedingYourAction = try container.decode(Int.self, forKey: .plansNeedingYourAction)
@@ -658,6 +663,7 @@ struct NativeInboxLastMessage: Codable, Hashable, Sendable {
 }
 
 struct NativeChatAuthor: Codable, Hashable, Sendable, Identifiable {
+    var isPlus: Bool? = nil
     let id: String
     let username: String
     let nickname: String?
@@ -719,7 +725,50 @@ struct NativePlanAuthor: Codable, Hashable, Sendable {
     }
 }
 
+struct NativePlanCancellation: Codable, Hashable, Sendable {
+    let actorId: String
+    let reasonCode: String?
+    let note: String?
+    let canceledAt: String
+    let wasConfirmed: Bool
+}
+
+enum PlanRelativeTime: Equatable {
+    case today, tomorrow, days(Int), hours(Int), withinAnHour, startingSoon, inProgress, ended
+
+    static func value(status: String, start: Date, end: Date, now: Date,
+                      calendar: Calendar = .autoupdatingCurrent) -> Self? {
+        guard ["PENDING", "ACCEPTED"].contains(status), end > start else { return nil }
+        if now >= end { return status == "ACCEPTED" ? .ended : nil }
+        if now >= start { return status == "ACCEPTED" ? .inProgress : nil }
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: now),
+                                           to: calendar.startOfDay(for: start)).day ?? 0
+        if days == 1 { return .tomorrow }
+        if days > 1 { return .days(days) }
+        let remaining = start.timeIntervalSince(now)
+        if remaining <= 30 * 60 { return status == "ACCEPTED" ? .startingSoon : .today }
+        if remaining < 3600 { return .withinAnHour }
+        if remaining <= 6 * 3600 { return .hours(Int((remaining / 3600).rounded())) }
+        return .today
+    }
+
+    var title: String {
+        switch self {
+        case .today: AppLocalization.string("Today")
+        case .tomorrow: AppLocalization.string("Tomorrow")
+        case .days(let count): String(format: AppLocalization.string("In %lld days"), Int64(count))
+        case .hours(1): AppLocalization.string("In about an hour")
+        case .hours(let count): String(format: AppLocalization.string("In about %lld hours"), Int64(count))
+        case .withinAnHour: AppLocalization.string("Within an hour")
+        case .startingSoon: AppLocalization.string("Starting soon")
+        case .inProgress: AppLocalization.string("In progress")
+        case .ended: AppLocalization.string("Ended")
+        }
+    }
+}
+
 struct NativePlanRequest: Codable, Identifiable, Hashable, Sendable {
+    var cancellation: NativePlanCancellation? = nil
     let id: String
     let connectionId: String
     let commitmentId: String?

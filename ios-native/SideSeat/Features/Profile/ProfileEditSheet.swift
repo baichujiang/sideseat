@@ -592,13 +592,13 @@ private struct ProfileEditFieldRow<Content: View>: View {
             .fixedSize(horizontal: false, vertical: true)
 
             content()
-                .frame(maxWidth: .infinity, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, SideSeatTheme.spaceSM)
         .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? SideSeatTheme.spaceSM : SideSeatTheme.spaceXS)
         .background {
             RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                .fill(isFocused ? SideSeatTheme.accent.opacity(0.06) : .clear)
+                .fill(isFocused ? SideSeatTheme.fillSubtle : .clear)
                 .animation(reduceMotion ? nil : .easeOut(duration: SideSeatTheme.Interaction.pressDuration), value: isFocused)
         }
         .overlay(alignment: .bottom) {
@@ -610,7 +610,6 @@ private struct ProfileEditFieldRow<Content: View>: View {
 }
 
 private struct ProfileEditMenuPicker: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     @Binding var selection: String
     let options: [(value: String, label: String)]
@@ -630,14 +629,15 @@ private struct ProfileEditMenuPicker: View {
                     Text(options.first(where: { $0.value == selection })?.label ?? selection)
                         .font(.body.weight(.medium))
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                        .multilineTextAlignment(dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     Image(systemName: "chevron.down")
                         .font(.caption2.weight(.semibold))
                         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.textSecondary)
                 }
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
             }
             .buttonStyle(SSPressButtonStyle())
@@ -773,7 +773,7 @@ private struct ProfileEditTextField: View {
                 .focused(focus, equals: field)
                 .submitLabel(field.next == nil ? .done : .next)
                 .onSubmit { focus.wrappedValue = field.next }
-                .tint(SideSeatTheme.accentText)
+                .tint(SideSeatTheme.utilityAction)
                 .frame(minHeight: 44)
                 .accessibilityLabel(title)
                 .accessibilityIdentifier(accessibilityID)
@@ -805,7 +805,7 @@ private struct ProfileEditTaglineField: View {
                 .font(.body)
                 .multilineTextAlignment(.leading)
                 .focused(focus, equals: .tagline)
-                .tint(SideSeatTheme.accentText)
+                .tint(SideSeatTheme.utilityAction)
                 .padding(.vertical, SideSeatTheme.spaceSM)
                 .frame(minHeight: 44)
                 .accessibilityLabel(AppLocalization.string("Tagline"))
@@ -840,22 +840,24 @@ private struct ProfileEditSemesterControl: View {
     var body: some View {
         ProfileEditFieldRow(title: AppLocalization.string("Semester"), showsDivider: false) {
             HStack(spacing: SideSeatTheme.spaceXS) {
-                semesterButton(systemImage: "minus", enabled: semester > 1) {
-                    semester -= 1
-                }
-
                 Text("\(semester)")
                     .font(.body.weight(.semibold).monospacedDigit())
-                    .frame(minWidth: 32)
                     .accessibilityIdentifier("profile-edit-semester")
 
-                semesterButton(systemImage: "plus", enabled: semester < 14) {
-                    semester += 1
+                Spacer(minLength: SideSeatTheme.spaceSM)
+
+                HStack(spacing: SideSeatTheme.spaceXS) {
+                    semesterButton(systemImage: "minus", enabled: semester > 1) {
+                        semester -= 1
+                    }
+                    semesterButton(systemImage: "plus", enabled: semester < 14) {
+                        semester += 1
+                    }
                 }
-            }
-            .background {
-                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .fill(SideSeatTheme.fillTertiary)
+                .background {
+                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                        .fill(SideSeatTheme.fillTertiary)
+                }
             }
         }
     }
@@ -937,7 +939,7 @@ struct ProfileEditToggleRow: View {
                 .font(.body.weight(.medium))
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .tint(SideSeatTheme.accentText)
+        .tint(SideSeatTheme.utilityAction)
         .accessibilityIdentifier(accessibilityID)
     }
 }

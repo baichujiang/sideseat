@@ -92,6 +92,34 @@ final class PlansStore {
                     updatedAt: formatter.string(from: Date())
                 )
             ]
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-mixed-waiting") {
+                // Earlier outgoing proposal verifies that incoming responses still take priority.
+                var outgoing = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(plans[1])) as! [String: Any]
+                outgoing["id"] = "ui-plan-outgoing"
+                outgoing["status"] = "PENDING"
+                outgoing["title"] = "Coffee after class"
+                outgoing["planType"] = "COFFEE"
+                outgoing["location"] = "Campus café"
+                outgoing["startTime"] = formatter.string(from: pendingStart.addingTimeInterval(-3600))
+                outgoing["endTime"] = formatter.string(from: pendingStart)
+                plans.append(try! JSONDecoder().decode(NativePlanRequest.self,
+                    from: JSONSerialization.data(withJSONObject: outgoing)))
+            }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-date-groups") {
+                let calendar = Calendar.autoupdatingCurrent
+                let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: Date()))!
+                for hour in [10, 14] {
+                    var item = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(plans[1])) as! [String: Any]
+                    let start = calendar.date(byAdding: .hour, value: hour, to: tomorrow)!
+                    item["id"] = "ui-plan-tomorrow-\(hour)"
+                    item["title"] = hour == 10 ? "Morning coffee" : "Library study"
+                    item["location"] = hour == 10 ? "Campus café" : "Central Library · Reading room on the second floor"
+                    item["startTime"] = formatter.string(from: start)
+                    item["endTime"] = formatter.string(from: start.addingTimeInterval(3600))
+                    plans.append(try! JSONDecoder().decode(NativePlanRequest.self,
+                        from: JSONSerialization.data(withJSONObject: item)))
+                }
+            }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-long-list") {
                 plans = plans.flatMap { plan in
                     (0..<8).map { index in
@@ -103,6 +131,9 @@ final class PlansStore {
                         return try! JSONDecoder().decode(NativePlanRequest.self, from: JSONSerialization.data(withJSONObject: json))
                     }
                 }
+            }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-no-incoming") {
+                plans.removeAll { $0.status == "PENDING" && $0.receiver.id == "ui-test-user" }
             }
             return
         }

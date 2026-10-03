@@ -569,7 +569,7 @@ private struct CourseSemesterReviewSheet: View {
                                         .font(.title3)
                                         .foregroundStyle(
                                             store.selectedCourseIDs.contains(course.id)
-                                                ? SideSeatTheme.accentText
+                                                ? SideSeatTheme.utilityAction
                                                 : Color.secondary
                                         )
                                         VStack(alignment: .leading, spacing: 4) {

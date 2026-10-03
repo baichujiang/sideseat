@@ -463,13 +463,13 @@ enum UITestingChatFixtures {
                     planRequest: NativePlanRequest(
                         id: "ui-plan-1",
                         connectionId: mina.connectionID,
-                        status: "PENDING",
+                        status: ProcessInfo.processInfo.arguments.contains("--ui-testing-cancellation-notice") ? "CANCELED" : ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-cancel") ? "ACCEPTED" : "PENDING",
                         planType: "STUDY",
                         title: "图书馆自习",
                         location: "中心图书馆",
                         message: "带上笔记",
-                        startTime: Date().addingTimeInterval(24 * 60 * 60).formatted(.iso8601),
-                        endTime: Date().addingTimeInterval(25 * 60 * 60).formatted(.iso8601),
+                        startTime: Date().addingTimeInterval(ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-cancel") ? 3600 : 24 * 60 * 60).formatted(.iso8601),
+                        endTime: Date().addingTimeInterval(ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-cancel") ? 7200 : 25 * 60 * 60).formatted(.iso8601),
                         proposer: NativePlanAuthor(
                             id: mina.id,
                             username: mina.username,

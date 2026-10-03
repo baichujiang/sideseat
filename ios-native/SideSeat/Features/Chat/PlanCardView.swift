@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlanCardView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
 
     let plan: NativePlanRequest
     let currentUserID: String
@@ -14,18 +15,42 @@ struct PlanCardView: View {
     let onOpenCalendar: () -> Void
 
     var body: some View {
-        SSFlowCard {
-            SSFlowCardHeader(
-                title: plan.title,
-                subtitle: statusLabel,
-                systemImage: statusIcon,
-                tint: statusForeground
-            )
-            .accessibilityIdentifier("plan-card-\(plan.id)")
+        SSFlowCard(contentPadding: 12, contentSpacing: SideSeatTheme.spaceSM) {
+            HStack(alignment: .top) {
+                let titleLayout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                    : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+                titleLayout {
+                    Text(plan.title)
+                        .font(.headline)
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Label(statusLabel, systemImage: statusIcon)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(statusForeground)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityIdentifier("plan-card-\(plan.id)")
+                if canCancel {
+                    Menu {
+                        Button(role: .destructive, action: onWithdraw) {
+                            Label(plan.status == "ACCEPTED" ? "Cancel plan" : "Withdraw proposal", systemImage: "xmark.circle")
+                        }.accessibilityIdentifier("plan-cancel-menu-action")
+                    } label: {
+                        Image(systemName: "ellipsis").frame(width: 44, height: 44)
+                    }
+                    .disabled(isActing)
+                    .accessibilityLabel("Plan options")
+                    .accessibilityIdentifier("plan-options-\(plan.id)")
+                }
+            }
 
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 4) {
                 if let start = plan.startDate, let end = plan.endDate {
-                    planDateDetails(start: start, end: end)
+                    TimelineView(.periodic(from: .now, by: 60)) { context in
+                        planDateDetails(start: start, end: end, now: context.date)
+                    }
                 }
                 if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines), !location.isEmpty {
                     Label(location, systemImage: "mappin.and.ellipse")
@@ -43,7 +68,7 @@ struct PlanCardView: View {
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(SideSeatTheme.spaceMD)
+                .padding(SideSeatTheme.spaceSM)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(
                     SideSeatTheme.fillTertiary,
@@ -62,7 +87,7 @@ struct PlanCardView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Divider()
+            if plan.status != "PENDING" || canRespond { Divider() }
 
             if canRespond {
                 Text(
@@ -77,30 +102,6 @@ struct PlanCardView: View {
                 planResponseActions
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("plan-card-actions-\(plan.id)")
-            } else if plan.status == "PENDING",
-                plan.proposer.id == currentUserID,
-                plan.usesActionCoordinationV2
-            {
-                Button(role: .destructive, action: onWithdraw) {
-                    Text(
-                        isRescheduleProposal
-                            ? AppLocalization.string("Withdraw new time")
-                            : AppLocalization.string("Withdraw proposal")
-                    )
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .disabled(isActing)
-                .accessibilityIdentifier("plan-card-withdraw-\(plan.id)")
-            } else if plan.status == "PENDING" {
-                Label(
-                    plan.proposer.id == currentUserID
-                        ? AppLocalization.string("Waiting for a response")
-                        : AppLocalization.string("Response pending"),
-                    systemImage: "hourglass"
-                )
-                .font(.caption.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             } else if plan.isOutcomeEligible() {
                 PlanOutcomePromptView(
                     plan: plan,
@@ -118,20 +119,43 @@ struct PlanCardView: View {
                             .font(.caption.weight(.bold))
                             .frame(width: 44, height: 44)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(SSPressButtonStyle())
                     .accessibilityLabel("View calendar")
                     .accessibilityIdentifier("plan-card-calendar-\(plan.id)")
                 }
-            } else {
+            } else if plan.status != "PENDING" {
                 Text(statusDetail)
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                if let cancellation = plan.cancellation {
+                    Text(cancellation.wasConfirmed
+                        ? (cancellation.actorId == currentUserID ? "Canceled by you" : "Canceled by the other person")
+                        : (cancellation.actorId == currentUserID ? "Withdrawn by you" : "Withdrawn by the other person"))
+                        .font(.caption).foregroundStyle(.secondary)
+                    if let reason = cancellation.reasonCode {
+                        Text(PlanCancellationSheet.reasonLabel(reason)).font(.footnote)
+                    }
+                    if let note = cancellation.note, !note.isEmpty { Text(note).font(.footnote) }
+                }
+                if plan.status == "CANCELED" {
+                    Button {
+                        PlanRebookingLaunch.shared.plan = plan
+                        deepLinkRouter.handleAppPath("/together")
+                    } label: { Label("Find other company", systemImage: "person.2") }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("plan-find-company")
+                }
             }
         }
         .frame(
             maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 340,
             alignment: .leading
         )
+    }
+
+    private var canCancel: Bool {
+        (plan.endDate ?? .distantPast) > Date() &&
+        (plan.status == "ACCEPTED" || (plan.status == "PENDING" && plan.proposer.id == currentUserID))
     }
 
     private var planResponseActions: some View {
@@ -170,21 +194,23 @@ struct PlanCardView: View {
         .disabled(isActing)
     }
 
-    @ViewBuilder
-    private func planDateDetails(start: Date, end: Date) -> some View {
+    private func planDateDetails(start: Date, end: Date, now: Date) -> some View {
         let calendar = Calendar.autoupdatingCurrent
         let locale = AppLocalization.selectedLanguage.locale
+        let dates: String
         if calendar.isDate(start, inSameDayAs: end) {
-            Label(
-                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) · \(end.formatted(.dateTime.hour().minute().locale(locale)))",
-                systemImage: "calendar"
-            )
+            dates = "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))–\(end.formatted(.dateTime.hour().minute().locale(locale)))"
         } else {
-            Label(
-                "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))",
-                systemImage: "calendar"
-            )
+            dates = "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))"
         }
+        let relative = PlanRelativeTime.value(status: plan.status, start: start, end: end, now: now)
+        return Label {
+            (Text(relative.map { "\($0.title) · " } ?? "").fontWeight(.semibold) + Text(dates))
+                .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "calendar")
+        }
+        .accessibilityIdentifier("plan-card-time-\(plan.id)")
     }
 
     private var canRespond: Bool {
@@ -242,16 +268,24 @@ struct PlanCardView: View {
 }
 
 struct PlanOutcomePromptView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isEditing = false
     let plan: NativePlanRequest
     let isSubmitting: Bool
+    var showsSavedQuestion = true
     let onAnswer: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            ViewThatFits(in: .horizontal) {
-                compactOutcomeRow
+            if !showsSavedQuestion, plan.viewerOutcome != nil, !isEditing {
+                outcomeContent(horizontal: true)
+            } else if dynamicTypeSize.isAccessibilitySize {
                 accessibleOutcomeStack
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    compactOutcomeRow
+                    accessibleOutcomeStack
+                }
             }
         }
         .accessibilityElement(children: .contain)
@@ -262,7 +296,7 @@ struct PlanOutcomePromptView: View {
 
     private var compactOutcomeRow: some View {
         HStack(spacing: SideSeatTheme.spaceSM) {
-            outcomeQuestion
+            outcomeQuestion(allowsWrapping: false)
             Spacer(minLength: SideSeatTheme.spaceXS)
             outcomeContent(horizontal: true)
         }
@@ -270,17 +304,17 @@ struct PlanOutcomePromptView: View {
 
     private var accessibleOutcomeStack: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            outcomeQuestion
+            outcomeQuestion(allowsWrapping: true)
             outcomeContent(horizontal: false)
         }
     }
 
-    private var outcomeQuestion: some View {
+    private func outcomeQuestion(allowsWrapping: Bool) -> some View {
         HStack(spacing: 5) {
             Text("Did this plan happen?")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: true, vertical: false)
+                .fixedSize(horizontal: !allowsWrapping, vertical: allowsWrapping)
             if isSubmitting {
                 ProgressView()
                     .controlSize(.small)

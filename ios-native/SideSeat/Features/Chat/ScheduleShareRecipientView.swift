@@ -50,6 +50,12 @@ final class ScheduleShareRecipientStore {
                     )
                 ]
             )
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-smart-time") {
+                let slots = SmartTimeMatcher.fixtureSlots(own: false)
+                snapshot = NativeScheduleShareSnapshot(ownerDisplayLabel: "Mina", rangeStart: slots.first!.start,
+                    rangeEnd: slots.last!.end, includedDates: [], expiresAt: nil, allowGuestProposals: true,
+                    freeSlots: slots, blocks: nil)
+            }
             allowGuestProposals = true
             proposal = nil
             linkID = "cuitestlink000000000000001"
@@ -161,8 +167,12 @@ struct ScheduleShareRecipientView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     let token: String
+    var onReturnToChat: (() -> Void)? = nil
 
     @State private var store = ScheduleShareRecipientStore()
+    @State private var smartAvailability = SmartTimeAvailabilityStore()
+    @State private var isCheckingTime = false
+    @State private var timingIssue: String?
     @State private var timeSelection: NativeScheduleShareProposalSelection?
     @State private var visibleDayCount = 3
     @State private var showsFullDay = false
@@ -178,13 +188,25 @@ struct ScheduleShareRecipientView: View {
             if let issue = store.issue, store.snapshot == nil {
                 ContentUnavailableView("Availability unavailable", systemImage: "calendar.badge.exclamationmark", description: Text(issue))
             } else if let snapshot = store.snapshot {
+                ScrollViewReader { scroll in
                 ScrollView {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
                         scheduleHeader(snapshot)
                         if store.ownedByViewer {
                             scheduleTimeline(snapshot)
                         } else {
-                            if snapshot.freeSlots.isEmpty {
+                            if store.allowGuestProposals {
+                                SmartTimeSuggestionsPanel(peerSlots: snapshot.freeSlots, ownStore: smartAvailability,
+                                    selection: timeSelection, onSelect: { candidate in
+                                        timingIssue = nil
+                                        if let candidate { selectCandidate(candidate) } else { timeSelection = nil }
+                                    }, onRetry: { Task { await smartAvailability.load(using: session) } })
+                                Button(showsFullSchedule ? "Hide full availability" : "View all available times") {
+                                    showsFullSchedule.toggle()
+                                }
+                                .frame(minHeight: 44)
+                                .accessibilityIdentifier("schedule-share-full-availability")
+                            } else if snapshot.freeSlots.isEmpty {
                                 scheduleTimeline(snapshot)
                             } else {
                                 recommendedTimes(
@@ -206,7 +228,7 @@ struct ScheduleShareRecipientView: View {
                                 .font(.body.weight(.semibold))
                             if let start = Date.sideSeatChatISO8601(proposal.startTime),
                                let end = Date.sideSeatChatISO8601(proposal.endTime) {
-                                Text("\(start.formatted(date: .abbreviated, time: .shortened)) – \(end.formatted(date: .omitted, time: .shortened))")
+                                Text("\(SmartTimeFormatting.label(start, date: true, time: true)) – \(SmartTimeFormatting.label(end, date: false, time: true))")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
                             }
@@ -224,14 +246,25 @@ struct ScheduleShareRecipientView: View {
                                     )
                                     .accessibilityIdentifier("schedule-share-my-proposal")
                             }
+                            .id("smart-time-sent-proposal")
+                            if let onReturnToChat {
+                                Button("Back to chat", action: onReturnToChat)
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity, minHeight: 44)
+                                    .accessibilityIdentifier("smart-time-return-chat")
+                            }
                     }
 
                     if !store.ownedByViewer,
                        store.allowGuestProposals,
                        timeSelection != nil {
-                        proposalComposer
+                        proposalComposer.id("smart-time-proposal-editor")
                     }
 
+                    if let timingIssue {
+                        Text(timingIssue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
+                            .accessibilityIdentifier("smart-time-conflict")
+                    }
                     if let issue = store.issue {
                             Label(issue, systemImage: "exclamationmark.circle")
                                 .font(.footnote)
@@ -242,6 +275,14 @@ struct ScheduleShareRecipientView: View {
                     .padding(.vertical, SideSeatTheme.spaceLG)
                 }
                 .background(SideSeatTheme.bgGrouped)
+                .disabled(isCheckingTime || store.isSubmitting)
+                .onChange(of: store.proposal?.id) { _, id in
+                    if id != nil { withAnimation { scroll.scrollTo("smart-time-sent-proposal", anchor: .top) } }
+                }
+                .onChange(of: timeSelection != nil) { _, selected in
+                    if selected { withAnimation { scroll.scrollTo("smart-time-proposal-editor", anchor: .top) } }
+                }
+                }
             } else {
                 SSLoadingState("Loading availability")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -250,6 +291,7 @@ struct ScheduleShareRecipientView: View {
         .background(SideSeatTheme.bgGrouped)
         .navigationTitle(store.ownedByViewer ? "Your shared availability" : "Shared availability")
         .navigationBarTitleDisplayMode(.inline)
+        .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
         .toolbar {
             if store.ownedByViewer, store.linkID != nil {
                 ToolbarItemGroup(placement: .topBarTrailing) {
@@ -281,6 +323,7 @@ struct ScheduleShareRecipientView: View {
             if let snapshot = store.snapshot, rangeDayCount(snapshot) > 3 {
                 visibleDayCount = 7
             }
+            if !store.ownedByViewer, store.allowGuestProposals { await smartAvailability.load(using: session) }
             restoreExistingProposalSelection()
         }
         .sheet(isPresented: $showEditShare) {
@@ -336,7 +379,7 @@ struct ScheduleShareRecipientView: View {
                     .font(.title3.weight(.semibold))
                 if let start = Date.sideSeatChatISO8601(snapshot.rangeStart),
                    let end = Date.sideSeatChatISO8601(snapshot.rangeEnd) {
-                    Text("\(start.formatted(date: .abbreviated, time: .omitted)) – \(end.formatted(date: .abbreviated, time: .omitted))")
+                    Text("\(SmartTimeFormatting.label(start, date: true, time: false)) – \(SmartTimeFormatting.label(end, date: true, time: false))")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -505,11 +548,11 @@ struct ScheduleShareRecipientView: View {
             Text(freeWindowTimeLabel(start: candidate.start, end: candidate.end))
                 .font(.caption.monospacedDigit())
         }
-        .foregroundStyle(selected ? Color.white : SideSeatTheme.textPrimary)
+        .foregroundStyle(selected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
         .padding(.horizontal, 12)
         .frame(height: 50)
         .background(
-            selected ? SideSeatTheme.accent : SideSeatTheme.fillTertiary,
+            selected ? SideSeatTheme.ProductAction.fill : SideSeatTheme.fillTertiary,
             in: RoundedRectangle(cornerRadius: 8, style: .continuous)
         )
         .overlay(
@@ -563,7 +606,7 @@ struct ScheduleShareRecipientView: View {
 
             SSPrimaryButton(
                 title: AppLocalization.string( "Send proposal"),
-                isLoading: store.isSubmitting,
+                isLoading: store.isSubmitting || isCheckingTime,
                 fill: .product,
                 height: 46,
                 accessibilityID: "schedule-share-proposal-submit"
@@ -573,7 +616,7 @@ struct ScheduleShareRecipientView: View {
             .disabled(
                 timeSelection == nil
                     || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    || store.isSubmitting
+                    || store.isSubmitting || isCheckingTime
             )
         }
     }
@@ -586,13 +629,13 @@ struct ScheduleShareRecipientView: View {
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     Image(systemName: "calendar.badge.checkmark")
                         .foregroundStyle(SideSeatTheme.HubTint.plans)
-                    Text("\(selection.start.formatted(date: .abbreviated, time: .shortened)) – \(selection.end.formatted(date: .omitted, time: .shortened))")
+                    Text("\(SmartTimeFormatting.label(selection.start, date: true, time: true)) – \(SmartTimeFormatting.label(selection.end, date: false, time: true))")
                         .foregroundStyle(SideSeatTheme.textPrimary)
                 }
                 .font(.subheadline.weight(.semibold))
 
                 Text(
-                    "\(AppLocalization.string( "Free window")) \(boundsStart.formatted(date: .omitted, time: .shortened))–\(boundsEnd.formatted(date: .omitted, time: .shortened))"
+                    "\(AppLocalization.string( "Free window")) \(SmartTimeFormatting.label(boundsStart, date: false, time: true))–\(SmartTimeFormatting.label(boundsEnd, date: false, time: true))"
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -668,9 +711,9 @@ struct ScheduleShareRecipientView: View {
                 .font(.caption.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 32)
-                .foregroundStyle(currentMinutes == minutes ? Color.white : SideSeatTheme.textPrimary)
+                .foregroundStyle(currentMinutes == minutes ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
                 .background(
-                    currentMinutes == minutes ? SideSeatTheme.accent : SideSeatTheme.fillTertiary,
+                    currentMinutes == minutes ? SideSeatTheme.ProductAction.fill : SideSeatTheme.fillTertiary,
                     in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                 )
         }
@@ -692,9 +735,9 @@ struct ScheduleShareRecipientView: View {
     private func freeWindowTimeLabel(start: Date, end: Date) -> String {
         let calendar = Calendar.sideSeatBerlin
         if calendar.isDate(start, inSameDayAs: end.addingTimeInterval(-0.001)) {
-            return "\(start.formatted(date: .omitted, time: .shortened))–\(end.formatted(date: .omitted, time: .shortened))"
+            return "\(SmartTimeFormatting.label(start, date: false, time: true))–\(SmartTimeFormatting.label(end, date: false, time: true))"
         }
-        return "\(start.formatted(date: .omitted, time: .shortened))–\(end.formatted(.dateTime.weekday(.abbreviated).hour().minute()))"
+        return "\(SmartTimeFormatting.label(start, date: false, time: true))–\(SmartTimeFormatting.label(end, date: true, time: true))"
     }
 
     private func datePickerComponents(boundsStart: Date, boundsEnd: Date) -> DatePickerComponents {
@@ -748,8 +791,23 @@ struct ScheduleShareRecipientView: View {
     }
 
     private func submitProposal() async {
-        guard let selection = timeSelection else { return }
-        _ = await store.submit(
+        guard let selection = timeSelection, !isCheckingTime, !store.isSubmitting else { return }
+        isCheckingTime = true
+        timingIssue = nil
+        defer { isCheckingTime = false }
+        await store.load(token: token, using: session)
+        guard store.issue == nil, !store.ownedByViewer, store.allowGuestProposals else {
+            timeSelection = nil
+            return
+        }
+        guard await smartAvailability.load(using: session) else { return }
+        let common = SmartTimeMatcher.commonSlots(store.snapshot?.freeSlots ?? [], smartAvailability.slots ?? [])
+        guard SmartTimeMatcher.contains(start: selection.start, end: selection.end, in: common) else {
+            timeSelection = nil
+            timingIssue = AppLocalization.string("This time is no longer free for both of you. Choose another suggestion.")
+            return
+        }
+        let sent = await store.submit(
             token: token,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             note: {
@@ -764,6 +822,7 @@ struct ScheduleShareRecipientView: View {
             end: selection.end,
             using: session
         )
+        if sent { timeSelection = nil }
     }
 
     @MainActor

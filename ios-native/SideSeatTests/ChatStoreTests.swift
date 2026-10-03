@@ -1113,6 +1113,83 @@ struct ChatSSEClientTests {
 
 @Suite("Inbox store")
 struct InboxStoreTests {
+    @Test("Manual unread survives refresh and restart without rewinding the server read cursor")
+    @MainActor
+    func manualUnreadPersistence() async throws {
+        let suite = "inbox-unread-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let transport = ChatTestTransport()
+        let session = try await chatSession(transport: transport)
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true), defaults: defaults)
+        await store.load(using: session)
+        let row = try #require(store.visibleConversations.first)
+
+        #expect(await store.toggleUnread(row, using: session))
+        #expect(await transport.readRequestCount == 1)
+        #expect(store.messageBadgeLabel == nil)
+        #expect(await store.toggleUnread(row, using: session))
+        #expect(store.manuallyUnreadIDs.contains(row.id))
+        #expect(store.messageBadgeLabel == "1")
+        await store.load(using: session)
+        #expect(store.visibleConversations.first?.unreadCount == 0)
+        #expect(store.messageBadgeLabel == "1")
+        #expect(await transport.readRequestCount == 1)
+
+        let restored = InboxStore(cache: InboxCache(inMemoryOnly: true), defaults: defaults)
+        await restored.load(using: session)
+        #expect(restored.manuallyUnreadIDs.contains(row.id))
+        #expect(restored.messageBadgeLabel == "1")
+        await transport.setInboxUnreadCount(2)
+        await restored.load(using: session)
+        #expect(restored.messageBadgeLabel == "2")
+        #expect(await restored.toggleUnread(row, using: session))
+        #expect(restored.manuallyUnreadIDs.isEmpty)
+        #expect(restored.messageBadgeLabel == nil)
+
+        #expect(await restored.toggleUnread(row, using: session))
+        restored.clearUnread(conversationID: row.id)
+        let opened = InboxStore(cache: InboxCache(inMemoryOnly: true), defaults: defaults)
+        await opened.load(using: session)
+        #expect(opened.manuallyUnreadIDs.isEmpty)
+    }
+
+    @Test("Manual unread reminders remain isolated across sign-out and account changes")
+    @MainActor
+    func manualUnreadAccountIsolation() async throws {
+        let suite = "inbox-accounts-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let session = try await chatSession(transport: ChatTestTransport())
+        let other = try await chatSession(transport: ChatTestTransport(loginUserID: "user-2"))
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true), defaults: defaults)
+        await store.load(using: session)
+        let row = try #require(store.visibleConversations.first)
+        #expect(await store.toggleUnread(row, using: session))
+        #expect(await store.toggleUnread(row, using: session))
+        store.reset()
+        #expect(store.manuallyUnreadIDs.isEmpty)
+        await store.load(using: other)
+        #expect(store.manuallyUnreadIDs.isEmpty)
+        await store.load(using: session)
+        #expect(store.manuallyUnreadIDs.contains(row.id))
+    }
+
+    @Test("A failed mark-read request keeps the unread badge")
+    @MainActor
+    func markReadFailurePreservesUnread() async throws {
+        let suite = "inbox-read-failure-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let session = try await chatSession(transport: ChatTestTransport(failDirectRead: true))
+        let store = InboxStore(cache: InboxCache(inMemoryOnly: true), defaults: defaults)
+        await store.load(using: session)
+        let row = try #require(store.visibleConversations.first)
+        #expect(await store.toggleUnread(row, using: session) == false)
+        #expect(store.messageBadgeLabel == "1")
+        #expect(store.issue != nil)
+    }
+
     @Test("Formats tab badges from 1 through 99+")
     func formatsAttentionBadge() {
         #expect(InboxStore.badgeLabel(for: 0) == nil)
@@ -2583,6 +2660,13 @@ private final class ChatNotificationProbe: @unchecked Sendable {
 }
 
 private actor ChatTestTransport: APITransport {
+    private let loginUserID: String
+    private let failDirectRead: Bool
+    private var inboxUnreadCount = 1
+    private(set) var readRequestCount = 0
+
+    func setInboxUnreadCount(_ count: Int) { inboxUnreadCount = count }
+
     private let failDirectHistory: Bool
     private let directHistoryStatus: Int?
     private let failCommunityHistory: Bool
@@ -2621,6 +2705,8 @@ private actor ChatTestTransport: APITransport {
     private var remainingPlanMutationRetryableConflicts: Int
 
     init(
+        loginUserID: String = "user-1",
+        failDirectRead: Bool = false,
         failDirectHistory: Bool = false,
         directHistoryStatus: Int? = nil,
         failCommunityHistory: Bool = false,
@@ -2630,6 +2716,8 @@ private actor ChatTestTransport: APITransport {
         paginatePlanHistory: Bool = false,
         planMutationRetryableConflicts: Int = 0
     ) {
+        self.loginUserID = loginUserID
+        self.failDirectRead = failDirectRead
         self.failDirectHistory = failDirectHistory
         self.directHistoryStatus = directHistoryStatus
         self.failCommunityHistory = failCommunityHistory
@@ -2675,7 +2763,7 @@ private actor ChatTestTransport: APITransport {
             return response(
                 request,
                 200,
-                #"{"data":{"user":{"id":"user-1","username":"test_001","nickname":"Test User","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"access-token","accessExpiresIn":900,"refreshToken":"refresh-token","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}"#
+                #"{"data":{"user":{"id":"\#(loginUserID)","username":"test_001","nickname":"Test User","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"access-token","accessExpiresIn":900,"refreshToken":"refresh-token","refreshExpiresAt":"2026-08-16T00:00:00.000Z"}}}"#
             )
         case "/api/v1/inbox":
             if failInbox {
@@ -2684,7 +2772,7 @@ private actor ChatTestTransport: APITransport {
             return response(
                 request,
                 200,
-                #"{"data":{"conversations":[{"kind":"DIRECT","id":"connection-1","displayName":"Mina","avatarUrl":null,"participantAvatars":[],"unreadCount":1,"pinned":\#(directPinned),"lastActivityAt":"2026-07-17T12:00:00.000Z","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"isSelfNotes":false,"course":null,"group":null,"lastMessage":{"id":"msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"See you?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T12:00:00.000Z"}},{"kind":"COURSE","id":"course-1","displayName":"Algorithms","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T13:00:00.000Z","peer":null,"isSelfNotes":false,"course":{"id":"course-1","name":"Algorithms","code":"IN0007","school":"TUM","semesterLabel":"SS26"},"group":null,"lastMessage":{"id":"course-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Tutorial?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T13:00:00.000Z"}},{"kind":"GROUP","id":"group-1","displayName":"Study crew","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T14:00:00.000Z","peer":null,"isSelfNotes":false,"course":null,"group":{"id":"group-1","participantCount":2,"participants":[{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}]},"lastMessage":{"id":"group-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Library at 4?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T14:00:00.000Z"}}],"unreadTotal":1,"plansNeedingYourAction":0}}"#
+                #"{"data":{"conversations":[{"kind":"DIRECT","id":"connection-1","displayName":"Mina","avatarUrl":null,"participantAvatars":[],"unreadCount":\#(inboxUnreadCount),"pinned":\#(directPinned),"lastActivityAt":"2026-07-17T12:00:00.000Z","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"isSelfNotes":false,"course":null,"group":null,"lastMessage":{"id":"msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"See you?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T12:00:00.000Z"}},{"kind":"COURSE","id":"course-1","displayName":"Algorithms","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T13:00:00.000Z","peer":null,"isSelfNotes":false,"course":{"id":"course-1","name":"Algorithms","code":"IN0007","school":"TUM","semesterLabel":"SS26"},"group":null,"lastMessage":{"id":"course-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Tutorial?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T13:00:00.000Z"}},{"kind":"GROUP","id":"group-1","displayName":"Study crew","avatarUrl":null,"participantAvatars":[],"unreadCount":0,"pinned":false,"lastActivityAt":"2026-07-17T14:00:00.000Z","peer":null,"isSelfNotes":false,"course":null,"group":{"id":"group-1","participantCount":2,"participants":[{"id":"user-1","username":"test_001","nickname":"Test User","avatarUrl":null},{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}]},"lastMessage":{"id":"group-msg-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"Library at 4?","imageUrl":null,"deletedAt":null,"createdAt":"2026-07-17T14:00:00.000Z"}}],"unreadTotal":1,"plansNeedingYourAction":0}}"#
             )
         case "/api/v1/connections/connection-1/block":
             return response(request, 200, #"{"data":{"blocked":true}}"#)
@@ -2798,6 +2886,9 @@ private actor ChatTestTransport: APITransport {
                 #"{"data":{"connection":{"id":"connection-1","isSelfNotes":false,"displayName":"Mina","peer":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null}},"messages":[{"id":"msg-1","connectionId":"connection-1","sender":{"id":"peer-1","username":"test_002","nickname":"Mina","avatarUrl":null},"type":"TEXT","body":"See you?","imageUrl":null,"location":null,"availabilityShareId":null,"planRequestId":null,"replyTo":null,"deletedAt":null,"createdAt":"2026-07-17T12:00:00.000Z"}]},"meta":{"hasMore":false,"nextCursor":null,"realtimeCursor":"cursor-1"}}"#
             )
         case "/api/v1/connections/connection-1/read":
+            readRequestCount += 1
+            if failDirectRead { throw URLError(.notConnectedToInternet) }
+            inboxUnreadCount = 0
             readMarked = true
             return response(request, 200, #"{"data":{"readAt":"2026-07-17T12:00:30.000Z"}}"#)
         case "/api/v1/plans/plan-accepted/accept":
@@ -2900,5 +2991,43 @@ private actor ChatTestTransport: APITransport {
             headerFields: ["Content-Type": "application/json"]
         )!
         return (Data(body.utf8), response)
+    }
+}
+
+@Suite("Plan relative timing")
+struct PlanRelativeTimeTests {
+    private let calendar = Calendar.sideSeatBerlin
+    private func date(_ value: String) -> Date { Date.sideSeatChatISO8601(value)! }
+    private func value(_ start: String, _ end: String, now: String, status: String = "ACCEPTED") -> PlanRelativeTime? {
+        PlanRelativeTime.value(status: status, start: date(start), end: date(end), now: date(now), calendar: calendar)
+    }
+
+    @Test("Calendar days take precedence over elapsed hours, including midnight and DST")
+    func daysAndClockChanges() {
+        #expect(value("2026-10-03T00:10:00+02:00", "2026-10-03T01:00:00+02:00", now: "2026-10-02T23:50:00+02:00") == .tomorrow)
+        #expect(value("2026-10-05T14:00:00+02:00", "2026-10-05T16:00:00+02:00", now: "2026-10-02T20:00:00+02:00") == .days(3))
+        #expect(value("2026-10-26T09:00:00+01:00", "2026-10-26T10:00:00+01:00", now: "2026-10-24T09:00:00+02:00") == .days(2))
+    }
+
+    @Test("Same-day hints transition from today to hours, soon, underway and ended")
+    func transitions() {
+        let start = "2026-10-02T16:00:00+02:00", end = "2026-10-02T18:00:00+02:00"
+        #expect(value(start, end, now: "2026-10-02T08:00:00+02:00") == .today)
+        #expect(value(start, end, now: "2026-10-02T13:45:00+02:00") == .hours(2))
+        #expect(value(start, end, now: "2026-10-02T15:15:00+02:00") == .withinAnHour)
+        #expect(value(start, end, now: "2026-10-02T15:30:00+02:00") == .startingSoon)
+        #expect(value(start, end, now: start) == .inProgress)
+        #expect(value(start, end, now: end) == .ended)
+    }
+
+    @Test("An unconfirmed or canceled proposal never claims to be happening")
+    func proposalAndCancellationStates() {
+        let start = "2026-10-02T16:00:00+02:00", end = "2026-10-02T18:00:00+02:00"
+        #expect(value(start, end, now: "2026-10-02T15:40:00+02:00", status: "PENDING") == .today)
+        #expect(value(start, end, now: start, status: "PENDING") == nil)
+        #expect(value(start, end, now: end, status: "PENDING") == nil)
+        for status in ["CANCELED", "DECLINED", "EXPIRED", "COUNTER_PROPOSED", "INVALIDATED"] {
+            #expect(value(start, end, now: "2026-10-01T12:00:00+02:00", status: status) == nil)
+        }
     }
 }

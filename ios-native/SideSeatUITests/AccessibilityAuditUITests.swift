@@ -44,7 +44,7 @@ final class AccessibilityAuditUITests: XCTestCase {
         )
 
         let togetherHome = app.descendants(matching: .any)["together-home"]
-        let togetherDecision = app.descendants(matching: .any)["mutual-opportunity-swipe-cmutualui0000000000000001"].firstMatch
+        let togetherDecision = app.descendants(matching: .any)["mutual-opportunity-actions-cmutualui0000000000000001"].firstMatch
         for _ in 0..<8 where !togetherDecision.exists || !togetherDecision.isHittable {
             togetherHome.swipeUp()
         }
@@ -189,7 +189,7 @@ final class AccessibilityAuditUITests: XCTestCase {
         let home = app.descendants(matching: .any)["together-home"].firstMatch
         XCTAssertTrue(home.waitForExistence(timeout: 6))
         app.buttons["together-tab-intentions"].tap()
-        let addIntent = app.buttons["together-add-intent"]
+        let addIntent = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["together-add-intent", "together-add-first-intent"])).firstMatch
         for _ in 0..<10 where !addIntent.exists || !addIntent.isHittable {
             app.scrollViews.firstMatch.swipeDown()
         }
@@ -199,14 +199,14 @@ final class AccessibilityAuditUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(addIntent.frame.height, 44)
 
         app.buttons["together-tab-recommendations"].tap()
-        let decision = app.descendants(matching: .any)["mutual-opportunity-swipe-cmutualui0000000000000001"].firstMatch
+        let decision = app.descendants(matching: .any)["mutual-opportunity-actions-cmutualui0000000000000001"].firstMatch
         for _ in 0..<10 where !decision.exists || !decision.isHittable {
             app.scrollViews.firstMatch.swipeUp()
         }
         XCTAssertTrue(decision.exists)
         XCTAssertTrue(decision.isHittable)
         XCTAssertGreaterThanOrEqual(decision.frame.height, 44)
-        XCTAssertTrue(decision.label.contains("Choose") || decision.label.contains("interest"), "The bilateral swipe needs an accessible decision label")
+        XCTAssertTrue(decision.label.contains("Choose") || decision.label.contains("interest"), "The decision buttons need an accessible group label")
 
         let tabButtons = app.tabBars.buttons.allElementsBoundByIndex
         XCTAssertEqual(tabButtons.count, 5)
@@ -533,7 +533,6 @@ final class AccessibilityAuditUITests: XCTestCase {
             "me-courses",
             "me-languages",
             "profile-privacy-settings",
-            "me-blocked",
             "me-settings",
         ]
         for identifier in managementRows {

@@ -6,6 +6,10 @@ struct MeRootView: View {
     @Environment(RouterPath.self) private var router
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = CurrentProfileStore()
+    @State private var membershipStore = MembershipStore()
+    @State private var showsMembership = false
+    @State private var editingAppearance: NativeCurrentProfile?
+    @Environment(\.scenePhase) private var scenePhase
     @State private var editingProfile: NativeCurrentProfile?
     @State private var editingPrivacy: NativeCurrentProfile?
     @State private var editingLanguages: NativeCurrentProfile?
@@ -24,11 +28,28 @@ struct MeRootView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         MeHeroCard(
                             profile: profile,
+                            isPlus: membershipStore.membership?.isPlus == true,
                             isPreparingAvatar: isPreparingAvatar || store.isSaving || selectedAvatarPhoto != nil,
                             avatarIssue: avatarIssue,
                             onChangeAvatar: { isChoosingAvatar = true },
                             onEditProfile: { editingProfile = profile }
                         )
+
+                        SSManagementSection(title: AppLocalization.string("Personalization"), accessibilityID: "me-section-personalization") {
+                            SSManagementRow(title: AppLocalization.string("Themes, icons & profile style"),
+                                systemImage: "paintpalette", showDivider: false,
+                                accessibilityID: "me-personalization") { editingAppearance = profile }
+                        }
+
+                        SSManagementSection(title: AppLocalization.string("Membership"), accessibilityID: "me-section-membership") {
+                            SSManagementRow(
+                                title: AppLocalization.string("Membership"),
+                                value: membershipStore.membership?.displayName,
+                                systemImage: "sparkles",
+                                showDivider: false,
+                                accessibilityID: "me-membership"
+                            ) { showsMembership = true }
+                        }
 
                         if let schoolChangeResult {
                             SchoolChangeResultBanner(
@@ -88,18 +109,10 @@ struct MeRootView: View {
                             SSManagementRow(
                                 title: AppLocalization.string("Privacy"),
                                 systemImage: "hand.raised",
+                                showDivider: false,
                                 accessibilityID: "profile-privacy-settings"
                             ) {
                                 editingPrivacy = profile
-                            }
-
-                            SSManagementRow(
-                                title: AppLocalization.string("Blocked"),
-                                systemImage: "person.crop.circle.badge.xmark",
-                                showDivider: false,
-                                accessibilityID: "me-blocked"
-                            ) {
-                                router.navigate(to: .blockedUsers)
                             }
                         }
 
@@ -142,6 +155,25 @@ struct MeRootView: View {
             }
         }
         .ssRootNavigationTitle("Me")
+        .sheet(item: $editingAppearance) { profile in
+            ProfileAppearanceSheet(profile: profile, membershipStore: membershipStore) { request in
+                await store.save(request, using: session)
+            }
+            .dynamicTypeSize(dynamicTypeSize)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await membershipStore.load(using: session) } }
+        }
+        .sheet(isPresented: $showsMembership) {
+            NavigationStack {
+                MembershipView(store: membershipStore)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showsMembership = false }
+                        }
+                    }
+            }
+        }
         .sheet(isPresented: $isChoosingAvatar) {
             if let profile = store.profile {
                 SystemAvatarPickerSheet(
@@ -204,6 +236,7 @@ struct MeRootView: View {
     private func loadProfile() async {
         await store.load(using: session)
         hasCompletedInitialProfileLoad = true
+        await membershipStore.load(using: session)
     }
 
     private func uploadAvatar(from item: PhotosPickerItem?) async {
@@ -378,14 +411,14 @@ private struct SystemAvatarPickerSheet: View {
                                             .padding(4)
                                             .overlay {
                                                 if selection == avatar.id {
-                                                    Circle().strokeBorder(SideSeatTheme.accent, lineWidth: 2)
+                                                    Circle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2)
                                                 }
                                             }
                                             .overlay(alignment: .bottomTrailing) {
                                                 if selection == avatar.id {
                                                     Image(systemName: "checkmark.circle.fill")
                                                         .symbolRenderingMode(.palette)
-                                                        .foregroundStyle(SideSeatTheme.onAccent, SideSeatTheme.accent)
+                                                        .foregroundStyle(SideSeatTheme.ProductAction.foreground, SideSeatTheme.ProductAction.fill)
                                                         .font(.system(size: 21, weight: .semibold))
                                                 }
                                             }
@@ -450,10 +483,13 @@ private struct SystemAvatarPickerSheet: View {
 private struct MeHeroCard: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let profile: NativeCurrentProfile
+    let isPlus: Bool
     let isPreparingAvatar: Bool
     let avatarIssue: String?
     let onChangeAvatar: () -> Void
     let onEditProfile: () -> Void
+
+    private var appearance: NativeProfileAppearance { (profile.appearance ?? .standard).effective(isPlus: isPlus) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -487,13 +523,14 @@ private struct MeHeroCard: View {
                 Button(action: onEditProfile) {
                     HStack(spacing: 14) {
                         VStack(alignment: .leading, spacing: 5) {
+                            Text(profile.displayName)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-display-name-visual")
                             nameLayout {
-                                Text(profile.displayName)
-                                    .font(.title3.weight(.bold))
-                                    .foregroundStyle(.primary)
-                                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .accessibilityIdentifier("me-display-name-visual")
+                                if isPlus && appearance.showMembershipBadge { SSPlusBadge() }
+                                ProfileDecorationIcon(appearance: appearance)
                                 if profile.verifiedStudent {
                                     VerifiedSchoolMark(school: profile.school, compact: false)
                                 }
@@ -522,7 +559,7 @@ private struct MeHeroCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .buttonStyle(SSPressButtonStyle())
                 .accessibilityLabel(AppLocalization.string( "Edit profile"))
-                .accessibilityValue("\(profile.displayName), @\(profile.username)")
+                .accessibilityValue("\(profile.displayName), @\(profile.username)" + (isPlus && appearance.showMembershipBadge ? ", " + AppLocalization.string("Plus member") : ""))
                 .accessibilityIdentifier("me-hero-edit")
             }
             .padding(16)
@@ -542,15 +579,7 @@ private struct MeHeroCard: View {
                     .accessibilityIdentifier("profile-avatar-error")
             }
         }
-        .background {
-            RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                .fill(SideSeatTheme.surface)
-                .overlay {
-                    RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous)
-                        .strokeBorder(SideSeatTheme.separator.opacity(0.35), lineWidth: 0.5)
-                }
-                .shadow(color: Color.black.opacity(0.04), radius: 10, y: 4)
-        }
+        .modifier(ProfileAppearanceSurface(appearance: appearance))
     }
 
     private var profileLayout: AnyLayout {
@@ -627,12 +656,12 @@ private struct SocialPreferencesView: View {
                                     .font(.subheadline.weight(.semibold))
                                     .frame(maxWidth: .infinity, minHeight: 44)
                                     .background(
-                                        topics.contains(topic) ? SideSeatTheme.accent.opacity(0.16) : SideSeatTheme.fillTertiary,
+                                        topics.contains(topic) ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillTertiary,
                                         in: Capsule()
                                     )
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(topics.contains(topic) ? SideSeatTheme.accentText : SideSeatTheme.textPrimary)
+                            .foregroundStyle(topics.contains(topic) ? SideSeatTheme.utilityAction : SideSeatTheme.textPrimary)
                             .accessibilityAddTraits(topics.contains(topic) ? .isSelected : [])
                             .accessibilityIdentifier("social-topic-\(topic.lowercased())")
                         }

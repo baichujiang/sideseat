@@ -6,12 +6,17 @@ import Observation
 final class MutualOpportunityStore {
     private(set) var opportunities: [NativeMutualOpportunity] = []
     private(set) var isLoading = false
+    private(set) var hasLoaded = false
     private(set) var mutatingIDs: Set<String> = []
     private(set) var issue: String?
     private(set) var notice: String?
 
     #if DEBUG
+    static var fixtureConversations: [String: NativeMutualOpportunity] = [:]
+    static var fixtureChatMessages: [String: [NativeDirectMessage]] = [:]
     private var simulatedDecisionFailures = 0
+    private var loadAttempts = 0
+    private var fixtureOverrides: [String: NativeMutualOpportunity] = [:]
     #endif
 
     func load(using session: SessionStore) async {
@@ -21,15 +26,30 @@ final class MutualOpportunityStore {
         defer { isLoading = false }
 
         #if DEBUG
+        loadAttempts += 1
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-recommendation-slow") {
+            do { try await Task.sleep(for: .seconds(4)) } catch { return }
+        }
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-recommendation-load-error"), loadAttempts == 1 {
+            issue = "Recommendations could not be loaded."
+            return
+        }
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-recommendation-refresh-error"), loadAttempts > 1 {
+            issue = "Recommendations could not be loaded."
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity-empty") {
             opportunities = []
+            hasLoaded = true
             return
         }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
             let ids = ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-list")
                 ? ["cmutualui0000000000000001", "cmutualui0000000000000002", "cmutualui0000000000000003"]
                 : ["cmutualui0000000000000001"]
-            opportunities = ids.map { .uiTestingFixture(id: $0) }
+            hasLoaded = true
+            opportunities = ids.map { fixtureOverrides[$0] ?? .uiTestingFixture(id: $0) }
+                + fixtureOverrides.values.filter { !ids.contains($0.id) }.sorted { $0.id < $1.id }
             return
         }
         #endif
@@ -39,13 +59,114 @@ final class MutualOpportunityStore {
                 "api/v1/me/mutual-opportunities"
             )
             opportunities = envelope.data.opportunities
+            hasLoaded = true
         } catch is CancellationError {
             // A cancelled refresh says nothing about the already loaded matches.
             return
         } catch {
-            opportunities = []
+            if Task.isCancelled { return }
             issue = error.localizedDescription
         }
+    }
+
+    @discardableResult
+    func interact(_ action: String, opportunity: NativeMutualOpportunity, body: String? = nil,
+                  using session: SessionStore) async -> NativeMutualOpportunity? {
+        guard !mutatingIDs.contains(opportunity.id) else { return nil }
+        mutatingIDs.insert(opportunity.id)
+        issue = nil
+        defer { mutatingIDs.remove(opportunity.id) }
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-opportunity-decision-failure"), simulatedDecisionFailures == 0 {
+                simulatedDecisionFailures += 1
+                issue = "UI test: message was not sent."
+                return nil
+            }
+            var updated = opportunity
+            switch action {
+            case "BOOKMARK": updated.isBookmarked = true
+            case "UNBOOKMARK": updated.isBookmarked = false
+            case "SEND":
+                updated.messageRequest = NativeOpportunityMessageRequest(body: body ?? "", direction: "OUTGOING", status: "PENDING", createdAt: Date().ISO8601Format())
+            case "IGNORE":
+                updated.messageRequest = NativeOpportunityMessageRequest(body: opportunity.messageRequest?.body ?? "", direction: "INCOMING", status: "IGNORED", createdAt: Date().ISO8601Format())
+            case "REPLY":
+                updated = .uiTestingFixture(id: opportunity.id, stateOverride: "READY_TO_COORDINATE")
+                if let request = opportunity.messageRequest, let connectionID = updated.coordination?.connectionId {
+                    updated.messageRequest = NativeOpportunityMessageRequest(body: request.body, direction: request.direction,
+                        status: "REPLIED", createdAt: request.createdAt, intention: request.intention)
+                    Self.fixtureChatMessages[connectionID] = [
+                        NativeDirectMessage(id: "ui-intention-context-\(opportunity.id)", connectionId: connectionID,
+                            sender: NativeChatAuthor(id: "ui-peer", username: opportunity.peer.displayName, nickname: nil, avatarUrl: opportunity.peer.avatarUrl),
+                            type: "MUTUAL_OPPORTUNITY_CARD", body: nil, createdAt: request.createdAt,
+                            mutualOpportunity: NativeMutualOpportunitySource(id: opportunity.id,
+                                policyVersion: opportunity.policyVersion, topic: opportunity.topic.rawValue,
+                                context: NativeActionContext(version: 1, sourceKind: "MUTUAL_OPPORTUNITY",
+                                    sourceId: opportunity.id, title: opportunity.messageActivityTitle,
+                                    startsAt: opportunity.startsAt, endsAt: opportunity.endsAt, location: nil,
+                                    planType: "CUSTOM", participantIds: ["ui-test-user", "ui-peer"],
+                                    author: NativeActionContextAuthor(id: "ui-peer", displayName: opportunity.peer.displayName),
+                                    course: nil))),
+                        NativeDirectMessage(id: "ui-introduction-\(opportunity.id)", connectionId: connectionID,
+                            sender: NativeChatAuthor(id: "ui-peer", username: opportunity.peer.displayName, nickname: nil, avatarUrl: opportunity.peer.avatarUrl),
+                            type: "TEXT", body: request.body, createdAt: request.createdAt),
+                        NativeDirectMessage(id: "ui-first-reply-\(opportunity.id)", connectionId: connectionID,
+                            sender: NativeChatAuthor(id: "ui-test-user", username: "You", nickname: nil, avatarUrl: nil),
+                            type: "TEXT", body: body, createdAt: Date().ISO8601Format())
+                    ]
+                }
+            default: break
+            }
+            fixtureOverrides[opportunity.id] = updated
+            upsert(updated)
+            notifyConversationChange(action)
+            return updated
+        }
+        #endif
+        do {
+            let envelope: APIEnvelope<NativeMutualOpportunity> = try await session.sendAuthorized(
+                "api/v1/me/mutual-opportunities/\(opportunity.id)/interaction",
+                method: .post, body: NativeOpportunityInteraction(action: action, body: body),
+                idempotencyKey: UUID().uuidString
+            )
+            upsert(envelope.data)
+            notifyConversationChange(action)
+            return envelope.data
+        } catch {
+            issue = error.localizedDescription
+            return nil
+        }
+    }
+
+    private func notifyConversationChange(_ action: String) {
+        guard ["SEND", "REPLY", "IGNORE"].contains(action) else { return }
+        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+        NotificationCenter.default.post(name: .sideSeatTogetherNeedsRefresh, object: nil)
+    }
+
+    func refreshConversation(_ opportunity: NativeMutualOpportunity, using session: SessionStore) async -> NativeMutualOpportunity? {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return Self.fixtureConversations[opportunity.id] ?? opportunity
+        }
+        #endif
+        return await loadConversation(id: opportunity.id, using: session)
+    }
+
+    func loadConversation(id: String, using session: SessionStore) async -> NativeMutualOpportunity? {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            return Self.fixtureConversations[id] ?? .uiTestingFixture(id: id)
+        }
+        #endif
+        do {
+            let response: APIEnvelope<NativeMutualOpportunity> = try await session.sendAuthorized(
+                "api/v1/me/mutual-opportunities/\(id)")
+            issue = nil
+            return response.data
+        } catch is CancellationError { return nil }
+        catch { issue = error.localizedDescription; return nil }
     }
 
     func decide(
@@ -137,7 +258,13 @@ final class MutualOpportunityStore {
     }
 
     func upsert(_ opportunity: NativeMutualOpportunity) {
-        if opportunity.state == "UNAVAILABLE" || opportunity.state == "CLOSED" {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-mutual-opportunity") {
+            fixtureOverrides[opportunity.id] = opportunity
+            if opportunity.messageRequest != nil || opportunity.isBookmarked != nil { Self.fixtureConversations[opportunity.id] = opportunity }
+        }
+        #endif
+        if opportunity.isBookmarked != true && (opportunity.state == "UNAVAILABLE" || opportunity.state == "CLOSED") {
             opportunities.removeAll { $0.id == opportunity.id }
             return
         }
@@ -192,7 +319,9 @@ extension NativeMutualOpportunity {
                 verifiedStudent: true,
                 major: "Computer Science",
                 semester: 3,
-                sharedLanguages: discovery ? [] : ["ENGLISH", "GERMAN"]
+                sharedLanguages: discovery ? [] : ["ENGLISH", "GERMAN"],
+                isPlus: ProcessInfo.processInfo.arguments.contains("--ui-testing-plus-member"),
+                campus: "TUM", languages: ["ENGLISH"]
             ),
             viewerDecision: ["DECIDED", "READY_TO_COORDINATE"].contains(state) ? "YES" : nil,
             coordination: state == "READY_TO_COORDINATE"
@@ -229,6 +358,15 @@ extension NativeMutualOpportunity {
                 peerActivity: NativeDiscoveryActivity(topic: .sports, activityText: nil, studyGoal: nil, sportTag: .basketball, sportOtherNote: nil)
             )
         }
+        card.peerIntention = NativeOpportunityIntention(
+            activity: card.matchFit?.peerActivity ?? NativeDiscoveryActivity(
+                topic: topic, activityText: card.matchFit?.peerActivityText ?? card.activityText,
+                studyGoal: card.peerStudyGoal, sportTag: card.sportTag, sportOtherNote: card.sportOtherNote),
+            timePreference: discovery ? NativeIntentTimePreference(kind: "EXACT") : card.timeContext,
+            timeWindows: flexible && !discovery ? [] : [NativeWeeklyIntentTimeWindow(startAt: start, endAt: end)],
+            course: !discovery && topic == .study ? NativeExploreIntentCourse(code: "IN0007", name: "Algorithms") : nil,
+            descriptionPreview: AppLocalization.string("Looking for someone to join casually. We can decide the exact details together.")
+        )
         return card
     }
 }

@@ -209,8 +209,31 @@ struct CalendarTimelineScrollAnchorTests {
             calendar: calendar
         )
 
+        #expect(top?.hiddenCount == 2)
+        #expect(bottom?.hiddenCount == 2)
         #expect(top?.item.id == "nearest-early")
         #expect(bottom?.item.id == "nearest-late")
+    }
+
+    @Test("Week hints count visible dates only and jump to the closest time")
+    func weekHintsSummarizeVisibleDates() throws {
+        let calendar = Calendar.sideSeatBerlin
+        let day = try #require(calendar.date(from: DateComponents(year: 2026, month: 8, day: 24)))
+        let next = try #require(calendar.date(byAdding: .day, value: 1, to: day))
+        let outside = try #require(calendar.date(byAdding: .day, value: 7, to: day))
+        let early = item("early", from: 6 * 60, to: 7 * 60, day: day, calendar: calendar)
+        let closest = item("closest", from: 8 * 60, to: 9 * 60, day: next, calendar: calendar)
+        let unrelated = item("outside", from: 8 * 60, to: 9 * 60, day: outside, calendar: calendar)
+        let partial = item("partial", from: 8 * 60, to: 10 * 60, day: next, calendar: calendar)
+        let allDay = item("all-day", from: 0, to: 24 * 60, day: day, calendar: calendar)
+        let hint = try #require(CalendarOffscreenEventHints.nearest(
+            items: [early, closest, unrelated, partial, allDay], across: [day, next],
+            viewportStartMinute: 9 * 60, viewportEndMinute: 17 * 60,
+            edge: .top, calendar: calendar
+        ))
+        #expect(hint.hiddenCount == 2)
+        #expect(hint.item.id == "closest")
+        #expect(CalendarOffscreenEventHints.scrollTargetMinute(for: hint) == 7 * 60 + 30)
     }
 
     @Test("Partially visible events do not create offscreen cues")

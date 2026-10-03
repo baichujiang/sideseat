@@ -454,7 +454,7 @@ struct FeedbackDetailView: View {
                                 Label("\(post.up ?? 0)", systemImage: post.myVote == "UP" ? "hand.thumbsup.fill" : "hand.thumbsup")
                             }
                             .buttonStyle(.bordered)
-                            .tint(post.myVote == "UP" ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
+                            .tint(post.myVote == "UP" ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondary)
                             .disabled(store.isMutating)
                             .accessibilityLabel(post.myVote == "UP" ? "Remove upvote" : "Upvote")
                             .accessibilityValue(post.myVote == "UP" ? "Selected" : "Not selected")
@@ -466,7 +466,7 @@ struct FeedbackDetailView: View {
                                 Label("\(post.down ?? 0)", systemImage: post.myVote == "DOWN" ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                             }
                             .buttonStyle(.bordered)
-                            .tint(post.myVote == "DOWN" ? SideSeatTheme.accentText : SideSeatTheme.textSecondary)
+                            .tint(post.myVote == "DOWN" ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondary)
                             .disabled(store.isMutating)
                             .accessibilityLabel(post.myVote == "DOWN" ? "Remove downvote" : "Downvote")
                             .accessibilityValue(post.myVote == "DOWN" ? "Selected" : "Not selected")

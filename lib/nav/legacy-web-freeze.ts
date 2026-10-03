@@ -1,4 +1,4 @@
-const NATIVE_WEB_PATHS = ["/", "/ios", "/privacy", "/support"] as const;
+const NATIVE_WEB_PATHS = ["/", "/ios", "/xhs", "/privacy", "/support"] as const;
 const ADMIN_WEB_PATHS = ["/admin", "/login", "/forgot-password"] as const;
 
 export function isLegacyWebFrozen(
@@ -17,6 +17,7 @@ export function isNativeWebPath(pathname: string): boolean {
     return true;
   }
   return (
+    pathname.startsWith("/share/intent/") ||
     pathname.startsWith("/share/view/") ||
     pathname.startsWith("/share/event/") ||
     pathname.startsWith("/.well-known/") ||
