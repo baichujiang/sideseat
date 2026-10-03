@@ -1,0 +1,27 @@
+{
+  "sourceCommit": "b554b98810c2e935bcfa2751260907b82c4c0b1e",
+  "verifiedAt": "2026-10-03T22:50:40.448506+00:00",
+  "backendDeploymentID": "dpl_56ce6g2JaUMRuQMCbofBftrMMq1s",
+  "backendChangedThisStage": false,
+  "build": {
+    "CFBundleIdentifier": "app.sideseat.mobile.preview",
+    "CFBundleDisplayName": "SideSeat Preview",
+    "CFBundleShortVersionString": "1.0.0",
+    "CFBundleVersion": "91",
+    "SideSeatAPIBaseURL": "https://api.sideseat.de",
+    "executableSHA256": "781dce2cdf3f0310ecafae75c943c92f27f6c5ffecd03eab6e0b23cf0365b827",
+    "signatureVerified": true,
+    "deviceProvisioningVerified": true,
+    "sourceManifestVerified": true,
+    "sourceFileCount": 294
+  },
+  "installed": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "91",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "installOutcome": "success",
+  "launchOutcome": "success",
+  "processIdentifier": 23033
+}
