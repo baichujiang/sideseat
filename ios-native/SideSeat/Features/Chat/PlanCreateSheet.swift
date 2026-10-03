@@ -13,6 +13,7 @@ struct PlanCreateSheet: View {
     let onCreated: (PlanSubmissionResult) -> Void
 
     @State private var title = ""
+    @State private var repeatPlanType = "CUSTOM"
     @State private var location = ""
     @State private var message = ""
     @State private var start = Date().addingTimeInterval(60 * 60)
@@ -25,6 +26,7 @@ struct PlanCreateSheet: View {
     @State private var submissionSignature: String?
     @State private var showSmartTime = false
     @State private var suggestedTime: SmartTimeWindow?
+    @State private var showsRepeatTimePicker = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
@@ -63,7 +65,9 @@ struct PlanCreateSheet: View {
             .scrollDismissesKeyboard(.interactively)
             .background(SideSeatTheme.bgGrouped)
             .navigationTitle(
-                counterOf == nil
+                draft?.isRepeat == true
+                    ? String(format: AppLocalization.string("Plan again with %@"), recipientName ?? AppLocalization.string("This chat"))
+                    : counterOf == nil
                     ? AppLocalization.string("Propose a plan")
                     : AppLocalization.string("Suggest another time")
             )
@@ -73,12 +77,17 @@ struct PlanCreateSheet: View {
                     Button("Cancel") { dismiss() }
                         .disabled(isCreating)
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
+                        .accessibilityIdentifier("plan-editor-keyboard-done")
+                }
             }
             .accessibilityIdentifier("plan-create-sheet")
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSFlowActionDock(
-                    title: AppLocalization.string(counterOf == nil ? "Send plan" : "Send new time"),
-                    detail: "",
+                    title: AppLocalization.string(draft?.isRepeat == true ? "Send invitation" : counterOf == nil ? "Send plan" : "Send new time"),
+                    detail: draft?.isRepeat == true && !hasConfirmedTiming ? AppLocalization.string("Choose a new time") : "",
                     isLoading: isCreating,
                     isEnabled: canSend,
                     accessibilityID: "plan-create-submit"
@@ -92,6 +101,29 @@ struct PlanCreateSheet: View {
                 guard end <= newValue else { return }
                 let previousDuration = max(end.timeIntervalSince(oldValue), 30 * 60)
                 end = newValue.addingTimeInterval(previousDuration)
+            }
+            .sheet(isPresented: $showsRepeatTimePicker) {
+                NavigationStack {
+                    Form {
+                        DatePicker("Starts", selection: $start, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                        DatePicker("Ends", selection: $end, displayedComponents: [.date, .hourAndMinute])
+                    }
+                    .environment(\.locale, AppLocalization.selectedLanguage.locale)
+                    .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
+                    .navigationTitle("Choose a new time")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showsRepeatTimePicker = false }
+                        }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { hasConfirmedTiming = true; showsRepeatTimePicker = false }
+                                .disabled(start <= Date() || end.timeIntervalSince(start) < 30 * 60)
+                                .accessibilityIdentifier("plan-repeat-time-done")
+                        }
+                    }
+                }
+                .ssFlowSheet(isSaving: false)
             }
             .sheet(isPresented: $showSmartTime) {
                 SmartTimeSuggestionSheet(activityTitle: title) { window in
@@ -170,6 +202,17 @@ struct PlanCreateSheet: View {
             Text("Details")
                 .font(.headline)
 
+            if draft?.isRepeat == true {
+                Picker("Activity", selection: $repeatPlanType) {
+                    Text("Study").tag("STUDY")
+                    Text("Food").tag("MEAL")
+                    Text("Sports").tag("SPORTS")
+                    Text("Languages").tag("LANGUAGE")
+                    Text("Other").tag("CUSTOM")
+                }
+                .accessibilityIdentifier("plan-repeat-activity")
+            }
+
             VStack(spacing: 0) {
                 HStack(spacing: SideSeatTheme.spaceMD) {
                     Image(systemName: "text.cursor")
@@ -228,12 +271,21 @@ struct PlanCreateSheet: View {
             Text("When")
                 .font(.headline)
 
-            VStack(spacing: 0) {
+            if draft?.isRepeat == true && !hasConfirmedTiming {
+                Button { showsRepeatTimePicker = true } label: {
+                    Text("Choose a new time")
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityIdentifier("plan-repeat-choose-time")
+            } else {
+                VStack(spacing: 0) {
                 dateRow(label: AppLocalization.string("Starts"), icon: "clock", selection: $start)
                 Divider().padding(.leading, 50)
                 dateRow(label: AppLocalization.string("Ends"), icon: "clock.badge.checkmark", selection: $end)
+                }
             }
-            if needsExplicitTiming {
+            if needsExplicitTiming && draft?.isRepeat != true {
                 Toggle("Propose these times", isOn: $hasConfirmedTiming)
                     .accessibilityIdentifier("plan-confirm-timing")
                 Text("The other person still needs to accept. Nothing is added to your calendars yet.")
@@ -306,6 +358,7 @@ struct PlanCreateSheet: View {
         }
         if let draft {
             title = draft.title
+            repeatPlanType = draft.planType
             location = draft.location ?? ""
             if let startDate = draft.startTime.flatMap(Date.sideSeatChatISO8601) {
                 start = startDate
@@ -313,7 +366,7 @@ struct PlanCreateSheet: View {
             if let endDate = draft.endTime.flatMap(Date.sideSeatChatISO8601) {
                 end = endDate
             } else {
-                end = start.addingTimeInterval(60 * 60)
+                end = start.addingTimeInterval(draft.suggestedDuration ?? 60 * 60)
             }
         }
     }
@@ -358,7 +411,7 @@ struct PlanCreateSheet: View {
                 message: normalized(message),
                 startTime: formatter.string(from: start),
                 endTime: formatter.string(from: end),
-                planType: counterOf?.planType ?? draft?.planType ?? "CUSTOM",
+                planType: draft?.isRepeat == true ? repeatPlanType : counterOf?.planType ?? draft?.planType ?? "CUSTOM",
                 origin: counterOf == nil ? draft?.origin : nil
             )
             let result = try await submit(body)
@@ -473,7 +526,7 @@ struct PlanCreateSheet: View {
             normalized(message) ?? "",
             start.formatted(.iso8601),
             end.formatted(.iso8601),
-            counterOf?.planType ?? draft?.planType ?? "CUSTOM",
+            draft?.isRepeat == true ? repeatPlanType : counterOf?.planType ?? draft?.planType ?? "CUSTOM",
         ].joined(separator: "\u{1F}")
         if submissionSignature != signature {
             submissionSignature = signature

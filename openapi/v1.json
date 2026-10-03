@@ -6341,7 +6341,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Pending invitations and upcoming confirmed plans involving the viewer.",
+            "description": "Viewer plan overview, or a page of current plans for an authorized connection when connectionId is provided.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6355,8 +6355,34 @@
           },
           "500": {
             "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "description": "When provided, return only current participant-visible revisions in this active conversation, paginated in stable ID order.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Opaque nextCursor from a connection-scoped page. Requires connectionId.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/v1/plans/{planId}": {
@@ -20805,6 +20831,13 @@
                 "items": {
                   "$ref": "#/components/schemas/PlanRequest"
                 }
+              },
+              "nextCursor": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Present for connection-scoped requests. Null when complete; otherwise request the next page with this cursor."
               }
             },
             "required": [

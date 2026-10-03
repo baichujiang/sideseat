@@ -1,0 +1,14 @@
+[local-test-db] Running against sideseat_same_peer_20261003 on 127.0.0.1:5433.
+{"mode":"advance","changed":"Only first plan and its two calendar times","startTime":"2026-10-03T15:47:43.704Z","endTime":"2026-10-03T16:47:43.704Z"}
+{
+  "result": "PASS",
+  "mode": "advance",
+  "firstPlan": "cmusnljun0042hc3ibnceyoo2",
+  "connection": "cmusnl6yc003ohc3ir3gaeqm4",
+  "calendarOwners": [
+    "cmusniws5000014iuln0iw7h2",
+    "cmusniwsb000114iurls72xng"
+  ],
+  "sourceIntentions": "ENDED",
+  "noOutcomesYet": true
+}

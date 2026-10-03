@@ -68,6 +68,45 @@ const legacyParticipantVisibleWhere = {
   ],
 } satisfies Prisma.PlanRequestWhereInput;
 
+/** Connection-scoped, complete pagination for the conversation's current arrangements. */
+export async function listCurrentConnectionPlans(userId: string, connectionId: string, cursor?: string) {
+  const connection = await prisma.connection.findFirst({
+    where: {
+      id: connectionId, status: ConnectionStatus.ACTIVE,
+      OR: [{ userAId: userId }, { userBId: userId }],
+      userA: { moderationBlocks: { none: { isActive: true } } },
+      userB: { moderationBlocks: { none: { isActive: true } } },
+    }, select: { id: true },
+  });
+  if (!connection) throw new PlansServiceError("NOT_FOUND", "Conversation not found.");
+  const now = new Date();
+  const rows = await prisma.planRequest.findMany({
+    where: {
+      connectionId,
+      ...(cursor ? { id: { gt: cursor } } : {}),
+      cancellationNotice: { is: null },
+      AND: [
+        legacyParticipantVisibleWhere,
+        { OR: [{ proposerUserId: userId }, { receiverUserId: userId }] },
+        { OR: [
+          { status: "PENDING", startTime: { gt: now }, OR: [
+            { commitmentId: null }, { pendingForCommitment: { isNot: null } },
+          ] },
+          { status: "ACCEPTED", endTime: { gt: now }, OR: [
+            { commitmentId: null }, { acceptedForCommitment: { isNot: null } },
+          ] },
+        ] },
+      ],
+    },
+    include: planRequestV1Include,
+    orderBy: { id: "asc" },
+    take: 51,
+  });
+  const page = rows.slice(0, 50);
+  return { plans: page.map(row => planRequestV1(row, userId)),
+    nextCursor: rows.length > 50 ? page[page.length - 1].id : null };
+}
+
 export async function listPlansForUser(userId: string) {
   const now = new Date();
   const recentOutcomeCutoff = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1_000);

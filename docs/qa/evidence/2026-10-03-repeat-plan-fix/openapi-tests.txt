@@ -1,0 +1,25 @@
+
+> sideseat@0.1.0 test:openapi:v1
+> tsx --test tests/openapi/*.test.ts
+
+✔ the repository v1 contract passes structural and route checks (44.444458ms)
+✔ coordination-language mutation is part of the generated client contract (2.861166ms)
+✔ legacy direct Interest documents its actual 201 and explicit wire schema (3.034042ms)
+✔ Discover Actions expose a bounded capability-aware coordination read model (3.303583ms)
+✔ an implementation success status missing from OpenAPI fails validation (0.61725ms)
+✔ operation IDs and request/response schemas are mandatory (0.221292ms)
+✔ strict operation IDs cannot be silently renamed (0.175541ms)
+✔ strict mutations require idempotency and explicit request-body semantics (0.157209ms)
+✔ strict security cannot include an anonymous alternative (0.150917ms)
+✔ B-light operations reject generic success envelopes, including nested refs (0.259667ms)
+✔ new B-light operations require independent manifest registration (0.12975ms)
+✔ B-light oneOf unions require a fixed discriminator in every variant (0.29925ms)
+✔ route discovery includes exported arrow functions and aliased exports (0.297959ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.327583

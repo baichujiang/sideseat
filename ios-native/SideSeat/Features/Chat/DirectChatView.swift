@@ -1,3 +1,4 @@
+import Combine
 import MapKit
 import PhotosUI
 import SwiftUI
@@ -14,6 +15,12 @@ struct DirectChatView: View {
     let initialFocus: DirectChatFocus?
 
     @State private var store = DirectChatStore()
+    @State private var conversationPlans = ConversationPlansStore()
+    @State private var showsConversationPlans = false
+    @State private var repeatPlan: NativePlanRequest?
+    @State private var hasLeftInitialFocus = false
+    @State private var selectedHeaderPlan: NativePlanRequest?
+    @State private var arrangementNow = Date()
     @State private var composerDraft = ChatComposerDraft()
     @State private var replyDraft: NativeDirectMessage?
     @State private var isNearBottom = true
@@ -62,6 +69,11 @@ struct DirectChatView: View {
         let focus: DirectChatFocus?
     }
 
+    private struct ConversationPlansTaskKey: Hashable {
+        let connectionID: String?
+        let plans: [NativePlanRequest]
+    }
+
     init(connectionID: String, initialFocus: DirectChatFocus? = nil) {
         self.connectionID = connectionID
         self.initialFocus = initialFocus
@@ -92,7 +104,7 @@ struct DirectChatView: View {
 
     private var conversationContext: ConversationContextSelection? {
         ConversationContextSelection.resolve(
-            focus: initialFocus,
+            focus: hasLeftInitialFocus ? nil : initialFocus,
             messages: store.messages
         )
     }
@@ -100,12 +112,7 @@ struct DirectChatView: View {
     var body: some View {
         // Composer in a VStack (not safeAreaInset) so scrollTo(bottom) isn't short by one row.
         VStack(spacing: 0) {
-            if let conversationContext {
-                ConversationContextBar(selection: conversationContext) {
-                    composerFocus.blur()
-                    showContextDetails = true
-                }
-            }
+            arrangementHeader
 
             ZStack {
                 if hasPreparedInitialViewport {
@@ -157,6 +164,8 @@ struct DirectChatView: View {
                 focusedPlanMessageID = nil
                 hasResolvedInitialFocus = initialFocus == nil
                 hasPositionedInitialTarget = initialFocus == nil
+                hasLeftInitialFocus = false
+                selectedHeaderPlan = nil
                 await store.load(
                     connectionID: connectionID,
                     using: session,
@@ -165,7 +174,7 @@ struct DirectChatView: View {
                 if let initialFocus {
                     let resolvedMessageID = await resolveMessageID(for: initialFocus)
                     initialFocusMessageID = resolvedMessageID
-                    if case .plan = initialFocus {
+                    if store.messages.contains(where: { $0.id == resolvedMessageID && $0.planRequest != nil }) {
                         focusedPlanMessageID = resolvedMessageID
                     }
                     hasResolvedInitialFocus = true
@@ -184,10 +193,19 @@ struct DirectChatView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
                     store.resumeRealtimeIfNeeded(using: session)
+                    arrangementNow = Date()
+                    Task { await refreshConversationPlans() }
                 } else {
                     store.stop()
                 }
             }
+            .task(id: ConversationPlansTaskKey(connectionID: store.conversation?.id, plans: store.messages.compactMap(\.planRequest))) {
+                if store.conversation != nil { await refreshConversationPlans() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
+                Task { await refreshConversationPlans() }
+            }
+            .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { arrangementNow = $0 }
             .onChange(of: store.messages.map(\.id)) { _, messageIDs in
                 if !hasPreparedInitialViewport, !messageIDs.isEmpty {
                     guard initialFocus == nil || hasResolvedInitialFocus else { return }
@@ -275,6 +293,20 @@ struct DirectChatView: View {
                     recipientName: store.conversation?.displayName
                 ) { result in
                     finishPlanSubmission(result)
+                }
+            }
+            .sheet(item: $repeatPlan) { plan in
+                PlanCreateSheet(target: .legacyConnection(connectionID: connectionID),
+                                recipientName: store.conversation?.displayName,
+                                draft: NativePlanDraft(repeating: plan)) { result in
+                    finishPlanSubmission(result, uiTestingTitle: plan.title)
+                }
+            }
+            .sheet(isPresented: $showsConversationPlans) {
+                ConversationPlansSheet(groups: arrangementGroups, viewerID: viewerID, now: arrangementNow) { plan in
+                    selectedHeaderPlan = plan
+                    hasLeftInitialFocus = true
+                    Task { await openPlanInChat(plan) }
                 }
             }
             .sheet(item: $actionPlanDraft) { presentation in
@@ -439,7 +471,7 @@ struct DirectChatView: View {
                                 if focusedPlanMessageID == message.id {
                                     HStack {
                                         Spacer(minLength: 0)
-                                        Label(AppLocalization.string("Current Plan"), systemImage: "scope")
+                                        Label(AppLocalization.string("Selected plan"), systemImage: "scope")
                                             .font(.caption2.weight(.semibold))
                                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                             .padding(.horizontal, 9)
@@ -508,6 +540,10 @@ struct DirectChatView: View {
                                                 using: session
                                             )
                                         }
+                                    },
+                                    onRepeatPlan: { plan in
+                                        composerFocus.blur()
+                                        repeatPlan = plan
                                     },
                                     onProposeFromAction: { interest, contextID in
                                         guard let contextID else { return }
@@ -954,6 +990,81 @@ struct DirectChatView: View {
         }
 
         showPlanCreate = true
+    }
+
+    private var viewerID: String { session.currentUser?.id ?? "ui-test-user" }
+
+    private var arrangementGroups: [ConversationPlanGroup] {
+        ConversationPlanSelection.groups(conversationPlans.plans, viewerID: viewerID, now: arrangementNow)
+    }
+
+    private var focusPlan: NativePlanRequest? {
+        if let selectedHeaderPlan {
+            return conversationPlans.plans.first { $0.id == selectedHeaderPlan.id }
+                ?? store.messages.compactMap(\.planRequest).last { $0.id == selectedHeaderPlan.id }
+                ?? selectedHeaderPlan
+        }
+        guard !hasLeftInitialFocus, let focusedPlanMessageID else { return nil }
+        return store.messages.first { $0.id == focusedPlanMessageID }?.planRequest
+    }
+
+    @ViewBuilder private var arrangementHeader: some View {
+        if store.conversation != nil {
+            let current = arrangementGroups.first?.primary
+            let focused = focusPlan
+            let isSourceFocus = !hasLeftInitialFocus && focused == nil && store.messages.contains {
+                $0.id == initialFocusMessageID && ($0.actionInterest != nil || $0.mutualOpportunity != nil)
+            }
+            if let plan = focused ?? (isSourceFocus ? nil : current) {
+                ConversationPlanBar(plan: plan, viewerID: viewerID, now: arrangementNow,
+                                    showsAll: arrangementGroups.reduce(0) { $0 + $1.plans.count } > 1,
+                                    isFocused: focused != nil && (focused?.id != current?.id || !ConversationPlanSelection.isCurrent(plan, at: arrangementNow)),
+                                    hasCurrent: current != nil,
+                                    onOpen: { Task { await openPlanInChat(plan) } },
+                                    onAll: { composerFocus.blur(); showsConversationPlans = true },
+                                    onCurrent: { returnToCurrentPlan() })
+            } else if (conversationPlans.hasLoaded || isSourceFocus), let conversationContext {
+                ConversationContextBar(selection: conversationContext, isFocused: isSourceFocus) {
+                    composerFocus.blur()
+                    showContextDetails = true
+                }
+                if isSourceFocus {
+                    Button { returnToCurrentPlan() } label: {
+                        Text(current == nil ? "Back to latest messages" : "View current plans")
+                            .font(.caption).frame(minHeight: 44).contentShape(Rectangle())
+                    }
+                    .accessibilityIdentifier("conversation-view-current")
+                }
+            }
+            if conversationPlans.issue != nil {
+                Button("Plans could not be refreshed. Try again.") { Task { await refreshConversationPlans() } }
+                    .font(.caption).frame(minHeight: 44)
+                    .accessibilityIdentifier("conversation-plans-retry")
+            }
+        }
+    }
+
+    private func refreshConversationPlans() async {
+        await conversationPlans.load(connectionID: connectionID, using: session,
+                                     fixturePlans: store.messages.compactMap(\.planRequest))
+    }
+
+    private func openPlanInChat(_ plan: NativePlanRequest) async {
+        composerFocus.blur()
+        if let id = await store.messageID(forPlanID: plan.id, loadingOlderUsing: session) {
+            focusedPlanMessageID = id
+            scrollToMessageID = id
+        }
+    }
+
+    private func returnToCurrentPlan() {
+        hasLeftInitialFocus = true
+        selectedHeaderPlan = nil
+        if let plan = arrangementGroups.first?.primary {
+            Task { await openPlanInChat(plan) }
+        } else {
+            NotificationCenter.default.post(name: .sideSeatChatScrollToBottom, object: nil)
+        }
     }
 
     private func beginReply(to message: NativeDirectMessage) {
@@ -1539,6 +1650,7 @@ private struct DirectMessageBubble: View {
     let onWithdrawPlan: (NativePlanRequest) -> Void
     let onCounterPlan: (NativePlanRequest) -> Void
     let onRecordPlanOutcome: (String, NativePlanRequest) -> Void
+    let onRepeatPlan: (NativePlanRequest) -> Void
     let onProposeFromAction: (NativeActionInterest, String?) -> Void
     let onProposeFromMutualOpportunity: (NativeMutualOpportunitySource) -> Void
     let onOpenCalendar: () -> Void
@@ -1738,7 +1850,8 @@ private struct DirectMessageBubble: View {
                 onWithdraw: { onWithdrawPlan(plan) },
                 onCounter: { onCounterPlan(plan) },
                 onRecordOutcome: { onRecordPlanOutcome($0, plan) },
-                onOpenCalendar: onOpenCalendar
+                onOpenCalendar: onOpenCalendar,
+                onRepeat: { onRepeatPlan(plan) }
             )
         } else if message.type == "ACTION_INTEREST_CARD",
                   let interest = message.actionInterest {

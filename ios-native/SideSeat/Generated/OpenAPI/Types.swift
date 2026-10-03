@@ -1805,8 +1805,14 @@ extension APIProtocol {
     }
     /// - Remark: HTTP `GET /api/v1/plans`.
     /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)`.
-    internal func listPlans(headers: Operations.ListPlans.Input.Headers = .init()) async throws -> Operations.ListPlans.Output {
-        try await listPlans(Operations.ListPlans.Input(headers: headers))
+    internal func listPlans(
+        query: Operations.ListPlans.Input.Query = .init(),
+        headers: Operations.ListPlans.Input.Headers = .init()
+    ) async throws -> Operations.ListPlans.Output {
+        try await listPlans(Operations.ListPlans.Input(
+            query: query,
+            headers: headers
+        ))
     }
     /// - Remark: HTTP `GET /api/v1/plans/{planId}`.
     /// - Remark: Generated from `#/paths//api/v1/plans/{planId}/get(getPlan)`.
@@ -19142,15 +19148,25 @@ internal enum Components {
             internal struct DataPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/PlansListEnvelope/data/plans`.
                 internal var plans: [Components.Schemas.PlanRequest]
+                /// Present for connection-scoped requests. Null when complete; otherwise request the next page with this cursor.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PlansListEnvelope/data/nextCursor`.
+                internal var nextCursor: Swift.String?
                 /// Creates a new `DataPayload`.
                 ///
                 /// - Parameters:
                 ///   - plans:
-                internal init(plans: [Components.Schemas.PlanRequest]) {
+                ///   - nextCursor: Present for connection-scoped requests. Null when complete; otherwise request the next page with this cursor.
+                internal init(
+                    plans: [Components.Schemas.PlanRequest],
+                    nextCursor: Swift.String? = nil
+                ) {
                     self.plans = plans
+                    self.nextCursor = nextCursor
                 }
                 internal enum CodingKeys: String, CodingKey {
                     case plans
+                    case nextCursor
                 }
             }
             /// - Remark: Generated from `#/components/schemas/PlansListEnvelope/data`.
@@ -47885,6 +47901,30 @@ internal enum Operations {
     internal enum ListPlans {
         internal static let id: Swift.String = "listPlans"
         internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/plans/GET/query`.
+            internal struct Query: Sendable, Hashable {
+                /// When provided, return only current participant-visible revisions in this active conversation, paginated in stable ID order.
+                ///
+                /// - Remark: Generated from `#/paths/api/v1/plans/GET/query/connectionId`.
+                internal var connectionId: Swift.String?
+                /// Opaque nextCursor from a connection-scoped page. Requires connectionId.
+                ///
+                /// - Remark: Generated from `#/paths/api/v1/plans/GET/query/cursor`.
+                internal var cursor: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - connectionId: When provided, return only current participant-visible revisions in this active conversation, paginated in stable ID order.
+                ///   - cursor: Opaque nextCursor from a connection-scoped page. Requires connectionId.
+                internal init(
+                    connectionId: Swift.String? = nil,
+                    cursor: Swift.String? = nil
+                ) {
+                    self.connectionId = connectionId
+                    self.cursor = cursor
+                }
+            }
+            internal var query: Operations.ListPlans.Input.Query
             /// - Remark: Generated from `#/paths/api/v1/plans/GET/header`.
             internal struct Headers: Sendable, Hashable {
                 internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPlans.AcceptableContentType>]
@@ -47900,8 +47940,13 @@ internal enum Operations {
             /// Creates a new `Input`.
             ///
             /// - Parameters:
+            ///   - query:
             ///   - headers:
-            internal init(headers: Operations.ListPlans.Input.Headers = .init()) {
+            internal init(
+                query: Operations.ListPlans.Input.Query = .init(),
+                headers: Operations.ListPlans.Input.Headers = .init()
+            ) {
+                self.query = query
                 self.headers = headers
             }
         }
@@ -47934,7 +47979,7 @@ internal enum Operations {
                     self.body = body
                 }
             }
-            /// Pending invitations and upcoming confirmed plans involving the viewer.
+            /// Viewer plan overview, or a page of current plans for an authorized connection when connectionId is provided.
             ///
             /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/200`.
             ///
@@ -47998,6 +48043,52 @@ internal enum Operations {
                     default:
                         try throwUnexpectedResponseStatus(
                             expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/plans/get(listPlans)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
                             response: self
                         )
                     }

@@ -1,0 +1,7 @@
+{
+  "base": "Preview 85",
+  "changedFiles": [
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift"
+  ],
+  "note": "Only UI test harness differs; application code starts identical to Preview 85."
+}

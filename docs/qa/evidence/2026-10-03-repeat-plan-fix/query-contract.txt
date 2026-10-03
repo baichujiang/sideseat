@@ -1,0 +1,16 @@
+[local-test-db] Running against sideseat_repeat_fix_20261003 on 127.0.0.1:5433.
+{
+  "result": "PASS",
+  "pages": 3,
+  "currentPlans": 107,
+  "checks": [
+    "connection scope",
+    "more than 100 results",
+    "current revisions",
+    "reschedule grouping data",
+    "no foreign access",
+    "input validation",
+    "restricted revisions",
+    "ended connection"
+  ]
+}

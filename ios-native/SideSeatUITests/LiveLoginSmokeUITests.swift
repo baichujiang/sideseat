@@ -402,7 +402,9 @@ final class SocialLiveUITests: XCTestCase {
         let opportunityID = String(bookmark.identifier.dropFirst("mutual-opportunity-bookmark-".count))
         loopCapture(b, "02-recommendation")
         bookmark.tap()
-        XCTAssertTrue(bookmark.waitForNonExistence(timeout: 10))
+        XCTAssertTrue(bookmark.exists, "Saving keeps the recommendation in place until refresh")
+        let savedBookmark = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Remove bookmark"), object: bookmark)
+        XCTAssertEqual(XCTWaiter.wait(for: [savedBookmark], timeout: 8), .completed)
         b.buttons["together-tab-bookmarks"].tap()
         XCTAssertTrue(bookmark.waitForExistence(timeout: 10))
         loopCapture(b, "03-saved")
@@ -429,8 +431,8 @@ final class SocialLiveUITests: XCTestCase {
         reply.tap(); reply.typeText("[loop-qa] Yes, let's meet!")
         receiver.buttons["chat-composer-send"].tap()
         XCTAssertTrue(receiver.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 15))
-        XCTAssertTrue(receiver.staticTexts["[loop-qa] Hello, may I join?"].exists)
-        XCTAssertTrue(receiver.staticTexts["[loop-qa] Yes, let's meet!"].exists)
+        XCTAssertTrue(receiver.staticTexts["[loop-qa] Hello, may I join?"].waitForExistence(timeout: 12))
+        XCTAssertTrue(receiver.staticTexts["[loop-qa] Yes, let's meet!"].waitForExistence(timeout: 12))
         loopCapture(receiver, "05-replied-chat")
         receiver.buttons["conversation-context-bar"].tap()
         let makePlan = receiver.buttons["conversation-context-make-plan"]
@@ -469,6 +471,154 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(proposer.staticTexts["[loop-qa] Campus coffee"].waitForExistence(timeout: 15))
         loopCapture(proposer, "10-calendar-alex")
         proposer.terminate()
+    }
+
+    func testSamePeerLoop02OutcomesInOriginalChat() {
+        for (username, peer, text) in [
+            ("loopqa_a", "Loop Mia", "[same-peer] Thanks for today!"),
+            ("loopqa_b", "Loop Alex", "[same-peer] Let's meet again!")
+        ] {
+            let app = loopLogin(username)
+            tabButton(in: app, labels: ["Plans"]).tap()
+            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
+            XCTAssertTrue(occurred.waitForExistence(timeout: 12))
+            let repeatBeforeFeedback = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-repeat-")).firstMatch
+            loopReveal(repeatBeforeFeedback, in: app)
+            repeatBeforeFeedback.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+            XCTAssertEqual(app.textFields["plan-create-title"].value as? String, "[loop-qa] Campus coffee")
+            XCTAssertFalse(app.buttons["plan-create-submit"].isEnabled)
+            XCTAssertFalse(app.switches["plan-confirm-timing"].exists)
+            loopCapture(app, "repeat-fix-before-feedback-\(username)")
+            app.buttons["Cancel"].tap()
+            XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 8))
+            loopReveal(occurred, in: app)
+            occurred.tap()
+            let saved = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-saved-")).firstMatch
+            XCTAssertTrue(saved.waitForExistence(timeout: 12))
+            loopCapture(app, "same-peer-11-outcome-\(username)")
+            openDirectChat(in: app, peerName: peer)
+            sendMessage(text, in: app)
+            loopCapture(app, "same-peer-12-continued-chat-\(username)")
+            app.terminate()
+        }
+
+    }
+
+    func testSamePeerLoop02RepeatPlanInOriginalChat() {
+        let proposer = loopLogin("loopqa_a")
+        openDirectChat(in: proposer, peerName: "Loop Mia")
+        XCTAssertTrue(proposer.staticTexts["[same-peer] Let's meet again!"].waitForExistence(timeout: 10))
+        let repeatInChat = proposer.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-repeat-")).firstMatch
+        XCTAssertTrue(repeatInChat.waitForExistence(timeout: 8))
+        loopReveal(repeatInChat, in: proposer)
+        repeatInChat.tap()
+        XCTAssertTrue(proposer.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+        XCTAssertEqual(proposer.textFields["plan-create-title"].value as? String, "[loop-qa] Campus coffee")
+        let title = proposer.textFields["plan-create-title"]
+        title.tap()
+        title.typeKey("a", modifierFlags: .command)
+        title.typeText("[same-peer] Coffee again")
+        XCTAssertEqual(title.value as? String, "[same-peer] Coffee again")
+        proposer.buttons["plan-editor-keyboard-done"].tap()
+        let submit = proposer.buttons["plan-create-submit"]
+        XCTAssertFalse(submit.isEnabled)
+        let chooseTime = proposer.buttons["plan-repeat-choose-time"]
+        loopReveal(chooseTime, in: proposer)
+        chooseTime.tap()
+        let done = proposer.buttons["plan-repeat-time-done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 8))
+        done.tap()
+        XCTAssertTrue(waitUntilEnabled(submit, timeout: 5))
+        loopCapture(proposer, "same-peer-13-second-plan-draft")
+        submit.tap()
+        XCTAssertTrue(proposer.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 15),
+            "An ended first plan must not prevent another plan with the same person")
+        XCTAssertTrue(proposer.staticTexts["[same-peer] Coffee again"].firstMatch.waitForExistence(timeout: 12))
+        XCTAssertTrue(proposer.staticTexts["Waiting for Loop Mia"].waitForExistence(timeout: 12))
+        loopCapture(proposer, "same-peer-14-second-plan-sent")
+        proposer.terminate()
+    }
+
+    func testSamePeerLoop03AcceptSecondPlanAndCalendars() {
+        let receiver = loopLogin("loopqa_b")
+        tabButton(in: receiver, labels: ["Plans"]).tap()
+        XCTAssertTrue(receiver.staticTexts["[same-peer] Coffee again"].firstMatch.waitForExistence(timeout: 15))
+        loopCapture(receiver, "same-peer-15-second-invitation-overview")
+        openDirectChat(in: receiver, peerName: "Loop Alex")
+        XCTAssertTrue(receiver.buttons["conversation-current-plan"].waitForExistence(timeout: 12))
+        XCTAssertTrue(receiver.staticTexts["Waiting for your reply"].waitForExistence(timeout: 12))
+        let accept = receiver.buttons["Accept"].firstMatch
+        XCTAssertTrue(accept.waitForExistence(timeout: 12))
+        loopReveal(accept, in: receiver)
+        accept.tap()
+        XCTAssertTrue(accept.waitForNonExistence(timeout: 15))
+        XCTAssertTrue(receiver.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 12))
+        loopCapture(receiver, "same-peer-16-second-plan-accepted")
+        receiver.navigationBars.buttons.firstMatch.tap()
+        tabButton(in: receiver, labels: ["Calendar"]).tap()
+        XCTAssertTrue(receiver.staticTexts["[same-peer] Coffee again"].waitForExistence(timeout: 15))
+        loopCapture(receiver, "same-peer-17-calendar-mia")
+        receiver.terminate()
+
+        let reloaded = loopLogin("loopqa_a")
+        tabButton(in: reloaded, labels: ["Calendar"]).tap()
+        XCTAssertTrue(reloaded.staticTexts["[same-peer] Coffee again"].waitForExistence(timeout: 15))
+        loopCapture(reloaded, "same-peer-18-calendar-alex")
+        openDirectChat(in: reloaded, peerName: "Loop Mia")
+        XCTAssertTrue(reloaded.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 12))
+        XCTAssertTrue(reloaded.staticTexts["[same-peer] Coffee again"].firstMatch.waitForExistence(timeout: 10))
+        loopCapture(reloaded, "same-peer-19-persisted-original-chat")
+        reloaded.navigationBars.buttons.firstMatch.tap()
+        tabButton(in: reloaded, labels: ["Plans"]).tap()
+        reloaded.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+        let ended = reloaded.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+        XCTAssertTrue(ended.waitForExistence(timeout: 10))
+        ended.tap()
+        XCTAssertTrue(reloaded.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+        XCTAssertTrue(reloaded.staticTexts["Viewing · Ended"].waitForExistence(timeout: 12))
+        loopCapture(reloaded, "repeat-fix-historical-header")
+        let repeatInHistory = reloaded.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-repeat-")).firstMatch
+        loopReveal(repeatInHistory, in: reloaded)
+        repeatInHistory.tap()
+        XCTAssertTrue(reloaded.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+        loopCapture(reloaded, "same-peer-20-ended-plan-repeat-entry")
+        reloaded.buttons["Cancel"].tap()
+        XCTAssertTrue(reloaded.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 8))
+        reloaded.buttons["conversation-view-current"].tap()
+        XCTAssertTrue(reloaded.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 12))
+        reloaded.terminate()
+    }
+
+    func testSamePeerLoop04ReopenConversationShowsLatestPlan() {
+        let app = loopLogin("loopqa_a")
+        openDirectChat(in: app, peerName: "Loop Mia")
+        let latestPlan = app.staticTexts["[same-peer] Coffee again"].firstMatch
+        let visible = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == true AND hittable == true"),
+            object: latestPlan
+        )
+        let result = XCTWaiter.wait(for: [visible], timeout: 15)
+        loopCapture(app, "same-peer-21-reopened-latest-plan")
+        XCTAssertEqual(result, .completed, "Opening the original chat must reveal the latest accepted plan without manual scrolling.")
+        app.buttons["conversation-current-plan"].tap()
+        XCTAssertTrue(app.staticTexts["Selected plan"].waitForExistence(timeout: 8))
+        app.navigationBars.buttons.firstMatch.tap()
+        tabButton(in: app, labels: ["Plans"]).tap()
+        app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+        let ended = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+        XCTAssertTrue(ended.waitForExistence(timeout: 10))
+        ended.tap()
+        XCTAssertTrue(app.staticTexts["Viewing · Ended"].waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["Selected plan"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.staticTexts["Current Plan"].exists)
+        XCTAssertGreaterThanOrEqual(app.buttons["conversation-view-current"].frame.height, 44)
+        loopCapture(app, "repeat-fix-historical-header")
+        app.buttons["conversation-view-current"].tap()
+        XCTAssertTrue(app.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 12))
+        loopCapture(app, "repeat-fix-return-current")
+        app.terminate()
     }
 
     func testClosedLoop02OutcomesContinueChatAndFindNewCompany() {

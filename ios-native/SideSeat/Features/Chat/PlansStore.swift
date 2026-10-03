@@ -76,7 +76,7 @@ final class PlansStore {
                     connectionId: "ui-connection",
                     commitmentId: "ui-plan-completed-commitment",
                     status: "ACCEPTED",
-                    planType: "COFFEE",
+                    planType: "CUSTOM",
                     title: "Coffee after class",
                     location: "Campus café",
                     message: nil,

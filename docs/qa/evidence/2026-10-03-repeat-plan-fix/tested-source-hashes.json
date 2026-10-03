@@ -1,0 +1,94 @@
+{
+  "app/api/v1/plans/route.ts": {
+    "sha256": "a1cb18da94bd9a85afd6f0433ecb35d4d434055c34c423ba04615b9ea3ad01e0",
+    "baselineSha256": "6023ca91a358ed37e4ef703aa715d0e6615ff2308de363bdd3f98f16f1f21c39"
+  },
+  "lib/api/v1/plans-service.ts": {
+    "sha256": "ac939e4d85e6c855c027413d7584d4820602a90079e33a116552ad50029316ca",
+    "baselineSha256": "de502b5cb3f557172d50f9af1de5b84cc16fc14fc8c2785bded6501c0f5b5831"
+  },
+  "openapi/v1.json": {
+    "sha256": "ff30c634993b2f5153422df035ea13daf9fb900cb943d5fef0e5481d45c517ae",
+    "baselineSha256": "0141c1d2f8211fc48ddb143fd1e0abffad73b9bc291257aac01ca27cf779f66d"
+  },
+  "ios-native/SideSeat.xcodeproj/project.pbxproj": {
+    "sha256": "6c7bc7cc8ed7fb4d66f7e8f0908a82c530219ae39e32c3abed7cb20546d985f7",
+    "baselineSha256": "4d770cf2a01229aab4277aedfcc7f789e0c61f49fde0b98b2df13280f984a10f"
+  },
+  "ios-native/SideSeat/Features/Chat/ChatModels.swift": {
+    "sha256": "9418af89903db1bb1e14d19cbf8aaef6ae35e003acdebe5ead96c575b39dbba3",
+    "baselineSha256": "0253c47c4cfb71349d463751c157b6789de49b815355c62e3e5151f46e687120"
+  },
+  "ios-native/SideSeat/Features/Chat/PlanCardView.swift": {
+    "sha256": "6918a08588217f7fe7037e0daceb63539987c2b548d4a1c020a87bb2d21056e0",
+    "baselineSha256": "59fb8be4c1ef509997fd3bac9b1448d1d2857cef4d97a024e143646634e75bbd"
+  },
+  "ios-native/SideSeat/Features/Chat/PlanCreateSheet.swift": {
+    "sha256": "27b6b4a3a9837740190cd0927c3aa608fa5e1ff0269fc21dc3a56c3a853eabb8",
+    "baselineSha256": "fc81814795507952940d529af1867d10255acb561b66b1f8c4414b554cbf141e"
+  },
+  "ios-native/SideSeat/Features/Chat/PlansRootView.swift": {
+    "sha256": "5b36d0e2b211f371770fcd0ba9e1cef60f1e793991330f2601ff8df5ebe89795",
+    "baselineSha256": "50b01da0afb1af59bb2c2726570b1a26685dfc58d649f12da0c6e2c857b4e2e2"
+  },
+  "ios-native/SideSeat/Features/Chat/DirectChatInfoView.swift": {
+    "sha256": "122024e0c8067d18dabdf181fe7e27e08add40de135d701e2e3c58fcd74a4135",
+    "baselineSha256": "9e9ec91fbcd78354f96cc2b208126ca2742ec9c129b657688960d478a8b54e99"
+  },
+  "ios-native/SideSeat/Features/Chat/DirectChatView.swift": {
+    "sha256": "a4f8ab8fb29f142c9c14794d56d98fa0acc3f828b4e9dccbacfee5050bedb903",
+    "baselineSha256": "8845741fc715feaae1596c310aaaa7d5aa58f85d5995b42df94524e5cdc91d68"
+  },
+  "ios-native/SideSeat/Features/Chat/DirectChatStore.swift": {
+    "sha256": "2cb45e6c16f75c30301ae2966cd142230f6dda4d91b1d89353e902cf9cdf48ee",
+    "baselineSha256": "2cb45e6c16f75c30301ae2966cd142230f6dda4d91b1d89353e902cf9cdf48ee"
+  },
+  "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift": {
+    "sha256": "b287600d55da9bedd827e8613deec2a97a071b181f1742b86aa9196d5841f4e5",
+    "baselineSha256": "d8b973a83fe8dec36d7921b5c3f792583c0f564df1586a4161fcc87e43be3462"
+  },
+  "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": {
+    "sha256": "f3000c18efee523f04fe1b2f95e28fef8d3ee77f76518b7ddc9328acb80d9936",
+    "baselineSha256": "f5de01c8ae0a3c654b2a66056ac0100ee240bac7ff26311fc1b34ef0be832baa"
+  },
+  "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": {
+    "sha256": "2398779b5c486a5ecdac56bb76e4c7ed91e5e6e9fb3a67f79a17f08e9068a2b2",
+    "baselineSha256": "7d0f0da98f964b5a2305811e863973d4410011a01e7a44345467434c559f0111"
+  },
+  "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": {
+    "sha256": "0b159541bb12ae03dcb316503ca433e39fa0f8db288069adf1d72323356c9fc2",
+    "baselineSha256": "4fc549ceda8d106f8cf53a73216ceb0fbbb2ef15972c8dd78a64c433967a7659"
+  },
+  "ios-native/SideSeat/Features/Chat/ConversationPlans.swift": {
+    "sha256": "ce0dd89490ee0f1dce277ff36e0658a501bc250a0a5ac0a6557a609ea7912ba5",
+    "baselineSha256": null
+  },
+  "ios-native/SideSeat/Features/Chat/PlansStore.swift": {
+    "sha256": "08039092baf1185f60e0b4e63f546aff0cbc0af7995b8776737ac6aca39e46f1",
+    "baselineSha256": null
+  },
+  "ios-native/SideSeat/Generated/OpenAPI/Client.swift": {
+    "sha256": "2a84580b7c940a9345c7e917a48e7317c6b95a8fe17e4e628131cd74da0e08b1",
+    "baselineSha256": null
+  },
+  "ios-native/SideSeat/Generated/OpenAPI/Types.swift": {
+    "sha256": "fc977e737befa6a52f6ed0a3815aa6586a6ffa757f4d7219e8c887d88ad01a9b",
+    "baselineSha256": null
+  },
+  "ios-native/SideSeatTests/ConversationPlansTests.swift": {
+    "sha256": "95ba87a0dcbcec152b51bab6c4f4bdbc1978af7b60e332f8d87995411e5459b6",
+    "baselineSha256": null
+  },
+  "ios-native/SideSeatUITests/VisualQAScreenshotUITests.swift": {
+    "sha256": "dd09392abf760fabf2b59a2bf2c6aba30feae835a304ef218815740e3c632cb7",
+    "baselineSha256": null
+  },
+  "scripts/qa-conversation-plans.ts": {
+    "sha256": "b1496b6b48e69d78eea4bc11b637c51ea30500f65f252b0f06379d0ef7bda8a1",
+    "baselineSha256": null
+  },
+  "scripts/qa-same-peer-loop.ts": {
+    "sha256": "0d62594ca29810907d334625087210f0f49b70a022b6c9bb9b6b0853d3f5affc",
+    "baselineSha256": null
+  }
+}

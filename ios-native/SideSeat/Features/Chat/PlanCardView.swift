@@ -13,6 +13,7 @@ struct PlanCardView: View {
     let onCounter: () -> Void
     let onRecordOutcome: (String) -> Void
     let onOpenCalendar: () -> Void
+    var onRepeat: (() -> Void)? = nil
 
     var body: some View {
         SSFlowCard(contentPadding: 12, contentSpacing: SideSeatTheme.spaceSM) {
@@ -106,8 +107,12 @@ struct PlanCardView: View {
                 PlanOutcomePromptView(
                     plan: plan,
                     isSubmitting: isActing,
+                    showsSavedQuestion: false,
                     onAnswer: onRecordOutcome
                 )
+                if let onRepeat {
+                    PlanRepeatButton(plan: plan, isDisabled: isActing, action: onRepeat)
+                }
             } else if plan.status == "ACCEPTED" {
                 HStack(spacing: 8) {
                     Label("Confirmed in both calendars", systemImage: "calendar.badge.checkmark")
@@ -264,6 +269,31 @@ struct PlanCardView: View {
         case "COUNTER_PROPOSED", "EXPIRED", "PENDING": SideSeatTheme.statusWarningText
         default: SideSeatTheme.textSecondaryStrong
         }
+    }
+}
+
+struct PlanRepeatButton: View {
+    let plan: NativePlanRequest
+    var isDisabled = false
+    let action: () -> Void
+
+    var body: some View {
+        let title = AppLocalization.string(plan.viewerOutcome == "DID_NOT_OCCUR" ? "Arrange another time" : "Plan again")
+        Group {
+            if plan.viewerOutcome != nil {
+                SSPrimaryButton(title: title, fill: .product, height: 46,
+                                accessibilityID: "plan-repeat-\(plan.id)", action: action)
+            } else {
+                Button(action: action) {
+                    Text(title).font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .accessibilityIdentifier("plan-repeat-\(plan.id)")
+            }
+        }
+        .disabled(isDisabled)
     }
 }
 

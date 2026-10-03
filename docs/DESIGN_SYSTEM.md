@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-09-12
+**Last updated:** 2026-10-02
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -12,9 +12,11 @@
 
 - Use native SwiftUI structure and behavior first.
 - One primary task per screen.
-- Rose (`#FB4185`) is the shared selection and interest accent, including Together.
-- Product primary actions use adaptive ink/chalk; Rose is a small selection accent,
-  not a large filled area on every card. Original category artwork adds personality.
+- Routine buttons, filters, menus, tabs and private-save controls use neutral text
+  and neutral selected surfaces. Selection also uses a checkmark, icon or weight.
+- Product primary actions use adaptive ink/chalk. Rare emphasized actions such as
+  Say hello may use deep Rose with white text. Avoid pale pink fills with red text.
+  Original category artwork adds personality without coloring every control.
 - Brand gradients belong to Auth/Tutorial and rare hero moments, not product lists.
 - Together, Calendar, Messages and Me share one component/token system.
 - Dynamic Type, VoiceOver, Light/Dark and safe-area behavior are requirements.
@@ -26,7 +28,7 @@
 | Surface  | Primary task                   | Visual rule                                                                         |
 | -------- | ------------------------------ | ----------------------------------------------------------------------------------- |
 | Together | Intent, countdown, Opportunity | Action-first cards; status through text/structure, not color alone                  |
-| Calendar | Understand and edit time       | Neutral grid; Rose for selection/current-time hierarchy                             |
+| Calendar | Understand and edit time       | Neutral grid and date selections; solid blue for today, separate current-time marker       |
 | Messages | Coordinate and manage Plans    | Reading comfort over brand saturation; source and Plan cards have distinct surfaces |
 | Me       | Identity and settings          | Native grouped hierarchy; light brand wash only where useful                        |
 
@@ -40,7 +42,9 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 
 | Token family                   | Use                                                           |
 | ------------------------------ | ------------------------------------------------------------- |
-| `accent` / `rose`              | selected controls, compact emphasis, unread state             |
+| `accent` / `rose`              | brand identity and rare compact emphasis; not routine controls             |
+| `utilityAction` / `ControlSelection.*` | neutral control text, selected fill and border                |
+| `BrandAction.*`                | rare deep-Rose primary action with white text                  |
 | `ProductAction.*`              | paired ink/chalk product button fill and foreground           |
 | `activityInset`                | warm neutral activity context                                |
 | `Together.headerFill`          | colored top row in all three Together card lists              |
@@ -48,7 +52,8 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 | `bg`, `bgGrouped`, `surface`   | system-adaptive canvases and cards                            |
 | `textPrimary`, `textSecondary` | system-adaptive content hierarchy                             |
 | `danger`, `success`            | destructive/error and success semantics                       |
-| `calendarNow`                  | current date/time indication                                  |
+| `calendarToday` / `onCalendarToday` | solid current-date marker and high-contrast number in Month/Week/Day, without an outer outline |
+| `calendarNow`                  | current-time line and time badge                              |
 | `Chat.*`                       | canvas, own/peer bubble, structured card and quote separation |
 | spacing/radius/text tokens     | consistent layout and Dynamic Type                            |
 
@@ -88,19 +93,19 @@ navigation chrome, with no Together-specific title-bar background or tint. The
 page and section-selector surround use the grouped system background. A neutral
 native Add action is shared by all three tabs; it shows a text label when
 space permits and an icon at accessibility sizes. The pinned section selector
-uses equal-width, minimum-44pt buttons on a warm inset surface, with dusty-Rose
-fill and semibold Rose ink marking selection. Warm colors are confined to this
-section selector, not the shared top title bar. Dark Mode adapts the selector to
-charcoal and muted plum; its text keeps at least 4.5:1 contrast. At accessibility sizes the buttons
-stack, labels wrap, and a checkmark reinforces selection. A divider separates the
+uses equal-width, minimum-44pt buttons on a warm inset surface. The 2026-10-02
+owner decision replaces the dusty-Rose selection with a neutral gray fill and
+semibold primary text in both appearances. Control text keeps at least 4.5:1
+contrast. At accessibility sizes the buttons stack, labels wrap, and a checkmark
+reinforces selection. A divider separates the
 fixed navigation from scrolling content; page swipes retain each scroll position.
 
 Together cards use a 24pt radius, 20pt inset, neutral system-adaptive bodies, a warm
 hairline and a subtle shadow. Category artwork stays compact. Activity headings
 are semibold; timing is an unboxed detail row. A 64pt warm inset decision rail has
 a 52pt ivory handle, with the privacy explanation underneath. Owner and Explore
-actions share the same restrained Rose treatment. Dark Mode uses warm charcoal
-and plum. Category color never indicates match quality, consent or a Plan.
+secondary actions share neutral controls; first-contact emphasis uses deep
+Rose/white. Dark Mode uses warm charcoal and plum. Category color never indicates match quality, consent or a Plan.
 Opportunity reading order remains peer → activity → timing → private decision.
 
 The Preview 49 refinement places the two decision labels above the rail so the
@@ -320,6 +325,47 @@ The editor uses native focus and scroll centering when focus, the input reason o
 the available Form height changes, keeping the active input above the action
 dock. Step navigation ends focus locally and preserves the draft.
 
+### Intention creation entry — 2026-10-02
+
+Place the compact + Add action beside the "What I want to do" heading in the
+My intentions content area, not in the Together navigation bar. Show it only
+when the current intention list has content. With no current intentions, use
+only the central Add your first intention action. The heading action scrolls
+with the list and appears on neither Recommendations nor Saved intentions.
+Keep a 44pt minimum target; accessibility text sizes use a plus icon with the
+full localized Add an intention accessibility label.
+
+### Expired intention action — 2026-10-02
+
+Place Plan again inside the expired card, trailing the status badge in the same
+row. Use a compact capsule with a minimum 44pt hit target; remove the separate
+full-width action beneath the card. At accessibility sizes, stack the badge and
+action inside the card and wrap the label. Terminal cards are noninteractive
+containers with an enabled repeat action; active-card edit/delete behavior is
+unchanged.
+
+### Intention time selection — 2026-10-02
+
+Keep a stable Time section in the intention form. Undecided timing uses a compact
+"Time undecided · Tap to set" row. Once selected, show every exact window in a
+chronologically ordered text list, with date/weekday and time range on each row.
+The section heading shows the number of options when there is more than one and
+an explicit Modify action opening the dedicated sheet. Stack date and time when
+space is limited or accessibility text sizes are enabled.
+
+Published own-intention cards initially show two windows. An inline disclosure
+expands the remaining windows and can collapse them again without opening the
+editor. Keep disclosure and edit controls separate in the accessibility tree.
+
+The sheet owns temporary start/end and additional-slot drafts. Done validates and
+commits them; Cancel and swipe dismissal leave the form unchanged. "Not sure yet"
+explicitly clears the committed selection and dismisses the sheet; hidden exact
+drafts are never submitted with undecided timing. Keep the last committed exact
+slot available when reopening within the editor. Existing date ranges remain
+intact until explicitly replaced or cleared. Plan rebooking still requires an
+exact time. Repeating an intention prefills next week's original weekday/local
+time and duration, displayed immediately in the summary.
+
 ### Comfort and character refresh — 2026-09-09
 
 The product direction combines quiet functional surfaces with warm, recognizable
@@ -385,7 +431,7 @@ Edit Profile keeps labels on the left and values on the right at ordinary text
 sizes. Each inset card has a compact icon/header and quiet row separators;
 inputs no longer sit inside individual gray wells. A native menu/picker keeps
 selection checkmarks while exposing a consistent trailing chevron. Only the
-focused text row receives a light Rose wash, without a leading marker. Focus
+focused text row receives a neutral fill, without a leading marker. Focus
 animation respects Reduce Motion. As of 2026-09-22, the editor uses a native
 inline title with Cancel and Save, matching Privacy. The avatar/account header
 and bottom Save area are removed to leave more room for fields and the keyboard.
@@ -428,7 +474,7 @@ uses a ring, checkmark and accessibility selected state, not color alone.
 - disabled: neutral fill and no fake affordance;
 - loading: in-control progress and duplicate-action prevention;
 - focus: native focus behavior and visible field-level error;
-- selected: accent wash/fill plus shape or text, never color alone;
+- selected: neutral fill plus shape, checkmark or text weight, never color alone;
 - keyboard: tapping outside an editor dismisses it and returns control to scrolling;
 - countdown: update in place; indicators must not fly in from screen edges;
 - confirmation: secondary actions do not appear at the top screen edge.
@@ -490,3 +536,38 @@ replace the old install-first shell. Calendar retains the Teams-inspired mini-mo
 sidebar, category filters, top actions and day/week/month workspace. Me contains
 campus identity, verification, courses, languages, privacy and account settings.
 No install bar, PWA update notice or cached tab snapshot is part of the new shell.
+
+## Profile personalization — 2026-10-02
+
+Owner-requested profile customization uses the existing semantic palette for
+classic/rose/ocean/forest profile cards, optional SF Symbol decorations, and
+classic/outline/spotlight surfaces. The profile card may have a light colored wash
+or stroke; display names and body text keep semantic foregrounds. Product-wide
+action colors remain unchanged. Light/dark/system is a device preference.
+See [Profile personalization](PROFILE_PERSONALIZATION.md) for entitlement and persistence.
+
+### Messages greeting shortcut
+
+The New greetings entrance uses a compact blue waving-hand tile, a label underneath and
+a count badge at its top-right corner. It is left-aligned above the continuous conversation
+list, without a full-width card or disclosure arrow. `Chat.greetingTile` and
+`Chat.greetingIcon` scope this requested color treatment to this shortcut. The count remains
+the total greetings in the existing request list; the Messages tab retains its unread policy.
+
+
+### Same-person follow-up and conversation arrangement — 2026-10-03
+
+Ended Plan cards separate the historical detail hit area from the 44pt minimum
+Plan again action. Before feedback, this action has low emphasis; after saving,
+it uses the shared adaptive primary button. Feedback remains one editable line.
+A did-not-happen answer uses Arrange another time. The editor inherits activity
+and place but requires a visibly unselected new time; no extra timing switch is
+added to this path. Keyboard Done dismisses text entry to expose the next fields.
+
+The compact chat header shows status, actual Plan title and date range. Incoming
+response needs outrank confirmed arrangements, which outrank outgoing invitations.
+Historical focus is explicit and offers a separate 44pt current-arrangement action.
+A source card says Met through this intention, never implies the old snapshot is
+the newest Plan. The multi-Plan sheet groups a reschedule and its confirmed time.
+Chinese, English and German strings use the existing semantic colors and Dynamic
+Type. Verification evidence is tracked in the same-person remediation QA report.

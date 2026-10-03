@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-09-09
+**Last updated:** 2026-10-03
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -37,15 +37,28 @@ Together initially explains one action:
 [添加想做的事]
 ```
 
+With current intentions, the compact + Add text action sits beside "What I want
+to do" in the content heading, without a background or border and with a minimum
+44-point touch target. The empty state shows only Add your first intention.
+The Together navigation bar has no creation action.
+
 The user may create several independent Intents. One Intent contains one concrete
-activity and a timing preference. Default: time to discuss. Users can instead
-choose a day/date range (tomorrow, this weekend, next week, custom), optionally a
-day-part, or one or more exact windows. Intention is not an appointment.
+activity and a timing preference. Default: time to discuss. A compact Time row
+opens a dedicated sheet for one or more exact windows. Done saves the draft;
+Cancel or swipe dismissal keeps the previous selection; Not sure yet restores
+undecided timing. Existing date-range preferences are preserved until explicitly
+replaced or cleared. Intention is not an appointment.
 
 Current editor behavior:
 
-- two steps: choose the concrete activity, then timing preference; Back preserves
-  all entered fields, and the bottom action advances or saves;
+- one form: choose the activity, optionally describe it and set the time; the
+  bottom action publishes or saves;
+- the Time section lists every selected date/weekday and time range. Its Modify
+  action opens the time sheet to adjust, add or remove slots; undecided timing
+  stays a compact row. Published own-intention cards show two slots initially
+  with an inline action to expand or collapse the rest;
+- Plan again prefills the original weekday/local time and duration next calendar
+  week. The user can adjust it or return to undecided timing before publishing;
 - choose Coffee, Study, Sports, Explore, Food or Events;
 - Coffee, Explore, Food and Events require a short concrete action rather than
   matching on the broad category alone;
@@ -130,9 +143,11 @@ connected and the server still caps results at five.
 Explore cards use exactly the same private Interested/save and Say hello controls
 as recommendations. Opening the composer needs no prior interest action and creates
 no notification; canceling sends nothing. The private contact draft does not reserve
-matching supply. Preparing an opportunity updates its card in place. Saving removes
-it from the recommendation feed after success and animates a miniature card toward
-Saved intentions. A successfully sent message removes the card from recommendations
+matching supply. Preparing an opportunity updates its card in place. Saving keeps
+the card and scroll position in the current browsing list, with a filled heart and
+Interest shown state. It neither flies to nor opens Saved intentions; that page is
+entered explicitly. An explicit refresh or new search can replace the result set
+and omit already saved cards. A successfully sent message removes the card from recommendations
 and exploration; eligible cards refill the requested result set up to its access
 limit. Demonstration cards have disabled contact/save controls.
 Saved intentions contains private heart bookmarks, an empty state and removal.
@@ -157,9 +172,16 @@ buttons vertically so their labels remain readable.
 - One first message is allowed per opportunity. Sending immediately opens the conversation
   with that message as the sender's bubble. Contacted cards leave recommendations,
   including after a reply. Saved cards remain in **Saved intentions** with a clickable
-  **View chat** button. Saved cards are also removed from recommendations; removing a bookmark restores an
-  otherwise eligible, uncontacted card.
-- The conversation is available in **Messages** for both participants. Before a reply,
+  **View chat** button. Cards saved during browsing remain in place until an explicit
+  refresh or new search; removing a bookmark restores an otherwise eligible,
+  uncontacted card on later requests.
+- **Messages** keeps active conversations in the main list. The **New greetings** shortcut sits below search, above the conversation rows,
+  leaving the navigation title uncluttered. It has a blue waving-hand tile with the label below,
+  aligned to the left, and shows the total greeting count as an icon corner badge and opens a separate list grouped into **Waiting for
+  your reply** and **Awaiting their response**. Each list has its own search. Pinned conversations
+  have an adaptive blue-gray background; ordinary chats keep the standard background.
+  Both appear in one continuous list, with pinned chats first and no Pinned/Recent section headings.
+- The conversation is available in **Messages → New greetings** for both participants. Before a reply,
   the sender can read it while the input area says to wait for the recipient's reply.
   The recipient can reply directly in the chat or ignore it. Incoming pending requests
   count in the Messages badge. Ignoring is private and does not permit resending.
@@ -199,6 +221,19 @@ The Conversation opens with the source card so neither user enters an unexplaine
 blank chat. People who have chatted remain reachable in Messages after this
 specific coordination ends, subject to Block and connection state.
 
+### Current arrangement in a native conversation — 2026-10-03
+
+The chat header reads the current connection's authorized, paginated Plans. It
+prioritizes an invitation needing the viewer's reply, then an ongoing or next
+confirmed meet-up, then an outgoing invitation. Superseded, canceled and ended
+Plans do not replace a current arrangement. Multiple Plans open a grouped list;
+a proposed reschedule stays with its existing confirmed time.
+
+An explicit historical Plan entry remains focused and says **Viewing · Ended**;
+**View current plans** returns to the current arrangement. With no current Plan,
+the original source is labeled **Met through this intention**. Source snapshots
+remain in chat history/details. Failed refreshes retain known data and offer retry.
+
 ## 7. Create and confirm a Plan
 
 From the source card or conversation:
@@ -229,6 +264,68 @@ proposal leads with timing and retains the previous title/place. The response
 card gives Accept the primary action, followed by alternate time and decline.
 It explains the effect on both calendars before acceptance.
 
+Plan list cards and chat Plan cards include a compact relative-time hint alongside
+their existing date/time information. Future dates use Tomorrow / In N days;
+same-day times use Today, approximate hours (within six hours), or Within an hour.
+Confirmed Plans within 30 minutes show Starting soon, then In progress until the
+end time. An unconfirmed proposal never claims to be in progress. Canceled,
+declined, expired or superseded proposals have no countdown. Absolute dates remain
+visible, including full date headings in Upcoming. Hints refresh each minute and
+on returning to the app; elapsed time never records a completed Outcome.
+
+### Native Plans overview — 2026-10-02
+
+Plans opens on **Overview**, showing invitations that need the viewer's response
+first (two initially, with an explicit expand action), followed by the nearest
+confirmed meet-up. The next meet-up remains visible even when there are no pending
+invitations. **View all** opens the complete Upcoming list, grouped by date.
+Outgoing invitations sit in a collapsed **Awaiting their response** section with
+a count. The existing Upcoming and Ended tabs remain available.
+
+Each card separates activity, time, location and participant. Incoming invitations
+name the sender and show **View and respond**, opening the existing conversation
+and its accept / alternative-time / decline controls. Confirmed cards carry an
+explicit confirmation label. Ended retains private Outcome entry and editing.
+This changes presentation only; it does not send a response or create a commitment.
+
+### Smart time coordination — 2026-10-02 (simplified)
+
+The chat composer has one **Plan** entry. It opens the standard Plan editor with a
+**Find a time together** shortcut at the very top, matching Calendar's Smart fill
+entry. Manual date/time, title, location and note fields remain directly editable.
+The separate smart-time bar above the chat composer has been removed.
+
+Tap the editor shortcut to immediately load three concrete free windows from the
+signed-in user's synchronized calendar, for example Saturday 09:00–12:00 and Sunday
+13:00–17:00. No date-range setup, duration picker or schedule sharing page is
+involved. **Show other times** cycles through further suggestions.
+
+The chooser shows the current activity title when provided, followed by a grouped
+list of date, time range and free duration. **Show other times** sits alongside the
+list heading. A close button returns to the draft; empty/error states also offer
+**Choose time manually**. Large text uses a full-height sheet and stacked content.
+The activity title is context only and does not affect recommendation ranking yet.
+
+Recommendations cover tomorrow through the following seven days in Berlin time.
+They retain continuous free time within morning (09–12), afternoon (12–17) and
+evening (17–21), excluding fragments shorter than 30 minutes and prioritizing
+several dates. They describe **your** availability, not the peer's private calendar.
+Errors and no suitable windows are explicitly shown rather than guessed.
+
+Selecting a window returns to the same Plan editor and updates only start/end time.
+Existing title, location, note and conversation origin are retained. Canceling the
+recommendation sheet leaves the whole draft unchanged. Nothing is sent until **Send plan**; the peer must
+accept before either calendar changes. Closing recommendations sends nothing.
+No new share/link is created. Existing historical share cards remain separate
+compatibility surfaces. Calculation is local and uses no LLM; this iteration adds
+no Plus gate. Unsynchronized commitments may be absent from suggestions.
+
+The requested next recommendation upgrade is not implemented by this entry change:
+respect the user's daily available hours, rank by activity fit, schedule density,
+transition/rest buffers and weekday/weekend context, explain why a window fits,
+and let the sender offer several candidate times for the peer to choose. Current
+recommendations remain free-window filtering and send one selected Plan time.
+
 Plan is the shared source of truth. A chat message cannot confirm a Plan, and a
 Calendar entry cannot independently change shared title, time, place or
 participants. Confirmed changes use mutual reschedule; either participant may
@@ -242,6 +339,23 @@ Plan.
 
 Calendar additionally supports personal events, courses, lightweight search and
 Apple Calendar interoperability. It does not show people recommendations.
+
+Smart fill supports typing, on-device dictation and image text input. Add from
+image opens the system photo picker for one image. On-device OCR appends text to
+the existing input, preserving typed details. The user can edit the result and
+open the source image for comparison before Preview events. Images are not
+uploaded; the existing text parser returns up to ten editable event drafts, and
+the user confirms the batch separately. Images are limited to 20 MB and parser
+input to 2,000 UTF-16 code units; oversized text is retained for editing rather
+than silently truncated. Dense grid timetables may need smaller crops and manual
+correction of date/time associations.
+
+The current smart-fill design uses one editable preview for all drafts, with no
+inference badges or extra confirmation step. Missing information is completed
+before preview, and the user chooses when to save. The authoritative completion
+tree, duration rules, examples and implementation gaps live in
+[Calendar smart input](./CALENDAR_SMART_INPUT.md). This design is not yet fully
+implemented or released; the linked document distinguishes it from current code.
 
 ## 9. Failure and terminal paths
 
@@ -260,6 +374,24 @@ Layer 2 is implemented: ended confirmed Plans offer private happened / did not
 happen / skip responses from Together, Plans history and the conversation reached
 from Calendar. Saving shows the viewer's answer; Change answer reopens the choices.
 Shared Encounter is derived only after both independently answer OCCURRED.
+
+### Directly invite the same person again — 2026-10-03
+
+Ended cards in Plans and chat offer **Plan again** (or **Arrange another time**
+after a did-not-happen answer). Feedback is optional for this action; it does not
+require Meet Again permission or its feature gate. Saved feedback is compact and
+remains editable and private.
+
+The new draft inherits the same recipient, title, activity type and place. Dates
+and note start empty. The user explicitly chooses a new future time or a free-time
+suggestion, then sends the invitation. Canceling creates no message or calendar
+entry. Editing a text field provides a keyboard Done action before continuing.
+
+Submission creates an independent Plan in the original conversation, with no
+reused intention origin or counterproposal link. Acceptance adds the new activity
+to both calendars; the first Plan and its feedback are preserved.
+
+### Private permission for future matching
 
 The owner authorized implementation and internal acceptance of the following
 repeat extension on 2026-09-08. Real-user pilot evidence remains pending and is
@@ -315,3 +447,15 @@ native. Event-share links show the filtered snapshot and currently use the App t
 add a copy. The rebuilt messaging workspace covers text, replies, history, shared
 calendar viewing and Plan negotiation; advanced media composition and the remaining
 native-only utilities are subsequent migration work.
+
+### 2026-10-02: external intention sharing, first version
+
+An explicit share action on an active intention creates an unlisted public link. Visitors see the activity and declared availability without signing in. Contact starts a temporary guest session; the first written greeting enters the publisher's existing message requests, and their written reply opens direct chat. The visitor stays on the shared page throughout.
+
+“Keep in touch” and “Add to my schedule” offer inline username/password registration. The guest User ID and conversation are preserved. Registration is required for a private calendar reminder; it does not confirm a bilateral Plan. No school identity is fabricated, and profile completion can happen later. Apple/Google sign-in is outside this first version. See [implementation and local verification](qa/2026-10-02-intent-share.md).
+
+### 2026-10-03: guest conversation and Plan continuation
+
+The shared intention page streams conversation updates while visible, reconnects on return, and uses polling only while the stream is unavailable. A Plan invitation shows its title, time, location, note and current status in the conversation. “Create account & accept invitation” opens inline registration with that Plan retained; successful registration continues through the canonical acceptance API and writes both participants’ Calendar projections. Guests cannot accept before registration. The existing guest identity, messages and invitation remain intact. The registered visitor can continue on the page or sign into the app with the same credentials.
+
+Ending an intention stops new visitors from contacting its owner but preserves access for its existing Mutual conversation participants while the share token remains valid. This includes the automatic ending that follows Plan acceptance. Revocation, Block and moderation continue to stop shared-page access. Canceling or changing a Plan updates the visible card.

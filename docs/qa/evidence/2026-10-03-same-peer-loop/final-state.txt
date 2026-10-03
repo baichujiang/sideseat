@@ -1,0 +1,14 @@
+[local-test-db] Running against sideseat_same_peer_20261003 on 127.0.0.1:5433.
+{
+  "result": "PASS",
+  "firstPlan": "cmusnljun0042hc3ibnceyoo2",
+  "secondPlan": "cmusnr7ey006lhc3ihba0cqax",
+  "sameConnection": "cmusnl6yc003ohc3ir3gaeqm4",
+  "intentions": 2,
+  "opportunities": 1,
+  "acceptedPlans": 2,
+  "calendarEntries": 4,
+  "firstPlanOutcomes": 2,
+  "sharedEncounters": 1,
+  "secondPlanOutcomes": 0
+}

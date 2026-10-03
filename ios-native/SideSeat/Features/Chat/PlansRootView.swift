@@ -71,6 +71,7 @@ struct PlansRootView: View {
     @State private var now = Date()
     @State private var showsAllIncoming = false
     @State private var showsOutgoing = false
+    @State private var repeatPlan: NativePlanRequest?
     @ScaledMetric(relativeTo: .subheadline) private var detailIconWidth: CGFloat = 18
 
     var body: some View {
@@ -105,6 +106,15 @@ struct PlansRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
             Task { await store.load(using: session) }
+        }
+        .sheet(item: $repeatPlan) { plan in
+            PlanCreateSheet(target: .legacyConnection(connectionID: plan.connectionId),
+                            recipientName: otherParticipant(for: plan).displayName,
+                            draft: NativePlanDraft(repeating: plan)) { result in
+                NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+                NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+                router.navigate(to: .directChat(connectionID: result.connectionID, focus: result.focus))
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plans-root")
@@ -458,6 +468,10 @@ struct PlansRootView: View {
                     showsSavedQuestion: false
                 ) { value in
                     Task { await store.recordOutcome(value, for: plan.id, using: session) }
+                }
+                PlanRepeatButton(plan: plan, isDisabled: store.mutatingOutcomeID == plan.id) {
+                    scrollPositions.capture(selectedSection)
+                    repeatPlan = plan
                 }
             }
         }

@@ -1,0 +1,251 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "E1ADC529-1F2F-412D-B382-960F45C996A0",
+      "deviceName" : "SideSeat Personalization QA",
+      "modelName" : "iPhone 13 mini",
+      "osBuildNumber" : "23F77",
+      "osVersion" : "26.5",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "0,0016s",
+                  "durationInSeconds" : 0.0016379356384277344,
+                  "name" : "Uses the newest message card matching the requested plan",
+                  "nodeIdentifier" : "DirectChatPlanFocusTests/newestMatchingCard()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/DirectChatPlanFocusTests/newestMatchingCard()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Direct chat plan focus",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/DirectChatPlanFocusTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0,0051s",
+                  "durationInSeconds" : 0.005114078521728516,
+                  "name" : "Publishing and resuming encode explicit automatic matching; legacy requests omit it",
+                  "nodeIdentifier" : "FlexibleIntentTimingTests/publicationConsent()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/FlexibleIntentTimingTests/publicationConsent()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0002s",
+                  "durationInSeconds" : 0.00019788742065429688,
+                  "name" : "Undecided intentions encode without fake exact windows",
+                  "nodeIdentifier" : "FlexibleIntentTimingTests/encodesUndecided()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/FlexibleIntentTimingTests/encodesUndecided()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0058s",
+                  "durationInSeconds" : 0.005795955657958984,
+                  "name" : "Nullable opportunity timing and unknown score components decode",
+                  "nodeIdentifier" : "FlexibleIntentTimingTests/decodesUndatedOpportunity()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/FlexibleIntentTimingTests/decodesUndatedOpportunity()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00031s",
+                  "durationInSeconds" : 0.000308990478515625,
+                  "name" : "Undated chat context requires an explicit time selection before proposing",
+                  "nodeIdentifier" : "FlexibleIntentTimingTests/requiresTimeSelection()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/FlexibleIntentTimingTests/requiresTimeSelection()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Flexible intention timing",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/FlexibleIntentTimingTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0,0059s",
+                  "durationInSeconds" : 0.005940914154052734,
+                  "name" : "Generated opportunity titles localize without changing authored or saved titles",
+                  "nodeIdentifier" : "ActionToPlanInheritanceTests/localizesGeneratedOpportunityTitle()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ActionToPlanInheritanceTests/localizesGeneratedOpportunityTitle()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0048s",
+                  "durationInSeconds" : 0.004812955856323242,
+                  "name" : "Every generated title has Chinese and German copy, including neutral related titles",
+                  "nodeIdentifier" : "ActionToPlanInheritanceTests/generatedOpportunityTitleTranslations()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ActionToPlanInheritanceTests/generatedOpportunityTitleTranslations()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00017s",
+                  "durationInSeconds" : 0.00016999244689941406,
+                  "name" : "Plan draft inherits all available action fields and trusted origin reference",
+                  "nodeIdentifier" : "ActionToPlanInheritanceTests/inheritsActionContext()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ActionToPlanInheritanceTests/inheritsActionContext()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Action-to-Plan inheritance",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ActionToPlanInheritanceTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0,0002s",
+                  "durationInSeconds" : 0.0001990795135498047,
+                  "name" : "An ended plan seeds a new invitation without reusing time, origin or requiring feedback",
+                  "nodeIdentifier" : "ConversationPlansTests/repeatDraft()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/repeatDraft()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00072s",
+                  "durationInSeconds" : 0.0007169246673583984,
+                  "name" : "An invitation needing my reply takes precedence over an earlier confirmed meet-up",
+                  "nodeIdentifier" : "ConversationPlansTests/incomingFirst()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/incomingFirst()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0021s",
+                  "durationInSeconds" : 0.002054929733276367,
+                  "name" : "The next confirmed meet-up precedes outgoing invitations",
+                  "nodeIdentifier" : "ConversationPlansTests/confirmedFirst()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/confirmedFirst()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00011s",
+                  "durationInSeconds" : 0.00011491775512695312,
+                  "name" : "A current plan is available without any chat history or intention origin",
+                  "nodeIdentifier" : "ConversationPlansTests/independentOfOrigin()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/independentOfOrigin()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0001s",
+                  "durationInSeconds" : 0.00010204315185546875,
+                  "name" : "Ended, declined, canceled, superseded and stale pending proposals cannot become current",
+                  "nodeIdentifier" : "ConversationPlansTests/terminalAndStale()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/terminalAndStale()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00017s",
+                  "durationInSeconds" : 0.00016808509826660156,
+                  "name" : "A reschedule invitation and the still-confirmed time stay in one group",
+                  "nodeIdentifier" : "ConversationPlansTests/rescheduleGrouping()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/rescheduleGrouping()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,000095s",
+                  "durationInSeconds" : 9.489059448242188e-05,
+                  "name" : "Simultaneous plans retain deterministic order",
+                  "nodeIdentifier" : "ConversationPlansTests/stableOrder()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests/stableOrder()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Same-person follow-up plans",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/ConversationPlansTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "SideSeatTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Passed"
+        },
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "1分钟14秒",
+                  "durationInSeconds" : 74.96848201751709,
+                  "name" : "testSamePeerLoop03AcceptSecondPlanAndCalendars()",
+                  "nodeIdentifier" : "SocialLiveUITests/testSamePeerLoop03AcceptSecondPlanAndCalendars()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testSamePeerLoop03AcceptSecondPlanAndCalendars",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "SocialLiveUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "children" : [
+                    {
+                      "name" : "VisualQAScreenshotUITests.swift:1838: XCTAssertGreaterThanOrEqual failed: (\"18.0\") is less than (\"44.0\")",
+                      "nodeType" : "Failure Message"
+                    }
+                  ],
+                  "duration" : "13秒",
+                  "durationInSeconds" : 13.45694100856781,
+                  "name" : "testRepeatPlanEntryAndDraftLocalizedAppearance()",
+                  "nodeIdentifier" : "VisualQAScreenshotUITests/testRepeatPlanEntryAndDraftLocalizedAppearance()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/VisualQAScreenshotUITests/testRepeatPlanEntryAndDraftLocalizedAppearance",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                }
+              ],
+              "name" : "VisualQAScreenshotUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/VisualQAScreenshotUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "SideSeatUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Failed"
+        }
+      ],
+      "name" : "SideSeat-Development",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

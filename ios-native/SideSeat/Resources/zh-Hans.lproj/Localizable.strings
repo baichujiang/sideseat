@@ -2320,3 +2320,41 @@
 "No current plans" = "目前没有待办计划";
 
 "Share intention" = "分享意愿";
+
+"Arrange another time" = "重新约时间";
+
+"Plan again with %@" = "再约 %@";
+
+"Send invitation" = "发送邀约";
+
+"Viewing · Canceled" = "正在查看 · 已取消";
+
+"Viewing · Ended" = "正在查看 · 已结束";
+
+"Next meet-up · Confirmed" = "下次见面 · 已确认";
+
+"Waiting for %@" = "等待 %@ 回应";
+
+"View current plans" = "查看当前安排";
+
+"Back to latest messages" = "返回最新消息";
+
+"View plans" = "查看计划";
+
+"Your plans together" = "你们的计划";
+
+"Confirmed time" = "已确认的时间";
+
+"Proposed new time" = "提议的新时间";
+
+"Plans could not be refreshed. Try again." = "计划刷新失败，点此重试";
+
+"Met through this intention" = "相识意愿";
+
+"Source activity" = "相识活动";
+
+"Viewing · Intention" = "正在查看 · 意愿";
+
+"Viewing · Confirmed" = "正在查看 · 已确认";
+
+"Selected plan" = "正在查看的计划";

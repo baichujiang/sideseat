@@ -1070,10 +1070,27 @@ struct NativePlanDraft: Codable, Hashable, Identifiable, Sendable {
     let location: String?
     let planType: String
     let participantIds: [String]
-    let origin: NativePlanOriginReference
+    let origin: NativePlanOriginReference?
+    var repeatPlanID: String? = nil
+    var suggestedDuration: TimeInterval? = nil
 
-    var id: String { "\(origin.kind):\(origin.id)" }
-    var needsTimeSelection: Bool { origin.kind == "MUTUAL_OPPORTUNITY" && startTime == nil }
+    var id: String { repeatPlanID.map { "repeat:\($0)" } ?? "\(origin?.kind ?? "CHAT"):\(origin?.id ?? title)" }
+    var isRepeat: Bool { repeatPlanID != nil }
+    var needsTimeSelection: Bool { isRepeat || (origin?.kind == "MUTUAL_OPPORTUNITY" && startTime == nil) }
+
+    init(repeating plan: NativePlanRequest) {
+        title = plan.title
+        location = plan.location
+        planType = plan.planType
+        participantIds = [plan.proposer.id, plan.receiver.id]
+        startTime = nil
+        endTime = nil
+        origin = nil
+        repeatPlanID = plan.id
+        if let start = plan.startDate, let end = plan.endDate, end > start {
+            suggestedDuration = max(30 * 60, end.timeIntervalSince(start))
+        }
+    }
 
     init(context: NativeActionContext, interestID: String) {
         title = context.title
@@ -1092,7 +1109,7 @@ struct NativePlanDraft: Codable, Hashable, Identifiable, Sendable {
         location: String?,
         planType: String,
         participantIds: [String] = [],
-        origin: NativePlanOriginReference
+        origin: NativePlanOriginReference?
     ) {
         self.title = title
         self.startTime = startTime

@@ -1,0 +1,11 @@
+[local-test-db] Running against sideseat_same_peer_20261003 on 127.0.0.1:5433.
+{
+  "result": "PASS",
+  "mode": "check-second-pending",
+  "secondPlan": "cmusnr7ey006lhc3ihba0cqax",
+  "status": "PENDING",
+  "sameConnection": "cmusnl6yc003ohc3ir3gaeqm4",
+  "secondPlanCalendarEntries": 0,
+  "retainedFirstPlanCalendarEntries": 2,
+  "firstPlanOutcomes": 2
+}

@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "E1ADC529-1F2F-412D-B382-960F45C996A0",
+        "deviceName" : "SideSeat Personalization QA",
+        "modelName" : "iPhone 13 mini",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 16,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "SideSeat-Development · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1791052171.007,
+  "passedTests" : 16,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1791052031.541,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertGreaterThanOrEqual failed: (\"18.0\") is less than (\"44.0\")",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 17,
+      "testIdentifierString" : "VisualQAScreenshotUITests/testRepeatPlanEntryAndDraftLocalizedAppearance()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/VisualQAScreenshotUITests/testRepeatPlanEntryAndDraftLocalizedAppearance",
+      "testName" : "testRepeatPlanEntryAndDraftLocalizedAppearance()"
+    }
+  ],
+  "title" : "Test - SideSeat-Development",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 17
+}

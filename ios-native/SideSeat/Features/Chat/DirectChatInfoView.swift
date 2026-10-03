@@ -110,11 +110,11 @@ struct ConversationContextSelection: Equatable, Sendable {
     var sourceTitle: String {
         switch source {
         case .mutualOpportunity:
-            AppLocalization.string("Together opportunity")
+            AppLocalization.string("Met through this intention")
         case .actionInterest:
             AppLocalization.string(context.sourceKind == "COURSE_ACTION" ? "Course action" : "Buddy action")
         case .plan:
-            AppLocalization.string("Plan")
+            AppLocalization.string(context.sourceKind == "MUTUAL_OPPORTUNITY" ? "Met through this intention" : "Source activity")
         }
     }
 
@@ -139,6 +139,7 @@ struct ConversationContextSelection: Equatable, Sendable {
 
 struct ConversationContextBar: View {
     let selection: ConversationContextSelection
+    var isFocused = false
     let action: () -> Void
 
     var body: some View {
@@ -151,7 +152,7 @@ struct ConversationContextBar: View {
                     .background(SideSeatTheme.fillSubtle, in: Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(selection.sourceTitle)
+                    Text(isFocused ? AppLocalization.string("Viewing · Intention") : selection.sourceTitle)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     Text(selection.context.localizedTitle)

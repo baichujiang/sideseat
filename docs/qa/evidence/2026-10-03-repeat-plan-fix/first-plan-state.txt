@@ -1,0 +1,13 @@
+[local-test-db] Running against sideseat_repeat_fix_20261003 on 127.0.0.1:5433.
+{
+  "result": "PASS",
+  "mode": "check-first",
+  "firstPlan": "cmuspju35001o1y4jg4eclmt9",
+  "connection": "cmuspjhpv001a1y4jk3jbufk9",
+  "calendarOwners": [
+    "cmuspf7vk0000jya30dbaac31",
+    "cmuspf7vt0001jya3tcgvt6zb"
+  ],
+  "sourceIntentions": "ENDED",
+  "noOutcomesYet": true
+}

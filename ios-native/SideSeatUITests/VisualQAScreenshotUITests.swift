@@ -1825,6 +1825,62 @@ final class VisualQAScreenshotUITests: XCTestCase {
     }
 
     @MainActor
+    func testRepeatPlanEntryAndDraftLocalizedAppearance() {
+        func reveal(_ element: XCUIElement, scroll: XCUIElement, in app: XCUIApplication) {
+            for _ in 0..<24 {
+                let visible = scroll.frame.intersection(app.frame)
+                let top = max(visible.minY, app.navigationBars.firstMatch.frame.maxY)
+                let submit = app.buttons["plan-create-submit"]
+                let bottom = submit.exists ? min(visible.maxY, submit.frame.minY - 20)
+                    : min(visible.maxY, app.tabBars.firstMatch.frame.minY)
+                if element.isHittable && element.frame.midY > top + 24 && element.frame.midY < bottom - 24 { return }
+                if element.exists && element.frame.midY < top + 24 { scroll.swipeDown(velocity: .slow) }
+                else { scroll.swipeUp(velocity: .slow) }
+            }
+            XCTFail("The control must be visible above the pinned actions")
+        }
+        for (language, appearance, large) in [("zh-Hans", "light", false), ("de", "dark", true)] {
+            var arguments = ["--ui-testing-chats", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)"]
+            if large { arguments += ["--ui-testing-dynamic-type-accessibility", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] }
+            let app = togetherApp(arguments)
+            tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+            selectPlanSection(2, in: app)
+            let repeatButton = app.buttons["plan-repeat-ui-plan-completed"]
+            reveal(repeatButton, scroll: app.scrollViews["plans-scroll-ended"], in: app)
+            XCTAssertTrue(repeatButton.isHittable)
+            XCTAssertGreaterThanOrEqual(repeatButton.frame.height, 44)
+            saveScreenshot(app: app, name: "repeat-plan-entry-\(language)-\(appearance)")
+            repeatButton.tap()
+            let submit = app.buttons["plan-create-submit"]
+            XCTAssertTrue(submit.waitForExistence(timeout: 6))
+            XCTAssertFalse(submit.isEnabled)
+            XCTAssertEqual(app.textFields["plan-create-title"].value as? String, "Coffee after class")
+            let choose = app.buttons["plan-repeat-choose-time"]
+            reveal(choose, scroll: app.scrollViews["plan-create-sheet"], in: app)
+            XCTAssertTrue(choose.isHittable)
+            XCTAssertGreaterThanOrEqual(choose.frame.height, 44)
+            XCTAssertFalse(app.switches["plan-confirm-timing"].exists)
+            saveScreenshot(app: app, name: "repeat-plan-draft-\(language)-\(appearance)")
+            choose.tap()
+            let done = app.buttons["plan-repeat-time-done"]
+            XCTAssertTrue(done.waitForExistence(timeout: 5))
+            XCTAssertTrue(done.isEnabled)
+            saveScreenshot(app: app, name: "repeat-plan-time-\(language)-\(appearance)")
+            done.tap()
+            XCTAssertTrue(submit.waitForExistence(timeout: 5))
+            XCTAssertTrue(submit.isEnabled)
+            app.navigationBars.buttons.firstMatch.tap()
+            selectPlanSection(0, in: app)
+            let invitation = app.buttons["plans-row-ui-plan-1"]
+            XCTAssertTrue(invitation.waitForExistence(timeout: 5))
+            invitation.tap()
+            XCTAssertTrue(app.buttons["conversation-current-plan"].waitForExistence(timeout: 6))
+            saveScreenshot(app: app, name: "repeat-plan-header-\(language)-\(appearance)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testOutcomeDoesNotPromptMeetAgainLightAndDark() {
         for appearance in ["light", "dark"] {
             let app = XCUIApplication()
