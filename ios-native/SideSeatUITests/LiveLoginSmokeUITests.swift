@@ -395,7 +395,7 @@ final class SocialLiveUITests: XCTestCase {
 
         let b = loopLogin("loopqa_b")
         loopCreateIntent("[loop-qa] Campus coffee", in: b)
-        b.buttons["together-tab-recommendations"].tap()
+        loopSelectTogetherSection("recommendations", in: b)
         let bookmark = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-bookmark-")).firstMatch
         XCTAssertTrue(bookmark.waitForExistence(timeout: 20))
         loopReveal(bookmark, in: b)
@@ -405,7 +405,7 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(bookmark.exists, "Saving keeps the recommendation in place until refresh")
         let savedBookmark = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Remove bookmark"), object: bookmark)
         XCTAssertEqual(XCTWaiter.wait(for: [savedBookmark], timeout: 8), .completed)
-        b.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: b)
         XCTAssertTrue(bookmark.waitForExistence(timeout: 10))
         loopCapture(b, "03-saved")
         let greeting = b.buttons["mutual-opportunity-message-\(opportunityID)"]
@@ -649,17 +649,17 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(a.staticTexts["[loop-qa] Great to meet you!"].waitForExistence(timeout: 10))
         a.navigationBars.buttons.firstMatch.tap()
         loopCreateIntent("[loop-qa] Meet someone new", in: a)
-        a.buttons["together-tab-recommendations"].tap()
+        loopSelectTogetherSection("recommendations", in: a)
         XCTAssertTrue(a.staticTexts["Loop Lee"].waitForExistence(timeout: 20))
         XCTAssertFalse(a.staticTexts["Loop Mia"].exists)
         loopCapture(a, "13-new-company")
-        a.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: a)
         let oldChat = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         // The bookmark belongs to Mia, not Alex: check privacy across accounts.
         XCTAssertFalse(oldChat.exists)
         a.terminate()
         let b = loopLogin("loopqa_b")
-        b.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: b)
         let chat = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         XCTAssertTrue(chat.waitForExistence(timeout: 12))
         loopReveal(chat, in: b); chat.tap()
@@ -695,7 +695,7 @@ final class SocialLiveUITests: XCTestCase {
     func testNewIntentLoop03CancelNewDraftWithoutChangingHistory() {
         let app = loopLogin("loopqa_a")
         tabButton(in: app, labels: ["Together"]).tap()
-        app.buttons["together-tab-intentions"].tap()
+        loopSelectTogetherSection("intentions", in: app)
         let add = app.buttons["together-add-first-intent"]
         XCTAssertTrue(add.waitForExistence(timeout: 12))
         loopCapture(app, "new-intent-13-return-to-intentions")
@@ -729,14 +729,14 @@ final class SocialLiveUITests: XCTestCase {
         let a = loopLogin("loopqa_a")
         loopCreateIntent(title, in: a)
         loopCapture(a, "new-intent-16-new-publication")
-        a.buttons["together-tab-recommendations"].tap()
+        loopSelectTogetherSection("recommendations", in: a)
         XCTAssertTrue(a.staticTexts["Loop Lee"].waitForExistence(timeout: 20))
         XCTAssertFalse(a.staticTexts["Loop Mia"].exists)
         let greeting = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-")).firstMatch
         loopReveal(greeting, in: a)
         XCTAssertTrue(greeting.isEnabled)
         loopCapture(a, "new-intent-17-new-company")
-        a.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: a)
         let privateBookmark = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         XCTAssertFalse(privateBookmark.exists)
         openDirectChat(in: a, peerName: "Loop Mia")
@@ -745,20 +745,20 @@ final class SocialLiveUITests: XCTestCase {
         a.terminate()
 
         let newPeer = loopLogin("loopqa_c")
-        XCTAssertTrue(newPeer.buttons["together-tab-recommendations"].waitForExistence(timeout: 12))
-        newPeer.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(newPeer.descendants(matching: .any)["together-home"].waitForExistence(timeout: 12))
+        loopSelectTogetherSection("recommendations", in: newPeer)
         XCTAssertTrue(newPeer.staticTexts["Loop Alex"].waitForExistence(timeout: 20))
         loopCapture(newPeer, "new-intent-19-new-peer-recommendation")
         newPeer.terminate()
 
         let returning = loopLogin("loopqa_a")
-        returning.buttons["together-tab-intentions"].tap()
+        loopSelectTogetherSection("intentions", in: returning)
         XCTAssertTrue(returning.staticTexts[title].firstMatch.waitForExistence(timeout: 12))
         loopCapture(returning, "new-intent-20-reloaded-publication")
         returning.terminate()
 
         let b = loopLogin("loopqa_b")
-        b.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: b)
         let chat = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         XCTAssertTrue(chat.waitForExistence(timeout: 12))
         loopReveal(chat, in: b); chat.tap()
@@ -857,7 +857,7 @@ final class SocialLiveUITests: XCTestCase {
         loopReveal(greeting, in: a)
         XCTAssertTrue(greeting.isEnabled)
         loopCapture(a, "return-flow-17-new-company")
-        a.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: a)
         let privateBookmark = a.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         XCTAssertFalse(privateBookmark.exists)
         openDirectChat(in: a, peerName: "Loop Mia")
@@ -866,20 +866,20 @@ final class SocialLiveUITests: XCTestCase {
         a.terminate()
 
         let newPeer = loopLogin("loopqa_c")
-        XCTAssertTrue(newPeer.buttons["together-tab-recommendations"].waitForExistence(timeout: 12))
-        newPeer.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(newPeer.descendants(matching: .any)["together-home"].waitForExistence(timeout: 12))
+        loopSelectTogetherSection("recommendations", in: newPeer)
         XCTAssertTrue(newPeer.staticTexts["Loop Alex"].waitForExistence(timeout: 20))
         loopCapture(newPeer, "return-flow-19-new-peer-recommendation")
         newPeer.terminate()
 
         let returning = loopLogin("loopqa_a")
-        returning.buttons["together-tab-intentions"].tap()
+        loopSelectTogetherSection("intentions", in: returning)
         XCTAssertTrue(returning.staticTexts[title].firstMatch.waitForExistence(timeout: 12))
         loopCapture(returning, "return-flow-20-reloaded-publication")
         returning.terminate()
 
         let b = loopLogin("loopqa_b")
-        b.buttons["together-tab-bookmarks"].tap()
+        loopSelectTogetherSection("bookmarks", in: b)
         let chat = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
         XCTAssertTrue(chat.waitForExistence(timeout: 12))
         loopReveal(chat, in: b); chat.tap()
@@ -887,6 +887,121 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(b.staticTexts["[loop-qa] Thanks for today!"].waitForExistence(timeout: 12))
         loopCapture(b, "return-flow-21-saved-history-chat")
         b.terminate()
+    }
+
+    func testNewIntentLoop08AdaptiveNavigationAndEmptyState() {
+        for (language, appearance, size, expectedTitle) in [
+            ("en", "light", "UICTContentSizeCategoryL", "Add an intention"),
+            ("zh-Hans", "light", "UICTContentSizeCategoryL", "添加意愿"),
+            ("de", "light", "UICTContentSizeCategoryL", "Vorhaben hinzufügen"),
+            ("en", "dark", "UICTContentSizeCategoryAccessibilityXXXL", "Add an intention"),
+            ("zh-Hans", "dark", "UICTContentSizeCategoryAccessibilityXXXL", "添加意愿"),
+            ("de", "dark", "UICTContentSizeCategoryAccessibilityXXXL", "Vorhaben hinzufügen")
+        ] {
+            let app = launchAndLogin(username: "loopqa_b", additionalLaunchArguments: [
+                "--ui-testing-discover", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
+            ])
+            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 12))
+            let menu = app.buttons["together-section-menu"]
+            if size.contains("Accessibility") {
+                XCTAssertTrue(menu.waitForExistence(timeout: 8))
+                XCTAssertLessThan(menu.frame.height, app.frame.height * 0.2, "Only the current section occupies fixed space")
+                XCTAssertGreaterThanOrEqual(menu.frame.height, 44)
+                menu.tap()
+                loopCapture(app, "adaptive-picker-\(language)-\(appearance)")
+                let selected = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND selected == true", "together-tab-")).firstMatch
+                XCTAssertTrue(selected.exists)
+                app.buttons["together-tab-intentions"].tap()
+            } else {
+                loopSelectTogetherSection("intentions", in: app)
+            }
+            let add = app.buttons["together-add-first-intent"]
+            XCTAssertTrue(add.waitForExistence(timeout: 12))
+            XCTAssertEqual(add.label, expectedTitle)
+            XCTAssertGreaterThanOrEqual(add.frame.height, 44)
+            XCTAssertTrue(add.isHittable, "Add is reachable immediately, without scrolling through duplicate headings")
+            XCTAssertLessThan(add.frame.maxY, app.tabBars.firstMatch.frame.minY)
+            loopCapture(app, "adaptive-empty-\(language)-\(appearance)")
+            add.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
+            let cancel = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "取消", "Abbrechen"])).firstMatch
+            cancel.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+            loopSelectTogetherSection("recommendations", in: app)
+            loopSelectTogetherSection("bookmarks", in: app)
+            let chat = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-open-")).firstMatch
+            XCTAssertTrue(chat.waitForExistence(timeout: 12))
+            loopReveal(chat, in: app)
+            let savedY = chat.frame.minY
+            loopSelectTogetherSection("intentions", in: app)
+            XCTAssertTrue(add.waitForExistence(timeout: 8))
+            loopSelectTogetherSection("bookmarks", in: app)
+            XCTAssertEqual(chat.frame.minY, savedY, accuracy: 12, "Section selection retains the saved page's scroll position")
+            loopCapture(app, "adaptive-saved-\(language)-\(appearance)")
+            app.terminate()
+        }
+    }
+
+    private func loopSelectTogetherSection(_ section: String, in app: XCUIApplication) {
+        let menu = app.buttons["together-section-menu"]
+        if menu.exists { menu.tap() }
+        let item = app.buttons["together-tab-\(section)"]
+        XCTAssertTrue(item.waitForExistence(timeout: 8))
+        item.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-section-picker"].waitForNonExistence(timeout: 8))
+    }
+
+    func testNewIntentLoop09RetainsPlanContinuationAndRecommendations() {
+        for (language, appearance, size) in [
+            ("zh-Hans", "light", "UICTContentSizeCategoryL"),
+            ("de", "dark", "UICTContentSizeCategoryAccessibilityXXXL")
+        ] {
+            let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: [
+                "--ui-testing-discover", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
+            ])
+            tabButton(in: app, labels: ["计划", "Pläne"]).tap()
+            let ended = app.buttons.matching(NSPredicate(format: "label IN %@", ["已结束", "Beendet"])).firstMatch
+            XCTAssertTrue(ended.waitForExistence(timeout: 8)); ended.tap()
+            let create = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-new-intention-")).firstMatch
+            XCTAssertTrue(create.waitForExistence(timeout: 12))
+            loopReveal(create, in: app)
+            loopCapture(app, "adaptive-plan-continuation-\(language)")
+            create.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
+            let field = app.textFields["intent-editor-activity"]
+            let fields = app.collectionViews["intent-editor-fields"]
+            for _ in 0..<8 {
+                if field.exists { break }
+                fields.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.85))
+                    .press(forDuration: 0.1, thenDragTo: fields.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.25)))
+            }
+            XCTAssertTrue(field.exists)
+            XCTAssertEqual(field.value as? String, "[loop-qa] Campus coffee")
+            let timing = app.buttons["intent-timing-choose"]
+            for _ in 0..<8 {
+                if timing.isHittable { break }
+                fields.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.85))
+                    .press(forDuration: 0.1, thenDragTo: fields.coordinate(withNormalizedOffset: CGVector(dx: 0.03, dy: 0.25)))
+            }
+            loopCapture(app, "adaptive-new-draft-\(language)")
+            if !timing.isHittable {
+                let hierarchy = XCTAttachment(string: app.debugDescription)
+                hierarchy.name = "draft-timing-diagnostic"; hierarchy.lifetime = .keepAlways; add(hierarchy)
+            }
+            XCTAssertTrue(timing.isHittable)
+            let cancel = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["取消", "Abbrechen"])).firstMatch
+            cancel.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 8))
+            tabButton(in: app, labels: ["同行", "Zusammen"]).tap()
+            loopSelectTogetherSection("intentions", in: app)
+            XCTAssertTrue(app.staticTexts["[new-loop] Library coffee"].firstMatch.waitForExistence(timeout: 12))
+            loopSelectTogetherSection("recommendations", in: app)
+            XCTAssertTrue(app.staticTexts["Loop Lee"].waitForExistence(timeout: 12))
+            loopCapture(app, "adaptive-new-company-\(language)")
+            app.terminate()
+        }
     }
 
     func testNewIntentLoop05ReturningEmptyStateLocalized() {
@@ -899,8 +1014,8 @@ final class SocialLiveUITests: XCTestCase {
                 "--ui-testing-discover", "--ui-testing-language=\(language)",
                 "--ui-testing-appearance=\(appearance)", "-UIPreferredContentSizeCategoryName", size
             ])
-            XCTAssertTrue(app.buttons["together-tab-intentions"].waitForExistence(timeout: 12))
-            app.buttons["together-tab-intentions"].tap()
+            XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 12))
+            loopSelectTogetherSection("intentions", in: app)
             let add = app.buttons["together-add-first-intent"]
             XCTAssertTrue(add.waitForExistence(timeout: 12))
             loopReveal(add, in: app)
@@ -972,8 +1087,8 @@ final class SocialLiveUITests: XCTestCase {
 
     private func loopCreateIntent(_ text: String, in app: XCUIApplication) {
         tabButton(in: app, labels: ["Together"]).tap()
-        XCTAssertTrue(app.buttons["together-tab-intentions"].waitForExistence(timeout: 12))
-        app.buttons["together-tab-intentions"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-home"].waitForExistence(timeout: 12))
+        loopSelectTogetherSection("intentions", in: app)
         app.buttons.matching(NSPredicate(format: "identifier IN %@", ["together-add-intent", "together-add-first-intent"])).firstMatch.tap()
         XCTAssertTrue(app.buttons["intent-topic-coffee"].waitForExistence(timeout: 8))
         app.buttons["intent-topic-coffee"].tap()

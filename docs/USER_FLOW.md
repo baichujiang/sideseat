@@ -132,6 +132,13 @@ A lower score does not prevent delivery; no eligible active peer still means no 
 ### Together page layout (2026-09-26)
 
 The page order is **My intentions / Recommendations / Saved intentions**.
+The native page keeps a horizontal selector when the complete labels fit. At
+accessibility text sizes or narrower widths, one button shows the current section
+and opens a section sheet; selection and each page's scroll position are retained.
+The sheet exposes the full section names and selected state to accessibility.
+An empty My intentions page shows one brief heading, a short **Add** action with
+the full **Add an intention** accessibility label, then explanatory text. It does
+not repeat the active-intentions heading or reduce the user's text size.
 Recommendations initially shows personalized opportunities, without a finding-status
 explanation. A **Find more recommendations** button at the bottom explicitly searches
 for additional public intentions. Results appear in the same feed, with no separate

@@ -209,6 +209,14 @@ enum TogetherSection: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    var compactTitle: String {
+        switch self {
+        case .intentions: AppLocalization.string("Intentions (section)")
+        case .recommendations: AppLocalization.string("Together recommendations")
+        case .bookmarks: AppLocalization.string("Saved (section)")
+        }
+    }
+
     static func initial(hasIntentions: Bool, hasOpportunities: Bool, hasLegacySession: Bool) -> Self {
         hasIntentions || hasOpportunities || hasLegacySession ? .recommendations : .intentions
     }
@@ -225,6 +233,7 @@ private struct TogetherHomeView: View {
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
     @State private var showsExpiredIntentions = false
+    @State private var showsSectionPicker = false
     @State private var selectedSection: TogetherSection = .recommendations
     @State private var resolvedInitialSection = false
     @State private var createdIntentionRevision = 0
@@ -369,24 +378,85 @@ private struct TogetherHomeView: View {
     private func sectionPicker(at now: Date) -> some View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: SideSeatTheme.spaceXS) {
-                    ForEach(TogetherSection.allCases) { section in
-                        sectionButton(section, at: now)
-                    }
-                }
+                sectionMenu(at: now)
             } else {
-                HStack(spacing: SideSeatTheme.spaceXS) {
-                    ForEach(TogetherSection.allCases) { section in
-                        sectionButton(section, at: now)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        ForEach(TogetherSection.allCases) { section in
+                            sectionButton(section, at: now)
+                        }
                     }
+                    .fixedSize(horizontal: true, vertical: false)
+                    sectionMenu(at: now)
                 }
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(SideSeatTheme.spaceXS)
         .background(SideSeatTheme.Together.decisionWell, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Together"))
         .accessibilityIdentifier("together-segmented-control")
+        .sheet(isPresented: $showsSectionPicker) {
+            NavigationStack {
+                List(TogetherSection.allCases) { section in
+                    Button {
+                        sectionSelection.wrappedValue = section
+                        showsSectionPicker = false
+                    } label: {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            Text(section.compactTitle)
+                                .font(.body.weight(section == selectedSection ? .semibold : .regular))
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                            if section == selectedSection {
+                                Image(systemName: "checkmark").accessibilityHidden(true)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .contentShape(Rectangle())
+                    }
+                    .accessibilityLabel(sectionTitle(section, at: now))
+                    .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
+                    .accessibilityIdentifier("together-tab-\(section.rawValue)")
+                }
+                .navigationTitle("Together")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { showsSectionPicker = false }
+                    }
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("together-section-picker")
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
+            .dynamicTypeSize(dynamicTypeSize)
+        }
+    }
+
+    private func sectionMenu(at now: Date) -> some View {
+        Button { showsSectionPicker = true } label: {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Text(selectedSection.compactTitle)
+                    .font(.body.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.down").font(.subheadline.weight(.semibold))
+                    .accessibilityHidden(true)
+            }
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .padding(.vertical, SideSeatTheme.spaceXS)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(AppLocalization.string("Together sections"))
+        .accessibilityValue(sectionTitle(selectedSection, at: now))
+        .accessibilityHint(AppLocalization.string("Choose a section"))
+        .accessibilityIdentifier("together-section-menu")
     }
 
     private func sectionButton(_ section: TogetherSection, at now: Date) -> some View {
@@ -396,7 +466,7 @@ private struct TogetherHomeView: View {
                 Text(section.title)
                     .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
                     .fontWeight(isSelected ? .semibold : .medium)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .fixedSize(horizontal: true, vertical: true)
                 if dynamicTypeSize.isAccessibilitySize {
                     Spacer(minLength: 0)
                     if isSelected {
@@ -465,26 +535,28 @@ private struct TogetherHomeView: View {
             let expired = store.expiredIntents + store.intents.filter { candidate in
                 status(for: candidate, at: now) == .expired && !store.expiredIntents.contains(where: { $0.id == candidate.id })
             }
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                let headingLayout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-                    : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
-                headingLayout {
-                    Text(AppLocalization.string("What I want to do"))
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.Together.ink)
+            if !current.isEmpty {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    let headingLayout = dynamicTypeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+                        : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+                    headingLayout {
+                        Text(AppLocalization.string("What I want to do"))
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.Together.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("together-intentions-heading")
+                        if !current.isEmpty { addIntentionButton }
+                    }
+                    Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
+                        .font(.subheadline)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("together-intentions-heading")
-                    if !current.isEmpty { addIntentionButton }
                 }
-                Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
-                    .font(.subheadline)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
+                .id("together-intentions-top")
             }
-            .id("together-intentions-top")
 
             if let publishedIntentID, store.intents.contains(where: { $0.id == publishedIntentID }) {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
@@ -512,14 +584,34 @@ private struct TogetherHomeView: View {
             } else if let issue = store.issue, store.intents.isEmpty {
                 loadFailure(issue: issue)
             } else if current.isEmpty {
-                SSEmptyState(
-                    title: "What would you like to do?", systemImage: "sparkles",
-                    description: "Add an activity and choose when to find company.",
-                    actionTitle: AppLocalization.string("Add an intention"),
-                    actionAccessibilityID: "together-add-first-intent",
-                    action: { presentedEditor = .create() }
-                )
-                .disabled(store.isCreating)
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                    Text("Your next activity")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.Together.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityAddTraits(.isHeader)
+                    Button { presentedEditor = .create() } label: {
+                        Text("Add")
+                            .font(.body.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, SideSeatTheme.spaceSM)
+                            .padding(.vertical, SideSeatTheme.spaceMD)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
+                            .background(SideSeatTheme.ProductAction.fill,
+                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(SSPressButtonStyle())
+                    .disabled(store.isCreating)
+                    .accessibilityLabel(AppLocalization.string("Add an intention"))
+                    .accessibilityIdentifier("together-add-first-intent")
+                    Text("Add an activity and choose when to find company.")
+                        .font(.subheadline)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("together-set-intent")
             } else {
@@ -1778,8 +1870,11 @@ private struct WeeklyIntentEditorView: View {
     }
 
     private var editorActionTitle: String {
-        if template != nil || completedPlanDraft != nil { return AppLocalization.string("Publish new intention") }
         let useShortTitle = focusedInput != nil || dynamicTypeSize.isAccessibilitySize
+        if template != nil { return AppLocalization.string("Publish new intention") }
+        if completedPlanDraft != nil {
+            return AppLocalization.string(useShortTitle ? "Publish intention (short)" : "Publish new intention")
+        }
         if automaticMatchingEnabled, intent?.isPaused != true {
             if intent?.automaticMatching == true {
                 return AppLocalization.string(useShortTitle ? "Save" : "Save changes")
