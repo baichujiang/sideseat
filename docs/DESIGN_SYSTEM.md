@@ -96,8 +96,10 @@ space permits and an icon at accessibility sizes. The pinned section selector
 uses equal-width, minimum-44pt buttons on a warm inset surface. The 2026-10-02
 owner decision replaces the dusty-Rose selection with a neutral gray fill and
 semibold primary text in both appearances. Control text keeps at least 4.5:1
-contrast. At accessibility sizes the buttons stack, labels wrap, and a checkmark
-reinforces selection. A divider separates the
+contrast. The 2026-10-04 refinement keeps the current text size and lets the three
+buttons and selected surface fill equal shares of the available width. At
+accessibility sizes, or when the labels do not fit, one full-width section chooser
+opens a list with wrapping labels and a checkmark for the current section. A divider separates the
 fixed navigation from scrolling content; page swipes retain each scroll position.
 
 Together cards use a 24pt radius, 20pt inset, neutral system-adaptive bodies, a warm

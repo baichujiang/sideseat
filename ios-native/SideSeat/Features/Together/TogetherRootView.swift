@@ -386,7 +386,6 @@ private struct TogetherHomeView: View {
                             sectionButton(section, at: now)
                         }
                     }
-                    .fixedSize(horizontal: true, vertical: false)
                     sectionMenu(at: now)
                 }
             }

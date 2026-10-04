@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "environment": "iPhone 13 mini simulator / iOS 26.5",
+  "fixture": "in-app authenticated UI fixture, API override 127.0.0.1:9, no real-user data",
+  "checks": [
+    "Chinese current text size: three section buttons stretch across the full selector, matching selected backgrounds",
+    "Chinese: recommendations -> intentions -> saved changes content and highlight correctly",
+    "English dark mode: labels remain visible, selector fills available width",
+    "German largest accessibility size: full-width chooser opens, selected checkmark shown, selecting saved dismisses and updates section"
+  ],
+  "screenshots": [
+    "after-de-largest-menu.png",
+    "after-de-largest-saved.png",
+    "after-en-dark.png",
+    "after-zh-intentions.png",
+    "after-zh-recommendations.png",
+    "after-zh-saved.png",
+    "before-zh-light.png"
+  ],
+  "physicalDeviceFullInteractionTested": false
+}

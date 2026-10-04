@@ -1,0 +1,15 @@
+{
+  "passed": [
+    "VisualQAScreenshotUITests.testTogetherExploreUnavailableKeepsNavigation"
+  ],
+  "failed": [
+    {
+      "test": "VisualQAScreenshotUITests.testTogetherFirstUseStartsWithIntentionsAndExploreEmptyIsIndependent",
+      "cause": "Obsolete expected label 添加第一个意愿; current label 添加意愿",
+      "productChangeInThisTask": false
+    }
+  ],
+  "manualCurrentUiNavigation": "PASS",
+  "simulatorBuild": "PASS",
+  "signedDeviceBuild": "PASS"
+}
