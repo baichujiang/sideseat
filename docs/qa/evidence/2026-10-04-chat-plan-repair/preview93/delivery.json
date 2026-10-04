@@ -4,9 +4,13 @@
   "previousPreviewBuild": "92",
   "githubPushed": true,
   "installedVersionReadBack": true,
-  "launchVerified": false,
-  "launchBlockedReason": "Device locked; operating system denied launching the app.",
+  "launchVerified": true,
+  "launchBlockedReason": null,
   "backendChanged": false,
   "existingBackendBaseline": "dpl_56ce6g2JaUMRuQMCbofBftrMMq1s",
-  "recordedAt": "2026-10-04T01:29:52.316166+00:00"
+  "recordedAt": "2026-10-04T01:29:52.316166+00:00",
+  "previousLaunchAttempt": "Device locked; operating system denied the initial launch. Resolved on 2026-10-04 follow-up.",
+  "launchFollowupEvidence": "launch-followup.json",
+  "launchVerifiedAt": "2026-10-04T08:27:47.385544+00:00",
+  "followupRecordedAt": "2026-10-04T08:32:28.283691+00:00"
 }

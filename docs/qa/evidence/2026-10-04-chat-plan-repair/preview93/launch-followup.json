@@ -1,0 +1,25 @@
+{
+  "sourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "installedVersion": "1.0.0",
+  "installedBuild": "93",
+  "launch": {
+    "outcome": "success",
+    "receiptRecordedAt": "2026-10-04T08:27:47.385544+00:00",
+    "processIdentifier": 23946,
+    "activatedWhenStarted": true
+  },
+  "processReadBack": {
+    "outcome": "success",
+    "receiptRecordedAt": "2026-10-04T08:30:22.847123+00:00",
+    "sameProcessStillRunning": true,
+    "elapsedSecondsSinceLaunchReceipt": 155.5
+  },
+  "installedVersionReadBack": {
+    "outcome": "success",
+    "receiptRecordedAt": "2026-10-04T08:31:44.227504+00:00"
+  },
+  "reinstalledDuringFollowup": false,
+  "appUIWalkthroughVerified": false,
+  "scope": "Installed version, successful OS launch, and continued presence of the same process; does not assert screen content or VoiceOver behavior."
+}

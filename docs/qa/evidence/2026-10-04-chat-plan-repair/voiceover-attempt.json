@@ -5,5 +5,20 @@
   "simulatorAppFocusReached": false,
   "spokenOutputVerified": false,
   "systemVoiceOverRestoredToOriginalOffState": true,
-  "result": "Incomplete; real iPhone VoiceOver walkthrough required"
+  "result": "Incomplete; real iPhone VoiceOver walkthrough required",
+  "followup": {
+    "date": "2026-10-04",
+    "activeXcodeVersion": "26.6",
+    "activeXcodeBuild": "17F113",
+    "activeXcodePath": "/Applications/Xcode.app/Contents/Developer",
+    "voiceOverAPIFoundInInstalledXCTestOrXCUIAutomationHeaders": false,
+    "newVoiceOverAPIIntroducedIn": "Xcode 27 beta 3",
+    "appleReleaseNotes": "https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes?changes=_5_1_2",
+    "actualIPhoneVoiceOverControlAvailable": false,
+    "actualIPhoneVoiceOverResult": "Pending device-side walkthrough feedback; not passed",
+    "systemVoiceOverChangedDuringFollowup": false,
+    "userWalkthroughRequested": true,
+    "userReportedVoiceOverEnabled": true,
+    "userReportedWalkthroughResults": []
+  }
 }
