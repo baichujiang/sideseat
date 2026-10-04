@@ -1,0 +1,11 @@
+{
+  "result": "PASS",
+  "mode": "check-return",
+  "bilateralOutcomes": 2,
+  "sharedEncounters": 1,
+  "originalEndedIntents": 2,
+  "newIntentions": 0,
+  "plans": 1,
+  "calendarEntries": 2,
+  "originalChatPreserved": true
+}

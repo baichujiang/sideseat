@@ -2,6 +2,8 @@
 
 日期：2026-10-04，Europe/Berlin。应用实现对应 `6ecd35884cb2f722196afa025c9e70d81a0d5b49` / Preview 93；本轮起点 `ab0994b`。
 
+**两条主闭环均已从全新隔离数据完整通过：共 9 个原生 UI 方法，0 失败、0 跳过、0 重试，两套独立数据库核验通过。** 未发现新的产品故障或需要另行设计的重大问题；本次修改仅为测试库白名单、报告及证据。
+
 ## 阶段一：1 → 2 → 3 → 6 → 3
 
 **完整通过。** 两个新测试账号从发布意愿、推荐收藏、招呼与回复开始，完成首次邀约、对方接受、双方日历、双方活动反馈、原聊天继续联系，再从原聊天发起第二次邀约。第二次接受后双方日历均保留两次活动，重登与历史计划切换通过。
@@ -24,7 +26,22 @@
 
 ## 阶段二：1 → 2 → 3 → 6 → 1
 
-已新建独立空库及三个测试账号，完整复跑进行中；此状态不计为通过。
+**完整通过。** 在第二个全新数据库中，Alex 与 Mia 从发布、推荐、招呼及回复开始重新成约；双方反馈后，Alex 从已结束计划的「发布新意愿」入口创建新的图书馆咖啡意愿，进入与 Lee 的下一轮推荐，原关系与记录保留。
+
+| 实际操作 | 结果 |
+| --- | --- |
+| 发布 → 推荐／收藏 → 招呼／回复 → 首次计划 → 双方日历 | 1 个原生 UI 方法通过；独立数据核验首次计划及双方日历 |
+| 尚未反馈时，从计划页与聊天打开新意愿并取消；再约入口仍可用 | 1 个 UI 方法通过；标题预填、时间待定、类别须选择，取消后仍只有 2 条原意愿、1 个原计划、2 条日历、0 反馈 |
+| 双方分别反馈活动发生，原聊天继续联系 | 1 个 UI 方法通过；两份 OCCURRED、一次共同经历、活动后双方消息均持久化 |
+| Lee 发布 → Alex 从已结束计划发布新意愿 → 双方新推荐 → 重登 → 原收藏返回旧聊天 | 1 个 UI 方法通过；Alex 与 Lee 相互进入推荐，未重新推荐已结束意愿的 Mia；原收藏保持私密 |
+
+合计 **4 个 UI 方法通过，0 失败、0 跳过**，无中断恢复或失败重试。[测试汇总](evidence/2026-10-04-preview93-full-loops/new-intent-results.json)。
+
+[取消后](evidence/2026-10-04-preview93-full-loops/new-intent-after-cancel.json)、[反馈后](evidence/2026-10-04-preview93-full-loops/new-intent-after-outcomes.json)、[最终数据](evidence/2026-10-04-preview93-full-loops/new-intent-final-state.json)核验：4 条意愿（原 2 条 ENDED、新 2 条 ACTIVE）、2 次推荐、原 1 个聊天、原 1 个计划及 2 条日历、2 份反馈、1 次共同经历、0 再次同行许可。新意愿的时间为 UNDECIDED，未继承旧日期；新推荐没有自动创建聊天、计划或日历。
+
+关键截图：[取消前的新草稿](evidence/2026-10-04-preview93-full-loops/new-intent-06-cancel/closed-loop-return-flow-02-independent-draft.png)、[新意愿发布](evidence/2026-10-04-preview93-full-loops/new-intent-07-publication/closed-loop-return-flow-16-new-publication.png)、[新同伴推荐](evidence/2026-10-04-preview93-full-loops/new-intent-07-publication/closed-loop-return-flow-17-new-company.png)、[原聊天保留](evidence/2026-10-04-preview93-full-loops/new-intent-07-publication/closed-loop-return-flow-18-original-chat-retained.png)、[原收藏返回](evidence/2026-10-04-preview93-full-loops/new-intent-07-publication/closed-loop-return-flow-21-saved-history-chat.png)。
+
+本闭环结束于发布新意愿并进入下一轮推荐，未向 Lee 发招呼或创建第二个计划；后者是下一轮活动，不冒充为本次覆盖范围。
 
 ## 环境和证据边界
 
@@ -33,9 +50,10 @@
 - 第一库 `sideseat_preview93_same_peer_20261004`，第二库 `sideseat_preview93_new_intent_20261004`，均从空库应用 147 个迁移。脚本只预置完整 QA 账号，业务记录由 App 创建。
 - 仅将首次已接受计划与对应两条日历的时间移到过去，以进入活动反馈；不合成反馈或共同经历。[第一条时间压缩](evidence/2026-10-04-preview93-full-loops/same-peer-time-compression.json)。
 - 原生测试需要反复登录切换角色；分阶段将该独立库的登录限流计数清零，记录在 `*-login-reset.json`。不修改产品限流实现、业务数据或生产配置；本轮不验证登录限流。
-- 第一条 API 运行记录汇总：[HTTP 状态](evidence/2026-10-04-preview93-full-loops/same-peer-api-summary.json)。本地编译与串行测试耗时不能用作生产消息时延结论。
+- 两轮本地 API 共记录 547 个请求，全部为 200／201，0 个 HTTP 4xx／5xx：[第一条](evidence/2026-10-04-preview93-full-loops/same-peer-api-summary.json)、[第二条](evidence/2026-10-04-preview93-full-loops/new-intent-api-summary.json)。本地编译与串行测试耗时不能用作生产消息时延结论。
 - 不包括双实体手机同时在线、生产 APNs、后台／断网恢复、群聊完整流程、游客注册联动或真实 VoiceOver 焦点。此前真机 UI 回归与本次真实本地后端闭环测试分别计证据，不能相互替代。
 - 本轮没有产品源码修复，因此继续使用手机上已交付的 Preview 93；没有新安装、生产后端部署或迁移。阶段提交与交付状态见[记录](../releases/2026-10-04-preview93-full-loop-verification.md)。
+- 两条闭环的本地 API 及本轮启动的 PostgreSQL 均已停止，测试库与证据保留；Next 自动生成的 `next-env.d.ts`／`tsconfig.json` 变动已恢复，其余既有未提交工作保留。[完成记录](evidence/2026-10-04-preview93-full-loops/completion.json)。
 
 ## 复现
 

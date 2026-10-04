@@ -1,13 +1,22 @@
-{"mode":"advance","changed":"Only first plan and its two calendar times","startTime":"2026-10-04T08:04:12.921Z","endTime":"2026-10-04T09:04:12.921Z"}
 {
-  "result": "PASS",
-  "mode": "advance",
-  "firstPlan": "cmutmi2ku001u13tqhdwzukic",
-  "connection": "cmutmhpbr001g13tq9okeah2y",
-  "calendarOwners": [
-    "cmutmf7p20000q4g366mst361",
-    "cmutmf7qp0001q4g33w81voz9"
-  ],
-  "sourceIntentions": "ENDED",
-  "noOutcomesYet": true
+  "operations": [
+    {
+      "mode": "advance",
+      "changed": "Only first plan and its two calendar times",
+      "startTime": "2026-10-04T08:04:12.921Z",
+      "endTime": "2026-10-04T09:04:12.921Z"
+    },
+    {
+      "result": "PASS",
+      "mode": "advance",
+      "firstPlan": "cmutmi2ku001u13tqhdwzukic",
+      "connection": "cmutmhpbr001g13tq9okeah2y",
+      "calendarOwners": [
+        "cmutmf7p20000q4g366mst361",
+        "cmutmf7qp0001q4g33w81voz9"
+      ],
+      "sourceIntentions": "ENDED",
+      "noOutcomesYet": true
+    }
+  ]
 }

@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "planId": "cmutmuxdc001unz09k0t83087",
+  "bilateralOutcomes": 2,
+  "sharedEncounters": 1,
+  "continuedConversation": "cmutmukzv001gnz09ywlhpey0",
+  "newOpportunity": "cmutmzhn7005dnz09zkvttgy8",
+  "intentions": {
+    "total": 4,
+    "originalEnded": 2,
+    "newActive": 2
+  },
+  "connections": 1,
+  "plans": 1,
+  "calendarEntries": 2,
+  "meetAgainPermissions": 0
+}

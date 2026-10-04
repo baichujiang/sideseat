@@ -1,0 +1,38 @@
+[
+  {
+    "result": "Passed",
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "startTime": 1791106882.851,
+    "finishTime": 1791107039.507,
+    "phase": "new-intent-01"
+  },
+  {
+    "result": "Passed",
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "startTime": 1791107043.248,
+    "finishTime": 1791107083.269,
+    "phase": "new-intent-06-cancel"
+  },
+  {
+    "result": "Passed",
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "startTime": 1791107085.717,
+    "finishTime": 1791107151.87,
+    "phase": "new-intent-02-outcomes"
+  },
+  {
+    "result": "Passed",
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "startTime": 1791107154.705,
+    "finishTime": 1791107281.824,
+    "phase": "new-intent-07-publication"
+  }
+]

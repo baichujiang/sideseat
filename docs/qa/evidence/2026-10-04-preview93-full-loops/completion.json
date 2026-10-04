@@ -1,0 +1,18 @@
+{
+  "completedAt": "2026-10-04T11:48:47.772732+02:00",
+  "nativeAppSource": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "samePeerUI": 5,
+  "newIntentionUI": 4,
+  "failed": 0,
+  "skipped": 0,
+  "retryRuns": 0,
+  "independentDatabaseVerification": "both passed",
+  "backendSourceStayedUnchanged": true,
+  "apiStopped": true,
+  "generatedTypeScriptFilesRestored": true,
+  "phoneBuild": 93,
+  "newPhoneInstall": false,
+  "productionDeployment": false,
+  "postgresStopped": true,
+  "ports3033And5433NoLongerListening": true
+}

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
 assert(["localhost", "127.0.0.1"].includes(url.hostname));
-assert(["/sideseat_new_intent_20261003", "/sideseat_return_flow_20261003", "/sideseat_return_flow_retry_20261003", "/sideseat_return_flow_final_20261004"].includes(url.pathname), "Use a dedicated closed-loop database");
+assert(["/sideseat_new_intent_20261003", "/sideseat_return_flow_20261003", "/sideseat_return_flow_retry_20261003", "/sideseat_return_flow_final_20261004", "/sideseat_preview93_new_intent_20261004"].includes(url.pathname), "Use a dedicated closed-loop database");
 const db = new PrismaClient();
 const names = ["loopqa_a", "loopqa_b", "loopqa_c"];
 const mode = process.argv[2];
