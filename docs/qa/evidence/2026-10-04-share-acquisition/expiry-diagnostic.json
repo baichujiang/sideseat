@@ -1,0 +1,15 @@
+{
+  "now": "2026-10-04T10:15:37.094Z",
+  "rows": [
+    {
+      "timezone": "Europe/Berlin",
+      "database_now": "2026-10-04 12:15:37.126078+02",
+      "bound_now": "2026-10-04 12:15:37.094+02",
+      "bound_type": "timestamp with time zone",
+      "expires_at": "2026-10-04 11:15:00",
+      "ended_at": "2026-10-04 10:13:09.664",
+      "current_comparison": true,
+      "utc_comparison": false
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "reason": "wait for asynchronously loaded conversation context before tapping",
+  "before": {
+    "guestId": "cmutovbi2000gk3gbdc2544mo",
+    "ownerId": "cmutosg3s0000gqi94w1t08jy",
+    "connections": 1,
+    "plans": 0,
+    "intent": {
+      "id": "cmutou2nd000dk3gbj71o1cgq",
+      "status": "ACTIVE"
+    }
+  },
+  "after": {
+    "users": 1,
+    "connections": 0,
+    "messageRequests": 0,
+    "plans": 0
+  },
+  "publishedOwnerIntentionPreserved": true
+}

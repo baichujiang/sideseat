@@ -1,0 +1,31 @@
+✔ shared intention → private anonymous greeting → native reply → guest upgrade keeps conversation (1373.835625ms)
+✔ intention expiry uses UTC storage under UTC database sessions (318.463958ms)
+✔ intention expiry uses UTC storage under Europe/Berlin database sessions (67.937375ms)
+✔ intention expiry uses UTC storage under America/New_York database sessions (65.485167ms)
+✔ all categories support creating and clearing optional details and matching category-only intentions (3.84825ms)
+✔ Weekly Intent input is strict, bounded, and activity-first (1.546708ms)
+✔ general categories accept one bounded concrete activity while topic-specific fields stay separate (0.447333ms)
+✔ Weekly Intent keeps legacy SPORTS payloads readable and validates concrete sports (0.568416ms)
+✔ Weekly Intent validates study goals and study-only Together modes (0.610208ms)
+✔ Weekly Intent rejects short, long, and overlapping time windows (0.357666ms)
+✔ Weekly Intent patch separates editing from pause and resume (0.466916ms)
+✔ Weekly Intent expiry is Sunday end-of-day across Berlin DST (3.909833ms)
+✔ Weekly Intent lifecycle accepts only future windows within its expiry (0.195625ms)
+✔ Weekly Intent normalization is chronological and UTC-stable (1.267542ms)
+✔ Weekly Intent migration is additive and installs owner-safe lifecycle constraints (0.736333ms)
+✔ Concrete sport context uses one additive migration for intents and opportunities (0.457416ms)
+✔ Together mode and study-goal migration preserves legacy exact semantics (0.599ms)
+✔ general concrete activity uses one additive migration for intents and opportunities (0.336209ms)
+✔ OpenAPI exposes concrete sport context on intent and opportunity contracts (4.3225ms)
+✔ OpenAPI exposes viewer-safe shared-context matching fields (4.203667ms)
+✔ Weekly Intent mutations match through explicit publication or legacy session consent (0.395625ms)
+✔ Weekly Intent uses an independent feature gate and idempotent mutations (0.751833ms)
+✔ Familiar Campus cutover removes public-feed entry points from the V2 surface (3.828209ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1620.692667

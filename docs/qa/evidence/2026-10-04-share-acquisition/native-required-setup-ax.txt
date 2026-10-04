@@ -1,0 +1,45 @@
+Application, 0x11385d400, pid: 50513, label: 'SideSeat' <App element pid: 50513>
+  Window (Main), 0x11385d540, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4394321920.6>
+    Other, 0x11385d680, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454931456.9>
+      Other, 0x11385d7c0, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454841344.12>
+        Other, 0x11385d900, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4394320896.16>
+          Other, 0x11385da40, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454526784.22>
+            Other, 0x11385db80, {{0.0, 0.0}, {375.0, 812.0}}, identifier: 'required-setup' <AX element pid: 50513, elementOrHash.elementID: 4454633408.137>
+              NavigationBar, 0x11385dcc0, {{0.0, 50.0}, {375.0, 54.0}}, identifier: 'SideSeat' <AX element pid: 50513, elementOrHash.elementID: 4507058944.138>
+                StaticText, 0x11385de00, {{151.7, 61.7}, {71.3, 20.7}}, label: 'SideSeat' <AX element pid: 50513, elementOrHash.elementID: 4948212608.136>
+              Other, 0x11385df40, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454629376.139>
+                Other, 0x11385e080, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4455186432.141>
+                  Other, 0x11385e1c0, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4948203648.143>
+                    Other, 0x11385e300, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4455225024.144>
+                      ScrollView, 0x11385e440, {{0.0, 0.0}, {375.3, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4506864640.145>
+                        Other, 0x11385e580, {{0.0, 0.0}, {375.3, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454634304.146>
+                          Other, 0x11385e6c0, {{0.0, 0.0}, {375.3, 158.8}} <AX element pid: 50513, elementOrHash.elementID: 4454617472.150>
+                        Other, 0x11385e800, {{0.0, 0.0}, {375.3, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454632960.147>
+                        Other, 0x11385e940, {{0.0, 104.0}, {375.2, 436.3}} <AX element pid: 50513, elementOrHash.elementID: 4947794944.148>
+                          StaticText, 0x11385ea80, {{20.0, 128.0}, {163.7, 26.3}}, label: 'Set your context' <AX element pid: 50513, elementOrHash.elementID: 4454621952.151>
+                          StaticText, 0x11385ebc0, {{20.0, 162.3}, {335.3, 42.3}}, label: 'A verified school identity helps people know who they are meeting.' <AX element pid: 50513, elementOrHash.elementID: 4454625984.152>
+                          Button, 0x11385ed00, {{20.2, 228.7}, {335.3, 63.0}}, label: 'School, None' <AX element pid: 50513, elementOrHash.elementID: 4454626432.153>
+                            Image, 0x11385ee40, {{41.5, 251.3}, {17.3, 17.3}}, identifier: 'circle', label: 'circle' <AX element pid: 50513, elementOrHash.elementID: 4454623744.158>
+                            StaticText, 0x11385ef80, {{76.0, 240.7}, {53.7, 20.3}}, label: 'School' <AX element pid: 50513, elementOrHash.elementID: 4454625536.159>
+                            StaticText, 0x11385f0c0, {{76.0, 264.0}, {32.3, 15.7}}, label: 'None' <AX element pid: 50513, elementOrHash.elementID: 4454627776.160>
+                            Image, 0x11385f200, {{332.2, 254.3}, {6.7, 11.7}}, identifier: 'chevron.right', label: 'Forward' <AX element pid: 50513, elementOrHash.elementID: 4454626880.161>
+                          Button, 0x11385f340, {{20.2, 292.0}, {335.3, 85.0}}, label: 'Languages used for matching, None' <AX element pid: 50513, elementOrHash.elementID: 4395220288.154>
+                            Image, 0x11385f480, {{41.5, 326.0}, {17.3, 17.3}}, identifier: 'circle', label: 'circle' <AX element pid: 50513, elementOrHash.elementID: 4454618368.162>
+                            StaticText, 0x11385f5c0, {{76.0, 304.0}, {132.7, 42.3}}, label: 'Languages used for matching' <AX element pid: 50513, elementOrHash.elementID: 4454628672.163>
+                            StaticText, 0x11385f700, {{76.0, 349.3}, {32.3, 15.7}}, label: 'None' <AX element pid: 50513, elementOrHash.elementID: 4454617024.164>
+                            Image, 0x11385f840, {{332.2, 328.7}, {6.7, 11.7}}, identifier: 'chevron.right', label: 'Forward' <AX element pid: 50513, elementOrHash.elementID: 4395215808.165>
+                          Button, 0x11385f980, {{20.2, 377.3}, {335.3, 63.0}}, label: 'School verification, Not school verified' <AX element pid: 50513, elementOrHash.elementID: 4395211776.155>
+                            Image, 0x11385fac0, {{41.5, 400.3}, {17.3, 17.3}}, identifier: 'circle', label: 'circle' <AX element pid: 50513, elementOrHash.elementID: 4395214912.166>
+                            StaticText, 0x11385fc00, {{76.0, 389.3}, {144.3, 20.3}}, label: 'School verification' <AX element pid: 50513, elementOrHash.elementID: 4395205952.167>
+                            StaticText, 0x11385fd40, {{76.0, 412.7}, {114.3, 15.7}}, label: 'Not school verified' <AX element pid: 50513, elementOrHash.elementID: 4395212672.168>
+                            Image, 0x11385fe80, {{332.2, 403.0}, {6.7, 11.7}}, identifier: 'chevron.right', label: 'Forward' <AX element pid: 50513, elementOrHash.elementID: 4395209984.169>
+                          Button, 0x113914000, {{158.2, 476.3}, {59.0, 20.3}}, identifier: 'required-setup-logout', label: 'Log out' <AX element pid: 50513, elementOrHash.elementID: 4395210880.156>
+                        Other, 0x113914140, {{342.0, 104.0}, {30.0, 664.0}}, label: '垂直滚动条, 1页', value: 0% <AX element pid: 50513, elementOrHash.elementID: 4947931648.149>
+                          Other, 0x113914280, {{369.0, 344.7}, {3.0, 420.3}} <AX element pid: 50513, elementOrHash.elementID: 4454621056.157>
+                        Other, 0x1139143c0, {{342.0, 104.0}, {30.0, 664.0}}, label: '垂直滚动条, 1页', value: 0% <AX element pid: 50513, elementOrHash.elementID: 4947931648.149>
+                          Other, 0x113914500, {{369.0, 344.7}, {3.0, 420.3}} <AX element pid: 50513, elementOrHash.elementID: 4454621056.157>
+              Other, 0x113914640, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4947802112.140>
+                Other, 0x113914780, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4947787776.142>
+  Window, 0x1139148c0, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4394396928.7>
+    Other, 0x113914a00, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454519168.10>
+      Other, 0x113914b40, {{0.0, 0.0}, {375.0, 812.0}} <AX element pid: 50513, elementOrHash.elementID: 4454522304.13>

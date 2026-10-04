@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "mode": "shared",
+  "intentId": "cmutou2nd000dk3gbj71o1cgq",
+  "title": "[share93] Coffee after class",
+  "windows": [
+    {
+      "endAt": "2026-10-04T11:45:00.000Z",
+      "startAt": "2026-10-04T11:15:00.000Z"
+    }
+  ],
+  "timeZone": "Europe/Berlin",
+  "users": 1,
+  "plans": 0
+}

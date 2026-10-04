@@ -1,0 +1,7 @@
+{
+  "replyVisibleAfterDatabaseWriteMs": 596,
+  "invitationVisibleAfterDatabaseWriteMs": 1196,
+  "sseOnlyDelivery": true,
+  "pageErrors": [],
+  "resumedAfterRegistration": true
+}

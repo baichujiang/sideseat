@@ -1,0 +1,45 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName": "SideSeat iPhone 13 mini QA 20260812",
+        "modelName": "iPhone 13 mini",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 1,
+      "passedTests": 0,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SideSeat-Development \u00b7 Built with macOS 26.3.1",
+  "expectedFailures": 0,
+  "failedTests": 1,
+  "finishTime": 1791110796.103,
+  "passedTests": 0,
+  "result": "Failed",
+  "skippedTests": 0,
+  "startTime": 1791110743.382,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertTrue failed - Signing in must retain the shared conversation destination",
+      "targetName": "SideSeatUITests",
+      "testIdentifier": 1,
+      "testIdentifierString": "SocialLiveUITests/testShareAcquisition03RegisteredGuestDeepLinkAndCalendar()",
+      "testIdentifierURL": "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testShareAcquisition03RegisteredGuestDeepLinkAndCalendar",
+      "testName": "testShareAcquisition03RegisteredGuestDeepLinkAndCalendar()"
+    }
+  ],
+  "title": "Test - SideSeat-Development",
+  "topInsights": [],
+  "totalTestCount": 1
+}

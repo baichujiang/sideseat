@@ -1,0 +1,12 @@
+{
+  "result": "PASS_WEB_FALLBACK",
+  "primaryFlow": "BLOCKED_NATIVE_REQUIRED_SETUP",
+  "ownerCalendarVisible": true,
+  "calendarEntries": 2,
+  "registeredGuestStillUnverified": true,
+  "guestNativeCalendarVerified": false,
+  "nativeOwnerAndBrowserGuestContinuity": true,
+  "refreshRetainsChat": true,
+  "endedIntentionClosedToNewVisitors": true,
+  "pageErrors": []
+}

@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 func sideSeatLiveEnvironmentValue(_ key: String, fallback: String) -> String {
     guard let value = ProcessInfo.processInfo.environment[key] else {
@@ -387,6 +388,130 @@ final class SocialLiveUITests: XCTestCase {
     }
 
     // Run 01, scripts/qa-closed-loop.ts advance, then 02 against the dedicated local DB.
+    func testShareAcquisition01PublishAndShare() {
+        let app = loopLogin("share93_owner")
+        loopSelectTogetherSection("intentions", in: app)
+        app.buttons["together-add-first-intent"].tap()
+        app.buttons["intent-topic-coffee"].tap()
+        let title = app.textFields["intent-editor-activity"]
+        title.tap(); title.typeText("[share93] Coffee after class")
+        let timing = app.buttons["intent-timing-choose"]
+        loopReveal(timing, in: app); timing.tap()
+        let done = app.buttons["intent-time-picker-done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 8)); XCTAssertTrue(done.isEnabled); done.tap()
+        app.buttons["intent-editor-save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 15))
+        let share = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-share-")).firstMatch
+        XCTAssertTrue(share.waitForExistence(timeout: 10)); loopReveal(share, in: app); share.tap()
+        let copy = app.cells.matching(NSPredicate(format: "label IN %@", ["Copy", "Copy Link", "拷贝", "复制"])).firstMatch
+        XCTAssertTrue(copy.waitForExistence(timeout: 15), "The native share sheet must offer a copy action")
+        loopCapture(app, "share93-01-native-share-sheet")
+        copy.tap()
+        XCTAssertTrue(copy.waitForNonExistence(timeout: 8))
+        let copied = UIPasteboard.general.url?.absoluteString ?? UIPasteboard.general.string ?? ""
+        XCTAssertTrue(copied.contains("/share/intent/"), "Copy must produce the public intention URL")
+        let attachment = XCTAttachment(string: copied)
+        attachment.name = "share93-copied-share-url"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        app.terminate()
+    }
+
+    func testShareAcquisition02ReplyAndInvite() {
+        let app = loopLogin("share93_owner")
+        tabButton(in: app, labels: ["Messages"]).tap()
+        app.buttons["inbox-message-requests"].tap()
+        let request = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "message-request-")).firstMatch
+        XCTAssertTrue(request.waitForExistence(timeout: 15)); request.tap()
+        XCTAssertTrue(app.staticTexts["[share93] Hello from the shared link"].waitForExistence(timeout: 10))
+        let reply = app.textViews["chat-composer-field"]
+        XCTAssertTrue(reply.waitForExistence(timeout: 8))
+        reply.tap(); reply.typeText("[share93] Yes, I will invite you")
+        app.buttons["chat-composer-send"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 15))
+        let context = app.buttons["conversation-context-bar"]
+        XCTAssertTrue(context.waitForExistence(timeout: 20)); context.tap()
+        let makePlan = app.buttons["conversation-context-make-plan"]
+        XCTAssertTrue(makePlan.waitForExistence(timeout: 8)); makePlan.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForExistence(timeout: 8))
+        XCTAssertEqual(app.textFields["plan-create-title"].value as? String, "[share93] Coffee after class")
+        let location = app.textFields["plan-create-location"]
+        loopReveal(location, in: app); location.tap(); location.typeText("Library cafe")
+        if app.buttons["plan-editor-keyboard-done"].exists { app.buttons["plan-editor-keyboard-done"].tap() }
+        let submit = app.buttons["plan-create-submit"]
+        let confirmTiming = app.switches["plan-confirm-timing"]
+        if confirmTiming.exists {
+            loopReveal(confirmTiming, in: app)
+            loopCapture(app, "share93-02a-time-needs-reconfirmation")
+            confirmTiming.tap()
+        }
+        XCTAssertTrue(waitUntilEnabled(submit, timeout: 5)); submit.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plan-create-sheet"].waitForNonExistence(timeout: 15))
+        loopCapture(app, "share93-02-native-invitation")
+        app.terminate()
+    }
+
+    func testShareAcquisition03RegisteredGuestDeepLinkAndCalendar() throws {
+        let url = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_SHARE_CHAT_URL"].flatMap(URL.init(string:)))
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-language=en", "--ui-testing-appearance=light"]
+        app.configureForSideSeatLiveAPI()
+        app.open(url)
+        let login = app.textFields["login-identifier"]
+        XCTAssertTrue(login.waitForExistence(timeout: 12)); login.tap(); login.typeText("share93_guest")
+        let field = app.secureTextFields["login-password"]
+        field.tap(); field.typeText(password); app.buttons["login-submit"].tap()
+        let system = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let deny = system.buttons.matching(NSPredicate(format: "label IN %@", ["Don’t Allow", "Don't Allow", "不允许"])).firstMatch
+        if deny.waitForExistence(timeout: 4) { deny.tap() }
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 20), "Signing in must retain the shared conversation destination")
+        XCTAssertTrue(app.buttons["conversation-current-plan"].waitForExistence(timeout: 12))
+        loopCapture(app, "share93-03-deep-link-after-login")
+        sendMessage("[share93] Continuing in the app", in: app)
+        app.navigationBars.buttons.firstMatch.tap()
+        tabButton(in: app, labels: ["Calendar"]).tap()
+        XCTAssertTrue(app.staticTexts["[share93] Coffee after class"].waitForExistence(timeout: 15))
+        loopCapture(app, "share93-04-guest-calendar")
+        app.terminate()
+    }
+
+    func testShareAcquisition04OwnerSeesAcceptanceAndContinues() throws {
+        let peer = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_SHARE_GUEST_NAME"])
+        let app = loopLogin("share93_owner")
+        tabButton(in: app, labels: ["Calendar"]).tap()
+        XCTAssertTrue(app.staticTexts["[share93] Coffee after class"].waitForExistence(timeout: 15))
+        loopCapture(app, "share93-05-owner-calendar")
+        openDirectChat(in: app, peerName: peer)
+        XCTAssertTrue(app.staticTexts["[share93] Continuing in the app"].waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 12))
+        sendMessage("[share93] We can keep chatting here", in: app)
+        loopCapture(app, "share93-06-owner-continued-chat")
+        app.terminate()
+    }
+
+    func testShareAcquisitionOwnerCalendarAndWebFallback() throws {
+        let peer = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_SHARE_GUEST_NAME"])
+        let app = loopLogin("share93_owner")
+        tabButton(in: app, labels: ["Calendar"]).tap()
+        XCTAssertTrue(app.staticTexts["[share93] Coffee after class"].waitForExistence(timeout: 15))
+        loopCapture(app, "share93-05-owner-calendar")
+        openDirectChat(in: app, peerName: peer)
+        XCTAssertTrue(app.staticTexts["[share93] Continuing from the browser"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["Next meet-up · Confirmed"].waitForExistence(timeout: 15))
+        sendMessage("[share93] We can keep chatting here", in: app)
+        loopCapture(app, "share93-06-owner-web-continuation")
+        app.terminate()
+    }
+
+    func testShareAcquisition05GuestReloginKeepsConversation() {
+        let app = loopLogin("share93_guest")
+        openDirectChat(in: app, peerName: "Share Alex")
+        XCTAssertTrue(app.staticTexts["[share93] We can keep chatting here"].waitForExistence(timeout: 12))
+        XCTAssertTrue(app.staticTexts["[share93] Continuing in the app"].waitForExistence(timeout: 12))
+        loopCapture(app, "share93-07-guest-persisted-chat")
+        app.terminate()
+    }
+
     func testClosedLoop01IntentBookmarkGreetingPlanAndCalendars() {
         let a = loopLogin("loopqa_a")
         loopCreateIntent("[loop-qa] Campus coffee", in: a)

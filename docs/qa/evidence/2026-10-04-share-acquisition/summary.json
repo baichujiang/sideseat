@@ -1,0 +1,56 @@
+{
+  "result": "BLOCKED_NATIVE_REQUIRED_SETUP",
+  "appImplementation": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "previewBuild": 93,
+  "backendFixCommit": "5ec86688ecfe1b289d649e01b971a751efbb3279",
+  "nativeStages": [
+    {
+      "stage": "native-01-complete",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failure": []
+    },
+    {
+      "stage": "native-02",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failure": []
+    },
+    {
+      "stage": "native-03",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "failure": [
+        "XCTAssertTrue failed - Signing in must retain the shared conversation destination"
+      ]
+    },
+    {
+      "stage": "native-owner-fallback",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failure": []
+    }
+  ],
+  "backendRegressions": {
+    "passed": 23,
+    "failed": 0,
+    "skipped": 0
+  },
+  "guestNativeCalendarAndRelogin": "NOT_REACHED_DUE_TO_SETUP_GATE",
+  "knownOpenIssues": [
+    "registered guest blocked by full campus setup",
+    "selected share time not carried into plan draft"
+  ],
+  "backendDeployment": "dpl_5PfSBjdqFonYm4BhyMfFpvEyBTkG",
+  "productionSmokeChecks": 7,
+  "candidateSmokeChecks": 7,
+  "runtimeErrorLogEntries": 0
+}

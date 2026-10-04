@@ -1,0 +1,16 @@
+{
+  "mode": "production",
+  "origin": "https://api.sideseat.de",
+  "checks": [
+    "temporary QA account authenticated and hidden",
+    "future exact intention created active",
+    "refresh preserves future intention and no premature expiry",
+    "share endpoint returns public production URL",
+    "anonymous share page exposes title and exact free time without an account",
+    "sharing preserves active status",
+    "native client config available"
+  ],
+  "completed": true,
+  "qaAccountRemoved": true,
+  "at": "2026-10-04T10:50:24.224Z"
+}

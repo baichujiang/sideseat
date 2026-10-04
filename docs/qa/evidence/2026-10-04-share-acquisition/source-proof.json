@@ -1,0 +1,9 @@
+{
+  "appSource": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "previewBuild": 93,
+  "verifiedInputFiles": 294,
+  "changedInputs": [
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift"
+  ],
+  "productImplementationUnchanged": true
+}
