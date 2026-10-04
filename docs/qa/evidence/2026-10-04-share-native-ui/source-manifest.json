@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "e127826dc8a84ea5bef15801f93110f88bc301f2",
+  "baselineDeployment": "dpl_jpLansrzskyM1RLFYH5kpQNaDxPY",
+  "verifiedFiles": 1864,
+  "changes": {
+    "app/share/intent/[token]/share.module.css": "639e075c26c393ceab72b80b9ee4a45c35c0bc9212be236125bafb66f423120f"
+  },
+  "migrationChanges": [],
+  "nativeBuild": "Preview 96 unchanged"
+}
