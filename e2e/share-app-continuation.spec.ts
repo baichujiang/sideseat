@@ -54,7 +54,7 @@ async function guide(page: Page, username: string, target: string) {
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: '注册成功' })).toBeVisible();
   await expect(dialog.getByText(username, { exact: true })).toBeVisible();
-  await expect(dialog.getByText('首次进入 App，请使用这个用户名和刚设置的密码登录，无需再次注册。')).toBeVisible();
+  await expect(dialog.getByText('用此账号和刚设置的密码登录 App。')).toBeVisible();
   await expect(dialog.getByRole('link', { name: '打开 SideSeat', exact: true })).toHaveAttribute('href', target);
   await expect(dialog.getByRole('link', { name: '打开 SideSeat', exact: true })).toHaveAttribute('aria-disabled', 'false');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -63,19 +63,22 @@ async function guide(page: Page, username: string, target: string) {
 
 test('waiting for a reply → register → app guide → browser continuation survives reload', async ({ page, request }) => {
   await withShare(page, request, async ({ username, token }) => {
+    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/invitation.png', fullPage: true });
     await greet(page);
+    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/guest-chat.png', fullPage: true });
     await page.getByRole('button', { name: '注册并继续', exact: true }).click();
     await register(page, username);
     const dialog = await guide(page, username, 'sideseat://inbox');
-    await expect(dialog.getByText('对话已保存到这个账号，进入 App 后可以继续联系。')).toBeVisible();
+    await expect(dialog.getByText('对话已保存。')).toBeVisible();
     await expect(dialog.getByRole('heading')).toBeFocused();
-    await page.screenshot({ path: '/tmp/sideseat-app-guide-20261004/registered-waiting.png' });
+    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-waiting.png' });
     await dialog.getByText('App 没有打开？', { exact: true }).click();
-    await expect(dialog.getByText(/还没有安装 SideSeat/)).toBeVisible();
-    await dialog.getByRole('button', { name: '继续在网页使用' }).click();
+    await expect(dialog.getByText(/还没安装/)).toBeVisible();
+    await dialog.getByRole('button', { name: '留在网页' }).click();
     await page.reload();
     await expect(page.getByText('你好，明天一起喝咖啡吗？', { exact: true })).toBeVisible();
     await expect(page.getByRole('region', { name: '在 App 中继续' }).getByRole('link', { name: '打开 SideSeat' })).toHaveAttribute('href', 'sideseat://inbox');
+    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-chat.png', fullPage: true });
     const conversation = (await (await page.request.get(`/api/public/intent-share/${token}`)).json()).data;
     expect(conversation.state).toBe('WAITING'); expect(conversation.isGuest).toBe(false);
     await page.getByLabel('Language').selectOption('en');
@@ -97,13 +100,12 @@ for (const action of ['save', 'cancel'] as const) test(`calendar registration �
       await page.keyboard.press('Escape');
     }
     const dialog = await guide(page, username, action === 'save' ? 'sideseat://home' : 'sideseat://inbox');
-    await expect(dialog.getByText('这个账号可以在网页和 SideSeat App 中使用。')).toBeVisible();
     if (action === 'save') {
       await expect(dialog.getByText('已保存到你的 SideSeat 日程。')).toBeVisible();
       expect(await db.calendarEntry.count({ where: { user: { username } } })).toBe(1);
-      await page.screenshot({ path: '/tmp/sideseat-app-guide-20261004/registered-calendar.png' });
+      await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-calendar.png' });
     } else expect(await db.calendarEntry.count({ where: { user: { username } } })).toBe(0);
-    await dialog.getByRole('button', { name: '继续在网页使用' }).click();
+    await dialog.getByRole('button', { name: '留在网页' }).click();
     await expect(page.getByRole('region', { name: '在 App 中继续' })).toBeVisible();
   });
 });
@@ -124,8 +126,8 @@ test('plan registration accepts invitation before app continuation and keeps the
     await expect(dialog.getByText('已接受邀请，已加入双方日程。')).toBeVisible();
     expect((await db.planRequest.findUniqueOrThrow({ where: { id: plan.id } })).status).toBe('ACCEPTED');
     expect(await db.calendarEntry.count({ where: { planRequestId: plan.id } })).toBe(2);
-    await page.screenshot({ path: '/tmp/sideseat-app-guide-20261004/registered-plan.png' });
-    await dialog.getByRole('button', { name: '继续在网页使用' }).click();
+    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-plan.png' });
+    await dialog.getByRole('button', { name: '留在网页' }).click();
     await expect(page.getByRole('article', { name: '计划邀请' }).first().getByText('已确认', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: '打开 SideSeat' })).toHaveAttribute('href', `sideseat://connections/${connection.id}`);
   });
