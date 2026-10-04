@@ -177,7 +177,7 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
   const appHelp = <details className={styles.appHelp}><summary>{t.appNotOpened}</summary><p>{t.appBrowserHint}</p>
     {installURL?<a className={styles.secondary} href={installURL} target="_blank" rel="noreferrer">{t.installApp}</a>:<p>{t.appInstallHint}</p>}
   </details>;
-  const appLink = <a className={styles.primary} href={appURL} aria-disabled={busy} onClick={event=>{if(busy) event.preventDefault();}}>{busy?t.busy:t.open}</a>;
+  const appLink = <a className={`${styles.primary} ${styles.appOpen}`} href={appURL} aria-disabled={busy} onClick={event=>{if(busy) event.preventDefault();}}>{busy?t.busy:t.open}</a>;
   const timing = value.timePreference;
   return <main lang={locale} className={styles.page}><div className={styles.wrap}>
     <header className={styles.brand}>SideSeat<select aria-label="Language" value={locale} onChange={e=>changeLanguage(e.target.value)}><option value="zh-CN">中文</option><option value="en">EN</option><option value="de">DE</option></select></header>
