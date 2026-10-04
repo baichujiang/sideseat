@@ -133,6 +133,14 @@ final class SessionStore {
         }
     }
 
+    func isUsernameAvailable(_ username: String) async throws -> Bool {
+        let response: APIEnvelope<UsernameAvailabilityData> = try await apiClient.send(
+            "api/auth/username-availability", method: .post,
+            body: UsernameAvailabilityRequest(username: AuthFieldValidation.normalizeUsername(username))
+        )
+        return response.data.available
+    }
+
     /// Creates an account via legacy signup, then exchanges for native tokens via v1 login.
     @discardableResult
     func signup(

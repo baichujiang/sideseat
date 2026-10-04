@@ -2410,3 +2410,8 @@
 "Their chosen time is filled in. Review it before sending your invitation." = "Their chosen time is filled in. Review it before sending your invitation.";
 
 "The shared time has passed. Choose a new time to propose." = "The shared time has passed. Choose a new time to propose.";
+
+// Username availability during signup
+"Checking username…" = "Checking username…";
+"This username is available." = "This username is available.";
+"Couldn’t check right now. Continue to verify when creating your account." = "Couldn’t check right now. Continue to verify when creating your account.";

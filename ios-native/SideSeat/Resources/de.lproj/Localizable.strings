@@ -2409,3 +2409,8 @@
 "Their chosen time is filled in. Review it before sending your invitation." = "Die gewählte Zeit ist eingetragen. Prüfe sie, bevor du die Einladung sendest.";
 
 "The shared time has passed. Choose a new time to propose." = "Die geteilte Zeit ist vorbei. Wähle eine neue Zeit für deinen Vorschlag.";
+
+// Username availability during signup
+"Checking username…" = "Benutzername wird geprüft…";
+"This username is available." = "Dieser Benutzername ist verfügbar.";
+"Couldn’t check right now. Continue to verify when creating your account." = "Prüfung derzeit nicht möglich. Beim Erstellen des Kontos wird erneut geprüft.";

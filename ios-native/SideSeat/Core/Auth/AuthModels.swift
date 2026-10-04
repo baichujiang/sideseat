@@ -45,6 +45,15 @@ struct SignupRequest: Encodable, Sendable {
     let graduationYear: Int?
 }
 
+struct UsernameAvailabilityRequest: Encodable, Sendable {
+    let username: String
+}
+
+struct UsernameAvailabilityData: Decodable, Sendable {
+    let username: String
+    let available: Bool
+}
+
 struct SignupResponseData: Decodable, Sendable {
     let userId: String
 }

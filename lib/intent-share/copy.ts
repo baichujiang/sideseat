@@ -1,5 +1,7 @@
 export const shareCopy = {
   en: {
+    usernameChecking: 'Checking username…', usernameAvailable: 'This username is available.', usernameTaken: 'This username is taken. Try another.', usernameCheckFailed: 'Couldn’t check right now. Try again or continue to verify.',
+    usernameRules: { tooShort: 'Use at least 2 characters.', tooLong: 'Use at most 32 characters.', invalid: 'Use only letters, numbers, underscores, and hyphens.', reserved: 'This username is reserved.' },
     timeChanged: 'This time changed or expired. Choose again; your message has been kept.',
     intentionClosed: 'This intention has ended. Your existing conversation and plans are still here.',
     live: 'Messages update automatically', reconnecting: 'Reconnecting…', newMessages: 'New messages',
@@ -25,6 +27,8 @@ export const shareCopy = {
     days: 'Choose any of these times to start a conversation.', selectTime: 'Select this time', pendingTime: 'Time to discuss',
   },
   'zh-CN': {
+    usernameChecking: '正在检查用户名…', usernameAvailable: '这个用户名可以使用', usernameTaken: '这个用户名已被使用，请换一个', usernameCheckFailed: '暂时无法检查，可重试或继续提交验证',
+    usernameRules: { tooShort: '用户名至少需要 2 位', tooLong: '用户名最多 32 位', invalid: '仅支持英文字母、数字、下划线和连字符', reserved: '这个用户名为系统保留，请换一个' },
     timeChanged: '时间已变更或过期，请重新选择；你写的消息已保留。',
     intentionClosed: '这份意愿已结束，你们的对话和计划仍然保留。',
     live: '消息自动更新', reconnecting: '正在重新连接…', newMessages: '查看新消息',
@@ -50,6 +54,8 @@ export const shareCopy = {
     days: '选一个时间，聊聊怎么约。', selectTime: '选择这个时间', pendingTime: '时间待商量',
   },
   de: {
+    usernameChecking: 'Benutzername wird geprüft…', usernameAvailable: 'Dieser Benutzername ist verfügbar.', usernameTaken: 'Dieser Benutzername ist vergeben. Wähle einen anderen.', usernameCheckFailed: 'Prüfung derzeit nicht möglich. Versuche es erneut oder fahre zur Prüfung fort.',
+    usernameRules: { tooShort: 'Mindestens 2 Zeichen.', tooLong: 'Höchstens 32 Zeichen.', invalid: 'Nur Buchstaben, Zahlen, Unterstriche und Bindestriche verwenden.', reserved: 'Dieser Benutzername ist reserviert.' },
     timeChanged: 'Diese Zeit wurde geändert oder ist vorbei. Bitte erneut wählen; deine Nachricht bleibt erhalten.',
     intentionClosed: 'Dieser Wunsch ist beendet. Euer Gespräch und eure Pläne bleiben erhalten.',
     live: 'Nachrichten werden automatisch aktualisiert', reconnecting: 'Verbindung wird wiederhergestellt…', newMessages: 'Neue Nachrichten',

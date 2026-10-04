@@ -2410,3 +2410,8 @@
 "Their chosen time is filled in. Review it before sending your invitation." = "对方选择的时间已填好，确认后即可发送邀请。";
 
 "The shared time has passed. Choose a new time to propose." = "分享中的时间已过，请选择新的计划时间。";
+
+// Username availability during signup
+"Checking username…" = "正在检查用户名…";
+"This username is available." = "这个用户名可以使用";
+"Couldn’t check right now. Continue to verify when creating your account." = "暂时无法检查，创建账户时会再次验证。";

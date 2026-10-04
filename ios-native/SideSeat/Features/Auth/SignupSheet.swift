@@ -20,7 +20,21 @@ struct SignupSheet: View {
     @State private var isConfirmPasswordVisible = false
     @State private var issue: String?
     @State private var isWorking = false
+    @State private var usernameStatus: UsernameStatus = .idle
+    @State private var usernameCheck: Task<Void, Never>?
     @FocusState private var focusedField: Field?
+
+    private enum UsernameStatus {
+        case idle, checking, available, taken, failed
+        case invalid(String)
+
+        var blocksSubmission: Bool {
+            switch self {
+            case .available, .failed: false
+            default: true
+            }
+        }
+    }
 
     private enum Field {
         case displayName
@@ -59,6 +73,8 @@ struct SignupSheet: View {
                         )
                         .focused($focusedField, equals: .username)
                         .onSubmit { focusedField = .password }
+
+                        usernameFeedback
 
                         SSSecureField(
                             title: AppLocalization.string( "Password"),
@@ -180,6 +196,68 @@ struct SignupSheet: View {
             .onAppear {
                 if !dynamicTypeSize.isAccessibilitySize { focusedField = .displayName }
             }
+            .onChange(of: username) { _, _ in
+                issue = nil
+                checkUsername(debounce: true)
+            }
+            .onChange(of: focusedField) { old, new in
+                if old == .username && new != .username {
+                    switch usernameStatus {
+                    case .checking, .failed: checkUsername(debounce: false)
+                    default: break
+                    }
+                }
+            }
+            .onDisappear { usernameCheck?.cancel() }
+        }
+    }
+
+    @ViewBuilder
+    private var usernameFeedback: some View {
+        switch usernameStatus {
+        case .idle: EmptyView()
+        case .checking:
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text(AppLocalization.string("Checking username…"))
+            }
+            .font(.footnote)
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("signup-username-status")
+        case .available:
+            SSFieldMessage(text: AppLocalization.string("This username is available."), kind: .success, accessibilityID: "signup-username-status")
+        case .taken:
+            SSFieldMessage(text: AppLocalization.string("That username is already taken."), accessibilityID: "signup-username-status")
+        case .invalid(let message):
+            SSFieldMessage(text: message, accessibilityID: "signup-username-status")
+        case .failed:
+            Text(AppLocalization.string("Couldn’t check right now. Continue to verify when creating your account."))
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .accessibilityIdentifier("signup-username-status")
+        }
+    }
+
+    private func checkUsername(debounce: Bool) {
+        usernameCheck?.cancel()
+        let normalized = AuthFieldValidation.normalizeUsername(username)
+        guard !normalized.isEmpty else { usernameStatus = .idle; return }
+        if let message = AuthFieldValidation.usernameIssue(normalized) {
+            usernameStatus = .invalid(message)
+            return
+        }
+        usernameStatus = .checking
+        usernameCheck = Task {
+            do {
+                if debounce { try await Task.sleep(for: .milliseconds(400)) }
+                let available = try await session.isUsernameAvailable(normalized)
+                guard !Task.isCancelled, normalized == AuthFieldValidation.normalizeUsername(username) else { return }
+                usernameStatus = available ? .available : .taken
+            } catch {
+                guard !Task.isCancelled, normalized == AuthFieldValidation.normalizeUsername(username) else { return }
+                usernameStatus = .failed
+            }
         }
     }
 
@@ -197,6 +275,7 @@ struct SignupSheet: View {
             && !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && password.count >= 8
             && password == confirmPassword
+            && !usernameStatus.blocksSubmission
     }
 
     private func focusBinding(for field: Field) -> Binding<Bool> {
@@ -213,6 +292,7 @@ struct SignupSheet: View {
     }
 
     private func submit() {
+        guard !isWorking, !session.isWorking, !usernameStatus.blocksSubmission else { return }
         issue = nil
         let trimmedDisplayName = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard (2...32).contains(trimmedDisplayName.count) else {

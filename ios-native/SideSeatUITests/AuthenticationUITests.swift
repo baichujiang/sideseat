@@ -6,6 +6,66 @@ final class AuthenticationUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testSignupChecksUsernameBeforeSubmissionWithLiveAPI() throws {
+        guard let takenName = ProcessInfo.processInfo.environment["SIDESEAT_QA_TAKEN_USERNAME"],
+              let baseURL = ProcessInfo.processInfo.environment["SIDESEAT_QA_API_URL"] else {
+            throw XCTSkip("Requires the isolated username QA fixture and local API.")
+        }
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans", "--ui-testing-local-api",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = baseURL
+        app.launch()
+        let create = app.buttons["login-create-account"]
+        XCTAssertTrue(create.waitForExistence(timeout: 8))
+        revealAuthControl(create, in: app)
+        create.tap()
+        let nickname = app.textFields["signup-display-name"]
+        XCTAssertTrue(nickname.waitForExistence(timeout: 5))
+        nickname.tap()
+        nickname.typeText("QA Student")
+        let username = app.textFields["signup-username"]
+        revealAuthControl(username, in: app)
+        username.tap()
+        username.typeText(takenName.uppercased())
+        let status = app.descendants(matching: .any)["signup-username-status"].firstMatch
+        func expectStatus(_ message: String) {
+            let predicate = NSPredicate(format: "label CONTAINS %@", message)
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: status)], timeout: 10), .completed)
+        }
+        expectStatus("已被占用")
+        XCTAssertFalse(app.buttons["signup-submit"].isEnabled)
+        let takenScreenshot = XCTAttachment(screenshot: app.screenshot())
+        takenScreenshot.name = "Username taken before submission"
+        takenScreenshot.lifetime = .keepAlways
+        add(takenScreenshot)
+        username.typeText("_new")
+        expectStatus("可以使用")
+        let availableScreenshot = XCTAttachment(screenshot: app.screenshot())
+        availableScreenshot.name = "Username available before submission"
+        availableScreenshot.lifetime = .keepAlways
+        add(availableScreenshot)
+        username.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4))
+        expectStatus("已被占用")
+        XCTAssertFalse(app.buttons["signup-submit"].isEnabled)
+        username.typeText("_new")
+        expectStatus("可以使用")
+        // Continue in normal form order instead of scrolling across focused secure fields.
+        username.typeText("\n")
+        let password = app.secureTextFields["signup-password"]
+        revealAuthControl(password, in: app)
+        password.tap()
+        password.typeText("Username-QA-password\n")
+        let confirm = app.secureTextFields["signup-confirm-password"]
+        revealAuthControl(confirm, in: app)
+        confirm.tap()
+        confirm.typeText("Username-QA-password")
+        XCTAssertTrue(app.buttons["signup-submit"].isEnabled)
+        // Checking a name must not create an account or sign out the real Preview.
+        app.terminate()
+    }
+
     func testPasswordResetReusesLoginEmailAndLeavesUsernamesOut() {
         for (language, identifierValue, largeText) in [("de", "student@example.com", true), ("en", "student_name", false)] {
             let app = XCUIApplication()
