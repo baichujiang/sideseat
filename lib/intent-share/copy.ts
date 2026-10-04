@@ -1,5 +1,10 @@
 export const shareCopy = {
   en: {
+    accountReady: 'Your account is ready', accountReadyHint: 'You can use this account on the web and in SideSeat.', conversationSaved: 'Your conversation is saved to this account. You can pick it up in the app.',
+    continueInApp: 'Continue in the app', continueWeb: 'Continue on the web',
+    appLoginHint: 'When you first open the app, sign in with this username and the password you just set. No need to register again.',
+    appNotOpened: 'App didn’t open?', appBrowserHint: 'If you opened this page inside another app, use its menu to open it in your browser, then try again. You can also open SideSeat yourself and sign in.',
+    appInstallHint: 'Don’t have SideSeat yet? Ask the person who shared this link for installation access. You can keep using this page in the meantime.', installApp: 'Get SideSeat for iPhone',
     usernameChecking: 'Checking username…', usernameAvailable: 'This username is available.', usernameTaken: 'This username is taken. Try another.', usernameCheckFailed: 'Couldn’t check right now. Try again or continue to verify.',
     usernameRules: { tooShort: 'Use at least 2 characters.', tooLong: 'Use at most 32 characters.', invalid: 'Use only letters, numbers, underscores, and hyphens.', reserved: 'This username is reserved.' },
     timeChanged: 'This time changed or expired. Choose again; your message has been kept.',
@@ -27,6 +32,11 @@ export const shareCopy = {
     days: 'Choose any of these times to start a conversation.', selectTime: 'Select this time', pendingTime: 'Time to discuss',
   },
   'zh-CN': {
+    accountReady: '注册成功', accountReadyHint: '这个账号可以在网页和 SideSeat App 中使用。', conversationSaved: '对话已保存到这个账号，进入 App 后可以继续联系。',
+    continueInApp: '在 App 中继续', continueWeb: '继续在网页使用',
+    appLoginHint: '首次进入 App，请使用这个用户名和刚设置的密码登录，无需再次注册。',
+    appNotOpened: 'App 没有打开？', appBrowserHint: '如果在其他平台内打开，请从右上角菜单选择在浏览器中打开，再试一次。也可以直接打开 SideSeat，用这个账号登录。',
+    appInstallHint: '还没有安装 SideSeat？可以向分享者获取安装方式，期间仍可在此页面继续联系。', installApp: '安装 SideSeat iPhone 版',
     usernameChecking: '正在检查用户名…', usernameAvailable: '这个用户名可以使用', usernameTaken: '这个用户名已被使用，请换一个', usernameCheckFailed: '暂时无法检查，可重试或继续提交验证',
     usernameRules: { tooShort: '用户名至少需要 2 位', tooLong: '用户名最多 32 位', invalid: '仅支持英文字母、数字、下划线和连字符', reserved: '这个用户名为系统保留，请换一个' },
     timeChanged: '时间已变更或过期，请重新选择；你写的消息已保留。',
@@ -54,6 +64,11 @@ export const shareCopy = {
     days: '选一个时间，聊聊怎么约。', selectTime: '选择这个时间', pendingTime: '时间待商量',
   },
   de: {
+    accountReady: 'Dein Konto ist bereit', accountReadyHint: 'Du kannst dieses Konto im Browser und in SideSeat verwenden.', conversationSaved: 'Dein Gespräch ist in diesem Konto gespeichert. Du kannst es in der App fortsetzen.',
+    continueInApp: 'In der App fortsetzen', continueWeb: 'Im Browser bleiben',
+    appLoginHint: 'Melde dich beim ersten Öffnen der App mit diesem Benutzernamen und dem gerade festgelegten Passwort an. Du musst dich nicht erneut registrieren.',
+    appNotOpened: 'Die App öffnet sich nicht?', appBrowserHint: 'Wenn du diese Seite in einer anderen App geöffnet hast, öffne sie über deren Menü im Browser und versuche es erneut. Du kannst SideSeat auch selbst öffnen und dich anmelden.',
+    appInstallHint: 'SideSeat noch nicht installiert? Frage die Person, die dir den Link geschickt hat, nach dem Installationszugang. Du kannst diese Seite solange weiter nutzen.', installApp: 'SideSeat für iPhone installieren',
     usernameChecking: 'Benutzername wird geprüft…', usernameAvailable: 'Dieser Benutzername ist verfügbar.', usernameTaken: 'Dieser Benutzername ist vergeben. Wähle einen anderen.', usernameCheckFailed: 'Prüfung derzeit nicht möglich. Versuche es erneut oder fahre zur Prüfung fort.',
     usernameRules: { tooShort: 'Mindestens 2 Zeichen.', tooLong: 'Höchstens 32 Zeichen.', invalid: 'Nur Buchstaben, Zahlen, Unterstriche und Bindestriche verwenden.', reserved: 'Dieser Benutzername ist reserviert.' },
     timeChanged: 'Diese Zeit wurde geändert oder ist vorbei. Bitte erneut wählen; deine Nachricht bleibt erhalten.',

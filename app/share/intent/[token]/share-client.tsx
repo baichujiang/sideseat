@@ -21,11 +21,14 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
   const [conversation, setConversation] = useState<Conversation>({ state: 'NEW', isGuest: true, username: null, messages: [] });
   const [opened, setOpened] = useState(false), [busy, setBusy] = useState(false), [body, setBody] = useState('');
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [selected, setSelected] = useState<string | null>(initialIntention.timeWindows[0]?.startAt ?? null);
-  const [modal, setModal] = useState<'register'|'calendar'|null>(null), [afterRegister, setAfterRegister] = useState<'calendar'|SharedPlan|null>(null);
+  const [modal, setModal] = useState<'register'|'calendar'|'complete'|null>(null), [afterRegister, setAfterRegister] = useState<'calendar'|SharedPlan|null>(null);
   const [syncing, setSyncing] = useState(false), [unavailable, setUnavailable] = useState(false), [unread, setUnread] = useState(false);
   const [username, setUsername] = useState(''), [password, setPassword] = useState('');
   const usernameCheck = useUsernameAvailability(username, modal === 'register', t.usernameRules);
   const usernameMessage = usernameCheck.status === 'checking' ? t.usernameChecking : usernameCheck.status === 'available' ? t.usernameAvailable : usernameCheck.status === 'taken' ? t.usernameTaken : usernameCheck.status === 'failed' ? t.usernameCheckFailed : usernameCheck.status === 'invalid' ? usernameCheck.issue : '';
+  const registrationGuidePending = useRef(false);
+  const [appDestination, setAppDestination] = useState<'conversation'|'calendar'>('conversation');
+  const installURL = process.env.NEXT_PUBLIC_IOS_INSTALL_URL?.trim();
   const [start, setStart] = useState(''), [end, setEnd] = useState('');
   const dialog = useRef<HTMLDialogElement>(null), chat = useRef<HTMLElement>(null);
   const messages = useRef<HTMLDivElement>(null), followLatest = useRef(true), revision = useRef(0);
@@ -97,7 +100,12 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
     if (followLatest.current && messages.current) { messages.current.scrollTop = messages.current.scrollHeight; setUnread(false); }
     else if (lastMessageId) setUnread(true);
   }, [lastMessageId]);
-  useEffect(() => { if (modal) dialog.current?.showModal(); else dialog.current?.close(); }, [modal]);
+  useEffect(() => {
+    if (modal) {
+      dialog.current?.showModal();
+      if (modal === 'complete') dialog.current?.querySelector<HTMLElement>('h2')?.focus();
+    } else dialog.current?.close();
+  }, [modal]);
   const windows = value.timeWindows.filter(w => new Date(w.endAt).getTime() > Date.now());
   const date = (raw: string) => new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: value.timeZone }).format(new Date(raw));
   const time = (raw: string) => new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: value.timeZone }).format(new Date(raw));
@@ -127,16 +135,18 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
   async function saveContact(forCalendar = false) { await run(async () => {
     const auth = await api(url,{ action:'START' }); await refresh();
     if (auth.isGuest) { setUsername(`seat_${crypto.randomUUID().slice(0,8)}`); setAfterRegister(forCalendar?'calendar':null); setModal('register'); }
-    else if (forCalendar) showCalendar(); else setNotice(t.saved);
+    else if (forCalendar) showCalendar(); else setModal('complete');
   }); }
   async function register(e: FormEvent) { e.preventDefault(); if (usernameCheck.blocked || busy) return; await run(async () => {
-    await api(url,{action:'REGISTER',username,password}); setPassword('');
-    setConversation(previous=>({...previous,isGuest:false,username})); await refresh(); setNotice(t.saved);
-    if (afterRegister === 'calendar') showCalendar();
-    else {
-      setModal(null);
-      if (afterRegister) await acceptPlan(afterRegister.id);
-    }
+    const account = await api(url,{action:'REGISTER',username,password}) as { username: string };
+    setPassword(''); ++revision.current;
+    setConversation(previous=>({...previous,isGuest:false,username:account.username}));
+    setNotice(''); setAppDestination('conversation');
+    // The account already exists even if the following conversation refresh fails.
+    if (afterRegister === 'calendar') { registrationGuidePending.current = true; showCalendar(); }
+    else setModal('complete');
+    if (afterRegister && afterRegister !== 'calendar') await acceptPlan(afterRegister.id);
+    else await refresh();
   }); }
   async function acceptPlan(id: string) {
     const current = await refresh();
@@ -154,8 +164,24 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
   async function saveCalendar(e: FormEvent) { e.preventDefault(); await run(async () => {
     const payload = { title: value.title, startAt: new Date(start).toISOString(), endAt: new Date(end).toISOString(), note: t.calendarNote, repeat: 'NONE', withUserIds: [] };
     const encoded=JSON.stringify(payload); if (!calendarKey.current || calendarKey.current.body!==encoded) calendarKey.current={body:encoded,key:crypto.randomUUID()};
-    await api('/api/v1/calendar/events',payload,calendarKey.current.key); setModal(null); setNotice(t.calendarSaved);
+    await api('/api/v1/calendar/events',payload,calendarKey.current.key);
+    setAppDestination('calendar'); finishModal(); setNotice(t.calendarSaved);
   }); }
+  function finishModal() {
+    if (registrationGuidePending.current) {
+      registrationGuidePending.current = false; setModal('complete');
+    } else setModal(null);
+  }
+  const appURL = appDestination === 'calendar' ? 'sideseat://home'
+    : conversation.connectionId ? `sideseat://connections/${encodeURIComponent(conversation.connectionId)}` : 'sideseat://inbox';
+  const appHandoff = <>
+    <div className={styles.accountName}><span>{t.username}</span><strong>{conversation.username}</strong></div>
+    <p>{t.appLoginHint}</p>
+    <a className={styles.primary} href={appURL} aria-disabled={busy} onClick={event=>{if(busy) event.preventDefault();}}>{busy?t.busy:t.open}</a>
+    <details className={styles.appHelp}><summary>{t.appNotOpened}</summary><p>{t.appBrowserHint}</p>
+      {installURL?<a className={styles.secondary} href={installURL} target="_blank" rel="noreferrer">{t.installApp}</a>:<p>{t.appInstallHint}</p>}
+    </details>
+  </>;
   const timing = value.timePreference;
   return <main lang={locale} className={styles.page}><div className={styles.wrap}>
     <header className={styles.brand}>SideSeat<span>together, naturally.</span><select aria-label="Language" value={locale} onChange={e=>changeLanguage(e.target.value)}><option value="zh-CN">中文</option><option value="en">EN</option><option value="de">DE</option></select></header>
@@ -187,14 +213,15 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
       </div>)}</div>
       {unread&&<button type="button" className={styles.newMessages} onClick={()=>{followLatest.current=true;if(messages.current) messages.current.scrollTop=messages.current.scrollHeight;setUnread(false);}}>{t.newMessages} ↓</button>}
       {conversation.state==='WAITING'?<p className={styles.waiting}><Check size={17}/>{t.waiting}</p>:<form onSubmit={send} className={styles.composer}><textarea aria-label={t.hello} placeholder={t.hello} maxLength={500} rows={2} required value={body} onChange={e=>setBody(e.target.value)} disabled={unavailable}/><button aria-label={t.send} disabled={busy||unavailable||!body.trim()}><Send size={19}/></button></form>}
-      {!conversation.isGuest&&conversation.connectionId&&<div className={styles.appPrompt}><p>{t.appContinueHint}</p><a className={styles.secondary} href={`sideseat://connections/${conversation.connectionId}`}>{t.open}</a></div>}
       {conversation.isGuest&&<div className={styles.savePrompt}><div><strong>{t.save}</strong><p>{t.benefits}</p></div><button disabled={busy} onClick={()=>saveContact()}>{t.register}<ChevronRight size={16}/></button></div>}
     </section>}
-    {!modal&&error&&<p role="alert" className={styles.error}>{error}</p>}{notice&&<p role="status" className={styles.notice}><Check size={17}/>{notice}</p>}
+    {!conversation.isGuest&&conversation.state!=='OWNER'&&<section className={`${styles.card} ${styles.appPrompt}`} aria-label={t.continueInApp}><h2>{t.continueInApp}</h2><p>{t.appContinueHint}</p>{appHandoff}</section>}
+    {!modal&&error&&<p role="alert" className={styles.error}>{error}</p>}{!modal&&notice&&<p role="status" className={styles.notice}><Check size={17}/>{notice}</p>}
     <footer className={styles.footer}><span>SideSeat</span> · <a href="/privacy">{locale==='zh-CN'?'隐私政策':locale==='de'?'Datenschutz':'Privacy'}</a></footer>
-    <dialog ref={dialog} className={styles.dialog} aria-modal="true" aria-labelledby="share-dialog-title" onCancel={()=>setModal(null)}><button className={styles.close} aria-label={t.close} onClick={()=>setModal(null)}><X size={21}/></button>
+    <dialog ref={dialog} className={styles.dialog} aria-modal="true" aria-labelledby="share-dialog-title" onCancel={event=>{event.preventDefault();if(!busy) finishModal();}}><button className={styles.close} aria-label={t.close} disabled={busy} onClick={finishModal}><X size={21}/></button>
       {modal==='register'?<form onSubmit={register}><div className={styles.modalIcon}>{afterRegister&&afterRegister!=='calendar'?<CalendarPlus/>:<MessageCircle/>}</div><h2 id="share-dialog-title">{afterRegister&&afterRegister!=='calendar'?t.registerAccept:t.save}</h2><p>{afterRegister&&afterRegister!=='calendar'?t.planSignupHint:t.benefits}</p>{afterRegister&&afterRegister!=='calendar'&&<div className={styles.registrationPlan}><strong>{afterRegister.title}</strong><p>{date(afterRegister.startAt)} · {time(afterRegister.startAt)} – {time(afterRegister.endAt)}</p>{afterRegister.location&&<p>{afterRegister.location}</p>}</div>}<label>{t.username}<input autoComplete="username" autoCapitalize="none" spellCheck={false} value={username} onChange={e=>{setUsername(e.target.value);setError('');}} onBlur={usernameCheck.onBlur} aria-describedby="share-username-status" aria-invalid={usernameCheck.status==='taken'||usernameCheck.status==='invalid'} required minLength={2} maxLength={32}/></label><p id="share-username-status" className={styles.usernameStatus} role="status" aria-live="polite" data-state={usernameCheck.status}>{usernameMessage}</p><label>{t.password}<input type="password" autoComplete="new-password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={8} maxLength={72}/></label><button className={styles.primary} disabled={busy||usernameCheck.blocked}>{busy?t.busy:afterRegister&&afterRegister!=='calendar'?t.registerAccept:t.register}</button><p className={styles.legal}>{t.terms} <a href="/privacy" target="_blank" rel="noreferrer">Privacy</a></p><button type="button" className={styles.secondary} onClick={()=>setModal(null)}>{t.later}</button></form>:
-      <form onSubmit={saveCalendar}><div className={styles.modalIcon}><CalendarPlus/></div><h2 id="share-dialog-title">{t.calendarTitle}</h2><p>{t.calendarNote}</p><strong>{value.title}</strong><label>{t.start}<input type="datetime-local" required value={start} onChange={e=>setStart(e.target.value)}/></label><label>{t.end}<input type="datetime-local" required value={end} min={start} onChange={e=>setEnd(e.target.value)}/></label><p className={styles.legal}>{Intl.DateTimeFormat().resolvedOptions().timeZone}</p><button className={styles.primary} disabled={busy}>{busy?t.busy:t.saveCalendar}</button></form>}
+      modal==='complete'?<div className={styles.appPrompt}><div className={styles.modalIcon}><Check/></div><h2 id="share-dialog-title" tabIndex={-1}>{t.accountReady}</h2><p>{conversation.messages.length?t.conversationSaved:t.accountReadyHint}</p>{notice&&<p role="status" className={styles.notice}>{notice}</p>}{appHandoff}<button type="button" className={styles.secondary} disabled={busy} onClick={finishModal}>{t.continueWeb}</button></div>:
+      <form onSubmit={saveCalendar}><div className={styles.modalIcon}><CalendarPlus/></div><h2 id="share-dialog-title">{t.calendarTitle}</h2>{registrationGuidePending.current&&<p className={styles.notice}>{t.accountReady}</p>}<p>{t.calendarNote}</p><strong>{value.title}</strong><label>{t.start}<input type="datetime-local" required value={start} onChange={e=>setStart(e.target.value)}/></label><label>{t.end}<input type="datetime-local" required value={end} min={start} onChange={e=>setEnd(e.target.value)}/></label><p className={styles.legal}>{Intl.DateTimeFormat().resolvedOptions().timeZone}</p><button className={styles.primary} disabled={busy}>{busy?t.busy:t.saveCalendar}</button></form>}
       {modal&&error&&<p role="alert" className={styles.error}>{error}</p>}
     </dialog>
   </div></main>;
