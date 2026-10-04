@@ -44,6 +44,7 @@ test('native share → browser guest → native invitation → registration → 
   const timeFormat=new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',timeZone:bridge.timeZone});
   const times=`${timeFormat.format(new Date(bridge.windows[0]!.startAt))} – ${timeFormat.format(new Date(bridge.windows[0]!.endAt))}`;
   await expect(page.getByRole('button',{name:new RegExp(times)})).toBeVisible();
+  await page.getByRole('button',{name:new RegExp(times)}).click();
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content',new RegExp(bridge.title.replace(/[\[\]]/g,'\\$&')));
   expect(await db.user.count()).toBe(1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

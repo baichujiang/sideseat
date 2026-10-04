@@ -34,7 +34,8 @@ test('share signup checks before submission, ignores old results, and keeps a fa
   try {
     await db.weeklyIntent.create({data:{userId:owner.id,topic:'COFFEE',activityText:'Username QA',timeWindows:[{startAt:new Date(Date.now()+86400000).toISOString(),endAt:new Date(Date.now()+90000000).toISOString()}],timePreference:{kind:'EXACT'},timeZone:'Europe/Berlin',shareToken:token}});
     await page.goto(`/share/intent/${token}?lang=zh-CN`);
-    await page.getByRole('button',{name:'添加到我的日程',exact:true}).click();
+    await page.getByRole('button',{name:'联系我',exact:true}).click();
+    await page.getByRole('button',{name:'注册并继续',exact:true}).click();
     const dialog = page.getByRole('dialog');
     const name = dialog.getByLabel('用户名',{exact:true});
     const password = dialog.getByLabel('设置密码 · 至少 8 位',{exact:true});
@@ -84,7 +85,7 @@ test('share signup checks before submission, ignores old results, and keeps a fa
     await password.focus();
     await expect(status).toHaveAttribute('data-state','available');
     await submit.click();
-    await expect(dialog.getByRole('heading',{name:'给这件事留个时间'})).toBeVisible();
+    await expect(dialog.getByRole('heading',{name:'注册成功'})).toBeVisible();
     expect((await db.user.findUnique({where:{username:username+'_retry'},select:{id:true}}))?.id).toBe(guestId);
     expect(errors).toEqual([]);
   } finally {

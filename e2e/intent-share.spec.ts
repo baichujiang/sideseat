@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { assertLocalTestDatabase } from './helpers/local-test-database';
 assertLocalTestDatabase();
 const db=new PrismaClient();
-test('public share → anonymous contact → native reply → inline signup → calendar, with no lost messages',async({page,request,browser})=>{
+test('public share → anonymous contact → native reply → inline signup preserves chat without a calendar commitment',async({page,request,browser})=>{
  const ids:string[]=[];const suffix=randomUUID().slice(0,8),username=`share_e2e_${suffix}`;
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  try {
@@ -34,17 +34,16 @@ test('public share → anonymous contact → native reply → inline signup → 
  const reply=await request.post(`/api/v1/me/mutual-opportunities/${intro.opportunityId}/interaction`,{headers:{...headers,'Idempotency-Key':randomUUID()},data:{action:'REPLY',body:'Yes, see you tomorrow!'}});expect(reply.status()).toBe(200);
  await expect(page.getByText('Yes, see you tomorrow!',{exact:true})).toBeVisible();
  await field.fill('Great, thank you!');await page.getByRole('button',{name:'发送',exact:true}).click();await expect(page.getByText('Great, thank you!',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'添加到我的日程',exact:true}).click();
+ await page.getByRole('button',{name:'注册并继续',exact:true}).click();
  await expect(page.getByRole('dialog')).toBeVisible();
  await page.getByLabel('用户名',{exact:true}).fill(`joined_${suffix}`);await page.getByLabel('设置密码 · 至少 8 位').fill('LocalShare123!');
  await page.screenshot({path:'docs/qa/evidence/2026-10-02-intent-share/quick-register.png',fullPage:true});
  await page.getByRole('dialog').getByRole('button',{name:'注册并继续',exact:true}).click();
- await expect(page.getByText('仅保存到你自己的日程，具体安排还需和对方确认。',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'保存到我的日程',exact:true}).click();
- await expect(page.getByText('已保存到你的 SideSeat 日程。',{exact:true})).toBeVisible();
+ await expect(page.getByRole('dialog').getByRole('heading',{name:'注册成功'})).toBeVisible();
+ await page.getByRole('dialog').getByRole('button',{name:'留在网页'}).click();
  await page.reload();await expect(page.getByText('Yes, see you tomorrow!',{exact:true})).toBeVisible();
  const upgraded=await db.user.findUniqueOrThrow({where:{id:intro.senderId}});expect(upgraded.isGuest).toBe(false);expect(upgraded.username).toBe(`joined_${suffix}`);
- expect(await db.calendarEntry.count({where:{userId:intro.senderId,title:'Coffee after class'}})).toBe(1);
+ expect(await db.calendarEntry.count({where:{userId:{in:[owner.id,intro.senderId]}}})).toBe(0);
  const nativeLogin=await request.post('/api/v1/auth/login',{data:{identifier:`joined_${suffix}`,password:'LocalShare123!',device:{id:`joined-${suffix}`,name:'New device',appVersion:'1.0.0',platformVersion:'17.0'}}});expect(nativeLogin.status()).toBe(200);expect((await nativeLogin.json()).data.user.id).toBe(intro.senderId);
  await page.screenshot({path:'docs/qa/evidence/2026-10-02-intent-share/registered-chat.png',fullPage:true});expect(errors).toEqual([]);
  const revoke=await request.delete(`/api/v1/me/weekly-intents/${intent.id}/share`,{headers});expect(revoke.status()).toBe(200);

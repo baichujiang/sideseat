@@ -62,9 +62,13 @@ async function guide(page: Page, username: string, target: string) {
 }
 
 test('waiting for a reply → register → app guide → browser continuation survives reload', async ({ page, request }) => {
-  await withShare(page, request, async ({ username, token }) => {
+  await withShare(page, request, async ({ username, token, ownerId, intentId }) => {
+    await expect(page.getByRole('button', { name: '添加到我的日程', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '时间可以一起商量', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/invitation.png', fullPage: true });
     await greet(page);
+    const opportunity = await db.mutualOpportunity.findFirstOrThrow({ where: { intentAId: intentId } });
+    expect(opportunity.contextSnapshot).toMatchObject({ startsAt: null, endsAt: null, timeContext: { kind: 'UNDECIDED' } });
     await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/guest-chat.png', fullPage: true });
     await page.getByRole('button', { name: '注册并继续', exact: true }).click();
     await register(page, username);
@@ -81,6 +85,7 @@ test('waiting for a reply → register → app guide → browser continuation su
     await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-chat.png', fullPage: true });
     const conversation = (await (await page.request.get(`/api/public/intent-share/${token}`)).json()).data;
     expect(conversation.state).toBe('WAITING'); expect(conversation.isGuest).toBe(false);
+    expect(await db.calendarEntry.count({ where: { OR: [{ userId: ownerId }, { user: { username } }] } })).toBe(0);
     await page.getByLabel('Language').selectOption('en');
     await expect(page.getByRole('region', { name: 'Continue in the app' })).toBeVisible();
     await page.getByLabel('Language').selectOption('de');
@@ -88,48 +93,65 @@ test('waiting for a reply → register → app guide → browser continuation su
   });
 });
 
-for (const action of ['save', 'cancel'] as const) test(`calendar registration → ${action} calendar → app guide without a conversation`, async ({ page, request }) => {
-  await withShare(page, request, async ({ username }) => {
-    await page.getByRole('button', { name: '添加到我的日程', exact: true }).click();
-    await register(page, username);
-    const calendar = page.getByRole('dialog');
-    await expect(calendar.getByRole('heading', { name: '给这件事留个时间' })).toBeVisible();
-    if (action === 'save') await calendar.getByRole('button', { name: '保存到我的日程' }).click();
-    else {
-      await expect(calendar.getByRole('button', { name: '关闭', exact: true })).toBeEnabled();
-      await page.keyboard.press('Escape');
-    }
-    const dialog = await guide(page, username, action === 'save' ? 'sideseat://home' : 'sideseat://inbox');
-    if (action === 'save') {
-      await expect(dialog.getByText('已保存到你的 SideSeat 日程。')).toBeVisible();
-      expect(await db.calendarEntry.count({ where: { user: { username } } })).toBe(1);
-      await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-calendar.png' });
-    } else expect(await db.calendarEntry.count({ where: { user: { username } } })).toBe(0);
-    await dialog.getByRole('button', { name: '留在网页' }).click();
-    await expect(page.getByRole('region', { name: '在 App 中继续' })).toBeVisible();
-  });
-});
-
-test('plan registration accepts invitation before app continuation and keeps the exact conversation link', async ({ page, request }) => {
+for (const registerFirst of [false, true]) test(`plan consent (${registerFirst ? 'existing account' : 'register and accept'}) uses proposal times and creates both calendars only after acceptance`, async ({ page, request }) => {
   await withShare(page, request, async ({ ownerId, intentId, username, headers, startAt, endAt }) => {
+    const time = (raw: string) => new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }).format(new Date(raw));
+    const date = (raw: string) => new Intl.DateTimeFormat('zh-CN', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Europe/Berlin' }).format(new Date(raw));
+    await page.getByRole('button', { name: new RegExp(`${time(startAt)} – ${time(endAt)}`) }).click();
     await greet(page);
     const intro = await db.mutualOpportunityMessageRequest.findFirstOrThrow({ where: { opportunity: { intentAId: intentId } } });
-    const reply = await request.post(`/api/v1/me/mutual-opportunities/${intro.opportunityId}/interaction`, { headers, data: { action: 'REPLY', body: '可以呀，给你发个计划。' } });
+    const participantIds = [ownerId, intro.senderId];
+    const calendarCount = () => db.calendarEntry.count({ where: { userId: { in: participantIds } } });
+    const opportunity = await db.mutualOpportunity.findUniqueOrThrow({ where: { id: intro.opportunityId } });
+    expect(opportunity.contextSnapshot).toMatchObject({ sharedTimeSelection: { startAt, endAt } });
+    expect(await calendarCount()).toBe(0);
+    const reply = await request.post(`/api/v1/me/mutual-opportunities/${intro.opportunityId}/interaction`, { headers, data: { action: 'REPLY', body: '可以呀，我们改成晚一点，给你发个计划。' } });
     expect(reply.status()).toBe(200);
     const connection = await db.connection.findFirstOrThrow({ where: { OR: [{ userAId: ownerId, userBId: intro.senderId }, { userBId: ownerId, userAId: intro.senderId }] } });
-    const proposal = await request.post(`/api/v1/connections/${connection.id}/plans`, { headers: { ...headers, 'Idempotency-Key': randomUUID() }, data: { title: '咖啡计划', startTime: startAt, endTime: endAt, origin: { kind: 'MUTUAL_OPPORTUNITY', id: intro.opportunityId } } });
+    // The negotiated proposal differs from the availability and crosses midnight in the source timezone.
+    const proposedStart = new Date(startAt); proposedStart.setUTCHours(21, 30, 0, 0);
+    const planStart = proposedStart.toISOString(), planEnd = new Date(+proposedStart + 2 * 3600000).toISOString();
+    const proposal = await request.post(`/api/v1/connections/${connection.id}/plans`, { headers: { ...headers, 'Idempotency-Key': randomUUID() }, data: { title: '咖啡计划', startTime: planStart, endTime: planEnd, origin: { kind: 'MUTUAL_OPPORTUNITY', id: intro.opportunityId } } });
     expect(proposal.status(), await proposal.text()).toBe(201);
     const plan = (await proposal.json()).data.plan;
-    await page.getByRole('article', { name: '计划邀请' }).getByRole('button', { name: '注册并接受邀请' }).click();
-    await register(page, username, true);
-    const dialog = await guide(page, username, `sideseat://connections/${connection.id}`);
-    await expect(dialog.getByText('已接受邀请，已加入双方日程。')).toBeVisible();
-    expect((await db.planRequest.findUniqueOrThrow({ where: { id: plan.id } })).status).toBe('ACCEPTED');
-    expect(await db.calendarEntry.count({ where: { planRequestId: plan.id } })).toBe(2);
-    await page.screenshot({ path: '/tmp/sideseat-share-focus-20261004/registered-plan.png' });
-    await dialog.getByRole('button', { name: '留在网页' }).click();
+    const card = page.getByRole('article', { name: '计划邀请' }).first();
+    const proposedLabel = `${date(planStart)} · ${time(planStart)} – ${date(planEnd)} · ${time(planEnd)}`;
+    await expect(card.getByText(proposedLabel, { exact: false })).toBeVisible();
+    expect(await calendarCount()).toBe(0);
+    await card.getByRole('button', { name: '注册并接受邀请' }).click();
+    await expect(page.getByRole('dialog').getByText(proposedLabel, { exact: true })).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: '先继续聊' }).click();
+    expect(await calendarCount()).toBe(0);
+    expect((await db.planRequest.findUniqueOrThrow({ where: { id: plan.id } })).status).toBe('PENDING');
+    if (registerFirst) {
+      await page.getByRole('button', { name: '注册并继续', exact: true }).click();
+      await register(page, username);
+      const dialog = await guide(page, username, `sideseat://connections/${connection.id}`);
+      expect(await calendarCount()).toBe(0);
+      expect((await db.planRequest.findUniqueOrThrow({ where: { id: plan.id } })).status).toBe('PENDING');
+      await dialog.getByRole('button', { name: '留在网页' }).click();
+      await card.getByRole('button', { name: '接受邀请并加入日程' }).click();
+    } else {
+      await card.getByRole('button', { name: '注册并接受邀请' }).click();
+      await register(page, username, true);
+      const dialog = await guide(page, username, `sideseat://connections/${connection.id}`);
+      await expect(dialog.getByText('已接受邀请，已加入双方日程。')).toBeVisible();
+      await dialog.getByRole('button', { name: '留在网页' }).click();
+    }
+    await expect(card.getByText('已确认', { exact: true })).toBeVisible();
+    const entries = await db.calendarEntry.findMany({ where: { userId: { in: participantIds } } });
+    expect(entries).toHaveLength(2);
+    expect(entries.map(entry => entry.userId).sort()).toEqual(participantIds.sort());
+    for (const entry of entries) {
+      expect(entry.planRequestId).toBe(plan.id);
+      expect(entry.startAt.toISOString()).toBe(planStart);
+      expect(entry.endAt.toISOString()).toBe(planEnd);
+    }
+    await page.reload();
     await expect(page.getByRole('article', { name: '计划邀请' }).first().getByText('已确认', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: '打开 SideSeat' })).toHaveAttribute('href', `sideseat://connections/${connection.id}`);
+    expect(await calendarCount()).toBe(2);
+    await page.screenshot({ path: `/tmp/sideseat-share-plan-consent-20261004/${registerFirst ? 'registered' : 'guest'}-accepted.png`, fullPage: true });
   });
 });
 
