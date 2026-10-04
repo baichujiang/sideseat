@@ -35,6 +35,16 @@
 Root pages may use one compact brand/navigation signature. Secondary pages use
 standard iOS titles and back behavior.
 
+### Public invitation visual continuity — 2026-10-04
+
+Public intention links mirror the native semantic palette, system-first typography,
+Together card geometry, 14px controls and Chat bubble colors. The web stylesheet
+maps those tokens locally and follows the visitor's system light/dark preference.
+Routine actions use ProductAction ink/chalk; the owner-requested “Open SideSeat”
+action uses adaptive Rose with black text. Primary buttons are at least 50px high,
+with 44px utility targets. The page preserves its focused invitation → guest contact
+→ registration → App continuation path and compact explanatory copy.
+
 ## 3. Semantic tokens
 
 Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
