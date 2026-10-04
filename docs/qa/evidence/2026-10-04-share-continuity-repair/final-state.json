@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "nativeContinuationVerified": true,
+  "mode": "verify",
+  "ownerId": "cmutqg65d0000zgp1gcesboka",
+  "guestId": "cmutqkc7a000vrgb6pbri22qx",
+  "guestUpgradedInPlace": true,
+  "users": 2,
+  "connectionId": "cmutqky8z002drgb65e18t26a",
+  "acceptedPlans": 1,
+  "calendarEntries": 2,
+  "sourceIntention": "ENDED",
+  "planId": "cmutql9240034rgb6c5kg5jr9",
+  "sharedWindows": [
+    {
+      "endAt": "2026-10-04T12:30:00.000Z",
+      "startAt": "2026-10-04T12:00:00.000Z"
+    }
+  ],
+  "confirmedPlan": {
+    "startAt": "2026-10-04T12:00:00.000Z",
+    "endAt": "2026-10-04T12:30:00.000Z"
+  },
+  "planMatchesOriginalWindow": true,
+  "greetingReplyAndContinuationPreservedExactlyOnce": true
+}

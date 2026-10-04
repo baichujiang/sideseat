@@ -6,6 +6,7 @@ import { deriveNativeMVPReadiness } from "../../lib/api/v1/mvp-readiness";
 describe("native MVP readiness", () => {
   it("requires real coordination languages rather than app locale", () => {
     const readiness = deriveNativeMVPReadiness({
+        isGuest: false, onboardingComplete: true,
       school: "TUM",
       studentStatus: "CURRENT_STUDENT",
       verifiedStudent: true,
@@ -14,6 +15,7 @@ describe("native MVP readiness", () => {
     });
 
     assert.deepEqual(readiness, {
+      canUseApp: true,
       campusIdentityComplete: true,
       languagesComplete: false,
       verificationState: "VERIFIED",
@@ -24,6 +26,7 @@ describe("native MVP readiness", () => {
   it("is ready only when campus identity, languages, and verification are complete", () => {
     assert.deepEqual(
       deriveNativeMVPReadiness({
+        isGuest: false, onboardingComplete: true,
         school: "LMU",
         studentStatus: "EXCHANGE_STUDENT",
         verifiedStudent: true,
@@ -31,7 +34,8 @@ describe("native MVP readiness", () => {
         languageCount: 2,
       }),
       {
-        campusIdentityComplete: true,
+        canUseApp: true,
+      campusIdentityComplete: true,
         languagesComplete: true,
         verificationState: "VERIFIED",
         ready: true,
@@ -47,6 +51,7 @@ describe("native MVP readiness", () => {
       "UNVERIFIED",
     ]) {
       const readiness = deriveNativeMVPReadiness({
+        isGuest: false, onboardingComplete: true,
         school: "TUM",
         studentStatus: "CURRENT_STUDENT",
         verifiedStudent: false,
@@ -61,6 +66,7 @@ describe("native MVP readiness", () => {
   it("requires a supported campus identity", () => {
     assert.equal(
       deriveNativeMVPReadiness({
+        isGuest: false, onboardingComplete: true,
         school: null,
         studentStatus: "CURRENT_STUDENT",
         verifiedStudent: true,
@@ -70,4 +76,12 @@ describe("native MVP readiness", () => {
       false,
     );
   });
+});
+
+it("allows an upgraded guest into existing conversations without campus verification", () => {
+  const input = { isGuest: false, onboardingComplete: true, school: null, studentStatus: null, verifiedStudent: false, studentVerificationStatus: "UNVERIFIED", languageCount: 0 };
+  assert.equal(deriveNativeMVPReadiness(input).canUseApp, true);
+  assert.equal(deriveNativeMVPReadiness(input).ready, false);
+  assert.equal(deriveNativeMVPReadiness({...input, isGuest: true}).canUseApp, false);
+  assert.equal(deriveNativeMVPReadiness({...input, onboardingComplete: false}).canUseApp, false);
 });

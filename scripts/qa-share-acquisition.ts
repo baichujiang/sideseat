@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
 assert.equal(url.hostname, "127.0.0.1");
-assert(["/sideseat_preview93_share_20261004", "/sideseat_preview93_share_final_20261004", "/sideseat_preview93_share_pass_20261004", "/sideseat_preview93_share_complete_20261004"].includes(url.pathname));
+assert(["/sideseat_preview94_share_20261004", "/sideseat_preview93_share_20261004", "/sideseat_preview93_share_final_20261004", "/sideseat_preview93_share_pass_20261004", "/sideseat_preview93_share_complete_20261004"].includes(url.pathname));
 const db = new PrismaClient();
 const title = "[share93] Coffee after class";
 async function main() {
@@ -43,6 +43,9 @@ async function main() {
  assert.equal(plan.proposerUserId,owner.id); assert.equal(plan.receiverUserId,guest.id);
  assert.equal(plan.originKind,"MUTUAL_OPPORTUNITY"); assert.equal(await db.planRequest.count(),1);
  assert.equal(await db.connection.count(),1); assert.equal(intent.status,"ENDED");
+ if (nativeContinuation) {
+  assert(windows.some(w => w.startAt===plan.startTime.toISOString() && w.endAt===plan.endTime.toISOString()));
+ }
  const entries=await db.calendarEntry.findMany({where:{planRequestId:plan.id}});
  assert.equal(entries.length,2);assert.deepEqual(new Set(entries.map(e=>e.userId)),new Set([owner.id,guest.id]));
  assert(entries.every(e=>e.projectionStatus==="ACTIVE"&&e.startAt.getTime()===plan.startTime.getTime()&&e.endAt.getTime()===plan.endTime.getTime()));

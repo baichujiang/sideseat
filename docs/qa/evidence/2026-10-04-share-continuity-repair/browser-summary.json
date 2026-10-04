@@ -1,0 +1,17 @@
+{
+  "resumedAfterRegistration": false,
+  "selectedTimePreserved": true,
+  "replyVisibleAfterDatabaseWriteMs": 1459,
+  "invitationVisibleAfterDatabaseWriteMs": 491,
+  "sseOnlyDelivery": true,
+  "result": "PASS",
+  "guestUpgradedInPlace": true,
+  "guestId": "cmutqkc7a000vrgb6pbri22qx",
+  "connectionId": "cmutqky8z002drgb65e18t26a",
+  "planId": "cmutql9240034rgb6c5kg5jr9",
+  "calendarEntries": 2,
+  "nativeDeepLinkAfterLogin": true,
+  "nativeBothWayContinuation": true,
+  "browserReloadRetainsChat": true,
+  "pageErrors": []
+}

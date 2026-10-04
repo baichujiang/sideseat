@@ -8,17 +8,19 @@ import { readIdempotencyKey } from "@/lib/api/v1/idempotency";
 import { loginUsernameField, LOGIN_USERNAME_MESSAGES_EN } from "@/lib/validators/auth";
 import { createShareGuest, publicIntention, sharedConversation, sendShareMessage, registerShareGuest, IntentShareError } from "@/lib/intent-share/service";
 import { notifyUserPush, scheduleNewDirectChatMessageNotification } from "@/lib/push/notify-user";
+import { sharedTimeSelectionSchema } from "@/lib/intent-share/time-selection";
 
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ token: string }> };
 const input = z.discriminatedUnion("action", [
   z.object({ action: z.literal("START") }),
-  z.object({ action: z.literal("SEND"), body: z.string().trim().min(1).max(500) }),
+  z.object({ action: z.literal("SEND"), body: z.string().trim().min(1).max(500), selectedTime: sharedTimeSelectionSchema.optional() }),
   z.object({ action: z.literal("REGISTER"), username: loginUsernameField(LOGIN_USERNAME_MESSAGES_EN), password: z.string().min(8).max(72) }),
 ]);
 function failure(request: Request, cause: unknown) {
   if (cause instanceof IntentShareError) return v1Error(request, { status: cause.status,
-    code: cause.status === 404 ? "NOT_FOUND" : "STATE_CONFLICT", message: cause.message });
+    code: cause.status === 404 ? "NOT_FOUND" : "STATE_CONFLICT", message: cause.message,
+    ...(cause.code === "SHARED_TIME_CHANGED" ? { field: "selectedTime" } : {}) });
   console.error("Intent share", cause);
   return v1Error(request, { status: 500, code: "INTERNAL_ERROR", message: "Please try again in a moment.", retryable: true });
 }
@@ -27,7 +29,7 @@ export async function GET(request: Request, context: Context) {
     const { token } = await context.params;
     const user = await getSessionUser();
     const conversation = await sharedConversation(token, user?.id);
-    return v1Success({ ...conversation, isGuest: !user || user.isGuest, username: user && !user.isGuest ? user.username : null }, { request });
+    return v1Success({ ...conversation, intention: await publicIntention(token, user?.id), isGuest: !user || user.isGuest, username: user && !user.isGuest ? user.username : null }, { request });
   } catch (cause) { return failure(request, cause); }
 }
 export async function POST(request: Request, context: Context) {
@@ -66,7 +68,7 @@ export async function POST(request: Request, context: Context) {
     }
     const key = readIdempotencyKey(request);
     if (!key) throw new IntentShareError(422, "A message identifier is required.");
-    const result = await sendShareMessage(token, user.id, value.body, key);
+    const result = await sendShareMessage(token, user.id, value.body, key, value.selectedTime);
     const senderId = user.id;
     if ("opportunityId" in result && result.opportunityId) {
       const opportunityId = result.opportunityId, recipientId = result.recipientId;

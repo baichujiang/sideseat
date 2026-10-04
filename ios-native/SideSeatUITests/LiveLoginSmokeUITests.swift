@@ -454,7 +454,7 @@ final class SocialLiveUITests: XCTestCase {
     func testShareAcquisition03RegisteredGuestDeepLinkAndCalendar() throws {
         let url = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_SHARE_CHAT_URL"].flatMap(URL.init(string:)))
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-language=en", "--ui-testing-appearance=light"]
+        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-language=en", "--ui-testing-appearance=light"]
         app.configureForSideSeatLiveAPI()
         app.open(url)
         let login = app.textFields["login-identifier"]
@@ -472,6 +472,13 @@ final class SocialLiveUITests: XCTestCase {
         tabButton(in: app, labels: ["Calendar"]).tap()
         XCTAssertTrue(app.staticTexts["[share93] Coffee after class"].waitForExistence(timeout: 15))
         loopCapture(app, "share93-04-guest-calendar")
+        tabButton(in: app, labels: ["Together"]).tap()
+        XCTAssertTrue(app.descendants(matching: .any)["required-setup"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
+        app.buttons["campus-setup-messages"].tap()
+        openDirectChat(in: app, peerName: "Share Alex")
+        XCTAssertTrue(app.buttons["conversation-current-plan"].waitForExistence(timeout: 10))
+        loopCapture(app, "share94-campus-gate-keeps-chat")
         app.terminate()
     }
 

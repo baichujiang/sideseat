@@ -4,20 +4,21 @@ import { CalendarPlus, Check, ChevronRight, Clock3, Copy, MapPin, MessageCircle,
 import type { SharedConversation, SharedIntention, SharedPlan } from "@/lib/intent-share/service";
 import { shareCopy, type ShareLocale } from "@/lib/intent-share/copy";
 import styles from "./share.module.css";
-type Conversation = SharedConversation & { isGuest: boolean; username: string | null };
+type Conversation = SharedConversation & { isGuest: boolean; username: string | null; intention?: SharedIntention | null };
 async function api(url: string, body?: object, key?: string) {
   const response = await fetch(url, { method: body ? "POST" : "GET", credentials: "same-origin", cache: "no-store",
     ...(body ? { headers: { "Content-Type": "application/json", ...(key ? { "Idempotency-Key": key } : {}) }, body: JSON.stringify(body) } : {}) });
   const payload = await response.json();
-  if (!response.ok) throw Object.assign(new Error(payload.error?.message || payload.error || "Please try again."), { status: response.status });
+  if (!response.ok) throw Object.assign(new Error(payload.error?.message || payload.error || "Please try again."), { status: response.status, field: payload.error?.field });
   return payload.data;
 }
 function localInput(value: string) { const d = new Date(value); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-export function IntentShareClient({ token, intention: value, locale: initialLocale }: { token: string; intention: SharedIntention; locale: ShareLocale }) {
+export function IntentShareClient({ token, intention: initialIntention, locale: initialLocale }: { token: string; intention: SharedIntention; locale: ShareLocale }) {
+  const [value, setIntention] = useState(initialIntention);
   const [locale, setLocale] = useState(initialLocale), t = shareCopy[locale];
   const [conversation, setConversation] = useState<Conversation>({ state: 'NEW', isGuest: true, username: null, messages: [] });
   const [opened, setOpened] = useState(false), [busy, setBusy] = useState(false), [body, setBody] = useState('');
-  const [error, setError] = useState(''), [notice, setNotice] = useState(''), [selected, setSelected] = useState(0);
+  const [error, setError] = useState(''), [notice, setNotice] = useState(''), [selected, setSelected] = useState<string | null>(initialIntention.timeWindows[0]?.startAt ?? null);
   const [modal, setModal] = useState<'register'|'calendar'|null>(null), [afterRegister, setAfterRegister] = useState<'calendar'|SharedPlan|null>(null);
   const [syncing, setSyncing] = useState(false), [unavailable, setUnavailable] = useState(false), [unread, setUnread] = useState(false);
   const [username, setUsername] = useState(''), [password, setPassword] = useState('');
@@ -30,7 +31,7 @@ export function IntentShareClient({ token, intention: value, locale: initialLoca
   const refresh = useCallback(async () => {
     const current = ++revision.current;
     const data = await api(url) as Conversation;
-    if (current === revision.current) { setConversation(data); if (data.messages.length) setOpened(true); }
+    if (current === revision.current) { if (data.intention) setIntention(data.intention); setConversation(data); if (data.messages.length) setOpened(true); }
     return data;
   }, [url]);
   const syncError = useCallback((cause: unknown) => {
@@ -86,12 +87,28 @@ export function IntentShareClient({ token, intention: value, locale: initialLoca
   const date = (raw: string) => new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: value.timeZone }).format(new Date(raw));
   const time = (raw: string) => new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: value.timeZone }).format(new Date(raw));
   async function run(action: () => Promise<void>) { setBusy(true); setError(''); try { await action(); } catch(e) { setError(e instanceof Error ? e.message : t.error); } finally { setBusy(false); } }
-  async function contact() { await run(async () => { await api(url,{ action:'START' }); await refresh(); setOpened(true); const picked = windows[selected]; if (!body && picked) setBody(`${locale === 'zh-CN' ? '你好！这个时间方便吗：' : locale === 'de' ? 'Hallo! Passt dir ' : 'Hi! Does this time work: '}${date(picked.startAt)} ${time(picked.startAt)} – ${time(picked.endAt)}?`); setTimeout(() => chat.current?.scrollIntoView({ behavior:'smooth', block:'start' }),100); }); }
+  async function contact() { await run(async () => { await api(url,{ action:'START' }); await refresh(); setOpened(true); const picked = windows.find(w => w.startAt === selected); if (!body && picked) setBody(`${locale === 'zh-CN' ? '你好！这个时间方便吗：' : locale === 'de' ? 'Hallo! Passt dir ' : 'Hi! Does this time work: '}${date(picked.startAt)} ${time(picked.startAt)} – ${time(picked.endAt)}?`); setTimeout(() => chat.current?.scrollIntoView({ behavior:'smooth', block:'start' }),100); }); }
   async function send(e: FormEvent) { e.preventDefault(); await run(async () => {
-    if (!messageKey.current || messageKey.current.body !== body) messageKey.current = { body, key: crypto.randomUUID() };
-    await api(url,{action:'SEND',body},messageKey.current.key); messageKey.current=null; setBody(''); followLatest.current=true; await refresh();
+    const picked = value.timeWindows.find(w => w.startAt === selected);
+    if (conversation.state === 'NEW' && selected !== null && !picked) {
+      setSelected(null); throw new Error(t.timeChanged);
+    }
+    const selectedTime = conversation.state === 'NEW' && picked
+      ? { intentVersion: value.version, startAt: picked.startAt, endAt: picked.endAt } : undefined;
+    const payload = { action:'SEND', body, ...(selectedTime ? { selectedTime } : {}) };
+    const fingerprint = JSON.stringify(payload);
+    if (!messageKey.current || messageKey.current.body !== fingerprint) messageKey.current = { body: fingerprint, key: crypto.randomUUID() };
+    try { await api(url,payload,messageKey.current.key); }
+    catch (cause) {
+      if ((cause as {field?: string}).field === 'selectedTime') {
+        await refresh(); setSelected(null); messageKey.current = null;
+        throw new Error(t.timeChanged);
+      }
+      throw cause;
+    }
+    messageKey.current=null; setBody(''); followLatest.current=true; await refresh();
   }); }
-  function showCalendar() { const window = windows[selected]; setStart(window ? localInput(window.startAt) : ''); setEnd(window ? localInput(window.endAt) : ''); setModal('calendar'); }
+  function showCalendar() { const window = windows.find(w => w.startAt === selected); setStart(window ? localInput(window.startAt) : ''); setEnd(window ? localInput(window.endAt) : ''); setModal('calendar'); }
   async function saveContact(forCalendar = false) { await run(async () => {
     const auth = await api(url,{ action:'START' }); await refresh();
     if (auth.isGuest) { setUsername(`seat_${crypto.randomUUID().slice(0,8)}`); setAfterRegister(forCalendar?'calendar':null); setModal('register'); }
@@ -131,7 +148,7 @@ export function IntentShareClient({ token, intention: value, locale: initialLoca
       <div className={styles.byline}><div className={styles.avatar}>{value.host.slice(0,1)}</div><div><strong>{value.host}</strong><p>{t.invitation}</p></div><button className={styles.icon} aria-label={t.copy} onClick={()=>run(async()=>{await navigator.clipboard.writeText(window.location.href);setNotice(t.copied);})}><Copy size={19}/></button></div>
       <h1>{value.title}</h1>{value.note && <p className={styles.note}>{value.note}</p>}
       <div className={styles.divider}/><div className={styles.sectionTitle}><Clock3 size={18}/><h2>{t.availability}</h2><span>{value.timeZone}</span></div>
-      {windows.length > 0 ? <div className={styles.times}>{windows.map((w,i)=><button key={w.startAt} aria-pressed={i===selected} className={i===selected?styles.selected:''} onClick={()=>setSelected(i)}><span>{date(w.startAt)}</span><strong>{time(w.startAt)} – {time(w.endAt)}{date(w.startAt)!==date(w.endAt)?` · ${date(w.endAt)}`:''}</strong>{i===selected?<Check size={17}/>:<span className={styles.radio}/>}</button>)}</div> : <div className={styles.flexible}><strong>{timing?.kind==='FLEXIBLE'?t.flexible:t.undecided}</strong>{timing?.kind==='FLEXIBLE'&&<p>{timing.startDate} — {timing.endDate} · {({ANY:t.any,MORNING:t.morning,AFTERNOON:t.afternoon,EVENING:t.evening} as Record<string,string>)[timing.period || 'ANY']}</p>}</div>}
+      {windows.length > 0 ? <div className={styles.times}>{windows.map(w=><button key={w.startAt} aria-pressed={w.startAt===selected} className={w.startAt===selected?styles.selected:''} onClick={()=>setSelected(w.startAt)}><span>{date(w.startAt)}</span><strong>{time(w.startAt)} – {time(w.endAt)}{date(w.startAt)!==date(w.endAt)?` · ${date(w.endAt)}`:''}</strong>{w.startAt===selected?<Check size={17}/>:<span className={styles.radio}/>}</button>)}<button aria-pressed={selected===null} onClick={()=>setSelected(null)} className={selected===null?styles.selected:''}>{t.undecided}</button></div> : <div className={styles.flexible}><strong>{timing?.kind==='FLEXIBLE'?t.flexible:t.undecided}</strong>{timing?.kind==='FLEXIBLE'&&<p>{timing.startDate} — {timing.endDate} · {({ANY:t.any,MORNING:t.morning,AFTERNOON:t.afternoon,EVENING:t.evening} as Record<string,string>)[timing.period || 'ANY']}</p>}</div>}
       {conversation.state==='OWNER'?<p className={styles.hint}>{t.owner}</p>:!value.acceptingContacts?<p className={styles.hint}>{t.intentionClosed}</p>:<><button className={styles.primary} disabled={busy} onClick={contact}><MessageCircle size={20}/>{busy?t.busy:t.contact}<ChevronRight size={19}/></button><p className={styles.underButton}>{t.noAccount}</p><button className={styles.secondary} disabled={busy} onClick={()=>saveContact(true)}><CalendarPlus size={18}/>{t.calendar}</button></>}
     </section>
     {opened&&conversation.state!=='OWNER'&&<section ref={chat} className={styles.card} aria-label={t.chat}><div className={styles.sectionTitle}><MessageCircle size={19}/><h2>{t.chat}</h2><span className={styles.dot}/></div>

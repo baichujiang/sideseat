@@ -19,7 +19,7 @@ test('native share → browser guest → native invitation → registration → 
  const password=process.env.SIDESEAT_QA_PASSWORD!;expect(password).toBeTruthy();
  const resume=process.env.SIDESEAT_SHARE_RESUME_ACCEPTED==='1';
  const summary:Record<string,unknown>=resume?JSON.parse(readFileSync(join(dir!,'browser-summary.json'),'utf8')):{};
- summary.resumedAfterRegistration=resume;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ summary.resumedAfterRegistration=resume; summary.selectedTimePreserved=true;const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  async function native(name:string,method:string,env:Record<string,string>={}) {
   const log=createWriteStream(join(dir!,name+'-driver.log'));
   try {
@@ -64,6 +64,8 @@ test('native share → browser guest → native invitation → registration → 
   const [,replyAt,inviteAt]=await Promise.all([native('native-02','testShareAcquisition02ReplyAndInvite'),replySeen,inviteSeen]);
   const reply=await db.message.findFirstOrThrow({where:{body:'[share93] Yes, I will invite you'}});
   const plan=await db.planRequest.findFirstOrThrow({where:{title:bridge.title}});
+  expect(plan.startTime.toISOString()).toBe(bridge.windows[0]!.startAt);
+  expect(plan.endTime.toISOString()).toBe(bridge.windows[0]!.endAt);
   expect(plan.status).toBe('PENDING');expect(await db.calendarEntry.count()).toBe(0);
   summary.replyVisibleAfterDatabaseWriteMs=replyAt-reply.createdAt.getTime();summary.invitationVisibleAfterDatabaseWriteMs=inviteAt-plan.createdAt.getTime();
   summary.sseOnlyDelivery=true;

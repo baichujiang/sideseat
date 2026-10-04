@@ -18,8 +18,11 @@ internal client and backend rollout. See [delivery and verification](./FLEXIBLE_
 
 ## 1. App entry
 
-After authentication, onboarding and required student eligibility, the app opens
-Together. The bottom navigation is always:
+Registered accounts can use their existing conversations, plans and own calendar
+without a school or language profile. Campus readiness gates Together and campus
+discovery only. A conversation link is retained through login and opens before
+optional tutorials; later profile completion must preserve existing relationships.
+The bottom navigation is always:
 
 ```text
 Together / Plans / Calendar / Messages / Me
@@ -514,3 +517,11 @@ Ending an intention stops new visitors from contacting its owner but preserves a
 同样在大字号输入期间，“最新”入口并入输入行，保留 44 pt 触区与完整读屏名称，收起键盘恢复“最新”文字。字号变化保留当前阅读的消息，计划定位直接落在卡片正文。原生实时接收保留 SSE 空行分隔，收到消息后按原规则更新未读提示。
 
 大字号下，来源意愿摘要同样使用紧凑入口。点开继续查看完整来源及事件信息，详情关闭后保留草稿。
+
+**2026-10-04 sharing continuity amendment:** A selected shared time is submitted
+separately from greeting text with the intention version. The server validates it
+against the locked current intention and stores an immutable suggestion in the
+conversation source. The native Plan draft prefills that suggestion and requires
+the proposer to confirm it. Stale selections at greeting submission keep the text
+and refresh available times; already-sent suggestions remain historical context,
+and elapsed times require a new proposal. No selection means time remains open.

@@ -145,6 +145,8 @@ export function currentProfileDto(
   }));
   const readiness = profile.userLanguages
     ? deriveNativeMVPReadiness({
+        isGuest: profile.isGuest,
+        onboardingComplete: profile.onboardingComplete,
         school: profile.school,
         studentStatus: profile.studentStatus,
         verifiedStudent: profile.verifiedStudent,

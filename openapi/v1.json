@@ -19366,13 +19366,18 @@
           },
           "ready": {
             "type": "boolean"
+          },
+          "canUseApp": {
+            "type": "boolean",
+            "description": "Registered account access to existing conversations, plans and own calendar; ready separately governs campus discovery."
           }
         },
         "required": [
           "campusIdentityComplete",
           "languagesComplete",
           "verificationState",
-          "ready"
+          "ready",
+          "canUseApp"
         ]
       },
       "ProfileUsernameUpdateRequest": {

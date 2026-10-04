@@ -1,0 +1,24 @@
+{
+  "baselineDeployment": "dpl_5PfSBjdqFonYm4BhyMfFpvEyBTkG",
+  "changedFiles": [
+    "lib/api/v1/mvp-readiness.ts",
+    "lib/intent-share/service.ts",
+    "lib/intent-share/time-selection.ts",
+    "lib/intent-share/copy.ts",
+    "app/share/intent/[token]/share-client.tsx",
+    "app/api/public/intent-share/[token]/route.ts",
+    "openapi/v1.json",
+    "lib/api/v1/profile-service.ts"
+  ],
+  "migrationsUnchanged": true,
+  "sha256": {
+    "lib/api/v1/mvp-readiness.ts": "dd3db7a16d52974dea516e4efe14138974a2b744730bf69f32b1695439f80977",
+    "lib/intent-share/service.ts": "e82a1804be1b878ef3429a04b51f370e04793c2e588c31a999caa88bbbc1103a",
+    "lib/intent-share/time-selection.ts": "e7f2d8c9bf2a585b5060fd9b68e4da5b1bdab5726b1c8b6bcf9c6e75697e9f59",
+    "lib/intent-share/copy.ts": "baa2f42571b0034460efd014183249158c3c99f0e16ec9bfd46a084352c936d7",
+    "app/share/intent/[token]/share-client.tsx": "518adb9ac44c15edfd4427fdbd3e557e3f2552a50b3bce79af8bb5bca61924e7",
+    "app/api/public/intent-share/[token]/route.ts": "4916753d623bd650200818fdbfbfa3c355cbd78eb132ca47be7f0c6150d428de",
+    "openapi/v1.json": "392c01d7547fd0bcff625bb390e8d35d8dcbda153c680603bcd5b568a61ee966",
+    "lib/api/v1/profile-service.ts": "cfc85a58fac5abed7ffbe210db27fb88dcbac3b05072574fffe0261f0e56854f"
+  }
+}

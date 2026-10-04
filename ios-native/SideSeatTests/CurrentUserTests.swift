@@ -59,6 +59,20 @@ struct MVPReadinessTests {
 
 @Suite("MVP readiness cache", .serialized)
 struct MVPReadinessCacheTests {
+    @Test("Unverified registered users keep basic access separately from campus readiness")
+    func basicAccess() throws {
+        let suite = "basic-access-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let state = NativeMVPReadiness(campusIdentityComplete: false, languagesComplete: false, verificationState: "UNVERIFIED", ready: false, canUseApp: true)
+        MVPReadinessCache.store(state, userID: "guest-upgraded", defaults: defaults)
+        #expect(MVPReadinessCache.canUseApp(userID: "guest-upgraded", defaults: defaults) == true)
+        #expect(MVPReadinessCache.ready(userID: "guest-upgraded", defaults: defaults) == false)
+        #expect(MVPReadinessCache.canUseApp(userID: "another-user", defaults: defaults) == nil)
+        MVPReadinessCache.remove(userID: "guest-upgraded", defaults: defaults)
+        #expect(MVPReadinessCache.canUseApp(userID: "guest-upgraded", defaults: defaults) == nil)
+    }
+
     @Test("Persists last-known ready state per user")
     func persistsReadyState() throws {
         let suiteName = "mvp-readiness-cache-tests-\(UUID().uuidString)"

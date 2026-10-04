@@ -185,6 +185,13 @@ struct PlanCreateSheet: View {
                 Text("Your chosen free time is filled in. The other person still needs to confirm.")
                     .font(.footnote)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else if draft?.isSharedTimeSuggestion == true {
+                Text(draft?.sharedTimeExpired == true
+                    ? "The shared time has passed. Choose a new time to propose."
+                    : "Their chosen time is filled in. Review it before sending your invitation.")
+                    .font(.footnote)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .accessibilityIdentifier("plan-shared-time-hint")
             } else if needsExplicitTiming {
                 Text("Your activity is filled in. Choose the time you want to propose.")
                     .font(.footnote)

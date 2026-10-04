@@ -988,6 +988,12 @@ struct NativeActionContextAuthor: Codable, Hashable, Sendable {
     let displayName: String
 }
 
+struct NativeSharedTimeSelection: Codable, Hashable, Sendable {
+    let intentVersion: Int
+    let startAt: String
+    let endAt: String
+}
+
 struct NativeActionContext: Codable, Hashable, Sendable {
     let version: Int
     let sourceKind: String
@@ -1004,6 +1010,7 @@ struct NativeActionContext: Codable, Hashable, Sendable {
     var sportTag: String? = nil
     var sportOtherNote: String? = nil
     var timeContext: NativeIntentTimePreference? = nil
+    var sharedTimeSelection: NativeSharedTimeSelection? = nil
 
     var startDate: Date? { startsAt.flatMap(Date.sideSeatChatISO8601) }
     var endDate: Date? { endsAt.flatMap(Date.sideSeatChatISO8601) }
@@ -1051,15 +1058,19 @@ struct NativeMutualOpportunitySource: Codable, Identifiable, Hashable, Sendable 
     let context: NativeActionContext
 
     var planDraft: NativePlanDraft {
-        NativePlanDraft(
+        let expiredSelection = context.sharedTimeSelection != nil && (context.startDate.map { $0 <= Date() } ?? true)
+        var draft = NativePlanDraft(
             title: context.localizedTitle,
-            startTime: context.startsAt,
-            endTime: context.endsAt,
+            startTime: expiredSelection ? nil : context.startsAt,
+            endTime: expiredSelection ? nil : context.endsAt,
             location: context.location,
             planType: context.planType,
             participantIds: context.participantIds,
             origin: NativePlanOriginReference(kind: "MUTUAL_OPPORTUNITY", id: id)
         )
+        draft.isSharedTimeSuggestion = context.sharedTimeSelection != nil
+        draft.sharedTimeExpired = expiredSelection
+        return draft
     }
 }
 
@@ -1073,10 +1084,12 @@ struct NativePlanDraft: Codable, Hashable, Identifiable, Sendable {
     let origin: NativePlanOriginReference?
     var repeatPlanID: String? = nil
     var suggestedDuration: TimeInterval? = nil
+    var isSharedTimeSuggestion: Bool = false
+    var sharedTimeExpired: Bool = false
 
     var id: String { repeatPlanID.map { "repeat:\($0)" } ?? "\(origin?.kind ?? "CHAT"):\(origin?.id ?? title)" }
     var isRepeat: Bool { repeatPlanID != nil }
-    var needsTimeSelection: Bool { isRepeat || (origin?.kind == "MUTUAL_OPPORTUNITY" && startTime == nil) }
+    var needsTimeSelection: Bool { isSharedTimeSuggestion || isRepeat || (origin?.kind == "MUTUAL_OPPORTUNITY" && startTime == nil) }
 
     init(repeating plan: NativePlanRequest) {
         title = plan.title

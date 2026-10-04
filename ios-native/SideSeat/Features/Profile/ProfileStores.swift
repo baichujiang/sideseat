@@ -3,6 +3,13 @@ import Observation
 
 enum MVPReadinessCache {
     private static let keyPrefix = "sideseat.mvp-readiness.ready."
+    private static let appKeyPrefix = "sideseat.mvp-readiness.app-access."
+
+    static func canUseApp(userID: String, defaults: UserDefaults = .standard) -> Bool? {
+        let key = appKeyPrefix + userID
+        guard defaults.object(forKey: key) != nil else { return ready(userID: userID, defaults: defaults) }
+        return defaults.bool(forKey: key)
+    }
 
     static func ready(userID: String, defaults: UserDefaults = .standard) -> Bool? {
         let key = keyPrefix + userID
@@ -16,10 +23,12 @@ enum MVPReadinessCache {
         defaults: UserDefaults = .standard
     ) {
         defaults.set(readiness.ready, forKey: keyPrefix + userID)
+        defaults.set(readiness.allowsApp, forKey: appKeyPrefix + userID)
     }
 
     static func remove(userID: String, defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: keyPrefix + userID)
+        defaults.removeObject(forKey: appKeyPrefix + userID)
     }
 }
 
@@ -143,7 +152,8 @@ final class CurrentProfileStore {
                 campusIdentityComplete: campusComplete,
                 languagesComplete: true,
                 verificationState: current.studentVerificationStatus,
-                ready: campusComplete && verificationComplete
+                ready: campusComplete && verificationComplete,
+                canUseApp: current.readiness?.canUseApp
             )
             install(current.withMVPState(languages: languages, readiness: readiness))
             return true

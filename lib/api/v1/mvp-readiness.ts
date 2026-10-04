@@ -1,6 +1,8 @@
 import { normalizeSchoolCode } from "@/lib/constants/schools";
 
 export type NativeMVPReadinessInput = Readonly<{
+  isGuest: boolean;
+  onboardingComplete: boolean;
   school: string | null;
   studentStatus: string | null;
   verifiedStudent: boolean;
@@ -9,6 +11,7 @@ export type NativeMVPReadinessInput = Readonly<{
 }>;
 
 export type NativeMVPReadiness = Readonly<{
+  canUseApp: boolean;
   campusIdentityComplete: boolean;
   languagesComplete: boolean;
   verificationState: string;
@@ -27,6 +30,7 @@ export function deriveNativeMVPReadiness(
     input.verifiedStudent && verificationState === "VERIFIED";
 
   return {
+    canUseApp: !input.isGuest && input.onboardingComplete,
     campusIdentityComplete,
     languagesComplete,
     verificationState,

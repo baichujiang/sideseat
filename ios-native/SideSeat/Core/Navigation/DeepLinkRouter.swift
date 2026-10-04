@@ -60,6 +60,11 @@ final class DeepLinkRouter {
         navigationEpoch += 1
     }
 
+    func reset() {
+        pendingRoute = nil
+        pendingTab = nil
+    }
+
     func consumePendingRoute() -> AppRoute? {
         defer { pendingRoute = nil }
         return pendingRoute

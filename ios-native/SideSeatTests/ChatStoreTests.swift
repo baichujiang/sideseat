@@ -389,6 +389,30 @@ struct FlexibleIntentTimingTests {
 
 @Suite("Action-to-Plan inheritance")
 struct ActionToPlanInheritanceTests {
+    @Test("Shared visitor timing prefills a proposal, requires confirmation, and expires without inventing a replacement")
+    func sharedTimeSuggestion() throws {
+        let start = Date().addingTimeInterval(7200).ISO8601Format()
+        let end = Date().addingTimeInterval(10800).ISO8601Format()
+        let data = Data("""
+        {"id":"opportunity","policyVersion":"MUTUAL_OPPORTUNITY_V1","topic":"COFFEE",
+         "context":{"version":1,"sourceKind":"MUTUAL_OPPORTUNITY","sourceId":"opportunity","title":"Coffee",
+          "startsAt":"\(start)","endsAt":"\(end)","location":null,"planType":"CUSTOM",
+          "participantIds":["a","b"],"author":{"id":"a","displayName":"QA"},"course":null,
+          "sharedTimeSelection":{"intentVersion":1,"startAt":"\(start)","endAt":"\(end)"}}}
+        """.utf8)
+        let source = try JSONDecoder().decode(NativeMutualOpportunitySource.self, from: data)
+        #expect(source.planDraft.startTime == start)
+        #expect(source.planDraft.endTime == end)
+        #expect(source.planDraft.needsTimeSelection)
+        #expect(!source.planDraft.sharedTimeExpired)
+        let expiredData = Data(String(decoding: data, as: UTF8.self).replacingOccurrences(of: start, with: "2020-01-01T12:00:00Z").utf8)
+        let expired = try JSONDecoder().decode(NativeMutualOpportunitySource.self, from: expiredData).planDraft
+        #expect(expired.startTime == nil)
+        #expect(expired.endTime == nil)
+        #expect(expired.sharedTimeExpired)
+        #expect(expired.needsTimeSelection)
+    }
+
     @Test("Generated opportunity titles localize without changing authored or saved titles")
     func localizesGeneratedOpportunityTitle() throws {
         let data = Data("""

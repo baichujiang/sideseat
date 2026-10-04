@@ -10,6 +10,10 @@ struct NativeMVPReadiness: Codable, Hashable, Sendable {
     let languagesComplete: Bool
     let verificationState: String
     let ready: Bool
+    var canUseApp: Bool? = nil
+
+    // Old servers only authorized the fully completed campus profile.
+    var allowsApp: Bool { canUseApp ?? ready }
 }
 
 struct NativeProfileSchoolSummary: Decodable, Hashable, Sendable {

@@ -4,10 +4,10 @@ struct AppRootView: View {
     @Environment(AppContainer.self) private var container
     @Environment(SessionStore.self) private var session
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
 
     @State private var readinessProfile = CurrentProfileStore()
     @State private var readinessUserID: String?
-    @State private var setupRequiredForCurrentSession: Bool?
 
     var body: some View {
         Group {
@@ -29,6 +29,9 @@ struct AppRootView: View {
                     sessionContent
                 }
             }
+        }
+        .onChange(of: session.phase) { previous, next in
+            if previous == .signedIn && next == .signedOut { deepLinkRouter.reset() }
         }
         .task(id: readinessTaskID) {
             await synchronizeReadiness()
@@ -57,22 +60,25 @@ struct AppRootView: View {
     }
 
     private var canUseAppShell: Bool {
-        if let readiness = readinessProfile.profile?.readiness {
-            return readiness.ready && setupRequiredForCurrentSession != true
+        if readinessProfile.profile?.id == session.currentUser?.id,
+           let readiness = readinessProfile.profile?.readiness {
+            return readiness.allowsApp
         }
         guard let userID = session.currentUser?.id else { return false }
-        return MVPReadinessCache.ready(userID: userID) == true
+        return MVPReadinessCache.canUseApp(userID: userID) == true
     }
 
     @ViewBuilder
     private var signedInContent: some View {
         // Keep one shell identity while cached readiness is refreshed, preserving navigation.
         if canUseAppShell {
-            AppShellView()
-        } else if readinessProfile.profile?.readiness != nil {
+            AppShellView(readinessProfile: readinessProfile)
+                .id(session.currentUser?.id)
+        } else if readinessProfile.profile?.id == session.currentUser?.id,
+                  readinessProfile.profile?.readiness != nil {
             RequiredSetupView(
                 profileStore: readinessProfile,
-                onEnter: { setupRequiredForCurrentSession = false }
+                onEnter: { Task { await retryReadiness() } }
             )
         } else if session.isOffline {
             RequiredSetupUnavailableView(
@@ -102,28 +108,19 @@ struct AppRootView: View {
         guard case .signedIn = session.phase, let user = session.currentUser else {
             readinessProfile.reset()
             readinessUserID = nil
-            setupRequiredForCurrentSession = nil
             return
         }
 
         if readinessUserID != user.id {
             readinessProfile.reset()
             readinessUserID = user.id
-            setupRequiredForCurrentSession = nil
         }
 
         guard session.canMakeAuthenticatedRequests else {
-            if session.isOffline, MVPReadinessCache.ready(userID: user.id) == true {
-                setupRequiredForCurrentSession = false
-            }
             return
         }
 
         await readinessProfile.load(using: session)
-        if let readiness = readinessProfile.profile?.readiness,
-           setupRequiredForCurrentSession == nil {
-            setupRequiredForCurrentSession = !readiness.ready
-        }
     }
 
     @MainActor
@@ -135,7 +132,7 @@ struct AppRootView: View {
     }
 }
 
-private struct RequiredSetupView: View {
+struct RequiredSetupView: View {
     @Environment(SessionStore.self) private var session
 
     let profileStore: CurrentProfileStore
@@ -154,7 +151,7 @@ private struct RequiredSetupView: View {
                                 .font(.title2.weight(.semibold))
                                 .foregroundStyle(SideSeatTheme.textPrimary)
 
-                            Text("A verified school identity helps people know who they are meeting.")
+                            Text("Complete your campus profile to find people. Your chats, plans and calendar remain available.")
                                 .font(.body)
                                 .foregroundStyle(SideSeatTheme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -210,6 +207,12 @@ private struct RequiredSetupView: View {
                             ) {
                                 onEnter()
                             }
+                        }
+
+                        if readiness.allowsApp && !readiness.ready {
+                            Button("Continue to messages", action: onEnter)
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                                .accessibilityIdentifier("campus-setup-messages")
                         }
 
                         Button("Log out") {

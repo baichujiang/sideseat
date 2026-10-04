@@ -17070,6 +17070,10 @@ internal enum Components {
             internal var verificationState: Swift.String
             /// - Remark: Generated from `#/components/schemas/ProfileReadiness/ready`.
             internal var ready: Swift.Bool
+            /// Registered account access to existing conversations, plans and own calendar; ready separately governs campus discovery.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ProfileReadiness/canUseApp`.
+            internal var canUseApp: Swift.Bool
             /// Creates a new `ProfileReadiness`.
             ///
             /// - Parameters:
@@ -17077,22 +17081,26 @@ internal enum Components {
             ///   - languagesComplete:
             ///   - verificationState:
             ///   - ready:
+            ///   - canUseApp: Registered account access to existing conversations, plans and own calendar; ready separately governs campus discovery.
             internal init(
                 campusIdentityComplete: Swift.Bool,
                 languagesComplete: Swift.Bool,
                 verificationState: Swift.String,
-                ready: Swift.Bool
+                ready: Swift.Bool,
+                canUseApp: Swift.Bool
             ) {
                 self.campusIdentityComplete = campusIdentityComplete
                 self.languagesComplete = languagesComplete
                 self.verificationState = verificationState
                 self.ready = ready
+                self.canUseApp = canUseApp
             }
             internal enum CodingKeys: String, CodingKey {
                 case campusIdentityComplete
                 case languagesComplete
                 case verificationState
                 case ready
+                case canUseApp
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -17112,11 +17120,16 @@ internal enum Components {
                     Swift.Bool.self,
                     forKey: .ready
                 )
+                self.canUseApp = try container.decode(
+                    Swift.Bool.self,
+                    forKey: .canUseApp
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "campusIdentityComplete",
                     "languagesComplete",
                     "verificationState",
-                    "ready"
+                    "ready",
+                    "canUseApp"
                 ])
             }
         }

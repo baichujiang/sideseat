@@ -53,6 +53,8 @@ enum AppShellNavigation {
 }
 
 struct AppShellView: View {
+    let readinessProfile: CurrentProfileStore
+    @State private var enteredFromLink = false
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.scenePhase) private var scenePhase
@@ -65,7 +67,8 @@ struct AppShellView: View {
     @State private var foregroundPushNotice: ForegroundPushNotice?
     @State private var foregroundPushDismissTask: Task<Void, Never>?
 
-    init() {
+    init(readinessProfile: CurrentProfileStore) {
+        self.readinessProfile = readinessProfile
         #if DEBUG
         let arguments = ProcessInfo.processInfo.arguments
         if arguments.contains("--ui-testing-reset-cancellation-ack") { UserDefaults.standard.removeObject(forKey: "ui-cancel-notice-ack") }
@@ -122,7 +125,7 @@ struct AppShellView: View {
                 selectedTab = .discover
                 productTutorial.evaluateAutoShow(for: nil)
             } else if session.phase == .signedIn {
-                productTutorial.evaluateAutoShow(for: session.currentUser)
+                evaluateTutorial()
                 routePendingDeepLink()
                 if session.canMakeAuthenticatedRequests {
                     Task {
@@ -134,7 +137,7 @@ struct AppShellView: View {
         }
         .onChange(of: session.currentUser?.id) {
             guard session.phase == .signedIn else { return }
-            productTutorial.evaluateAutoShow(for: session.currentUser)
+            evaluateTutorial()
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, session.canMakeAuthenticatedRequests else { return }
@@ -187,7 +190,7 @@ struct AppShellView: View {
             }
             #endif
             if session.phase == .signedIn {
-                productTutorial.evaluateAutoShow(for: session.currentUser)
+                evaluateTutorial()
             }
         }
         .task(
@@ -253,7 +256,13 @@ struct AppShellView: View {
     private func rootView(for tab: AppTab) -> some View {
         switch tab {
         case .discover:
-            TogetherRootView()
+            if readinessProfile.profile?.readiness?.ready == true
+                || (session.isOffline && MVPReadinessCache.ready(userID: session.currentUser?.id ?? "") == true) {
+                TogetherRootView()
+            } else {
+                RequiredSetupView(profileStore: readinessProfile, onEnter: { selectedTab = .chats })
+                    .task { if session.canMakeAuthenticatedRequests { await readinessProfile.load(using: session) } }
+            }
         case .plans:
             PlansRootView().id(session.currentUser?.id)
         case .home:
@@ -356,7 +365,7 @@ struct AppShellView: View {
     ) -> some View {
         NavigationStack(path: routers.binding(for: tab)) {
             content()
-                .withAppDestinations(inboxStore: inboxStore)
+                .withAppDestinations(inboxStore: inboxStore, readinessProfile: readinessProfile, onMessages: { deepLinkRouter.handleAppPath("/inbox") })
         }
         .environment(routers.router(for: tab))
         .tabItem {
@@ -367,6 +376,12 @@ struct AppShellView: View {
         }
         .badge(badge.map { Text(verbatim: $0) })
         .tag(tab)
+    }
+
+    private func evaluateTutorial() {
+        let canPresent = readinessProfile.profile?.readiness?.ready == true
+            && !enteredFromLink && deepLinkRouter.pendingRoute == nil
+        productTutorial.evaluateAutoShow(for: canPresent ? session.currentUser : nil)
     }
 
     private func routePendingDeepLink() {
@@ -382,6 +397,8 @@ struct AppShellView: View {
         } else {
             return
         }
+        enteredFromLink = true
+        productTutorial.evaluateAutoShow(for: nil)
         selectedTab = tab
         if let route, route != .plans {
             routers.router(for: tab).navigate(to: route)
@@ -390,7 +407,7 @@ struct AppShellView: View {
 }
 
 private extension View {
-    func withAppDestinations(inboxStore: InboxStore) -> some View {
+    func withAppDestinations(inboxStore: InboxStore, readinessProfile: CurrentProfileStore, onMessages: @escaping () -> Void) -> some View {
         navigationDestination(for: AppRoute.self) { route in
             switch MVPRoutePolicy.disposition(for: route) {
             case .legacyUnavailable:
@@ -404,7 +421,11 @@ private extension View {
                 case .plans:
                     PlansRootView()
                 case .exploreIntents:
-                    ExploreIntentListView()
+                    if readinessProfile.profile?.readiness?.ready == true {
+                        ExploreIntentListView()
+                    } else {
+                        RequiredSetupView(profileStore: readinessProfile, onEnter: onMessages)
+                    }
                 case .settings:
                     SettingsRootView()
                 case .blockedUsers:
