@@ -1,0 +1,12 @@
+{
+  "mode": "candidate",
+  "checks": [
+    "Existing username detected before submission, case and spaces normalized",
+    "Unused username available",
+    "Reserved username rejected",
+    "Final signup still rejects duplicates"
+  ],
+  "completed": true,
+  "qaAccountRemoved": true,
+  "at": "2026-10-04T14:51:03.622Z"
+}

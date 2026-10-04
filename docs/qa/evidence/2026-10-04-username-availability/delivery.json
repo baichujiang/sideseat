@@ -1,0 +1,25 @@
+{
+  "build": "96",
+  "bundle": "app.sideseat.mobile.preview",
+  "apiBaseURL": "https://api.sideseat.de",
+  "signatureVerified": true,
+  "phoneInProvisioningProfile": true,
+  "sourceCommit": "9dbcf5ab8a1b3b955b85beb903bacbaec378dd7e",
+  "nativeTrackedFilesMatchCommit": 293,
+  "sourcePushed": true,
+  "productionDeployment": "dpl_DYWJ3mJArxUhdSHHNWBebghRgPvd",
+  "productionState": "READY",
+  "device": {
+    "model": "iPhone 16 Pro Max",
+    "osVersion": "26.0.1",
+    "installSucceeded": true,
+    "verifiedBuild": "96",
+    "launchSucceeded": true,
+    "launchArguments": [],
+    "processIdentifier": 25449,
+    "processReadbackSucceeded": true,
+    "fullPhysicalUiFlowTested": false
+  },
+  "recentErrorLogCount": 0,
+  "recordedAt": "2026-10-04T14:55:53.858532+00:00"
+}

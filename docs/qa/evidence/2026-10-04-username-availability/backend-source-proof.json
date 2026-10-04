@@ -1,0 +1,20 @@
+{
+  "baselineDeployment": "dpl_ANYwksr5oKuz3PYZ8rqjschbzrun",
+  "baselineFilesCompared": 1865,
+  "changedFiles": [
+    "app/api/auth/username-availability/route.ts",
+    "app/share/intent/[token]/share-client.tsx",
+    "app/share/intent/[token]/share.module.css",
+    "lib/auth/use-username-availability.ts",
+    "lib/intent-share/copy.ts"
+  ],
+  "sha256": {
+    "app/api/auth/username-availability/route.ts": "f415e0a47e1dd09e847179cb1f6ab7296bba12d7aaa56ab521c7c0bd6eead898",
+    "app/share/intent/[token]/share-client.tsx": "ff34455294169fd04900b4bb5a59563e98f88ea6540145262e1b3d2ef4537286",
+    "app/share/intent/[token]/share.module.css": "a79cbd7fedbf01f55b1eb54e9e993286a070c4b199bd2044a28be7ae7f940e90",
+    "lib/auth/use-username-availability.ts": "8a3551a6bfc76289f945ecafc221ef13f2e349db78ccd4aab6341c6bb5dca3cd",
+    "lib/intent-share/copy.ts": "000d084b6aa20075c642c59b60da2e1c02888f281ef545adb1857a1f18d83589"
+  },
+  "databaseMigrationsChanged": false,
+  "sourceCommit": "9dbcf5ab8a1b3b955b85beb903bacbaec378dd7e"
+}
