@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "1f082624ff60f36387bf4e2c7c7f0620065310c3",
+  "baselineDeployment": "dpl_2xsttrcgHvv9rpo3CWojEFmBDTVE",
+  "verifiedFiles": 1865,
+  "changes": {
+    "app/share/intent/[token]/share-client.tsx": "26f75d8f4b6c43d6f1cb72819ed82464e3b761ae4fe1e04633477e0b576eb763",
+    "app/share/intent/[token]/share.module.css": "cc5255c515db1c467a1c10383625c272eae27bc54fddaaa5b7cd3a1711b373a1",
+    "lib/intent-share/copy.ts": "700b2dd6f032f01c54bf471fb42beeef933b053a0fe3c81d835cd07b71ec4142"
+  },
+  "migrationChanges": [],
+  "nativeBuild": "Preview 96 unchanged"
+}
