@@ -6,6 +6,8 @@ import { REFRESH_COOKIE_NAME } from '../lib/constants/app';
 import { assertLocalTestDatabase } from './helpers/local-test-database';
 
 assertLocalTestDatabase();
+// Browser timezone deliberately differs from the SSR server.
+test.use({ timezoneId: 'Asia/Shanghai' });
 const db = new PrismaClient();
 const password = 'Local-guide-password';
 
@@ -29,9 +31,9 @@ async function withShare(page: Page, request: APIRequestContext, run: (data: {
     await run({ ownerId: owner.id, intentId: intent.id, token, username: username + '_new', startAt, endAt, headers });
     expect(errors).toEqual([]);
   } finally {
-    const cookie = (await page.context().cookies()).find(c => c.name === REFRESH_COOKIE_NAME);
+    const cookie = (await page.context().cookies().catch(() => [])).find(c => c.name === REFRESH_COOKIE_NAME);
     const guest = cookie ? await db.session.findUnique({ where: { tokenHash: createHash('sha256').update(cookie.value).digest('hex') }, select: { userId: true } }) : null;
-    await page.goto('about:blank');
+    await page.goto('about:blank').catch(() => {});
     await db.user.deleteMany({ where: { id: { in: [owner.id, ...(guest && guest.userId !== owner.id ? [guest.userId] : [])] } } });
   }
 }
