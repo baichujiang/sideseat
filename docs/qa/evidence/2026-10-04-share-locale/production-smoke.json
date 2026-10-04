@@ -1,0 +1,16 @@
+{
+  "mode": "production",
+  "checks": [
+    "Chinese system",
+    "German region",
+    "English region",
+    "Unsupported fallback",
+    "Language weights",
+    "Saved manual choice",
+    "Explicit legacy link",
+    "Unavailable invitation follows language"
+  ],
+  "completed": true,
+  "qaAccountRemoved": true,
+  "at": "2026-10-04T14:21:35.709Z"
+}

@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "6ab46843661165176d64cbdd2b0fb6e18a73a7dc",
+  "sourcePushed": true,
+  "deployment": "dpl_ANYwksr5oKuz3PYZ8rqjschbzrun",
+  "readyState": "READY",
+  "promoted": true,
+  "productionAliasesVerified": [
+    "https://api.sideseat.de",
+    "https://www.sideseat.de"
+  ],
+  "databaseMigrationsChanged": false,
+  "nativeAppChanged": false,
+  "installedPreviewUnchanged": "95",
+  "candidateChecks": 8,
+  "productionChecks": 8,
+  "qaAccountsRemoved": true,
+  "recentErrorLogCheck": {
+    "level": "error",
+    "since": "15m",
+    "entries": 0,
+    "continuousMonitoring": false
+  },
+  "recordedAt": "2026-10-04T14:22:49.294712+00:00"
+}

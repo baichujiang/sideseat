@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "6ab46843661165176d64cbdd2b0fb6e18a73a7dc",
+  "baselineDeployment": "dpl_J84PyBHUAkJ29LZFVVdC6FbXXhHs",
+  "baselineFilesCompared": 1863,
+  "changedFiles": [
+    "app/share/intent/[token]/page.tsx",
+    "app/share/intent/[token]/share-client.tsx",
+    "lib/intent-share/locale.ts"
+  ],
+  "sha256": {
+    "app/share/intent/[token]/page.tsx": "144bf4532ffecd859744eabb4f7cd9b24c512c513ed321590a2cdde383216215",
+    "app/share/intent/[token]/share-client.tsx": "1e4ddd7c959eaf8eb0abfe2595ee3218e21201f511fada4da20da2729b8c3327",
+    "lib/intent-share/locale.ts": "231026d73f8927bf3946549935c5f96ce9609d9b77abbe56c0c40df961c898e6"
+  },
+  "databaseMigrationsChanged": false
+}
