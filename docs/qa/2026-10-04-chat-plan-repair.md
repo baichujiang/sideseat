@@ -27,7 +27,7 @@
 
 原生自动化验证完整标签、私有状态值、选中语义、最小触区和布局。另尝试开启 macOS 旁白并通过模拟器进行实际导航，但当前控制环境未能把旁白焦点送入 App 内容，无法确认朗读或关闭表单后的真实焦点落点。系统旁白已恢复原先关闭状态。真实 iPhone VoiceOver 走查仍待完成，不能用自动化标签测试替代或声称已通过。
 
-10 月 4 日续验确认当前工具链为 Xcode 26.6（17F113），其 XCTest／XCUIAutomation 头文件没有 VoiceOver 测试接口。[Apple 的 Xcode 27 发布说明](https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes?changes=_5_1_2) 将驱动旁白、检查朗读及焦点的 `XCUIVoiceOverService` 列为 27 beta 3 新增功能。当前工具也没有 iPhone 旁白控制能力；本轮没有重复更改 Mac 旁白或升级开发工具链。已向手机使用者提供走查步骤，收到实际结果前保留待验。见[读屏验收记录](evidence/2026-10-04-chat-plan-repair/voiceover-attempt.json)。
+10 月 4 日续验确认当前工具链为 Xcode 26.6（17F113），其 XCTest／XCUIAutomation 头文件没有 VoiceOver 测试接口。[Apple 的 Xcode 27 发布说明](https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes?changes=_5_1_2) 将驱动旁白、检查朗读及焦点的 `XCUIVoiceOverService` 列为 27 beta 3 新增功能。本轮没有重复更改 Mac 旁白或升级开发工具链。手机用户随后实际确认历史计划摘要的名称和时间读完整；其余朗读与真实旁白焦点未核实。原生 XCTest 已能直接操作这台 iPhone 的 Preview，操作结果与旁白结果分别记录。见[读屏验收记录](evidence/2026-10-04-chat-plan-repair/voiceover-attempt.json)。
 
 ### 补充测试发现的问题
 
@@ -63,17 +63,31 @@
 
 ### 剩余事项
 
-真实 VoiceOver 朗读、顺序和返回焦点仍未完成，等待手机端走查结果。自动化标签、选中状态和触区检查已经覆盖，但这不是实际读屏验收。此项保留为人工验收限制，不标记通过。手机端需要检查：
+真实 VoiceOver 只确认了历史计划摘要的名称和时间朗读，其余顺序与返回焦点尚未完成。自动化标签、选中状态、触区及真机页面操作已覆盖，但不能替代实际旁白焦点验收。以下保留为未完整覆盖的读屏范围，不再要求用户继续手工执行：
 
-1. 开启旁白后，从聊天导航依次进入计划入口、当前计划／更多、消息与最新入口、输入和发送，确认完整朗读及可操作性。
-2. 打开再关闭“更多计划”，确认焦点返回入口；选择计划后确认焦点到目标卡片，返回最新后到最新消息区域。
-3. 已保存反馈能读出完整结果及私有属性；“修改 → 取消”保留原反馈并把焦点送回入口。保存后也需检查确认状态与焦点。
+1. 先从“计划 → 已结束”选择一条历史计划进入聊天，确保该计划摘要可见。开启旁白后，从聊天导航依次进入计划入口、当前计划／更多、消息与最新入口、输入和发送，确认完整朗读及可操作性。直接进入没有当前计划的聊天并不保证出现计划栏。
+2. 在同一会话有多条当前计划、确实显示更多入口的前提下，打开再关闭“更多计划”，确认焦点返回入口；选择计划后确认焦点到目标卡片，返回最新后到最新消息区域。没有此数据时记录未覆盖，不为了验证向真实联系人发邀请。
+3. 在已有个人反馈的历史计划中，确认已保存反馈能读出完整结果及私有属性；“修改 → 取消”保留原反馈并把焦点送回入口。保存后也需检查确认状态与焦点。
 
-可先用已安装的 Preview 93 检查计划入口、“更多计划”关闭和反馈编辑取消三个场景；局部结果只计对应场景，不能据此将上述全部项目标为通过。
+局部读屏结果只计对应场景，不能据此将上述全部项目标为通过。真机自动化通过的菜单关闭和反馈取消只确认页面行为、选择及数据保留，没有断言实际旁白落点。
+
+用户已在手机开启旁白。首次回复“朗读不完整或入口找不到”，随后明确为“聊天页面上也看不到计划入口”，最终确认“已结束”列表为空，没有可选计划。因此首次检查缺少历史计划这一前置条件，未建立 VoiceOver 漏读／不可聚焦缺陷，不能记为通过或产品失败。
+
+为补齐前置条件，10:40:25（Europe/Berlin）使用 Preview 93 已有的 DEBUG 导航 fixture 重新启动：一条历史计划 `nav-old`、两条当前计划 `nav-current`／`nav-later`，均为内存测试数据；同时使用 `--ui-testing-ephemeral-credentials`，不覆盖正常账号的持久登录凭据。用户确认“能找到摘要，计划名称和时间都读完整”。用户要求由代理直接操作后，停止人工走查，10:45:24 恢复普通启动，再接入真机 XCTest。没有为此修改应用实现或创建生产计划。
+
+真机测试还产生一条 `_UIReparentingView` 视图重新挂载运行时警告，未导致断言失败；所留截图未见对应异常，来源尚未定位。作为非阻塞观察项保留[原始警告](evidence/2026-10-04-chat-plan-repair/device-ui/runtime-warning.txt)，不据此修改产品代码。Xcode 的诊断包收集另有错误，不影响结构化测试结果和三张自留截图。
 
 ### 10 月 4 日手机续验
 
-10:27:47（Europe/Berlin）系统成功启动 `app.sideseat.mobile.preview`，此前锁屏限制已解除。10:30:22 再次查询，启动返回的同一个进程仍在运行，间隔 155.5 秒；10:31:44 读回安装版本仍为 `1.0.0 (93)`。这是系统启动及进程存活证据，不代表已检查手机屏幕内容或真实读屏行为。本轮未重装应用，未改动应用源码。见[续验证据](evidence/2026-10-04-chat-plan-repair/preview93/launch-followup.json)。
+10:27:47（Europe/Berlin）系统成功启动 `app.sideseat.mobile.preview`，此前锁屏限制已解除。10:30:22 再次查询，启动返回的同一个进程仍在运行，间隔 155.5 秒；10:31:44 读回安装版本仍为 `1.0.0 (93)`。这是系统启动及进程存活证据，不代表已检查手机屏幕内容或真实读屏行为。这次启动重试未重装应用，未改动应用源码。见[续验证据](evidence/2026-10-04-chat-plan-repair/preview93/launch-followup.json)。
+
+随后完成直接真机操作：iPhone 16 Pro Max／iOS 26.0.1，中文界面，原交付 Preview 93 签名包。新增专用用例 `SocialLiveUITests/testPreviewDevicePlanNavigationAndFeedback`，Preview scheme 的 TestAction 改为 Preview 并接入 UI 测试目标。仅测试代码和测试配置变化，应用实现仍为 `6ecd358`；实际测试目标的可执行文件 SHA-256 仍为 `cba45a270d5392d6404161246d8d02edfeeb9c74a0124c966e8677c7be9d00fd`。
+
+- 历史计划入口点击后原卡片可见；打开／关闭计划列表保留历史选择；从列表切换计划，再返回默认当前计划和最新消息。
+- 在内存 fixture 中提交“发生了”，打开修改再取消，确认原反馈值不变、修改入口仍可操作。
+- 最终结果为 **1 项通过、0 失败、0 跳过**：[结构化结果](evidence/2026-10-04-chat-plan-repair/device-ui/summary.json)。截图：[历史计划](evidence/2026-10-04-chat-plan-repair/device-ui/history-plan.png)、[返回最新](evidence/2026-10-04-chat-plan-repair/device-ui/latest-message.png)、[反馈取消后](evidence/2026-10-04-chat-plan-repair/device-ui/feedback-cancel.png)。这是真机 UI 操作回归，业务数据来自本地内存 fixture，不是生产账号或完整闭环的端到端重跑。
+- 首轮实际操作发现测试前置假设不适合这台 440 × 956 pt 手机：切换到较晚计划后，最新消息已经可见，因此“最新”入口按设计隐藏。测试改为显式返回较早的当前计划，再验证返回最新。保留此前 0 用例筛选失误、临时构建配置／资源问题和该失败，不将其计入通过；见[执行记录](evidence/2026-10-04-chat-plan-repair/device-ui/attempts.json)。
+- 测试结束自动清除启动参数并重启 Preview，10:59:39 再读回版本仍为 `1.0.0 (93)`；正常账号界面未另行截图验收。见[恢复记录](evidence/2026-10-04-chat-plan-repair/device-ui/restoration.json)、[原签名包身份](evidence/2026-10-04-chat-plan-repair/device-ui/tested-app-identity.json)和[测试源码核对](evidence/2026-10-04-chat-plan-repair/device-ui/source-verification.json)。
 
 ## 交付
 

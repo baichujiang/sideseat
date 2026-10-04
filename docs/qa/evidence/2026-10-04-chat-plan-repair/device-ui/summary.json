@@ -1,0 +1,30 @@
+{
+  "title": "Test - SideSeat-Preview",
+  "result": "Passed",
+  "totalTestCount": 1,
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "expectedFailures": 0,
+  "startTime": 1791104287.927,
+  "finishTime": 1791104334.739,
+  "testFailures": [],
+  "device": {
+    "modelName": "iPhone 16 Pro Max",
+    "osVersion": "26.0.1",
+    "osBuildNumber": "23A355",
+    "platform": "iOS",
+    "architecture": "arm64"
+  },
+  "test": "SideSeatUITests/SocialLiveUITests/testPreviewDevicePlanNavigationAndFeedback()",
+  "scope": [
+    "Historical plan header activation",
+    "Plan picker open and close without changing selected historical plan",
+    "Select another plan",
+    "Return to current plan",
+    "Return to latest message",
+    "Record local outcome, edit, cancel, and retain confirmed value"
+  ],
+  "usesInMemoryFixtures": true,
+  "voiceOverFocusOrSpeechVerifiedByAutomation": false
+}

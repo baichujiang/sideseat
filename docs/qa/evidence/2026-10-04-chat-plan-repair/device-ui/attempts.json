@@ -1,0 +1,27 @@
+[
+  {
+    "stage": "Initial build",
+    "result": "No tests executed",
+    "reason": "Development scheme included a unit-test host path for SideSeat.app; Preview product name is SideSeat Preview.app. Added UI test target to Preview scheme with Preview configuration."
+  },
+  {
+    "stage": "Isolated build context",
+    "result": "No tests executed",
+    "reason": "Shared CalendarSmartInputPolicy.json was missing from temporary context. Copied the frozen manifest resource and verified all 294 inputs."
+  },
+  {
+    "stage": "Initial test filter",
+    "result": "0 tests; not a pass",
+    "reason": "Incorrect class prefix LiveLoginSmokeUITests. Enumerated tests and selected SocialLiveUITests."
+  },
+  {
+    "stage": "First device UI execution",
+    "result": "1 failed test",
+    "reason": "After selecting the later plan, Navigation message 7 was already visible on the 440 x 956 pt phone; Latest correctly hidden. Test now explicitly returns to the earlier current plan before asserting and using Latest."
+  },
+  {
+    "stage": "Final device UI execution",
+    "result": "1 passed, 0 failed, 0 skipped",
+    "evidence": "summary.json"
+  }
+]

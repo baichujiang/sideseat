@@ -968,6 +968,75 @@ final class SocialLiveUITests: XCTestCase {
         }
     }
 
+    /// Drives the installed Preview on an iPhone. This checks native interactions,
+    /// not VoiceOver speech or its focus-return behavior.
+    func testPreviewDevicePlanNavigationAndFeedback() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["SIDESEAT_PHYSICAL_PREVIEW_UI_TESTS"] == "1")
+        let app = XCUIApplication(bundleIdentifier: "app.sideseat.mobile.preview")
+        let fixtureArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial"]
+        app.launchArguments = fixtureArguments + ["--ui-testing-plan-navigation"]
+        app.launch()
+        defer { app.terminate() }
+
+        tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+        loopSelectPlanSection("ended", in: app)
+        let old = app.buttons["plans-row-nav-old"]
+        XCTAssertTrue(old.waitForExistence(timeout: 10)); old.tap()
+        let header = app.buttons["conversation-current-plan"]
+        XCTAssertTrue(header.waitForExistence(timeout: 10))
+        XCTAssertTrue(header.label.contains("A long original plan"))
+        header.tap()
+        XCTAssertTrue(app.staticTexts["A long original plan for an afternoon of coffee and conversation at the campus library"].firstMatch.isHittable)
+        loopCapture(app, "phone-preview-history-plan")
+
+        let menu = app.buttons["conversation-plan-menu"]
+        menu.tap(); app.buttons["conversation-all-plans"].tap()
+        let done = app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成", "Fertig"])).firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 5)); done.tap()
+        XCTAssertTrue(menu.waitForExistence(timeout: 5))
+        XCTAssertTrue(header.label.contains("A long original plan"), "Closing the list keeps the selected historical plan")
+        menu.tap(); app.buttons["conversation-all-plans"].tap()
+        let later = app.buttons["conversation-select-plan-nav-later"]
+        loopReveal(later, in: app); later.tap()
+        XCTAssertTrue(header.label.contains("A later confirmed plan"))
+        // A large phone may already show the last message below the later plan.
+        // Explicitly return to the earlier current plan before testing Latest.
+        let current = app.buttons["conversation-view-current"]
+        XCTAssertTrue(current.waitForExistence(timeout: 5)); current.tap()
+        XCTAssertTrue(header.label.contains("Reply to the next library plan"))
+        let latest = app.buttons["chat-new-messages"]
+        XCTAssertTrue(latest.waitForExistence(timeout: 5)); latest.tap()
+        XCTAssertTrue(app.staticTexts["Navigation message 7"].isHittable)
+        loopCapture(app, "phone-preview-latest-message")
+
+        // A fresh in-memory fixture supplies an unanswered completed plan.
+        app.terminate()
+        app.launchArguments = fixtureArguments
+        app.launch()
+        tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+        loopSelectPlanSection("ended", in: app)
+        let id = "ui-plan-completed"
+        let scroll = app.scrollViews["plans-scroll-ended"]
+        let answer = app.buttons["plan-outcome-occurred-\(id)"]
+        revealOutcome(answer, in: app, scroll: scroll); answer.tap()
+        let edit = app.buttons["plan-outcome-edit-\(id)"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 5))
+        revealOutcome(edit, in: app, scroll: scroll)
+        let saved = app.descendants(matching: .any)["plan-outcome-saved-\(id)"].firstMatch
+        XCTAssertTrue(saved.exists)
+        let confirmedAnswer = try XCTUnwrap(saved.value as? String)
+        XCTAssertFalse(confirmedAnswer.isEmpty)
+        edit.tap()
+        let cancel = app.buttons["plan-outcome-cancel-\(id)"]
+        revealOutcome(cancel, in: app, scroll: scroll)
+        XCTAssertTrue(answer.isSelected)
+        cancel.tap()
+        XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(saved.value as? String, confirmedAnswer)
+        XCTAssertTrue(edit.isHittable)
+        loopCapture(app, "phone-preview-feedback-cancel")
+    }
+
     func testNewIntentLoop11ChatHeaderBoundsAndDraft() {
         for (language, size) in [("de", "UICTContentSizeCategoryAccessibilityXXXL"),
                                  ("en", "UICTContentSizeCategoryAccessibilityXXXL"),

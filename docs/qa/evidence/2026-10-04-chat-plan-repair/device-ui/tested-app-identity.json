@@ -1,0 +1,9 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "93",
+  "appSourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "executableSHA256": "cba45a270d5392d6404161246d8d02edfeeb9c74a0124c966e8677c7be9d00fd",
+  "usingOriginalDeliveredApp": true,
+  "signedUITestRunnerBuilt": true
+}

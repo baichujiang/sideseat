@@ -1,0 +1,12 @@
+{
+  "appSourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "changesFromTestedSnapshot": [
+    "ios-native/SideSeat.xcodeproj/xcshareddata/xcschemes/SideSeat-Preview.xcscheme",
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift"
+  ],
+  "filesVerified": 294,
+  "testInputs": {
+    "ios-native/SideSeat.xcodeproj/xcshareddata/xcschemes/SideSeat-Preview.xcscheme": "466d64d7e950f243fcfdc9e9a63442045becfe0d27487e5cb7067c2801a1c63c",
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift": "1e5a3fd547ea73f3de15e089b6589274d2bfbbf0191e4d50a95574c310d66458"
+  }
+}

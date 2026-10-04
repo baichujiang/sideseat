@@ -12,5 +12,15 @@
   "previousLaunchAttempt": "Device locked; operating system denied the initial launch. Resolved on 2026-10-04 follow-up.",
   "launchFollowupEvidence": "launch-followup.json",
   "launchVerifiedAt": "2026-10-04T08:27:47.385544+00:00",
-  "followupRecordedAt": "2026-10-04T08:32:28.283691+00:00"
+  "followupRecordedAt": "2026-10-04T08:32:28.283691+00:00",
+  "nativeDeviceUIFollowup": {
+    "result": "Passed",
+    "tests": 1,
+    "failed": 0,
+    "skipped": 0,
+    "evidence": "../device-ui/summary.json",
+    "normalLaunchRestored": true,
+    "appBuildRemains": "93",
+    "applicationImplementationChanged": false
+  }
 }

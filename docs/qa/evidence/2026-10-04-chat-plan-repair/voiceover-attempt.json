@@ -15,10 +15,48 @@
     "newVoiceOverAPIIntroducedIn": "Xcode 27 beta 3",
     "appleReleaseNotes": "https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes?changes=_5_1_2",
     "actualIPhoneVoiceOverControlAvailable": false,
-    "actualIPhoneVoiceOverResult": "Pending device-side walkthrough feedback; not passed",
+    "actualIPhoneVoiceOverResult": "Historical plan name/time confirmed by user. Real VoiceOver focus-return checks remain unverified; agent continues with native device UI automation.",
     "systemVoiceOverChangedDuringFollowup": false,
     "userWalkthroughRequested": true,
     "userReportedVoiceOverEnabled": true,
-    "userReportedWalkthroughResults": []
+    "userReportedWalkthroughResults": [
+      {
+        "scenario": "Find and activate the plan header with VoiceOver",
+        "initialResponse": "朗读不完整或入口找不到",
+        "clarification": "聊天页面上也看不到计划入口；“已结束”列表为空，没有可选计划",
+        "result": "Not exercised: user confirmed that their Ended list is empty; no VoiceOver defect established.",
+        "nextStep": "Use existing offline navigation fixtures in Preview 93 to supply a historical plan and two current plans."
+      },
+      {
+        "scenario": "Read the historical plan header in Preview 93 offline fixture",
+        "reportedBy": "User operating iPhone VoiceOver",
+        "userResponse": "能找到摘要，计划名称和时间都读完整",
+        "result": "Passed for finding the header and reading plan name/time; does not establish activation or return focus."
+      }
+    ],
+    "deviceFixtureSession": {
+      "previewBuild": "93",
+      "sourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+      "launchArguments": [
+        "--ui-testing-authenticated",
+        "--ui-testing-ephemeral-credentials",
+        "--ui-testing-skip-tutorial",
+        "--ui-testing-plan-navigation"
+      ],
+      "launchOutcome": "success",
+      "launchReceiptRecordedAt": "2026-10-04T08:40:26.206718+00:00",
+      "credentialMode": "EphemeralCredentialStore; normal saved credentials untouched by fixture setup",
+      "dataMode": "Existing DEBUG in-memory fixtures; historical plan nav-old and current plans nav-current/nav-later",
+      "userVisibleFixtureConfirmed": true,
+      "normalLaunchRestored": true,
+      "normalLaunchRestoreReceiptRecordedAt": "2026-10-04T08:45:24.670532+00:00"
+    },
+    "manualWalkthroughStoppedAtUserRequest": true,
+    "nativeDeviceUIAutomation": {
+      "result": "Passed",
+      "evidence": "device-ui/summary.json",
+      "normalLaunchRestored": true,
+      "voiceOverFocusVerified": false
+    }
   }
 }
