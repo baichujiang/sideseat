@@ -21,6 +21,10 @@ final class PlansStore {
 
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-navigation") {
+                plans = UITestingChatFixtures.planNavigationPage(connectionID: "ui-connection").messages.compactMap(\.planRequest)
+                return
+            }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-loading") {
                 do { try await Task.sleep(for: .seconds(3)) } catch { return }
             }

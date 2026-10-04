@@ -968,6 +968,98 @@ final class SocialLiveUITests: XCTestCase {
         }
     }
 
+    func testNewIntentLoop11ChatHeaderBoundsAndDraft() {
+        for (language, size) in [("de", "UICTContentSizeCategoryAccessibilityXXXL"),
+                                 ("en", "UICTContentSizeCategoryAccessibilityXXXL"),
+                                 ("zh-Hans", "UICTContentSizeCategoryAccessibilityXXXL"),
+                                 ("de", "UICTContentSizeCategoryL"), ("en", "UICTContentSizeCategoryL"), ("zh-Hans", "UICTContentSizeCategoryL")] {
+            let large = size.contains("Accessibility")
+            let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: [
+                "--ui-testing-discover", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(large ? "dark" : "light")",
+                "-UIPreferredContentSizeCategoryName", size
+            ])
+            tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+            loopSelectPlanSection("ended", in: app)
+            let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+            XCTAssertTrue(row.waitForExistence(timeout: 12)); row.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+            let header = app.buttons["conversation-current-plan"]
+            XCTAssertTrue(header.waitForExistence(timeout: 12))
+            let list = app.scrollViews["chat-message-list"]
+            loopCapture(app, "chat-header-\(language)-\(large)")
+            XCTAssertGreaterThanOrEqual(header.frame.minY, app.navigationBars.firstMatch.frame.maxY - 1)
+            XCTAssertLessThan(header.frame.height, app.frame.height * 0.22)
+            XCTAssertLessThanOrEqual(header.frame.maxY, list.frame.minY + 1)
+            if large {
+                let field = app.textViews["chat-composer-field"]
+                let draft = String(repeating: "Keep this draft safely. ", count: 4)
+                field.tap(); field.typeText(draft)
+                XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+                XCTAssertEqual(field.value as? String, draft)
+                let composer = app.descendants(matching: .any)["chat-composer"].firstMatch
+                let bounds = XCTAttachment(string: "header=\(header.frame), list=\(list.frame), composer=\(composer.frame), keyboard=\(app.keyboards.firstMatch.frame)")
+                bounds.name = "keyboard-bounds-\(language)"; bounds.lifetime = .keepAlways; add(bounds)
+                loopCapture(app, "chat-keyboard-\(language)")
+                XCTAssertGreaterThanOrEqual(list.frame.height, 112, "At least two body lines remain scrollable at the largest text size")
+                XCTAssertLessThanOrEqual(composer.frame.maxY, app.keyboards.firstMatch.frame.minY + 1)
+                XCTAssertTrue(app.buttons["chat-composer-send"].isHittable)
+                header.tap()
+                XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+                XCTAssertEqual(field.value as? String, draft)
+                let latest = app.buttons["chat-new-messages"]
+                let hasLatest = latest.waitForExistence(timeout: 5)
+                if !hasLatest { loopCapture(app, "chat-missing-latest-\(language)"); let tree = XCTAttachment(string: app.debugDescription); tree.lifetime = .keepAlways; add(tree) }
+                XCTAssertTrue(hasLatest); latest.tap()
+                XCTAssertTrue(header.waitForNonExistence(timeout: 5), "No current plan exists; latest clears the historical plan selection")
+                XCTAssertTrue(app.staticTexts["[loop-qa] Thanks for today!"].isHittable)
+                XCTAssertEqual(field.value as? String, draft)
+                loopCapture(app, "chat-latest-\(language)")
+            }
+            app.terminate()
+        }
+    }
+
+    func testNewIntentLoop12ExplicitPlanNavigation() {
+        for canceled in [false, true] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-plan-navigation",
+                "--ui-testing-language=de", "--ui-testing-appearance=dark", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            if canceled { app.launchArguments.append("--ui-testing-navigation-canceled") }
+            app.launch()
+            tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+            loopSelectPlanSection("ended", in: app)
+            let old = app.buttons["plans-row-nav-old"]
+            XCTAssertTrue(old.waitForExistence(timeout: 8)); old.tap()
+            let header = app.buttons["conversation-current-plan"]
+            XCTAssertTrue(header.waitForExistence(timeout: 8))
+            XCTAssertTrue(header.label.contains("A long original plan"))
+            let current = app.buttons["conversation-view-current"]
+            XCTAssertTrue(current.isHittable)
+            app.buttons["conversation-plan-menu"].tap()
+            app.buttons["conversation-all-plans"].tap()
+            XCTAssertTrue(app.navigationBars.buttons["Fertig"].waitForExistence(timeout: 5))
+            loopCapture(app, "chat-plan-picker-\(canceled)")
+            app.navigationBars.buttons["Fertig"].tap()
+            XCTAssertTrue(header.label.contains("A long original plan"), "Dismissing the list keeps the original history selection")
+            current.tap()
+            XCTAssertTrue(app.staticTexts["Reply to the next library plan"].firstMatch.waitForExistence(timeout: 5))
+            XCTAssertTrue(header.label.contains("Reply to the next library plan"))
+            loopCapture(app, "chat-current-plan-\(canceled)")
+            app.buttons["conversation-plan-menu"].tap(); app.buttons["conversation-all-plans"].tap()
+            let later = app.buttons["conversation-select-plan-nav-later"]
+            for _ in 0..<8 where !later.isHittable { app.swipeUp(velocity: .slow) }
+            XCTAssertTrue(later.isHittable); later.tap()
+            XCTAssertTrue(header.label.contains("A later confirmed plan"))
+            let latest = app.buttons["chat-new-messages"]
+            XCTAssertTrue(latest.waitForExistence(timeout: 5)); latest.tap()
+            XCTAssertTrue(app.staticTexts["Navigation message 7"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.staticTexts["Navigation message 7"].isHittable)
+            XCTAssertTrue(header.label.contains("Reply to the next library plan"), "Latest restores the default summary without scrolling back to its card")
+            loopCapture(app, "chat-multiple-latest-\(canceled)")
+            app.terminate()
+        }
+    }
+
     func testNewIntentLoop10AccessiblePlanNavigationAndContinuation() {
         for (language, appearance, size) in [
             ("de", "dark", "UICTContentSizeCategoryAccessibilityXXXL"),

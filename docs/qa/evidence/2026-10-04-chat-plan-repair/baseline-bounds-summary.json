@@ -1,0 +1,45 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName": "SideSeat iPhone 13 mini QA 20260812",
+        "modelName": "iPhone 13 mini",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 1,
+      "passedTests": 0,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SideSeat-Development \u00b7 Built with macOS 26.3.1",
+  "expectedFailures": 0,
+  "failedTests": 1,
+  "finishTime": 1791070561.752,
+  "passedTests": 0,
+  "result": "Failed",
+  "skippedTests": 0,
+  "startTime": 1791070520.429,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertLessThan failed: (\"185.66666666666663\") is not less than (\"178.64000000000001\")",
+      "targetName": "SideSeatUITests",
+      "testIdentifier": 1,
+      "testIdentifierString": "SocialLiveUITests/testNewIntentLoop11ChatHeaderBoundsAndDraft()",
+      "testIdentifierURL": "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testNewIntentLoop11ChatHeaderBoundsAndDraft",
+      "testName": "testNewIntentLoop11ChatHeaderBoundsAndDraft()"
+    }
+  ],
+  "title": "Test - SideSeat-Development",
+  "topInsights": [],
+  "totalTestCount": 1
+}

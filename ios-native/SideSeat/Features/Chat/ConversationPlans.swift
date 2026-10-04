@@ -43,6 +43,15 @@ enum ConversationPlanSelection {
         return String(format: AppLocalization.string("Waiting for %@"), plan.receiver.displayName)
     }
 
+    static func compactTitle(_ plan: NativePlanRequest, viewerID: String, now: Date) -> String {
+        if plan.cancellation != nil || plan.status == "CANCELED" { return AppLocalization.string("Canceled") }
+        if !isCurrent(plan, at: now) { return AppLocalization.string("Ended") }
+        if plan.status == "ACCEPTED" {
+            return AppLocalization.string((plan.startDate ?? .distantFuture) <= now ? "In progress" : "Confirmed")
+        }
+        return AppLocalization.string(plan.receiver.id == viewerID ? "Reply needed (compact)" : "Awaiting reply (compact)")
+    }
+
     static func time(_ plan: NativePlanRequest) -> String {
         guard let start = plan.startDate, let end = plan.endDate else { return "" }
         let format = Date.IntervalFormatStyle(date: .abbreviated, time: .shortened)
@@ -109,32 +118,88 @@ final class ConversationPlansStore {
 }
 
 struct ConversationPlanBar: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var expandedHeight: CGFloat = 0
     let plan: NativePlanRequest
     let viewerID: String
     let now: Date
     let showsAll: Bool
     let isFocused: Bool
     let hasCurrent: Bool
+    var maximumHeight: CGFloat = .infinity
     let onOpen: () -> Void
     let onAll: () -> Void
     let onCurrent: () -> Void
 
+    private var usesCompactLayout: Bool { dynamicTypeSize.isAccessibilitySize || expandedHeight > maximumHeight }
+    private var fullTitle: String {
+        isFocused && plan.status == "ACCEPTED" && ConversationPlanSelection.isCurrent(plan, at: now)
+            ? AppLocalization.string("Viewing · Confirmed")
+            : ConversationPlanSelection.title(plan, viewerID: viewerID, now: now)
+    }
+    private var participant: String { (plan.proposer.id == viewerID ? plan.receiver : plan.proposer).displayName }
+
     var body: some View {
+        Group {
+            if usesCompactLayout {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        compactPlanButton.fixedSize(horizontal: true, vertical: true)
+                        Spacer(minLength: 0)
+                        actions.fixedSize(horizontal: true, vertical: true)
+                    }
+                    VStack(alignment: .leading, spacing: 0) {
+                        compactPlanButton
+                        HStack(spacing: 8) { actions; Spacer(minLength: 0) }
+                    }
+                }
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.vertical, 4)
+            } else {
+                expandedContent
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .background(alignment: .top) {
+            // Measure the full summary at this width, independently of the height offered by chat.
+            expandedContent.fixedSize(horizontal: false, vertical: true)
+                .hidden().accessibilityHidden(true).allowsHitTesting(false)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { expandedHeight = $0 }
+        }
+        .background(.bar)
+        .overlay(alignment: .bottom) { Divider() }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("conversation-plan-bar")
+    }
+
+    private var compactPlanButton: some View {
+        Button(action: onOpen) {
+            HStack(spacing: 8) {
+                Image(systemName: "calendar").font(.system(size: 20)).accessibilityHidden(true)
+                Text(ConversationPlanSelection.compactTitle(plan, viewerID: viewerID, now: now))
+                    .font(.subheadline.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                Image(systemName: "chevron.right").font(.system(size: 12)).accessibilityHidden(true)
+            }
+            .frame(minHeight: 44, alignment: .leading).contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(SideSeatTheme.utilityAction)
+        .accessibilityLabel([AppLocalization.string("View plans"), fullTitle, plan.title, participant,
+                             ConversationPlanSelection.time(plan)].joined(separator: ", "))
+        .accessibilityIdentifier("conversation-current-plan")
+    }
+
+    private var expandedContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             Button(action: onOpen) {
                 HStack(spacing: 10) {
-                    Image(systemName: "calendar")
-                        .font(.body).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    Image(systemName: "calendar").font(.body).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.utilityAction)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isFocused && plan.status == "ACCEPTED" && ConversationPlanSelection.isCurrent(plan, at: now)
-                             ? AppLocalization.string("Viewing · Confirmed")
-                             : ConversationPlanSelection.title(plan, viewerID: viewerID, now: now))
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        Text(plan.title).font(.subheadline.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textPrimary)
-                        Text(ConversationPlanSelection.time(plan)).font(.caption)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(fullTitle).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(plan.title).font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                        Text(ConversationPlanSelection.time(plan)).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -144,31 +209,36 @@ struct ConversationPlanBar: View {
                 .padding(.horizontal, SideSeatTheme.screenHorizontal).padding(.vertical, 8)
                 .frame(minHeight: 44).contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("conversation-current-plan")
-            if isFocused || showsAll {
-                HStack {
-                    if isFocused {
-                        Button(action: onCurrent) {
-                            Text(hasCurrent ? "View current plans" : "Back to latest messages")
-                                .frame(minHeight: 44).contentShape(Rectangle())
-                        }
-                        .accessibilityIdentifier("conversation-view-current")
-                    }
-                    if showsAll {
-                        Spacer(minLength: 8)
-                        Button(action: onAll) {
-                            Text("View plans").frame(minHeight: 44).contentShape(Rectangle())
-                        }
-                        .accessibilityIdentifier("conversation-all-plans")
-                    }
-                }
-                .font(.caption.weight(.medium)).buttonStyle(.plain)
-                .frame(minHeight: 44).padding(.horizontal, SideSeatTheme.screenHorizontal)
+            .buttonStyle(.plain).accessibilityIdentifier("conversation-current-plan")
+            if (isFocused && hasCurrent) || showsAll {
+                HStack(spacing: 8) { actions; Spacer(minLength: 0) }
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
             }
         }
-        .background(.bar)
-        .overlay(alignment: .bottom) { Divider() }
+    }
+
+    @ViewBuilder private var actions: some View {
+        if isFocused && hasCurrent {
+            Button(action: onCurrent) {
+                Text(AppLocalization.string("Current plan (compact)"))
+                    .font(.caption.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: 44).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+            .accessibilityLabel(AppLocalization.string("View current plans"))
+            .accessibilityIdentifier("conversation-view-current")
+        }
+        if showsAll {
+            Menu {
+                Button("View plans", action: onAll).accessibilityIdentifier("conversation-all-plans")
+            } label: {
+                Image(systemName: "ellipsis").font(.system(size: 20))
+                    .frame(width: 44, height: 44).contentShape(Rectangle())
+            }
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .accessibilityLabel(AppLocalization.string("More plan actions"))
+            .accessibilityIdentifier("conversation-plan-menu")
+        }
     }
 }
 
@@ -205,6 +275,7 @@ struct ConversationPlansSheet: View {
                                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                                             .contentShape(Rectangle())
                                         }.buttonStyle(.plain)
+                                        .accessibilityIdentifier("conversation-select-plan-\(plan.id)")
                                     }
                                 }
                             }

@@ -1,0 +1,53 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName": "SideSeat iPhone 13 mini QA 20260812",
+        "modelName": "iPhone 13 mini",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 2,
+      "passedTests": 8,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SideSeat-Development \u00b7 Built with macOS 26.3.1",
+  "expectedFailures": 0,
+  "failedTests": 2,
+  "finishTime": 1791071182.707,
+  "passedTests": 8,
+  "result": "Failed",
+  "skippedTests": 0,
+  "startTime": 1791071095.812,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "SideSeatUITests",
+      "testIdentifier": 9,
+      "testIdentifierString": "SocialLiveUITests/testNewIntentLoop11ChatHeaderBoundsAndDraft()",
+      "testIdentifierURL": "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testNewIntentLoop11ChatHeaderBoundsAndDraft",
+      "testName": "testNewIntentLoop11ChatHeaderBoundsAndDraft()"
+    },
+    {
+      "failureText": "Failed to tap Button (First Match): No matches found for first query match sequence: `Descendants matching type Button` -> `Elements containing elements matching type StaticText with identifier 'A later confirmed plan'`, given input App element pid: 14051\nPossibly caused by runtime issues:\nAutomation type mismatch: computed Button from legacy attributes vs PopUpButton from modern attribute. Input attributes and values: {\n    \"XC_kAXXCAttributeAutomationType\" = 14;\n    \"XC_kAXXCAttributeElementBaseType\" = UIResponder;\n    \"XC_kAXXCAttributeElementType\" = \"SwiftUI.AccessibilityNode\";\n    \"XC_kAXXCAttributeTraits\" = 1108101562369;\n}\nAutomation type mismatch: computed Other from legacy attributes vs StaticText from modern attribute. Input attributes and values: {\n    \"XC_kAXXCAttributeAutomationType\" = 48;\n    \"XC_kAXXCAttributeElementBaseType\" = UILabel;\n    \"XC_kAXXCAttributeElementType\" = UILabel;\n    \"XC_kAXXCAttributeTraits\" = 8590000128;\n}\nSee test report attachments for more detail.",
+      "targetName": "SideSeatUITests",
+      "testIdentifier": 10,
+      "testIdentifierString": "SocialLiveUITests/testNewIntentLoop12ExplicitPlanNavigation()",
+      "testIdentifierURL": "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testNewIntentLoop12ExplicitPlanNavigation",
+      "testName": "testNewIntentLoop12ExplicitPlanNavigation()"
+    }
+  ],
+  "title": "Test - SideSeat-Development",
+  "topInsights": [],
+  "totalTestCount": 10
+}

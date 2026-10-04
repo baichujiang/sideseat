@@ -2384,3 +2384,15 @@
 "New time (compact)" = "换个时间";
 
 "New intention (compact)" = "新意愿";
+
+"Current plan (compact)" = "当前计划";
+
+"Reply needed (compact)" = "待我回复";
+
+"Awaiting reply (compact)" = "等对方回复";
+
+"More plan actions" = "更多计划操作";
+
+"Latest messages (compact)" = "最新";
+
+"Plan could not be opened. Try again." = "暂时无法打开计划，点此重试。";

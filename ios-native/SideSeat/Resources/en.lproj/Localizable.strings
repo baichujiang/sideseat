@@ -2384,3 +2384,15 @@
 "New time (compact)" = "New time";
 
 "New intention (compact)" = "New intention";
+
+"Current plan (compact)" = "Current";
+
+"Reply needed (compact)" = "Reply needed";
+
+"Awaiting reply (compact)" = "Awaiting reply";
+
+"More plan actions" = "More plan actions";
+
+"Latest messages (compact)" = "Latest";
+
+"Plan could not be opened. Try again." = "Plan could not be opened. Try again.";

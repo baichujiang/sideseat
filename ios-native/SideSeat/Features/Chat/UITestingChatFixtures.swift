@@ -212,6 +212,9 @@ enum UITestingChatFixtures {
     ]
 
     static func directPage(connectionID: String) -> NativeDirectMessagePageData {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-navigation") {
+            return planNavigationPage(connectionID: connectionID)
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-dense-chat") {
             return denseDirectPage(connectionID: connectionID)
         }
@@ -264,6 +267,35 @@ enum UITestingChatFixtures {
         default:
             return minaDirectPage
         }
+    }
+
+    static func planNavigationPage(connectionID: String) -> NativeDirectMessagePageData {
+        let now = Date()
+        let author = NativePlanAuthor(id: me.id, username: me.username, nickname: me.nickname, avatarUrl: nil)
+        let other = NativePlanAuthor(id: mina.id, username: mina.username, nickname: mina.nickname, avatarUrl: nil)
+        let items: [(String, Double, String, String)] = [
+            ("nav-old", -4, "ACCEPTED", "A long original plan for an afternoon of coffee and conversation at the campus library"),
+            ("nav-current", 2, "PENDING", "Reply to the next library plan"),
+            ("nav-later", 5, "ACCEPTED", "A later confirmed plan")
+        ]
+        var messages = items.enumerated().map { index, item in
+            let start = now.addingTimeInterval(item.1 * 3600)
+            let plan = NativePlanRequest(id: item.0, connectionId: connectionID, commitmentId: item.0,
+                status: item.0 == "nav-old" && ProcessInfo.processInfo.arguments.contains("--ui-testing-navigation-canceled") ? "CANCELED" : item.2,
+                planType: "CUSTOM", title: item.3, location: "Campus", message: nil,
+                startTime: start.ISO8601Format(), endTime: start.addingTimeInterval(3600).ISO8601Format(),
+                proposer: other, receiver: author, counterOfId: nil, availabilityShareId: nil, scheduleShareLinkId: nil,
+                createdAt: now.ISO8601Format(), updatedAt: now.ISO8601Format())
+            return NativeDirectMessage(id: "msg-" + item.0, connectionId: connectionID, sender: mina.author,
+                type: "PLAN_REQUEST_CARD", body: nil, createdAt: now.addingTimeInterval(Double(index - 30) * 60).ISO8601Format(),
+                planRequestId: plan.id, planRequest: plan)
+        }
+        messages += (0..<8).map { index in
+            NativeDirectMessage(id: "nav-text-\(index)", connectionId: connectionID, sender: mina.author,
+                type: "TEXT", body: "Navigation message \(index)", createdAt: now.addingTimeInterval(Double(index - 8) * 60).ISO8601Format())
+        }
+        return NativeDirectMessagePageData(connection: NativeDirectConversation(id: connectionID, isSelfNotes: false,
+            displayName: mina.nickname, peer: mina.author), messages: messages)
     }
 
     private static func simpleDirectPage(

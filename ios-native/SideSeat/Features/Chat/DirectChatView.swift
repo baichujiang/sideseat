@@ -10,6 +10,17 @@ struct DirectChatView: View {
     @Environment(RouterPath.self) private var router
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var planHeaderHeight: CGFloat = 0
+    @State private var composerHeight: CGFloat = ChatComposerUIKitTextView.minimumHeight + 34
+    @State private var composerTextHeight: CGFloat = ChatComposerUIKitTextView.minimumHeight
+    @State private var latestControlHeight: CGFloat = 0
+    @State private var messageViewportHeight: CGFloat = 0
+    @State private var messageBottomY: CGFloat?
+    @State private var planNavigationIssue: String?
+    @State private var retryHeaderPlan: NativePlanRequest?
+    @State private var planMessageAfterKeyboardDismissal: String?
+    @AccessibilityFocusState private var focusedMessageForAccessibility: String?
 
     let connectionID: String
     let initialFocus: DirectChatFocus?
@@ -109,26 +120,42 @@ struct DirectChatView: View {
         )
     }
 
-    var body: some View {
-        // Composer in a VStack (not safeAreaInset) so scrollTo(bottom) isn't short by one row.
-        VStack(spacing: 0) {
-            arrangementHeader
-
-            ZStack {
-                if hasPreparedInitialViewport {
-                    messageList
-                        .opacity(isInitialViewportVisible ? 1 : 0)
-                        .allowsHitTesting(isInitialViewportVisible)
-                        .accessibilityHidden(!isInitialViewportVisible)
+    private var chatLayout: some View {
+        // Keep fixed controls outside the message scroll view so they never cover plan actions.
+        GeometryReader { geometry in
+            let minimumMessages = max(88, UIFont.preferredFont(forTextStyle: .body).lineHeight * 2)
+            let composerChrome = max(34, composerHeight - composerTextHeight)
+            let inputLimit = max(ChatComposerUIKitTextView.minimumHeight,
+                                 geometry.size.height - planHeaderHeight - latestControlHeight - minimumMessages - composerChrome)
+            VStack(spacing: 0) {
+                arrangementHeader(maximumHeight: max(44, geometry.size.height - composerHeight - latestControlHeight - minimumMessages))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { planHeaderHeight = $0 }
+                ZStack {
+                    if hasPreparedInitialViewport {
+                        messageList
+                            .opacity(isInitialViewportVisible ? 1 : 0)
+                            .allowsHitTesting(isInitialViewportVisible)
+                            .accessibilityHidden(!isInitialViewportVisible)
+                    }
+                    if !hasPreparedInitialViewport || !isInitialViewportVisible {
+                        SSLoadingState("Loading conversation").accessibilityIdentifier("chat-initial-loading")
+                    }
                 }
-                if !hasPreparedInitialViewport || !isInitialViewportVisible {
-                    SSLoadingState("Loading conversation")
-                        .accessibilityIdentifier("chat-initial-loading")
-                }
-            }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            composer
+                .clipped()
+                latestMessagesControl
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { latestControlHeight = $0 }
+                composer(maximumInputHeight: inputLimit)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { composerHeight = $0 }
+            }
         }
+    }
+
+    var body: some View {
+        chatLayout
             .background(SideSeatTheme.Chat.canvas)
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
@@ -206,6 +233,14 @@ struct DirectChatView: View {
                 Task { await refreshConversationPlans() }
             }
             .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { arrangementNow = $0 }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)) { _ in
+                guard let target = planMessageAfterKeyboardDismissal else { return }
+                planMessageAfterKeyboardDismissal = nil
+                Task { @MainActor in
+                    await Task.yield()
+                    scrollToMessageID = target
+                }
+            }
             .onChange(of: store.messages.map(\.id)) { _, messageIDs in
                 if !hasPreparedInitialViewport, !messageIDs.isEmpty {
                     guard initialFocus == nil || hasResolvedInitialFocus else { return }
@@ -304,9 +339,7 @@ struct DirectChatView: View {
             }
             .sheet(isPresented: $showsConversationPlans) {
                 ConversationPlansSheet(groups: arrangementGroups, viewerID: viewerID, now: arrangementNow) { plan in
-                    selectedHeaderPlan = plan
-                    hasLeftInitialFocus = true
-                    Task { await openPlanInChat(plan) }
+                    Task { await openPlanInChat(plan, select: true) }
                 }
             }
             .sheet(item: $actionPlanDraft) { presentation in
@@ -570,12 +603,16 @@ struct DirectChatView: View {
                                 )
                                 .padding(.top, focusedPlanMessageID == message.id ? 2 : (connectsAbove ? 2 : 8))
                             }
+                            .accessibilityFocused($focusedMessageForAccessibility, equals: message.id)
                             .id(message.id)
                         }
-                        ChatBottomSentinel(isNearBottom: $isNearBottom) {
-                            revealInitialViewport()
-                            store.clearPendingRemoteCount()
-                        }
+                        Color.clear.frame(height: 12).id(ChatScrollAnchor.bottomID)
+                            .onGeometryChange(for: CGFloat.self) { geometry in
+                                geometry.frame(in: .named("direct-chat-viewport")).maxY
+                            } action: { bottom in
+                                messageBottomY = bottom
+                                updateMessageBottomVisibility()
+                            }
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
@@ -590,33 +627,18 @@ struct DirectChatView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .defaultScrollAnchor(.bottom)
                 .accessibilityIdentifier("chat-message-list")
+                .coordinateSpace(name: "direct-chat-viewport")
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                    messageViewportHeight = $0
+                    updateMessageBottomVisibility()
+                }
 
                 VStack(spacing: 8) {
                     if let actionNotice {
                         ChatTransientNoticeView(notice: actionNotice)
                     }
 
-                    if store.pendingRemoteCount > 0 {
-                        Button {
-                            store.clearPendingRemoteCount()
-                            isNearBottom = true
-                            pinMessageListToBottom()
-                            Task {
-                                await ChatScrollAnchor.scrollToBottom(
-                                    proxy: proxy,
-                                    animated: true
-                                )
-                            }
-                        } label: {
-                            Text(store.pendingRemoteCount == 1 ? AppLocalization.string("1 new message") : AppLocalization.string("\(store.pendingRemoteCount) new messages"))
-                                .font(.footnote.weight(.semibold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(.ultraThinMaterial, in: Capsule())
-                        }
-                        .buttonStyle(SSPressButtonStyle())
-                        .accessibilityIdentifier("chat-new-messages")
-                    }
+
                 }
                 .padding(.bottom, 10)
             }
@@ -639,9 +661,10 @@ struct DirectChatView: View {
                 guard let messageID else { return }
                 releaseMessageListBottomPin()
                 withAnimation(.easeOut(duration: 0.2)) {
-                    proxy.scrollTo(messageID, anchor: .center)
+                    proxy.scrollTo(messageID, anchor: .top)
                 }
                 scrollToMessageID = nil
+                focusedMessageForAccessibility = messageID
             }
             .onReceive(NotificationCenter.default.publisher(for: .sideSeatChatScrollToBottom)) { note in
                 let animated = (note.userInfo?["animated"] as? Bool) ?? false
@@ -669,7 +692,7 @@ struct DirectChatView: View {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
                         withTransaction(transaction) {
-                            proxy.scrollTo(initialFocusMessageID, anchor: .center)
+                            proxy.scrollTo(initialFocusMessageID, anchor: .top)
                         }
                         guard attempt < 2 else { break }
                         try? await Task.sleep(for: .milliseconds(60))
@@ -710,7 +733,7 @@ struct DirectChatView: View {
         }
     }
 
-    private var composer: some View {
+    private func composer(maximumInputHeight: CGFloat) -> some View {
         VStack(spacing: 6) {
             if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
                 UnrepliedReplyBanner(
@@ -787,7 +810,9 @@ struct DirectChatView: View {
                     draft: composerDraft,
                     placeholder: replyDraft == nil ? AppLocalization.string("Message") : AppLocalization.string("Reply"),
                     isBlocked: store.isUnrepliedSendBlocked,
-                    focusController: composerFocus
+                    focusController: composerFocus,
+                    maximumHeight: maximumInputHeight,
+                    onMeasuredHeight: { composerTextHeight = $0 }
                 ) { text in
                     Task { await send(text) }
                 }
@@ -1008,7 +1033,7 @@ struct DirectChatView: View {
         return store.messages.first { $0.id == focusedPlanMessageID }?.planRequest
     }
 
-    @ViewBuilder private var arrangementHeader: some View {
+    @ViewBuilder private func arrangementHeader(maximumHeight: CGFloat) -> some View {
         if store.conversation != nil {
             let current = arrangementGroups.first?.primary
             let focused = focusPlan
@@ -1020,21 +1045,27 @@ struct DirectChatView: View {
                                     showsAll: arrangementGroups.reduce(0) { $0 + $1.plans.count } > 1,
                                     isFocused: focused != nil && (focused?.id != current?.id || !ConversationPlanSelection.isCurrent(plan, at: arrangementNow)),
                                     hasCurrent: current != nil,
+                                    maximumHeight: maximumHeight,
                                     onOpen: { Task { await openPlanInChat(plan) } },
                                     onAll: { composerFocus.blur(); showsConversationPlans = true },
-                                    onCurrent: { returnToCurrentPlan() })
+                                    onCurrent: { if let current { Task { await returnToCurrentPlan(current) } } })
             } else if (conversationPlans.hasLoaded || isSourceFocus), let conversationContext {
                 ConversationContextBar(selection: conversationContext, isFocused: isSourceFocus) {
                     composerFocus.blur()
                     showContextDetails = true
                 }
-                if isSourceFocus {
-                    Button { returnToCurrentPlan() } label: {
-                        Text(current == nil ? "Back to latest messages" : "View current plans")
+                if isSourceFocus, let current {
+                    Button { Task { await returnToCurrentPlan(current) } } label: {
+                        Text("View current plans")
                             .font(.caption).frame(minHeight: 44).contentShape(Rectangle())
                     }
                     .accessibilityIdentifier("conversation-view-current")
                 }
+            }
+            if let planNavigationIssue, let retryHeaderPlan {
+                Button(planNavigationIssue) { Task { await openPlanInChat(retryHeaderPlan, select: true) } }
+                    .font(.caption).frame(minHeight: 44)
+                    .accessibilityIdentifier("conversation-plan-navigation-retry")
             }
             if conversationPlans.issue != nil {
                 Button("Plans could not be refreshed. Try again.") { Task { await refreshConversationPlans() } }
@@ -1049,21 +1080,82 @@ struct DirectChatView: View {
                                      fixturePlans: store.messages.compactMap(\.planRequest))
     }
 
-    private func openPlanInChat(_ plan: NativePlanRequest) async {
+    private func openPlanInChat(_ plan: NativePlanRequest, select: Bool = false) async {
+        let wasEditing = composerFocus.isFocused
+        releaseMessageListBottomPin()
+        isNearBottom = false
         composerFocus.blur()
         if let id = await store.messageID(forPlanID: plan.id, loadingOlderUsing: session) {
+            if select { selectedHeaderPlan = plan; hasLeftInitialFocus = true }
+            planNavigationIssue = nil
+            retryHeaderPlan = nil
             focusedPlanMessageID = id
-            scrollToMessageID = id
+            if wasEditing && keyboardBottomAnchor.isKeyboardVisible {
+                planMessageAfterKeyboardDismissal = id
+            } else {
+                scrollToMessageID = id
+            }
+        } else {
+            retryHeaderPlan = plan
+            planNavigationIssue = AppLocalization.string("Plan could not be opened. Try again.")
         }
     }
 
-    private func returnToCurrentPlan() {
+    private func returnToCurrentPlan(_ plan: NativePlanRequest) async {
+        guard arrangementGroups.contains(where: { $0.primary.id == plan.id }) else {
+            planNavigationIssue = AppLocalization.string("Plan could not be opened. Try again.")
+            retryHeaderPlan = plan
+            return
+        }
+        await openPlanInChat(plan, select: true)
+    }
+
+    private func returnToLatestMessages() {
+        planMessageAfterKeyboardDismissal = nil
         hasLeftInitialFocus = true
         selectedHeaderPlan = nil
-        if let plan = arrangementGroups.first?.primary {
-            Task { await openPlanInChat(plan) }
-        } else {
-            NotificationCenter.default.post(name: .sideSeatChatScrollToBottom, object: nil)
+        focusedPlanMessageID = nil
+        planNavigationIssue = nil
+        retryHeaderPlan = nil
+        focusedMessageForAccessibility = store.messages.last?.id
+        NotificationCenter.default.post(name: .sideSeatChatScrollToBottom, object: nil, userInfo: ["animated": true])
+    }
+
+    private var isMessageBottomVisible: Bool {
+        guard messageViewportHeight > 0, let messageBottomY else { return false }
+        return messageBottomY >= 0 && messageBottomY <= messageViewportHeight + 24
+    }
+
+    private func updateMessageBottomVisibility() {
+        isNearBottom = isMessageBottomVisible
+        if isNearBottom {
+            revealInitialViewport()
+            store.clearPendingRemoteCount()
+        }
+    }
+
+    @ViewBuilder private var latestMessagesControl: some View {
+        if isInitialViewportVisible && (!isMessageBottomVisible || store.pendingRemoteCount > 0) {
+            HStack {
+                Spacer(minLength: 0)
+                Button(action: returnToLatestMessages) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.down").font(.system(size: 16)).accessibilityHidden(true)
+                        Text(AppLocalization.string("Latest messages (compact)"))
+                            .font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                        if store.pendingRemoteCount > 0 { Text("\(store.pendingRemoteCount)").font(.caption) }
+                    }
+                    .padding(.horizontal, 12).frame(minHeight: 44)
+                    .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                .accessibilityLabel(AppLocalization.string("Back to latest messages"))
+                .accessibilityValue(store.pendingRemoteCount > 0 ? AppLocalization.string("\(store.pendingRemoteCount) new messages") : "")
+                .accessibilityIdentifier("chat-new-messages")
+            }
+            .padding(.horizontal, 12).padding(.vertical, 4)
+            .background(SideSeatTheme.Chat.canvas)
         }
     }
 
@@ -1298,6 +1390,8 @@ struct ChatComposerTextInput: View {
     let placeholder: String
     let isBlocked: Bool
     let focusController: ChatComposerFocusController
+    let maximumHeight: CGFloat?
+    let onMeasuredHeight: (CGFloat) -> Void
     let onSend: (String) -> Void
 
     init(
@@ -1305,12 +1399,16 @@ struct ChatComposerTextInput: View {
         placeholder: String,
         isBlocked: Bool = false,
         focusController: ChatComposerFocusController,
+        maximumHeight: CGFloat? = nil,
+        onMeasuredHeight: @escaping (CGFloat) -> Void = { _ in },
         onSend: @escaping (String) -> Void
     ) {
         self.draft = draft
         self.placeholder = placeholder
         self.isBlocked = isBlocked
         self.focusController = focusController
+        self.maximumHeight = maximumHeight
+        self.onMeasuredHeight = onMeasuredHeight
         self.onSend = onSend
     }
 
@@ -1330,10 +1428,12 @@ struct ChatComposerTextInput: View {
                 isBlocked: isBlocked,
                 accessibilityLabel: placeholder,
                 focusController: focusController,
+                availableHeight: maximumHeight,
                 onTextChange: draft.updateText,
                 onHeightChange: { height in
                     guard abs(editorHeight - height) > 0.5 else { return }
                     editorHeight = height
+                    onMeasuredHeight(height)
                 },
                 onSend: submit
             )
@@ -1396,6 +1496,7 @@ private struct ChatComposerUIKitTextView: UIViewRepresentable {
     let isBlocked: Bool
     let accessibilityLabel: String
     let focusController: ChatComposerFocusController
+    var availableHeight: CGFloat? = nil
     let onTextChange: (String) -> Void
     let onHeightChange: (CGFloat) -> Void
     let onSend: (String) -> Void
@@ -1438,6 +1539,7 @@ private struct ChatComposerUIKitTextView: UIViewRepresentable {
     }
 
     func updateUIView(_ textView: UITextView, context: Context) {
+        let heightLimitChanged = context.coordinator.parent.availableHeight != availableHeight
         context.coordinator.parent = self
 
         if context.coordinator.appliedResetVersion != resetVersion,
@@ -1461,7 +1563,7 @@ private struct ChatComposerUIKitTextView: UIViewRepresentable {
             base: accessibilityLabel
         )
 
-        context.coordinator.scheduleHeightUpdate(for: textView)
+        context.coordinator.scheduleHeightUpdate(for: textView, force: heightLimitChanged)
     }
 
     @MainActor
@@ -1591,11 +1693,10 @@ private struct ChatComposerUIKitTextView: UIViewRepresentable {
             guard textView.bounds.width > 0 else { return }
             lastMeasuredWidth = textView.bounds.width
             let contentHeight = ceil(textView.contentSize.height)
-            let height = min(
-                max(contentHeight, ChatComposerUIKitTextView.minimumHeight),
-                ChatComposerUIKitTextView.maximumHeight
-            )
-            let shouldScroll = contentHeight > ChatComposerUIKitTextView.maximumHeight + 0.5
+            let limit = max(ChatComposerUIKitTextView.minimumHeight,
+                            min(ChatComposerUIKitTextView.maximumHeight, parent.availableHeight ?? .infinity))
+            let height = min(max(contentHeight, ChatComposerUIKitTextView.minimumHeight), limit)
+            let shouldScroll = contentHeight > limit + 0.5
             if textView.isScrollEnabled != shouldScroll {
                 textView.isScrollEnabled = shouldScroll
             }

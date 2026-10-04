@@ -302,6 +302,19 @@ and its accept / alternative-time / decline controls. Confirmed cards carry an
 explicit confirmation label. Ended retains private Outcome entry and editing.
 This changes presentation only; it does not send a response or create a commitment.
 
+### Chat plan navigation — 2026-10-04
+
+At accessibility text sizes or when the full summary cannot fit the available
+height, chat uses a compact status entry. Tapping it locates the same plan revision
+in the message history, aligned from its top. Full plan facts remain in that card.
+Current-plan navigation and jumping to the latest message are separate actions.
+The latest-message control appears while away from the bottom and reserves space
+outside the message viewport; it preserves the composer draft and clears explicit
+historical plan focus. Choosing a different plan is explicit; closing its selector
+keeps the previous selection. The original historical plan is not replaced by the
+current-only plan list. Long draft input scrolls within the editor when vertical
+space is needed for messages and fixed controls.
+
 ### Smart time coordination — 2026-10-02 (simplified)
 
 The chat composer has one **Plan** entry. It opens the standard Plan editor with a
