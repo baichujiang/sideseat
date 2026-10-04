@@ -1,0 +1,38 @@
+{
+  "mode": "post-fail-once",
+  "events": [
+    {
+      "event": "qa-proxy-ready",
+      "at": "2026-10-04T00:53:15.228Z"
+    },
+    {
+      "event": "outcome-attempt",
+      "number": 1,
+      "at": "2026-10-04T00:53:53.883Z"
+    },
+    {
+      "event": "injected-post-failure",
+      "at": "2026-10-04T00:53:58.886Z"
+    },
+    {
+      "event": "outcome-attempt",
+      "number": 2,
+      "at": "2026-10-04T00:54:06.683Z"
+    },
+    {
+      "event": "outcome-response",
+      "status": 200,
+      "at": "2026-10-04T00:54:13.148Z"
+    },
+    {
+      "event": "outcome-attempt",
+      "number": 3,
+      "at": "2026-10-04T00:54:29.949Z"
+    },
+    {
+      "event": "outcome-response",
+      "status": 200,
+      "at": "2026-10-04T00:54:35.045Z"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "50730E7E-1FA4-4B7F-85D0-3943A6F4C478",
+        "deviceName": "iPhone 17",
+        "modelName": "iPhone 17",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "expectedFailures": 0,
+      "failedTests": 1,
+      "passedTests": 0,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "SideSeat-Development \u00b7 Built with macOS 26.3.1",
+  "expectedFailures": 0,
+  "failedTests": 1,
+  "finishTime": 1791075969.456,
+  "passedTests": 0,
+  "result": "Failed",
+  "skippedTests": 0,
+  "startTime": 1791075894.803,
+  "statistics": [],
+  "testFailures": [
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "SideSeatUITests",
+      "testIdentifier": 1,
+      "testIdentifierString": "SocialLiveUITests/testNewIntentLoop17IncomingMessagePreservesHistoryAndDraft()",
+      "testIdentifierURL": "test://com.apple.xcode/SideSeat/SideSeatUITests/SocialLiveUITests/testNewIntentLoop17IncomingMessagePreservesHistoryAndDraft",
+      "testName": "testNewIntentLoop17IncomingMessagePreservesHistoryAndDraft()"
+    }
+  ],
+  "title": "Test - SideSeat-Development",
+  "topInsights": [],
+  "totalTestCount": 1
+}

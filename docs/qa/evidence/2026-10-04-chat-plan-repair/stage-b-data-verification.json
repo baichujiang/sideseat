@@ -1,0 +1,23 @@
+{
+  "originalPlanUnchanged": true,
+  "originalCalendarEntriesUnchanged": 2,
+  "originalMessagesUnchanged": 7,
+  "explicitQaIncomingMessagesAdded": 2,
+  "afterState": {
+    "result": "PASS",
+    "planId": "cmusyp4c6001ul74q3zzxtj3a",
+    "bilateralOutcomes": 2,
+    "sharedEncounters": 1,
+    "continuedConversation": "cmusyos2p001gl74qknpfk2s2",
+    "newOpportunity": "cmusytiu60054l74qj73s7e56",
+    "intentions": {
+      "total": 4,
+      "originalEnded": 2,
+      "newActive": 2
+    },
+    "connections": 1,
+    "plans": 1,
+    "calendarEntries": 2,
+    "meetAgainPermissions": 0
+  }
+}

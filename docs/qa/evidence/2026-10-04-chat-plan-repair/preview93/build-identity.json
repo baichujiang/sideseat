@@ -1,0 +1,13 @@
+{
+  "CFBundleIdentifier": "app.sideseat.mobile.preview",
+  "CFBundleDisplayName": "SideSeat Preview",
+  "CFBundleShortVersionString": "1.0.0",
+  "CFBundleVersion": "93",
+  "SideSeatAPIBaseURL": "https://api.sideseat.de",
+  "executableSHA256": "cba45a270d5392d6404161246d8d02edfeeb9c74a0124c966e8677c7be9d00fd",
+  "signatureVerified": true,
+  "deviceProvisioningVerified": true,
+  "sourceManifestVerified": true,
+  "sourceFileCount": 294,
+  "appPath": "/tmp/sideseat-chat-feedback-repair-20261004/PreviewDerivedData/Build/Products/Preview-iphoneos/SideSeat Preview.app"
+}

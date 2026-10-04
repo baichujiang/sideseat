@@ -138,43 +138,63 @@ struct ConversationContextSelection: Equatable, Sendable {
 }
 
 struct ConversationContextBar: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let selection: ConversationContextSelection
     var isFocused = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: SideSeatTheme.spaceMD) {
-                Image(systemName: "sparkles")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.utilityAction)
-                    .frame(width: 32, height: 32)
-                    .background(SideSeatTheme.fillSubtle, in: Circle())
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(isFocused ? AppLocalization.string("Viewing · Intention") : selection.sourceTitle)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    Text(selection.context.localizedTitle)
+            if dynamicTypeSize.isAccessibilitySize {
+                HStack(spacing: 10) {
+                    Image(systemName: "sparkles").font(.system(size: 20)).accessibilityHidden(true)
+                    Text(AppLocalization.string("Intention (compact)"))
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .lineLimit(1)
-                    if let summary = selection.secondarySummary {
-                        Text(summary)
-                            .font(.caption)
-                            .foregroundStyle(SideSeatTheme.textSecondary)
-                            .lineLimit(1)
-                    }
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right").font(.system(size: 12)).accessibilityHidden(true)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(SideSeatTheme.utilityAction)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .padding(.horizontal, SideSeatTheme.spaceLG).padding(.vertical, 4)
+                .contentShape(Rectangle())
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel([isFocused ? AppLocalization.string("Viewing · Intention") : selection.sourceTitle,
+                                     selection.context.localizedTitle, selection.secondarySummary]
+                    .compactMap { $0 }.joined(separator: ", "))
+            } else {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Image(systemName: "sparkles")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .frame(width: 32, height: 32)
+                        .background(SideSeatTheme.fillSubtle, in: Circle())
 
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isFocused ? AppLocalization.string("Viewing · Intention") : selection.sourceTitle)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(selection.context.localizedTitle)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .lineLimit(1)
+                        if let summary = selection.secondarySummary {
+                            Text(summary)
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .lineLimit(1)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .padding(.vertical, SideSeatTheme.spaceSM)
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, SideSeatTheme.spaceLG)
-            .padding(.vertical, SideSeatTheme.spaceSM)
-            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .background(.bar)

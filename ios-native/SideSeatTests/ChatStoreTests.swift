@@ -1097,6 +1097,22 @@ struct UnrepliedDirectMessageLimitTests {
 
 @Suite("Chat SSE client")
 struct ChatSSEClientTests {
+    @Test("Byte stream keeps blank event separators and complete Unicode across CRLF lines")
+    func byteStreamPreservesBoundaries() {
+        var decoder = ChatSSEClient.ByteDecoder()
+        let prefix = ": heartbeat\r\n\r\nid: first\r\nevent: message\r\ndata: 你好 Mia\r\ndata: café\r\n"
+        for byte in prefix.utf8 { #expect(decoder.append(byte).isEmpty) }
+        #expect(decoder.append(13).isEmpty)
+        let first = decoder.append(10)
+        #expect(first.count == 1)
+        #expect(first.first?.id == "first")
+        #expect(first.first?.data == "你好 Mia\ncafé")
+        let next = "id: second\ndata: next\n\n".utf8.flatMap { decoder.append($0) }
+        #expect(next.count == 1)
+        #expect(next.first?.id == "second")
+        #expect(next.first?.data == "next")
+    }
+
     @Test("Parses multi-line SSE blocks across chunks")
     func parsesAcrossChunks() {
         var partial = ""

@@ -1,0 +1,9 @@
+{
+  "platform": "macOS VoiceOver with iOS Simulator",
+  "attempted": true,
+  "systemVoiceOverEnabledDuringAttempt": true,
+  "simulatorAppFocusReached": false,
+  "spokenOutputVerified": false,
+  "systemVoiceOverRestoredToOriginalOffState": true,
+  "result": "Incomplete; real iPhone VoiceOver walkthrough required"
+}

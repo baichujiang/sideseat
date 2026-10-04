@@ -734,10 +734,10 @@ final class CommunityChatStore {
             )
         }
 
-        var partial = ""
-        for try await line in bytes.lines {
+        var decoder = ChatSSEClient.ByteDecoder()
+        for try await byte in bytes {
             if Task.isCancelled { break }
-            let events = ChatSSEClient.parse(line + "\n", carrying: &partial)
+            let events = decoder.append(byte)
             for event in events {
                 if let id = event.id {
                     await MainActor.run { onCursor(id) }

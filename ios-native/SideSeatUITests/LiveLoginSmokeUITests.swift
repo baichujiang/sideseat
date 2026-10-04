@@ -996,6 +996,8 @@ final class SocialLiveUITests: XCTestCase {
                 field.tap(); field.typeText(draft)
                 XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
                 XCTAssertEqual(field.value as? String, draft)
+                XCTAssertTrue(app.staticTexts["[loop-qa] Campus coffee"].firstMatch.isHittable,
+                              "Opening the keyboard while reading a historical plan retains that reading anchor")
                 let composer = app.descendants(matching: .any)["chat-composer"].firstMatch
                 let bounds = XCTAttachment(string: "header=\(header.frame), list=\(list.frame), composer=\(composer.frame), keyboard=\(app.keyboards.firstMatch.frame)")
                 bounds.name = "keyboard-bounds-\(language)"; bounds.lifetime = .keepAlways; add(bounds)
@@ -1011,7 +1013,9 @@ final class SocialLiveUITests: XCTestCase {
                 if !hasLatest { loopCapture(app, "chat-missing-latest-\(language)"); let tree = XCTAttachment(string: app.debugDescription); tree.lifetime = .keepAlways; add(tree) }
                 XCTAssertTrue(hasLatest); latest.tap()
                 XCTAssertTrue(header.waitForNonExistence(timeout: 5), "No current plan exists; latest clears the historical plan selection")
-                XCTAssertTrue(app.staticTexts["[loop-qa] Thanks for today!"].isHittable)
+                let incoming = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "[chat-repair-qa] Incoming")).allElementsBoundByIndex
+                if let last = incoming.last { XCTAssertTrue(last.isHittable) }
+                else { XCTAssertTrue(app.staticTexts["[loop-qa] Thanks for today!"].isHittable) }
                 XCTAssertEqual(field.value as? String, draft)
                 loopCapture(app, "chat-latest-\(language)")
             }
@@ -1056,6 +1060,284 @@ final class SocialLiveUITests: XCTestCase {
             XCTAssertTrue(app.staticTexts["Navigation message 7"].isHittable)
             XCTAssertTrue(header.label.contains("Reply to the next library plan"), "Latest restores the default summary without scrolling back to its card")
             loopCapture(app, "chat-multiple-latest-\(canceled)")
+            app.terminate()
+        }
+    }
+
+    private func revealOutcome(_ element: XCUIElement, in app: XCUIApplication, scroll: XCUIElement) {
+        for _ in 0..<32 {
+            let area = scroll.frame.intersection(app.frame).insetBy(dx: 0, dy: 12)
+            let target = element.exists ? element.frame : CGRect.null
+            if element.exists && element.isHittable &&
+                (area.contains(target) || (target.height > area.height && area.intersection(target).height > 100)) { return }
+            let downward = !target.isNull && target.minY < area.minY
+            let delta = target.isNull ? area.height : (downward ? area.minY - target.minY + 12 : target.maxY - area.maxY + 12)
+            let distance = min(area.height * 0.55, max(35, delta))
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let start = origin.withOffset(CGVector(dx: area.maxX - 20, dy: downward ? area.minY + 20 : area.maxY - 20))
+            let end = start.withOffset(CGVector(dx: 0, dy: downward ? distance : -distance))
+            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.15)
+        }
+        let diagnostic = XCTAttachment(string: "target=\(element.frame), scroll=\(scroll.frame)\n\(app.debugDescription)")
+        diagnostic.name = "feedback-scroll-diagnostic"; diagnostic.lifetime = .keepAlways; add(diagnostic)
+        XCTAssertTrue(element.isHittable, "Feedback control is reachable in its own scroll region")
+    }
+
+    func testNewIntentLoop13FeedbackWrappingAndCancel() {
+        for language in ["de", "en", "zh-Hans"] {
+            for large in [true, false] {
+                let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: [
+                    "--ui-testing-discover", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(large ? "dark" : "light")",
+                    "-UIPreferredContentSizeCategoryName", large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"
+                ])
+                tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap()
+                loopSelectPlanSection("ended", in: app)
+                let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+                XCTAssertTrue(row.waitForExistence(timeout: 12))
+                let id = String(row.identifier.dropFirst("plans-row-".count))
+                let saved = app.descendants(matching: .any)["plan-outcome-saved-\(id)"].firstMatch
+                let edit = app.buttons["plan-outcome-edit-\(id)"]
+                let cancel = app.buttons["plan-outcome-cancel-\(id)"]
+                for surface in ["plans", "chat"] {
+                    let scroll = app.scrollViews[surface == "plans" ? "plans-scroll-ended" : "chat-message-list"]
+                    revealOutcome(edit, in: app, scroll: scroll)
+                    XCTAssertGreaterThanOrEqual(edit.frame.height, 44)
+                    XCTAssertTrue(saved.exists)
+                    let originalValue = saved.value as? String
+                    XCTAssertFalse((originalValue ?? "").isEmpty)
+                    XCTAssertLessThanOrEqual(saved.frame.maxX, app.frame.maxX)
+                    if large { XCTAssertGreaterThan(saved.frame.height, 50, "Saved feedback grows to fit large text") }
+                    revealOutcome(saved, in: app, scroll: scroll)
+                    XCTAssertTrue(scroll.frame.contains(saved.frame), "The complete saved result can be brought into view")
+                    let bounds = XCTAttachment(string: "saved=\(saved.frame), edit=\(edit.frame), viewport=\(scroll.frame), value=\(originalValue ?? "")")
+                    bounds.name = "feedback-bounds-\(surface)-\(language)-\(large)"; bounds.lifetime = .keepAlways; add(bounds)
+                    loopCapture(app, "feedback-saved-\(surface)-\(language)-\(large)")
+                    revealOutcome(edit, in: app, scroll: scroll); edit.tap()
+                    revealOutcome(cancel, in: app, scroll: scroll)
+                    XCTAssertGreaterThanOrEqual(cancel.frame.height, 44)
+                    XCTAssertEqual(saved.value as? String, originalValue)
+                    let yes = app.buttons["plan-outcome-occurred-\(id)"]
+                    XCTAssertTrue(yes.isSelected)
+                    loopCapture(app, "feedback-edit-\(surface)-\(language)-\(large)")
+                    cancel.tap()
+                    XCTAssertTrue(cancel.waitForNonExistence(timeout: 5))
+                    XCTAssertEqual(saved.value as? String, originalValue)
+                    if surface == "plans" {
+                        revealOutcome(row, in: app, scroll: scroll); row.tap()
+                        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+                    }
+                }
+                app.terminate()
+            }
+        }
+    }
+
+    func testNewIntentLoop14FeedbackFailureRetryAndReadback() {
+        let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=en", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        tabButton(in: app, labels: ["Plans"]).tap(); loopSelectPlanSection("ended", in: app)
+        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 12))
+        let id = String(row.identifier.dropFirst("plans-row-".count))
+        let saved = app.descendants(matching: .any)["plan-outcome-saved-\(id)"].firstMatch
+        let edit = app.buttons["plan-outcome-edit-\(id)"]
+        let scroll = app.scrollViews["plans-scroll-ended"]
+        revealOutcome(edit, in: app, scroll: scroll)
+        let original = saved.value as? String
+        XCTAssertEqual(original, "Happened")
+        edit.tap()
+        let no = app.buttons["plan-outcome-did_not_occur-\(id)"]
+        revealOutcome(no, in: app, scroll: scroll); no.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plan-outcome-saving-\(id)"].firstMatch.waitForExistence(timeout: 2))
+        XCTAssertFalse(no.isEnabled)
+        let error = app.staticTexts["plan-outcome-error-\(id)"]
+        XCTAssertTrue(error.waitForExistence(timeout: 15), "A failed or unconfirmed save stays explicit")
+        XCTAssertEqual(saved.value as? String, original, "Failure keeps the last confirmed feedback")
+        revealOutcome(error, in: app, scroll: scroll); loopCapture(app, "feedback-controlled-failure")
+        revealOutcome(no, in: app, scroll: scroll); no.tap()
+        XCTAssertTrue(waitForValue(saved, values: ["Didn't happen"], timeout: 15))
+        XCTAssertFalse(error.exists)
+        revealOutcome(edit, in: app, scroll: scroll); loopCapture(app, "feedback-retry-saved")
+        revealOutcome(row, in: app, scroll: scroll); row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 12))
+        let chatScroll = app.scrollViews["chat-message-list"]
+        revealOutcome(edit, in: app, scroll: chatScroll)
+        XCTAssertEqual(saved.value as? String, "Didn't happen")
+        let repeatButton = app.buttons["plan-repeat-\(id)"]
+        XCTAssertTrue(repeatButton.label.contains("another time"))
+        edit.tap()
+        let yes = app.buttons["plan-outcome-occurred-\(id)"]
+        revealOutcome(yes, in: app, scroll: chatScroll); yes.tap()
+        XCTAssertTrue(waitForValue(saved, values: ["Happened"], timeout: 15))
+        revealOutcome(edit, in: app, scroll: chatScroll); loopCapture(app, "feedback-chat-restored")
+        XCTAssertTrue(repeatButton.label.contains("again"))
+        app.terminate()
+        let reloaded = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=en"])
+        tabButton(in: reloaded, labels: ["Plans"]).tap(); loopSelectPlanSection("ended", in: reloaded)
+        let persisted = reloaded.descendants(matching: .any)["plan-outcome-saved-\(id)"].firstMatch
+        XCTAssertTrue(persisted.waitForExistence(timeout: 12)); XCTAssertEqual(persisted.value as? String, "Happened")
+        reloaded.terminate()
+    }
+
+    func testNewIntentLoop15UnansweredFeedbackAndQuoteDraft() {
+        for language in ["de", "en", "zh-Hans"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-language=\(language)",
+                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            app.launch()
+            tabButton(in: app, labels: ["Plans", "计划", "Pläne"]).tap(); loopSelectPlanSection("ended", in: app)
+            let id = "ui-plan-completed"
+            let scroll = app.scrollViews["plans-scroll-ended"]
+            let no = app.buttons["plan-outcome-did_not_occur-\(id)"]
+            let yes = app.buttons["plan-outcome-occurred-\(id)"]
+            let saved = app.descendants(matching: .any)["plan-outcome-saved-\(id)"].firstMatch
+            revealOutcome(no, in: app, scroll: scroll)
+            XCTAssertFalse(saved.exists); XCTAssertFalse(no.isSelected); XCTAssertFalse(yes.isSelected)
+            XCTAssertGreaterThanOrEqual(no.frame.height, 44)
+            loopCapture(app, "feedback-unanswered-\(language)"); no.tap()
+            let edit = app.buttons["plan-outcome-edit-\(id)"]
+            XCTAssertTrue(edit.waitForExistence(timeout: 5))
+            revealOutcome(edit, in: app, scroll: scroll)
+            XCTAssertTrue(saved.exists); loopCapture(app, "feedback-did-not-happen-\(language)")
+            edit.tap()
+            let cancel = app.buttons["plan-outcome-cancel-\(id)"]
+            revealOutcome(cancel, in: app, scroll: scroll); XCTAssertTrue(no.isSelected)
+            cancel.tap(); XCTAssertTrue(cancel.waitForNonExistence(timeout: 5)); app.terminate()
+        }
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-plan-navigation",
+            "--ui-testing-language=de", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        tabButton(in: app, labels: ["Plans", "Pläne"]).tap(); loopSelectPlanSection("ended", in: app)
+        app.buttons["plans-row-nav-old"].tap()
+        let latest = app.buttons["chat-new-messages"]
+        XCTAssertTrue(latest.waitForExistence(timeout: 8)); latest.tap()
+        let bubble = app.descendants(matching: .any)["chat-bubble-nav-text-7"].firstMatch
+        XCTAssertTrue(bubble.waitForExistence(timeout: 5)); bubble.press(forDuration: 0.8)
+        let reply = app.buttons["chat-reply-nav-text-7"]
+        XCTAssertTrue(reply.waitForExistence(timeout: 5)); reply.tap()
+        let field = app.textViews["chat-composer-field"]
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+        let draft = "Keep this quoted draft. Keep every word."
+        field.typeText(draft)
+        XCTAssertTrue(app.descendants(matching: .any)["chat-reply-preview"].firstMatch.exists)
+        loopCapture(app, "chat-quote-keyboard-bounds")
+        let quoteBounds = XCTAttachment(string: "header=\(app.buttons["conversation-current-plan"].frame), messages=\(app.scrollViews["chat-message-list"].frame), input=\(field.frame), keyboard=\(app.keyboards.firstMatch.frame)")
+        quoteBounds.name = "chat-layout-bounds-quote"; quoteBounds.lifetime = .keepAlways; add(quoteBounds)
+        XCTAssertGreaterThanOrEqual(app.scrollViews["chat-message-list"].frame.height, 112)
+        XCTAssertTrue(app.buttons["chat-composer-send"].isHittable)
+        app.buttons["conversation-current-plan"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(field.value as? String, draft)
+        XCTAssertTrue(app.descendants(matching: .any)["chat-reply-preview"].firstMatch.exists)
+        loopCapture(app, "chat-quote-preserved-after-plan-navigation")
+        app.buttons["chat-reply-cancel"].tap()
+        XCTAssertEqual(field.value as? String, draft)
+        app.terminate()
+    }
+
+    func testNewIntentLoop16RuntimeTextSizeKeepsDraftAndHistory() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-skip-tutorial", "--ui-testing-plan-navigation", "--ui-testing-language=de", "--ui-testing-chat-layout-diagnostics"]
+        app.launch()
+        tabButton(in: app, labels: ["Plans", "Pläne"]).tap(); loopSelectPlanSection("ended", in: app)
+        let row = app.buttons["plans-row-nav-old"]
+        XCTAssertTrue(row.waitForExistence(timeout: 5)); row.tap()
+        let header = app.buttons["conversation-current-plan"]
+        XCTAssertTrue(header.waitForExistence(timeout: 5))
+        let field = app.textViews["chat-composer-field"]
+        field.tap(); field.typeText("Keep this runtime size draft.")
+        let chat = app.descendants(matching: .any)["direct-chat"].firstMatch
+        XCTAssertEqual(chat.value as? String, "large")
+        loopCapture(app, "chat-runtime-size-before")
+        NSLog("SIDESEAT_RUNTIME_SIZE_READY")
+        XCTAssertTrue(waitForValue(chat, values: ["accessibility5"], timeout: 25))
+        loopCapture(app, "chat-runtime-size-after-change")
+        XCTAssertEqual(field.value as? String, "Keep this runtime size draft.")
+        XCTAssertTrue(header.label.contains("A long original plan"))
+        let originalTitle = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "A long original plan")).firstMatch
+        XCTAssertGreaterThan(originalTitle.frame.intersection(app.scrollViews["chat-message-list"].frame).height, 20)
+        XCTAssertGreaterThanOrEqual(app.scrollViews["chat-message-list"].frame.height, 112)
+        XCTAssertTrue(app.buttons["chat-composer-send"].isHittable)
+        loopCapture(app, "chat-runtime-size-large")
+        NSLog("SIDESEAT_RUNTIME_SIZE_RESTORE")
+        XCTAssertTrue(waitForValue(chat, values: ["large"], timeout: 25))
+        XCTAssertEqual(field.value as? String, "Keep this runtime size draft.")
+        loopCapture(app, "chat-runtime-size-restored")
+        app.terminate()
+    }
+
+    func testNewIntentLoop17IncomingMessagePreservesHistoryAndDraft() async throws {
+        let base = try XCTUnwrap(URL(string: ProcessInfo.processInfo.environment["SIDESEAT_LIVE_API_BASE_URL"] ?? ""))
+        XCTAssertTrue(["127.0.0.1", "localhost"].contains(base.host ?? ""))
+        guard ["127.0.0.1", "localhost"].contains(base.host ?? "") else { return }
+        let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=de", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        tabButton(in: app, labels: ["Plans", "Pläne"]).tap(); loopSelectPlanSection("ended", in: app)
+        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        let planID = String(row.identifier.dropFirst("plans-row-".count)); row.tap()
+        let field = app.textViews["chat-composer-field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText("Keep my draft during incoming messages.")
+        let header = app.buttons["conversation-current-plan"]
+        header.tap(); XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+        let title = app.staticTexts["[loop-qa] Campus coffee"].firstMatch
+        XCTAssertTrue(title.isHittable); let oldY = title.frame.minY
+        var login = URLRequest(url: base.appendingPathComponent("api/v1/auth/login"))
+        login.httpMethod = "POST"; login.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        login.httpBody = try JSONSerialization.data(withJSONObject: ["identifier": "loopqa_b", "password": password,
+            "device": ["id": "chat-repair-peer-qa", "name": "Isolated peer QA", "appVersion": "93", "platformVersion": "UI test"]])
+        let (authData, authResponse) = try await URLSession.shared.data(for: login)
+        XCTAssertEqual((authResponse as? HTTPURLResponse)?.statusCode, 200)
+        let auth = try XCTUnwrap((try JSONSerialization.jsonObject(with: authData) as? [String: Any])?["data"] as? [String: Any])
+        let token = try XCTUnwrap((auth["tokens"] as? [String: Any])?["accessToken"] as? String)
+        var plans = URLRequest(url: base.appendingPathComponent("api/v1/plans")); plans.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let (plansData, _) = try await URLSession.shared.data(for: plans)
+        let payload = try XCTUnwrap((try JSONSerialization.jsonObject(with: plansData) as? [String: Any])?["data"] as? [String: Any])
+        let match = try XCTUnwrap((payload["plans"] as? [[String: Any]])?.first { $0["id"] as? String == planID })
+        XCTAssertEqual(match["title"] as? String, "[loop-qa] Campus coffee")
+        let connection = try XCTUnwrap(match["connectionId"] as? String)
+        let text = "[chat-repair-qa] Incoming \(UUID().uuidString.prefix(8))"
+        var send = URLRequest(url: base.appendingPathComponent("api/v1/connections/\(connection)/messages"))
+        send.httpMethod = "POST"; send.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        send.setValue("application/json", forHTTPHeaderField: "Content-Type"); send.setValue(UUID().uuidString, forHTTPHeaderField: "Idempotency-Key")
+        send.httpBody = try JSONSerialization.data(withJSONObject: ["body": text])
+        let (_, response) = try await URLSession.shared.data(for: send)
+        XCTAssertTrue([200, 201].contains((response as? HTTPURLResponse)?.statusCode ?? 0))
+        let latest = app.buttons["chat-new-messages"]
+        XCTAssertTrue(waitForValue(latest, values: ["1 neue Nachrichten"], timeout: 20))
+        XCTAssertEqual(title.frame.minY, oldY, accuracy: 12)
+        XCTAssertEqual(field.value as? String, "Keep my draft during incoming messages.")
+        XCTAssertTrue(header.label.contains("[loop-qa] Campus coffee"))
+        loopCapture(app, "chat-incoming-keeps-history")
+        latest.tap(); XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 5)); XCTAssertTrue(app.staticTexts[text].isHittable)
+        XCTAssertEqual(field.value as? String, "Keep my draft during incoming messages.")
+        loopCapture(app, "chat-incoming-return-to-latest")
+        app.terminate()
+    }
+
+    func testNewIntentLoop18IntentionContextWhileTyping() {
+        for language in ["de", "en", "zh-Hans"] {
+            let app = launchAndLogin(username: "loopqa_a", additionalLaunchArguments: ["--ui-testing-discover", "--ui-testing-language=\(language)", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+            tabButton(in: app, labels: ["Plans", "Pläne", "计划"]).tap(); loopSelectPlanSection("ended", in: app)
+            let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
+            XCTAssertTrue(row.waitForExistence(timeout: 10)); row.tap()
+            let latest = app.buttons["chat-new-messages"]
+            XCTAssertTrue(latest.waitForExistence(timeout: 10)); latest.tap()
+            let context = app.buttons["conversation-context-bar"]
+            XCTAssertTrue(context.waitForExistence(timeout: 5))
+            XCTAssertTrue(context.label.contains("[loop-qa]"), "The compact entrance preserves the full source in its accessibility name")
+            XCTAssertLessThan(context.frame.height, app.frame.height * 0.22)
+            let field = app.textViews["chat-composer-field"]
+            field.tap(); field.typeText("Keep this intention context draft.")
+            XCTAssertGreaterThanOrEqual(app.scrollViews["chat-message-list"].frame.height, 112)
+            XCTAssertTrue(app.buttons["chat-composer-send"].isHittable)
+            loopCapture(app, "chat-intention-keyboard-\(language)")
+            context.tap()
+            let sheet = app.descendants(matching: .any)["conversation-context-sheet"].firstMatch
+            XCTAssertTrue(sheet.waitForExistence(timeout: 5))
+            loopCapture(app, "chat-intention-details-\(language)")
+            app.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "Fertig", "完成"])).firstMatch.tap()
+            XCTAssertTrue(sheet.waitForNonExistence(timeout: 5))
+            XCTAssertEqual(field.value as? String, "Keep this intention context draft.")
             app.terminate()
         }
     }

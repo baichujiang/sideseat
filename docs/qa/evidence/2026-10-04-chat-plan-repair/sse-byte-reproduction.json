@@ -1,0 +1,12 @@
+{
+  "fixture": "isolated localhost SSE with two events",
+  "oldAsyncBytesLines": [
+    "id: one",
+    "data: first",
+    "id: two",
+    "data: second"
+  ],
+  "oldEmptySeparators": 0,
+  "newDecoderEvents": 2,
+  "newDecoderOutput": "event=one data=first\nevent=two data=second\nevents=2\n"
+}

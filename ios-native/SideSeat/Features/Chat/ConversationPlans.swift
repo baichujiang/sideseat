@@ -148,9 +148,18 @@ struct ConversationPlanBar: View {
                         Spacer(minLength: 0)
                         actions.fixedSize(horizontal: true, vertical: true)
                     }
-                    VStack(alignment: .leading, spacing: 0) {
-                        compactPlanButton
-                        HStack(spacing: 8) { actions; Spacer(minLength: 0) }
+                    // Keep a single icon action beside a wrapping status. A separate
+                    // current-plan action still gets its own row when width is tight.
+                    if isFocused && hasCurrent {
+                        VStack(alignment: .leading, spacing: 0) {
+                            compactPlanButton
+                            HStack(spacing: 8) { actions; Spacer(minLength: 0) }
+                        }
+                    } else {
+                        HStack(alignment: .top, spacing: 8) {
+                            compactPlanButton.frame(maxWidth: .infinity, alignment: .leading)
+                            actions.fixedSize(horizontal: true, vertical: true)
+                        }
                     }
                 }
                 .padding(.horizontal, SideSeatTheme.screenHorizontal)

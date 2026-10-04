@@ -504,3 +504,13 @@ An explicit share action on an active intention creates an unlisted public link.
 The shared intention page streams conversation updates while visible, reconnects on return, and uses polling only while the stream is unavailable. A Plan invitation shows its title, time, location, note and current status in the conversation. “Create account & accept invitation” opens inline registration with that Plan retained; successful registration continues through the canonical acceptance API and writes both participants’ Calendar projections. Guests cannot accept before registration. The existing guest identity, messages and invitation remain intact. The registered visitor can continue on the page or sign into the app with the same credentials.
 
 Ending an intention stops new visitors from contacting its owner but preserves access for its existing Mutual conversation participants while the share token remains valid. This includes the automatic ending that follows Plan acceptance. Revocation, Block and moderation continue to stop shared-page access. Canceling or changing a Plan updates the visible card.
+
+### 反馈编辑与保存（Preview 93）
+
+计划页与原聊天的结束计划共用反馈组件。较大字号／不足的宽度下，已保存状态和选项完整换行，修改入口单独占行。编辑时仍显示最后一次确认的私有结果；“取消修改”只收起编辑，不发请求。提交中显示保存进度并禁用重复操作；只有读回对应结果后结束编辑。提交失败或结果未能确认时保留原值并显示重试提示。发生／未发生仍分别对应再约／换个时间，发布新意愿独立存在。
+
+最大辅助字号且键盘打开时，引用回复提示使用输入行左侧的回复／取消按钮；收起键盘恢复完整引用预览。提示的读屏值保留发送者与原消息。引用关系和全部草稿不变；输入框占位文字不参与容器高度测量。
+
+同样在大字号输入期间，“最新”入口并入输入行，保留 44 pt 触区与完整读屏名称，收起键盘恢复“最新”文字。字号变化保留当前阅读的消息，计划定位直接落在卡片正文。原生实时接收保留 SSE 空行分隔，收到消息后按原规则更新未读提示。
+
+大字号下，来源意愿摘要同样使用紧凑入口。点开继续查看完整来源及事件信息，详情关闭后保留草稿。

@@ -370,6 +370,10 @@ struct PlanRepeatButton: View {
 struct PlanOutcomePromptView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isEditing = false
+    @State private var attemptedAnswer: String?
+    @State private var saveIssue: String?
+    @AccessibilityFocusState private var outcomeFocus: OutcomeFocus?
+    private enum OutcomeFocus: Hashable { case saved, edit, question, issue }
     let plan: NativePlanRequest
     let isSubmitting: Bool
     var showsSavedQuestion = true
@@ -377,100 +381,158 @@ struct PlanOutcomePromptView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            if !showsSavedQuestion, plan.viewerOutcome != nil, !isEditing {
-                outcomeContent(horizontal: true)
-            } else if dynamicTypeSize.isAccessibilitySize {
+            if dynamicTypeSize.isAccessibilitySize || isEditing {
                 accessibleOutcomeStack
             } else {
                 ViewThatFits(in: .horizontal) {
-                    compactOutcomeRow
+                    compactOutcomeRow.fixedSize(horizontal: true, vertical: true)
                     accessibleOutcomeStack
                 }
+            }
+            if isSubmitting && attemptedAnswer != nil {
+                HStack(spacing: 8) {
+                    ProgressView().accessibilityHidden(true)
+                    Text("Saving").fixedSize(horizontal: false, vertical: true)
+                }
+                .font(.subheadline).accessibilityElement(children: .combine)
+                .accessibilityIdentifier("plan-outcome-saving-\(plan.id)")
+            }
+            if let saveIssue {
+                Text(saveIssue).font(.subheadline).foregroundStyle(SideSeatTheme.danger)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityFocused($outcomeFocus, equals: .issue)
+                    .accessibilityIdentifier("plan-outcome-error-\(plan.id)")
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("plan-outcome-\(plan.id)")
         .accessibilityHint(AppLocalization.string("Your answer stays private. Choose what actually happened."))
-        .onChange(of: plan.viewerOutcome) { _, _ in isEditing = false }
+        .onChange(of: plan.viewerOutcome) { _, answer in
+            guard let attemptedAnswer, answer == attemptedAnswer else { return }
+            finishSave()
+        }
+        .onChange(of: isSubmitting) { wasSubmitting, nowSubmitting in
+            guard wasSubmitting, !nowSubmitting, let attemptedAnswer else { return }
+            if plan.viewerOutcome == attemptedAnswer {
+                finishSave()
+            } else {
+                self.attemptedAnswer = nil
+                saveIssue = AppLocalization.string("Your answer was not confirmed. Please try again.")
+                outcomeFocus = .issue
+            }
+        }
     }
+
+    private func finishSave() {
+        attemptedAnswer = nil
+        saveIssue = nil
+        isEditing = false
+        outcomeFocus = .saved
+    }
+
+    private var shouldShowQuestion: Bool { showsSavedQuestion || plan.viewerOutcome == nil || isEditing }
 
     private var compactOutcomeRow: some View {
         HStack(spacing: SideSeatTheme.spaceSM) {
-            outcomeQuestion(allowsWrapping: false)
-            Spacer(minLength: SideSeatTheme.spaceXS)
-            outcomeContent(horizontal: true)
+            if shouldShowQuestion { outcomeQuestion }
+            if plan.viewerOutcome == nil {
+                answerChoices(horizontal: true)
+            } else {
+                savedOutcomeChip(stacked: false)
+                editButton(compact: true)
+            }
         }
     }
 
     private var accessibleOutcomeStack: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            outcomeQuestion(allowsWrapping: true)
-            outcomeContent(horizontal: false)
-        }
-    }
-
-    private func outcomeQuestion(allowsWrapping: Bool) -> some View {
-        HStack(spacing: 5) {
-            Text("Did this plan happen?")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: !allowsWrapping, vertical: allowsWrapping)
-            if isSubmitting {
-                ProgressView()
-                    .controlSize(.small)
-                    .accessibilityLabel("Saving")
+            if shouldShowQuestion { outcomeQuestion }
+            if plan.viewerOutcome != nil {
+                savedOutcomeChip(stacked: true)
             }
-        }
-    }
-
-    @ViewBuilder
-    private func outcomeContent(horizontal: Bool) -> some View {
-        if plan.viewerOutcome == nil || isEditing {
-            if horizontal {
-                HStack(spacing: 6) {
-                    outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success)
-                    outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger)
+            if plan.viewerOutcome == nil || isEditing {
+                answerChoices(horizontal: false)
+                if isEditing {
+                    Button {
+                        isEditing = false
+                        saveIssue = nil
+                        outcomeFocus = .edit
+                    } label: {
+                        Text("Cancel editing answer").font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                    .disabled(isSubmitting)
+                    .accessibilityIdentifier("plan-outcome-cancel-\(plan.id)")
                 }
             } else {
-                VStack(spacing: 6) {
-                    outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success)
-                    outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger)
-                }
+                editButton(compact: false)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var outcomeQuestion: some View {
+        Text("Did this plan happen?").font(.subheadline.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityFocused($outcomeFocus, equals: .question)
+    }
+
+    @ViewBuilder private func answerChoices(horizontal: Bool) -> some View {
+        if horizontal {
+            HStack(spacing: 6) {
+                outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success, stacked: false)
+                outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger, stacked: false)
             }
         } else {
-            HStack(spacing: 6) {
-                savedOutcomeChip
-                Button {
-                    isEditing = true
-                } label: {
-                    Image(systemName: "pencil")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .frame(width: 44, height: 44)
-                        .background(SideSeatTheme.fillTertiary, in: Circle())
-                }
-                .buttonStyle(SSPressButtonStyle())
-                .accessibilityLabel("Change answer")
-                .accessibilityIdentifier("plan-outcome-edit-\(plan.id)")
+            VStack(spacing: 6) {
+                outcomeButton(title: AppLocalization.string("Happened"), systemImage: "checkmark", value: "OCCURRED", tone: .success, stacked: true)
+                outcomeButton(title: AppLocalization.string("Didn't happen"), systemImage: "xmark", value: "DID_NOT_OCCUR", tone: .danger, stacked: true)
             }
         }
     }
 
-    private var savedOutcomeChip: some View {
-        Label(savedAnswerTitle, systemImage: savedAnswerIcon)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(savedAnswerTone.foreground)
-            .lineLimit(1)
-            .minimumScaleFactor(0.78)
-            .padding(.horizontal, 10)
-            .frame(minHeight: 44)
-            .background(savedAnswerTone.fill, in: Capsule())
-            .overlay {
-                Capsule().strokeBorder(savedAnswerTone.stroke, lineWidth: 1)
+    private func editButton(compact: Bool) -> some View {
+        Button {
+            isEditing = true
+            saveIssue = nil
+            outcomeFocus = .question
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "pencil").font(.system(size: 18)).accessibilityHidden(true)
+                if !compact {
+                    Text("Change answer").font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                }
             }
-            .accessibilityLabel(AppLocalization.string("Your answer is saved privately. Only you can see it."))
-            .accessibilityValue(savedAnswerTitle)
-            .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
+            .frame(minWidth: 44, maxWidth: compact ? nil : .infinity, minHeight: 44, alignment: compact ? .center : .leading)
+            .background(compact ? SideSeatTheme.fillTertiary : Color.clear, in: Circle())
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+        .disabled(isSubmitting)
+        .accessibilityLabel("Change answer")
+        .accessibilityFocused($outcomeFocus, equals: .edit)
+        .accessibilityIdentifier("plan-outcome-edit-\(plan.id)")
+    }
+
+    private func savedOutcomeChip(stacked: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: savedAnswerIcon).font(.system(size: 18, weight: .semibold)).accessibilityHidden(true)
+            Text(savedAnswerTitle).fixedSize(horizontal: false, vertical: true)
+        }
+        .font(.subheadline.weight(.semibold)).foregroundStyle(savedAnswerTone.foreground)
+        .padding(.horizontal, 10).padding(.vertical, stacked ? 8 : 0)
+        .frame(maxWidth: stacked ? .infinity : nil, minHeight: 44, alignment: .leading)
+        .background(savedAnswerTone.fill, in: RoundedRectangle(cornerRadius: stacked ? SideSeatTheme.controlRadius : 1000))
+        .overlay { RoundedRectangle(cornerRadius: stacked ? SideSeatTheme.controlRadius : 1000).strokeBorder(savedAnswerTone.stroke, lineWidth: 1) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(AppLocalization.string("Your answer is saved privately. Only you can see it."))
+        .accessibilityValue(savedAnswerTitle)
+        .accessibilityFocused($outcomeFocus, equals: .saved)
+        .accessibilityIdentifier("plan-outcome-saved-\(plan.id)")
     }
 
     private var savedAnswerTitle: String {
@@ -498,26 +560,24 @@ struct PlanOutcomePromptView: View {
     }
 
     private func outcomeButton(
-        title: String,
-        systemImage: String,
-        value: String,
-        tone: OutcomeTone
+        title: String, systemImage: String, value: String, tone: OutcomeTone, stacked: Bool
     ) -> some View {
         let isSelected = plan.viewerOutcome == value
         return Button {
+            attemptedAnswer = value
+            saveIssue = nil
             onAnswer(value)
         } label: {
-            Label(title, systemImage: systemImage)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(tone.foreground)
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .padding(.horizontal, 9)
-                .frame(minHeight: 44)
-                .background(tone.fill, in: Capsule())
-                .overlay {
-                    Capsule().strokeBorder(tone.stroke, lineWidth: 1)
-                }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: systemImage).font(.system(size: 18, weight: .semibold)).accessibilityHidden(true)
+                Text(title).fixedSize(horizontal: false, vertical: true)
+            }
+            .font(stacked ? .subheadline.weight(.semibold) : .caption.weight(.semibold))
+            .foregroundStyle(tone.foreground)
+            .padding(.horizontal, 9).padding(.vertical, stacked ? 8 : 0)
+            .frame(maxWidth: stacked ? .infinity : nil, minHeight: 44, alignment: .leading)
+            .background(tone.fill, in: RoundedRectangle(cornerRadius: stacked ? SideSeatTheme.controlRadius : 1000))
+            .overlay { RoundedRectangle(cornerRadius: stacked ? SideSeatTheme.controlRadius : 1000).strokeBorder(tone.stroke, lineWidth: 1) }
         }
         .buttonStyle(SSPressButtonStyle())
         .disabled(isSubmitting || isSelected)

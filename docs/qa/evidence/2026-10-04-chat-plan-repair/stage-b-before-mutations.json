@@ -1,0 +1,58 @@
+{
+  "plan": {
+    "id": "cmusyp4c6001ul74q3zzxtj3a",
+    "title": "[loop-qa] Campus coffee",
+    "status": "ACCEPTED",
+    "startTime": "2026-10-03T20:58:24.657Z",
+    "endTime": "2026-10-03T21:58:24.657Z",
+    "commitmentId": "cmusyp4c2001sl74qdpodo3pc",
+    "connectionId": "cmusyos2p001gl74qknpfk2s2"
+  },
+  "calendar": [
+    {
+      "id": "cmusypmte002gl74qpeozlwid",
+      "userId": "cmusy38550000e7dgqlw6m002",
+      "startAt": "2026-10-03T20:58:24.657Z",
+      "endAt": "2026-10-03T21:58:24.657Z",
+      "projectionStatus": "ACTIVE"
+    },
+    {
+      "id": "cmusypmtl002il74q5qq6n5sb",
+      "userId": "cmusy38590001e7dgz5noqcyk",
+      "startAt": "2026-10-03T20:58:24.657Z",
+      "endAt": "2026-10-03T21:58:24.657Z",
+      "projectionStatus": "ACTIVE"
+    }
+  ],
+  "originalMessages": [
+    {
+      "id": "cmusyos2t001il74qcwjd0tbp",
+      "body": ""
+    },
+    {
+      "id": "cmusyos33001kl74qy1r5njk1",
+      "body": "[loop-qa] Hello, may I join?"
+    },
+    {
+      "id": "cmusyos35001ml74qtets48ek",
+      "body": "[loop-qa] Yes, let's meet!"
+    },
+    {
+      "id": "cmusyp4ce001wl74q42zvmocn",
+      "body": ""
+    },
+    {
+      "id": "cmusypmtw002kl74q0msewiht",
+      "body": "Plan confirmed"
+    },
+    {
+      "id": "cmusyrsql003nl74qm0751joq",
+      "body": "[loop-qa] Thanks for today!"
+    },
+    {
+      "id": "cmusysfm50049l74qr4rim9z3",
+      "body": "[loop-qa] Great to meet you!"
+    }
+  ],
+  "qaIncomingMessages": []
+}

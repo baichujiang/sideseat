@@ -8,6 +8,24 @@ struct ChatSSEClient: Sendable {
         var data: String
     }
 
+    /// AsyncBytes.lines omits blank lines, which SSE needs as event boundaries.
+    /// Decode complete UTF-8 lines from bytes instead, retaining empty separators.
+    struct ByteDecoder {
+        private var lineBytes: [UInt8] = []
+        private var partial = ""
+
+        mutating func append(_ byte: UInt8) -> [Event] {
+            guard byte == 10 else {
+                lineBytes.append(byte)
+                return []
+            }
+            var line = String(decoding: lineBytes, as: UTF8.self)
+            lineBytes.removeAll(keepingCapacity: true)
+            if line.last == "\r" { line.removeLast() }
+            return ChatSSEClient.parse(line + "\n", carrying: &partial)
+        }
+    }
+
     static func parse(_ chunk: String, carrying partial: inout String) -> [Event] {
         partial += chunk
         var events: [Event] = []

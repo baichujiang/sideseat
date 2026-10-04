@@ -2396,3 +2396,9 @@
 "Latest messages (compact)" = "最新";
 
 "Plan could not be opened. Try again." = "暂时无法打开计划，点此重试。";
+
+"Cancel editing answer" = "取消修改";
+
+"Your answer was not confirmed. Please try again." = "暂未确认保存，请重试。";
+
+"Intention (compact)" = "来源意愿";

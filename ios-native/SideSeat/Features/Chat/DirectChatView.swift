@@ -11,12 +11,14 @@ struct DirectChatView: View {
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .body) private var messageLineHeight: CGFloat = 20.5
     @State private var planHeaderHeight: CGFloat = 0
     @State private var composerHeight: CGFloat = ChatComposerUIKitTextView.minimumHeight + 34
     @State private var composerTextHeight: CGFloat = ChatComposerUIKitTextView.minimumHeight
     @State private var latestControlHeight: CGFloat = 0
     @State private var messageViewportHeight: CGFloat = 0
     @State private var messageBottomY: CGFloat?
+    @State private var readingAnchorsByTextSize: [DynamicTypeSize: String] = [:]
     @State private var planNavigationIssue: String?
     @State private var retryHeaderPlan: NativePlanRequest?
     @State private var planMessageAfterKeyboardDismissal: String?
@@ -80,6 +82,11 @@ struct DirectChatView: View {
         let focus: DirectChatFocus?
     }
 
+    private struct MessageReadingGeometry: Equatable {
+        let textSize: DynamicTypeSize
+        let isAtTop: Bool
+    }
+
     private struct ConversationPlansTaskKey: Hashable {
         let connectionID: String?
         let plans: [NativePlanRequest]
@@ -123,7 +130,7 @@ struct DirectChatView: View {
     private var chatLayout: some View {
         // Keep fixed controls outside the message scroll view so they never cover plan actions.
         GeometryReader { geometry in
-            let minimumMessages = max(88, UIFont.preferredFont(forTextStyle: .body).lineHeight * 2)
+            let minimumMessages = max(88, messageLineHeight * 2)
             let composerChrome = max(34, composerHeight - composerTextHeight)
             let inputLimit = max(ChatComposerUIKitTextView.minimumHeight,
                                  geometry.size.height - planHeaderHeight - latestControlHeight - minimumMessages - composerChrome)
@@ -161,6 +168,9 @@ struct DirectChatView: View {
             .navigationBarTitleDisplayMode(.inline)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("direct-chat")
+            #if DEBUG
+            .accessibilityValue(ProcessInfo.processInfo.arguments.contains("--ui-testing-chat-layout-diagnostics") ? String(describing: dynamicTypeSize) : "")
+            #endif
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     directChatTitle
@@ -446,6 +456,7 @@ struct DirectChatView: View {
 
     private var messageList: some View {
         let displayedMessages = DirectChatStore.presentationMessages(from: store.messages)
+        let textSize = dynamicTypeSize
         return ScrollViewReader { proxy in
             ZStack(alignment: .bottom) {
                 ScrollView {
@@ -601,10 +612,17 @@ struct DirectChatView: View {
                                         openedScheduleShareToken = ScheduleShareNavToken(id: token)
                                     }
                                 )
+                                .id("chat-message-content-\(message.id)")
                                 .padding(.top, focusedPlanMessageID == message.id ? 2 : (connectsAbove ? 2 : 8))
                             }
                             .accessibilityFocused($focusedMessageForAccessibility, equals: message.id)
                             .id(message.id)
+                            .onGeometryChange(for: MessageReadingGeometry.self) { geometry in
+                                let bounds = geometry.frame(in: .named("direct-chat-viewport"))
+                                return MessageReadingGeometry(textSize: textSize, isAtTop: bounds.minY <= 24 && bounds.maxY > 24)
+                            } action: { reading in
+                                if reading.isAtTop { readingAnchorsByTextSize[reading.textSize] = message.id }
+                            }
                         }
                         Color.clear.frame(height: 12).id(ChatScrollAnchor.bottomID)
                             .onGeometryChange(for: CGFloat.self) { geometry in
@@ -625,7 +643,6 @@ struct DirectChatView: View {
                     }
                 )
                 .scrollDismissesKeyboard(.interactively)
-                .defaultScrollAnchor(.bottom)
                 .accessibilityIdentifier("chat-message-list")
                 .coordinateSpace(name: "direct-chat-viewport")
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
@@ -661,10 +678,28 @@ struct DirectChatView: View {
                 guard let messageID else { return }
                 releaseMessageListBottomPin()
                 withAnimation(.easeOut(duration: 0.2)) {
-                    proxy.scrollTo(messageID, anchor: .top)
+                    proxy.scrollTo("chat-message-content-\(messageID)", anchor: .top)
                 }
                 scrollToMessageID = nil
                 focusedMessageForAccessibility = messageID
+            }
+            .onChange(of: dynamicTypeSize) { oldSize, newSize in
+                let wasPinned = keyboardBottomAnchor.isPinned
+                let anchor = readingAnchorsByTextSize[oldSize]
+                Task { @MainActor in
+                    // Font metrics and measured fixed controls settle in separate
+                    // layout passes. Retain the actual reading message across both.
+                    for _ in 0..<2 {
+                        await Task.yield()
+                        guard dynamicTypeSize == newSize else { return }
+                        if wasPinned {
+                            proxy.scrollTo(ChatScrollAnchor.bottomID, anchor: .bottom)
+                        } else if let anchor {
+                            proxy.scrollTo("chat-message-content-\(anchor)", anchor: .top)
+                        }
+                        try? await Task.sleep(for: .milliseconds(60))
+                    }
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .sideSeatChatScrollToBottom)) { note in
                 let animated = (note.userInfo?["animated"] as? Bool) ?? false
@@ -692,7 +727,7 @@ struct DirectChatView: View {
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
                         withTransaction(transaction) {
-                            proxy.scrollTo(initialFocusMessageID, anchor: .top)
+                            proxy.scrollTo("chat-message-content-\(initialFocusMessageID)", anchor: .top)
                         }
                         guard attempt < 2 else { break }
                         try? await Task.sleep(for: .milliseconds(60))
@@ -733,6 +768,10 @@ struct DirectChatView: View {
         }
     }
 
+    private var usesInlineReplyPreview: Bool {
+        replyDraft != nil && dynamicTypeSize.isAccessibilitySize && keyboardBottomAnchor.isKeyboardVisible
+    }
+
     private func composer(maximumInputHeight: CGFloat) -> some View {
         VStack(spacing: 6) {
             if store.isUnrepliedSendBlocked || store.showUnrepliedHint {
@@ -754,7 +793,7 @@ struct DirectChatView: View {
                     .accessibilityIdentifier("chat-action-issue")
             }
 
-            if let reply = replyDraft {
+            if let reply = replyDraft, !usesInlineReplyPreview {
                 HStack(alignment: .top, spacing: 10) {
                     RoundedRectangle(cornerRadius: 1.5)
                         .fill(SideSeatTheme.accent)
@@ -786,25 +825,53 @@ struct DirectChatView: View {
             }
 
             HStack(alignment: .bottom, spacing: 10) {
-                Button {
-                    composerFocus.blur()
-                    presentPrimaryPlan()
-                } label: {
-                    Image(systemName: "calendar.badge.plus")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(SideSeatTheme.utilityAction)
-                        .frame(width: 34, height: 34)
-                        .background(SideSeatTheme.fillSubtle, in: Circle())
-                        .ssIconButtonHitTarget()
+                if usesInlineLatestControl { latestMessagesButton(compact: true) }
+                if let reply = replyDraft, usesInlineReplyPreview {
+                    // Reuse the leading action slot at accessibility sizes so a
+                    // quote never takes away the message viewport while typing.
+                    HStack(spacing: 0) {
+                        Button {
+                            replyDraft = nil
+                            store.clearReply()
+                        } label: {
+                            Image(systemName: "arrowshape.turn.up.left.circle.fill")
+                                .font(.system(size: 28))
+                                .overlay(alignment: .topTrailing) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .background(.bar, in: Circle())
+                                }
+                                .foregroundStyle(SideSeatTheme.utilityAction)
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(AppLocalization.string("Cancel reply"))
+                        .accessibilityValue(AppLocalization.string("Replying to \(reply.sender.displayName)") + ": " + reply.previewText)
+                        .accessibilityIdentifier("chat-reply-cancel")
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("chat-reply-preview")
+                } else if !usesInlineLatestControl {
+                    Button {
+                        composerFocus.blur()
+                        presentPrimaryPlan()
+                    } label: {
+                        Image(systemName: "calendar.badge.plus")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(SideSeatTheme.utilityAction)
+                            .frame(width: 34, height: 34)
+                            .background(SideSeatTheme.fillSubtle, in: Circle())
+                            .ssIconButtonHitTarget()
+                    }
+                    .buttonStyle(SSPressButtonStyle())
+                    .disabled(
+                        store.conversation?.isSelfNotes == true
+                            || store.isUnrepliedSendBlocked
+                            || store.isActingOnPlan
+                    )
+                    .accessibilityIdentifier("chat-composer-plan")
+                    .accessibilityLabel("Plan")
                 }
-                .buttonStyle(SSPressButtonStyle())
-                .disabled(
-                    store.conversation?.isSelfNotes == true
-                        || store.isUnrepliedSendBlocked
-                        || store.isActingOnPlan
-                )
-                .accessibilityIdentifier("chat-composer-plan")
-                .accessibilityLabel("Plan")
 
                 ChatComposerTextInput(
                     draft: composerDraft,
@@ -1134,25 +1201,39 @@ struct DirectChatView: View {
         }
     }
 
+    private var shouldShowLatestMessages: Bool {
+        isInitialViewportVisible && (!isMessageBottomVisible || store.pendingRemoteCount > 0)
+    }
+
+    private var usesInlineLatestControl: Bool {
+        shouldShowLatestMessages && dynamicTypeSize.isAccessibilitySize && keyboardBottomAnchor.isKeyboardVisible
+    }
+
+    private func latestMessagesButton(compact: Bool) -> some View {
+        Button(action: returnToLatestMessages) {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.down").font(.system(size: 16)).accessibilityHidden(true)
+                if !compact {
+                    Text(AppLocalization.string("Latest messages (compact)"))
+                        .font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                }
+                if store.pendingRemoteCount > 0 { Text("\(store.pendingRemoteCount)").font(.caption) }
+            }
+            .padding(.horizontal, compact ? 6 : 12).frame(minWidth: 44, minHeight: 44)
+            .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+        .accessibilityLabel(AppLocalization.string("Back to latest messages"))
+        .accessibilityValue(store.pendingRemoteCount > 0 ? AppLocalization.string("\(store.pendingRemoteCount) new messages") : "")
+        .accessibilityIdentifier("chat-new-messages")
+    }
+
     @ViewBuilder private var latestMessagesControl: some View {
-        if isInitialViewportVisible && (!isMessageBottomVisible || store.pendingRemoteCount > 0) {
+        if shouldShowLatestMessages && !usesInlineLatestControl {
             HStack {
                 Spacer(minLength: 0)
-                Button(action: returnToLatestMessages) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.down").font(.system(size: 16)).accessibilityHidden(true)
-                        Text(AppLocalization.string("Latest messages (compact)"))
-                            .font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
-                        if store.pendingRemoteCount > 0 { Text("\(store.pendingRemoteCount)").font(.caption) }
-                    }
-                    .padding(.horizontal, 12).frame(minHeight: 44)
-                    .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                .accessibilityLabel(AppLocalization.string("Back to latest messages"))
-                .accessibilityValue(store.pendingRemoteCount > 0 ? AppLocalization.string("\(store.pendingRemoteCount) new messages") : "")
-                .accessibilityIdentifier("chat-new-messages")
+                latestMessagesButton(compact: false)
             }
             .padding(.horizontal, 12).padding(.vertical, 4)
             .background(SideSeatTheme.Chat.canvas)
@@ -1414,14 +1495,6 @@ struct ChatComposerTextInput: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Text(placeholder)
-                .font(.body)
-                .foregroundStyle(SideSeatTheme.placeholderText)
-                .padding(.top, 1)
-                .opacity(draft.isEmpty ? 1 : 0)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-
             ChatComposerUIKitTextView(
                 text: draft.text,
                 resetVersion: draft.resetVersion,
@@ -1433,12 +1506,26 @@ struct ChatComposerTextInput: View {
                 onHeightChange: { height in
                     guard abs(editorHeight - height) > 0.5 else { return }
                     editorHeight = height
-                    onMeasuredHeight(height)
                 },
                 onSend: submit
             )
-            .frame(height: editorHeight)
+            // Apply a smaller space budget immediately, before UIKit's deferred
+            // content measurement catches up with a keyboard or quote change.
+            .frame(height: min(editorHeight, max(ChatComposerUIKitTextView.minimumHeight, maximumHeight ?? .infinity)))
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { onMeasuredHeight($0) }
         }
+            .overlay(alignment: .topLeading) {
+                // Placeholder text must not add height after a draft is entered.
+                // Long localized placeholders otherwise defeat the input budget.
+                if draft.isEmpty {
+                    Text(placeholder)
+                        .font(.body).lineLimit(1)
+                        .foregroundStyle(SideSeatTheme.placeholderText)
+                        .padding(.top, 1)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+            }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
             .frame(minHeight: 40)
