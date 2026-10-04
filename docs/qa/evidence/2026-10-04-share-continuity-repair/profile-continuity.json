@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "sameUser": true,
+  "basicAccessRetained": true,
+  "campusStillNotReady": true,
+  "unverified": true,
+  "existingMessagesPreserved": true,
+  "acceptedPlanPreserved": true
+}

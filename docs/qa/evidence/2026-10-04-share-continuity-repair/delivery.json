@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "d8bff3c2e837682fdef63e31de373d8f0a60b34d",
+  "branch": "codex/ios-uxui-20260922",
+  "sourcePushed": true,
+  "backend": {
+    "previousDeployment": "dpl_5PfSBjdqFonYm4BhyMfFpvEyBTkG",
+    "deployment": "dpl_J84PyBHUAkJ29LZFVVdC6FbXXhHs",
+    "url": "https://sideseat-l8bhzqe55-baichus-projects.vercel.app",
+    "productionAlias": "https://api.sideseat.de",
+    "readyState": "READY",
+    "promoted": true,
+    "databaseMigrationsChanged": false,
+    "candidateChecksPassed": 7,
+    "productionChecksPassed": 7,
+    "candidateAndProductionQaAccountsRemoved": true,
+    "errorLogs": {
+      "level": "error",
+      "window": "15 minutes immediately after release verification",
+      "entries": 0,
+      "longTermMonitoring": false
+    }
+  },
+  "device": {
+    "model": "iPhone 16 Pro Max",
+    "osVersion": "26.0.1",
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "94",
+    "installSucceeded": true,
+    "launchSucceeded": true,
+    "launchedWithoutTestArguments": true,
+    "processIdentifier": 24778,
+    "processReadbackSucceeded": true,
+    "installedAt": "2026-10-04T13:44:47+02:00",
+    "launchedAt": "2026-10-04T13:45:06+02:00",
+    "processVerifiedAt": "2026-10-04T13:45:27+02:00",
+    "fullPhysicalDeviceFlowTested": false
+  },
+  "evidenceRecordedAt": "2026-10-04T11:46:36.510629+00:00"
+}

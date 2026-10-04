@@ -1,0 +1,16 @@
+{
+  "mode": "production",
+  "origin": "https://api.sideseat.de",
+  "checks": [
+    "public activity carries exact time and intention version",
+    "custom greeting retains selected time in native chat context",
+    "anonymous visitor sees the invitation",
+    "registered guest has basic app access with honest unverified profile",
+    "accepted plan appears in both native calendar payloads",
+    "later profile setup preserves identity, accepted plan and continued messages",
+    "native configuration available"
+  ],
+  "completed": true,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-04T11:44:10.803Z"
+}

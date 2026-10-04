@@ -1,0 +1,38 @@
+{
+  "checks": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "initialStatus": 200,
+      "status": 200,
+      "finalUrl": "https://api.sideseat.de/api/v1/client-config"
+    },
+    {
+      "url": "https://sideseat.de/privacy",
+      "initialStatus": 307,
+      "status": 200,
+      "finalUrl": "https://www.sideseat.de/privacy"
+    },
+    {
+      "url": "https://sideseat.de/support",
+      "initialStatus": 307,
+      "status": 200,
+      "finalUrl": "https://www.sideseat.de/support"
+    },
+    {
+      "url": "https://sideseat.de/.well-known/apple-app-site-association",
+      "initialStatus": 307,
+      "status": 200,
+      "finalUrl": "https://www.sideseat.de/.well-known/apple-app-site-association",
+      "previewAssociated": true
+    },
+    {
+      "url": "https://www.sideseat.de/.well-known/apple-app-site-association",
+      "initialStatus": 200,
+      "status": 200,
+      "finalUrl": "https://www.sideseat.de/.well-known/apple-app-site-association",
+      "previewAssociated": true
+    }
+  ],
+  "at": "2026-10-04T11:44:35.105Z",
+  "note": "Apex site redirects to www; the app-associated www AASA responds directly with 200."
+}

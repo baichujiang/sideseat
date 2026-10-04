@@ -27,12 +27,14 @@
 
 本轮完整主流程 `resumedAfterRegistration=false`，五个原生阶段全部通过。另有 10 项后端测试、10 项原生模型测试、13 项 OpenAPI 测试和 1 项浏览器过期选择恢复测试通过；类型检查、定向 lint 和 OpenAPI 一致性检查通过。完整流程没有以预建计划、伪造校园认证或接续上轮失败结果代替测试。
 
+补充资料后继续联系的 HTTP 检查也通过：学校资料更新保留同一账号、未认证状态、原消息和已接受计划。首次检查脚本误把 PATCH 的直接资料响应当成 `profile` 包装对象；修正脚本后按实际响应复验通过，没有为此改动产品。
+
 本地 SSE 写入到可见：回复 1459 ms、邀请 491 ms，仅代表该测试环境。
 
 [闭环证据](evidence/2026-10-04-share-continuity-repair/browser-summary.json) / [最终数据](evidence/2026-10-04-share-continuity-repair/final-state.json)。测试数据沿用 `share93` 标识，实际测试的是本轮源码，不代表 Preview 93 已含修复。
 
 ## 发布与边界
 
-源码提交、后端候选/正式验证和手机 Preview 94 安装状态见[发布记录](../releases/2026-10-04-preview94-share-continuity.md)。本报告不将模拟器测试等同于真机全部闭环验收；小红书 SDK 实际发布、第三方内置浏览器、未安装 App 后恢复对话和真机 VoiceOver 不在本次测试范围。
+源码 `d8bff3c` 已推送；候选和正式后端各七项接续验收通过，测试账号已清理；手机 Preview 94 已安装、回读版本并正常启动。具体状态见[发布记录](../releases/2026-10-04-preview94-share-continuity.md)。本报告不将模拟器测试等同于真机全部闭环验收；小红书 SDK 实际发布、第三方内置浏览器、未安装 App 后恢复对话和真机 VoiceOver 不在本次测试范围。
 
 原始记录保留于 `/tmp/sideseat-preview94-share-loop-20261004/`；密码、Cookie、原始分享 token 不提交。
