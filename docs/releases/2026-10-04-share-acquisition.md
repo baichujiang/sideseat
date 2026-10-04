@@ -8,7 +8,7 @@
 
 - 正式 API：[api.sideseat.de](https://api.sideseat.de)，公开分享站点：[sideseat.de](https://sideseat.de)。
 - 状态 READY；部署 `dpl_5PfSBjdqFonYm4BhyMfFpvEyBTkG`，候选地址 `https://sideseat-b48028pwy-baichus-projects.vercel.app`。
-- 修复源码提交 `5ec86688ecfe1b289d649e01b971a751efbb3279`，已推送 `origin/codex/ios-uxui-20260922`。
+- 修复源码提交 `5ec86688ecfe1b289d649e01b971a751efbb3279`；闭环测试、失败报告和发布证据提交 `7dc3734`。均已推送 `origin/codex/ios-uxui-20260922`。
 - 从上一正式部署 `dpl_56ce6g2JaUMRuQMCbofBftrMMq1s` 的受控源码建立候选，比较 1,860 个基线文件，仅修改 `lib/v2/weekly-intents.ts`。活跃工作区与候选的 79 个分享获客相关后端文件一致，未夹带资料外观等未完成修改。
 - 使用生产环境构建候选并跳过域名切换。Prisma 检查 146 条迁移已同步，`SKIP_DATABASE_MIGRATIONS=1`，没有迁移或修改历史数据。
 - 候选 7 项真实 HTTP 验证通过后，再核对正式域名仍指向原部署，执行 promote。正式域名再次通过 7 项检查，包含注册登录、未来明确时间意愿、刷新保留 ACTIVE、公开链接、匿名页面活动与时间、分享后状态和原生 client-config。生产复测完成于 12:50 CEST，临时 QA 账号均已通过账户删除 API 清理。
