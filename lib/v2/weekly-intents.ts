@@ -234,12 +234,14 @@ async function expireCurrentRows(
   userId: string,
   now: Date,
 ) {
+  // Prisma stores DateTime as UTC timestamp without time zone, but binds Date
+  // parameters as timestamptz. Compare in UTC regardless of the DB session zone.
   const stale = await db.$queryRaw<Array<{ id: string }>>(Prisma.sql`
     SELECT "id"
     FROM "WeeklyIntent"
     WHERE "userId" = ${userId}
       AND "status" IN ('ACTIVE', 'PAUSED')
-      AND "expiresAt" <= ${now}
+      AND "expiresAt" <= (${now}::timestamptz AT TIME ZONE 'UTC')
     ORDER BY "id"
     FOR UPDATE
   `);
