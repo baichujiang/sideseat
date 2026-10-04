@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 const url = new URL(process.env.DATABASE_URL ?? "http://invalid");
 assert(["localhost", "127.0.0.1"].includes(url.hostname));
-assert(["/sideseat_same_peer_20261003", "/sideseat_repeat_fix_20261003"].includes(url.pathname));
+assert(["/sideseat_same_peer_20261003", "/sideseat_repeat_fix_20261003", "/sideseat_preview93_same_peer_20261004"].includes(url.pathname));
 const db = new PrismaClient();
 const firstTitle = "[loop-qa] Campus coffee";
 const secondTitle = "[same-peer] Coffee again";

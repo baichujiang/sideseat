@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "mode": "check-second-pending",
+  "secondPlan": "cmutmmse7004o13tq8dlsdjvw",
+  "status": "PENDING",
+  "sameConnection": "cmutmhpbr001g13tq9okeah2y",
+  "secondPlanCalendarEntries": 0,
+  "retainedFirstPlanCalendarEntries": 2,
+  "firstPlanOutcomes": 2
+}

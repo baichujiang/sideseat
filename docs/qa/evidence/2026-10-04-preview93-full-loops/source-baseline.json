@@ -1,0 +1,10 @@
+{
+  "appSourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "head": "ab0994bcefc74a8200fd61f726875e4fe2d3255b",
+  "verifiedFiles": 294,
+  "differencesFromDeliveredSnapshot": [
+    "ios-native/SideSeat.xcodeproj/xcshareddata/xcschemes/SideSeat-Preview.xcscheme",
+    "ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift"
+  ],
+  "testBuild": "Development native simulator; same app implementation as Preview 93"
+}

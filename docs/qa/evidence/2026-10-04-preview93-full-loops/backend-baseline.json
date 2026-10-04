@@ -1,0 +1,9 @@
+{
+  "kind": "local active working tree API",
+  "trackedFilesHashed": 868,
+  "apns": "disabled in isolated QA environment",
+  "databasePort": 5433,
+  "appSourceCommit": "6ecd358",
+  "productionBackendChanged": false,
+  "unrelatedWorkingTreeChangesPreserved": true
+}

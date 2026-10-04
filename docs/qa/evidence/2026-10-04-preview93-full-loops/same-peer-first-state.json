@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "mode": "check-first",
+  "firstPlan": "cmutmi2ku001u13tqhdwzukic",
+  "connection": "cmutmhpbr001g13tq9okeah2y",
+  "calendarOwners": [
+    "cmutmf7p20000q4g366mst361",
+    "cmutmf7qp0001q4g33w81voz9"
+  ],
+  "sourceIntentions": "ENDED",
+  "noOutcomesYet": true
+}

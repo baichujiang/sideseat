@@ -1,0 +1,13 @@
+{
+  "result": "PASS",
+  "firstPlan": "cmutmi2ku001u13tqhdwzukic",
+  "secondPlan": "cmutmmse7004o13tq8dlsdjvw",
+  "sameConnection": "cmutmhpbr001g13tq9okeah2y",
+  "intentions": 2,
+  "opportunities": 1,
+  "acceptedPlans": 2,
+  "calendarEntries": 4,
+  "firstPlanOutcomes": 2,
+  "sharedEncounters": 1,
+  "secondPlanOutcomes": 0
+}

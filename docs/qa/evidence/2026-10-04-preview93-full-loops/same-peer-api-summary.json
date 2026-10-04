@@ -1,0 +1,8 @@
+{
+  "statusCounts": {
+    "200": 265,
+    "201": 17
+  },
+  "errors4xx5xx": 0,
+  "note": "Local development compilation and serial QA execution; not production latency evidence."
+}
