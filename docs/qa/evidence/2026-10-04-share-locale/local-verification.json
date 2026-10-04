@@ -1,0 +1,22 @@
+{
+  "browserLocaleFlow": "PASS",
+  "timeSelectionRegression": "PASS",
+  "testedBrowserLanguages": [
+    "zh-CN",
+    "de-DE",
+    "en-US",
+    "fr-FR",
+    "zh-TW"
+  ],
+  "manualChoiceSurvivesReload": true,
+  "copiedLinkDoesNotForceRecipientLanguage": true,
+  "serverRenderedMainLanguageVerified": true,
+  "oldNextLocaleIgnored": true,
+  "unavailablePageLocalized": true,
+  "typescriptSourceCheck": "PASS (isolated config excludes stale Next generated build directories)",
+  "focusedEslint": "PASS",
+  "initialHarnessIssues": [
+    "New fixture initially had a 40-character token; corrected to required 48 characters.",
+    "Default typecheck included stale and current Next generated route types together; isolated source typecheck passed."
+  ]
+}

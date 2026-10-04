@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import { publicIntention } from "@/lib/intent-share/service";
 import { getSessionUser } from "@/lib/auth/session";
-import { getServerAppLocale } from "@/lib/i18n/server-locale";
-import { shareCopy, type ShareLocale } from "@/lib/intent-share/copy";
+import { shareCopy } from "@/lib/intent-share/copy";
+import { resolveShareLocale, SHARE_LOCALE_COOKIE } from "@/lib/intent-share/locale";
 import { IntentShareClient } from "./share-client";
 import styles from "./share.module.css";
 export const dynamic = "force-dynamic";
@@ -16,9 +17,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params, searchParams }: Props) {
   const { token } = await params;
   const requested = (await searchParams).lang;
-  const locale = (requested && requested in shareCopy ? requested : await getServerAppLocale()) as ShareLocale;
+  const [jar, requestHeaders] = await Promise.all([cookies(), headers()]);
+  const locale = resolveShareLocale({ requested, saved: jar.get(SHARE_LOCALE_COOKIE)?.value,
+    acceptLanguage: requestHeaders.get("accept-language") });
   const user = await getSessionUser();
   const value = await publicIntention(token, user?.id);
-  if (!value) return <main className={styles.page}><div className={styles.wrap}><header className={styles.brand}>SideSeat<span>together, naturally.</span></header><section className={styles.card}><h1>{shareCopy[locale].unavailable}</h1></section></div></main>;
+  if (!value) return <main lang={locale} className={styles.page}><div className={styles.wrap}><header className={styles.brand}>SideSeat<span>together, naturally.</span></header><section className={styles.card}><h1>{shareCopy[locale].unavailable}</h1></section></div></main>;
   return <IntentShareClient token={token} intention={value} locale={locale} />;
 }

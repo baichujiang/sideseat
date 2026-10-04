@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { CalendarPlus, Check, ChevronRight, Clock3, Copy, MapPin, MessageCircle, Send, X } from "lucide-react";
 import type { SharedConversation, SharedIntention, SharedPlan } from "@/lib/intent-share/service";
 import { shareCopy, type ShareLocale } from "@/lib/intent-share/copy";
+import { isShareLocale, SHARE_LOCALE_COOKIE } from "@/lib/intent-share/locale";
 import styles from "./share.module.css";
 type Conversation = SharedConversation & { isGuest: boolean; username: string | null; intention?: SharedIntention | null };
 async function api(url: string, body?: object, key?: string) {
@@ -28,6 +29,17 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
   const planKeys = useRef(new Map<string, string>());
   const messageKey = useRef<{body:string;key:string}|null>(null), calendarKey = useRef<{body:string;key:string}|null>(null);
   const url = `/api/public/intent-share/${token}`;
+  function recipientURL() {
+    const link = new URL(window.location.href);
+    link.searchParams.delete('lang');
+    return link.href;
+  }
+  function changeLanguage(next: string) {
+    if (!isShareLocale(next)) return;
+    setLocale(next);
+    document.cookie = `${SHARE_LOCALE_COOKIE}=${next}; Path=/share/intent; Max-Age=31536000; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+    window.history.replaceState(window.history.state, '', recipientURL());
+  }
   const refresh = useCallback(async () => {
     const current = ++revision.current;
     const data = await api(url) as Conversation;
@@ -142,10 +154,10 @@ export function IntentShareClient({ token, intention: initialIntention, locale: 
     await api('/api/v1/calendar/events',payload,calendarKey.current.key); setModal(null); setNotice(t.calendarSaved);
   }); }
   const timing = value.timePreference;
-  return <main className={styles.page}><div className={styles.wrap}>
-    <header className={styles.brand}>SideSeat<span>together, naturally.</span><select aria-label="Language" value={locale} onChange={e=>setLocale(e.target.value as ShareLocale)}><option value="zh-CN">中文</option><option value="en">EN</option><option value="de">DE</option></select></header>
+  return <main lang={locale} className={styles.page}><div className={styles.wrap}>
+    <header className={styles.brand}>SideSeat<span>together, naturally.</span><select aria-label="Language" value={locale} onChange={e=>changeLanguage(e.target.value)}><option value="zh-CN">中文</option><option value="en">EN</option><option value="de">DE</option></select></header>
     <section className={styles.card} aria-label={t.invitation}>
-      <div className={styles.byline}><div className={styles.avatar}>{value.host.slice(0,1)}</div><div><strong>{value.host}</strong><p>{t.invitation}</p></div><button className={styles.icon} aria-label={t.copy} onClick={()=>run(async()=>{await navigator.clipboard.writeText(window.location.href);setNotice(t.copied);})}><Copy size={19}/></button></div>
+      <div className={styles.byline}><div className={styles.avatar}>{value.host.slice(0,1)}</div><div><strong>{value.host}</strong><p>{t.invitation}</p></div><button className={styles.icon} aria-label={t.copy} onClick={()=>run(async()=>{await navigator.clipboard.writeText(recipientURL());setNotice(t.copied);})}><Copy size={19}/></button></div>
       <h1>{value.title}</h1>{value.note && <p className={styles.note}>{value.note}</p>}
       <div className={styles.divider}/><div className={styles.sectionTitle}><Clock3 size={18}/><h2>{t.availability}</h2><span>{value.timeZone}</span></div>
       {windows.length > 0 ? <div className={styles.times}>{windows.map(w=><button key={w.startAt} aria-pressed={w.startAt===selected} className={w.startAt===selected?styles.selected:''} onClick={()=>setSelected(w.startAt)}><span>{date(w.startAt)}</span><strong>{time(w.startAt)} – {time(w.endAt)}{date(w.startAt)!==date(w.endAt)?` · ${date(w.endAt)}`:''}</strong>{w.startAt===selected?<Check size={17}/>:<span className={styles.radio}/>}</button>)}<button aria-pressed={selected===null} onClick={()=>setSelected(null)} className={selected===null?styles.selected:''}>{t.undecided}</button></div> : <div className={styles.flexible}><strong>{timing?.kind==='FLEXIBLE'?t.flexible:t.undecided}</strong>{timing?.kind==='FLEXIBLE'&&<p>{timing.startDate} — {timing.endDate} · {({ANY:t.any,MORNING:t.morning,AFTERNOON:t.afternoon,EVENING:t.evening} as Record<string,string>)[timing.period || 'ANY']}</p>}</div>}
