@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "6ecd35884cb2f722196afa025c9e70d81a0d5b49",
+  "previewBuild": "93",
+  "previousPreviewBuild": "92",
+  "githubPushed": true,
+  "installedVersionReadBack": true,
+  "launchVerified": false,
+  "launchBlockedReason": "Device locked; operating system denied launching the app.",
+  "backendChanged": false,
+  "existingBackendBaseline": "dpl_56ce6g2JaUMRuQMCbofBftrMMq1s",
+  "recordedAt": "2026-10-04T01:29:52.316166+00:00"
+}
