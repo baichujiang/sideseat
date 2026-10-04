@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-04T15:29:17.998619+00:00",
+  "sourceCommit": "7e1917f9cb9950d6cec09a9c2d13206c9449fbc0",
+  "guideCommit": "59e8fab96b508847ea8432a2c0541abe53a3aa2b",
+  "branch": "codex/ios-uxui-20260922",
+  "pushed": true,
+  "deploymentId": "dpl_2xsttrcgHvv9rpo3CWojEFmBDTVE",
+  "deploymentURL": "https://sideseat-1r1qqr7eh-baichus-projects.vercel.app",
+  "aliases": {
+    "www.sideseat.de": {
+      "deployment": "dpl_2xsttrcgHvv9rpo3CWojEFmBDTVE",
+      "state": "READY"
+    },
+    "api.sideseat.de": {
+      "deployment": "dpl_2xsttrcgHvv9rpo3CWojEFmBDTVE",
+      "state": "READY"
+    }
+  },
+  "migrationChanges": [],
+  "initialDeployment": "dpl_6YuMhwWnABskyEg9FxWjf33JSmPN",
+  "previousProductionBeforeTask": "dpl_DYWJ3mJArxUhdSHHNWBebghRgPvd",
+  "localTests": {
+    "passed": 8,
+    "serverTimezone": "UTC",
+    "browserTimezone": "Asia/Shanghai",
+    "durationSeconds": 33.6
+  },
+  "candidate": {
+    "mode": "candidate",
+    "checks": [
+      "Chinese system",
+      "German region",
+      "English region",
+      "Unsupported fallback",
+      "Language weights",
+      "Saved manual choice",
+      "Explicit legacy link",
+      "Unavailable invitation follows language",
+      "Closed calendar omitted from SSR",
+      "New registration guide deployed in shared page client",
+      "API config, Privacy, Support and AASA healthy"
+    ],
+    "completed": true,
+    "qaAccountRemoved": true,
+    "at": "2026-10-04T15:27:11.365Z"
+  },
+  "productionBrowser": {
+    "completed": true,
+    "checks": [
+      "Real mobile browser signup shows success, username, login instructions and app inbox link while waiting",
+      "The new web account can sign in through the native API",
+      "Owner reply upgrades the destination to the exact chat; messages and app entry survive reload",
+      "No browser page errors or horizontal overflow"
+    ],
+    "qaAccountsRemoved": true,
+    "browserErrors": [],
+    "at": "2026-10-04T15:28:00.714Z"
+  },
+  "health": {
+    "at": "2026-10-04T15:28:08.616Z",
+    "results": [
+      {
+        "url": "https://api.sideseat.de/api/v1/client-config",
+        "status": 200,
+        "ok": true
+      },
+      {
+        "url": "https://www.sideseat.de/privacy",
+        "status": 200,
+        "ok": true
+      },
+      {
+        "url": "https://www.sideseat.de/support",
+        "status": 200,
+        "ok": true
+      },
+      {
+        "url": "https://www.sideseat.de/.well-known/apple-app-site-association",
+        "status": 200,
+        "ok": true
+      }
+    ]
+  },
+  "runtimeErrorScan": {
+    "deployment": "dpl_2xsttrcgHvv9rpo3CWojEFmBDTVE",
+    "window": "15m",
+    "errorCount": 0
+  },
+  "native": {
+    "build": 96,
+    "changed": false,
+    "installedThisStage": false,
+    "physicalBrowserToAppTestedThisStage": false
+  }
+}
