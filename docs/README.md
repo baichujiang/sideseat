@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-09-07
+**Last updated:** 2026-10-03
 
 ## Read this first
 
@@ -38,6 +38,7 @@ Historical build evidence never certifies a newer build.
 | [Together Contract](./TOGETHER_CONTRACT.md) | Weekly Intent, matching session and Mutual Opportunity engineering rules |
 | [Safety](./SAFETY.md) | Pair-wide Block, Plan/Calendar cleanup, privacy and concurrency |
 | [Native iOS](./IOS.md) | SwiftUI architecture, environments, build and Calendar sync |
+| [Profile personalization](./PROFILE_PERSONALIZATION.md) | Profile completeness, themes, decorative icons, display styles and Plus entitlement |
 | [Membership](./MEMBERSHIP.md) | Free/Plus identity, invitation redemption limits and operator instructions |
 | [Design System](./DESIGN_SYSTEM.md) | Tokens, reusable UI, interaction and visual acceptance |
 | [Release](./RELEASE.md) | Database/Vercel/TestFlight/App Store procedure and gates |

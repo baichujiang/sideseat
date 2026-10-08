@@ -1,0 +1,5 @@
+
+> sideseat@0.1.0 check:openapi:v1
+> node scripts/check-openapi-v1.mjs
+
+OpenAPI v1 matches 174 implemented operations and passes contract validation.

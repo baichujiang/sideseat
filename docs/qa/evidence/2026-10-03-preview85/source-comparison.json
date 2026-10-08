@@ -1,0 +1,7 @@
+{
+  "base": "Preview 84",
+  "changedFiles": [
+    "ios-native/Configuration/Preview.xcconfig",
+    "ios-native/SideSeat/Features/Together/TogetherRootView.swift"
+  ]
+}

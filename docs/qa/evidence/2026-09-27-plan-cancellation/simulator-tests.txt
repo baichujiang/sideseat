@@ -1,0 +1,238 @@
+Test Suite 'Selected tests' started at 2026-09-27 01:24:41.414.
+Test Suite 'SideSeatTests.xctest' started at 2026-09-27 01:24:41.415.
+Test Suite 'SideSeatTests.xctest' passed at 2026-09-27 01:24:41.415.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'Selected tests' passed at 2026-09-27 01:24:41.415.
+	 Executed 0 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: arm64-apple-ios13.0-simulator
+◇ Suite "Navigation" started.
+◇ Test "Section paging needs deliberate horizontal travel and never wraps" started.
+✔ Test "Section paging needs deliberate horizontal travel and never wraps" passed after 0.001 seconds.
+◇ Test "Together task tabs have a stable order and a useful first section" started.
+✔ Test "Together task tabs have a stable order and a useful first section" passed after 0.001 seconds.
+◇ Test "App shell exposes the new product navigation in its exact order" started.
+✔ Test "App shell exposes the new product navigation in its exact order" passed after 0.001 seconds.
+◇ Test "App shell uses the new customer-facing tab titles" started.
+✔ Test "App shell uses the new customer-facing tab titles" passed after 0.001 seconds.
+◇ Test "Focused plan chat routes remain distinct from ordinary chat routes" started.
+✔ Test "Focused plan chat routes remain distinct from ordinary chat routes" passed after 0.001 seconds.
+◇ Test "Plan deep links preserve commitment and optional revision focus" started.
+✔ Test "Plan deep links preserve commitment and optional revision focus" passed after 0.001 seconds.
+◇ Test "Action Context deep links are not swallowed by the ordinary chat route" started.
+✔ Test "Action Context deep links are not swallowed by the ordinary chat route" passed after 0.001 seconds.
+◇ Test "Routes supported universal links" started.
+✔ Test "Routes supported universal links" passed after 0.001 seconds.
+◇ Test "Universal links route profile handoffs to the Me tab" started.
+✔ Test "Universal links route profile handoffs to the Me tab" passed after 0.001 seconds.
+◇ Test "Course links hand off to course management in the Me tab" started.
+✔ Test "Course links hand off to course management in the Me tab" passed after 0.001 seconds.
+◇ Test "Routes relative push notification paths" started.
+✔ Test "Routes relative push notification paths" passed after 0.001 seconds.
+◇ Test "Parses structured plan pushes and suppresses duplicate notice in the open chat" started.
+✔ Test "Parses structured plan pushes and suppresses duplicate notice in the open chat" passed after 0.001 seconds.
+◇ Test "Builds notification routes from structured conversation identifiers" started.
+✔ Test "Builds notification routes from structured conversation identifiers" passed after 0.001 seconds.
+◇ Test "Mutual opportunity notifications route to Together" started.
+✔ Test "Mutual opportunity notifications route to Together" passed after 0.001 seconds.
+◇ Test "Canonical Together links open the same root as legacy Discover links" started.
+✔ Test "Canonical Together links open the same root as legacy Discover links" passed after 0.001 seconds.
+◇ Test "Mutual opportunity delivery refreshes Together exactly once" started.
+✔ Test "Mutual opportunity delivery refreshes Together exactly once" passed after 0.001 seconds.
+◇ Test "Replays a notification tap received before the app router is installed" started.
+✔ Test "Replays a notification tap received before the app router is installed" passed after 0.001 seconds.
+◇ Test "Rejects unknown and unsafe links" started.
+✔ Test "Rejects unknown and unsafe links" passed after 0.001 seconds.
+◇ Test "Product tutorial copy stays customer-facing" started.
+✔ Test "Product tutorial copy stays customer-facing" passed after 0.001 seconds.
+✔ Suite "Navigation" passed after 0.018 seconds.
+✔ Test run with 19 tests in 1 suite passed after 0.018 seconds.
+2026-09-27 01:24:42.389953+0200 SideSeatUITests-Runner[29906:2316337] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'Selected tests' started at 2026-09-27 01:24:43.002.
+Test Suite 'SideSeatUITests.xctest' started at 2026-09-27 01:24:43.003.
+Test Suite 'PlanCancellationUITests' started at 2026-09-27 01:24:43.003.
+Test Case '-[SideSeatUITests.PlanCancellationUITests testCancellationPopupAcknowledgedAcrossRelaunch]' started.
+    t =     0.00s Start Test at 2026-09-27 01:24:43.004
+    t =     0.02s Set Up
+    t =     0.03s Open app.sideseat.mobile
+    t =     0.03s     Launch app.sideseat.mobile
+2026-09-27 01:24:43.212 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-09-27 01:24:43.212 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     0.62s         Setting up automation session
+objc[29906]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x10b7fc310) and /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x10a75c398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+    t =     1.45s         Wait for app.sideseat.mobile to idle
+    t =     3.56s Waiting 10.0s for "计划变更" Alert to exist
+    t =     4.60s     Checking `Expect predicate `existsNoRetry == 1` for object "计划变更" Alert`
+    t =     4.60s         Checking existence of `"计划变更" Alert`
+    t =     4.77s Checking existence of `StaticText (First Match)`
+    t =     4.80s Find the Target Application 'app.sideseat.mobile'
+    t =     4.95s Added attachment named 'cancellation-notification'
+    t =     4.95s Tap "知道了" Button
+    t =     4.95s     Wait for app.sideseat.mobile to idle
+    t =     4.95s     Find the "知道了" Button
+    t =     5.01s     Check for interrupting elements affecting "知道了" Button
+    t =     5.07s     Synthesize event
+    t =     5.36s     Wait for app.sideseat.mobile to idle
+    t =     5.68s Checking existence of `"计划变更" Alert`
+    t =     5.73s Terminate app.sideseat.mobile:29911
+    t =     6.79s Open app.sideseat.mobile
+    t =     6.79s     Launch app.sideseat.mobile
+2026-09-27 01:24:49.793 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-09-27 01:24:49.793 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     7.00s         Setting up automation session
+    t =     7.90s         Wait for app.sideseat.mobile to idle
+    t =     9.73s Waiting 8.0s for "计划" Button to exist
+    t =    10.77s     Checking `Expect predicate `existsNoRetry == 1` for object "计划" Button`
+    t =    10.78s         Checking existence of `"计划" Button`
+    t =    10.86s Waiting 3.0s for "计划变更" Alert to exist
+    t =    11.90s     Checking `Expect predicate `existsNoRetry == 1` for object "计划变更" Alert`
+    t =    11.91s         Checking existence of `"计划变更" Alert`
+    t =    12.02s         Capturing element debug description
+    t =    12.96s     Checking `Expect predicate `existsNoRetry == 1` for object "计划变更" Alert`
+    t =    12.96s         Checking existence of `"计划变更" Alert`
+    t =    13.02s         Capturing element debug description
+    t =    13.87s     Checking `Expect predicate `existsNoRetry == 1` for object "计划变更" Alert`
+    t =    13.87s         Checking existence of `"计划变更" Alert`
+    t =    13.94s         Capturing element debug description
+    t =    13.94s     Checking existence of `"计划变更" Alert`
+    t =    14.04s Collecting debug information to assist test failure triage
+    t =    14.04s     Requesting snapshot of accessibility hierarchy for app with pid 29923
+    t =    14.20s Tear Down
+Test Case '-[SideSeatUITests.PlanCancellationUITests testCancellationPopupAcknowledgedAcrossRelaunch]' passed (14.504 seconds).
+Test Case '-[SideSeatUITests.PlanCancellationUITests testLateCancellationAndFindNewCompany]' started.
+    t =     0.00s Start Test at 2026-09-27 01:24:57.515
+    t =     0.05s Set Up
+    t =     0.05s Open app.sideseat.mobile
+    t =     0.05s     Launch app.sideseat.mobile
+    t =     0.05s         Terminate app.sideseat.mobile:29923
+2026-09-27 01:24:58.632 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-09-27 01:24:58.632 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.23s         Wait for app.sideseat.mobile to idle
+    t =     4.12s Waiting 10.0s for "计划" Button to exist
+    t =     5.18s     Checking `Expect predicate `existsNoRetry == 1` for object "计划" Button`
+    t =     5.18s         Checking existence of `"计划" Button`
+    t =     5.25s Tap "计划" Button
+    t =     5.25s     Wait for app.sideseat.mobile to idle
+    t =     5.27s     Find the "计划" Button
+    t =     5.29s     Check for interrupting elements affecting "计划" Button
+    t =     5.36s     Synthesize event
+    t =     5.66s     Wait for app.sideseat.mobile to idle
+    t =     7.20s Waiting 5.0s for "plans-row-ui-plan-1" Button to exist
+    t =     8.23s     Checking `Expect predicate `existsNoRetry == 1` for object "plans-row-ui-plan-1" Button`
+    t =     8.24s         Checking existence of `"plans-row-ui-plan-1" Button`
+    t =     8.33s Tap "plans-row-ui-plan-1" Button
+    t =     8.33s     Wait for app.sideseat.mobile to idle
+    t =     8.33s     Find the "plans-row-ui-plan-1" Button
+    t =     8.37s     Check for interrupting elements affecting "plans-row-ui-plan-1" Button
+    t =     8.41s     Synthesize event
+    t =     8.70s     Wait for app.sideseat.mobile to idle
+    t =     8.85s Waiting 8.0s for "plan-options-ui-plan-1" Button to exist
+    t =     9.89s     Checking `Expect predicate `existsNoRetry == 1` for object "plan-options-ui-plan-1" Button`
+    t =     9.90s         Checking existence of `"plan-options-ui-plan-1" Button`
+    t =     9.95s         Capturing element debug description
+    t =    10.88s     Checking `Expect predicate `existsNoRetry == 1` for object "plan-options-ui-plan-1" Button`
+    t =    10.88s         Checking existence of `"plan-options-ui-plan-1" Button`
+    t =    11.00s Tap "plan-options-ui-plan-1" Button
+    t =    11.00s     Wait for app.sideseat.mobile to idle
+    t =    11.00s     Find the "plan-options-ui-plan-1" Button
+    t =    11.08s     Check for interrupting elements affecting "plan-options-ui-plan-1" Button
+    t =    11.15s     Synthesize event
+    t =    11.44s     Wait for app.sideseat.mobile to idle
+    t =    12.73s Tap "取消计划" Button
+    t =    12.73s     Wait for app.sideseat.mobile to idle
+    t =    12.73s     Find the "取消计划" Button
+    t =    12.83s     Check for interrupting elements affecting "plan-cancel-menu-action" Button
+    t =    12.90s     Synthesize event
+    t =    13.20s     Wait for app.sideseat.mobile to idle
+    t =    14.69s Waiting 5.0s for "plan-cancel-confirm" Button to exist
+    t =    15.73s     Checking `Expect predicate `existsNoRetry == 1` for object "plan-cancel-confirm" Button`
+    t =    15.73s         Checking existence of `"plan-cancel-confirm" Button`
+    t =    15.87s Find the "plan-cancel-confirm" Button
+    t =    15.98s Checking existence of `"距离开始不足 2 小时，对方可能已在准备或路上。请选择取消原因。" StaticText`
+    t =    16.10s Find the Target Application 'app.sideseat.mobile'
+    t =    16.29s Added attachment named 'late-cancellation-confirmation'
+    t =    16.29s Tap "plan-cancel-reason" Button
+    t =    16.29s     Wait for app.sideseat.mobile to idle
+    t =    16.29s     Find the "plan-cancel-reason" Button
+    t =    16.40s     Check for interrupting elements affecting "plan-cancel-reason" Button
+    t =    16.49s     Synthesize event
+    t =    16.78s     Wait for app.sideseat.mobile to idle
+    t =    18.02s Tap "身体不适" Button
+    t =    18.02s     Wait for app.sideseat.mobile to idle
+    t =    18.03s     Find the "身体不适" Button
+    t =    18.15s     Check for interrupting elements affecting "身体不适" Button
+    t =    18.25s     Synthesize event
+    t =    18.54s     Wait for app.sideseat.mobile to idle
+    t =    20.07s Find the "plan-cancel-confirm" Button
+    t =    20.20s Tap "plan-cancel-confirm" Button
+    t =    20.20s     Wait for app.sideseat.mobile to idle
+    t =    20.20s     Find the "plan-cancel-confirm" Button
+    t =    20.32s     Check for interrupting elements affecting "plan-cancel-confirm" Button
+    t =    20.42s     Synthesize event
+    t =    20.71s     Wait for app.sideseat.mobile to idle
+    t =    21.25s Waiting 5.0s for "plan-find-company" Button to exist
+    t =    22.28s     Checking `Expect predicate `existsNoRetry == 1` for object "plan-find-company" Button`
+    t =    22.28s         Checking existence of `"plan-find-company" Button`
+    t =    22.40s Checking existence of `"plan-options-ui-plan-1" Button`
+    t =    22.48s Find the Target Application 'app.sideseat.mobile'
+    t =    22.64s Added attachment named 'canceled-plan-chat'
+    t =    22.64s Tap "plan-find-company" Button
+    t =    22.64s     Wait for app.sideseat.mobile to idle
+    t =    22.64s     Find the "plan-find-company" Button
+    t =    22.74s     Check for interrupting elements affecting "plan-find-company" Button
+    t =    22.80s     Synthesize event
+    t =    23.10s     Wait for app.sideseat.mobile to idle
+    t =    24.39s Waiting 8.0s for "添加意愿" NavigationBar to exist
+    t =    25.43s     Checking `Expect predicate `existsNoRetry == 1` for object "添加意愿" NavigationBar`
+    t =    25.44s         Checking existence of `"添加意愿" NavigationBar`
+    t =    25.57s Checking existence of `TextField (First Match)`
+    t =    25.66s Find the Target Application 'app.sideseat.mobile'
+    t =    25.82s Added attachment named 'new-intention-from-canceled-plan'
+    t =    25.82s Tear Down
+Test Case '-[SideSeatUITests.PlanCancellationUITests testLateCancellationAndFindNewCompany]' passed (26.107 seconds).
+Test Case '-[SideSeatUITests.PlanCancellationUITests testNoticeOpensCanceledPlanInChat]' started.
+    t =     0.00s Start Test at 2026-09-27 01:25:23.619
+    t =     0.02s Set Up
+    t =     0.02s Open app.sideseat.mobile
+    t =     0.02s     Launch app.sideseat.mobile
+    t =     0.02s         Terminate app.sideseat.mobile:29942
+2026-09-27 01:25:24.698 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-09-27 01:25:24.699 xcodebuild[29813:2315259] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.29s         Setting up automation session
+    t =     2.18s         Wait for app.sideseat.mobile to idle
+    t =     4.20s Waiting 10.0s for "计划变更" Alert to exist
+    t =     5.24s     Checking `Expect predicate `existsNoRetry == 1` for object "计划变更" Alert`
+    t =     5.25s         Checking existence of `"计划变更" Alert`
+    t =     5.42s Tap "查看详情" Button
+    t =     5.42s     Wait for app.sideseat.mobile to idle
+    t =     5.43s     Find the "查看详情" Button
+    t =     5.49s     Check for interrupting elements affecting "查看详情" Button
+    t =     5.55s     Synthesize event
+    t =     5.84s     Wait for app.sideseat.mobile to idle
+    t =     7.77s Waiting 8.0s for "plan-find-company" Button to exist
+    t =     8.81s     Checking `Expect predicate `existsNoRetry == 1` for object "plan-find-company" Button`
+    t =     8.81s         Checking existence of `"plan-find-company" Button`
+    t =     8.95s Checking existence of `"计划变更" Alert`
+    t =     9.03s Find the Target Application 'app.sideseat.mobile'
+    t =     9.19s Added attachment named 'notification-opens-canceled-plan'
+    t =     9.19s Tear Down
+Test Case '-[SideSeatUITests.PlanCancellationUITests testNoticeOpensCanceledPlanInChat]' passed (9.429 seconds).
+Test Suite 'PlanCancellationUITests' passed at 2026-09-27 01:25:33.048.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 50.040 (50.045) seconds
+Test Suite 'SideSeatUITests.xctest' passed at 2026-09-27 01:25:33.049.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 50.040 (50.046) seconds
+Test Suite 'Selected tests' passed at 2026-09-27 01:25:33.050.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 50.040 (50.048) seconds
+2026-09-27 01:25:33.355 xcodebuild[29813:2315259] [MT] IDETestOperationsObserverDebug: 54.469 elapsed -- Testing started completed.
+2026-09-27 01:25:33.355 xcodebuild[29813:2315259] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-09-27 01:25:33.355 xcodebuild[29813:2315259] [MT] IDETestOperationsObserverDebug: 54.469 sec, +54.469 sec -- end
+
+Test session results, code coverage, and logs:
+	/tmp/plan-cancel-verified-20260927.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

@@ -1,0 +1,37 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "install",
+      "app",
+      "--device",
+      "DBD39EB5-1345-539C-A974-E6128E75A942",
+      "/tmp/sideseat-preview56-20260930/DerivedData/Build/Products/Preview-iphoneos/SideSeat Preview.app",
+      "--json-output",
+      "/tmp/sideseat-preview56-20260930/install-receipt.json"
+    ],
+    "commandType" : "devicectl.device.install.app",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 3,
+    "outcome" : "success",
+    "version" : "518.33"
+  },
+  "result" : {
+    "deviceIdentifier" : "DBD39EB5-1345-539C-A974-E6128E75A942",
+    "installedApplications" : [
+      {
+        "bundleID" : "app.sideseat.mobile.preview",
+        "databaseSequenceNumber" : 29036,
+        "databaseUUID" : "22EB1912-6B03-4C6A-AC06-A31249CE8118",
+        "installationURL" : "file:///private/var/containers/Bundle/Application/6EFA3C73-53A4-4017-A1A0-1E9D45C44AEC/SideSeat%20Preview.app/",
+        "launchServicesIdentifier" : "unknown",
+        "options" : {
+
+        }
+      }
+    ]
+  }
+}

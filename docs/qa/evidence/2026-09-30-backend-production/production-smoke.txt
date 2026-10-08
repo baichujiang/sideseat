@@ -1,0 +1,18 @@
+2026-09-30 — Vercel deployment dpl_ERSM5FbjLHHdEEcqgKPWBW2Q68Dp
+Production alias and endpoint checks completed by 2026-09-30 19:10:53 UTC.
+
+Vercel alias list: api.sideseat.de -> sideseat-mzzv3ixfn-baichus-projects.vercel.app
+Candidate /api/v1/client-config: HTTP 200
+Candidate /api/v1/me/plan-cancellations (anonymous): HTTP 401, expected auth gate
+Candidate /.well-known/apple-app-site-association: HTTP 200
+Candidate /privacy: HTTP 200
+Candidate /support: HTTP 200
+
+Production api.sideseat.de/api/v1/client-config: HTTP 200
+Production api.sideseat.de/api/v1/me/plan-cancellations (anonymous): HTTP 401, expected auth gate
+Canonical www.sideseat.de/.well-known/apple-app-site-association: HTTP 200 after redirect
+Canonical www.sideseat.de/privacy: HTTP 200 after redirect
+Canonical www.sideseat.de/support: HTTP 200 after redirect
+
+No authenticated production account data was read or changed.
+No production two-account flow was run in this release.

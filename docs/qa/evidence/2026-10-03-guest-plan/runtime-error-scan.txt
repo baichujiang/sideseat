@@ -1,0 +1,4 @@
+Resolving deployment "sideseat-ll1h9tisz-baichus-projects.vercel.app"
+Fetching project "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N"
+Fetching logs...
+No logs found for baichus-projects/sideseat

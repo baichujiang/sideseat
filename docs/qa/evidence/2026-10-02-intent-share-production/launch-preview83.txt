@@ -1,0 +1,4 @@
+22:28:11  Acquired tunnel connection to device.
+22:28:11  Enabling developer disk image services.
+22:28:11  Acquired usage assertion.
+Launched application with app.sideseat.mobile.preview bundle identifier.

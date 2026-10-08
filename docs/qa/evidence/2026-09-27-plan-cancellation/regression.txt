@@ -1,0 +1,27 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+✔ the repository v1 contract passes structural and route checks (46.035458ms)
+✔ coordination-language mutation is part of the generated client contract (2.781ms)
+✔ legacy direct Interest documents its actual 201 and explicit wire schema (2.464916ms)
+✔ Discover Actions expose a bounded capability-aware coordination read model (1.894417ms)
+✔ an implementation success status missing from OpenAPI fails validation (0.523292ms)
+✔ operation IDs and request/response schemas are mandatory (0.647834ms)
+✔ strict operation IDs cannot be silently renamed (0.184416ms)
+✔ strict mutations require idempotency and explicit request-body semantics (0.187583ms)
+✔ strict security cannot include an anonymous alternative (0.154042ms)
+✔ B-light operations reject generic success envelopes, including nested refs (0.281959ms)
+✔ new B-light operations require independent manifest registration (0.144417ms)
+✔ B-light oneOf unions require a fixed discriminator in every variant (0.347083ms)
+✔ route discovery includes exported arrow functions and aliased exports (0.356875ms)
+✔ Layer 3 internal acceptance refuses remote databases (0.469458ms)
+✔ two private permissions + new intents → fresh consent → new Plan → both Calendars → second Shared Encounter (985.365583ms)
+✔ withdrawal, Outcome editing, feature kill switch and Block retain private safe behavior (187.908416ms)
+﹣ local HTTP route authenticates, keeps permission private and replays idempotently (0.191959ms) # requires localhost database and LAYER3_LOCAL_HTTP_URL
+✔ bookmark → first message → recipient reply preserves context and opens one chat (845.428416ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 1310.591917

@@ -604,6 +604,7 @@ model User {
   semester                           Int?
   graduationYear                     Int?
   avatarUrl                          String?
+  profileAppearance                  Json?
   bio                                String?
   discoverByCourse                   Boolean                             @default(true)
   discoverByMajor                    Boolean                             @default(true)

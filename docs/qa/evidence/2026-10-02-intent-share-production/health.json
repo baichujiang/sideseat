@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-02T20:27:51.071Z",
+  "results": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "status": 200,
+      "contentType": "application/json",
+      "bytes": 819
+    },
+    {
+      "url": "https://api.sideseat.de/.well-known/apple-app-site-association",
+      "status": 200,
+      "contentType": "application/json",
+      "bytes": 840,
+      "applinksPresent": true
+    },
+    {
+      "url": "https://www.sideseat.de/privacy",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 28217
+    },
+    {
+      "url": "https://www.sideseat.de/support",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 15084
+    },
+    {
+      "url": "https://www.sideseat.de/share/intent/release-check-invalid",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytes": 13982
+    }
+  ]
+}

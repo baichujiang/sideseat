@@ -1,0 +1,5 @@
+Pipi web page 200
+Pipi cookie-auth admin API 200
+ordinary QA web page 200
+ordinary QA cookie-auth admin API 403
+Temporary web sessions removed: 2

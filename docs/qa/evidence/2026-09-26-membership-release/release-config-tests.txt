@@ -1,0 +1,148 @@
+
+> sideseat@0.1.0 test:release:config
+> npm run test:ios-release:config && npm run test:profile && npm run test:verification && tsx --test tests/ops/cron-monitor-config.test.ts tests/release/production-readiness.test.ts
+
+
+> sideseat@0.1.0 test:ios-release:config
+> tsx --test tests/ios-release/*.test.ts
+
+▶ isApnsConfigured
+  ✔ uses a legacy key only for its declared default environment (0.50775ms)
+  ✔ selects independent credentials for Sandbox and Production (0.155584ms)
+  ✔ prefers environment-scoped credentials over the legacy key (0.109791ms)
+  ✔ honors APNS_USE_SANDBOX override (0.118292ms)
+  ✔ routes each device token to its own APNs environment (0.690667ms)
+✔ isApnsConfigured (2.335833ms)
+▶ APNs payload
+  ✔ carries routing, grouping, event context, and an exact unread badge (0.482917ms)
+  ✔ normalizes negative badge counts to zero (0.093667ms)
+  ✔ keeps discover comment routing context in the APNs payload (0.104833ms)
+✔ APNs payload (0.798583ms)
+▶ native client APNs capability
+  ✔ does not advertise TestFlight delivery when only Sandbox is configured (0.141542ms)
+  ✔ advertises TestFlight delivery only with Production credentials (0.111375ms)
+✔ native client APNs capability (0.402416ms)
+▶ isStoreKitAppleApiConfigured
+  ✔ is false without Apple API credentials (0.066333ms)
+  ✔ is true when issuer, key id and private key are set (0.039042ms)
+✔ isStoreKitAppleApiConfigured (0.205417ms)
+▶ native iOS release assets
+  ✔ loads optional local signing values in every app configuration (0.806667ms)
+  ✔ declares push and Universal Link entitlements (0.329958ms)
+  ✔ registers Debug and Release device tokens with explicit APNs environments (0.378292ms)
+  ✔ serves only the Universal Link paths understood by the native router (0.2505ms)
+  ✔ declares linked product data without tracking (0.287542ms)
+  ✔ starts the native crash reporter without default PII (0.414709ms)
+  ✔ declares that the app uses no non-exempt encryption (0.202ms)
+  ✔ uploads Production archive dSYMs through a guarded Sentry build phase (0.253167ms)
+  ✔ requires on-device speech recognition (0.224417ms)
+  ✔ localizes sensitive permission prompts (0.306333ms)
+  ✔ rejects placeholder Associated Domains for Production (0.079083ms)
+✔ native iOS release assets (3.687208ms)
+▶ native performance CI configuration
+  ✔ runs every performance test in isolation from the functional suite (0.803375ms)
+✔ native performance CI configuration (1.21375ms)
+▶ physical iPhone destination resolver
+  ✔ selects the hardware iPhone UDID and ignores iPad and Simulator IDs (13.39475ms)
+  ✔ honors an explicitly selected physical device (6.948917ms)
+  ✔ fails instead of mistaking an iPhone Simulator for hardware (11.064167ms)
+✔ physical iPhone destination resolver (31.978333ms)
+▶ Production Sentry dSYM upload
+  ✔ does nothing for Development and non-archive actions (12.370958ms)
+  ✔ fails a Production archive before upload when credentials are missing (32.641833ms)
+  ✔ uploads the exact generated dSYM with the configured organization and project (275.174667ms)
+  ✔ loads the upload token from the macOS Keychain fallback (515.642583ms)
+✔ Production Sentry dSYM upload (836.561625ms)
+ℹ tests 31
+ℹ suites 8
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 982.776875
+
+> sideseat@0.1.0 test:profile
+> tsx --test tests/profile/*.test.ts
+
+▶ native MVP readiness
+  ✔ requires real coordination languages rather than app locale (0.708125ms)
+  ✔ is ready only when campus identity, languages, and verification are complete (0.077208ms)
+  ✔ keeps pending and rejected verification out of the ready state (0.089958ms)
+  ✔ requires a supported campus identity (0.050792ms)
+✔ native MVP readiness (1.414667ms)
+▶ school change social state
+  ✔ treats canonical and full school names as the same school (0.358792ms)
+  ✔ archives old-school social state without deleting its history (0.678125ms)
+✔ school change social state (1.464291ms)
+✔ all 20 stable preset ids have identical original web and native assets (6.226917ms)
+✔ custom photos stay unchanged and missing avatars use the shared p01 default (0.146041ms)
+▶ username change policy
+  ✔ allows three changes during a seven-day window (0.727416ms)
+  ✔ blocks a fourth change until seven days after the window began (1.009ms)
+  ✔ resets the allowance after the seven-day window (0.125833ms)
+✔ username change policy (2.358708ms)
+ℹ tests 11
+ℹ suites 3
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 167.479542
+
+> sideseat@0.1.0 test:verification
+> tsx --test tests/verification/*.test.ts
+
+▶ school verification policy
+  ✔ manual proof retention is thirty days (1.238125ms)
+✔ school verification policy (1.659083ms)
+▶ school-scoped verification state
+  ✔ a school without a saved state resets the mirrored user identity (0.658666ms)
+  ✔ the selected school's saved identity is mirrored to the user (0.176167ms)
+✔ school-scoped verification state (1.285417ms)
+ℹ tests 3
+ℹ suites 2
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.04825
+▶ cron monitor configuration
+  ✔ routes success and failure to the matching job endpoints (0.792416ms)
+  ✔ does not let one configured job mask a missing job (0.118458ms)
+  ✔ rejects malformed and private endpoints (0.241459ms)
+  ✔ keeps the legacy single endpoint only as a compatibility fallback (0.052333ms)
+✔ cron monitor configuration (1.698375ms)
+▶ production readiness guard
+  ✔ accepts a complete production configuration (36.678833ms)
+  ✔ rejects backup retention below seven days (33.269458ms)
+  ✔ rejects a stale restore drill (33.749791ms)
+  ✔ rejects persistent remote migration authority (33.323709ms)
+  ✔ rejects a production-wide V2 TestFlight bypass (34.889708ms)
+  ✔ rejects a production-wide small-group bypass (34.205667ms)
+  ✔ rejects a private cron monitor endpoint (35.118083ms)
+  ✔ requires an independent monitor for every deployed cron (42.328875ms)
+  ✔ requires a separate token for private verification documents (36.227959ms)
+  ✔ accepts a monitored personal support inbox (35.558291ms)
+  ✔ rejects an invalid support inbox (33.4795ms)
+  ✔ rejects a sandbox-only APNs key for an App Store release (33.369333ms)
+  ✔ allows StoreKit to remain disabled for a release without purchases (33.649875ms)
+  ✔ requires strict Apple verification before StoreKit can be enabled (33.610583ms)
+✔ production readiness guard (490.636417ms)
+▶ build database migration policy
+  ✔ runs migrations for local databases (0.180708ms)
+  ✔ does not let Preview or CI builds mutate a remote database by default (0.454208ms)
+  ✔ skips a remote database during a local build unless explicitly approved (0.057042ms)
+  ✔ honors an explicit skip before any migration approval (0.038ms)
+  ✔ skips migrations when the local process cannot verify the target (0.102958ms)
+✔ build database migration policy (0.930125ms)
+ℹ tests 23
+ℹ suites 3
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 615.328292

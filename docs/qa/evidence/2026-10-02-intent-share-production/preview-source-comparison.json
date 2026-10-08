@@ -1,0 +1,10 @@
+{
+  "builtVersion": "82",
+  "installedVersion": "83",
+  "fileCount": 289,
+  "differences": [
+    "ios-native/Configuration/Preview.xcconfig",
+    "ios-native/SideSeat/Features/Chat/ChatsRootView.swift"
+  ],
+  "intentionSharingUnchanged": true
+}

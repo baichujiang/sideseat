@@ -1,0 +1,1 @@
+OpenAPI v1 matches 180 implemented operations and passes contract validation.

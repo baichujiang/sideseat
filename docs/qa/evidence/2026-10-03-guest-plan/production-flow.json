@@ -1,0 +1,27 @@
+{
+  "origin": "https://api.sideseat.de",
+  "publicOrigin": "https://www.sideseat.de",
+  "passed": [
+    "anonymous greeting from public share",
+    "stream requires participant session",
+    "native reply delivered over production SSE",
+    "complete invitation delivered to guest",
+    "guest cannot accept before registration",
+    "registration preserves conversation and invitation",
+    "registered guest accepts through canonical plan API",
+    "both participant calendars contain confirmed plan",
+    "completed intention retains participant page and conversation",
+    "closed intention remains unavailable to new visitors",
+    "conversation continues after acceptance",
+    "new credentials open same account in native app",
+    "canceled invitation updates live",
+    "revocation ends an open stream"
+  ],
+  "metrics": {
+    "replyDeliveryMs": 408,
+    "planDeliveryMs": 510
+  },
+  "completed": true,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-02T22:17:15.514Z"
+}

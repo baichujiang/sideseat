@@ -1,0 +1,10 @@
+{
+  "unitTests": 10,
+  "uiTests": 3,
+  "result": "passed",
+  "resultBundles": [
+    "/tmp/sideseat-message-sections-r1.xcresult",
+    "/tmp/sideseat-message-navigation.xcresult"
+  ],
+  "scope": "Fixture UI on iPhone 13 mini simulator. Device verification limited to install/version/launch; no live backend mutations."
+}

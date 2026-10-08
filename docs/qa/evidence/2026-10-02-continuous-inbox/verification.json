@@ -1,0 +1,15 @@
+{
+  "result": "passed",
+  "test": "VisualQAScreenshotUITests/testMessagesPinnedSurfaceAndRequestEntry",
+  "appearances": [
+    "light",
+    "dark"
+  ],
+  "resultBundle": "/tmp/sideseat-continuous-inbox.xcresult",
+  "preview72RelevantSourcesMatch": true,
+  "sources": {
+    "ios-native/SideSeat/Features/Chat/ChatsRootView.swift": "541d7f4a239611a34170ab5f2515f0da6728e71f7666e401da813fc84ee30164",
+    "ios-native/SideSeat/Features/Chat/InboxStore.swift": "e1576c5d112795fc0484b47dea739d3885d5e12fff6adc802191bb6715c26980",
+    "ios-native/SideSeat/Core/Design/SideSeatTheme.swift": "cbeb5f032da875a6ba84dcca58e6b858eb56d90d96f97324d1cc759bc0528634"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "productionBaseline": "dpl_E7gKLADCsaYt57px2kqAdqNj9tsJ",
+  "sourceBase": "a273a55cbd98aee8533a03c841904dc8ebf43c96",
+  "scope": "Xiaohongshu Universal Link and browser handoff only",
+  "url": "https://www.sideseat.de/xhs/",
+  "migrations": [],
+  "files": {
+    "app/.well-known/apple-app-site-association/route.ts": "794535d100380a3f8f17d386707862374680e94dc2505e0f5318d1103c060f39",
+    "app/xhs/[[...callback]]/page.tsx": "444cb83e904a449922e22648ac2320098dad173d9f46f087c6f73dec01dcfee4",
+    "lib/nav/public-app-path.ts": "b3308ef46416088c824e8641070449a7410d3704acab92435a27c98a5120cf3b",
+    "lib/nav/legacy-web-freeze.ts": "072e8bd4a92fa3f2b6477222ddda308a2940b9dfbe5f1c4203d2dd8190f742ad",
+    "tests/release/native-web-handoff.test.ts": "1c0bd089097b775a9fb09a675753a2155a4c042043291c41fafde42fe7bd2f0c"
+  },
+  "deploymentId": "dpl_D4NTYvfR6ZSKE8jMB5FA9sHeuxd4",
+  "deploymentURL": "https://sideseat-nzsht1mku-baichus-projects.vercel.app"
+}

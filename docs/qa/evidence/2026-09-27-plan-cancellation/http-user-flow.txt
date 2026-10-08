@@ -1,0 +1,12 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+{
+  "result": "PASS",
+  "passed": [
+    "intention → exploration → bookmark → greeting → reply → chat",
+    "receiver cancels confirmed plan → both calendars clear → one durable notice → acknowledge → no repeat → chat preserved",
+    "late cancellation requires reason; validation failure leaves plan/calendar intact",
+    "pending proposal can only be withdrawn by its proposer",
+    "withdraw reschedule preserves the confirmed plan",
+    "complete plan → bilateral outcomes → shared encounter → continue chat → new intention → new companion"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "base": "0edab4210e184dd58642b7a2f5cd18616a151bc2",
+  "files": [
+    {
+      "path": "app/(admin)/admin/invitations/page.tsx",
+      "sha256": "1dfedcfeb743c7b99bca3d392f587a4e37d1b9315a5695f236d0429e23d2522a"
+    },
+    {
+      "path": "app/(admin)/admin/page.tsx",
+      "sha256": "6d9e8dccb036075149ade3e3b42442f2842038cb5dd1c5467c3e99957d492586"
+    },
+    {
+      "path": "app/api/admin/membership-invites/[batchId]/route.ts",
+      "sha256": "ec0791b90419605784d590d044d0b0cbaeb0543cf649c3c6a24fda864185f463"
+    },
+    {
+      "path": "app/api/admin/membership-invites/route.ts",
+      "sha256": "7a2b1b9fd8de28d64789de6358351699be83a61d92eba99f2567e9441d363104"
+    },
+    {
+      "path": "app/api/v1/me/membership/redeem/route.ts",
+      "sha256": "4cd086fad2460bc46f08e5a1f329fd52a3f53086f466878e9250061714c86c31"
+    },
+    {
+      "path": "app/api/v1/me/membership/route.ts",
+      "sha256": "567bdd8b701ca3c8c8cce5a96b7ea2179d64760525d3d245c30b354356b64068"
+    },
+    {
+      "path": "components/admin/membership-invite-admin.tsx",
+      "sha256": "be3eacb5c10fed95ab48d769879ac59a632b0dfcb96652890b8f08d65ca349fa"
+    },
+    {
+      "path": "components/profile/profile-page-client.tsx",
+      "sha256": "54285c12cfcfcb77160e43c01a73b75f897e736bb34e5ea0440cdd5ba7864c90"
+    },
+    {
+      "path": "docs/MEMBERSHIP.md",
+      "sha256": "f3ce5ab9f177714a7f3c3e51709094d26ff218896f1530ddb915ebb18d09dcd4"
+    },
+    {
+      "path": "lib/api/v1/feedback-service.ts",
+      "sha256": "ef335667518936827eb88b52b3edff672cc01eac024bc01be6965ca965efd77f"
+    },
+    {
+      "path": "lib/auth/guards.ts",
+      "sha256": "d418920a48457baf31d1493ac678e5b93020988fdeba1a24edb9170256632986"
+    },
+    {
+      "path": "lib/constants/app.ts",
+      "sha256": "9f1efc0c4dbaf1d2a81934f2469fd6493de7b784154c52056592d4a0092e5fa2"
+    },
+    {
+      "path": "lib/db/prisma.ts",
+      "sha256": "35f2e140e97d9c65c464f465c6d53691bafc7c3b79c4da1effd7be39006cac6c"
+    },
+    {
+      "path": "lib/membership/admin-http.ts",
+      "sha256": "939bef29e2b7e909110175f329aa010fe27ee8b657342424a491e6c37a7a2cb6"
+    },
+    {
+      "path": "lib/membership/admin.ts",
+      "sha256": "10404af20bc25cc608f904cbc42a2d312429a73f40b8b0231c0ae09f11305c7f"
+    },
+    {
+      "path": "lib/membership/invite-code.ts",
+      "sha256": "31915bb572f99691deda7266489252e382f3c6b360eba87141b7875a9d16f36a"
+    },
+    {
+      "path": "lib/membership/service.ts",
+      "sha256": "1adcf7638c04d58194c601d41a79918cdea053bc84748a6fc0f4173d1c25d785"
+    },
+    {
+      "path": "openapi/v1.json",
+      "sha256": "9718eb3d91ccece10281e9bddcb582fae91cf50f83ad5b5155729d0805ed6574"
+    },
+    {
+      "path": "prisma/migrations/20260926160000_membership_invite_codes/migration.sql",
+      "sha256": "3bebaa8abb8d34f57fed30df366e6624933e76831ebd86f38b8ce0d95bd79b30"
+    },
+    {
+      "path": "prisma/migrations/20260926180000_membership_invite_admin/migration.sql",
+      "sha256": "c02d663d94a71de0448b4d463a33ea7b22885ded7f71fae514424dd6a89e7b24"
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "764a9e736ab06ae386cf5593af4fd477cac96343a57df5e367ce9a105cfba1a4"
+    },
+    {
+      "path": "scripts/membership-invites.ts",
+      "sha256": "3874f7da8d80df82790dc08baf787e3231cb57fd5e748a8b1f74dae64c20e066"
+    },
+    {
+      "path": "tests/membership/admin-postgres.test.ts",
+      "sha256": "408703982c2f2c31932c5fa23a002e54156e375a2ff5c55e4839f22c5099ba2f"
+    },
+    {
+      "path": "tests/membership/invite-postgres.test.ts",
+      "sha256": "60d92647a681b4e60e0b9b6a6bb0982bbd0930a78739083feb61a509bbd7d179"
+    },
+    {
+      "path": "components/auth/auth-bootstrap.tsx",
+      "sha256": "7fc5397a4a0a824324a06f8e5fec0468e13f3b1e912f0eea20267365bea85d22"
+    },
+    {
+      "path": "app/(auth)/login/page.tsx",
+      "sha256": "9aa40240b99f4bdf0d4de2c5d809eb7bacd076555ee1fec2acf3c3d336af8b7b"
+    }
+  ],
+  "release": "admin-session-redirect-fix-20260926"
+}

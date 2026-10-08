@@ -1,0 +1,42 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "modelName" : "iPhone 13 mini",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 13,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "SideSeat · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1790941767.013,
+  "passedTests" : 13,
+  "result" : "Passed",
+  "skippedTests" : 0,
+  "startTime" : 1790941647.434,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - SideSeat",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 13
+}

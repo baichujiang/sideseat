@@ -1,0 +1,28 @@
+[
+  {
+    "appClip": false,
+    "builtByDeveloper": true,
+    "bundleIdentifier": "app.sideseat.mobile",
+    "bundleVersion": "41",
+    "defaultApp": false,
+    "hidden": false,
+    "internalApp": false,
+    "name": "SideSeat",
+    "removable": true,
+    "url": "file:///private/var/containers/Bundle/Application/846476A9-BCE0-4E56-A370-41D42EA89AB1/SideSeat.app/",
+    "version": "1.0.0"
+  },
+  {
+    "appClip": false,
+    "builtByDeveloper": true,
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "66",
+    "defaultApp": false,
+    "hidden": false,
+    "internalApp": false,
+    "name": "SideSeat Preview",
+    "removable": true,
+    "url": "file:///private/var/containers/Bundle/Application/E8F24280-F773-422B-8235-4348B4C48F20/SideSeat%20Preview.app/",
+    "version": "1.0.0"
+  }
+]

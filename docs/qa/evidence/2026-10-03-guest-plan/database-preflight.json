@@ -1,0 +1,20 @@
+{
+  "hostMatchesReviewedProduction": true,
+  "shareColumnPresent": true,
+  "migrations": [
+    {
+      "migration_name": "20261002200000_intent_share",
+      "finished_at": "2026-10-02T20:16:30.760Z"
+    },
+    {
+      "migration_name": "20260930190000_media_lifecycle",
+      "finished_at": "2026-09-30T22:26:06.651Z"
+    },
+    {
+      "migration_name": "20260927010000_plan_cancellation_notices",
+      "finished_at": "2026-09-30T19:07:23.481Z"
+    }
+  ],
+  "plannedMigrations": [],
+  "existingRestorePoint": "br-square-king-ap1ow7vt"
+}

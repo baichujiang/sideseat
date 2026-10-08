@@ -1,0 +1,10 @@
+GET /api/v1/client-config 200
+GET /.well-known/apple-app-site-association 200
+GET /privacy 200
+GET /support 200
+GET /share/event/release-validation-invalid 200
+GET /api/admin/membership-invites 401
+GET /api/v1/me/membership 401
+GET /admin/invitations 307
+GET /api/admin/membership-invites 200
+Production read smoke passed

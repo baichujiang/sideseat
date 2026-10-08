@@ -1,0 +1,10 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+{
+  "checked": "check-plan",
+  "planId": "cmuibhl6200218zf8ynn8uqdd",
+  "connectionId": "cmuibhbjt001n8zf8zncpa0h7",
+  "calendarOwners": [
+    "cmuib922l0000gdtqyoyzmp2v",
+    "cmuib922u0001gdtquuc8iewb"
+  ]
+}

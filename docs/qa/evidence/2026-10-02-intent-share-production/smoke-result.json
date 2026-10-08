@@ -1,0 +1,19 @@
+{
+  "origin": "https://api.sideseat.de",
+  "publicOrigin": "https://www.sideseat.de",
+  "passed": [
+    "native sign-in",
+    "native share link",
+    "public activity and availability page",
+    "anonymous greeting",
+    "native inbox sees greeting",
+    "native reply reaches guest",
+    "registration keeps conversation",
+    "registered private calendar reminder",
+    "registered credentials work in native app",
+    "link revocation"
+  ],
+  "completed": true,
+  "qaAccountsRemoved": true,
+  "at": "2026-10-02T20:28:39.574Z"
+}

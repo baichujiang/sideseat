@@ -1,0 +1,45 @@
+{
+  "base": "a273a55cbd98aee8533a03c841904dc8ebf43c96",
+  "overlay": [
+    "lib/intent-share",
+    "app/share/intent",
+    "app/api/public/intent-share",
+    "app/api/v1/me/weekly-intents/[intentId]/share",
+    "lib/nav/public-app-path.ts",
+    "lib/nav/legacy-web-freeze.ts",
+    "prisma/migrations/20261002200000_intent_share",
+    "tests/intent-share",
+    "e2e/intent-share.spec.ts"
+  ],
+  "productionBaseline": "dpl_HheJbQRRDLjEJcrZBYyuggf5j1Dg",
+  "preservedProductionFiles": [
+    "lib/analytics/layer2-outcome-pilot.ts",
+    "lib/media/private-blob.ts"
+  ],
+  "deploymentId": "dpl_E7gKLADCsaYt57px2kqAdqNj9tsJ",
+  "deploymentURL": "https://sideseat-kob1t3vzm-baichus-projects.vercel.app",
+  "productionDomains": [
+    "api.sideseat.de",
+    "www.sideseat.de"
+  ],
+  "migrationBatch": [
+    "20261002200000_intent_share"
+  ],
+  "files": {
+    "prisma/schema.prisma": "8d4258b914b1a6e69491996c0c46a78b199a8332a932dd4b8f39f13721454ca0",
+    "e2e/intent-share.spec.ts": "789e8ce864153cb1132f13daaf9a3d8befaef84379664df608e383ffbc5c1b89",
+    "lib/intent-share/copy.ts": "25bea834adc7b6ab7a9ede6a8b6dc04ae6ebbb92e09ff30edbdcb990e9991c48",
+    "lib/intent-share/service.ts": "eeca7b466fa958d9c47511800fff4543f93b22be0f8a5456f89399a4248a6fb5",
+    "lib/nav/public-app-path.ts": "ebe03305d207f9dbe243867467aede555b3f492cab15738522a50b8d9201cd76",
+    "lib/nav/legacy-web-freeze.ts": "3f8cd3398cb8d3dd667a7111f7fccbcaeba22664003679191c24226c8aafd639",
+    "lib/analytics/layer2-outcome-pilot.ts": "a1898840e97c7badbca016a1533856e207c6415447bc35a673f6dd8c8caf201e",
+    "lib/media/private-blob.ts": "0c585766594579c8cd20db8380c2ebed1395c37c8c487be9a67bbe3411291f67",
+    "tests/intent-share/share-postgres.test.ts": "4444f9feff0b1e97bd74b80abe91c1ae7c71449f7bc3629dd68e58699a5266c4",
+    "prisma/migrations/20261002200000_intent_share/migration.sql": "5f5c9f2a96490ab3dedd2f40e7f776a07e42ad0a0b119274593c8f40dfd69a02",
+    "app/share/intent/[token]/share-client.tsx": "48605711be167079afa64c3346766f4ea36e905c01bd6a659ee2b15a65d98a5c",
+    "app/share/intent/[token]/page.tsx": "83137ab749cbf9534031b09bf1aa639622fcd808d584037aaa285ee6bdfee3b9",
+    "app/share/intent/[token]/share.module.css": "21abb31554451ca3c3f4462d458532693e1e9187edf0b60f88819053d66ecf37",
+    "app/api/public/intent-share/[token]/route.ts": "f6d7c75cf4694759eef0ef61623cc34d9dba98fd1c2cd79209dbf46d6d863a8c",
+    "app/api/v1/me/weekly-intents/[intentId]/share/route.ts": "72bef2c20ca9fce969be78c470263943fed107e182d454bd436e6a65e7227464"
+  }
+}

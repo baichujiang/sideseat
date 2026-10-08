@@ -60,17 +60,19 @@ struct CalendarChromeFormattingTests {
         #expect(!CalendarChrome.compactClock(day, calendar: calendar).contains("上午"))
     }
 
-    @Test("Selection uses accent semantics separate from today/now")
+    @Test("Today keeps its blue marker independently of selection and current time")
     func selectionVersusTodayColors() {
         let selectedTodayWeekday = CalendarChrome.weekdayForeground(selected: true, isToday: true)
         let unselectedTodayWeekday = CalendarChrome.weekdayForeground(selected: false, isToday: true)
-        #expect(selectedTodayWeekday == SideSeatTheme.textPrimary)
-        #expect(unselectedTodayWeekday == CalendarChrome.nowAccent)
+        #expect(selectedTodayWeekday == CalendarChrome.todayAccent)
+        #expect(unselectedTodayWeekday == CalendarChrome.todayAccent)
+        #expect(CalendarChrome.todayAccent != CalendarChrome.nowAccent)
 
         let selectedNumber = CalendarChrome.dayNumberForeground(selected: true, isToday: false)
         let todayNumber = CalendarChrome.dayNumberForeground(selected: false, isToday: true)
-        #expect(selectedNumber == Color.white)
-        #expect(todayNumber == CalendarChrome.nowAccent)
+        #expect(selectedNumber == SideSeatTheme.ProductAction.foreground)
+        #expect(todayNumber == SideSeatTheme.onCalendarToday)
+        #expect(CalendarChrome.dayNumberForeground(selected: true, isToday: true) == todayNumber)
     }
 
     @Test("Week header dimensions keep compact day chips readable")

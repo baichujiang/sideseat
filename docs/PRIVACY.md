@@ -34,6 +34,11 @@ All categories below are currently marked as not used for cross-company tracking
   not sent to SideSeat or DashScope.
 - Timetable screenshot recognition uses Apple Vision on device. The image is sent
   only if the user separately uploads/publishes it through an enabled flow.
+- Smart calendar image input also uses Apple Vision on device. A selected image
+  and its preview remain in memory for the current sheet and are not uploaded or
+  stored by SideSeat. Recognized text is appended to editable input; only when
+  the user taps Preview events is that text sent through the existing calendar
+  parser to DashScope. Saving calendar events requires a separate confirmation.
 - Keychain credentials and local preferences remain on device except when an auth
   credential is presented to the API.
 
@@ -71,3 +76,18 @@ All categories below are currently marked as not used for cross-company tracking
 5. SideSeat currently declares no tracking domains or cross-company tracking.
 
 Reference: [Apple — App privacy details on the App Store](https://developer.apple.com/app-store/app-privacy-details/).
+
+### Smart time coordination (2026-10-02, simplified)
+
+The Plan editor shortcut reads only the signed-in user's free intervals through the
+existing authenticated owner-preview endpoint and computes suggestions on device.
+It creates no schedule share or bearer link, does not read the peer's private
+calendar and does not send anything when opened, browsed or dismissed. Only the
+chosen interval and user-confirmed Plan details are sent when **Send plan** is
+pressed. The peer still needs to accept the Plan.
+
+No model provider receives calendar information. Calendar data that has not
+synchronized, including an external feed that failed to refresh, may be absent;
+the UI labels the suggestions as based on synchronized data. System-calendar read
+permissions are not added. Historical schedule-share cards retain their existing,
+separate sharing and expiry rules; the new shortcut does not navigate to them.

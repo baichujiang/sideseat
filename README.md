@@ -3,23 +3,24 @@
 > 让每一段校园时光，都有人同行。
 
 SideSeat 是面向大学生的校园同行产品。用户从一个具体、短期的意愿开始，
-在双方独立同意后进入带上下文的沟通，确认 Plan，并把真实承诺写入双方日历。
+先私密收藏或发送一条带意愿上下文的招呼，对方回复后继续聊天，确认 Plan，并把真实承诺写入双方日历。
 长期目标不是制造更多匹配，而是让一次共同经历自然发展成下一次适合的同行，
 让原本陌生的校园逐渐充满熟悉的人。
 
 当前核心链路：
 
 ```text
-Weekly Intent
-→ 48 小时主动匹配
-→ private Mutual Opportunity
-→ bilateral consent
-→ contextual Messages
-→ Plan confirmed
-→ both Calendars
-→ Outcome
-→ Meet Again（下一阶段）
-→ Familiar Face / Repeat Opportunity（下一阶段）
+Weekly Intent 发布
+→ 自动推荐 / 主动寻找更多
+→ 私密收藏（可选）
+→ 一条招呼消息
+→ 对方回复后持续聊天
+→ Plan 提议与明确接受
+→ 双方 Calendar
+→ 双方独立 Outcome
+→ 原聊天继续保留 / 新意愿寻找新同行
+
+Meet Again / Repeat Opportunity：另受功能开关与发布验收控制
 ```
 
 SideSeat 不提供人物广场、滑动匹配、课程大群、同学名单或公开社交关系图。
@@ -33,13 +34,16 @@ SideSeat 不提供人物广场、滑动匹配、课程大群、同学名单或�
 Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me / 我
 ```
 
-- **Together**：管理多个短期意愿、开启或停止 48 小时匹配、决定有限的同行机会。
+- **Together**：我的意愿、推荐、我的收藏；发布后自动匹配，也可主动寻找更多推荐。
 - **Plans**：集中处理待回复的提议、即将进行的计划与结束后的反馈。
 - **Calendar**：个人日程、课程、确认后的 Plan、搜索以及 Apple Calendar 互操作。
-- **Messages**：双方同意后的上下文沟通、Plan 提议、接受、改期与取消。
-- **Me**：身份、学生认证、课程、语言、隐私、安全和设置。
+- **Messages**：招呼与回复、持续聊天，以及 Plan 提议、接受、改期与取消。
+- **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 旧 Next.js 页面和 Capacitor 工程仅作为回归及紧急兼容路径，不是当前正式用户界面。
+
+2026-10-02 控件用色约定：普通按钮、分页、筛选和收藏使用清晰的中性色；
+深红底白字仅用于少数强调操作，避免浅粉底红字。品牌标志与语义状态色保留。
 
 ## Architecture
 

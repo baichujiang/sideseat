@@ -1,0 +1,21 @@
+[local-test-db] Running against sideseat_ios_test on 127.0.0.1:5433.
+✔ Explore draft and bookmark stay private, do not reserve supply, and only a written reply opens chat (817.600666ms)
+✔ Explore preparation reuses a recommendation without a YES decision or message (103.366458ms)
+✔ Drafts recheck public visibility and blocks before sending; removing a saved unavailable intention remains possible (156.929375ms)
+✔ Saved and contacted exploration cards leave the feed, fill the next slot, and keep saved/chat access (175.436125ms)
+✔ Layer 3 internal acceptance refuses remote databases (0.493833ms)
+✔ two private permissions + new intents → fresh consent → new Plan → both Calendars → second Shared Encounter (924.656042ms)
+✔ withdrawal, Outcome editing, feature kill switch and Block retain private safe behavior (190.686875ms)
+﹣ local HTTP route authenticates, keeps permission private and replays idempotently (0.205125ms) # requires localhost database and LAYER3_LOCAL_HTTP_URL
+✔ Mutual Plan closure PostgreSQL tests refuse non-local database targets (0.444458ms)
+✔ Mutual source creates one stable Plan, accept closes only its discovery supply, and Block cancels both projections (755.123458ms)
+✔ an elapsed Mutual proposal is lazily finalized before the same source is proposed again (119.339208ms)
+✔ bookmark → first message → recipient reply preserves context and opens one chat (822.13325ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 1415.780041

@@ -1,0 +1,58 @@
+{
+  "info" : {
+    "arguments" : [
+      "devicectl",
+      "device",
+      "process",
+      "launch",
+      "--device",
+      "DBD39EB5-1345-539C-A974-E6128E75A942",
+      "app.sideseat.mobile.preview",
+      "--json-output",
+      "/tmp/sideseat-preview63-20261002/launch-receipt.json",
+      "--timeout",
+      "30"
+    ],
+    "commandType" : "devicectl.device.process.launch",
+    "environment" : {
+      "TERM" : "dumb"
+    },
+    "jsonVersion" : 3,
+    "outcome" : "success",
+    "version" : "518.33"
+  },
+  "result" : {
+    "deviceIdentifier" : "DBD39EB5-1345-539C-A974-E6128E75A942",
+    "launchOptions" : {
+      "activatedWhenStarted" : true,
+      "arguments" : [
+
+      ],
+      "environmentVariables" : {
+        "TERM" : "dumb"
+      },
+      "platformSpecificOptions" : {
+
+      },
+      "startStopped" : false,
+      "terminateExistingInstances" : false,
+      "user" : {
+        "active" : true
+      }
+    },
+    "process" : {
+      "auditToken" : [
+        4294967295,
+        501,
+        501,
+        501,
+        501,
+        15124,
+        0,
+        300824
+      ],
+      "executable" : "file:///private/var/containers/Bundle/Application/848CC0F6-F5B8-4098-8BD2-2EA45BD3E5BE/SideSeat%20Preview.app/SideSeat%20Preview",
+      "processIdentifier" : 15124
+    }
+  }
+}

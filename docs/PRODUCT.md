@@ -10,7 +10,10 @@
 Together uses My intentions → Recommendations → Saved intentions. A private heart
 bookmark does not notify the peer. Say hello sends one contextual message and opens
 its readable conversation; the peer must reply before ongoing chat is available.
-Contacted and saved cards leave recommendations; saved cards retain the chat entry.
+Contacted cards leave recommendations; saved cards retain the chat entry.
+The 2026-10-02 owner decision keeps newly saved cards in the current browsing list
+with an Interest shown state, without flying to or opening Saved intentions.
+An explicit refresh or new search may omit previously saved cards.
 Additional public intentions load from Find more recommendations into the same feed.
 This amendment supersedes legacy bilateral-YES and no-save-shelf descriptions;
 older endpoints remain compatibility paths. It does not approve paid quotas,

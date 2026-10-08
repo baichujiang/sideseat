@@ -1,0 +1,38 @@
+{
+  "host": "ep-muddy-glitter-apcgou54.c-7.us-east-1.aws.neon.tech",
+  "database": "neondb",
+  "migrations": [
+    {
+      "migration_name": "20260930190000_media_lifecycle",
+      "applied": true,
+      "rolled_back": false
+    },
+    {
+      "migration_name": "20260927010000_plan_cancellation_notices",
+      "applied": true,
+      "rolled_back": false
+    },
+    {
+      "migration_name": "20260926210000_intention_time_deadlines",
+      "applied": true,
+      "rolled_back": false
+    },
+    {
+      "migration_name": "20260926130100_explore_draft_activation_constraint",
+      "applied": true,
+      "rolled_back": false
+    },
+    {
+      "migration_name": "20260926130000_explore_contact_drafts",
+      "applied": true,
+      "rolled_back": false
+    },
+    {
+      "migration_name": "20260926120000_opportunity_message_requests",
+      "applied": true,
+      "rolled_back": false
+    }
+  ],
+  "columns": [],
+  "backupBranch": "br-square-king-ap1ow7vt"
+}

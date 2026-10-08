@@ -1,0 +1,29 @@
+Fetching deployment "sideseat-ll1h9tisz-baichus-projects.vercel.app" in baichus-projects
+> Fetched deployment "sideseat-ll1h9tisz-baichus-projects.vercel.app" in baichus-projects [963ms]
+
+  General
+
+    id		dpl_FboLxfNxYRMfNi6GmtCA14ZXqyw4
+    name	sideseat
+    target	production
+    status	● Ready
+    url		https://sideseat-ll1h9tisz-baichus-projects.vercel.app
+    created	Sat Oct 03 2026 00:11:03 GMT+0200 (Central European Summer Time) [5m ago]
+
+
+  Aliases
+
+    ╶ https://sideseat-baichus-projects.vercel.app
+    
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ index (10.41MB) [iad1]
+    ├── λ _not-found (10.41MB) [iad1]
+    ├── λ _not-found.rsc (10.41MB) [iad1]
+    ├── λ about (10.41MB) [iad1]
+    ├── λ about.rsc (10.41MB) [iad1]
+    └── 751 output items hidden
+    
+

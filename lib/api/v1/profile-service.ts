@@ -1,5 +1,11 @@
 import { isPlusMember } from "@/lib/membership/status";
 import "server-only";
+import {
+  profileAppearanceSchema,
+  requiresPlus,
+  savedProfileAppearance,
+  effectiveProfileAppearance,
+} from "@/lib/profile/appearance";
 
 import { ConnectionStatus, Prisma, type User } from "@prisma/client";
 import { z } from "zod";
@@ -20,6 +26,7 @@ import { profileObjectSchema } from "@/lib/validators/profile";
 
 export const nativeProfileUpdateSchema = profileObjectSchema
   .omit({ languages: true })
+  .extend({ appearance: profileAppearanceSchema })
   .partial()
   .strict()
   .superRefine((values, ctx) => {
@@ -53,7 +60,8 @@ export class NativeProfileUpdateError extends Error {
       | "NICKNAME_TAKEN"
       | "NICKNAME_RESERVED"
       | "NICKNAME_INVALID"
-      | "PROFILE_NOT_FOUND",
+      | "PROFILE_NOT_FOUND"
+      | "PLUS_REQUIRED",
   ) {
     super(code);
   }
@@ -93,6 +101,7 @@ function courseDto(course: { id: string; name: string; code: string | null }) {
 
 function profileUserDto(user: {
   membership?: { plusExpiresAt: Date } | null;
+  profileAppearance?: unknown;
   id: string;
   username: string;
   nickname: string | null;
@@ -114,6 +123,7 @@ function profileUserDto(user: {
     username: user.username,
     displayName: user.nickname?.trim() || user.username,
     isPlus: isPlusMember(user.membership?.plusExpiresAt),
+    appearance: effectiveProfileAppearance(user.profileAppearance, isPlusMember(user.membership?.plusExpiresAt)),
     nickname: user.nickname,
     gender: user.gender,
     avatarUrl: user.avatarUrl,
@@ -157,6 +167,7 @@ export function currentProfileDto(
 
   return {
     ...currentUserV1(profile, options.locale),
+    appearance: savedProfileAppearance(profile.profileAppearance),
     displayName: profile.nickname?.trim() || profile.username,
     schoolSummary: schoolSummary(profile),
     lifePhotos: profile.lifePhotos,
@@ -224,6 +235,13 @@ export async function updateNativeCurrentProfile(options: {
   let schoolChange: Awaited<ReturnType<typeof archivePreviousSchoolSocialState>> | null = null;
 
   const data: Prisma.UserUpdateInput = {};
+  if (values.appearance !== undefined) {
+    const membership = await db.userMembership.findUnique({ where: { userId: options.user.id } });
+    if (requiresPlus(values.appearance) && !isPlusMember(membership?.plusExpiresAt)) {
+      throw new NativeProfileUpdateError("PLUS_REQUIRED");
+    }
+    data.profileAppearance = values.appearance;
+  }
   if (values.nickname !== undefined) {
     const nicknameCheck = await validateNicknameForUser(values.nickname, {
       excludeUserId: options.user.id,
@@ -332,6 +350,7 @@ export async function loadNativePublicProfile(options: {
       gender: true,
       avatarUrl: true,
       membership: { select: { plusExpiresAt: true } },
+      profileAppearance: true,
       bio: true,
       school: true,
       studentStatus: true,

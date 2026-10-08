@@ -114,6 +114,14 @@ export async function PATCH(request: Request) {
     return v1Success(result.body, { request });
   } catch (cause) {
     if (cause instanceof NativeProfileUpdateError) {
+      if (cause.code === "PLUS_REQUIRED") {
+        return v1Error(request, {
+          code: "PLUS_REQUIRED",
+          message: "These profile styles require an active Plus membership.",
+          status: 403,
+          field: "appearance",
+        });
+      }
       if (cause.code === "PROFILE_NOT_FOUND") {
         return v1Error(request, {
           code: "NOT_FOUND",

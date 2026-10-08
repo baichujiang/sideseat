@@ -1,0 +1,16 @@
+Isolated release candidate validation — 2026-09-30
+
+- Production build completed with SKIP_DATABASE_MIGRATIONS=1.
+- TypeScript check passed.
+- ESLint passed; one existing unused-variable warning remains in tests/v2/explore-examples-postgres.test.ts.
+- OpenAPI check: 180 implemented operations match.
+- OpenAPI contract tests: 13/13 passed.
+- Full active tests/v2 PostgreSQL suite passed serially against a fresh local PostgreSQL database after applying all 144 migrations.
+- scripts/qa-plan-cancellation.ts real-HTTP local acceptance passed for six branches:
+  intention -> explore -> bookmark -> greeting -> reply -> chat;
+  confirmed-plan cancellation -> calendar projection cleared -> durable notice -> acknowledgement -> chat retained;
+  late-cancellation validation;
+  proposer-only pending withdrawal;
+  reschedule withdrawal preserves the confirmed plan;
+  completion -> bilateral outcomes -> shared encounter -> continued chat -> new intention and recommendation.
+- These are local acceptance results, not an authenticated production two-account test.

@@ -1,0 +1,140 @@
+a273a55cbd98aee8533a03c841904dc8ebf43c96
+## codex/ios-uxui-20260922...origin/codex/ios-uxui-20260922
+ M README.md
+ M docs/DESIGN_SYSTEM.md
+ M ios-native/Configuration/Preview.xcconfig
+ M ios-native/SideSeat.xcodeproj/project.pbxproj
+ M ios-native/SideSeat/Core/Design/Components/SSFlowCard.swift
+ M ios-native/SideSeat/Core/Design/SideSeatTheme.swift
+ M ios-native/SideSeat/Core/Navigation/AppRoute.swift
+ M ios-native/SideSeat/Core/Push/SideSeatAppDelegate.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarAgendaListView.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarChrome.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarDayTimelineView.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarEventEditorView.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarSmartAddView.swift
+ M ios-native/SideSeat/Features/Calendar/CalendarTimelineScrollAnchor.swift
+ M ios-native/SideSeat/Features/Chat/ChatModels.swift
+ M ios-native/SideSeat/Features/Chat/ChatsRootView.swift
+ M ios-native/SideSeat/Features/Chat/DirectChatInfoView.swift
+ M ios-native/SideSeat/Features/Chat/DirectChatStore.swift
+ M ios-native/SideSeat/Features/Chat/DirectChatView.swift
+ M ios-native/SideSeat/Features/Chat/InboxStore.swift
+ M ios-native/SideSeat/Features/Chat/PlanCardView.swift
+ M ios-native/SideSeat/Features/Chat/PlansRootView.swift
+ M ios-native/SideSeat/Features/Chat/PlansStore.swift
+ M ios-native/SideSeat/Features/Chat/UITestingChatFixtures.swift
+ M ios-native/SideSeat/Features/Home/HomeDateStripView.swift
+ M ios-native/SideSeat/Features/Home/HomeRootView.swift
+ M ios-native/SideSeat/Features/Home/HomeWeekTimetableView.swift
+ M ios-native/SideSeat/Features/Profile/MeRootView.swift
+ M ios-native/SideSeat/Features/Profile/ProfileEditSheet.swift
+ M ios-native/SideSeat/Features/Profile/ProfileModels.swift
+ M ios-native/SideSeat/Features/Profile/PublicProfileView.swift
+ M ios-native/SideSeat/Features/Settings/SettingsRootView.swift
+ M ios-native/SideSeat/Features/Shell/AppShellView.swift
+ M ios-native/SideSeat/Features/Together/ExploreIntentListView.swift
+ M ios-native/SideSeat/Features/Together/ExploreIntentModels.swift
+ M ios-native/SideSeat/Features/Together/ExploreIntentStore.swift
+ M ios-native/SideSeat/Features/Together/MutualOpportunityModels.swift
+ M ios-native/SideSeat/Features/Together/MutualOpportunityStore.swift
+ M ios-native/SideSeat/Features/Together/TogetherRootView.swift
+ M ios-native/SideSeat/Features/Together/WeeklyIntentModels.swift
+ M ios-native/SideSeat/Features/Together/WeeklyIntentStore.swift
+ M ios-native/SideSeat/Resources/de.lproj/Localizable.strings
+ M ios-native/SideSeat/Resources/en.lproj/Localizable.strings
+ M ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings
+ M ios-native/SideSeatTests/CalendarCategoryModelsTests.swift
+ M ios-native/SideSeatTests/CalendarTimelineScrollAnchorTests.swift
+ M ios-native/SideSeatTests/CourseModelsTests.swift
+ M ios-native/SideSeatTests/CurrentUserTests.swift
+ M ios-native/SideSeatTests/DiscoverStoreTests.swift
+ M ios-native/SideSeatTests/NavigationTests.swift
+ M ios-native/SideSeatTests/ThemeContrastTests.swift
+ M ios-native/SideSeatUITests/AccessibilityAuditUITests.swift
+ M ios-native/SideSeatUITests/AuthenticationUITests.swift
+ M ios-native/SideSeatUITests/LiveLoginSmokeUITests.swift
+ M ios-native/SideSeatUITests/VisualQAScreenshotUITests.swift
+?? docs/qa/2026-09-23-local-simulator.md
+?? docs/qa/2026-09-24-all-activity-intentions.md
+?? docs/qa/2026-09-24-compact-intention-form.md
+?? docs/qa/2026-09-24-intention-activity-tiles.md
+?? docs/qa/2026-09-24-intention-editor-ui.md
+?? docs/qa/2026-09-24-one-page-intention.md
+?? docs/qa/2026-09-24-optional-intention-details.md
+?? docs/qa/2026-09-24-study-intention-preview.md
+?? docs/qa/2026-09-25-peer-intention-recommendations.md
+?? docs/qa/2026-09-25-simple-intention-cards.md
+?? docs/qa/2026-09-25-simple-intention-time.md
+?? docs/qa/2026-09-26-bookmark-flight.md
+?? docs/qa/2026-09-26-bookmark-message-requests.md
+?? docs/qa/2026-09-26-complete-user-flow-report.md
+?? docs/qa/2026-09-26-contacted-recommendations.md
+?? docs/qa/2026-09-26-intention-chat-entry.md
+?? docs/qa/2026-09-26-intention-history.md
+?? docs/qa/2026-09-26-membership-design.md
+?? docs/qa/2026-09-26-membership-invites.md
+?? docs/qa/2026-09-26-merged-recommendations-favorites.md
+?? docs/qa/2026-09-26-on-demand-recommendations.md
+?? docs/qa/2026-09-26-opportunity-decision-buttons.md
+?? docs/qa/2026-09-26-plan-activity-first.md
+?? docs/qa/2026-09-26-plan-cards.md
+?? docs/qa/2026-09-26-profile-alignment.md
+?? docs/qa/2026-09-26-recommendation-details.md
+?? docs/qa/2026-09-26-unified-explore-contact.md
+?? docs/qa/2026-09-26-waiting-plan-groups.md
+?? docs/qa/2026-09-27-calendar-add-toolbar.md
+?? docs/qa/2026-09-27-calendar-event-form.md
+?? docs/qa/2026-09-27-calendar-form-top-spacing.md
+?? docs/qa/2026-09-27-calendar-hidden-event-cues.md
+?? docs/qa/2026-09-27-calendar-mode-plus-centered.md
+?? docs/qa/2026-09-27-calendar-stable-sheet.md
+?? docs/qa/2026-09-27-calendar-today-blue-add.md
+?? docs/qa/2026-09-27-compact-plan-cards.md
+?? docs/qa/2026-09-27-plan-cancellation-user-flow.md
+?? docs/qa/2026-09-27-plans-hierarchy.md
+?? docs/qa/2026-09-27-recommendation-loading.md
+?? docs/qa/2026-10-02-calendar-today-highlight.md
+?? docs/qa/2026-10-02-repeat-intention-next-week.md
+?? docs/qa/evidence/2026-09-26-admin-redirect/
+?? docs/qa/evidence/2026-09-26-closed-loop/
+?? docs/qa/evidence/2026-09-26-intention-history/
+?? docs/qa/evidence/2026-09-26-membership-release/
+?? docs/qa/evidence/2026-09-26-membership/
+?? docs/qa/evidence/2026-09-26-plan-activity-first/
+?? docs/qa/evidence/2026-09-26-plan-cards/
+?? docs/qa/evidence/2026-09-26-plus-badges/
+?? docs/qa/evidence/2026-09-26-profile-alignment/
+?? docs/qa/evidence/2026-09-26-short-invite-codes/
+?? docs/qa/evidence/2026-09-26-waiting-plan-groups/
+?? docs/qa/evidence/2026-09-27-calendar-add-toolbar/
+?? docs/qa/evidence/2026-09-27-calendar-event-form/
+?? docs/qa/evidence/2026-09-27-calendar-form-top-spacing/
+?? docs/qa/evidence/2026-09-27-calendar-hidden-event-cues/
+?? docs/qa/evidence/2026-09-27-calendar-mode-plus-centered/
+?? docs/qa/evidence/2026-09-27-calendar-stable-sheet/
+?? docs/qa/evidence/2026-09-27-calendar-today-blue-add/
+?? docs/qa/evidence/2026-09-27-compact-plan-cards/
+?? docs/qa/evidence/2026-09-27-plan-cancellation/
+?? docs/qa/evidence/2026-09-27-plans-hierarchy/
+?? docs/qa/evidence/2026-09-27-recommendation-loading/
+?? docs/qa/evidence/2026-09-30-backend-production/
+?? docs/qa/evidence/2026-09-30-preview56/
+?? docs/qa/evidence/2026-10-02-calendar-today/
+?? docs/qa/evidence/2026-10-02-preview57/
+?? docs/qa/evidence/2026-10-02-preview58/
+?? docs/qa/evidence/2026-10-02-repeat-intention/
+?? docs/releases/2026-09-30-backend-production.md
+?? docs/releases/2026-09-30-preview56.md
+?? docs/releases/2026-10-02-preview57.md
+?? docs/releases/2026-10-02-preview58.md
+?? ios-native/SideSeat/Core/Design/Components/SSPlusBadge.swift
+?? ios-native/SideSeat/Features/Chat/PlanCancellationSheet.swift
+?? ios-native/SideSeat/Features/Settings/MembershipStore.swift
+?? ios-native/SideSeat/Features/Settings/MembershipView.swift
+?? ios-native/SideSeatUITests/MembershipBadgeUITests.swift
+?? ios-native/SideSeatUITests/PlanCancellationUITests.swift
+?? scripts/qa-closed-loop.ts
+?? scripts/qa-invite-admin.ts
+?? scripts/qa-membership.ts
+?? scripts/qa-plan-cancellation.ts

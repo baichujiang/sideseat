@@ -1,0 +1,5 @@
+Existing client feature configuration unchanged (excluding server clock)
+/privacy 200
+/support 200
+/.well-known/apple-app-site-association 200
+/share/event/release-validation-invalid 200

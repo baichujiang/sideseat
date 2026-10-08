@@ -1,0 +1,110 @@
+{
+  "ios-native/SideSeat/Core/Design/SideSeatTheme.swift": {
+    "sha256": "4038981741e47998b3510994b9e27ccf90b026c88b17933afcdfbbea6cf2de66",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Core/Design/Components/SSSectionHeader.swift": {
+    "sha256": "df1e2ee402ad0099eaa7ccb2d4b0fe072e5317148d18c65f72325308fb967ec5",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Core/Design/Components/SSViewModifiers.swift": {
+    "sha256": "d55b3dd93d43191145f8174f349ab95c067b5f50b4bf8fdaeecbc527868aa984",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Core/Design/Components/SSFlowCard.swift": {
+    "sha256": "848b5a3848cbed2944c828ae875cad77879cbd3b9ee1811d52d8a16c81278256",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Together/TogetherRootView.swift": {
+    "sha256": "f2b802d7c55779914d95d29ce2aea0e157f54f883ae5ce5193101707c6afa840",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Together/ExploreIntentListView.swift": {
+    "sha256": "f99099dc46f930eeba9f1c451109bdd7d01c8af35a681f3e1a577b498655d096",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/GroupCreateSheet.swift": {
+    "sha256": "ae7c7b8d0c740a614f7f867999807f9d4f7d0b0c8e679c1135f7d815409d2202",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/GroupInfoView.swift": {
+    "sha256": "db40688bb03a77ac078f2e6ad5c893e1e76e1755c0a18cf51d8e8c3fce9563b5",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/DirectChatInfoView.swift": {
+    "sha256": "9e9ec91fbcd78354f96cc2b208126ca2742ec9c129b657688960d478a8b54e99",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/DirectChatView.swift": {
+    "sha256": "8845741fc715feaae1596c310aaaa7d5aa58f85d5995b42df94524e5cdc91d68",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/ChatsRootView.swift": {
+    "sha256": "a7f7f6e30d5bf6baf2dcc8510451e4398e7045c69867eb51cfd01a97fc8d0397",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/ChatModels.swift": {
+    "sha256": "0253c47c4cfb71349d463751c157b6789de49b815355c62e3e5151f46e687120",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/ScheduleShareComposeSheet.swift": {
+    "sha256": "e10d7c081db5d76b53b895370c47dfd49229b0099ae2b469a4f9a6e9fc41679d",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Profile/ProfileEditSheet.swift": {
+    "sha256": "389900e57e1bd333402a7af9f7db96e76d00bcc2a0f0ac25325d4d52daf9abf2",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Profile/MeRootView.swift": {
+    "sha256": "f5ae5ff135297530ea8953a0ff4b9795a27ec399b3fb42ef1f4f1ab2b4724763",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Calendar/CalendarChrome.swift": {
+    "sha256": "0b652bc32fd00a25c66de0eae0dd6ba277170f26abb2eb43dd2a598e65e80b06",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Calendar/CalendarEventEditorView.swift": {
+    "sha256": "2be5417aedf8e72711b40f92a5e09cd71f6e50f48ea2f81c7f07a54cd2e15230",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Calendar/CalendarSmartAddView.swift": {
+    "sha256": "11e56e5810b6b27a8a2ff372fc7d710177f0104a1b5b662a06e0635c19f01116",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Courses/CourseListView.swift": {
+    "sha256": "0aba864ea5c99a182c57fe644ca0f0edf6c428549db2e854a8758a84b4105725",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Courses/CourseScreenshotImportView.swift": {
+    "sha256": "7211717299428aa85296b8649126cc92e2f975fa4957b384f0f29403d7139f59",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Settings/FeedbackRootView.swift": {
+    "sha256": "2391c2766cc6adb6d96120b52ece417f51947532e79b1973db27c51def4927cd",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/PlansRootView.swift": {
+    "sha256": "50b01da0afb1af59bb2c2726570b1a26685dfc58d649f12da0c6e2c857b4e2e2",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Chat/ScheduleShareRecipientView.swift": {
+    "sha256": "e542fdf5e79aa110980d7b93da33bd05fd50364d07784353134027bf4752a515",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Core/Design/Components/SSShareComponents.swift": {
+    "sha256": "228c758e307f462f3d0501707e863564201b604f2ec4c1a98c964cff7c155f62",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeatTests/ThemeContrastTests.swift": {
+    "sha256": "3ecadbde1ab80ca532cc5339c183984abc53a4fc9170253651999181a9869966",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeat/Features/Calendar/CalendarCategoryListView.swift": {
+    "sha256": "b1296c6c47b737543252f11fd225346065679d2c4a24c9d3dd87c74925c69f63",
+    "matches_final_snapshot": true
+  },
+  "ios-native/SideSeatUITests/VisualQAScreenshotUITests.swift": {
+    "sha256": "66a09eda9b2716c8464a61d8f7155574e69d6f3825d4b99034ac7e45141d3c0b",
+    "matches_final_snapshot": true
+  }
+}

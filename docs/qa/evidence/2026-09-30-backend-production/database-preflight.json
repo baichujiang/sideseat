@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-30",
+  "provider": "Neon",
+  "project": {
+    "name": "neon-charcoal-island",
+    "id": "hidden-star-16421165"
+  },
+  "productionBranch": {
+    "name": "main",
+    "id": "br-frosty-snow-apffdw0p"
+  },
+  "restoreBranch": {
+    "name": "release-backup-20260930",
+    "id": "br-rapid-band-ap6xvkqf",
+    "parent": "main",
+    "expires": "never",
+    "modified": false
+  },
+  "migrationStatusBefore": {
+    "total": 144,
+    "pending": [
+      "20260926120000_opportunity_message_requests",
+      "20260926130000_explore_contact_drafts",
+      "20260926130100_explore_draft_activation_constraint",
+      "20260926210000_intention_time_deadlines",
+      "20260927010000_plan_cancellation_notices"
+    ]
+  },
+  "readOnlyDataPreflight": {
+    "opportunityConstraintViolations": 0,
+    "intentionRowsForDeadlineBackfill": 38,
+    "invalidFlexibleDatesOrTimeZones": 0,
+    "invalidExactTimeWindows": 0
+  },
+  "migrationDeploy": {
+    "invocations": 1,
+    "applied": 5,
+    "statusAfter": "up-to-date"
+  }
+}

@@ -1,0 +1,27 @@
+GET /api/v1/client-config 200
+GET /.well-known/apple-app-site-association 200
+GET /privacy 200
+GET /support 200
+GET /share/event/release-validation-invalid 200
+GET /api/admin/membership-invites 401
+GET /api/v1/me/membership 401
+GET /admin/invitations 307
+GET /api/admin/membership-invites 200
+POST /api/v1/auth/login 200
+GET /api/v1/me/membership 200
+GET /api/admin/membership-invites 403
+POST /api/v1/auth/login 200
+GET /api/v1/me/membership 200
+GET /api/admin/membership-invites 403
+POST /api/admin/membership-invites 201
+POST /api/admin/membership-invites 201
+POST /api/v1/me/membership/redeem 200
+POST /api/v1/me/membership/redeem 200
+POST /api/v1/me/membership/redeem 422
+GET /api/admin/membership-invites/cmuilt5m300071340qeri677z?view=redemptions 200
+PATCH /api/admin/membership-invites/cmuilt5m300071340qeri677z 200
+GET /api/v1/me/membership 200
+GET /api/admin/membership-invites/cmuilt5m300071340qeri677z?view=audit 200
+Candidate membership smoke passed; batch disabled: cmuilt5m300071340qeri677z
+POST /api/v1/auth/logout 200
+POST /api/v1/auth/logout 200

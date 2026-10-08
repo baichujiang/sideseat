@@ -50,3 +50,77 @@ test('public share → anonymous contact → native reply → inline signup pres
  await page.reload();await expect(page.getByText('这份邀约已经结束或停止分享。')).toBeVisible();
  } finally {await db.user.deleteMany({where:{id:{in:ids}}});await db.$disconnect();}
 });
+
+test('guest receives live plan → inline registration accepts it → both calendars → live cancellation', async ({page, request, browser}, testInfo) => {
+ const ids:string[]=[];
+ const suffix=randomUUID().slice(0,8), username=`share_plan_${suffix}`, password='LocalShare123!';
+ const errors:string[]=[];page.on('pageerror', e=>errors.push(e.message));
+ try {
+  const owner=await db.user.create({data:{username,hashedPassword:await bcrypt.hash(password,12),nickname:'Alex',verifiedStudent:true,school:'TUM',onboardingComplete:true}});ids.push(owner.id);
+  const startAt=new Date(Date.now()+86400000).toISOString(),endAt=new Date(Date.now()+90000000).toISOString();
+  const intent=await db.weeklyIntent.create({data:{userId:owner.id,topic:'COFFEE',activityText:'下课后，一起喝杯咖啡',timeWindows:[{startAt,endAt}],timePreference:{kind:'EXACT'},exploreVisible:true,expiresAt:new Date(endAt)}});
+  const login=await request.post('/api/v1/auth/login',{data:{identifier:username,password,device:{id:`plan-${suffix}`,name:'Share plan test',appVersion:'1.0.0',platformVersion:'17.0'}}});expect(login.status()).toBe(200);
+  const headers={Authorization:`Bearer ${(await login.json()).data.tokens.accessToken}`};
+  const share=await request.post(`/api/v1/me/weekly-intents/${intent.id}/share`,{headers});expect(share.status()).toBe(200);
+  const path=new URL((await share.json()).data.url).pathname, token=path.split('/').at(-1)!;
+  await page.goto(`${path}?lang=zh-CN`);
+  await page.getByRole('button',{name:'联系我',exact:true}).click();
+  await page.getByRole('textbox',{name:'打个招呼，或聊聊想约的时间…'}).fill('你好！明天有空一起喝咖啡吗？');
+  await page.getByRole('button',{name:'发送',exact:true}).click();
+  await expect(page.getByText('招呼已送达，对方回复后会显示在这里。')).toBeVisible();
+  const intro=await db.mutualOpportunityMessageRequest.findFirstOrThrow({where:{opportunity:{intentAId:intent.id}}});ids.push(intro.senderId);
+  // Disable GET polling: the following reply and invitation must arrive through SSE.
+  await page.route(`**/api/public/intent-share/${token}`,async route=>route.request().method()==='GET'?route.abort():route.continue());
+  await expect(page.getByText('消息自动更新',{exact:true})).toBeVisible();
+  const reply=await request.post(`/api/v1/me/mutual-opportunities/${intro.opportunityId}/interaction`,{headers:{...headers,'Idempotency-Key':randomUUID()},data:{action:'REPLY',body:'可以呀，我发个计划给你。'}});expect(reply.status()).toBe(200);
+  const replyAt=Date.now();await expect(page.getByText('可以呀，我发个计划给你。',{exact:true})).toBeVisible({timeout:3000});const replyLatency=Date.now()-replyAt;
+  const connection=await db.connection.findFirstOrThrow({where:{OR:[{userAId:owner.id,userBId:intro.senderId},{userBId:owner.id,userAId:intro.senderId}]}});
+  const proposal={title:'一起喝咖啡',location:'图书馆一楼咖啡厅',message:'到门口时给我发消息就好。',startTime:startAt,endTime:endAt,origin:{kind:'MUTUAL_OPPORTUNITY',id:intro.opportunityId}};
+  const create=await request.post(`/api/v1/connections/${connection.id}/plans`,{headers:{...headers,'Idempotency-Key':randomUUID()},data:proposal});expect(create.status(),await create.text()).toBe(201);
+  const plan=(await create.json()).data.plan;
+  const inviteAt=Date.now();const card=page.getByRole('article',{name:'计划邀请'});
+  await expect(card.getByRole('heading',{name:'一起喝咖啡',exact:true})).toBeVisible({timeout:3000});const planLatency=Date.now()-inviteAt;
+  await expect(card.getByText('图书馆一楼咖啡厅',{exact:true})).toBeVisible();
+  await expect(card.getByText('到门口时给我发消息就好。',{exact:true})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await card.scrollIntoViewIfNeeded();await page.screenshot({path:'docs/qa/evidence/2026-10-03-guest-plan/invitation.png',fullPage:true});
+  const denied=await page.request.post(`/api/v1/plans/${plan.id}/accept`,{headers:{'Idempotency-Key':randomUUID()},data:{}});expect(denied.status()).toBe(401);
+  const outsider=await browser.newContext();const otherPage=await outsider.newPage();await otherPage.goto(path);
+  expect((await (await otherPage.request.get(`/api/public/intent-share/${token}`)).json()).data.messages).toEqual([]);
+  expect((await otherPage.request.get(`/api/public/intent-share/${token}/events`)).status()).toBe(401);await outsider.close();
+  await page.unroute(`**/api/public/intent-share/${token}`);
+  await card.getByRole('button',{name:'注册并接受邀请',exact:true}).click();
+  await expect(page.getByRole('dialog').getByText('一起喝咖啡',{exact:true})).toBeVisible();
+  await page.getByLabel('用户名',{exact:true}).fill(`joined_plan_${suffix}`);
+  await page.getByLabel('设置密码 · 至少 8 位').fill(password);
+  await page.screenshot({path:'docs/qa/evidence/2026-10-03-guest-plan/register-and-accept.png',fullPage:true});
+  await page.getByRole('dialog').getByRole('button',{name:'注册并接受邀请',exact:true}).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect.poll(async()=>(await db.planRequest.findUniqueOrThrow({where:{id:plan.id}})).status).toBe('ACCEPTED');
+  await expect.poll(()=>db.calendarEntry.count({where:{planRequestId:plan.id,userId:{in:ids}}})).toBe(2);
+  expect((await db.user.findUniqueOrThrow({where:{id:intro.senderId}})).isGuest).toBe(false);
+  await expect(card.first().getByText('已确认',{exact:true})).toBeVisible();
+  await expect(page.getByText('可以呀，我发个计划给你。',{exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'打开 SideSeat',exact:true})).toHaveAttribute('href',`sideseat://connections/${connection.id}`);
+  await page.screenshot({path:'docs/qa/evidence/2026-10-03-guest-plan/accepted.png',fullPage:true});
+  const nativeLogin=await request.post('/api/v1/auth/login',{data:{identifier:`joined_plan_${suffix}`,password,device:{id:`registered-${suffix}`,name:'Registered device',appVersion:'1.0.0',platformVersion:'17.0'}}});expect(nativeLogin.status()).toBe(200);expect((await nativeLogin.json()).data.user.id).toBe(intro.senderId);
+  const cancellation=await request.post(`/api/v1/plans/${plan.id}/cancel`,{headers:{...headers,'Idempotency-Key':randomUUID()},data:{reasonCode:'OTHER',note:'改天再约'}});expect(cancellation.status(),await cancellation.text()).toBe(200);
+  await expect(card.first().getByText('已取消',{exact:true})).toBeVisible({timeout:3000});
+  await expect(page.getByRole('button',{name:'接受邀请并加入日程',exact:true})).toHaveCount(0);
+  await page.reload();await expect(card.first().getByText('已取消',{exact:true})).toBeVisible();
+  await expect(page.getByText('这份意愿已结束，你们的对话和计划仍然保留。',{exact:true})).toBeVisible();
+  await page.getByRole('textbox',{name:'打个招呼，或聊聊想约的时间…'}).fill('没问题，我们在这里继续商量。');
+  await page.getByRole('button',{name:'发送',exact:true}).click();
+  await expect(page.getByText('没问题，我们在这里继续商量。',{exact:true})).toBeVisible();
+  const freshVisitor=await browser.newContext();
+  expect((await freshVisitor.request.get(`/api/public/intent-share/${token}`)).status()).toBe(404);
+  await freshVisitor.close();
+  // Block ends an already open guest-page stream without leaking subsequent messages.
+  await expect(page.getByText('消息自动更新',{exact:true})).toBeVisible();
+  await db.block.create({data:{blockerId:owner.id,blockedId:intro.senderId}});
+  await expect(page.getByRole('alert').filter({hasText:'这份邀约已经结束或停止分享。'})).toBeVisible();
+  await expect(page.getByRole('textbox',{name:'打个招呼，或聊聊想约的时间…'})).toBeDisabled();
+  await testInfo.attach('live-delivery-latency',{body:JSON.stringify({replyLatencyMs:replyLatency,planLatencyMs:planLatency}),contentType:'application/json'});
+  console.log(JSON.stringify({replyLatencyMs:replyLatency,planLatencyMs:planLatency}));expect(errors).toEqual([]);
+ } finally {await page.goto('about:blank');await db.user.deleteMany({where:{id:{in:ids}}});await db.$disconnect();}
+});

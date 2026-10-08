@@ -1,0 +1,2 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+PASS: one redemption, one Plus account; second account remains Free; shared capacity remains exactly 1.

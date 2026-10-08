@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-02T21:43:38.081286+00:00",
+  "httpStatus": 200,
+  "associations": [
+    {
+      "appIDs": [
+        "V4238R5R53.app.sideseat.mobile"
+      ],
+      "xhsPresent": true
+    },
+    {
+      "appIDs": [
+        "V4238R5R53.app.sideseat.mobile.preview"
+      ],
+      "xhsPresent": true
+    }
+  ],
+  "headers": [
+    "Date: Fri, 02 Oct 2026 21:43:22 GMT",
+    "Cache-Control: max-age=3600,public",
+    "Age: 5"
+  ]
+}

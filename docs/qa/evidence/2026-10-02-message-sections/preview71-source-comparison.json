@@ -1,0 +1,34 @@
+{
+  "ios-native/SideSeat/Features/Chat/ChatsRootView.swift": {
+    "testedSHA256": "ecad0ae1cc19b43f97f1a71fddd9528390974444a12d34eb3ac4ed121b51cf74",
+    "preview71SHA256": "46a31428320b134aadaf31b2c5ce88db89dcad1b02086a78081c9319158f5907"
+  },
+  "ios-native/SideSeat/Features/Chat/InboxStore.swift": {
+    "testedSHA256": "e1576c5d112795fc0484b47dea739d3885d5e12fff6adc802191bb6715c26980",
+    "preview71SHA256": "e1576c5d112795fc0484b47dea739d3885d5e12fff6adc802191bb6715c26980"
+  },
+  "ios-native/SideSeat/Core/Navigation/AppRoute.swift": {
+    "testedSHA256": "bb56707d95431add1c76379cd036e47ab739adcf6376a394d4d78ef65b11f385",
+    "preview71SHA256": "bb56707d95431add1c76379cd036e47ab739adcf6376a394d4d78ef65b11f385"
+  },
+  "ios-native/SideSeat/Features/Shell/AppShellView.swift": {
+    "testedSHA256": "764cb062583f2f15c38632d5ed42dc29d56d65201377d3b53a20cef4ceb39b79",
+    "preview71SHA256": "764cb062583f2f15c38632d5ed42dc29d56d65201377d3b53a20cef4ceb39b79"
+  },
+  "ios-native/SideSeat/Core/Design/SideSeatTheme.swift": {
+    "testedSHA256": "cbeb5f032da875a6ba84dcca58e6b858eb56d90d96f97324d1cc759bc0528634",
+    "preview71SHA256": "cbeb5f032da875a6ba84dcca58e6b858eb56d90d96f97324d1cc759bc0528634"
+  },
+  "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": {
+    "testedSHA256": "9b643796b6f8302170cc9b139a18b7a644b29df6f276162f750b9f2ea270e0eb",
+    "preview71SHA256": "9b643796b6f8302170cc9b139a18b7a644b29df6f276162f750b9f2ea270e0eb"
+  },
+  "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": {
+    "testedSHA256": "d2cf9ce800a410a40826a663e480306f972962db62c796a7ea35fffc04aae8cb",
+    "preview71SHA256": "d2cf9ce800a410a40826a663e480306f972962db62c796a7ea35fffc04aae8cb"
+  },
+  "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": {
+    "testedSHA256": "da72bdf08991554ca5cf1adcbe41ef7f05a97fad74fcf2b6bd17edd631ec3baf",
+    "preview71SHA256": "da72bdf08991554ca5cf1adcbe41ef7f05a97fad74fcf2b6bd17edd631ec3baf"
+  }
+}

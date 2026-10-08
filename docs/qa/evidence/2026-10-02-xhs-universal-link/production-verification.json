@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-02T21:41:02.374Z",
+  "aasaStatus": 200,
+  "applicationIDs": [
+    "V4238R5R53.app.sideseat.mobile",
+    "V4238R5R53.app.sideseat.mobile.preview"
+  ],
+  "callbackPattern": "/xhs/*",
+  "results": [
+    {
+      "path": "/xhs/",
+      "initialStatus": 308,
+      "finalStatus": 200,
+      "finalURL": "https://www.sideseat.de/xhs"
+    },
+    {
+      "path": "/xhs/sdk-verification",
+      "initialStatus": 200,
+      "finalStatus": 200,
+      "finalURL": "https://www.sideseat.de/xhs/sdk-verification"
+    },
+    {
+      "path": "/privacy",
+      "initialStatus": 200,
+      "finalStatus": 200,
+      "finalURL": "https://www.sideseat.de/privacy"
+    },
+    {
+      "path": "/support",
+      "initialStatus": 200,
+      "finalStatus": 200,
+      "finalURL": "https://www.sideseat.de/support"
+    }
+  ],
+  "apiHealth": 200,
+  "passed": true
+}

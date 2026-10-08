@@ -9,9 +9,12 @@ const config = [
   {
     ignores: [
       ".next/**",
+      ".next-*/**",
       ".local-postgres/**",
       "ios/**",
       "ios-native/**/DerivedData/**",
+      "ios-native/DerivedData-*/**",
+      "ios-native/.build-tools/**",
       "node_modules/**",
       "next-env.d.ts",
       "playwright-report/**",

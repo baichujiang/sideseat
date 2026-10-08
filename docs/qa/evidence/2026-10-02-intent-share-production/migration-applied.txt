@@ -1,0 +1,14 @@
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "neondb", schema "public" at "ep-muddy-glitter-apcgou54.c-7.us-east-1.aws.neon.tech"
+
+146 migrations found in prisma/migrations
+
+Applying migration `20261002200000_intent_share`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261002200000_intent_share/
+    └─ migration.sql
+      
+All migrations have been successfully applied.

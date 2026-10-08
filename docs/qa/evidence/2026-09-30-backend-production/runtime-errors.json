@@ -1,0 +1,8 @@
+{
+  "deploymentId": "dpl_ERSM5FbjLHHdEEcqgKPWBW2Q68Dp",
+  "scope": "post-promotion deployment-scoped error logs",
+  "window": "last 5 minutes, queried at 2026-09-30 19:18 UTC after promotion",
+  "levelFilter": "error",
+  "entries": 0,
+  "unparsedLines": 0
+}

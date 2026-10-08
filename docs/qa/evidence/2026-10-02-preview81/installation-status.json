@@ -1,0 +1,13 @@
+{
+  "installed": true,
+  "verifiedAt": "2026-10-02T21:58:20+02:00",
+  "previousBundleVersion": "80",
+  "installedIdentity": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "81",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "launched": true,
+  "verificationScope": "Paired iPhone installation, version readback, and launch; visual interactions verified in simulator."
+}

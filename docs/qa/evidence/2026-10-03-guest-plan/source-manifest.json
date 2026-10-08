@@ -1,0 +1,12 @@
+{
+  "baseDeployment": "dpl_D4NTYvfR6ZSKE8jMB5FA9sHeuxd4",
+  "files": {
+    "lib/intent-share/service.ts": "bf5fffbff82801385a5021dcab41b723c9527998c72113c699e3da3f4ec2bcbe",
+    "lib/intent-share/copy.ts": "a64ec3c9a8074d6d94b4a84fd30a0aff70b1a02808076ceed5157a0cffd11890",
+    "app/share/intent/[token]/page.tsx": "6d25a55e4e1c043f299b3952dda98e9f9c9fb50f8b87970cbd9e99b232cde3a8",
+    "app/share/intent/[token]/share-client.tsx": "0cf5db130841a548cab2e1a40b835fd56479aa8cb67103ed32848ef3b84e68b8",
+    "app/share/intent/[token]/share.module.css": "e00af479e529c99d31ab26c31be8b53767020767634571f935ea84952d22570a",
+    "app/api/public/intent-share/[token]/route.ts": "f718bc1c97bc6876d06b2345b17ed4087c33aa9a1df275c33832e8e6d2a3ff28",
+    "app/api/public/intent-share/[token]/events/route.ts": "6983c891c888998f06f387912298b15a6b8e7c8908b693a885c8ff078874b33e"
+  }
+}

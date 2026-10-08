@@ -1,0 +1,77 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "401A8BFD-3E57-4C8E-BFA8-376AE5D4690C.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "intention-chat-accepted-details-zh_0_74EEB423-F2C4-4417-9581-FA3E58DB4C80.png",
+        "timestamp" : 1790950503.367
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "B4045922-09D7-4F74-9A37-569DBF3EA420.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "opportunity-message-incoming-zh_0_67375BAD-0D3F-4885-9AB1-8748C1F2589F.png",
+        "timestamp" : 1790950495.865
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "5D98668E-0F77-478A-96F9-45757418E627.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "message-requests-incoming-zh_0_955212B7-5852-47CA-BCFD-0E916F873FB7.png",
+        "timestamp" : 1790950492.152
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "B69D4719-6218-45EA-BD23-21B3C3052431.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "opportunity-message-incoming-zh_0_584226AD-EDE3-40E0-95DE-2195B9B0BC1E.png",
+        "timestamp" : 1790950477.07
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "D5E45F38-5778-4488-8794-EF7524396022.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "message-requests-incoming-zh_0_AA09B65E-6FA3-4D21-8D36-2E7840676502.png",
+        "timestamp" : 1790950473.384
+      }
+    ],
+    "testIdentifier" : "VisualQAScreenshotUITests/testIncomingOpportunityMessageReplyAndIgnore()",
+    "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/VisualQAScreenshotUITests/testIncomingOpportunityMessageReplyAndIgnore"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "C1715860-1037-4E61-B098-04A498C3DE66.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "messages-pinned-dark-zh_0_AB3C87F8-5DD7-4BFB-A4F6-F49C4301FE35.png",
+        "timestamp" : 1790950523.451
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "F1CBFB3B-7291-4AED-BF33-FA66229D0FDE",
+        "deviceName" : "SideSeat iPhone 13 mini QA 20260812",
+        "exportedFileName" : "3B1B8130-DBD5-4AF1-B577-7476B81E58AA.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "messages-pinned-light-zh_0_1F862EA7-555F-44C6-9650-5F18A04E72E7.png",
+        "timestamp" : 1790950509.62
+      }
+    ],
+    "testIdentifier" : "VisualQAScreenshotUITests/testMessagesPinnedSurfaceAndRequestEntry()",
+    "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/VisualQAScreenshotUITests/testMessagesPinnedSurfaceAndRequestEntry"
+  }
+]

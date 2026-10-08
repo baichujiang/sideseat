@@ -1,0 +1,14 @@
+{
+  "preview": {
+    "name": "SideSeat Preview",
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "bundleVersion": "56"
+  },
+  "standard": {
+    "name": "SideSeat",
+    "bundleIdentifier": "app.sideseat.mobile",
+    "version": "1.0.0",
+    "bundleVersion": "41"
+  }
+}

@@ -883,9 +883,11 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let button = app.buttons["together-tab-\(raw)"].firstMatch
         if button.waitForExistence(timeout: 2) { button.tap() }
         else {
-            let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
-            XCTAssertTrue(picker.waitForExistence(timeout: 5), app.debugDescription)
-            picker.buttons.element(boundBy: [1, 0, 2][index]).tap()
+            let menu = app.buttons["together-section-menu"]
+            XCTAssertTrue(menu.waitForExistence(timeout: 5), app.debugDescription)
+            menu.tap()
+            XCTAssertTrue(button.waitForExistence(timeout: 5), app.debugDescription)
+            button.tap()
         }
     }
 

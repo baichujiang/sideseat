@@ -1,0 +1,18 @@
+
+> sideseat@0.1.0 test:feedback
+> tsx --test tests/feedback/*.test.ts
+
+▶ feedback comprehensive ranking
+  ✔ rewards agreement and useful discussion (0.878417ms)
+  ✔ penalizes disagreement instead of treating all activity as positive (0.11425ms)
+  ✔ lets established useful feedback outrank a fresh empty post (0.507ms)
+  ✔ uses recent activity and then id as deterministic tie breakers (7.703167ms)
+✔ feedback comprehensive ranking (9.775417ms)
+ℹ tests 4
+ℹ suites 1
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.145291

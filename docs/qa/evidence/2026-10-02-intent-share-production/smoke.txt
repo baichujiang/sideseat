@@ -1,0 +1,10 @@
+PASS native sign-in
+PASS native share link
+PASS public activity and availability page
+PASS anonymous greeting
+PASS native inbox sees greeting
+PASS native reply reaches guest
+PASS registration keeps conversation
+PASS registered private calendar reminder
+PASS registered credentials work in native app
+PASS link revocation

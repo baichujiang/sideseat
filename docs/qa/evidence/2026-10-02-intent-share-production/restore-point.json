@@ -1,0 +1,9 @@
+{
+  "projectId": "hidden-star-16421165",
+  "parentBranchId": "br-frosty-snow-apffdw0p",
+  "restoreBranchId": "br-square-king-ap1ow7vt",
+  "name": "release-backup-20261002-intent-share",
+  "createdLocal": "2026-10-02 22:14:05 Europe/Berlin",
+  "autoDelete": "Never",
+  "scope": "data and schema at creation; not modified by this release"
+}

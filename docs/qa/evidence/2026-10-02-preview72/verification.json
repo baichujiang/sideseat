@@ -1,0 +1,10 @@
+{
+  "change": "Remove duplicate basic profile card; keep the top profile card as the edit entry.",
+  "uiTestsPassed": [
+    "AuthenticationUITests.testMeProfileEditSheetSavesInlineChanges",
+    "ProfileAppearanceUITests.testPlusSavesAndReopensStyle"
+  ],
+  "uiTestResult": "/tmp/sideseat-personalization-derived/Logs/Test/Test-SideSeat-Development-2026.10.02_15-49-07-+0200.xcresult",
+  "launchOutcome": "success",
+  "productionBackendUpdated": false
+}

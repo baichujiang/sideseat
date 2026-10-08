@@ -1,0 +1,14 @@
+[local-test-db] Running against sideseat_loop_20260926 on 127.0.0.1:5433.
+✔ Free becomes Plus, expiry returns Free, and retry never renews or spends another use (142.794292ms)
+✔ Concurrent users cannot redeem beyond the code's capacity (122.603417ms)
+✔ Same-account retries are idempotent; different codes extend without lost days (99.220833ms)
+✔ Invalid, expired and disabled codes do not grant membership or consume capacity (89.653ms)
+✔ Real HTTP requires login, redeems persistently, rejects client privilege input and rate limits attempts (1820.65475ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2402.543917

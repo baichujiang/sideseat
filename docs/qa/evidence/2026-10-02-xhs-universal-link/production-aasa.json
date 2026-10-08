@@ -1,0 +1,85 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "V4238R5R53.app.sideseat.mobile"
+        ],
+        "components": [
+          {
+            "/": "/xhs/*",
+            "comment": "Xiaohongshu SDK callback"
+          },
+          {
+            "/": "/users/*",
+            "comment": "Public profiles"
+          },
+          {
+            "/": "/connections/*",
+            "comment": "Direct chats"
+          },
+          {
+            "/": "/courses/*",
+            "comment": "Courses and course chat"
+          },
+          {
+            "/": "/groups/*",
+            "comment": "Group chats"
+          },
+          {
+            "/": "/discover/posts/*",
+            "comment": "Discover posts"
+          },
+          {
+            "/": "/discover/activities/*",
+            "comment": "Discover activities"
+          },
+          {
+            "/": "/activities/*",
+            "comment": "Activities"
+          },
+          {
+            "/": "/share/view/*",
+            "comment": "Schedule share links"
+          },
+          {
+            "/": "/share/event/*",
+            "comment": "Shared event links"
+          },
+          {
+            "/": "/profile",
+            "comment": "Profile tab"
+          },
+          {
+            "/": "/profile/info",
+            "comment": "Profile details handoff"
+          },
+          {
+            "/": "/profile/verification",
+            "comment": "Verification handoff"
+          },
+          {
+            "/": "/profile/account",
+            "comment": "Account settings handoff"
+          },
+          {
+            "/": "/profile/blocked",
+            "comment": "Blocked users handoff"
+          }
+        ]
+      },
+      {
+        "appIDs": [
+          "V4238R5R53.app.sideseat.mobile.preview"
+        ],
+        "components": [
+          {
+            "/": "/xhs/*",
+            "comment": "Xiaohongshu SDK callback in Preview"
+          }
+        ]
+      }
+    ]
+  }
+}

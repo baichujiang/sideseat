@@ -1,0 +1,9 @@
+{
+  "bundleId": "app.sideseat.mobile.preview",
+  "build": "84",
+  "applicationIdentifier": "V4238R5R53.app.sideseat.mobile.preview",
+  "associatedDomains": [
+    "applinks:www.sideseat.de"
+  ],
+  "signatureVerified": true
+}
