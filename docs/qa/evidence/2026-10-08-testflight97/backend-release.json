@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-08T12:48:32.125259+00:00",
+  "deploymentId": "dpl_ssQz7eBBytwUSNHj5vmaLs7ZYNNH",
+  "apiDomainVerifiedByInspect": "https://api.sideseat.de",
+  "state": "READY",
+  "buildDurationSeconds": 135.789,
+  "runtimeErrors": {
+    "query": "vercel logs --no-branch --level error --since 15m --limit 20",
+    "results": 0,
+    "scope": "This deployment, at release verification time; not a long-term production guarantee."
+  }
+}

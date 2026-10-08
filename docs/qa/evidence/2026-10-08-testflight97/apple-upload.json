@@ -1,0 +1,16 @@
+{
+  "appId": "6800410369",
+  "bundle": "app.sideseat.mobile",
+  "version": "1.0.0",
+  "build": 97,
+  "uploadSucceededAt": "2026-10-08T12:48:25.414Z",
+  "exportSucceeded": true,
+  "archive": "/tmp/sideseat-20261008-97.xcarchive",
+  "applicationDsymUUID": "448CA6B4-0A7A-309D-B5FB-1D620E3261BC",
+  "applicationDsymUploadedToSentry": true,
+  "warning": {
+    "framework": "Sentry.framework",
+    "missingDsymUUID": "A5638EFA-0FA5-33AF-A1E2-B3DBDB81AD45",
+    "uploadWasNotBlocked": true
+  }
+}

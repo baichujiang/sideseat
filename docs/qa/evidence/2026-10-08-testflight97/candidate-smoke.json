@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-08T12:45:44.243Z",
+  "stage": "candidate",
+  "target": "https://sideseat-9b56g9gx5-baichus-projects.vercel.app",
+  "successful": true,
+  "checks": [
+    "native-client-config",
+    "privacy",
+    "support",
+    "universal-links-app-identity",
+    "owner-native-login",
+    "viewer-native-login",
+    "default-current-profile",
+    "free-style-save",
+    "free-style-reload",
+    "free-premium-style-denied",
+    "plus-style-save",
+    "plus-style-reload",
+    "public-plus-style-no-private-expiry",
+    "expired-plus-public-fallback",
+    "expired-plus-owner-saved-style-preserved",
+    "unrelated-profile-update-preserves-style"
+  ],
+  "temporaryAccountsCreated": 2,
+  "temporaryAccountsRemaining": 0,
+  "cleanupNote": "Cleanup helper corrected after HTTP assertions passed; all temporary account rows removed."
+}

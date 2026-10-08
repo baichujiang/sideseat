@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-10-08T12:59:01.377723+00:00",
+  "app": "SideSeat",
+  "appId": "6800410369",
+  "buildId": "67d7c75f-9ffe-4fc3-9ddf-416550f3d034",
+  "version": "1.0.0",
+  "build": 97,
+  "processed": true,
+  "group": {
+    "name": "SideSeat Internal",
+    "id": "aed21632-d6c2-4d51-82c3-95cea39c0761",
+    "type": "internal",
+    "existingTesters": 1,
+    "distribution": "existing automatic Xcode build distribution",
+    "statusObserved": "正在测试",
+    "expiresInDaysObserved": 90
+  },
+  "whatToTest": {
+    "locale": "zh-Hans",
+    "saved": true,
+    "file": "what-to-test-zh.txt"
+  },
+  "externalBetaReviewSubmitted": false,
+  "physicalInstallationVerified": false,
+  "screenshots": [
+    "testflight97-details.png",
+    "testflight97-internal-testing.png"
+  ],
+  "url": "https://appstoreconnect.apple.com/teams/7e8bad76-6f24-4db0-a666-fc8ee07c7e84/apps/6800410369/testflight/ios/67d7c75f-9ffe-4fc3-9ddf-416550f3d034"
+}

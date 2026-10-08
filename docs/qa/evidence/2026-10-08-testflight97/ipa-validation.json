@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "build": 97,
+  "bundle": "app.sideseat.mobile",
+  "api": "https://api.sideseat.de",
+  "productionPush": true,
+  "debuggerAllowed": false,
+  "deviceAllowlist": false,
+  "sha256": "0b15bc697d8b261c966f27cb1358a8f01e7f9e30675700c2fbd5d372ebc8f502"
+}

@@ -2,7 +2,7 @@
 
 **Status:** Current platform guide
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-10-08
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -123,7 +123,9 @@ secrets—not Git.
 
 ## 7. Current release state
 
-Version `1.0.0` build `29` was uploaded to TestFlight on 2026-09-02. See its
-[release record](./releases/2026-09-02-testflight-29.md). TestFlight upload is not
+Version `1.0.0` build `97` was uploaded, processed and distributed to the existing
+`SideSeat Internal` group on 2026-10-08. See its
+[release record](./releases/2026-10-08-testflight97.md). Preview remains build `96`.
+TestFlight upload is not
 App Store approval and does not replace current physical-device, privacy, APNs or
 tester acceptance gates.

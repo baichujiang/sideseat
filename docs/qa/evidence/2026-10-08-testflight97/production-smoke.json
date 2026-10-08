@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-08T12:46:19.827Z",
+  "stage": "production",
+  "target": "https://api.sideseat.de",
+  "successful": true,
+  "checks": [
+    "native-client-config",
+    "privacy",
+    "support",
+    "universal-links-app-identity",
+    "owner-native-login",
+    "viewer-native-login",
+    "default-current-profile",
+    "free-style-save",
+    "free-style-reload",
+    "free-premium-style-denied",
+    "plus-style-save",
+    "plus-style-reload",
+    "public-plus-style-no-private-expiry",
+    "expired-plus-public-fallback",
+    "expired-plus-owner-saved-style-preserved",
+    "unrelated-profile-update-preserves-style"
+  ],
+  "temporaryAccountsCreated": 2,
+  "temporaryAccountsRemaining": 0
+}

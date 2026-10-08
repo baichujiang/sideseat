@@ -2,7 +2,7 @@
 
 **Status:** Current release procedure and go/no-go gate
 
-**Last updated:** 2026-09-09
+**Last updated:** 2026-10-08
 
 **Scope:** Shared database migrations, Vercel Production, native signing, TestFlight, App Store and recovery
 
@@ -154,7 +154,13 @@ Store submission additionally requires:
 - Rollback must not reverse destructive migrations. Use forward repair, feature
   kill switches and compatible older clients where appropriate.
 
-Current recorded build: [TestFlight 1.0.0 (40)](./releases/2026-09-09-testflight-40.md)
+Current recorded build: [TestFlight 1.0.0 (97)](./releases/2026-10-08-testflight97.md),
+processed and distributed to `SideSeat Internal` on 2026-10-08. Its profile
+appearance backend dependency and production migration were released and checked
+with temporary accounts. Current physical installation, APNs delivery and real
+Sentry event symbolication remain unverified for this build.
+
+Historical Build 40: [TestFlight 1.0.0 (40)](./releases/2026-09-09-testflight-40.md)
 (processed and available in `SideSeat Internal`; discovery is now ON after
 [owner-authorized activation](./releases/2026-09-09-discovery-matching-production.md).
 The owner confirmed both phones on Build 40; candidate and production two-account
