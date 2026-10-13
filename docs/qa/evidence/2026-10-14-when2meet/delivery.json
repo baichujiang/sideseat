@@ -33,7 +33,19 @@
     "installed_version": "1.0.0",
     "installed_build": "98",
     "launch_blocker": "iOS rejected launch because the device was locked",
-    "installation_receipt_outcome": "success"
+    "installation_receipt_outcome": "success",
+    "launch_attempts": [
+      {
+        "mode": "normal_foreground",
+        "outcome": "failed",
+        "reason": "Locked"
+      },
+      {
+        "mode": "background_no_activate",
+        "outcome": "failed",
+        "reason": "Locked"
+      }
+    ]
   },
   "test_scope": {
     "unit_tests": {

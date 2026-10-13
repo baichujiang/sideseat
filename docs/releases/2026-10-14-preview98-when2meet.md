@@ -38,6 +38,7 @@ When2meet 原页面，使用 SideSeat 的字体、圆角、控件和浅色/深�
   `SideSeat Preview / 1.0.0 / 98`。旧 Preview 为 96。
 - 00:21 无 UI 测试参数正常启动尝试被 iOS 拒绝，明确原因 `Locked`：手机
   尚未解锁。已请求用户解锁，启动与运行进程验收待该设备条件满足后完成。
+  系统提供的后台 `--no-activate` 启动方式也返回同一 `Locked` 原因。
 - [交付收据](../qa/evidence/2026-10-14-when2meet/delivery.json) 记录源码、
   可执行文件哈希、构建/安装成功及当前启动阻塞；没有将安装算作启动成功。
 
