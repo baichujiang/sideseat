@@ -99,6 +99,8 @@ final class SmartTimeSchedulingUITests: XCTestCase {
         attach(app, "plan-editor-smart-entry")
         let title = app.textFields["plan-create-title"]
         title.tap(); title.typeText("手动约时间")
+        let done = app.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成", "Fertig"])).firstMatch
+        if done.exists { done.tap() }
         let start = app.datePickers["plan-create-start"]
         let end = app.datePickers["plan-create-end"]
         for _ in 0..<5 where !end.buttons.firstMatch.isHittable { scrollForm(app, down: false) }

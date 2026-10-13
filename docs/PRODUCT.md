@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-10-14
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -29,6 +29,13 @@ separate follow-up integrations; the membership badge does not certify them.
 
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
+
+**2026-10-13 owner-approved time coordination amendment:**
+Messages and existing group chats may embed When2meet's original availability
+polls. Retain its creation, participant entry, paint/erase, automatic saving and
+group heatmap mechanisms, with SideSeat's visual styling. A poll is coordination;
+it does not create a confirmed Plan or Calendar entry. This does not enable new
+group formation or alter existing Plan consent. See [User Flow](./USER_FLOW.md).
 
 ## 1. Positioning
 

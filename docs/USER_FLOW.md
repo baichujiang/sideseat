@@ -2,11 +2,30 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-10-03
+**Last updated:** 2026-10-14
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
+
+## Embedded time polls — owner-approved 2026-10-13
+
+Messages offers **Coordinate a time**, and existing group chats offer the same
+action. The sheet loads When2meet's original HTTPS pages inside WKWebView. The
+provider owns event creation, participant name/optional-password entry, 15-minute
+paint/erase selection, automatic saving and the group availability heatmap.
+SideSeat applies its existing semantic typography, surfaces and controls without
+replacing those functions or adding a separate availability submit step.
+
+Once an event exists, its link can be copied/shared from the native menu. A
+When2meet event link in a direct/group message opens in the same sheet. The most
+recent event link/title is saved on device under the current SideSeat account,
+so closing the sheet does not lose the route back to the provider's saved poll.
+
+This is coordination, not a confirmed Plan. It does not send a message, read a
+private Calendar, create a group commitment or write Calendar entries on its own.
+Existing Plan consent continues to govern SideSeat commitments. Provider names,
+availability, advertising and consent choices remain with When2meet.
 
 **Approved publication amendment:** With `v2AutomaticMatching`, publishing replaces
 the separate matching start. Legacy saved intentions keep their original consent.

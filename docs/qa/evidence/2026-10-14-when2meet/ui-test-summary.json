@@ -1,0 +1,12 @@
+{
+  "title": "Test - SideSeat-Development",
+  "result": "Passed",
+  "totalTestCount": 3,
+  "passedTests": 3,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "startTime": 1791929397.111,
+  "finishTime": 1791929662.697,
+  "testFailures": [],
+  "environmentDescription": "SideSeat-Development · Built with macOS 26.3.1"
+}

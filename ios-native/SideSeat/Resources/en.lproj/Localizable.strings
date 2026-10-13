@@ -2415,3 +2415,22 @@
 "Checking username…" = "Checking username…";
 "This username is available." = "This username is available.";
 "Couldn’t check right now. Continue to verify when creating your account." = "Couldn’t check right now. Continue to verify when creating your account.";
+
+/* Embedded When2meet time coordination */
+"Time poll" = "Time poll";
+"Coordinate a time" = "Coordinate a time";
+"Open time poll" = "Open time poll";
+"New time poll" = "New time poll";
+"Open a poll link" = "Open a poll link";
+"Most recent time poll" = "Most recent time poll";
+"Copy poll link" = "Copy poll link";
+"Share poll link" = "Share poll link";
+"Time poll actions" = "Time poll actions";
+"Poll link" = "Poll link";
+"Paste a When2meet event link." = "Paste a When2meet event link.";
+"Loading time poll" = "Loading time poll";
+"Unable to load time poll" = "Unable to load time poll";
+"New Event Name" = "New Event Name";
+"Your name" = "Your name";
+"Optional password" = "Optional password";
+"Group availability" = "Group availability";

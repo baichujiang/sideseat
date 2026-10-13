@@ -2414,3 +2414,22 @@
 "Checking username…" = "Benutzername wird geprüft…";
 "This username is available." = "Dieser Benutzername ist verfügbar.";
 "Couldn’t check right now. Continue to verify when creating your account." = "Prüfung derzeit nicht möglich. Beim Erstellen des Kontos wird erneut geprüft.";
+
+/* Embedded When2meet time coordination */
+"Time poll" = "Zeitumfrage";
+"Coordinate a time" = "Zeit abstimmen";
+"Open time poll" = "Zeitumfrage öffnen";
+"New time poll" = "Neue Zeitumfrage";
+"Open a poll link" = "Umfragelink öffnen";
+"Most recent time poll" = "Letzte Zeitumfrage";
+"Copy poll link" = "Umfragelink kopieren";
+"Share poll link" = "Umfragelink teilen";
+"Time poll actions" = "Aktionen zur Zeitumfrage";
+"Poll link" = "Umfragelink";
+"Paste a When2meet event link." = "Füge einen When2meet-Veranstaltungslink ein.";
+"Loading time poll" = "Zeitumfrage wird geladen";
+"Unable to load time poll" = "Zeitumfrage kann nicht geladen werden";
+"New Event Name" = "Name der Veranstaltung";
+"Your name" = "Dein Name";
+"Optional password" = "Passwort (optional)";
+"Group availability" = "Verfügbarkeit der Gruppe";

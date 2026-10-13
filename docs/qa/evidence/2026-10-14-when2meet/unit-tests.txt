@@ -1,0 +1,7 @@
+◇ Suite When2meetTests started.
+◇ Test "Shared provider event links open in-app without accepting lookalike hosts" started.
+✔ Test "Shared provider event links open in-app without accepting lookalike hosts" passed after 0.013 seconds.
+◇ Test "The last real poll persists for its owner without crossing SideSeat accounts" started.
+✔ Test "The last real poll persists for its owner without crossing SideSeat accounts" passed after 0.004 seconds.
+✔ Suite When2meetTests passed after 0.020 seconds.
+✔ Test run with 2 tests in 1 suite passed after 0.020 seconds.

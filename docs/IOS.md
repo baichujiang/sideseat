@@ -2,7 +2,7 @@
 
 **Status:** Current platform guide
 
-**Last updated:** 2026-10-08
+**Last updated:** 2026-10-14
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -111,7 +111,21 @@ depend on a minute-level server cron because iOS controls background execution.
 
 ## 6. Platform integrations
 
+- Messages embeds When2meet through `When2meetSheet`/WKWebView. Original provider
+  pages and save endpoints remain authoritative; only presentation/accessibility
+  is adapted with `SideSeatTheme`. Exact HTTPS event-host validation keeps pasted
+  links in the provider surface; clicked external links use the system browser.
+  No SideSeat bearer token, password, profile or Calendar data is injected.
+  `When2meetLiveUITests` is opt-in through
+  `SIDESEAT_WHEN2MEET_LIVE_UI_TESTS=1`; it creates only an anonymous QA poll and
+  verifies real provider persistence. DEBUG-only observations return the original
+  fetch Promise without changing save payloads or endpoints.
+
 - `PrivacyInfo.xcprivacy` describes required manifest APIs.
+- The When2meet input adapter suppresses iOS compatibility mouse events after a
+  grid touch, which otherwise toggles a tapped slot twice. Original touch handlers
+  and save requests are unchanged. Live verification counts one save per gesture
+  and rereads the provider's stored selections.
 - Associated Domains and AASA provide approved Universal Links.
 - APNs device registration uses `/api/v1/push/devices` after sign-in.
 - Sentry starts only when a crash DSN is configured and default PII is disabled.

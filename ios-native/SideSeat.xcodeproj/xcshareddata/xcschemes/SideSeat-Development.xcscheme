@@ -144,6 +144,11 @@
             value = "$(SIDESEAT_RUN_REAL_PHOTO_TEST)"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "SIDESEAT_WHEN2MEET_LIVE_UI_TESTS"
+            value = "$(SIDESEAT_WHEN2MEET_LIVE_UI_TESTS)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
    </TestAction>
    <LaunchAction
