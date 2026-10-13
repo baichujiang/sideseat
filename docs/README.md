@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-03
+**Last updated:** 2026-10-14
 
 ## Read this first
 
@@ -53,6 +53,7 @@ Historical build evidence never certifies a newer build.
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |
 | [Storage lifecycle and cost audit](./qa/2026-09-30-storage-lifecycle-and-cost.md) | Sequential fixes, local verification, production follow-up and Vercel Pro cost scenarios |
 | [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |
+| [Preview 1.0.0 (98)](./releases/2026-10-14-preview98-when2meet.md) | Original When2meet integration, live provider verification, signed phone installation and launch status |
 | [TestFlight 1.0.0 (97)](./releases/2026-10-08-testflight97.md) | Current local snapshot, profile appearance backend dependency, signed archive and distribution evidence |
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |
 | [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md) | Distributed Layer 2 build and physical acceptance evidence |

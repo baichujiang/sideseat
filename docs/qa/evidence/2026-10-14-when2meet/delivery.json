@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-14",
+  "timezone": "Europe/Berlin",
+  "branch": "codex/ios-uxui-20260922",
+  "initial_sync": {
+    "source_commit": "6f57923a743286aaa64b0f1d90da071256ecf331",
+    "ahead": 0,
+    "behind": 0,
+    "working_tree_clean": true
+  },
+  "source_commit": "c1bf19d21234fb458f18c0ad2ed9f04393ba2f94",
+  "source_pushed": true,
+  "backend": {
+    "required": false,
+    "deployed": false,
+    "deployment_id": null
+  },
+  "preview": {
+    "bundle_identifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "98",
+    "api_base_url": "https://api.sideseat.de",
+    "signed_build_verified": true,
+    "build_verified_at": "2026-10-13T22:20:46.981049+00:00",
+    "executable_sha256": "597838b1a13d8b7fb4bfcaea195aef4c99e16ac844d3f27b85ffad1b0d7c6d62"
+  },
+  "device": {
+    "model": "iPhone 16 Pro Max",
+    "os_version": "26.0.1",
+    "previous_preview_build": "96",
+    "installed": true,
+    "launched": false,
+    "installed_version": "1.0.0",
+    "installed_build": "98",
+    "launch_blocker": "iOS rejected launch because the device was locked",
+    "installation_receipt_outcome": "success"
+  },
+  "test_scope": {
+    "unit_tests": {
+      "passed": 2,
+      "failed": 0
+    },
+    "combined_ui_tests": {
+      "passed": 3,
+      "failed": 0
+    },
+    "final_appearance_recheck": {
+      "passed": 1,
+      "failed": 0
+    },
+    "provider": "live_when2meet",
+    "sideseat_account": "isolated_ui_fixture",
+    "physical_acceptance": "install_version_and_normal_launch"
+  }
+}

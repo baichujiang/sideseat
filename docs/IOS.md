@@ -139,7 +139,10 @@ secrets—not Git.
 
 Version `1.0.0` build `97` was uploaded, processed and distributed to the existing
 `SideSeat Internal` group on 2026-10-08. See its
-[release record](./releases/2026-10-08-testflight97.md). Preview remains build `96`.
+[release record](./releases/2026-10-08-testflight97.md). Preview `1.0.0 (98)` was
+installed on 2026-10-14 with the original When2meet integration; normal launch
+verification currently awaits an unlocked phone. See its
+[delivery record](./releases/2026-10-14-preview98-when2meet.md).
 TestFlight upload is not
 App Store approval and does not replace current physical-device, privacy, APNs or
 tester acceptance gates.
