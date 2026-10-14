@@ -10794,6 +10794,255 @@
           }
         }
       }
+    },
+    "/api/v1/time-polls": {
+      "get": {
+        "operationId": "listTimePolls",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollListEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTimePoll",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTimePollRequest"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/time-polls/{token}": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "getTimePoll",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTimePoll",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteTimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "x-sideseat-empty-request-body": true
+      }
+    },
+    "/api/v1/time-polls/{token}/response": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "saveTimePollResponse",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveTimePollResponseRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -21992,6 +22241,369 @@
           "style",
           "showMembershipBadge"
         ]
+      },
+      "TimePollSlot": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "date",
+          "row",
+          "label",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "date": {
+            "type": "string"
+          },
+          "row": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TimePollParticipant": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "displayName",
+          "slotIds",
+          "isMe"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "isMe": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimePollWindow": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end",
+          "attendeeIds",
+          "count"
+        ],
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attendeeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "TimePollSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "counts",
+          "participantCount",
+          "maximum",
+          "common",
+          "windows"
+        ],
+        "properties": {
+          "counts": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "participantCount": {
+            "type": "integer"
+          },
+          "maximum": {
+            "type": "integer"
+          },
+          "common": {
+            "type": "boolean"
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollWindow"
+            }
+          }
+        }
+      },
+      "TimePoll": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "title",
+          "timeZone",
+          "dates",
+          "startMinute",
+          "endMinute",
+          "slots",
+          "participants",
+          "mySlotIds",
+          "myDisplayName",
+          "didRespond",
+          "isOwner",
+          "updatedAt",
+          "shareUrl",
+          "summary"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "dates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startMinute": {
+            "type": "integer"
+          },
+          "endMinute": {
+            "type": "integer"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollSlot"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollParticipant"
+            }
+          },
+          "mySlotIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "myDisplayName": {
+            "type": "string"
+          },
+          "didRespond": {
+            "type": "boolean"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shareUrl": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TimePollSummary"
+          }
+        }
+      },
+      "TimePollEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TimePoll"
+          }
+        }
+      },
+      "TimePollListItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "title",
+          "timeZone",
+          "dates",
+          "updatedAt",
+          "shareUrl"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "dates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shareUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "TimePollListEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "polls"
+            ],
+            "properties": {
+              "polls": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TimePollListItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CreateTimePollRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "timeZone",
+          "dates",
+          "startMinute",
+          "endMinute"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "dates": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 31,
+            "items": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          },
+          "startMinute": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1425,
+            "multipleOf": 15
+          },
+          "endMinute": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 1440,
+            "multipleOf": 15
+          }
+        }
+      },
+      "SaveTimePollResponseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "displayName",
+          "slotIds"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "slotIds": {
+            "type": "array",
+            "maxItems": 3100,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "DeleteTimePollEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "deleted"
+            ],
+            "properties": {
+              "deleted": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
       }
     }
   }

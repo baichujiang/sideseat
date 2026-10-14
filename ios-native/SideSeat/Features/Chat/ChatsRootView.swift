@@ -12,7 +12,7 @@ struct ChatsRootView: View {
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Bindable var store: InboxStore
     @ScaledMetric(relativeTo: .body) private var greetingTileSize: CGFloat = 54
-    @State private var showsWhen2meet = false
+    @State private var showsTimePoll = false
 
     var body: some View {
         ZStack {
@@ -107,15 +107,15 @@ struct ChatsRootView: View {
         .ssRootNavigationTitle("Messages")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showsWhen2meet = true } label: {
+                Button { showsTimePoll = true } label: {
                     Image(systemName: "calendar.badge.clock").frame(minWidth: 44, minHeight: 44)
                 }
                 .accessibilityLabel("Coordinate a time")
-                .accessibilityIdentifier("inbox-when2meet")
+                .accessibilityIdentifier("inbox-time-poll")
             }
         }
-        .sheet(isPresented: $showsWhen2meet) {
-            When2meetSheet(userID: session.currentUser?.id ?? "guest")
+        .sheet(isPresented: $showsTimePoll) {
+            TimePollSheet()
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             InboxSearchHeader(text: $store.searchQuery)

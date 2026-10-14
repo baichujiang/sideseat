@@ -30,6 +30,7 @@ export function GET() {
             { "/": "/activities/*", comment: "Activities" },
             { "/": "/share/view/*", comment: "Schedule share links" },
             { "/": "/share/event/*", comment: "Shared event links" },
+            { "/": "/time-polls/*", comment: "Native time coordination" },
             { "/": "/profile", comment: "Profile tab" },
             { "/": "/profile/info", comment: "Profile details handoff" },
             { "/": "/profile/verification", comment: "Verification handoff" },
@@ -41,6 +42,7 @@ export function GET() {
           appIDs: [`${teamId}.app.sideseat.mobile.preview`],
           components: [
             { "/": "/xhs/*", comment: "Xiaohongshu SDK callback in Preview" },
+            { "/": "/time-polls/*", comment: "Native time coordination in Preview" },
           ],
         },
       ],

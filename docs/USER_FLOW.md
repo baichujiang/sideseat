@@ -2,30 +2,40 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
-## Embedded time polls — owner-approved 2026-10-13
+## Native time polls — owner-approved 2026-10-15
 
-Messages offers **Coordinate a time**, and existing group chats offer the same
-action. The sheet loads When2meet's original HTTPS pages inside WKWebView. The
-provider owns event creation, participant name/optional-password entry, 15-minute
-paint/erase selection, automatic saving and the group availability heatmap.
-SideSeat applies its existing semantic typography, surfaces and controls without
-replacing those functions or adding a separate availability submit step.
+Messages offers **Coordinate a time**, with the same action in existing group
+chats. Create a name, select up to 31 candidate dates, and set a daily time range.
+The displayed time zone is fixed when created so all respondents use the same
+instants. Each cell is 15 minutes. Drag a rectangle to paint availability; start
+on a selected cell to erase. Swipe the time-label column to scroll the grid.
+Changes save automatically after a gesture, with Saving / Saved / visible error
+and Retry. Respondents may explicitly record that they have no available time.
 
-Once an event exists, its link can be copied/shared from the native menu. A
-When2meet event link in a direct/group message opens in the same sheet. The most
-recent event link/title is saved on device under the current SideSeat account,
-so closing the sheet does not lose the route back to the provider's saved poll.
+Each signed-in Sideseat account owns one editable response per poll. Its display
+name is editable for that poll; it does not require a separate provider password.
+**Group results** shows attendance in each cell and the highest-attendance windows.
+“Everyone” means everyone who has responded, including empty responses; the
+respondent count is shown. Adjacent cells are merged only if the same people can
+attend the full interval. If no common time exists, recommend maximum attendance.
 
-This is coordination, not a confirmed Plan. It does not send a message, read a
-private Calendar, create a group commitment or write Calendar entries on its own.
-Existing Plan consent continues to govern SideSeat commitments. Provider names,
-availability, advertising and consent choices remain with When2meet.
+Share or copy the Sideseat link using the native menu. The link opens the native
+poll after login, or a branded browser handoff page. Creator and respondent polls
+appear in **Your time polls** and reopen from server data. Invite holders who are
+signed in can view/respond. Existing block rules hide blocked users' responses;
+statistics use the visible responses. Creator may delete the poll and responses.
+Historical When2meet links and dated QA reports remain historical records; new
+polls use Sideseat's own service exclusively.
+
+This feature does not send a message, read Calendar, create a group commitment or
+write Calendar entries on its own. Existing Plan consent continues to govern
+Sideseat commitments.
 
 **Approved publication amendment:** With `v2AutomaticMatching`, publishing replaces
 the separate matching start. Legacy saved intentions keep their original consent.

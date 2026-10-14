@@ -17,6 +17,7 @@ export function isNativeWebPath(pathname: string): boolean {
     return true;
   }
   return (
+    pathname.startsWith("/time-polls/") ||
     pathname.startsWith("/share/intent/") ||
     pathname.startsWith("/share/view/") ||
     pathname.startsWith("/share/event/") ||

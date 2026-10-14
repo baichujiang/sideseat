@@ -41,6 +41,7 @@ export function isPublicAppPath(pathname: string): boolean {
     return true;
   }
   if (
+    pathname.startsWith("/time-polls/") ||
     pathname.startsWith("/share/intent/") ||
     pathname === "/share/schedule" ||
     pathname.startsWith("/share/schedule/") ||

@@ -2079,7 +2079,7 @@ private struct DirectMessageBubble: View {
                 if let reply = message.replyTo {
                     replyStrip(reply)
                 }
-                When2meetMessageContent(text: displayBody)
+                TimePollMessageContent(text: displayBody)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

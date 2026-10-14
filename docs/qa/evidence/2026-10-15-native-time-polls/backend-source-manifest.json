@@ -1,0 +1,60 @@
+{
+  "baseDeployment": "dpl_ssQz7eBBytwUSNHj5vmaLs7ZYNNH",
+  "verifiedSourceFiles": 1305,
+  "overlays": [
+    {
+      "path": "app/.well-known/apple-app-site-association/route.ts",
+      "sha256": "df1c426626e073fd00edaa0548f53dff2bf6fd3ee3cf19114b3470153bdefe11"
+    },
+    {
+      "path": "lib/nav/public-app-path.ts",
+      "sha256": "466754c642474d7640bd99f246f538c72a9a04faf183b51879a0527300ed6f88"
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "ca674002c2b96d3b9337c06bddda5e10a301ac53e2770f167e70e6d09a7087d1"
+    },
+    {
+      "path": "prisma/migrations/20261015093000_native_time_polls/migration.sql",
+      "sha256": "b187e82101bc8cd958208479017a38333236d03c671fd0b656980b0322266164"
+    },
+    {
+      "path": "openapi/v1.json",
+      "sha256": "abdd4c20b2e744fc1ebde702a319d19190bd8ef1fcd64239819edfe4022dea66"
+    },
+    {
+      "path": "lib/time-polls/domain.ts",
+      "sha256": "d9be1b4a6d5f3dd930e4ad643af369a397a67f027b906353d2164f97e72a05ce"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "sha256": "23e7a45921ce9fb5f6535501254c23709a2cb32d34361b1ad105438e3b57a19a"
+    },
+    {
+      "path": "app/api/v1/time-polls/route.ts",
+      "sha256": "0afb8e6220758818c07506fdf1602308ea8247a336ca8f89b14bcc2c21f838a1"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/route.ts",
+      "sha256": "6d0cca72406166d7daa28d96ec5cf04b235759fd45851faa7729aec5c79d51f7"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/response/route.ts",
+      "sha256": "98b06577c907b3c009c9b16425cdf8e6845d488a2708801658532bf661335ff6"
+    },
+    {
+      "path": "app/time-polls/[token]/page.tsx",
+      "sha256": "f9c286562531c557de21e0c62a2e1c9b89b28c2a94f5d061ee214bb5de29d2d6"
+    },
+    {
+      "path": "lib/nav/legacy-web-freeze.ts",
+      "sha256": "826976b65ea754b6eb254bbda2bd847ce664199d5e70f5fb78a899835e1fa82e"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "sha256": "fafb97b0363018e58a442113dd933cc5da3df003fe729c93dbbe2ff32bc585c9"
+    }
+  ],
+  "buildCommand": "npm run build",
+  "migrationPolicy": "explicit one-shot before promotion"
+}

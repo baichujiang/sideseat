@@ -35,6 +35,7 @@
 		186D180AFBDDFACE4D6A3C6F /* InboxStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D9B7E4E90D0246C91B6C35 /* InboxStore.swift */; };
 		192F3E751DAB7AAC424C38AB /* CreateChooserSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F88078731B89C2C0298D66 /* CreateChooserSheet.swift */; };
 		1933A2A1BCEBBE1AB05F4020 /* MutualOpportunityModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09A928752AC6CF2606877944 /* MutualOpportunityModels.swift */; };
+		198884B0875215B4E5CD2476 /* TimePoll.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71471A16565A598085F1753 /* TimePoll.swift */; };
 		1AAF8BD9AA7727D5B4F8A316 /* DirectConnectionActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BAF9C02C65270C7A0DD488 /* DirectConnectionActions.swift */; };
 		1BB0B635D9F9584EDFA5E1CE /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF57114581BA83F81840755B /* NavigationTests.swift */; };
 		1BDC19A71CE7274FCC8B3AC9 /* StudentVerificationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A055A6EA2F80F2C51A5A5E /* StudentVerificationSheet.swift */; };
@@ -42,7 +43,6 @@
 		1CCFCF52AE29AD9BB71E659F /* ContactsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4877D42DC56DD9AFA40E0F52 /* ContactsModels.swift */; };
 		1ECC26E920DE0A1F88DC73EB /* CalendarSmartAddModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB06D77347B4207E25CF13 /* CalendarSmartAddModels.swift */; };
 		2188BA3876536036C48F3B87 /* SSFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */; };
-		21BE29E9CC099FC83ED8F6DD /* When2meet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF3FA5D651210E5D5B9645D /* When2meet.swift */; };
 		252F38EB1C429112CA5E42FB /* FeedbackRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05297190706209F0E28ED8E9 /* FeedbackRootView.swift */; };
 		2783CAE0C2CD0A38FE5BF083 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3118E7610273B103B5A2FBE0 /* APIClient.swift */; };
 		2867C263B537ED5BD56AE53E /* MembershipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DA8E7180D77128923A93A4 /* MembershipView.swift */; };
@@ -65,6 +65,7 @@
 		4118D58DE1DA24C71026E48F /* HomeWeekWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75118340767EE65354F2967E /* HomeWeekWindow.swift */; };
 		418D083E4E1F97044CB4D155 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD784401C3E398DA91867FFB /* StoreKitManager.swift */; };
 		41FCBDB76E5ED049AD61B259 /* AccessibilityAuditUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B28E7A928C47B3A2885B16D /* AccessibilityAuditUITests.swift */; };
+		420555A92E86125524178A24 /* TimePollStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8949EDFC00E4F92635CFCA /* TimePollStore.swift */; };
 		420811ECC1989B461B3F676B /* CalendarTimelineScrollAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02567893D80FDF128456D3C /* CalendarTimelineScrollAnchor.swift */; };
 		427EBACB2C89FA3576D664D4 /* CalendarImageInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F64CDB3CE97C3E2B027F55A /* CalendarImageInput.swift */; };
 		4551268BD3F3306EE05F11F7 /* CalendarSmartAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E40DE4CD91068AA6B73C09 /* CalendarSmartAddView.swift */; };
@@ -90,6 +91,7 @@
 		633E883E463EE786E77E2D2C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F1FDCB0D2F92250F6A32AB /* LoginView.swift */; };
 		6511C18E561BA1C959174F7F /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C468BD9DED03DE05528A642 /* SettingsRootView.swift */; };
 		69B201839D3F7FA4577433C3 /* SSShareComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF7DEEFE1BFFD55F7F04FD8B /* SSShareComponents.swift */; };
+		69C6C5E596EAEA8EC1F8B8A9 /* TimePollTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ADB7414BEB982CDFA26C43A /* TimePollTests.swift */; };
 		69E0505855B19BEF62188A88 /* CalendarEventTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72F2512976085BF070CD3F4B /* CalendarEventTransfer.swift */; };
 		6B4FEE0D14C140B1CADEAC34 /* CalendarEventEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955B999108F8DF50B0560FCC /* CalendarEventEditorView.swift */; };
 		6C53AD05A5552F436E808DD9 /* CalendarCategoryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D4377A9632FA4FF3206223 /* CalendarCategoryListView.swift */; };
@@ -105,7 +107,6 @@
 		76A2A47EA27413612076FE65 /* HomeRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685349FEAE957E5EE3B3045A /* HomeRootView.swift */; };
 		76C7AB994F965F1115771AED /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0F0CC6E11A165A3B719A5B36 /* Localizable.strings */; };
 		77001344FA523F4A5CE81366 /* ConversationPlansTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25FEA39CE720EBB74D7B997 /* ConversationPlansTests.swift */; };
-		782859E6913362D10B8AF9CA /* When2meetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BE3224D75D110B928EF845 /* When2meetTests.swift */; };
 		79EC6D4BC19B474B33DB432F /* PlanCancellationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00F2DD0C7E13C0AE7ECEEB12 /* PlanCancellationSheet.swift */; };
 		7B10B0D37AB3F45EEE7D61EF /* ForgotPasswordSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD749E6183CC90A658FE209 /* ForgotPasswordSheet.swift */; };
 		7E006D49F781591EF03F268D /* OpenConversationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 625FA40C22F15C5BDF81967C /* OpenConversationModels.swift */; };
@@ -173,6 +174,7 @@
 		C75C99A7E543FC1FE9B9ED78 /* DirectChatCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E73FCD44512CF8B201D14F2 /* DirectChatCache.swift */; };
 		C859C690A1E14371D66096AF /* CourseManualAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BDFC41299BFEAA585462ED /* CourseManualAddView.swift */; };
 		CA31652EA2F547F5808E0401 /* HomeWeekTimetableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFBE1FE825C1633DB8C3E2D /* HomeWeekTimetableView.swift */; };
+		CC138832AECB7E02E9FE6DAF /* TimePollLiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */; };
 		CED0E87BF207BC73E506B34D /* SideSeatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1D3411983EFB3808E94B856 /* SideSeatApp.swift */; };
 		CF1995B97F5C7776EEB67C50 /* CalendarDayTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AEF74EA0D86C379B0C1ECD6 /* CalendarDayTimelineView.swift */; };
 		D08954EB796596A5D2E6AB92 /* CalendarSmartInputPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = AF002FFED2B34C2454F5F507 /* CalendarSmartInputPolicy.json */; };
@@ -186,7 +188,6 @@
 		DA5AF475FC523F1855EE30BC /* CourseModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3841B46647A86508AB1446B1 /* CourseModelsTests.swift */; };
 		DCBA4685737799E2093D8F19 /* DirectChatInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03F6B2D96D052258ABA1372 /* DirectChatInfoView.swift */; };
 		DD88264E3F8EC79053A45EB9 /* CalendarCategoryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815AF51FC3CF52331459AF17 /* CalendarCategoryModels.swift */; };
-		DF193C0D184D92C61F380833 /* When2meetLiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 900CE084F84DFE99F26F3B2F /* When2meetLiveUITests.swift */; };
 		E52483890E09BF20DFD284DB /* SSListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B49A6F281466CD2C625A3D /* SSListRow.swift */; };
 		E70C0097B7514E4CE55D0A6B /* BlockedUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9748456C73AEA6D53A6CD6CD /* BlockedUsersView.swift */; };
 		E71F11FADCB88D69FDEA344F /* ChatSSEClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4EC5C6BE658AA2886D46F1 /* ChatSSEClient.swift */; };
@@ -197,7 +198,7 @@
 		EC2E3CFCD62A238B1737976D /* GroupInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A675FE957FB469D2AEDEFB /* GroupInfoView.swift */; };
 		ED70BE27D8AE69117D929B92 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FAF0DAF0FAFC178BC3E535 /* APIModels.swift */; };
 		EE53E8F5660517E7C3C13E14 /* CourseStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843627AD8F218DA5D2232BC6 /* CourseStores.swift */; };
-		EEEA92C0ACDF0B862A8D847A /* When2meetSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D2A5B07404C30F534FDAA7D /* When2meetSheet.swift */; };
+		F74A8D688F6C8CC98B89D758 /* TimePollSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF620B25C8B323A0AFCED41F /* TimePollSheet.swift */; };
 		F983BA64B5182A6129C4A602 /* MembershipStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C6045F7F931B6BBCE7736F0 /* MembershipStore.swift */; };
 		F9F94194E335505AE088CCD7 /* MutualOpportunityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45283F13EF638C68289B21B4 /* MutualOpportunityStore.swift */; };
 		FC3D62F858CB807BC2D2209D /* CalendarDayTimelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD03F633A5C67F0135C4C02C /* CalendarDayTimelineTests.swift */; };
@@ -233,7 +234,6 @@
 		09A928752AC6CF2606877944 /* MutualOpportunityModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutualOpportunityModels.swift; sourceTree = "<group>"; };
 		0B047DABCEDBE71A957EE08A /* SSViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSViewModifiers.swift; sourceTree = "<group>"; };
 		0BF7F0B0BE6539441B903817 /* CalendarVoiceInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarVoiceInput.swift; sourceTree = "<group>"; };
-		0D2A5B07404C30F534FDAA7D /* When2meetSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = When2meetSheet.swift; sourceTree = "<group>"; };
 		0D97A39039117E9C225EC47C /* SSSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSSectionHeader.swift; sourceTree = "<group>"; };
 		0E4C6F2C3D61764D6514D45F /* DiscoverModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverModels.swift; sourceTree = "<group>"; };
 		0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartTimeSchedulingUITests.swift; sourceTree = "<group>"; };
@@ -268,6 +268,7 @@
 		39A8C7BAEF22D50B86A08F65 /* CourseModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseModels.swift; sourceTree = "<group>"; };
 		39ADC6411B25D680FD66CBE0 /* DiscoverCreateViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverCreateViews.swift; sourceTree = "<group>"; };
 		39CFEC8F4D75CC777D4FBDF5 /* ProfileStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStores.swift; sourceTree = "<group>"; };
+		3ADB7414BEB982CDFA26C43A /* TimePollTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollTests.swift; sourceTree = "<group>"; };
 		3AEF74EA0D86C379B0C1ECD6 /* CalendarDayTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayTimelineView.swift; sourceTree = "<group>"; };
 		3B8D4E37B43C570A523DFC5B /* AppRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootView.swift; sourceTree = "<group>"; };
 		3C2047C3A354B99FCC0B518C /* SideSeatAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideSeatAppDelegate.swift; sourceTree = "<group>"; };
@@ -295,7 +296,6 @@
 		53153421E0B86C234BBA457A /* CrashReporting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReporting.swift; sourceTree = "<group>"; };
 		552B30C2604314E5CB4F7EB5 /* ClientConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientConfigurationTests.swift; sourceTree = "<group>"; };
 		565501EF903FE964AC960048 /* TogetherRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TogetherRootView.swift; sourceTree = "<group>"; };
-		57BE3224D75D110B928EF845 /* When2meetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = When2meetTests.swift; sourceTree = "<group>"; };
 		5929F6766FF38C93D6016E1F /* ChatStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStoreTests.swift; sourceTree = "<group>"; };
 		5989ECB14FAD6FA2713CB01F /* StoreKitModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitModels.swift; sourceTree = "<group>"; };
 		5C482A58F5EEB3600479A040 /* SmartTimeSchedulingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartTimeSchedulingTests.swift; sourceTree = "<group>"; };
@@ -342,7 +342,6 @@
 		8CAA3783FEFE6BD91D6FF4E8 /* HomeScheduleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScheduleModels.swift; sourceTree = "<group>"; };
 		8E4EC5C6BE658AA2886D46F1 /* ChatSSEClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSSEClient.swift; sourceTree = "<group>"; };
 		8E56A57977F5529D517DA271 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
-		900CE084F84DFE99F26F3B2F /* When2meetLiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = When2meetLiveUITests.swift; sourceTree = "<group>"; };
 		916BC5CB89EF656BD01C07E8 /* CalendarTransferStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTransferStoreTests.swift; sourceTree = "<group>"; };
 		93D553AA379EE2BE32D3D719 /* DirectChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectChatStore.swift; sourceTree = "<group>"; };
 		955B999108F8DF50B0560FCC /* CalendarEventEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventEditorView.swift; sourceTree = "<group>"; };
@@ -351,6 +350,7 @@
 		9B28E7A928C47B3A2885B16D /* AccessibilityAuditUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuditUITests.swift; sourceTree = "<group>"; };
 		9C468BD9DED03DE05528A642 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		9DFF1B221A5ED72A5959924E /* DiscoverPlanShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverPlanShare.swift; sourceTree = "<group>"; };
+		9E8949EDFC00E4F92635CFCA /* TimePollStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollStore.swift; sourceTree = "<group>"; };
 		9EEC67F6581568857A4D683F /* ScheduleSharePhotoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSharePhotoLibrary.swift; sourceTree = "<group>"; };
 		9F8B24F33D337C2525B5E7D7 /* ProfileAvatarPreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarPreprocessor.swift; sourceTree = "<group>"; };
 		9FEBE4F2ACF6A60EF3E8737A /* DirectChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectChatView.swift; sourceTree = "<group>"; };
@@ -398,6 +398,7 @@
 		CF0D8FA9E2DF899C1CA0A97D /* CalendarChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarChrome.swift; sourceTree = "<group>"; };
 		CF3A0E7F015CCE6FC2772477 /* SSPlusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSPlusBadge.swift; sourceTree = "<group>"; };
 		CF57114581BA83F81840755B /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
+		D71471A16565A598085F1753 /* TimePoll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePoll.swift; sourceTree = "<group>"; };
 		D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSFlowCard.swift; sourceTree = "<group>"; };
 		D85D3F2CE3E6DD2E1AA74289 /* CommunityChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityChatView.swift; sourceTree = "<group>"; };
 		DB1DDE44E260D324CBA2E141 /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
@@ -407,6 +408,7 @@
 		E073C688D902C02A99DC2B75 /* DiscoverImagePreprocessorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverImagePreprocessorTests.swift; sourceTree = "<group>"; };
 		E105066676F44745C8A89430 /* CalendarCategoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCategoryStore.swift; sourceTree = "<group>"; };
 		E148EB3A71EA8CB00D298207 /* DiscoverPlanShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverPlanShareTests.swift; sourceTree = "<group>"; };
+		E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollLiveUITests.swift; sourceTree = "<group>"; };
 		E4793DD95879802D1A232D2A /* CurrentUserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUserTests.swift; sourceTree = "<group>"; };
 		E4ED838F558F56B6675F212F /* ExploreIntentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreIntentStore.swift; sourceTree = "<group>"; };
 		E4F9ED145119860B00693A89 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -416,7 +418,6 @@
 		EB010BD5F8DB63B711470EE8 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		EB30FD8D94239AB56B89B3E5 /* CourseScreenshotImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseScreenshotImportView.swift; sourceTree = "<group>"; };
 		EBCD065BA769FCE2746CFF5B /* PushRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistration.swift; sourceTree = "<group>"; };
-		EBF3FA5D651210E5D5B9645D /* When2meet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = When2meet.swift; sourceTree = "<group>"; };
 		ECA6BDFC8E1906BE22DF662D /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
 		ECBBAFB0BF6B3C95630B9EC4 /* HomeScheduleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScheduleStore.swift; sourceTree = "<group>"; };
 		EFCCBF3A1A8C98CD370286B9 /* DiscoverRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverRootView.swift; sourceTree = "<group>"; };
@@ -432,6 +433,7 @@
 		FC9E8E0ADC80816792B3ED83 /* Preview.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Preview.xcconfig; sourceTree = "<group>"; };
 		FDD944FD0E1667B0F2FD1471 /* ChatLocationCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLocationCapture.swift; sourceTree = "<group>"; };
 		FDFC29920481D7B2982AD5C5 /* TabRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRouter.swift; sourceTree = "<group>"; };
+		FF620B25C8B323A0AFCED41F /* TimePollSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollSheet.swift; sourceTree = "<group>"; };
 		FF8842FFFA21FD89D3D41EF2 /* CalendarEventPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventPresentation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -477,7 +479,7 @@
 				5C482A58F5EEB3600479A040 /* SmartTimeSchedulingTests.swift */,
 				49DC930CC5BBB2F79B937782 /* StoreKitTests.swift */,
 				7A3340179AA96558BA6FFACC /* ThemeContrastTests.swift */,
-				57BE3224D75D110B928EF845 /* When2meetTests.swift */,
+				3ADB7414BEB982CDFA26C43A /* TimePollTests.swift */,
 			);
 			path = SideSeatTests;
 			sourceTree = "<group>";
@@ -606,8 +608,8 @@
 				50815624BB3031A64ACBCAC5 /* PlanCancellationUITests.swift */,
 				E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */,
 				0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */,
+				E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */,
 				CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */,
-				900CE084F84DFE99F26F3B2F /* When2meetLiveUITests.swift */,
 			);
 			path = SideSeatUITests;
 			sourceTree = "<group>";
@@ -842,9 +844,10 @@
 				C1EC7B6461F3CFDB8B3510A1 /* ScheduleShareRecipientView.swift */,
 				404AFC630C3200DF37360B09 /* SmartTimeScheduling.swift */,
 				C7F41614CFB80329D132C73F /* SmartTimeSuggestionSheet.swift */,
+				D71471A16565A598085F1753 /* TimePoll.swift */,
+				FF620B25C8B323A0AFCED41F /* TimePollSheet.swift */,
+				9E8949EDFC00E4F92635CFCA /* TimePollStore.swift */,
 				B1902D449D76776DDF5990B3 /* UITestingChatFixtures.swift */,
-				EBF3FA5D651210E5D5B9645D /* When2meet.swift */,
-				0D2A5B07404C30F534FDAA7D /* When2meetSheet.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -1251,13 +1254,14 @@
 				1BDC19A71CE7274FCC8B3AC9 /* StudentVerificationSheet.swift in Sources */,
 				B25584AAF5955E1A32445EC1 /* SupportStoreView.swift in Sources */,
 				3773083EA509D53F3112DBA5 /* TabRouter.swift in Sources */,
+				198884B0875215B4E5CD2476 /* TimePoll.swift in Sources */,
+				F74A8D688F6C8CC98B89D758 /* TimePollSheet.swift in Sources */,
+				420555A92E86125524178A24 /* TimePollStore.swift in Sources */,
 				726B379303A676CF8AED40DB /* TogetherRootView.swift in Sources */,
 				FCB0F03DA407444686DF57E2 /* Types.swift in Sources */,
 				017F900917DE557A3AA83583 /* UITestingChatFixtures.swift in Sources */,
 				899F59B62C3CB40579CFE803 /* WeeklyIntentModels.swift in Sources */,
 				615BA456C3DF225BE273A328 /* WeeklyIntentStore.swift in Sources */,
-				21BE29E9CC099FC83ED8F6DD /* When2meet.swift in Sources */,
-				EEEA92C0ACDF0B862A8D847A /* When2meetSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1290,7 +1294,7 @@
 				7EBF1B1F422C2F0CC6837006 /* SmartTimeSchedulingTests.swift in Sources */,
 				2DEAFD5CD619760E2313AEB8 /* StoreKitTests.swift in Sources */,
 				97DCB6EA0AA1036481074510 /* ThemeContrastTests.swift in Sources */,
-				782859E6913362D10B8AF9CA /* When2meetTests.swift in Sources */,
+				69C6C5E596EAEA8EC1F8B8A9 /* TimePollTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1307,8 +1311,8 @@
 				4F5F7BC65A341DF5A2679E75 /* PlanCancellationUITests.swift in Sources */,
 				9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */,
 				80F89555CBB966F96DB9BBDF /* SmartTimeSchedulingUITests.swift in Sources */,
+				CC138832AECB7E02E9FE6DAF /* TimePollLiveUITests.swift in Sources */,
 				90ADB3D2C81172F69F3259A8 /* VisualQAScreenshotUITests.swift in Sources */,
-				DF193C0D184D92C61F380833 /* When2meetLiveUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

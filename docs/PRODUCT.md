@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -30,12 +30,16 @@ separate follow-up integrations; the membership badge does not certify them.
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
 
-**2026-10-13 owner-approved time coordination amendment:**
-Messages and existing group chats may embed When2meet's original availability
-polls. Retain its creation, participant entry, paint/erase, automatic saving and
-group heatmap mechanisms, with SideSeat's visual styling. A poll is coordination;
-it does not create a confirmed Plan or Calendar entry. This does not enable new
-group formation or alter existing Plan consent. See [User Flow](./USER_FLOW.md).
+**2026-10-15 owner-approved native time coordination amendment:**
+Messages and existing group chats offer native SwiftUI time polls backed by
+Sideseat's authenticated API and PostgreSQL. This supersedes the October 13
+When2meet webpage embedding decision. Retain the mature date/time grid,
+15-minute rectangle paint/erase, automatic save and attendance heatmap mechanisms;
+implement them in Sideseat with its own UI and storage. No provider webview,
+advertising or provider save requests are part of this feature. Show times all
+respondents can attend, or the highest-attendance times when no common time exists.
+A poll is coordination and does not create a confirmed Plan or Calendar entry.
+See [User Flow](./USER_FLOW.md) and [native time poll contract](./TIME_POLLS.md).
 
 ## 1. Positioning
 

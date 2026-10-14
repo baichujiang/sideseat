@@ -665,6 +665,8 @@ model User {
   nativePushDevices                  NativePushDevice[]
   studyProposalsCreated              StudySessionProposal[]              @relation("StudyProposer")
   availabilitySharesOwned            AvailabilityShare[]                 @relation("AvailabilityShareOwner")
+  timePollsCreated                    TimePoll[]                          @relation("TimePollCreator")
+  timePollResponses                  TimePollResponse[]
   planRequestsProposed               PlanRequest[]                       @relation("PlanRequestProposer")
   planRequestsReceived               PlanRequest[]                       @relation("PlanRequestReceiver")
   planRequestsResolved               PlanRequest[]                       @relation("PlanRequestResolvedBy")
@@ -2747,4 +2749,36 @@ model PlanCancellationNotice {
   actor        User @relation("CancellationActor", fields: [actorId], references: [id], onDelete: Cascade)
   recipient    User @relation("CancellationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
   @@index([recipientId, readAt, createdAt])
+}
+
+model TimePoll {
+  id          String             @id @default(cuid())
+  token       String             @unique
+  creatorId   String
+  title       String
+  timeZone    String
+  dates       String[]
+  startMinute Int
+  endMinute   Int
+  slots       Json
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  creator     User               @relation("TimePollCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  responses   TimePollResponse[]
+
+  @@index([creatorId, updatedAt])
+}
+
+model TimePollResponse {
+  id          String   @id @default(cuid())
+  pollId      String
+  userId      String
+  displayName String
+  slotIds     Int[]
+  updatedAt   DateTime @updatedAt
+  poll        TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@index([userId, updatedAt])
 }

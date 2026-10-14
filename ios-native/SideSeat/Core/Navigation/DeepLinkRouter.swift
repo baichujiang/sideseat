@@ -119,6 +119,9 @@ final class DeepLinkRouter {
         let identifier = components[1]
         guard identifier.count <= 128 else { return nil }
         switch components[0] {
+        case "time-polls" where components.count == 2:
+            guard TimePollLink.token(from: "https://www.sideseat.de/time-polls/\(identifier)") != nil else { return nil }
+            return .timePoll(token: identifier)
         case "users": return .profile(userID: identifier)
         case "connections":
             if components.count == 4, components[2] == "contexts" {

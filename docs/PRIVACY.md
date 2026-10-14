@@ -2,7 +2,7 @@
 
 **Status:** Current internal App Store disclosure source; per-build audit required
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 
 **Governing release procedure:** [Release](./RELEASE.md)
 
@@ -55,23 +55,25 @@ All categories below are currently marked as not used for cross-company tracking
 | Apple APNs | Device token and notification delivery | Minimize lock-screen payload |
 | Apple StoreKit | Optional transaction identity | Strict verification when enabled |
 | Sentry | Unlinked crash/performance diagnostics | `sendDefaultPii=false`; no identity tags |
-| When2meet | User-opened external availability polls inside WKWebView | Participant names/passwords and selected times are entered directly on the provider; its ads/consent UI is retained. Review this new web provider before a distribution release. |
 
 ## First-party event rules
 
-### Embedded When2meet — 2026-10-13
+### Native time polls — 2026-10-15
 
-The Messages time-poll action loads When2meet only after the user opens it.
-SideSeat does not inject its account identity, credentials, Calendar or contacts.
-The provider receives the user's explicitly entered participant name, optional
-password and chosen availability, and handles its own advertising/consent UI.
-SideSeat does not automatically accept that consent or move those records into
-its database. The last event URL/title is stored on device under the SideSeat
-user ID for reopening. Provider records and their deletion/retention remain the
-external service's responsibility; SideSeat account deletion is not provider
-account deletion. The previous production disclosure is not a certification of
-this newly added embedded web provider; distribution still uses the per-build
-privacy review above.
+Preview 99 replaces the embedded provider page with SwiftUI and first-party
+API/PostgreSQL storage. Poll-specific display names and selected free-time cells
+are linked to the Sideseat account for response ownership. Authenticated holders
+of the invite link may view the visible responses and derived attendance results.
+Blocked creators/participants follow the existing visibility restrictions. The
+browser handoff shows no names or availability without authentication.
+
+No When2meet service, advertising or separate provider password is used by new
+polls. Sideseat stores created/responded polls for reopening until the creator
+removes them or the corresponding account deletion cascades through them. No
+Calendar, contact list, chat message or location is automatically read or sent.
+The existing Name, Other User Content and User ID categories and Vercel/Neon
+providers cover this feature. Historical provider records are not imported and
+remain subject to that provider's deletion and retention rules.
 
 - Never include message/post bodies, precise location or private Calendar content.
 - Use stable UUID/idempotency to avoid duplicate business-state events.

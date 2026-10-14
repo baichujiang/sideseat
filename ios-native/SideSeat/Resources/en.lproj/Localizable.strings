@@ -2434,3 +2434,32 @@
 "Your name" = "Your name";
 "Optional password" = "Optional password";
 "Group availability" = "Group availability";
+
+// Native time coordination
+"Create time poll" = "Create time poll";
+"Your time polls" = "Your time polls";
+"Create a poll and invite people to mark their free time." = "Create a poll and invite people to mark their free time.";
+"Sideseat poll link" = "Sideseat poll link";
+"Enter a Sideseat time poll link." = "Enter a Sideseat time poll link.";
+"Poll name" = "Poll name";
+"For example: Friday dinner" = "For example: Friday dinner";
+"Candidate dates" = "Candidate dates";
+"Choose dates" = "Choose dates";
+"Choose up to 31 dates." = "Choose up to 31 dates.";
+"Daily time range" = "Daily time range";
+"Until" = "Until";
+"Everyone sees the same dates and time zone. Each cell is 15 minutes." = "Everyone sees the same dates and time zone. Each cell is 15 minutes.";
+"Availability" = "Availability";
+"Group results" = "Group results";
+"Enter your name." = "Enter your name.";
+"Drag to mark free time. Start on a selected cell to erase. Changes save automatically." = "Drag to mark free time. Start on a selected cell to erase. Changes save automatically. Swipe the time labels to scroll.";
+"I have no available time" = "I have no available time";
+"Couldn't load the poll" = "Couldn't load the poll";
+"Share poll" = "Share poll";
+"Delete poll" = "Delete poll";
+"Delete this poll and all responses?" = "Delete this poll and all responses?";
+"%d people responded" = "%d people responded";
+"No available time yet." = "No available time yet.";
+"Everyone can attend" = "Everyone can attend";
+"Best available times" = "Best available times";
+"%d of %d available" = "%d of %d available";

@@ -514,6 +514,13 @@ final class SessionStore {
         refreshOperation = nil
         currentUser = Self.uiTestingUser
         accessToken = "ui-test-access-token"
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-time-poll-live"),
+           ProcessInfo.processInfo.arguments.contains("--ui-testing-ephemeral-credentials"),
+           let token = ProcessInfo.processInfo.environment["SIDESEAT_QA_ACCESS_TOKEN"] {
+            // The shell keeps its standard QA fixture. Poll APIs identify the real
+            // isolated account from this token, without changing owner credentials.
+            accessToken = token
+        }
         isOffline = false
         restorationIssue = nil
         phase = .signedIn

@@ -21,7 +21,7 @@ struct CommunityChatView: View {
     @State private var pendingReport: NativeCommunityMessage?
     @State private var actionNotice: ChatTransientNotice?
     @State private var showThreadSearch = false
-    @State private var showsWhen2meet = false
+    @State private var showsTimePoll = false
     @State private var scrollToMessageID: String?
     @State private var composerFocus = ChatComposerFocusController()
     @Environment(RouterPath.self) private var router
@@ -56,10 +56,10 @@ struct CommunityChatView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if kind == .group {
                         Menu {
-                            Button { showsWhen2meet = true } label: {
+                            Button { showsTimePoll = true } label: {
                                 Label("Coordinate a time", systemImage: "calendar.badge.clock")
                             }
-                            .accessibilityIdentifier("group-chat-when2meet")
+                            .accessibilityIdentifier("group-chat-time-poll")
 
                             Button {
                                 showThreadSearch = true
@@ -108,8 +108,8 @@ struct CommunityChatView: View {
                     }
                 )
             }
-            .sheet(isPresented: $showsWhen2meet) {
-                When2meetSheet(userID: session.currentUser?.id ?? "guest")
+            .sheet(isPresented: $showsTimePoll) {
+                TimePollSheet()
             }
             .task(id: "\(kind.rawValue)-\(conversationID)") {
                 ActiveChatPresentation.begin(activeConversationKey)
@@ -754,7 +754,7 @@ private struct CommunityMessageBubble: View {
                                 .opacity(0.9)
                                 .accessibilityIdentifier("chat-tombstone-\(message.id)")
                         } else {
-                            When2meetMessageContent(text: message.body ?? "")
+                            TimePollMessageContent(text: message.body ?? "")
                         }
                     }
                     .padding(.horizontal, 12)

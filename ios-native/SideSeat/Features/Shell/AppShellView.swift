@@ -436,6 +436,8 @@ private extension View {
                     FeedbackDetailView(feedbackID: id)
                 case .scheduleShare(let token):
                     ScheduleShareRecipientView(token: token)
+                case .timePoll(let token):
+                    TimePollDetailView(token: token)
                 case .eventShare(let token):
                     CalendarEventShareRecipientView(token: token)
                 case .messageRequests:

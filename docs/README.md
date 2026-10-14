@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 
 ## Read this first
 
@@ -36,6 +36,7 @@ Historical build evidence never certifies a newer build.
 | [Calendar smart input](./CALENDAR_SMART_INPUT.md) | Event extraction, missing-information completion, duration defaults, uniform preview and acceptance examples; implemented policy, shared defaults and verification boundaries |
 | [Roadmap](./ROADMAP.md) | Current implementation order and decision gates |
 | [Together Contract](./TOGETHER_CONTRACT.md) | Weekly Intent, matching session and Mutual Opportunity engineering rules |
+| [Native time polls](./TIME_POLLS.md) | Native creation, paint/erase, autosave, attendance results and own-data contract |
 | [Safety](./SAFETY.md) | Pair-wide Block, Plan/Calendar cleanup, privacy and concurrency |
 | [Native iOS](./IOS.md) | SwiftUI architecture, environments, build and Calendar sync |
 | [Profile personalization](./PROFILE_PERSONALIZATION.md) | Profile completeness, themes, decorative icons, display styles and Plus entitlement |

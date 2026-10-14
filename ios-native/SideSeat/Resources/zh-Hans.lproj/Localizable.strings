@@ -2434,3 +2434,32 @@
 "Your name" = "你的名字";
 "Optional password" = "密码（可选）";
 "Group availability" = "大家的空闲";
+
+// Native time coordination
+"Create time poll" = "创建时间征集";
+"Your time polls" = "你的时间征集";
+"Create a poll and invite people to mark their free time." = "创建征集，邀请大家填写空余时间。";
+"Sideseat poll link" = "Sideseat 征集链接";
+"Enter a Sideseat time poll link." = "请输入 Sideseat 时间征集链接。";
+"Poll name" = "征集名称";
+"For example: Friday dinner" = "例如：周五聚餐";
+"Candidate dates" = "候选日期";
+"Choose dates" = "选择日期";
+"Choose up to 31 dates." = "最多选择 31 个日期。";
+"Daily time range" = "每天的时间范围";
+"Until" = "结束时间";
+"Everyone sees the same dates and time zone. Each cell is 15 minutes." = "所有人使用同一组日期和时区，每格为 15 分钟。";
+"Availability" = "空余时间";
+"Group results" = "大家的结果";
+"Enter your name." = "请输入你的名字。";
+"Drag to mark free time. Start on a selected cell to erase. Changes save automatically." = "拖选空余时间；从已选格子开始可擦除。修改会自动保存，沿时间标签滑动可滚动。";
+"I have no available time" = "我没有空余时间";
+"Couldn't load the poll" = "无法加载时间征集";
+"Share poll" = "分享征集";
+"Delete poll" = "删除征集";
+"Delete this poll and all responses?" = "删除这份征集及所有答复？";
+"%d people responded" = "%d 人已填写";
+"No available time yet." = "暂时还没有可参加的时段。";
+"Everyone can attend" = "所有人都能参加";
+"Best available times" = "参加人数最多的时段";
+"%d of %d available" = "%d / %d 人可以参加";

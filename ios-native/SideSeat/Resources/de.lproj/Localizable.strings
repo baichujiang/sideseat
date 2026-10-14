@@ -2433,3 +2433,32 @@
 "Your name" = "Dein Name";
 "Optional password" = "Passwort (optional)";
 "Group availability" = "Verfügbarkeit der Gruppe";
+
+// Native time coordination
+"Create time poll" = "Zeitumfrage erstellen";
+"Your time polls" = "Deine Zeitumfragen";
+"Create a poll and invite people to mark their free time." = "Erstelle eine Umfrage und lade andere ein, ihre freien Zeiten einzutragen.";
+"Sideseat poll link" = "Sideseat-Umfragelink";
+"Enter a Sideseat time poll link." = "Gib einen Sideseat-Zeitumfragelink ein.";
+"Poll name" = "Name der Umfrage";
+"For example: Friday dinner" = "Zum Beispiel: Abendessen am Freitag";
+"Candidate dates" = "Mögliche Tage";
+"Choose dates" = "Tage auswählen";
+"Choose up to 31 dates." = "Wähle bis zu 31 Tage aus.";
+"Daily time range" = "Täglicher Zeitraum";
+"Until" = "Bis";
+"Everyone sees the same dates and time zone. Each cell is 15 minutes." = "Alle sehen dieselben Tage und dieselbe Zeitzone. Jede Zelle entspricht 15 Minuten.";
+"Availability" = "Verfügbarkeit";
+"Group results" = "Gruppenergebnis";
+"Enter your name." = "Gib deinen Namen ein.";
+"Drag to mark free time. Start on a selected cell to erase. Changes save automatically." = "Ziehe über freie Zeiten. Beginne in einer markierten Zelle zum Löschen. Änderungen werden automatisch gespeichert. Wische über die Zeitangaben zum Scrollen.";
+"I have no available time" = "Ich habe keine freie Zeit";
+"Couldn't load the poll" = "Umfrage konnte nicht geladen werden";
+"Share poll" = "Umfrage teilen";
+"Delete poll" = "Umfrage löschen";
+"Delete this poll and all responses?" = "Diese Umfrage und alle Antworten löschen?";
+"%d people responded" = "%d Personen haben geantwortet";
+"No available time yet." = "Noch keine verfügbare Zeit.";
+"Everyone can attend" = "Alle können teilnehmen";
+"Best available times" = "Zeiten mit den meisten Zusagen";
+"%d of %d available" = "%d von %d können teilnehmen";
