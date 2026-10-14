@@ -120,6 +120,11 @@ depend on a minute-level server cron because iOS controls background execution.
   `SIDESEAT_WHEN2MEET_LIVE_UI_TESTS=1`; it creates only an anonymous QA poll and
   verifies real provider persistence. DEBUG-only observations return the original
   fetch Promise without changing save payloads or endpoints.
+  Physical five-participant QA uses the standalone runner at
+  `ios-native/phone-qa/when2meet98/run.sh`, enabled by
+  `SIDESEAT_WHEN2MEET_PHONE_QA=1`. It operates the installed Preview 98 and returns
+  to its ordinary session afterward; it builds no SideSeat app target. See the
+  [physical acceptance record](./qa/2026-10-14-when2meet-phone98-five.md).
 
 - `PrivacyInfo.xcprivacy` describes required manifest APIs.
 - The When2meet input adapter suppresses iOS compatibility mouse events after a

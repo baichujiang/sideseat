@@ -1,0 +1,146 @@
+{
+  "date" : "2026-10-16",
+  "facts" : {
+    "event" : "?39270140-3grXW",
+    "maximum" : 4,
+    "own" : 8,
+    "participants" : 5,
+    "previewObserved" : false,
+    "previewVisible" : false,
+    "saveRequests" : 0,
+    "styled" : true
+  },
+  "participant" : "SS98-1792014169-A",
+  "phase" : "server-reload-1",
+  "slots" : [
+    {
+      "count" : 4,
+      "time" : 1792134000
+    },
+    {
+      "count" : 4,
+      "time" : 1792134900
+    },
+    {
+      "count" : 4,
+      "time" : 1792135800
+    },
+    {
+      "count" : 4,
+      "time" : 1792136700
+    },
+    {
+      "count" : 1,
+      "time" : 1792137600
+    },
+    {
+      "count" : 1,
+      "time" : 1792138500
+    },
+    {
+      "count" : 1,
+      "time" : 1792139400
+    },
+    {
+      "count" : 1,
+      "time" : 1792140300
+    },
+    {
+      "count" : 1,
+      "time" : 1792141200
+    },
+    {
+      "count" : 1,
+      "time" : 1792142100
+    },
+    {
+      "count" : 1,
+      "time" : 1792143000
+    },
+    {
+      "count" : 1,
+      "time" : 1792143900
+    },
+    {
+      "count" : 1,
+      "time" : 1792144800
+    },
+    {
+      "count" : 1,
+      "time" : 1792145700
+    },
+    {
+      "count" : 1,
+      "time" : 1792146600
+    },
+    {
+      "count" : 1,
+      "time" : 1792147500
+    },
+    {
+      "count" : 1,
+      "time" : 1792148400
+    },
+    {
+      "count" : 1,
+      "time" : 1792149300
+    },
+    {
+      "count" : 1,
+      "time" : 1792150200
+    },
+    {
+      "count" : 1,
+      "time" : 1792151100
+    },
+    {
+      "count" : 1,
+      "time" : 1792152000
+    },
+    {
+      "count" : 1,
+      "time" : 1792152900
+    },
+    {
+      "count" : 1,
+      "time" : 1792153800
+    },
+    {
+      "count" : 1,
+      "time" : 1792154700
+    },
+    {
+      "count" : 0,
+      "time" : 1792155600
+    },
+    {
+      "count" : 0,
+      "time" : 1792156500
+    },
+    {
+      "count" : 0,
+      "time" : 1792157400
+    },
+    {
+      "count" : 0,
+      "time" : 1792158300
+    },
+    {
+      "count" : 0,
+      "time" : 1792159200
+    },
+    {
+      "count" : 0,
+      "time" : 1792160100
+    },
+    {
+      "count" : 0,
+      "time" : 1792161000
+    },
+    {
+      "count" : 0,
+      "time" : 1792161900
+    }
+  ],
+  "timezone" : "Europe\/Berlin"
+}

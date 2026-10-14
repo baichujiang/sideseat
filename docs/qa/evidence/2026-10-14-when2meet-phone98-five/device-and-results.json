@@ -1,0 +1,48 @@
+{
+  "client_date": "2026-10-14",
+  "timezone": "Europe/Berlin",
+  "device": "iPhone 16 Pro Max",
+  "os_version": "26.0.1",
+  "app_bundle": "app.sideseat.mobile.preview",
+  "app_version": "1.0.0",
+  "app_build": "98",
+  "app_source_commit": "c1bf19d21234fb458f18c0ad2ed9f04393ba2f94",
+  "app_reinstalled": false,
+  "existing_installation_url_unchanged": true,
+  "provider": "live_when2meet",
+  "poll_url": "https://www.when2meet.com/?39270140-3grXW",
+  "poll_date": "2026-10-16",
+  "participants": [
+    "SS98-1792014169-A",
+    "SS98-1792014169-B",
+    "SS98-1792014169-C",
+    "SS98-1792014169-D",
+    "SS98-1792014169-E"
+  ],
+  "input": "physical_xcuitest_touch_and_text",
+  "sideseat_session": "isolated_fixture_with_ephemeral_credentials",
+  "provider_mocked": false,
+  "common_time": {
+    "start": "09:00",
+    "end": "10:00",
+    "attendance": 5,
+    "total": 5
+  },
+  "after_e_erases_common_time": {
+    "common_slots": 0,
+    "best_start": "09:00",
+    "best_end": "10:00",
+    "attendance": 4,
+    "total": 5
+  },
+  "provider_save_requests": 11,
+  "provider_save_status": 200,
+  "app_terminated_before_reload": true,
+  "participant_reloads_verified": 5,
+  "quarter_hour_cells_checked_per_reload": 32,
+  "normal_launch_restored": true,
+  "restored_launch_arguments": [],
+  "restored_process_identifier": 29582,
+  "runner_source_sha256": "ab8f555815f4f245f94d598285382e5cab2b5494eae52d8619ec011037848a49",
+  "restored_running_process_verified": true
+}

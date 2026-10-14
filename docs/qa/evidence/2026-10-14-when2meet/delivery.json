@@ -74,6 +74,12 @@
     },
     "provider": "live_when2meet",
     "sideseat_account": "isolated_ui_fixture",
-    "physical_acceptance": "install_version_and_normal_launch"
+    "physical_acceptance": "install_version_and_normal_launch",
+    "physical_five_participant_acceptance": {
+      "passed": 1,
+      "failed": 0,
+      "date": "2026-10-14",
+      "record": "../2026-10-14-when2meet-phone98-five/device-and-results.json"
+    }
   }
 }
