@@ -281,15 +281,24 @@ private struct TimePollGrid: View {
         let lookup = Dictionary(uniqueKeysWithValues: poll.slots.map { ("\($0.date)|\($0.row)", $0) })
         GeometryReader { geometry in
         let cellWidth = max(88, (geometry.size.width - labelWidth) / CGFloat(max(1, min(4, poll.dates.count))))
-        ScrollView([.horizontal, .vertical]) {
+        ScrollView(.vertical) {
+            HStack(alignment: .top, spacing: 0) {
+                VStack(spacing: 0) {
+                    Text("Time").font(.caption).frame(width: labelWidth, height: headerHeight)
+                    ForEach(rows, id: \.self) { row in
+                        Text(poll.slots.first { $0.row == row }?.label ?? "")
+                            .font(.caption2.monospacedDigit())
+                            .minimumScaleFactor(0.7)
+                            .frame(width: labelWidth, height: cellHeight)
+                    }
+                }
+                ScrollView(.horizontal) {
             VStack(spacing: 0) {
                 HStack(spacing: 0) {
-                    Text("Time").font(.caption).frame(width: labelWidth, height: headerHeight)
                     ForEach(poll.dates, id: \.self) { date in Text(dateLabel(date)).font(.caption.weight(.semibold)).frame(width: cellWidth, height: headerHeight) }
                 }
                 ForEach(rows, id: \.self) { row in
                     HStack(spacing: 0) {
-                        Text(poll.slots.first { $0.row == row }?.label ?? "").font(.caption2.monospacedDigit()).frame(width: labelWidth, height: cellHeight)
                         ForEach(poll.dates, id: \.self) { date in
                             if let slot = lookup["\(date)|\(row)"] {
                                 let count = poll.summary.counts[slot.id]
@@ -330,9 +339,11 @@ private struct TimePollGrid: View {
                             if let preview { selected = preview; onSave() }
                             preview = nil; dragStart = nil
                         })
-                        .offset(x: labelWidth, y: headerHeight)
+                        .offset(y: headerHeight)
                         .accessibilityHidden(true)
                 }
+            }
+                }.frame(width: max(0, geometry.size.width - labelWidth), height: headerHeight + cellHeight * CGFloat(rows.count))
             }
         }.accessibilityIdentifier("time-poll-grid")
         }

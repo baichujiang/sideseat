@@ -97,9 +97,40 @@ import XCTest
         attach("reopened")
     }
 
-    @MainActor private func launch(_ auth: (token: String, user: String)) {
+    func testMultipleDatesKeepTimeLabelsAndChineseDarkAppearance() throws {
+        let auth = try login(0); ownerAuth = auth.token
+        let created = try call("/api/v1/time-polls", method: "POST", auth: ownerAuth, body: [
+            "title": "多日聚餐时间", "timeZone": "Europe/Berlin", "dates": ["2026-10-16", "2026-10-17", "2026-10-18", "2026-10-19", "2026-10-20"], "startMinute": 540, "endMinute": 1020,
+        ], expectedStatus: 201)
+        token = try XCTUnwrap((created["data"] as? [String: Any])?["token"] as? String)
+        addTeardownBlock { [self] in MainActor.assumeIsolated {
+            app.terminate(); _ = try? call("/api/v1/time-polls/\(token)", method: "DELETE", auth: ownerAuth)
+        } }
+        launch(auth); openInvite()
+        app.buttons["time-poll-cell-0"].press(forDuration: 0.15, thenDragTo: app.buttons["time-poll-cell-35"])
+        waitSaved()
+        XCTAssertEqual(try poll(auth: ownerAuth)["mySlotIds"] as? [Int], [0, 1, 2, 3, 32, 33, 34, 35])
+        let header = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Oct 16")).firstMatch
+        app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Oct 18")).firstMatch.press(forDuration: 0.15, thenDragTo: header)
+        XCTAssertTrue(app.staticTexts["Time"].isHittable)
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Oct 20")).firstMatch.isHittable)
+        let grid = app.scrollViews["time-poll-grid"]
+        grid.coordinate(withNormalizedOffset: CGVector(dx: 0.04, dy: 0.85)).press(forDuration: 0.1, thenDragTo: grid.coordinate(withNormalizedOffset: CGVector(dx: 0.04, dy: 0.15)))
+        XCTAssertFalse(app.staticTexts["09:00"].isHittable)
+        XCTAssertEqual(try poll(auth: ownerAuth)["mySlotIds"] as? [Int], [0, 1, 2, 3, 32, 33, 34, 35])
+        launch(auth, language: "zh-Hans", appearance: "dark")
+        app.buttons["inbox-time-poll"].tap()
+        let recent = app.buttons["time-poll-recent-\(token)"]
+        XCTAssertTrue(recent.waitForExistence(timeout: 15)); recent.tap()
+        XCTAssertTrue(app.textFields["time-poll-name"].waitForExistence(timeout: 15))
+        app.buttons["大家的结果"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "所有人都能参加")
+        attach("chinese-dark-multiple-dates")
+    }
+
+    @MainActor private func launch(_ auth: (token: String, user: String), language: String = "en", appearance: String = "light") {
         app.terminate()
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats", "--ui-testing-skip-tutorial", "--ui-testing-ephemeral-credentials", "--ui-testing-time-poll-live", "--ui-testing-language=en", "--ui-testing-local-api"]
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-chats", "--ui-testing-skip-tutorial", "--ui-testing-ephemeral-credentials", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)", "--ui-testing-local-api"]
         app.launchEnvironment["SIDESEAT_QA_ACCESS_TOKEN"] = auth.token
         if api.hasPrefix("http://127.0.0.1") { app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = api }
         app.launch()
@@ -131,9 +162,10 @@ import XCTest
         let user = try JSONSerialization.data(withJSONObject: XCTUnwrap(data["user"]))
         return (try XCTUnwrap(tokens["accessToken"] as? String), String(decoding: user, as: UTF8.self))
     }
-    private func call(_ path: String, method: String = "GET", auth: String? = nil, body: [String: Any]? = nil) throws -> [String: Any] {
+    private func call(_ path: String, method: String = "GET", auth: String? = nil, body: [String: Any]? = nil, expectedStatus: Int = 200) throws -> [String: Any] {
         var request = URLRequest(url: URL(string: api + path)!); request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(UUID().uuidString, forHTTPHeaderField: "Idempotency-Key")
         if let auth { request.setValue("Bearer \(auth)", forHTTPHeaderField: "Authorization") }
         if let body { request.httpBody = try JSONSerialization.data(withJSONObject: body) }
         let waiter = expectation(description: method + " " + path)
@@ -143,7 +175,7 @@ import XCTest
         }.resume()
         wait(for: [waiter], timeout: 30)
         if let error = box.error { throw error }
-        XCTAssertEqual(box.status, 200)
+        XCTAssertEqual(box.status, expectedStatus)
         return try JSONSerialization.jsonObject(with: XCTUnwrap(box.data)) as? [String: Any] ?? [:]
     }
 }
