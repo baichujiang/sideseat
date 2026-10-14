@@ -29,10 +29,10 @@
     "os_version": "26.0.1",
     "previous_preview_build": "96",
     "installed": true,
-    "launched": false,
+    "launched": true,
     "installed_version": "1.0.0",
     "installed_build": "98",
-    "launch_blocker": "iOS rejected launch because the device was locked",
+    "launch_blocker": null,
     "installation_receipt_outcome": "success",
     "launch_attempts": [
       {
@@ -44,8 +44,20 @@
         "mode": "background_no_activate",
         "outcome": "failed",
         "reason": "Locked"
+      },
+      {
+        "mode": "normal_foreground",
+        "outcome": "success",
+        "after_user_unlock": true,
+        "process_identifier": 29390,
+        "verified_at": "2026-10-14T23:29:56+02:00"
       }
-    ]
+    ],
+    "launch_mode": "normal_foreground",
+    "launch_arguments": [],
+    "process_identifier": 29390,
+    "running_process_verified": true,
+    "launch_verified_at": "2026-10-14T23:29:56+02:00"
   },
   "test_scope": {
     "unit_tests": {
