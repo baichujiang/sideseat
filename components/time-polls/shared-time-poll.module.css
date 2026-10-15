@@ -1,0 +1,39 @@
+.page {
+  color-scheme: light;
+  background: #fafaf9;
+  color: #1c1917;
+  --poll-selected: #14755c;
+  --poll-on-selected: #fff;
+  --poll-partial: #fff0c7;
+  --poll-on-partial: #7a4d05;
+}
+
+.selected {
+  background: var(--poll-selected);
+  color: var(--poll-on-selected);
+  border-color: var(--poll-selected);
+}
+
+.partial {
+  background: var(--poll-partial);
+  color: var(--poll-on-partial);
+  border-color: var(--poll-on-partial);
+}
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    color-scheme: dark;
+    background: #0c0a09;
+    color: #f5f5f4;
+    --background: 24 10% 10%;
+    --foreground: 60 9% 95%;
+    --muted: 12 6% 16%;
+    --muted-foreground: 24 6% 70%;
+    --border: 12 6% 25%;
+    --input: 12 6% 25%;
+    --poll-selected: #3b9e80;
+    --poll-on-selected: #051f17;
+    --poll-partial: #4f3817;
+    --poll-on-partial: #ffd48a;
+  }
+}

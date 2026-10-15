@@ -11,11 +11,12 @@ export function useSharedTimePoll(token: string) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(true);
   const [editingName, setEditingName] = useState(false);
+  const [editingAvailability, setEditingAvailability] = useState(false);
   const pending = useRef<Draft | null>(null);
   const running = useRef(false);
   const revision = useRef(0);
   const pauseRefresh = useRef(false);
-  pauseRefresh.current = busy || saving || editingName;
+  pauseRefresh.current = busy || saving || editingName || editingAvailability;
   const base = `/api/public/time-polls/${encodeURIComponent(token)}`;
   const call = useCallback(async (suffix = "", method = "GET", body?: unknown) => {
     const response = await fetch(base + suffix, { method, credentials: "same-origin", cache: "no-store", keepalive: method !== "GET", ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}) });
@@ -80,7 +81,7 @@ export function useSharedTimePoll(token: string) {
     catch (cause) { setError((cause as Error).message); }
     finally { setBusy(false); }
   };
-  return { poll, selected, error, busy, saving, saved, editingName, setEditingName, saveSelection, retry: flush,
+  return { poll, selected, error, busy, saving, saved, editingName, setEditingName, setEditingAvailability, saveSelection, retry: flush,
     join: (displayName: string) => act("/participant", "POST", { displayName }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),
     reply: (status: string) => act("/invitation-response", "PUT", { participantId: poll?.viewerId, status, version: poll?.invitationVersion }) };

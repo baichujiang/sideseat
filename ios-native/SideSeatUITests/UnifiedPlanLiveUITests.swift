@@ -86,8 +86,15 @@ import XCTest
         XCTAssertTrue(webName().waitForExistence(timeout: 30), "The share link must open a guest form in Safari")
         webName().tap(); webName().typeText("Guest Lin")
         webButton("Join this plan", "开始参与").tap()
-        let addTime = webButton("Add this time", "添加这段时间")
-        XCTAssertTrue(addTime.waitForExistence(timeout: 20)); addTime.tap()
+        // The share page uses the same 15-minute grid as Preview 105.
+        let firstCell = safari.buttons.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
+        let lastCell = safari.buttons.matching(NSPredicate(format: "label CONTAINS %@", ", 09:45")).firstMatch
+        XCTAssertTrue(firstCell.waitForExistence(timeout: 20))
+        for _ in 0..<3 where !lastCell.isHittable { safari.swipeUp() }
+        firstCell.press(forDuration: 0.6, thenDragTo: lastCell)
+        webCapture("grid-hour-selected")
+        webButton("Undo last change", "撤销上次修改").tap()
+        firstCell.press(forDuration: 0.6, thenDragTo: lastCell)
         XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved", "已保存"])).firstMatch.waitForExistence(timeout: 20))
         webCapture("availability-saved")
         let editName = webButton("Edit nickname", "编辑昵称")
