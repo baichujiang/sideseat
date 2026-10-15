@@ -1,0 +1,26 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "107",
+  "runtimeSource": "6222c88e89a7d43569afb681a2d34f937f0296e3",
+  "result": "passed",
+  "passedTests": 1,
+  "failedTests": 0,
+  "cases": [
+    {
+      "name": "testDayHeaderSelectsClearsUndoesAndPersists",
+      "seconds": 58.784,
+      "status": "passed"
+    }
+  ],
+  "savedLabelChinese": "已保存",
+  "appearancesVerified": [
+    "light",
+    "dark"
+  ],
+  "initialAttempt": "xctest107-initial-attempt.json",
+  "testSource": "24b9e0d869853abaa0c9d61090b7e7548613aae0",
+  "skippedTests": 0
+}

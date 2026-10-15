@@ -1,0 +1,16 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "107",
+  "runtimeSource": "6222c88e89a7d43569afb681a2d34f937f0296e3",
+  "result": "failed",
+  "passedTests": 0,
+  "failedTests": 1,
+  "case": "testDayHeaderSelectsClearsUndoesAndPersists",
+  "seconds": 52.103,
+  "failure": "Test query expected a single element for time-poll-saved; SwiftUI exposes both the image and static text with that identifier.",
+  "observedStaticText": "已保存",
+  "correction": "Use app.staticTexts[\"time-poll-saved\"] and assert its exact Chinese text. Runtime saving code is unchanged."
+}

@@ -1,0 +1,34 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "106",
+  "runtimeSource": "8bea32b50eacbfa111b977b9a9d200091f78aa36",
+  "result": "passed",
+  "passedTests": 4,
+  "failedTests": 0,
+  "cases": [
+    {
+      "name": "testDayHeaderSelectsClearsUndoesAndPersists",
+      "seconds": 58.619,
+      "status": "passed"
+    },
+    {
+      "name": "testDeliberateRangeTapEraseAndUndoPersist",
+      "seconds": 33.752,
+      "status": "passed"
+    },
+    {
+      "name": "testLegacyPartialHalfHourFillsAndUndoesWithoutRounding",
+      "seconds": 25.673,
+      "status": "passed"
+    },
+    {
+      "name": "testOrdinarySwipesScrollWithoutEditing",
+      "seconds": 20.141,
+      "status": "passed"
+    }
+  ],
+  "skippedTests": 0
+}

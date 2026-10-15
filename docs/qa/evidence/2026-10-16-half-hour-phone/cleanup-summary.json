@@ -1,0 +1,24 @@
+{
+  "ownedPollsDeleted": 4,
+  "ownedAccountDeleted": true,
+  "oldTokenStatus": 401,
+  "publicPollStatuses": [
+    {
+      "case": "range",
+      "status": 404
+    },
+    {
+      "case": "scroll",
+      "status": 404
+    },
+    {
+      "case": "day",
+      "status": 404
+    },
+    {
+      "case": "legacy",
+      "status": 404
+    }
+  ],
+  "checkedAt": "2026-10-15T22:46:04.310420+00:00"
+}

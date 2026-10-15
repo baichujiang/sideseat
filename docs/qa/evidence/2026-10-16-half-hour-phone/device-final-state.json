@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-15T22:46:38.306217+00:00",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "os": "iOS 26.6.1",
+  "preview": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "name": "SideSeat Preview",
+    "version": "1.0.0",
+    "bundleVersion": "107"
+  },
+  "ordinaryRetained": {
+    "bundleIdentifier": "app.sideseat.mobile",
+    "name": "SideSeat",
+    "version": "1.0.0",
+    "bundleVersion": "97"
+  },
+  "runtimeSource": "6222c88e89a7d43569afb681a2d34f937f0296e3",
+  "normalLaunch": {
+    "processIdentifier": 903,
+    "runningProcessVerified": true,
+    "qaLaunchArguments": false
+  },
+  "qaRunnerUninstalled": true,
+  "localizedSavedText": {
+    "en": "Saved",
+    "zh-Hans": "已保存",
+    "de": "Gespeichert"
+  },
+  "backendDeployment": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+  "backendChangeRequired": false,
+  "databaseMigration": false,
+  "storeUpload": false
+}
