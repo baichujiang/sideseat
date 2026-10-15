@@ -87,8 +87,8 @@ import XCTest
         webName().tap(); webName().typeText("Guest Lin")
         webButton("Join this plan", "开始参与").tap()
         // The share page uses the same 15-minute grid as Preview 105.
-        let firstCell = safari.buttons.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
-        let lastCell = safari.buttons.matching(NSPredicate(format: "label CONTAINS %@", ", 09:45")).firstMatch
+        let firstCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
+        let lastCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:45")).firstMatch
         XCTAssertTrue(firstCell.waitForExistence(timeout: 20))
         for _ in 0..<3 where !lastCell.isHittable { safari.swipeUp() }
         firstCell.press(forDuration: 0.6, thenDragTo: lastCell)
