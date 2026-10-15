@@ -42,7 +42,7 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview 99 是当前开发交付，普通 SideSeat / TestFlight 97 为独立的旧分发版本。
+Preview 101 是当前开发交付，普通 SideSeat / TestFlight 97 为独立的旧分发版本。
 多人时间征集位于「消息 → 一起定时间」；聊天中的「智能约时间」是个人日历空档推荐。
 
 旧 Capacitor 工程、When2meet 网页实现及过期演示工具已移入

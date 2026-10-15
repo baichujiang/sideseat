@@ -14,6 +14,10 @@
 duration and participant count (default five). Choose **Collect availability** or **Set a time**. The existing Messages coordination
 entry and shared links open these same plans in the Plans tab.
 
+The Plans **+** opens the creation form directly in one sheet. One Cancel or
+downward dismissal returns to Plans. Successful creation shows the new plan's
+details in that same sheet; Done returns to Plans.
+
 For collection, select candidate dates and daily hours; the creation time zone
 fixes the actual instants. Drag 15-minute rectangles to paint or erase availability.
 Autosave shows Saving / Saved / retryable error; one account owns one response,

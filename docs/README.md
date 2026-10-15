@@ -58,7 +58,8 @@ Historical build evidence never certifies a newer build.
 | [Storage lifecycle and cost audit](./qa/2026-09-30-storage-lifecycle-and-cost.md) | Sequential fixes, local verification, production follow-up and Vercel Pro cost scenarios |
 | [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |
 | [Deployment and retirement audit](./qa/2026-10-15-deployment-and-retirement.md) | Live deployment/source comparison, phone entry audit, compatibility classification and archive verification |
-| [Preview 1.0.0 (100)](./releases/2026-10-15-preview100-unified-plans.md) | Current development delivery: unified manual plans, five-person collection, individual confirmation and Calendar sync |
+| [Preview 1.0.0 (101)](./releases/2026-10-15-preview101-plan-creation.md) | Current development delivery: single-sheet plan creation, physical iPhone 14 Plus regression and save-flow checks |
+| [Preview 1.0.0 (100)](./releases/2026-10-15-preview100-unified-plans.md) | Previous unified manual plans delivery: five-person collection, individual confirmation and Calendar sync |
 | [Preview 1.0.0 (99)](./releases/2026-10-15-preview99-native-time-polls.md) | Previous native time-poll delivery and Sideseat-owned API/storage |
 | [TestFlight 1.0.0 (97)](./releases/2026-10-08-testflight97.md) | Separate supported older distribution: dated source, backend, signing and internal distribution evidence |
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |

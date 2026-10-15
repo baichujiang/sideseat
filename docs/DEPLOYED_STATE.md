@@ -11,12 +11,14 @@
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a5904fc` 与远程 0/0、干净；功能提交 `7657176` 已推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (100)` | 本次签名校验、设备安装和空参数启动；[本次交付](./releases/2026-10-15-preview100-unified-plans.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 100 | 2026-10-15 安装与普通启动；独立临时账号的计划、时间征集、个人日历增改删、双人确认与日历跳转实测通过并清理；[安装记录](./releases/2026-10-15-preview100-iphone14plus.md)、[真机验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) |
-| Preview 100 原生源码 | `6d5e6b5137c78e49291805b1a9989ac462fb209f` | 当前分支已提交并推送；本次签名构建来自该源码 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (101)` | 单层新增计划修复；签名校验、设备安装和空参数启动；[本次交付](./releases/2026-10-15-preview101-plan-creation.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 101 | 2026-10-15 新增计划取消/下滑关闭、两种创建方式及消息创建实测；临时数据已清理；[本次验证](./qa/2026-10-15-preview101-plan-creation.md)。此前 [Preview 100 计划/日历验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) 保留为历史证据 |
+| Preview 101 原生源码 | `f3def22fcd9e70ecd5dcae12a42087b6aac7f349` | 当前分支已提交并推送；本次签名构建与该源码一致 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 本次设备应用清单；独立安装，仍保留兼容；本次未重新核验 Apple 当前分发状态 |
 | 生产 API | `https://api.sideseat.de` → `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |
 | 生产源码 | 1,323 个上传文件均与受控发布目录 SHA-1 一致；基于原生产部署保留差异，22 项覆盖来自功能提交；排除 7 个归档原路径 | [发布清单](./qa/evidence/2026-10-15-unified-plans/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-unified-plans/uploaded-source-verification.json) |
+
+Preview 101 只修复新增计划的双重弹窗；一次取消/下滑直接回到计划页，创建后在同一弹窗显示详情。后端未重新发布；下面的后端、开关和生产源码核验仍来自 Preview 100 的有日期记录。
 
 此前审计与归档没有产生发布。之后用户明确批准统一计划，本次增加两项向前迁移、
 发布后端并安装 Preview 100；没有上传 TestFlight/App Store。

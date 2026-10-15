@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-15",
+  "timeZone": "Europe/Berlin",
+  "sourceCommit": "f3def22fcd9e70ecd5dcae12a42087b6aac7f349",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "previewBuild": "101",
+  "baseline100": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "00008110-001A69110CC1401E",
+          "deviceName": "iPhone (4)",
+          "modelName": "iPhone 14 Plus",
+          "osBuildNumber": "23G83",
+          "osVersion": "26.6.1",
+          "platform": "iOS"
+        },
+        "expectedFailures": 0,
+        "failedTests": 1,
+        "passedTests": 0,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "PlanPresentationQA · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 1,
+    "finishTime": 1792085446.307,
+    "passedTests": 0,
+    "result": "Failed",
+    "skippedTests": 0,
+    "startTime": 1792085413.404,
+    "statistics": [],
+    "testFailures": [
+      {
+        "failureText": "XCTAssertTrue failed - One Cancel must return directly to Plans",
+        "targetName": "PlanPresentationUITests",
+        "testIdentifier": 1,
+        "testIdentifierString": "PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep()",
+        "testIdentifierURL": "test://com.apple.xcode/PlanPresentationQA/PlanPresentationUITests/PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep",
+        "testName": "testPlansCreateCancelReturnsToPlansInOneStep()"
+      }
+    ],
+    "title": "Test - PlanPresentationQA",
+    "topInsights": [],
+    "totalTestCount": 1
+  },
+  "presentation101": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "00008110-001A69110CC1401E",
+          "deviceName": "iPhone (4)",
+          "modelName": "iPhone 14 Plus",
+          "osBuildNumber": "23G83",
+          "osVersion": "26.6.1",
+          "platform": "iOS"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 3,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "PlanPresentationQA · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1792085630.914,
+    "passedTests": 3,
+    "result": "Passed",
+    "skippedTests": 0,
+    "startTime": 1792085558.332,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - PlanPresentationQA",
+    "topInsights": [],
+    "totalTestCount": 3
+  },
+  "realAPISave101": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64e",
+          "deviceId": "00008110-001A69110CC1401E",
+          "deviceName": "iPhone (4)",
+          "modelName": "iPhone 14 Plus",
+          "osBuildNumber": "23G83",
+          "osVersion": "26.6.1",
+          "platform": "iOS"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 1,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "PlanSaveQA · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1792085747.735,
+    "passedTests": 1,
+    "result": "Passed",
+    "skippedTests": 0,
+    "startTime": 1792085697.244,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - PlanSaveQA",
+    "topInsights": [],
+    "totalTestCount": 1
+  },
+  "cleanup": {
+    "isolatedAccountCount": 1,
+    "persistedPlans": [
+      {
+        "title": "QA101 Plans fixed",
+        "planningMode": null,
+        "phase": "INVITING"
+      },
+      {
+        "title": "QA101 Plans collect",
+        "planningMode": null,
+        "phase": "COLLECTING"
+      }
+    ],
+    "remainingPlans": 0,
+    "accountDeleted": true,
+    "deletedAccountTokenStatus": 401,
+    "note": "Snapshot records remaining plans after an earlier cleanup pass had already deleted the Messages collection plan."
+  },
+  "normalLaunch": {
+    "time": "2026-10-15 19:36 Europe/Berlin",
+    "processIdentifier": 886,
+    "arguments": [],
+    "processObservedAfterLaunch": true
+  },
+  "verificationScope": "Focused modal presentation and creation; no repeat multi-person Calendar or native-login acceptance."
+}
