@@ -21,7 +21,7 @@ struct TimePollTests {
         #expect(TimePollLink.token(from: "https://www.when2meet.com/?12345-AbC") == nil)
         #expect(TimePollLink.token(from: "https://sideseat.de.attacker.test/time-polls/\(token)") == nil)
         #expect(DeepLinkRouter.route(for: URL(string: "sideseat://time-polls/\(token)")!) == .timePoll(token: token))
-        #expect(MVPRoutePolicy.tab(for: .timePoll(token: token)) == .chats)
+        #expect(MVPRoutePolicy.tab(for: .timePoll(token: token)) == .plans)
     }
 
     @Test("Quick consecutive drags save in order and leave the latest draft acknowledged")
@@ -30,7 +30,7 @@ struct TimePollTests {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll")
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
         store.displayName = "Ming"
         store.selected = [0]; store.save(session: session)
         await transport.waitUntilFirstStarted()
@@ -49,7 +49,7 @@ struct TimePollTests {
         let transport = PollSaveTransport(firstStatus: status)
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll")
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
         store.displayName = "Ming"; store.selected = [0]; store.save(session: session)
         await transport.waitUntilFirstStarted()
         store.selected = [1, 2]; store.save(session: session)
@@ -62,6 +62,12 @@ struct TimePollTests {
         #expect(await transport.refreshCount == 0)
         }
     }
+}
+
+private func collectingPoll() throws -> NativeTimePoll {
+    let data = Data(#"{"token":"poll","title":"Dinner","timeZone":"Europe/Berlin","dates":["2026-10-16"],"startMinute":540,"endMinute":600,"slots":[],"participants":[],"mySlotIds":[],"myDisplayName":"Ming","didRespond":false,"isOwner":true,"updatedAt":"2026-10-16T07:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/poll","summary":{"counts":[],"participantCount":0,"maximum":0,"common":false,"windows":[]}}"#.utf8)
+    let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+    return try decoder.decode(NativeTimePoll.self, from: data)
 }
 
 private actor PollSaveTransport: APITransport {

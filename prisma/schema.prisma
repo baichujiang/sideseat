@@ -667,6 +667,7 @@ model User {
   availabilitySharesOwned            AvailabilityShare[]                 @relation("AvailabilityShareOwner")
   timePollsCreated                    TimePoll[]                          @relation("TimePollCreator")
   timePollResponses                  TimePollResponse[]
+  timePollInvitations                TimePollInvitation[]
   planRequestsProposed               PlanRequest[]                       @relation("PlanRequestProposer")
   planRequestsReceived               PlanRequest[]                       @relation("PlanRequestReceiver")
   planRequestsResolved               PlanRequest[]                       @relation("PlanRequestResolvedBy")
@@ -2633,6 +2634,7 @@ model CalendarEntry {
   proposalId                 String?
   planRequestId              String?
   planCommitmentId           String?
+  timePollId                 String?
   projectionStatus           CalendarProjectionStatus            @default(ACTIVE)
   discoverActivityId         String?
   eventShareLinkId           String?
@@ -2665,6 +2667,7 @@ model CalendarEntry {
   proposal                   StudySessionProposal?               @relation(fields: [proposalId], references: [id], onDelete: SetNull)
   planRequest                PlanRequest?                        @relation(fields: [planRequestId], references: [id], onDelete: SetNull)
   planCommitment             PlanCommitment?                     @relation(fields: [planCommitmentId], references: [id], onDelete: SetNull)
+  timePoll                   TimePoll?                           @relation(fields: [timePollId], references: [id], onDelete: Cascade)
   discoverActivity           DiscoverActivity?                   @relation(fields: [discoverActivityId], references: [id], onDelete: SetNull)
   eventShareLink             EventShareLink?                     @relation("EventShareImports", fields: [eventShareLinkId], references: [id], onDelete: SetNull)
   socialGroupOpportunity     SocialGroupOpportunity?             @relation(fields: [socialGroupOpportunityId], references: [id], onDelete: SetNull)
@@ -2678,6 +2681,8 @@ model CalendarEntry {
   @@unique([userId, proposalId])
   @@unique([userId, planRequestId])
   @@unique([userId, planCommitmentId])
+  @@unique([userId, timePollId])
+  @@index([timePollId])
   @@unique([userId, discoverActivityId])
   @@unique([userId, eventShareLinkId])
   @@unique([userId, socialGroupOpportunityId])
@@ -2765,8 +2770,36 @@ model TimePoll {
   updatedAt   DateTime           @updatedAt
   creator     User               @relation("TimePollCreator", fields: [creatorId], references: [id], onDelete: Cascade)
   responses   TimePollResponse[]
+  location    String?
+  durationMinutes Int?
+  expectedCount Int?
+  planningMode String @default("COLLECT")
+  phase String @default("COLLECTING")
+  invitationVersion Int @default(0)
+  chosenStart DateTime?
+  chosenEnd DateTime?
+  confirmedAt DateTime?
+  canceledAt DateTime?
+  invitations TimePollInvitation[]
+  calendarEntries CalendarEntry[]
 
   @@index([creatorId, updatedAt])
+}
+
+model TimePollInvitation {
+  id String @id @default(cuid())
+  pollId String
+  userId String
+  displayName String
+  status String @default("INVITED")
+  version Int
+  selected Boolean @default(true)
+  updatedAt DateTime @updatedAt
+  poll TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@index([userId, updatedAt])
 }
 
 model TimePollResponse {

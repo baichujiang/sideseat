@@ -111,9 +111,9 @@ enum MVPRoutePolicy {
         switch route {
         case .courses, .archivedCourses, .course:
             return .me
-        case .plans:
+        case .plans, .timePoll:
             return .plans
-        case .messageRequests, .intentionChat, .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare, .timePoll,
+        case .messageRequests, .intentionChat, .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare,
              .actionResponses, .coordinationShell:
             return .chats
         case .eventShare:

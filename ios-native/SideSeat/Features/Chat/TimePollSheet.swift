@@ -12,25 +12,26 @@ struct TimePollSheet: View {
     @State private var error: String?
     @State private var loading = true
     let initialToken: String?
+    let initiallyCreating: Bool
 
-    init(initialToken: String? = nil) { self.initialToken = initialToken }
+    init(initialToken: String? = nil, initiallyCreating: Bool = false) { self.initialToken = initialToken; self.initiallyCreating = initiallyCreating }
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    Button { showsCreate = true } label: { Label("Create time poll", systemImage: "plus") }
+                    Button { showsCreate = true } label: { Label("Create a plan", systemImage: "plus") }
                         .accessibilityIdentifier("time-poll-create")
                     Button { showsOpen = true } label: { Label("Open a poll link", systemImage: "link") }
                 }
-                Section("Your time polls") {
+                Section("Your plans") {
                     if loading { ProgressView() }
                     if polls.isEmpty && !loading { Text("Create a poll and invite people to mark their free time.").foregroundStyle(.secondary) }
                     ForEach(polls) { poll in
                         Button { openToken = poll.token } label: {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                                 Text(poll.title).font(.headline)
-                                Text(poll.dates.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
+                                Text(poll.statusLabel).font(.subheadline).foregroundStyle(.secondary)
                             }.padding(.vertical, SideSeatTheme.spaceXS)
                         }
                         .accessibilityIdentifier("time-poll-recent-\(poll.token)")
@@ -38,7 +39,7 @@ struct TimePollSheet: View {
                 }
                 if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
             }
-            .navigationTitle("Coordinate a time")
+            .navigationTitle("Plan together")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .navigationDestination(item: $openToken) { TimePollDetailView(token: $0) }
@@ -56,6 +57,7 @@ struct TimePollSheet: View {
             .refreshable { await load() }
             .task {
                 openToken = initialToken
+                showsCreate = initiallyCreating
                 await load()
             }
             .onChange(of: openToken) { _, token in if token == nil { Task { await load() } } }
@@ -71,13 +73,18 @@ struct TimePollSheet: View {
     }
 }
 
-private struct TimePollCreateView: View {
+struct TimePollCreateView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
-    @State private var dates: Set<DateComponents> = [Calendar.current.dateComponents([.era, .year, .month, .day], from: Date())]
+    @State private var dates: Set<DateComponents> = [Calendar.current.dateComponents([.era, .year, .month, .day], from: Calendar.current.date(byAdding: .day, value: 1, to: Date())!)]
     @State private var startMinute = 9 * 60
     @State private var endMinute = 17 * 60
+    @State private var planningMode = "COLLECT"
+    @State private var location = ""
+    @State private var durationMinutes = 60
+    @State private var expectedCount = 5
+    @State private var fixedStart = Date(timeIntervalSince1970: ceil(Date().addingTimeInterval(3600).timeIntervalSince1970 / 900) * 900)
     @State private var creating = false
     @State private var error: String?
     @State private var createKey = UUID().uuidString
@@ -86,7 +93,26 @@ private struct TimePollCreateView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Poll name") { TextField("For example: Friday dinner", text: $title).accessibilityIdentifier("time-poll-title") }
+                Section("Plan details") {
+                    TextField("For example: Friday dinner", text: $title).accessibilityIdentifier("time-poll-title")
+                    TextField("Location (optional)", text: $location).accessibilityIdentifier("unified-plan-location")
+                    Picker("Activity duration", selection: $durationMinutes) {
+                        ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) { Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0) }
+                    }.accessibilityIdentifier("unified-plan-duration")
+                    Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
+                        .accessibilityIdentifier("unified-plan-participant-count")
+                }
+                Section("Choose the time") {
+                    Picker("Timing method", selection: $planningMode) {
+                        Text("Collect availability").tag("COLLECT")
+                        Text("Set a time").tag("FIXED")
+                    }.pickerStyle(.segmented).accessibilityIdentifier("unified-plan-timing-method")
+                    if planningMode == "FIXED" {
+                        DatePicker("Starts", selection: $fixedStart, in: Date()...).accessibilityIdentifier("unified-plan-fixed-start")
+                        Text("Creating confirms your participation. Share the link so others can confirm before calendars are updated.").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                if planningMode == "COLLECT" {
                 Section("Candidate dates") {
                     MultiDatePicker("Choose dates", selection: $dates)
                         .accessibilityIdentifier("time-poll-dates")
@@ -100,18 +126,16 @@ private struct TimePollCreateView: View {
                     LabeledContent("Time zone", value: TimeZone.current.identifier)
                     Text("Everyone sees the same dates and time zone. Each cell is 15 minutes.").font(.caption).foregroundStyle(.secondary)
                 }
+                }
                 if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
             }
-            .navigationTitle("Create time poll").navigationBarTitleDisplayMode(.inline)
-            .onChange(of: title) { _, _ in createKey = UUID().uuidString }
-            .onChange(of: dates) { _, _ in createKey = UUID().uuidString }
-            .onChange(of: startMinute) { _, _ in createKey = UUID().uuidString }
-            .onChange(of: endMinute) { _, _ in createKey = UUID().uuidString }
+            .navigationTitle("Create a plan").navigationBarTitleDisplayMode(.inline)
+            .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
                 ToolbarItem(placement: .confirmationAction) {
                     Button { Task { await create() } } label: {
-                        if creating { ProgressView() } else { Text("Create") }
+                        if creating { ProgressView() } else { Text(planningMode == "FIXED" ? "Create invitation" : "Create") }
                     }
                     .disabled(creating || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || dates.isEmpty || dates.count > 31 || endMinute <= startMinute)
                     .accessibilityIdentifier("time-poll-create-confirm")
@@ -122,7 +146,8 @@ private struct TimePollCreateView: View {
 
     private func create() async {
         creating = true; defer { creating = false }
-        let keys = dates.compactMap { Calendar.current.date(from: $0) }.map { date in
+        let chosenDates = planningMode == "FIXED" ? Set([Calendar.current.dateComponents([.era, .year, .month, .day], from: fixedStart)]) : dates
+        let keys = chosenDates.compactMap { Calendar.current.date(from: $0) }.map { date in
             let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
             formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
             return formatter.string(from: date)
@@ -130,7 +155,7 @@ private struct TimePollCreateView: View {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                 "/api/v1/time-polls", method: .post,
-                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute),
+                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: durationMinutes, expectedCount: expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil),
                 idempotencyKey: createKey
             )
             onCreate(response.data); dismiss()
@@ -146,6 +171,8 @@ struct TimePollDetailView: View {
     @State private var results = false
     @State private var showsDelete = false
     @State private var deleting = false
+    @State private var selectedWindow: NativeTimePoll.Window?
+    @State private var choosingAgain = false
     @FocusState private var nameFocused: Bool
 
     init(token: String) { _store = State(initialValue: TimePollStore(token: token)) }
@@ -153,13 +180,14 @@ struct TimePollDetailView: View {
     var body: some View {
         VStack(spacing: SideSeatTheme.spaceMD) {
             if let poll = store.poll {
+                if poll.planningPhase == "COLLECTING" || choosingAgain {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Text(poll.title).font(.title2.weight(.semibold)).accessibilityIdentifier("time-poll-detail-title")
                     Text(poll.timeZone).font(.caption).foregroundStyle(.secondary)
                     Picker("Availability", selection: $results) {
                         Text("My availability").tag(false)
                         Text("Group results").tag(true)
-                    }.pickerStyle(.segmented).accessibilityIdentifier("time-poll-mode")
+                    }.pickerStyle(.segmented).accessibilityIdentifier("time-poll-mode").disabled(choosingAgain)
                     if results { summary(poll) }
                     else {
                         HStack {
@@ -184,6 +212,11 @@ struct TimePollDetailView: View {
                         Button("Retry") { if deleting { Task { await delete() } } else { store.save(session: session) } }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
+                } else {
+                    UnifiedPlanConfirmationView(poll: poll, store: store) {
+                        choosingAgain = true; results = true
+                    }
+                }
             } else if let error = store.error {
                 ContentUnavailableView {
                     Label("Couldn't load the poll", systemImage: "wifi.exclamationmark")
@@ -192,14 +225,14 @@ struct TimePollDetailView: View {
         }
         .padding(.top, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.bg)
-        .navigationTitle("Coordinate a time").navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Plan together").navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if let poll = store.poll {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         ShareLink(item: poll.shareUrl) { Label("Share poll", systemImage: "square.and.arrow.up") }
                         Button { UIPasteboard.general.url = poll.shareUrl } label: { Label("Copy link", systemImage: "doc.on.doc") }
-                        if poll.isOwner { Button("Delete poll", role: .destructive) { showsDelete = true } }
+                        if poll.isOwner && ["COLLECTING", "CANCELLED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
                     } label: { Image(systemName: "ellipsis") }.accessibilityIdentifier("time-poll-menu")
                 }
             }
@@ -207,6 +240,8 @@ struct TimePollDetailView: View {
         .confirmationDialog("Delete this poll and all responses?", isPresented: $showsDelete, titleVisibility: .visible) {
             Button("Delete poll", role: .destructive) { Task { await delete() } }
         }
+        .sheet(item: $selectedWindow) { window in UnifiedPlanInviteView(poll: store.poll!, window: window, store: store) }
+        .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false }
         .onChange(of: nameFocused) { old, new in if old && !new { store.save(session: session) } }
         .onChange(of: results) { _, _ in nameFocused = false }
         .task {
@@ -226,7 +261,7 @@ struct TimePollDetailView: View {
 
     private func summary(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)).font(.caption).foregroundStyle(.secondary)
+            Text(poll.expectedCount.map { String(format: AppLocalization.string("%d of %d people filled in their availability"), poll.summary.participantCount, $0) } ?? String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)).font(.caption).foregroundStyle(.secondary)
             if poll.summary.maximum == 0 {
                 Text("No available time yet.").font(.headline)
             } else {
@@ -234,15 +269,22 @@ struct TimePollDetailView: View {
                     .accessibilityIdentifier("time-poll-result-heading")
                 ScrollView(.horizontal) {
                     HStack(spacing: SideSeatTheme.spaceSM) {
-                        ForEach(Array(poll.summary.windows.enumerated()), id: \.offset) { _, window in
+                        ForEach(Array(poll.summary.windows.prefix(24).enumerated()), id: \.offset) { _, window in
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                                 Text(windowLabel(window, timeZone: poll.timeZone)).font(.subheadline.weight(.medium))
-                                Text(String(format: AppLocalization.string("%d of %d available"), window.count, poll.summary.participantCount)).font(.caption)
+                                Text(String(format: AppLocalization.string("%d of %d available"), window.count, poll.expectedCount ?? poll.summary.participantCount)).font(.caption)
                                 Text(poll.participants.filter { window.attendeeIds.contains($0.id) }.map(\.displayName).joined(separator: ", "))
                                     .font(.caption).foregroundStyle(.secondary)
+                                if poll.isOwner {
+                                    Button("Use this time to invite") { selectedWindow = window }
+                                        .buttonStyle(.borderedProminent).tint(SideSeatTheme.utilityAction)
+                                        .accessibilityIdentifier("unified-plan-invite-window")
+                                        .disabled(!store.canMutate)
+                                }
                             }
                             .padding(SideSeatTheme.spaceSM)
                             .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                            .accessibilityElement(children: .contain)
                             .accessibilityIdentifier("time-poll-window-\(window.count)")
                         }
                     }

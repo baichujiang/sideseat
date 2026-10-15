@@ -99,7 +99,7 @@ struct NativeHomeSchedule: Codable, Sendable {
         let planIdentity = entry.planProjectionIdentity
         let source: HomeAgendaItem.Source = entry.id.hasPrefix("icsfeed:")
             ? .subscription
-            : planIdentity == nil ? .event : .plan
+            : planIdentity == nil && entry.timePollToken == nil ? .event : .plan
 
         return HomeAgendaItem(
             id: entry.id,
@@ -118,7 +118,8 @@ struct NativeHomeSchedule: Codable, Sendable {
             discoverActivityID: entry.discoverActivityId,
             planCommitmentID: planIdentity?.commitmentID,
             planConnectionID: planIdentity?.connectionID,
-            planRevisionID: planIdentity?.revisionID
+            planRevisionID: planIdentity?.revisionID,
+            timePollToken: entry.timePollToken
         )
     }
 
@@ -241,6 +242,7 @@ struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
     let planCommitmentId: String?
     let planConnectionId: String?
     let planRevisionId: String?
+    let timePollToken: String?
 
     init(
         id: String,
@@ -259,7 +261,8 @@ struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
         discoverActivityId: String?,
         planCommitmentId: String? = nil,
         planConnectionId: String? = nil,
-        planRevisionId: String? = nil
+        planRevisionId: String? = nil,
+        timePollToken: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -278,6 +281,7 @@ struct NativeHomeStudyEntry: Codable, Hashable, Sendable {
         self.planCommitmentId = planCommitmentId
         self.planConnectionId = planConnectionId
         self.planRevisionId = planRevisionId
+        self.timePollToken = timePollToken
     }
 
     var planProjectionIdentity: PlanProjectionIdentity? {
@@ -354,6 +358,7 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     let planCommitmentID: String?
     let planConnectionID: String?
     let planRevisionID: String?
+    let timePollToken: String?
 
     init(
         id: String,
@@ -372,7 +377,8 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         discoverActivityID: String? = nil,
         planCommitmentID: String? = nil,
         planConnectionID: String? = nil,
-        planRevisionID: String? = nil
+        planRevisionID: String? = nil,
+        timePollToken: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -391,6 +397,7 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
         self.planCommitmentID = planCommitmentID
         self.planConnectionID = planConnectionID
         self.planRevisionID = planRevisionID
+        self.timePollToken = timePollToken
     }
 
     var context: Context {
@@ -408,9 +415,7 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     }
 
     var isPlanProjection: Bool {
-        source == .plan
-            && planConnectionID != nil
-            && (planCommitmentID != nil || planRevisionID != nil)
+        source == .plan && (timePollToken != nil || (planConnectionID != nil && (planCommitmentID != nil || planRevisionID != nil)))
     }
 
     var isUserEditableEvent: Bool {
@@ -418,6 +423,7 @@ struct HomeAgendaItem: Identifiable, Hashable, Sendable {
     }
 
     var canonicalPlanRoute: AppRoute? {
+        if let timePollToken { return .timePoll(token: timePollToken) }
         guard isPlanProjection,
               let planConnectionID,
               let focusID = planCommitmentID ?? planRevisionID

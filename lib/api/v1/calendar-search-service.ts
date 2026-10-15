@@ -17,6 +17,7 @@ import {
 type CalendarDb = Prisma.TransactionClient | PrismaClient;
 
 const searchEntrySelect = {
+  timePoll: { select: { token: true } },
   id: true,
   title: true,
   eventType: true,
@@ -46,6 +47,7 @@ type SearchEntry = Prisma.CalendarEntryGetPayload<{
 }>;
 
 export type NativeCalendarSearchResult = {
+  timePollToken?: string;
   id: string;
   title: string;
   location: string | null;
@@ -208,6 +210,7 @@ function toNativeResult(
     categoryColor: entry.category?.color ?? null,
     categoryName: entry.category?.name ?? null,
     discoverActivityId: entry.discoverActivityId,
+    ...(entry.timePoll ? { timePollToken: entry.timePoll.token } : {}),
   };
 }
 

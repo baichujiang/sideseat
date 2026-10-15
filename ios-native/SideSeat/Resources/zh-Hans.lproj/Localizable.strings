@@ -2463,3 +2463,77 @@
 "Everyone can attend" = "所有人都能参加";
 "Best available times" = "参加人数最多的时段";
 "%d of %d available" = "%d / %d 人可以参加";
+
+"Create a plan" = "发起计划";
+
+"Your plans" = "你的计划";
+
+"Plan together" = "共同计划";
+
+"Activity duration" = "活动时长";
+
+"%d minutes" = "%d 分钟";
+
+"%d participants including you" = "共 %d 人（包括你）";
+
+"Choose the time" = "确定时间";
+
+"Timing method" = "定时间方式";
+
+"Collect everyone’s availability" = "一起定时间";
+
+"Choose a time directly" = "直接选时间";
+
+"Share the invitation link. Each participant confirms before the plan is added to calendars." = "分享邀请链接。每位参与者确认后，计划才会加入日历。";
+
+"Awaiting confirmations" = "等待大家确认";
+
+"Finding a time" = "正在找时间";
+
+"Cancelled" = "已取消";
+
+"%d of %d people filled in their availability" = "%d/%d 人已填写空闲时间";
+
+"Use this time to invite" = "用这个时间发出邀请";
+
+"Choose who to invite" = "选择本次参与者";
+
+"Available for the full activity" = "整个活动时段都有空";
+
+"Not available for the full activity" = "未填写此完整时段有空";
+
+"Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated." = "发出邀请代表你确认参加。所选参与者都确认此时间后，才会更新日历。";
+
+"Send invitations" = "发出邀请";
+
+"Invite participants" = "邀请参与者";
+
+"%d of %d confirmed" = "%d/%d 人已确认";
+
+"Synced to participants' calendars" = "已同步至参与者日历";
+
+"This plan is cancelled. Its calendar entries have been removed." = "计划已取消，相关日历安排已移除。";
+
+"The plan is added to calendars after everyone included confirms." = "本次参与者全部确认后，计划才会加入日历。";
+
+"Awaiting confirmation" = "待确认";
+
+"Confirm participation" = "确认参加";
+
+"I can't attend" = "我无法参加";
+
+"Cancel this plan for everyone?" = "为所有人取消这个计划？";
+
+"Shared plan details are managed in Plans." = "共同计划的详情在「计划」中管理。";
+
+"Create invitation" = "创建邀请";
+
+"Creating confirms your participation. Share the link so others can confirm before calendars are updated." = "创建即代表你确认参加。分享链接，让其他人确认后再同步日历。";
+
+"You are not included in this invitation. Your availability is saved." = "本次邀请未包含你，你填写的空闲时间已保留。";
+
+"Collect availability" = "一起定时间";
+
+"Set a time" = "直接选时间";
+
+"Time zone" = "时区";

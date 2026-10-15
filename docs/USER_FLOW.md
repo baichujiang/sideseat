@@ -8,34 +8,49 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
-## Native time polls — owner-approved 2026-10-15
+## Unified manual plans — owner-approved 2026-10-15
 
-Messages offers **Coordinate a time**, with the same action in existing group
-chats. Create a name, select up to 31 candidate dates, and set a daily time range.
-The displayed time zone is fixed when created so all respondents use the same
-instants. Each cell is 15 minutes. Drag a rectangle to paint availability; start
-on a selected cell to erase. Swipe the time-label column to scroll the grid.
-Changes save automatically after a gesture, with Saving / Saved / visible error
-and Retry. Respondents may explicitly record that they have no available time.
+**Plans → + → Create a plan** starts one shared plan. Enter title, optional place,
+duration and participant count (default five). Choose **Collect everyone's
+availability** or **Choose a time directly**. The existing Messages coordination
+entry and shared links open these same plans in the Plans tab.
 
-Each signed-in Sideseat account owns one editable response per poll. Its display
-name is editable for that poll; it does not require a separate provider password.
-**Group results** shows attendance in each cell and the highest-attendance windows.
-“Everyone” means everyone who has responded, including empty responses; the
-respondent count is shown. Adjacent cells are merged only if the same people can
-attend the full interval. If no common time exists, recommend maximum attendance.
+For collection, select candidate dates and daily hours; the creation time zone
+fixes the actual instants. Drag 15-minute rectangles to paint or erase availability.
+Autosave shows Saving / Saved / retryable error; one account owns one response,
+including an explicit empty response. Results retain the heatmap and show whole
+activity-duration windows. Until the requested five respond, label responses as
+incomplete rather than declaring three of three to be everyone's common time.
+With all five responses, show common windows or maximum attendance. Availability
+must cover the entire suggested interval for each counted person.
 
-Share or copy the Sideseat link using the native menu. The link opens the native
-poll after login, or a branded browser handoff page. Creator and respondent polls
-appear in **Your time polls** and reopen from server data. Invite holders who are
-signed in can view/respond. Existing block rules hide blocked users' responses;
-statistics use the visible responses. Creator may delete the poll and responses.
-Historical When2meet links and dated QA reports remain historical records; new
-polls use Sideseat's own service exclusively.
+The creator selects **Use this time to invite**, reviews the explicit participant
+list and sends. The creator's send action confirms their own participation; other
+selected people see **Confirm participation** / **Can't attend**. A four-person
+recommendation may invite four explicitly; the fifth remains outside the roster
+and receives no Calendar entry. Decline leaves the invitation pending. Before all
+accept, the creator may choose another time/roster; this increments the invitation
+version and requires new confirmations. Already confirmed plans can be cancelled.
 
-This feature does not send a message, read Calendar, create a group commitment or
-write Calendar entries on its own. Existing Plan consent continues to govern
-Sideseat commitments.
+For a direct-time plan, creation confirms the creator's time. Share the private
+Sideseat link; signed-in holders explicitly join/accept until the requested count
+is filled. This uses the same per-person confirmation view and final calendar rule.
+The browser offers an app/login handoff without displaying respondents' details.
+
+**Overview** includes collection and pending invitations. **Upcoming** includes
+confirmed plans for the selected viewer. Each selected person's Calendar receives
+one projection only after everyone selected has accepted. Reopening Plans or
+Calendar loads persisted server data. Shared calendar details are read-only and
+**Manage Plan** opens the original plan; cancellation removes all its projections.
+**Ended** retains cancelled, past or excluded records. Creator deletion is allowed
+for collecting/cancelled plans, with active plans requiring cancellation first.
+
+Sharing a link does not send a message or disclose anyone's personal Calendar.
+Block/account deletion cancels affected invitations/confirmed manual plans and
+removes their Calendar projections. This flow does not open old group-chat or Pod
+routes. Existing chat-based bilateral Plans and Outcome/Repeat continue under the
+contracts below. Historical When2meet implementation remains frozen.
+See [Unified plans](./UNIFIED_PLANS.md) for the API and state contract.
 
 **Approved publication amendment:** With `v2AutomaticMatching`, publishing replaces
 the separate matching start. Legacy saved intentions keep their original consent.

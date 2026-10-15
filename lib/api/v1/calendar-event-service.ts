@@ -215,7 +215,7 @@ async function resolveTarget(
   }
 
   const entry = await db.calendarEntry.findFirst({
-    where: { id: eventId, userId, projectionStatus: "ACTIVE" },
+    where: { id: eventId, userId, timePollId: null, projectionStatus: "ACTIVE" },
     select: entrySelect,
   });
   if (!entry) return null;

@@ -2463,3 +2463,77 @@
 "Everyone can attend" = "Everyone can attend";
 "Best available times" = "Best available times";
 "%d of %d available" = "%d of %d available";
+
+"Create a plan" = "Create a plan";
+
+"Your plans" = "Your plans";
+
+"Plan together" = "Plan together";
+
+"Activity duration" = "Activity duration";
+
+"%d minutes" = "%d minutes";
+
+"%d participants including you" = "%d participants including you";
+
+"Choose the time" = "Choose the time";
+
+"Timing method" = "Timing method";
+
+"Collect everyone’s availability" = "Collect everyone’s availability";
+
+"Choose a time directly" = "Choose a time directly";
+
+"Share the invitation link. Each participant confirms before the plan is added to calendars." = "Share the invitation link. Each participant confirms before the plan is added to calendars.";
+
+"Awaiting confirmations" = "Awaiting confirmations";
+
+"Finding a time" = "Finding a time";
+
+"Cancelled" = "Cancelled";
+
+"%d of %d people filled in their availability" = "%d of %d people filled in their availability";
+
+"Use this time to invite" = "Use this time to invite";
+
+"Choose who to invite" = "Choose who to invite";
+
+"Available for the full activity" = "Available for the full activity";
+
+"Not available for the full activity" = "Not available for the full activity";
+
+"Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated." = "Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated.";
+
+"Send invitations" = "Send invitations";
+
+"Invite participants" = "Invite participants";
+
+"%d of %d confirmed" = "%d of %d confirmed";
+
+"Synced to participants' calendars" = "Synced to participants' calendars";
+
+"This plan is cancelled. Its calendar entries have been removed." = "This plan is cancelled. Its calendar entries have been removed.";
+
+"The plan is added to calendars after everyone included confirms." = "The plan is added to calendars after everyone included confirms.";
+
+"Awaiting confirmation" = "Awaiting confirmation";
+
+"Confirm participation" = "Confirm participation";
+
+"I can't attend" = "I can't attend";
+
+"Cancel this plan for everyone?" = "Cancel this plan for everyone?";
+
+"Shared plan details are managed in Plans." = "Shared plan details are managed in Plans.";
+
+"Create invitation" = "Create invitation";
+
+"Creating confirms your participation. Share the link so others can confirm before calendars are updated." = "Creating confirms your participation. Share the link so others can confirm before calendars are updated.";
+
+"You are not included in this invitation. Your availability is saved." = "You are not included in this invitation. Your availability is saved.";
+
+"Collect availability" = "Collect availability";
+
+"Set a time" = "Set a time";
+
+"Time zone" = "Time zone";

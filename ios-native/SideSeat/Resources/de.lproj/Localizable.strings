@@ -2462,3 +2462,77 @@
 "Everyone can attend" = "Alle können teilnehmen";
 "Best available times" = "Zeiten mit den meisten Zusagen";
 "%d of %d available" = "%d von %d können teilnehmen";
+
+"Create a plan" = "Plan erstellen";
+
+"Your plans" = "Deine Pläne";
+
+"Plan together" = "Gemeinsam planen";
+
+"Activity duration" = "Aktivitätsdauer";
+
+"%d minutes" = "%d Minuten";
+
+"%d participants including you" = "%d Personen einschließlich dir";
+
+"Choose the time" = "Zeit festlegen";
+
+"Timing method" = "Zeitwahl";
+
+"Collect everyone’s availability" = "Gemeinsam Zeit finden";
+
+"Choose a time directly" = "Zeit direkt wählen";
+
+"Share the invitation link. Each participant confirms before the plan is added to calendars." = "Teile den Einladungslink. Erst nach allen Zusagen wird der Plan in die Kalender eingetragen.";
+
+"Awaiting confirmations" = "Zusagen ausstehend";
+
+"Finding a time" = "Zeit wird gesucht";
+
+"Cancelled" = "Abgesagt";
+
+"%d of %d people filled in their availability" = "%d von %d haben freie Zeiten eingetragen";
+
+"Use this time to invite" = "Zu dieser Zeit einladen";
+
+"Choose who to invite" = "Teilnehmende auswählen";
+
+"Available for the full activity" = "Für die ganze Aktivität verfügbar";
+
+"Not available for the full activity" = "Nicht für den ganzen Zeitraum verfügbar";
+
+"Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated." = "Mit dem Senden sagst du zu. Alle ausgewählten Personen müssen diese Zeit bestätigen, bevor die Kalender aktualisiert werden.";
+
+"Send invitations" = "Einladungen senden";
+
+"Invite participants" = "Teilnehmende einladen";
+
+"%d of %d confirmed" = "%d von %d haben zugesagt";
+
+"Synced to participants' calendars" = "Mit den Kalendern der Teilnehmenden synchronisiert";
+
+"This plan is cancelled. Its calendar entries have been removed." = "Dieser Plan wurde abgesagt und aus den Kalendern entfernt.";
+
+"The plan is added to calendars after everyone included confirms." = "Der Plan erscheint in den Kalendern, sobald alle Beteiligten zugesagt haben.";
+
+"Awaiting confirmation" = "Zusage ausstehend";
+
+"Confirm participation" = "Teilnahme bestätigen";
+
+"I can't attend" = "Ich kann nicht teilnehmen";
+
+"Cancel this plan for everyone?" = "Diesen Plan für alle absagen?";
+
+"Shared plan details are managed in Plans." = "Details gemeinsamer Pläne werden unter „Pläne“ verwaltet.";
+
+"Create invitation" = "Einladung erstellen";
+
+"Creating confirms your participation. Share the link so others can confirm before calendars are updated." = "Mit dem Erstellen sagst du zu. Teile den Link, damit alle vor dem Kalendereintrag bestätigen können.";
+
+"You are not included in this invitation. Your availability is saved." = "Du bist in dieser Einladung nicht enthalten. Deine freien Zeiten sind gespeichert.";
+
+"Collect availability" = "Verfügbarkeit sammeln";
+
+"Set a time" = "Zeit festlegen";
+
+"Time zone" = "Zeitzone";

@@ -34,3 +34,16 @@ test("DST repeated hour has distinct cells and actual UTC intervals", () => {
   assert.equal(new Set(repeated.map((slot) => slot.row)).size, 20);
   for (let i = 1; i < repeated.length; i++) assert.equal(repeated[i - 1].end, repeated[i].start);
 });
+
+test("recommendations cover the entire activity duration and keep unfilled invitees visible", () => {
+  const slots = buildPollSlots({ title: "Dinner", timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 660 });
+  const people = Array.from({ length: 5 }, (_, n) => ({ id: String(n), displayName: String(n), isMe: n === 0, slotIds: n === 4 ? [0, 1] : [0, 1, 2, 3] }));
+  const fullHour = summarizePoll(slots, people, 60, 5);
+  assert.equal(fullHour.maximum, 4);
+  assert.equal(fullHour.common, false);
+  assert.equal(fullHour.windows[0].end, slots[3].end);
+  assert.deepEqual(fullHour.windows[0].attendeeIds, ["0", "1", "2", "3"]);
+  const waiting = summarizePoll(slots, people.slice(0, 3), 60, 5);
+  assert.equal(waiting.maximum, 3);
+  assert.equal(waiting.common, false);
+});

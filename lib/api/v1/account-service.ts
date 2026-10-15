@@ -1,3 +1,5 @@
+import { cancelPollPlansForUsers } from "@/lib/time-polls/planning";
+import { userConnectionSafetyLocks } from "@/lib/v2/action-coordination/db-locks";
 import "server-only";
 
 import { Prisma } from "@prisma/client";
@@ -33,6 +35,8 @@ export async function deleteAccount(options: {
 export async function eraseAccountRecords(userId: string) {
   try {
     const urls = await prisma.$transaction(async tx => {
+      await userConnectionSafetyLocks(tx, [userId]);
+      await cancelPollPlansForUsers(tx, [userId]);
       const urls = await queueAccountMediaDeletion(tx, userId);
       await tx.user.delete({ where: { id: userId } });
       return urls;

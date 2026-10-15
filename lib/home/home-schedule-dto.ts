@@ -39,6 +39,7 @@ export type HomeStudyEntry = {
   categoryColor: string | null;
   categoryName: string | null;
   discoverActivityId?: string | null;
+  timePollToken?: string | null;
   planCommitmentId?: string | null;
   planConnectionId?: string | null;
   planRevisionId?: string | null;
@@ -66,6 +67,7 @@ export type HomeSchedulePayload = {
 };
 
 export function homeSchedulePlanProjectionFields(entry: {
+  timePoll?: { token: string } | null;
   planCommitmentId: string | null;
   planRequestId: string | null;
   planCommitment: { connectionId: string } | null;
@@ -79,6 +81,7 @@ export function homeSchedulePlanProjectionFields(entry: {
     Boolean(connectionID) && Boolean(commitmentID || revisionID);
 
   return {
+    ...(entry.timePoll ? { timePollToken: entry.timePoll.token } : {}),
     planCommitmentId: commitmentID,
     planConnectionId: hasExplicitPlanIdentity ? connectionID : null,
     planRevisionId: hasExplicitPlanIdentity ? revisionID : null,

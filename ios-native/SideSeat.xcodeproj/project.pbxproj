@@ -42,7 +42,9 @@
 		1C65C5B189C7EE4BCCF43C51 /* SignupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CB4A0C2F244A86B7B5B78EC /* SignupSheet.swift */; };
 		1CCFCF52AE29AD9BB71E659F /* ContactsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4877D42DC56DD9AFA40E0F52 /* ContactsModels.swift */; };
 		1ECC26E920DE0A1F88DC73EB /* CalendarSmartAddModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CCB06D77347B4207E25CF13 /* CalendarSmartAddModels.swift */; };
+		20C6299766AE502DCA6196FF /* UnifiedPlanViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4288FF3A5DE5DC6C4C42ED1 /* UnifiedPlanViews.swift */; };
 		2188BA3876536036C48F3B87 /* SSFlowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BBE47B8C85A36913574BC0 /* SSFlowCard.swift */; };
+		239D2A57E0CA358D00F90250 /* UnifiedPlanLiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B7F0AEA42C1F86E5B3207C /* UnifiedPlanLiveUITests.swift */; };
 		252F38EB1C429112CA5E42FB /* FeedbackRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05297190706209F0E28ED8E9 /* FeedbackRootView.swift */; };
 		2783CAE0C2CD0A38FE5BF083 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3118E7610273B103B5A2FBE0 /* APIClient.swift */; };
 		2867C263B537ED5BD56AE53E /* MembershipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41DA8E7180D77128923A93A4 /* MembershipView.swift */; };
@@ -334,6 +336,7 @@
 		7D856098D6E0B6E262F79125 /* AppShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShellView.swift; sourceTree = "<group>"; };
 		7DE982D5D5C77FDAB46E733F /* DiscoverStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverStoreTests.swift; sourceTree = "<group>"; };
 		815AF51FC3CF52331459AF17 /* CalendarCategoryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCategoryModels.swift; sourceTree = "<group>"; };
+		82B7F0AEA42C1F86E5B3207C /* UnifiedPlanLiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedPlanLiveUITests.swift; sourceTree = "<group>"; };
 		82E40DE4CD91068AA6B73C09 /* CalendarSmartAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSmartAddView.swift; sourceTree = "<group>"; };
 		83B5CEA5BA2004D2FAC864A8 /* ExploreIntentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreIntentModels.swift; sourceTree = "<group>"; };
 		843627AD8F218DA5D2232BC6 /* CourseStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseStores.swift; sourceTree = "<group>"; };
@@ -427,6 +430,7 @@
 		F2BDFC41299BFEAA585462ED /* CourseManualAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseManualAddView.swift; sourceTree = "<group>"; };
 		F2F9B1D8217108C54A294505 /* CalendarSmartAddStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSmartAddStore.swift; sourceTree = "<group>"; };
 		F3DB966A27DF9A982A0FC8B1 /* DiscoverDetailViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverDetailViews.swift; sourceTree = "<group>"; };
+		F4288FF3A5DE5DC6C4C42ED1 /* UnifiedPlanViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedPlanViews.swift; sourceTree = "<group>"; };
 		F6AA9339D411DEEB3506342C /* InboxChatSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxChatSearch.swift; sourceTree = "<group>"; };
 		FA2946A8CE4ECDA9CBFE4A12 /* CalendarTimelineScrollAnchorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTimelineScrollAnchorTests.swift; sourceTree = "<group>"; };
 		FBB4CAFBBA78E438A185B8A0 /* GroupCreateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupCreateSheet.swift; sourceTree = "<group>"; };
@@ -609,6 +613,7 @@
 				E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */,
 				0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */,
 				E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */,
+				82B7F0AEA42C1F86E5B3207C /* UnifiedPlanLiveUITests.swift */,
 				CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */,
 			);
 			path = SideSeatUITests;
@@ -848,6 +853,7 @@
 				FF620B25C8B323A0AFCED41F /* TimePollSheet.swift */,
 				9E8949EDFC00E4F92635CFCA /* TimePollStore.swift */,
 				B1902D449D76776DDF5990B3 /* UITestingChatFixtures.swift */,
+				F4288FF3A5DE5DC6C4C42ED1 /* UnifiedPlanViews.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -1260,6 +1266,7 @@
 				726B379303A676CF8AED40DB /* TogetherRootView.swift in Sources */,
 				FCB0F03DA407444686DF57E2 /* Types.swift in Sources */,
 				017F900917DE557A3AA83583 /* UITestingChatFixtures.swift in Sources */,
+				20C6299766AE502DCA6196FF /* UnifiedPlanViews.swift in Sources */,
 				899F59B62C3CB40579CFE803 /* WeeklyIntentModels.swift in Sources */,
 				615BA456C3DF225BE273A328 /* WeeklyIntentStore.swift in Sources */,
 			);
@@ -1312,6 +1319,7 @@
 				9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */,
 				80F89555CBB966F96DB9BBDF /* SmartTimeSchedulingUITests.swift in Sources */,
 				CC138832AECB7E02E9FE6DAF /* TimePollLiveUITests.swift in Sources */,
+				239D2A57E0CA358D00F90250 /* UnifiedPlanLiveUITests.swift in Sources */,
 				90ADB3D2C81172F69F3259A8 /* VisualQAScreenshotUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

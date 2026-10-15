@@ -17,6 +17,26 @@ struct NativeTimePoll: Decodable, Sendable {
     let shareUrl: URL
     let summary: Summary
 
+    let location: String?
+    let durationMinutes: Int?
+    let expectedCount: Int?
+    let planningMode: String?
+    let phase: String?
+    let invitationVersion: Int?
+    let chosenStart: Date?
+    let chosenEnd: Date?
+    let invitations: [Invitation]?
+    var planningPhase: String { phase ?? "COLLECTING" }
+    var allInvitations: [Invitation] { invitations ?? [] }
+    var targetCount: Int { planningMode == "FIXED" ? expectedCount ?? 2 : allInvitations.filter(\.selected).count }
+    struct Invitation: Decodable, Sendable, Identifiable {
+        let id: String
+        let displayName: String
+        let status: String
+        let selected: Bool
+        let isMe: Bool
+    }
+
     struct Slot: Decodable, Sendable, Identifiable {
         let id: Int
         let date: String
@@ -31,7 +51,8 @@ struct NativeTimePoll: Decodable, Sendable {
         let slotIds: [Int]
         let isMe: Bool
     }
-    struct Window: Decodable, Sendable {
+    struct Window: Decodable, Sendable, Identifiable {
+        var id: Date { start }
         let start: Date
         let end: Date
         let attendeeIds: [String]
@@ -60,6 +81,23 @@ struct NativeTimePollList: Decodable, Sendable {
         let dates: [String]
         let updatedAt: Date
         let shareUrl: URL
+        let phase: String?
+        let chosenStart: Date?
+        let chosenEnd: Date?
+        let expectedCount: Int?
+        let respondedCount: Int?
+        let acceptedCount: Int?
+        let invitedCount: Int?
+        let myInvitationStatus: String?
+        let isIncluded: Bool?
+        var statusLabel: String {
+            switch phase ?? "COLLECTING" {
+            case "INVITING": AppLocalization.string("Awaiting confirmations")
+            case "CONFIRMED": AppLocalization.string("Confirmed")
+            case "CANCELLED": AppLocalization.string("Cancelled")
+            default: AppLocalization.string("Finding a time")
+            }
+        }
     }
 }
 
@@ -69,7 +107,20 @@ struct CreateTimePollRequest: Encodable, Sendable {
     let dates: [String]
     let startMinute: Int
     let endMinute: Int
+    var location: String? = nil
+    var durationMinutes: Int? = nil
+    var expectedCount: Int? = nil
+    var planningMode: String? = nil
+    var fixedStart: String? = nil
 }
+
+struct SendPollInvitationsRequest: Encodable, Sendable {
+    let start: String
+    let attendeeIds: [String]
+    let version: Int
+}
+struct RespondPollInvitationRequest: Encodable, Sendable { let status: String; let version: Int }
+struct CancelPollPlanRequest: Encodable, Sendable { let version: Int }
 
 struct SaveTimePollRequest: Codable, Sendable, Equatable {
     let displayName: String

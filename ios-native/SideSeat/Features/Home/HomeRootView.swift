@@ -720,13 +720,14 @@ struct HomeRootView: View {
             categoryName: event.categoryName,
             repeatRule: event.repeatRule,
             repeatUntil: event.repeatUntilISO.flatMap(Date.sideSeatISO8601),
-            source: planIdentity == nil ? .event : .plan,
+            source: planIdentity == nil && event.timePollToken == nil ? .event : .plan,
             withLabel: event.withLabel,
             participantNames: event.eventParticipants.map(\.name),
             discoverActivityID: event.discoverActivityId,
             planCommitmentID: planIdentity?.commitmentID,
             planConnectionID: planIdentity?.connectionID,
-            planRevisionID: planIdentity?.revisionID
+            planRevisionID: planIdentity?.revisionID,
+            timePollToken: event.timePollToken
         )
         Task { await store.ensureCovers(start, using: session) }
     }
@@ -1400,7 +1401,7 @@ private struct HomeAgendaDetailView: View {
                         }
                         .accessibilityIdentifier("calendar-manage-plan")
                     } footer: {
-                        Text("Shared Plan details are managed in Messages.")
+                        Text(AppLocalization.string(item.timePollToken == nil ? "Shared Plan details are managed in Messages." : "Shared plan details are managed in Plans."))
                     }
                 }
 

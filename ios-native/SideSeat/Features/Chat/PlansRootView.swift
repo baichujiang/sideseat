@@ -72,6 +72,10 @@ struct PlansRootView: View {
     @State private var showsAllIncoming = false
     @State private var showsOutgoing = false
     @State private var showsSectionPicker = false
+    @State private var coordinatedPlans: [NativeTimePollList.Item] = []
+    @State private var selectedCoordinatedPlan: NativeTimePollList.Item?
+    @State private var showsPlanCreation = false
+    @State private var coordinationError: String?
     @State private var repeatPlan: NativePlanRequest?
     @ScaledMetric(relativeTo: .subheadline) private var detailIconWidth: CGFloat = 18
 
@@ -93,20 +97,30 @@ struct PlansRootView: View {
                     .background(PlanListScrollCapture(positions: scrollPositions, section: section))
                 }
                 .accessibilityIdentifier("plans-scroll-\(section.rawValue)")
-                .refreshable { await store.load(using: session) }
+                .refreshable { await store.load(using: session); await loadCoordinatedPlans() }
             }
         }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Plans")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showsPlanCreation = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("Create a plan").accessibilityIdentifier("plans-create-unified")
+            }
+        }
+        .sheet(isPresented: $showsPlanCreation, onDismiss: { Task { await loadCoordinatedPlans() } }) { TimePollSheet(initiallyCreating: true) }
+        .sheet(item: $selectedCoordinatedPlan, onDismiss: { Task { await loadCoordinatedPlans() } }) { TimePollSheet(initialToken: $0.token) }
+        .task { await loadCoordinatedPlans() }
         .background(PlanListReturnObserver(positions: scrollPositions))
         .task { if !store.hasLoaded { await store.load(using: session) } }
-        .onAppear { now = Date() }
+        .onAppear { now = Date(); Task { await loadCoordinatedPlans() } }
         .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { now = $0 }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             now = Date()
+            Task { await loadCoordinatedPlans() }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
-            Task { await store.load(using: session) }
+            Task { await store.load(using: session); await loadCoordinatedPlans() }
         }
         .sheet(item: $repeatPlan) { plan in
             PlanCreateSheet(target: .legacyConnection(connectionID: plan.connectionId),
@@ -196,6 +210,24 @@ struct PlansRootView: View {
 
     @ViewBuilder
     private func sectionContent(_ section: MVPPlanSection) -> some View {
+        ForEach(coordinated(in: section)) { plan in
+            Button { selectedCoordinatedPlan = plan } label: {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    Text(plan.title).font(.headline).foregroundStyle(SideSeatTheme.textPrimary)
+                    Text(plan.statusLabel).font(.subheadline).foregroundStyle(.secondary)
+                    if let start = plan.chosenStart, let end = plan.chosenEnd {
+                        Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: plan.timeZone)).font(.footnote).foregroundStyle(.secondary)
+                    } else if let expected = plan.expectedCount {
+                        Text(String(format: AppLocalization.string("%d of %d people filled in their availability"), plan.respondedCount ?? 0, expected)).font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+            }
+            .buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-coordinated-\(plan.token)")
+        }
+        if let coordinationError { Text(coordinationError).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
+
         if (!store.hasLoaded || store.isLoading) && store.plans.isEmpty {
             SSLoadingState("Loading plans")
                 .frame(maxWidth: .infinity, minHeight: 200)
@@ -220,7 +252,7 @@ struct PlansRootView: View {
             let visiblePlans = plans(in: section)
             if section == .waitingResponse {
                 overview
-            } else if visiblePlans.isEmpty { emptyState(for: section) }
+            } else if visiblePlans.isEmpty { if coordinated(in: section).isEmpty { emptyState(for: section) } }
             else {
                 LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                     if section == .upcoming {
@@ -233,6 +265,24 @@ struct PlansRootView: View {
                 .accessibilityValue("\(visiblePlans.count)")
             }
         }
+    }
+
+    private func coordinated(in section: MVPPlanSection) -> [NativeTimePollList.Item] {
+        coordinatedPlans.filter { plan in
+            switch section {
+            case .waitingResponse: ["COLLECTING", "INVITING"].contains(plan.phase ?? "COLLECTING")
+            case .upcoming: plan.phase == "CONFIRMED" && plan.isIncluded != false && (plan.chosenEnd ?? .distantPast) > now
+            case .ended: plan.phase == "CANCELLED" || (plan.phase == "CONFIRMED" && (plan.isIncluded == false || (plan.chosenEnd ?? .distantFuture) <= now))
+            }
+        }
+    }
+    private func loadCoordinatedPlans() async {
+        let generation = session.authorizationGeneration
+        do {
+            let result: APIEnvelope<NativeTimePollList> = try await session.sendAuthorized("/api/v1/time-polls")
+            guard generation == session.authorizationGeneration else { return }
+            coordinatedPlans = result.data.polls; coordinationError = nil
+        } catch { coordinationError = error.localizedDescription }
     }
 
     private var overview: some View {
@@ -296,7 +346,7 @@ struct PlansRootView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 8)
-            } else {
+            } else if coordinatedPlans.isEmpty {
                 emptyState(for: .waitingResponse)
             }
 

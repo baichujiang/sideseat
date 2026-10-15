@@ -6,6 +6,7 @@ import { expandCalendarRecurrenceInWindow } from "@/lib/calendar/calendar-recurr
 type CalendarDb = Prisma.TransactionClient | PrismaClient;
 
 const calendarEntryInclude = {
+  timePoll: { select: { token: true } },
   companions: { orderBy: { createdAt: "asc" as const } },
   category: { select: { id: true, name: true, color: true, presetKey: true } },
   planRequest: { select: { connectionId: true } },

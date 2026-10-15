@@ -30,16 +30,30 @@ separate follow-up integrations; the membership badge does not certify them.
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
 
-**2026-10-15 owner-approved native time coordination amendment:**
-Messages and existing group chats offer native SwiftUI time polls backed by
-Sideseat's authenticated API and PostgreSQL. This supersedes the October 13
-When2meet webpage embedding decision. Retain the mature date/time grid,
-15-minute rectangle paint/erase, automatic save and attendance heatmap mechanisms;
-implement them in Sideseat with its own UI and storage. No provider webview,
-advertising or provider save requests are part of this feature. Show times all
-respondents can attend, or the highest-attendance times when no common time exists.
-A poll is coordination and does not create a confirmed Plan or Calendar entry.
-See [User Flow](./USER_FLOW.md) and [native time poll contract](./TIME_POLLS.md).
+**2026-10-15 owner-approved unified planning amendment:**
+Plans owns manual coordination from availability collection through individual
+confirmation and Calendar projection. A creator can collect availability first or
+choose a concrete time directly. Both routes use one shared plan and the same
+invitation, confirmation and cancellation lifecycle. Native SwiftUI and Sideseat's
+API/database retain the mature 15-minute paint/erase, autosave and attendance
+heatmap mechanism; provider pages, advertisements and storage are excluded.
+
+Availability is input, never acceptance. For a five-person collection, show a
+common complete-duration window only after all five respond; otherwise recommend
+the complete-duration windows with the highest attendance. The creator explicitly
+selects a time and invitees; sending confirms the creator's participation. Every
+selected invitee must explicitly accept that invitation version before the same
+plan appears in each selected person's Calendar. A maximum-attendance result
+never silently includes an unavailable person. Declines remain pending; choosing
+a new time/roster resets acceptance. Cancellation removes Calendar projections.
+
+This approves manually shared 2–20-person plans, including five-person collection;
+it does not activate discovery-driven Pod formation, group chat, matching, repeat
+eligibility or bilateral Outcome credit for these manual plans. Existing
+conversation-bound one-to-one Plans keep their consent and provenance contracts.
+See [User Flow](./USER_FLOW.md), [time polls](./TIME_POLLS.md) and the
+[unified planning contract](./UNIFIED_PLANS.md). Deployment facts belong in
+[Deployed state](./DEPLOYED_STATE.md).
 
 ## 1. Positioning
 
@@ -102,11 +116,13 @@ Me / 我
 
 - **Together** owns Weekly Intent, matching sessions, first/repeat Opportunities,
   private bookmarks and later Pod formation.
-- **Plans** owns waiting proposals, upcoming commitments and ended-plan feedback.
+- **Plans** owns availability collection, manual invitations, waiting proposals,
+  upcoming commitments and ended-plan feedback for conversation-bound Plans.
 - **Calendar** owns personal scheduling, courses, confirmed Plan projections,
   retrieval and Apple Calendar interoperability.
 - **Messages** owns contextual first-message requests, ongoing communication after a
-  written reply, and all Plan negotiation or shared-commitment changes.
+  written reply, and conversation-bound Plan negotiation. Manual coordination
+  is managed in Plans; approved links open the same plan there.
 - **Me** owns identity, verification, courses, language, privacy, safety and
   durable preferences.
 

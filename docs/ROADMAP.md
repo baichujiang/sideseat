@@ -62,11 +62,13 @@ new group formation or confirmed group-Plan product.
 
 ## Supporting coordination and Calendar work
 
-Native multi-person time polls are delivered in Preview 99 with Sideseat storage.
-They collect availability and show common/highest-attendance windows; they do
-not create confirmed Plans or Calendar entries. The proposed poll-result → Plan
-flow and multi-person confirmation model are not implemented or scheduled by
-this roadmap update. See the [time poll contract](./TIME_POLLS.md).
+The owner approved manual unified planning on 2026-10-15: collect availability or
+choose a time → explicit selected invitations → every selected person accepts →
+Calendar projections. Native implementation and verification are tracked in
+[Unified plans](./UNIFIED_PLANS.md); actual backend/Preview delivery belongs in
+[Deployed state](./DEPLOYED_STATE.md). This manual link-based coordination is not
+the gated discovery Pod or old group-chat product and creates no repeat/Outcome
+credit. The mature native grid/autosave mechanism and archived boundary remain.
 
 Calendar reliability, smart input, search and import/export maintenance may
 continue within current authority. Read-only EventKit Busy/Available remains
@@ -93,7 +95,8 @@ justify adding more matching surfaces.
 - public feed, generic publisher and save shelf;
 - person search, swipe deck, follower graph and person compatibility scoring;
 - course roster, mega-chat and course community;
-- RSVP, collaborative calendar and complex attendee lifecycle;
+- public RSVP, collaborative calendar and attendee lifecycle beyond the approved
+  manual plan invitation/confirmation contract;
 - People Match as an independent product object;
 - production Pod before the one-to-one repeat gate;
 - engagement features that do not improve real plans or repeated encounters.

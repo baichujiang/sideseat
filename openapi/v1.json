@@ -11043,6 +11043,186 @@
           }
         }
       }
+    },
+    "/api/v1/time-polls/{token}/invitations": {
+      "post": {
+        "operationId": "sendPollInvitations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendPollInvitationsRequest"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/api/v1/time-polls/{token}/invitation-response": {
+      "put": {
+        "operationId": "respondPollInvitation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RespondPollInvitationRequest"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/api/v1/time-polls/{token}/cancel": {
+      "post": {
+        "operationId": "cancelPollPlan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPollPlanRequest"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     }
   },
   "components": {
@@ -19100,6 +19280,12 @@
               "string",
               "null"
             ]
+          },
+          "timePollToken": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -22384,7 +22570,16 @@
           "isOwner",
           "updatedAt",
           "shareUrl",
-          "summary"
+          "summary",
+          "location",
+          "durationMinutes",
+          "expectedCount",
+          "planningMode",
+          "phase",
+          "invitationVersion",
+          "chosenStart",
+          "chosenEnd",
+          "invitations"
         ],
         "properties": {
           "token": {
@@ -22444,6 +22639,63 @@
           },
           "summary": {
             "$ref": "#/components/schemas/TimePollSummary"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMinutes": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "expectedCount": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "planningMode": {
+            "type": "string",
+            "enum": [
+              "COLLECT",
+              "FIXED"
+            ]
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "COLLECTING",
+              "INVITING",
+              "CONFIRMED",
+              "CANCELLED"
+            ]
+          },
+          "invitationVersion": {
+            "type": "integer"
+          },
+          "chosenStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "chosenEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollInvitation"
+            }
           }
         }
       },
@@ -22468,7 +22720,16 @@
           "timeZone",
           "dates",
           "updatedAt",
-          "shareUrl"
+          "shareUrl",
+          "phase",
+          "chosenStart",
+          "chosenEnd",
+          "expectedCount",
+          "respondedCount",
+          "acceptedCount",
+          "invitedCount",
+          "myInvitationStatus",
+          "isIncluded"
         ],
         "properties": {
           "token": {
@@ -22492,6 +22753,53 @@
           },
           "shareUrl": {
             "type": "string"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "COLLECTING",
+              "INVITING",
+              "CONFIRMED",
+              "CANCELLED"
+            ]
+          },
+          "chosenStart": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "chosenEnd": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expectedCount": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "respondedCount": {
+            "type": "integer"
+          },
+          "acceptedCount": {
+            "type": "integer"
+          },
+          "invitedCount": {
+            "type": "integer"
+          },
+          "myInvitationStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isIncluded": {
+            "type": "boolean"
           }
         }
       },
@@ -22558,6 +22866,32 @@
             "minimum": 15,
             "maximum": 1440,
             "multipleOf": 15
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 480,
+            "multipleOf": 15
+          },
+          "expectedCount": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 20
+          },
+          "planningMode": {
+            "type": "string",
+            "enum": [
+              "COLLECT",
+              "FIXED"
+            ]
+          },
+          "fixedStart": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -22602,6 +22936,100 @@
                 "type": "boolean"
               }
             }
+          }
+        }
+      },
+      "TimePollInvitation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "displayName",
+          "status",
+          "selected",
+          "isMe"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INVITED",
+              "ACCEPTED",
+              "DECLINED"
+            ]
+          },
+          "selected": {
+            "type": "boolean"
+          },
+          "isMe": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SendPollInvitationsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "attendeeIds",
+          "version"
+        ],
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attendeeIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "RespondPollInvitationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "version"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "DECLINED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "CancelPollPlanRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
           }
         }
       }

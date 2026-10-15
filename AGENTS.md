@@ -27,7 +27,9 @@
   production with the entire local checkout on the assumption that they match.
 - Keep dated release and QA verdicts as evidence. Add new verification records;
   do not promote old screenshots, disabled flags or proposed designs to deployed
-  functionality. The time-poll → Plan conversion is still a proposal.
+  functionality. The owner approved manual unified planning (time collection →
+  invitation → individual confirmation → Calendar) on 2026-10-15; see
+  `docs/UNIFIED_PLANS.md`. Discovery Pod and archived group routes stay frozen.
 
 ## Owner delivery rule — 2026-10-03
 

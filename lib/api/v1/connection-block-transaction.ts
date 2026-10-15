@@ -1,3 +1,4 @@
+import { cancelPollPlansForUsers } from "@/lib/time-polls/planning";
 import type { Prisma } from "@prisma/client";
 
 import {
@@ -81,6 +82,8 @@ export async function convergeLockedPairPeerBlock(
       );
     }
   }
+
+  await cancelPollPlansForUsers(tx, [options.userId, options.blockedId], true);
 
   const planSafety = await terminalizePairPlanCommitmentsForSafety(tx, {
     pair: options.pair,
