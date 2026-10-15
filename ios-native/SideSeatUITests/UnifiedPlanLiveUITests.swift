@@ -33,6 +33,132 @@ import XCTest
         }
     }
 
+    /// The Mac prepares/checks the isolated fixture. This runner only drives the
+    /// real App/Safari UI and does not need its own iOS network permission.
+    func testSafariGuestShareNicknameAndConfirmation() throws {
+        struct Fixture: Decodable { let token: String; let title: String; let shareUrl: URL }
+        let fixtureJSON = ProcessInfo.processInfo.environment["SIDESEAT_GUEST_PHONE_FIXTURE_JSON"]
+        try XCTSkipIf(fixtureJSON == nil, "Requires a fresh Mac-prepared guest phone fixture.")
+        let raw = try XCTUnwrap(fixtureJSON)
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw.utf8))
+        token = fixture.token; title = fixture.title
+        let shareURL = fixture.shareUrl
+        let safari = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app.terminate() } }
+        loginUI(0); tab("Plans"); openPlanCard()
+        app.buttons["time-poll-edit-name"].tap()
+        replace(app.textFields["time-poll-name"], with: "Host Ming\n")
+        paintHour()
+        app.buttons["time-poll-menu"].tap()
+        XCTAssertTrue(app.buttons["Copy link"].waitForExistence(timeout: 10))
+        app.buttons["Copy link"].tap()
+        safari.activate()
+        // The host phone also has SideSeat installed. Enter the web destination
+        // explicitly so universal-link routing does not switch the guest to it.
+        if safari.buttons["取消"].exists && safari.buttons["打开"].exists { safari.buttons["取消"].tap() }
+        let done = safari.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成"])).firstMatch
+        if done.exists { done.tap() }
+        let address = safari.textFields["TabBarItemTitle"]
+        if !address.exists { safari.swipeDown() }
+        XCTAssertTrue(address.waitForExistence(timeout: 10)); address.tap()
+        let webURL = shareURL.absoluteString.replacingOccurrences(of: "https://sideseat.de/", with: "https://www.sideseat.de/")
+        replace(safari.textFields.firstMatch, with: webURL + "\n")
+
+        func webButton(_ en: String, _ zh: String) -> XCUIElement {
+            safari.buttons.matching(NSPredicate(format: "label IN %@", [en, zh])).firstMatch
+        }
+        func webName() -> XCUIElement { safari.webViews.textFields.firstMatch }
+        func replaceWebName(_ value: String) {
+            let field = webName()
+            field.tap()
+            if !(field.value as? String ?? "").isEmpty {
+                field.press(forDuration: 1.2)
+                let selectAll = safari.menuItems.matching(NSPredicate(format: "label IN %@", ["Select All", "全选"])).firstMatch
+                XCTAssertTrue(selectAll.waitForExistence(timeout: 5), "Use Safari's text selection menu to replace the nickname")
+                selectAll.tap()
+            }
+            field.typeText(value)
+            XCTAssertEqual(field.value as? String, value)
+        }
+        func webCapture(_ name: String) {
+            let attachment = XCTAttachment(screenshot: safari.screenshot()); attachment.name = "phone-guest-web-" + name; attachment.lifetime = .keepAlways; add(attachment)
+        }
+        XCTAssertTrue(webName().waitForExistence(timeout: 30), "The share link must open a guest form in Safari")
+        webName().tap(); webName().typeText("Guest Lin")
+        webButton("Join this plan", "开始参与").tap()
+        let addTime = webButton("Add this time", "添加这段时间")
+        XCTAssertTrue(addTime.waitForExistence(timeout: 20)); addTime.tap()
+        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved", "已保存"])).firstMatch.waitForExistence(timeout: 20))
+        webCapture("availability-saved")
+        let editName = webButton("Edit nickname", "编辑昵称")
+        for _ in 0..<3 where !editName.isHittable { safari.swipeDown() }
+        editName.tap(); XCTAssertTrue(webName().waitForExistence(timeout: 10))
+        replaceWebName("Lin Xia")
+        webButton("Save name", "保存昵称").tap()
+        XCTAssertTrue(editName.waitForExistence(timeout: 15))
+        webCapture("nickname-edited")
+
+        app.activate()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+        let groupResults = app.buttons["Group results"]
+        XCTAssertTrue(groupResults.waitForExistence(timeout: 10)); groupResults.tap()
+        attach("safari-returned-to-results")
+        let names = app.staticTexts["time-poll-participants"]
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "Lin Xia (Guest)"), evaluatedWith: names)
+        waitForExpectations(timeout: 20)
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Everyone can attend")
+        attach("safari-guest-results")
+        app.buttons["unified-plan-invite-window"].firstMatch.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        for _ in 0..<3 where !send.isHittable { app.swipeUp() }
+        send.tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-confirmation-count"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["unified-plan-confirmation-count"].label, "1 of 2 confirmed")
+        print("GUEST_PHONE_PHASE awaiting-confirmation")
+        app.buttons["time-poll-edit-name"].tap()
+        let nativeName = app.textFields["time-poll-edit-name-field"]
+        XCTAssertTrue(nativeName.waitForExistence(timeout: 10)); replace(nativeName, with: "Host Li")
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Host Li"].waitForExistence(timeout: 20))
+
+        safari.activate()
+        let accept = webButton("Confirm participation", "确认参加")
+        XCTAssertTrue(accept.waitForExistence(timeout: 35), "The same guest page must receive the invitation")
+        editName.tap(); XCTAssertTrue(webName().waitForExistence(timeout: 10))
+        replaceWebName("Lin Final")
+        webButton("Save name", "保存昵称").tap()
+        XCTAssertTrue(accept.waitForExistence(timeout: 20)); accept.tap()
+        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Plan confirmed", "计划已确定"])).firstMatch.waitForExistence(timeout: 25))
+        webCapture("participation-confirmed")
+        XCTAssertFalse(editName.exists)
+        app.activate()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+        let count = app.staticTexts["unified-plan-confirmation-count"]
+        expectation(for: NSPredicate(format: "label == %@", "2 of 2 confirmed"), evaluatedWith: count)
+        waitForExpectations(timeout: 20)
+        XCTAssertTrue(app.staticTexts["Lin Final"].exists)
+        attach("safari-guest-confirmed")
+        print("GUEST_PHONE_PHASE confirmed")
+        loginUI(0); tab("Calendar"); app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(title)
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "calendar-search-result-")).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()
+        let manage = app.buttons["calendar-manage-plan"]
+        for _ in 0..<4 where !manage.isHittable { app.swipeUp() }
+        XCTAssertTrue(manage.waitForExistence(timeout: 10)); attach("safari-guest-calendar")
+        manage.tap()
+        XCTAssertTrue(app.staticTexts["Lin Final"].waitForExistence(timeout: 20))
+    }
+
+    private func replace(_ field: XCUIElement, with value: String) {
+        field.tap()
+        // Native fields and Safari's address bar support the Select All shortcut.
+        field.typeKey("a", modifierFlags: .command)
+        field.typeText(value)
+        if !value.hasSuffix("\n") { XCTAssertEqual(field.value as? String, value) }
+    }
+
     func testGuestNamesInvitationsAndCalendar() throws {
         try authenticateAccounts()
         title = "Guest plan QA \(Int(Date().timeIntervalSince1970))"
