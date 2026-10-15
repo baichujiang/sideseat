@@ -27,11 +27,11 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
     return `${pollDate(date, zh)} · ${pollClock(start, poll!.timeZone)}–${pollClock(end, poll!.timeZone)}`;
   };
   return <main lang={zh ? "zh-CN" : "en"} className={`${styles.page} min-h-dvh px-4 pb-12 pt-5 sm:px-6`}>
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl lg:max-w-[1440px]">
       <header className="mb-8 flex items-center justify-between gap-4"><Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={34} height={34} alt="" className="rounded-lg" />SideSeat</Link><div className="flex items-center gap-4"><button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = `${POLL_LOCALE_COOKIE}=${next ? "zh-CN" : "en"}; Path=/time-polls; Max-Age=31536000; SameSite=Lax`; }}>{zh ? "English" : "中文"}</button><a href={`sideseat://time-polls/${encodeURIComponent(token)}`} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "在 App 中打开" : "Open in app"}<ArrowUpRight className="h-4 w-4" aria-hidden /></a></div></header>
       {!poll ? <section className="rounded-2xl border bg-background p-7" aria-live="polite"><h1 className="text-2xl font-semibold">{error ? (zh ? "暂时无法打开计划" : "Plan unavailable") : (zh ? "正在打开计划…" : "Opening your plan…")}</h1>{error ? <p className="mt-3 text-sm text-muted-foreground">{error}</p> : null}</section> : <>
         <div className="mb-7 space-y-2"><p className="text-sm text-muted-foreground">{zh ? "一起找到合适的时间" : "Find a time together"}</p><h1 className="text-3xl font-semibold tracking-tight">{poll.title}</h1><p className="text-sm text-muted-foreground">{poll.durationMinutes ? `${poll.durationMinutes} ${zh ? "分钟" : "minutes"} · ` : ""}{poll.timeZone}{poll.location ? ` · ${poll.location}` : ""}</p></div>
-        <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)]">
+        <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)] lg:grid-cols-[minmax(0,1fr)_224px]">
           <div className="min-w-0 space-y-5">
             {!closed ? <section className="rounded-2xl border bg-background p-5 sm:p-6">
               {!poll.viewerId || editingName ? <form onSubmit={(event) => { event.preventDefault(); void (poll.viewerId ? state.rename(name.trim()) : state.join(name.trim())); }} className="space-y-3">
