@@ -62,6 +62,39 @@ import XCTest
         capture("reopened-saved-selection")
     }
 
+    func testDayHeaderSelectsClearsUndoesAndPersists() throws {
+        struct Fixture: Decodable { let token: String; let firstDate: String; let secondSlotId: Int }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_DAY_QA_FIXTURE_JSON"]
+        try XCTSkipIf(raw == nil, "Requires a fresh day-selection poll.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(try XCTUnwrap(raw).utf8))
+        pollToken = fixture.token
+        openEmptyPoll()
+        let day = app.buttons["time-poll-day-" + fixture.firstDate]
+        let other = app.buttons["time-poll-cell-\(fixture.secondSlotId)"]
+        XCTAssertTrue(day.waitForExistence(timeout: 10))
+        other.tap(); assertSaved([])
+        day.tap(); assertSaved([0, 1, 2, 3])
+        XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
+        capture("day-selected")
+        app.buttons["time-poll-cell-0"].tap(); assertSaved([1, 2, 3])
+        XCTAssertFalse(day.isSelected)
+        XCTAssertEqual(day.value as? String, "Some times selected")
+        day.tap(); assertSaved([0, 1, 2, 3]); XCTAssertTrue(day.isSelected)
+        day.tap(); assertSaved([])
+        XCTAssertFalse(day.isSelected); XCTAssertTrue(other.isSelected)
+        app.buttons["time-poll-undo"].tap(); assertSaved([0, 1, 2, 3])
+        XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
+        app.buttons["Group results"].tap()
+        XCTAssertFalse(day.exists, "Results must not offer availability edits")
+        app.buttons["My availability"].tap()
+        XCTAssertTrue(day.isSelected)
+        app.terminate()
+        launch(language: "zh-Hans"); openPlan(tab: "计划")
+        XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
+        XCTAssertEqual(day.value as? String, "已选中当天全部时段")
+        capture("day-reopened-chinese")
+    }
+
     private func openEmptyPoll() {
         launch()
         openPlan()
@@ -69,16 +102,16 @@ import XCTest
         for id in 0...3 { XCTAssertFalse(app.buttons["time-poll-cell-\(id)"].isSelected, "Supply a fresh empty QA poll") }
     }
 
-    private func launch() {
+    private func launch(language: String = "en") {
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
-            "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=en"]
+            "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)"]
         app.launchEnvironment["SIDESEAT_QA_ACCESS_TOKEN"] = token
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
     }
 
-    private func openPlan() {
-        app.tabBars.buttons["Plans"].tap()
+    private func openPlan(tab: String = "Plans") {
+        app.tabBars.buttons[tab].tap()
         let card = app.buttons["plans-coordinated-\(pollToken)"]
         XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))

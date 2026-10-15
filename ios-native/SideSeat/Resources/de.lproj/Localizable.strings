@@ -2545,3 +2545,11 @@
 "Edit nickname" = "Namen bearbeiten";
 "Your name in this plan" = "Dein Name in diesem Plan";
 "Synced to Sideseat calendars" = "Mit Sideseat-Kalendern synchronisiert";
+
+// Whole-day availability shortcut
+"Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "Wische zum Scrollen. Tippe auf einen Tag für alle Zeiten oder auf Felder zum Bearbeiten. Zum Ziehen gedrückt halten. Änderungen werden automatisch gespeichert.";
+"All times selected" = "Alle Zeiten ausgewählt";
+"Some times selected" = "Einige Zeiten ausgewählt";
+"No times selected" = "Keine Zeiten ausgewählt";
+"Deselect all times for this day" = "Alle Zeiten dieses Tages abwählen";
+"Select all times for this day" = "Alle Zeiten dieses Tages auswählen";

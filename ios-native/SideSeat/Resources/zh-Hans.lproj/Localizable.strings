@@ -2546,3 +2546,11 @@
 "Edit nickname" = "编辑昵称";
 "Your name in this plan" = "本次计划中的昵称";
 "Synced to Sideseat calendars" = "已同步到 Sideseat 日历";
+
+// Whole-day availability shortcut
+"Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "滑动查看，点星期全选当天；点时间格单选，长按拖选。修改自动保存。";
+"All times selected" = "已选中当天全部时段";
+"Some times selected" = "已选中部分时段";
+"No times selected" = "尚未选择时段";
+"Deselect all times for this day" = "取消选择当天全部时段";
+"Select all times for this day" = "选择当天全部时段";

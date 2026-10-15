@@ -347,7 +347,7 @@ private struct TimePollGrid: View {
         VStack(spacing: SideSeatTheme.spaceSM) {
             if !results {
                 HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-                    Text("Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically.")
+                    Text("Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically.")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 0)
                     Button {
@@ -380,8 +380,12 @@ private struct TimePollGrid: View {
                             VStack(spacing: 0) {
                                 HStack(spacing: 0) {
                                     ForEach(poll.dates, id: \.self) { date in
-                                        Text(dateLabel(date)).font(.caption.weight(.semibold))
-                                            .frame(width: cellWidth, height: headerHeight)
+                                        if results {
+                                            Text(dateLabel(date)).font(.caption.weight(.semibold))
+                                                .frame(width: cellWidth, height: headerHeight)
+                                        } else {
+                                            dayButton(date, width: cellWidth)
+                                        }
                                     }
                                 }
                                 VStack(spacing: 0) {
@@ -428,6 +432,33 @@ private struct TimePollGrid: View {
         }
         .onChange(of: results) { _, _ in clearPreview() }
         .onDisappear { clearPreview() }
+    }
+
+    private func dayButton(_ date: String, width: CGFloat) -> some View {
+        let slots = Set(poll.slots.filter { $0.date == date }.map(\.id))
+        let allSelected = !slots.isEmpty && slots.isSubset(of: selected)
+        let partlySelected = !allSelected && !slots.isDisjoint(with: selected)
+        return Button {
+            apply(allSelected ? selected.subtracting(slots) : selected.union(slots))
+        } label: {
+            HStack(spacing: 4) {
+                Text(dateLabel(date)).multilineTextAlignment(.center)
+                Image(systemName: allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle")
+            }
+            .font(.caption.weight(.semibold))
+            .frame(width: width - 6, height: headerHeight - 4)
+            .background(allSelected ? SideSeatTheme.ControlSelection.fill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
+            .overlay { RoundedRectangle(cornerRadius: 8).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }
+            .frame(width: width, height: headerHeight)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(slots.isEmpty || dragStart != nil)
+        .accessibilityLabel(dateLabel(date).replacingOccurrences(of: "\n", with: ", "))
+        .accessibilityValue(AppLocalization.string(allSelected ? "All times selected" : partlySelected ? "Some times selected" : "No times selected"))
+        .accessibilityHint(AppLocalization.string(allSelected ? "Deselect all times for this day" : "Select all times for this day"))
+        .accessibilityAddTraits(allSelected ? .isSelected : [])
+        .accessibilityIdentifier("time-poll-day-\(date)")
     }
 
     private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Slot]) {

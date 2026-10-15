@@ -18,6 +18,14 @@ preview. The most recent committed selection change can be undone once; Undo
 also uses the normal autosave queue. Cells are 44 points high, with adaptive
 separator borders. Accessibility activation still toggles an individual cell.
 
+In My availability, tapping a weekday/date header selects every candidate slot
+for that date within the plan's configured hours. A partially selected day becomes
+fully selected; tapping a fully selected day clears it. Other dates are preserved.
+The header shows empty, partial and full states, including accessible values and
+select/clear hints. This change uses the same one-step Undo and autosave queue.
+Group results keeps noninteractive date labels. This does not extend the poll's
+immutable time range or change anybody else's response.
+
 UIKit tap/long-press recognition arbitrates with the enclosing scroll views;
 the zero-distance SwiftUI drag that previously intercepted scrolling is removed.
 The slot model, 15-minute precision and response ownership are unchanged.

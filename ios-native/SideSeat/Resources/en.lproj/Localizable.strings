@@ -2546,3 +2546,11 @@
 "Edit nickname" = "Edit nickname";
 "Your name in this plan" = "Your name in this plan";
 "Synced to Sideseat calendars" = "Synced to Sideseat calendars";
+
+// Whole-day availability shortcut
+"Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically.";
+"All times selected" = "All times selected";
+"Some times selected" = "Some times selected";
+"No times selected" = "No times selected";
+"Deselect all times for this day" = "Deselect all times for this day";
+"Select all times for this day" = "Select all times for this day";
