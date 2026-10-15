@@ -2536,3 +2536,6 @@
 "Set a time" = "Zeit festlegen";
 
 "Time zone" = "Zeitzone";
+
+"Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically." = "Wische zum Scrollen. Tippe auf ein Feld oder halte es gedrückt und ziehe zum Auswählen. Änderungen werden automatisch gespeichert.";
+"Undo last change" = "Letzte Änderung rückgängig machen";

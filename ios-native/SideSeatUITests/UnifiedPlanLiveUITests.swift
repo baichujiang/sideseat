@@ -200,7 +200,7 @@ import XCTest
     }
     private func paintHour() {
         let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-3"]
-        XCTAssertTrue(first.waitForExistence(timeout: 15)); first.press(forDuration: 0.15, thenDragTo: last)
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); first.press(forDuration: 0.6, thenDragTo: last)
         XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].waitForExistence(timeout: 20))
     }
     private func poll(_ n: Int) throws -> [String: Any] { try XCTUnwrap(call("/api/v1/time-polls/\(token)", auth: auth[n])["data"] as? [String: Any]) }

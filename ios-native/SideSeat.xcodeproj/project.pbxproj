@@ -64,6 +64,7 @@
 		3CBFB62CAF5F49D250BCC3CA /* CalendarLiveUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B4F7AFF1F2EEF950896417 /* CalendarLiveUITests.swift */; };
 		3DF4DD4F4C5097FC12CDC8BC /* DirectChatPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56511EF60D953582EB93A5E /* DirectChatPlaceholderView.swift */; };
 		3F1B2DFD7BA2F4E51FEE91F2 /* DiscoverCityPreferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F420D7045FA8264D98B094 /* DiscoverCityPreferenceTests.swift */; };
+		3FB7B97B227A7F2B1B124BAA /* AvailabilityGestureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCB595CA475FBE1636C29DD /* AvailabilityGestureUITests.swift */; };
 		4118D58DE1DA24C71026E48F /* HomeWeekWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75118340767EE65354F2967E /* HomeWeekWindow.swift */; };
 		418D083E4E1F97044CB4D155 /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD784401C3E398DA91867FFB /* StoreKitManager.swift */; };
 		41FCBDB76E5ED049AD61B259 /* AccessibilityAuditUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B28E7A928C47B3A2885B16D /* AccessibilityAuditUITests.swift */; };
@@ -246,6 +247,7 @@
 		19A675FE957FB469D2AEDEFB /* GroupInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInfoView.swift; sourceTree = "<group>"; };
 		1A416AF70202E49A8A019030 /* CalendarCategoryModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarCategoryModelsTests.swift; sourceTree = "<group>"; };
 		1AAAEC305E145814C51CDE9B /* DiscoverCityPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverCityPreference.swift; sourceTree = "<group>"; };
+		1DCB595CA475FBE1636C29DD /* AvailabilityGestureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailabilityGestureUITests.swift; sourceTree = "<group>"; };
 		1F214C2F712C9A6079E5D9B9 /* ContactsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsStore.swift; sourceTree = "<group>"; };
 		1F64CDB3CE97C3E2B027F55A /* CalendarImageInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarImageInput.swift; sourceTree = "<group>"; };
 		22C8CE032ACEB321C2797799 /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
@@ -607,6 +609,7 @@
 			children = (
 				9B28E7A928C47B3A2885B16D /* AccessibilityAuditUITests.swift */,
 				6432CCCAF6CC10DF7090C564 /* AuthenticationUITests.swift */,
+				1DCB595CA475FBE1636C29DD /* AvailabilityGestureUITests.swift */,
 				64B4F7AFF1F2EEF950896417 /* CalendarLiveUITests.swift */,
 				2994C3E92F406A2707D7361E /* CoursesLiveUITests.swift */,
 				7301DBAEBCC79573895478FE /* LiveLoginSmokeUITests.swift */,
@@ -1314,6 +1317,7 @@
 			files = (
 				41FCBDB76E5ED049AD61B259 /* AccessibilityAuditUITests.swift in Sources */,
 				4BB80E77BDC66779A686C5E4 /* AuthenticationUITests.swift in Sources */,
+				3FB7B97B227A7F2B1B124BAA /* AvailabilityGestureUITests.swift in Sources */,
 				3CBFB62CAF5F49D250BCC3CA /* CalendarLiveUITests.swift in Sources */,
 				AC6F7D9A2E2AD631C9A90C7B /* CoursesLiveUITests.swift in Sources */,
 				9210AB46B48F229A8BD52454 /* LiveLoginSmokeUITests.swift in Sources */,

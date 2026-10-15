@@ -19,7 +19,9 @@ downward dismissal returns to Plans. Successful creation shows the new plan's
 details in that same sheet; Done returns to Plans.
 
 For collection, select candidate dates and daily hours; the creation time zone
-fixes the actual instants. Drag 15-minute rectangles to paint or erase availability.
+fixes the actual instants. Swipe over the grid to scroll, tap to toggle one
+15-minute cell, or hold briefly before dragging to paint/erase a rectangle.
+Undo reverses the last selection change. A normal swipe does not edit availability.
 Autosave shows Saving / Saved / retryable error; one account owns one response,
 including an explicit empty response. Results retain the heatmap and show whole
 activity-duration windows. Until the requested five respond, label responses as

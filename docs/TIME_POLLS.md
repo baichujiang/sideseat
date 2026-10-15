@@ -4,8 +4,24 @@ Owner decision: 2026-10-15. Supersedes the original-page embedding in Preview 98
 
 SwiftUI creation, 15-minute rectangular paint/erase, immediate preview, automatic
 save, participant heatmap and best windows are implemented by Sideseat. No
-When2meet source code or save service is used. The mature interaction mechanism
-is retained; Sideseat account authentication replaces provider name/password login.
+When2meet source code or save service is used. Sideseat account authentication
+replaces provider name/password login.
+
+## Mobile selection
+
+Ordinary vertical and horizontal swipes over the cells scroll without editing.
+A tap changes one 15-minute cell. Hold for 0.4 seconds for light feedback, then
+drag to preview a rectangular range; release applies it and starts autosave.
+Starting on an available cell erases the range. A cancelled gesture discards the
+preview. The most recent committed selection change can be undone once; Undo
+also uses the normal autosave queue. Cells are 44 points high, with adaptive
+separator borders. Accessibility activation still toggles an individual cell.
+
+UIKit tap/long-press recognition arbitrates with the enclosing scroll views;
+the zero-distance SwiftUI drag that previously intercepted scrolling is removed.
+The slot model, 15-minute precision and response ownership are unchanged.
+
+## Data and saving
 
 API: `GET/POST /api/v1/time-polls`, `GET/DELETE /api/v1/time-polls/{token}`,
 `PUT /api/v1/time-polls/{token}/response`. Contract: `openapi/v1.json`.

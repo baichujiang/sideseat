@@ -51,7 +51,7 @@ import XCTest
             setName("Person \(index + 1)")
             let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-3"]
             XCTAssertTrue(first.waitForExistence(timeout: 10))
-            first.press(forDuration: 0.15, thenDragTo: last)
+            first.press(forDuration: 0.6, thenDragTo: last)
             waitSaved()
             app.buttons["time-poll-cell-\(4 + index)"].tap()
             waitSaved()
@@ -67,7 +67,7 @@ import XCTest
         XCTAssertEqual(summary["maximum"] as? Int, 5); XCTAssertEqual(summary["common"] as? Bool, true)
 
         app.buttons["My availability"].tap()
-        app.buttons["time-poll-cell-0"].press(forDuration: 0.15, thenDragTo: app.buttons["time-poll-cell-3"])
+        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-3"])
         waitSaved()
         showResults()
         XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
@@ -109,7 +109,7 @@ import XCTest
             app.terminate(); _ = try? call("/api/v1/time-polls/\(token)", method: "DELETE", auth: ownerAuth)
         } }
         launch(auth); openInvite()
-        app.buttons["time-poll-cell-0"].press(forDuration: 0.15, thenDragTo: app.buttons["time-poll-cell-35"])
+        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-35"])
         waitSaved()
         XCTAssertEqual(try poll(auth: ownerAuth)["mySlotIds"] as? [Int], [0, 1, 2, 3, 32, 33, 34, 35])
         let header = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Oct 16")).firstMatch
