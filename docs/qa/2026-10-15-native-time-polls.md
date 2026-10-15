@@ -33,3 +33,60 @@ PostgreSQL poll/response → native selection, autosave, attendance results → 
 
 Backend release and physical-device completion are recorded in
 [Preview 99 release](../releases/2026-10-15-preview99-native-time-polls.md).
+
+## Initial physical Preview 99 validation
+
+- Installed and normally launched Preview 99 on iPhone 16 Pro Max / iOS 26.0.1.
+- Five-account native UI flow passed in 191.232 seconds, 0 failures: native create,
+  name entry, rectangular paint, single cell, erase, actual autosave acknowledgements,
+  5/5 common hour, 4/5 best hour, then full app termination and each account's own
+  recent-poll reopen. All selected cells, names and group results matched the API.
+  Copy link / Share poll controls were visible in the native menu.
+- A separate physical case passed in 31.201 seconds: five candidate dates,
+  rectangular selection spanning two dates, horizontal scrolling with time labels
+  kept visible, vertical scrolling without altering selection, Chinese/dark results.
+- Final result bundles: `/tmp/sideseat-native-poll-phone99-3.xcresult` and the
+  multiple-date case in `/tmp/sideseat-native-poll-phone99-2.xcresult`.
+- Physical preparation failures remain recorded: runner-only project initially
+  instantiated XCUIApplication without an explicit target, so no business test ran.
+  The next five-person run completed all data assertions but its last menu tap was
+  intercepted by a system notification banner. It is not counted as a passed case.
+  The final test dismisses an existing banner and waits for the menu; its rerun
+  passed. No app source or installed app was replaced for these harness repairs.
+- Candidate and promoted production each passed the five-account HTTP/storage
+  smoke, native browser handoff and config/AASA/privacy/support checks. The final
+  candidate was promoted as-is; no deployment protection was disabled.
+- Both physical screenshots and the delivery receipt were reviewed. All five
+  temporary accounts were deleted; their polls were already deleted by teardown.
+  The app was relaunched with no QA arguments; Build 99 and PID 30057 were read
+  back from the device. Owner Keychain credentials use the normal path again.
+
+QA harness source: `de0f312ac1638e88fb3852864f6f6bd19d331770`, pushed to the current branch. The installed
+app source is `5cbba4df77b2683bd4cd3a528125f158a9278310`.
+
+Evidence: [delivery receipt](./evidence/2026-10-15-native-time-polls/delivery.json),
+[5/5](./evidence/2026-10-15-native-time-polls/phone/five-common.png),
+[4/5](./evidence/2026-10-15-native-time-polls/phone/four-best.png),
+[Chinese dark multi-date view](./evidence/2026-10-15-native-time-polls/phone/chinese-dark-multiple-dates.png).
+
+## Final account-scope repair
+
+A queued autosave could outlive its original session. The final client captures
+both login generation and account ID, drops queued work on an account change,
+and prevents unauthorized JSON requests from refreshing/retrying under a new
+account. The regression suspends the old request, switches accounts, then releases
+both a successful response and a 401; only the original write occurs and no new
+account refresh is attempted. All 16 time-poll/authentication tests passed,
+including ordinary authorized-write refresh and shared concurrent refresh.
+Result: `/tmp/sideseat-native-poll-account-scope-complete.xcresult`.
+Source: `02300a46027c8f0a1952561098f0169d98cbe9be`, committed and pushed. The final
+physical retest and receipt below supersede the initial client-source receipt.
+
+Final account-scoped client physical rerun: **2 passed, 0 failures**. The five-person
+case took 194.015 seconds and the multi-date Chinese/dark case 31.213 seconds.
+Both are in `/tmp/sideseat-native-poll-phone99-final.xcresult`; screenshots and
+`delivery.json` have been replaced with this final source's evidence. Normal launch
+has no test arguments, Build 99 and PID 30126 confirmed. Both temporary
+five-account sets have been removed. Task-only local server/database were stopped
+and the isolated test database removed. No owner credentials or real poll data
+were deleted.

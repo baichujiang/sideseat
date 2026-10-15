@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-15",
+  "timeZone": "Europe/Berlin",
+  "nativeSourceCommit": "02300a46027c8f0a1952561098f0169d98cbe9be",
+  "featureCommit": "05307e46983f5050c47037ff5dd0eda0874c8fec",
+  "sourcePushed": true,
+  "backendDeployment": "dpl_7osq5AhK8d7Bsxh3hs2tQUHE4vRi",
+  "backendReady": true,
+  "apiAndWebDomainsVerified": true,
+  "backendOverlayFiles": 13,
+  "migration": "20261015093000_native_time_polls",
+  "migrationAppliedOnce": true,
+  "appliedMigrationsAfter": 148,
+  "logicalBackup": {
+    "tables": 98,
+    "rows": 29710,
+    "compressedBytes": 1381165,
+    "sha256": "acf2c8d7468e3248d2098dcb3a0a1f77ff459c7b0f3be1ade356f63c98bd476d",
+    "restoreRehearsed": false
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "99",
+  "apiBaseURL": "https://api.sideseat.de",
+  "device": "iPhone 16 Pro Max",
+  "deviceOS": "26.0.1",
+  "signatureVerified": true,
+  "installed": true,
+  "normalLaunchArguments": [],
+  "normalLaunchPID": 30126,
+  "runningPIDConfirmed": true,
+  "binarySHA256": "f52172db5acc120327ce56ba37508e871d2b5228cc064ac7e9b2170f483524d7",
+  "physicalTests": [
+    {
+      "name": "five accounts create/paint/erase/reopen/share controls",
+      "passed": true,
+      "seconds": 194.015,
+      "resultBundle": "/tmp/sideseat-native-poll-phone99-final.xcresult"
+    },
+    {
+      "name": "multiple dates/rectangle/scroll/Chinese dark appearance",
+      "passed": true,
+      "seconds": 31.213,
+      "resultBundle": "/tmp/sideseat-native-poll-phone99-final.xcresult"
+    }
+  ],
+  "qaUsesEphemeralCredentials": true,
+  "ownerKeychainReplaced": false,
+  "testFlightOrAppStoreUploaded": false,
+  "qaHarnessCommit": "de0f312ac1638e88fb3852864f6f6bd19d331770",
+  "qaAccountsRemoved": 5,
+  "qaAccountsRemaining": 0,
+  "qaPollsBeforeAccountCleanup": 0,
+  "initialNativeSourceCommit": "5cbba4df77b2683bd4cd3a528125f158a9278310",
+  "authenticationAndPollTestsPassed": 16,
+  "accountSwitchSuccessAnd401Verified": true,
+  "totalTemporaryQAAccountsRemoved": 10
+}

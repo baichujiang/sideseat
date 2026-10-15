@@ -1,0 +1,30 @@
+{
+  "base": "https://api.sideseat.de",
+  "passed": true,
+  "checks": [
+    {
+      "route": "/api/v1/client-config",
+      "status": 200
+    },
+    {
+      "route": "/.well-known/apple-app-site-association",
+      "status": 200
+    },
+    {
+      "route": "/privacy",
+      "status": 200
+    },
+    {
+      "route": "/support",
+      "status": 200
+    },
+    {
+      "flow": "five accounts create/paint/erase/reopen",
+      "common": 5,
+      "best": 4,
+      "respondents": 5,
+      "idempotent": true,
+      "privateBrowserHandoff": true
+    }
+  ]
+}
