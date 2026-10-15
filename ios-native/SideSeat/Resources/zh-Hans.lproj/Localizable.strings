@@ -2565,3 +2565,5 @@
 "Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "每格 30 分钟。滑动可滚动，点日期选全天；点按或长按拖选，修改自动保存。";
 
 "Partially selected" = "部分已选";
+
+"Availability saved" = "已保存";

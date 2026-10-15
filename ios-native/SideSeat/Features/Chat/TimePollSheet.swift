@@ -278,7 +278,7 @@ struct TimePollDetailView: View {
 
     @ViewBuilder private var saveStatus: some View {
         if store.saving { ProgressView().controlSize(.small); Text("Saving…").font(.caption) }
-        else if store.saved { Label("Saved", systemImage: "checkmark.circle").font(.caption).foregroundStyle(SideSeatTheme.statusSuccessText).accessibilityIdentifier("time-poll-saved") }
+        else if store.saved { Label("Availability saved", systemImage: "checkmark.circle").font(.caption).foregroundStyle(SideSeatTheme.statusSuccessText).accessibilityIdentifier("time-poll-saved") }
     }
 
     private func summary(_ poll: NativeTimePoll) -> some View {

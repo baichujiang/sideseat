@@ -95,11 +95,13 @@ import XCTest
         launch(language: "zh-Hans"); openPlan(tab: "计划")
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         XCTAssertEqual(day.value as? String, "已选中当天全部时段")
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].label.contains("已保存"))
         capture("day-reopened-chinese")
         app.terminate()
         launch(language: "zh-Hans", appearance: "dark"); openPlan(tab: "计划")
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         XCTAssertEqual(day.value as? String, "已选中当天全部时段")
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].label.contains("已保存"))
         capture("day-dark-chinese")
     }
 
