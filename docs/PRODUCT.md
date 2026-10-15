@@ -35,16 +35,18 @@ Plans owns manual coordination from availability collection through individual
 confirmation and Calendar projection. A creator can collect availability first or
 choose a concrete time directly. Both routes use one shared plan and the same
 invitation, confirmation and cancellation lifecycle. Native SwiftUI and Sideseat's
-API/database retain the mature 15-minute paint/erase, autosave and attendance
+API/database retain 30-minute paint/erase over existing quarter-hour storage, autosave and attendance
 heatmap mechanism; provider pages, advertisements and storage are excluded.
 
-Availability is input, never acceptance. For a five-person collection, show a
-common complete-duration window only after all five respond; otherwise recommend
-the complete-duration windows with the highest attendance. The creator explicitly
-selects a time and invitees; sending confirms the creator's participation. Every
+**2026-10-16 timetable amendment:** Availability is input, never acceptance.
+Collection shows the complete availability heatmap and response progress, without
+common-time or maximum-attendance recommendation cards. Creating a collection does
+not require an activity duration. Friends can decide to spend half a day or a full
+day together from the timetable. The creator explicitly chooses start/end and
+invitees; sending confirms the creator's participation. Every
 selected invitee must explicitly accept that invitation version before the same
-plan appears in each selected registered person's Sideseat Calendar. A maximum-attendance result
-never silently includes an unavailable person. Declines remain pending; choosing
+plan appears in each selected registered person's Sideseat Calendar. The timetable
+does not automatically choose the activity duration or roster. Declines remain pending; choosing
 a new time/roster resets acceptance. Cancellation removes Calendar projections.
 
 The owner also approved browser guest participation on 2026-10-15: invite-link

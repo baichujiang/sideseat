@@ -85,7 +85,7 @@ import XCTest
         }
         XCTAssertTrue(webName().waitForExistence(timeout: 30), "The share link must open a guest form in Safari")
         webName().tap(); webName().typeText("Guest Lin")
-        webButton("Join this plan", "开始参与").tap()
+        webButton("Start or continue", "开始 / 继续填写").tap()
         // The share page uses the same 30-minute grid as Preview 106.
         let firstCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
         let lastCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
@@ -113,7 +113,7 @@ import XCTest
         let names = app.staticTexts["time-poll-participants"]
         expectation(for: NSPredicate(format: "label CONTAINS %@", "Lin Xia (Guest)"), evaluatedWith: names)
         waitForExpectations(timeout: 20)
-        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Everyone can attend")
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
         attach("safari-guest-results")
         app.buttons["unified-plan-invite-window"].firstMatch.tap()
         let send = app.buttons["unified-plan-send-invitations"]
@@ -234,17 +234,17 @@ import XCTest
         paintHour()
         for n in 1..<5 { loginUI(n); openLink(); paintHour() }
         app.buttons["Group results"].tap()
-        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Everyone can attend")
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
         attach("five-common")
         app.buttons["My availability"].tap(); paintHour()
         app.buttons["Group results"].tap()
-        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
         XCTAssertTrue(app.staticTexts["4 of 5 available"].exists)
         attach("four-person-recommendation")
         app.buttons["My availability"].tap(); paintHour()
         loginUI(0); tab("Plans"); openPlanCard()
         app.buttons["Group results"].tap()
-        let invite = app.buttons.matching(NSPredicate(format: "identifier == %@ OR label == %@", "unified-plan-invite-window", "Use this time to invite")).firstMatch
+        let invite = app.buttons.matching(NSPredicate(format: "identifier == %@ OR label == %@", "unified-plan-invite-window", "Choose time and invite")).firstMatch
         XCTAssertTrue(invite.waitForExistence(timeout: 15)); invite.tap()
         let send = app.buttons["unified-plan-send-invitations"]
         for _ in 0..<3 where !send.isHittable { app.swipeUp() }

@@ -22262,25 +22262,33 @@ internal enum Components {
             internal var attendeeIds: [Swift.String]
             /// - Remark: Generated from `#/components/schemas/SendPollInvitationsRequest/version`.
             internal var version: Swift.Int
+            /// Explicit end chosen by the creator; supports half-day/full-day ranges. If omitted, older clients keep the stored duration or 60-minute fallback.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendPollInvitationsRequest/end`.
+            internal var end: Foundation.Date?
             /// Creates a new `SendPollInvitationsRequest`.
             ///
             /// - Parameters:
             ///   - start:
             ///   - attendeeIds:
             ///   - version:
+            ///   - end: Explicit end chosen by the creator; supports half-day/full-day ranges. If omitted, older clients keep the stored duration or 60-minute fallback.
             internal init(
                 start: Foundation.Date,
                 attendeeIds: [Swift.String],
-                version: Swift.Int
+                version: Swift.Int,
+                end: Foundation.Date? = nil
             ) {
                 self.start = start
                 self.attendeeIds = attendeeIds
                 self.version = version
+                self.end = end
             }
             internal enum CodingKeys: String, CodingKey {
                 case start
                 case attendeeIds
                 case version
+                case end
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -22296,10 +22304,15 @@ internal enum Components {
                     Swift.Int.self,
                     forKey: .version
                 )
+                self.end = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .end
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "start",
                     "attendeeIds",
-                    "version"
+                    "version",
+                    "end"
                 ])
             }
         }

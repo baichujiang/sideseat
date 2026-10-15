@@ -2566,3 +2566,13 @@
 "Partially selected" = "Teilweise ausgewählt";
 
 "Availability saved" = "Gespeichert";
+
+"Group timetable" = "Gemeinsamer Zeitplan";
+
+"Choose time and invite" = "Zeit wählen und einladen";
+
+"Collect availability first. Decide the activity's start and end together after viewing the timetable." = "Sammelt zuerst die Verfügbarkeiten. Legt Beginn und Ende der Aktivität anschließend gemeinsam anhand des Zeitplans fest.";
+
+"Choose the hours you want to spend together, including half a day or a full day." = "Wählt die Zeit, die ihr gemeinsam verbringen möchtet – auch einen halben oder ganzen Tag.";
+
+"Darker cells mean more people are available. Numbers show attendance per slot." = "Je dunkler das Feld, desto mehr Personen haben Zeit. Die Zahlen zeigen die Verfügbarkeit je Zeitfenster.";

@@ -11,21 +11,62 @@ struct UnifiedPlanInviteView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     let poll: NativeTimePoll
-    let window: NativeTimePoll.Window
     @Bindable var store: TimePollStore
+    @State private var date: String
+    @State private var starts: Date
+    @State private var ends: Date
     @State private var selected: Set<String>
 
-    init(poll: NativeTimePoll, window: NativeTimePoll.Window, store: TimePollStore) {
-        self.poll = poll; self.window = window; self.store = store
-        _selected = State(initialValue: Set(window.attendeeIds).union(poll.participants.filter(\.isMe).map(\.id)))
+    init(poll: NativeTimePoll, store: TimePollStore) {
+        self.poll = poll; self.store = store
+        let date = poll.slots.first(where: { $0.start == poll.chosenStart })?.date ?? poll.dates.first ?? ""
+        let cells = poll.cells.filter { $0.date == date }
+        let start = cells.first(where: { $0.slots[0].start == poll.chosenStart })?.slots[0].start ?? cells.first?.slots[0].start ?? Date()
+        let end = cells.first(where: { $0.end == poll.chosenEnd && $0.end > start })?.end ?? cells.last?.end ?? start
+        _date = State(initialValue: date); _starts = State(initialValue: start); _ends = State(initialValue: end)
+        _selected = State(initialValue: Set(poll.participants.map(\.id)))
+    }
+
+    private var cells: [NativeTimePoll.Cell] { poll.cells.filter { $0.date == date } }
+    private var rangeIds: Set<Int> {
+        Set(poll.slots.filter { $0.date == date && $0.start >= starts && $0.end <= ends }.map(\.id))
+    }
+    private func available(_ person: NativeTimePoll.Participant) -> Bool {
+        !rangeIds.isEmpty && rangeIds.isSubset(of: Set(person.slotIds))
+    }
+    private func endLabel(_ cell: NativeTimePoll.Cell) -> String {
+        if let next = cells.first(where: { $0.slots[0].start == cell.end }) { return next.label }
+        return poll.endMinute == 1440 ? "24:00" : timePollClockFormatter(poll.timeZone).string(from: cell.end)
     }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section(poll.title) {
-                    Text(unifiedPlanTimeLabel(start: window.start, end: invitationEnd, timeZone: poll.timeZone))
+                    Text(unifiedPlanTimeLabel(start: starts, end: ends, timeZone: poll.timeZone))
+                        .accessibilityIdentifier("unified-plan-chosen-range")
                     if let location = poll.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
+                }
+                Section("Choose the time") {
+                    Picker("Date", selection: Binding(get: { date }, set: { value in
+                        date = value
+                        let day = poll.cells.filter { $0.date == value }
+                        starts = day.first?.slots[0].start ?? starts; ends = day.last?.end ?? ends
+                    })) {
+                        ForEach(poll.dates, id: \.self) { Text(timePollDateLabel($0).replacingOccurrences(of: "\n", with: " ")).tag($0) }
+                    }.accessibilityIdentifier("unified-plan-invite-date")
+                    Picker("From", selection: Binding(get: { starts }, set: { value in
+                        starts = value
+                        if ends <= value { ends = cells.first(where: { $0.end > value })?.end ?? ends }
+                    })) {
+                        ForEach(cells) { Text($0.label).tag($0.slots[0].start) }
+                    }.accessibilityIdentifier("unified-plan-invite-from")
+                    Picker("Until", selection: $ends) {
+                        ForEach(cells.filter { $0.end > starts }) { Text(endLabel($0)).tag($0.end) }
+                    }.accessibilityIdentifier("unified-plan-invite-until")
+                    LabeledContent("Time zone", value: poll.timeZone)
+                    Text("Choose the hours you want to spend together, including half a day or a full day.")
+                        .font(.footnote).foregroundStyle(.secondary)
                 }
                 Section("Choose who to invite") {
                     ForEach(poll.participants) { person in
@@ -37,7 +78,7 @@ struct UnifiedPlanInviteView: View {
                                 VStack(alignment: .leading) {
                                     Text(person.displayName).foregroundStyle(SideSeatTheme.textPrimary)
                                     if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
-                                    Text(window.attendeeIds.contains(person.id) ? "Available for the full activity" : "Not available for the full activity")
+                                    Text(available(person) ? "Available for the full activity" : "Not available for the full activity")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                             }.frame(minHeight: 44)
@@ -53,13 +94,13 @@ struct UnifiedPlanInviteView: View {
                 Section {
                     Button {
                         Task {
-                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: window.start), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
+                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: starts), end: ISO8601DateFormatter().string(from: ends), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
                             if store.error == nil && store.poll?.planningPhase == "INVITING" { dismiss() }
                         }
                     } label: {
                         if store.acting { ProgressView() } else { Text("Send invitations") }
                     }
-                    .disabled(!store.canMutate || !poll.participants.contains { !($0.isMe) && selected.contains($0.id) })
+                    .disabled(!store.canMutate || ends <= starts || !poll.participants.contains { !($0.isMe) && selected.contains($0.id) })
                     .accessibilityIdentifier("unified-plan-send-invitations")
                 }
             }
@@ -67,7 +108,6 @@ struct UnifiedPlanInviteView: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(store.acting) } }
         }.tint(SideSeatTheme.utilityAction)
     }
-    private var invitationEnd: Date { window.start.addingTimeInterval(Double(poll.durationMinutes ?? 60) * 60) }
 }
 
 struct UnifiedPlanConfirmationView: View {

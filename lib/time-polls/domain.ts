@@ -31,9 +31,10 @@ export type PollWindow = { start: string; end: string; attendeeIds: string[]; co
 
 export const sendPollInvitationsSchema = z.object({
   start: z.string().datetime(),
+  end: z.string().datetime().optional(),
   attendeeIds: z.array(z.string().min(1).max(100)).min(1).max(20),
   version: z.number().int().min(0),
-}).strict();
+}).strict().refine((value) => !value.end || new Date(value.end) > new Date(value.start), { path: ["end"], message: "End time must follow start time." });
 export const respondPollInvitationSchema = z.object({
   status: z.enum(["ACCEPTED", "DECLINED"]),
   version: z.number().int().min(1),

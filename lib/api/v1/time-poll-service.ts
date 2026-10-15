@@ -122,7 +122,7 @@ export async function sendPollInvitations(token: string, userId: string, input: 
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
     if (!["COLLECTING", "INVITING"].includes(poll.phase) || poll.invitationVersion !== input.version || poll.planningMode === "FIXED") throw new TimePollError(409, "This plan changed. Reopen it before sending an invitation.");
-    const start = new Date(input.start), end = new Date(start.getTime() + (poll.durationMinutes ?? 60) * 60_000);
+    const start = new Date(input.start), end = input.end ? new Date(input.end) : new Date(start.getTime() + (poll.durationMinutes ?? 60) * 60_000);
     if (start <= new Date()) throw new TimePollError(422, "Choose a future start time.");
     const range = (poll.slots as unknown as PollSlot[]).filter((s) => s.start >= start.toISOString() && s.end <= end.toISOString());
     if (!range.length || range[0].start !== start.toISOString() || range.at(-1)!.end !== end.toISOString() || range.some((s, i) => i > 0 && range[i - 1].end !== s.start)) throw new TimePollError(422, "Choose a complete activity window from this poll.");

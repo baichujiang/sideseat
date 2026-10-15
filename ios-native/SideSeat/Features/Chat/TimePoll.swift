@@ -133,6 +133,7 @@ struct CreateTimePollRequest: Encodable, Sendable {
 
 struct SendPollInvitationsRequest: Encodable, Sendable {
     let start: String
+    var end: String? = nil
     let attendeeIds: [String]
     let version: Int
 }

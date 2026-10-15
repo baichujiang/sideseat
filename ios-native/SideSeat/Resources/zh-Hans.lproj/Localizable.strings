@@ -2567,3 +2567,13 @@
 "Partially selected" = "部分已选";
 
 "Availability saved" = "已保存";
+
+"Group timetable" = "大家的时间表";
+
+"Choose time and invite" = "选择时间并邀请";
+
+"Collect availability first. Decide the activity's start and end together after viewing the timetable." = "先收集大家有空的时间，看完时间表再一起决定活动的起止时间。";
+
+"Choose the hours you want to spend together, including half a day or a full day." = "按大家商量的安排选择起止时间，半天、一天都可以。";
+
+"Darker cells mean more people are available. Numbers show attendance per slot." = "颜色越深，有空的人越多。数字是每个时段的可用人数。";

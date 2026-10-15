@@ -12,9 +12,10 @@ PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.
 
-- COLLECTING: immutable candidate slots, one autosaved response/account or browser guest. Duration
-  recommendations intersect the same attendees across every consecutive slot of
-  the complete window. Expected but missing respondents prevent `common=true`.
+- COLLECTING: immutable candidate slots, one autosaved response/account or browser guest.
+  The complete heatmap and response count are primary. No duration is required,
+  and no common-time/maximum-attendance cards are shown. The older summary/window
+  fields remain compatible for existing clients.
 - INVITING: a chosen future start/end and explicit roster. Creator send is explicit
   acceptance; each other selected person accepts or declines. For FIXED,
   link holders can join until the target count is filled. Declining that open link
@@ -30,8 +31,9 @@ not imported into manual plans. Discovery Pod and archived code remain disabled.
 
 Before confirmation, COLLECT creators may resend another time/roster. Version
 increments, other participants reset to INVITED, and stale responses return 409.
-Availability is frozen after the first invitation. A recommendation can be sent to
-an explicitly reviewed roster; heatmap availability alone is never acceptance.
+Availability is frozen after the first invitation. The creator manually selects
+start/end and reviews the roster; half-day and full-day ranges are supported.
+Heatmap availability alone is never acceptance.
 
 ## API and data ownership
 
@@ -40,7 +42,7 @@ Existing `GET/POST /api/v1/time-polls`, `GET/DELETE /{token}` and
 
 | Method/path | Behavior |
 | --- | --- |
-| POST `/invitations` | Owner selects future complete window, response IDs, current version |
+| POST `/invitations` | Owner selects future start and explicit end, response IDs, current version; omitted end retains the legacy duration/60-minute fallback |
 | PUT `/invitation-response` | Authenticated viewer accepts/declines current version |
 | POST `/cancel` | Owner cancels current version and removes projections |
 

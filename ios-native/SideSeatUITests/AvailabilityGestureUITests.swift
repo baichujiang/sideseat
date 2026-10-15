@@ -24,6 +24,60 @@ import XCTest
 
     override func tearDown() async throws { await MainActor.run { app?.terminate() } }
 
+    func testTimetableResultsAndManualHalfDayInvitation() throws {
+        let raw = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_TIMETABLE_HALF_DAY_POLL"])
+        pollToken = raw
+        launch(language: "zh-Hans"); openPlan(tab: "计划")
+        app.buttons["大家的结果"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "大家的时间表")
+        XCTAssertFalse(app.staticTexts["人数最多的时间"].exists)
+        XCTAssertFalse(app.staticTexts["所有人都方便的时间"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-cell-0"].label.hasSuffix(", 2"))
+        capture("timetable-results")
+        app.buttons["unified-plan-invite-window"].tap()
+        XCTAssertTrue(app.buttons["unified-plan-invite-from"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["unified-plan-invite-until"].label.contains("21:00"))
+        app.buttons["unified-plan-invite-until"].tap()
+        app.buttons["13:00"].tap()
+        XCTAssertTrue(app.buttons["unified-plan-invite-until"].label.contains("13:00"))
+        capture("manual-half-day")
+        sendManualInvitation()
+    }
+
+    func testManualFullDayInvitationInDarkMode() throws {
+        pollToken = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_TIMETABLE_FULL_DAY_POLL"])
+        launch(language: "zh-Hans", appearance: "dark"); openPlan(tab: "计划")
+        app.buttons["大家的结果"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "大家的时间表")
+        app.buttons["unified-plan-invite-window"].tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-chosen-range"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["unified-plan-invite-from"].label.contains("09:00"))
+        XCTAssertTrue(app.buttons["unified-plan-invite-until"].label.contains("21:00"))
+        capture("manual-full-day-dark")
+        sendManualInvitation()
+    }
+
+    func testCollectCreationDoesNotRequireActivityDuration() {
+        launch(language: "zh-Hans")
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-create-unified"].tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.descendants(matching: .any)["unified-plan-duration"].exists)
+        title.tap(); title.typeText("QA108 Timetable creation\n")
+        capture("collect-without-duration")
+        app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, "QA108 Timetable creation")
+    }
+
+    private func sendManualInvitation() {
+        let send = app.buttons["unified-plan-send-invitations"]
+        for _ in 0..<4 where !send.isHittable { app.swipeUp() }
+        XCTAssertTrue(send.isHittable); send.tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-confirmation-count"].waitForExistence(timeout: 20))
+        capture("manual-invitation-sent")
+    }
+
     func testOrdinarySwipesScrollWithoutEditing() {
         pollToken = scrollPollToken
         openEmptyPoll()

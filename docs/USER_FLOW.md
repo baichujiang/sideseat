@@ -11,7 +11,7 @@
 ## Unified manual plans — owner-approved 2026-10-15
 
 **Plans → + → Create a plan** starts one shared plan. Enter title, optional place,
-duration and participant count (default five). Choose **Collect availability** or **Set a time**. The existing Messages coordination
+and participant count (default five). Choose **Collect availability** or **Set a time**; only the direct-time route asks for a duration. The existing Messages coordination
 entry and shared links open these same plans in the Plans tab.
 
 The Plans **+** opens the creation form directly in one sheet. One Cancel or
@@ -24,16 +24,18 @@ fixes the actual instants. Swipe over the grid to scroll, tap to toggle one
 Older quarter-hour selections remain visible as partial cells until explicitly edited.
 Undo reverses the last selection change. A normal swipe does not edit availability.
 Autosave shows Saving / Saved / retryable error; one account owns one response,
-including an explicit empty response. Results retain the heatmap and show whole
-activity-duration windows. Until the requested five respond, label responses as
-incomplete rather than declaring three of three to be everyone's common time.
-With all five responses, show common windows or maximum attendance. Availability
-must cover the entire suggested interval for each counted person.
+including an explicit empty response. Results show **Group timetable**, the full
+read-only heatmap and response count, without recommendation cards or a required
+activity duration. Each number counts people covering that full 30-minute cell.
+Friends use the table to decide the date and hours, including half a day or a full day.
 
-The creator selects **Use this time to invite**, reviews the explicit participant
-list and sends. The creator's send action confirms their own participation; other
+The creator selects **Choose time and invite**, chooses a date and start/end from
+the configured hours, reviews the explicit participant list and sends. The initial
+range covers the configured day, with no one-hour limit. Availability labels update
+for the chosen range; they do not automatically remove people from the reviewed roster.
+The creator's send action confirms their own participation; other
 selected people see **Confirm participation** / **Can't attend**. A four-person
-recommendation may invite four explicitly; the fifth remains outside the roster
+roster may invite four explicitly; the fifth remains outside the roster
 and receives no Calendar entry. Decline leaves the invitation pending. Before all
 accept, the creator may choose another time/roster; this increments the invitation
 version and requires new confirmations. Already confirmed plans can be cancelled.

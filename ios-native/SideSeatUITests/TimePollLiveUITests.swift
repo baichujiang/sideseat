@@ -59,8 +59,8 @@ import XCTest
             XCTAssertEqual(own["mySlotIds"] as? [Int], [0, 1, 2, 3, 4 + index * 2, 5 + index * 2])
         }
         showResults()
-        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Everyone can attend")
-        XCTAssertTrue(app.otherElements["time-poll-window-5"].exists || app.staticTexts.matching(NSPredicate(format: "label == %@", "5 of 5 available")).firstMatch.exists)
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-cell-0"].label.hasSuffix(", 5"))
         attach("five-common")
         let shared = try poll(auth: ownerAuth)
         let summary = try XCTUnwrap(shared["summary"] as? [String: Any])
@@ -70,8 +70,8 @@ import XCTest
         app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-2"])
         waitSaved()
         showResults()
-        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label == %@", "4 of 5 available")).firstMatch.exists)
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-cell-0"].label.hasSuffix(", 4"))
         attach("four-best")
 
         for index in 0..<5 {
@@ -89,8 +89,8 @@ import XCTest
             let reopened = try poll(auth: auth.token)
             XCTAssertEqual(reopened["mySlotIds"] as? [Int], expected)
             showResults()
-            XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
-            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label == %@", "4 of 5 available")).firstMatch.exists)
+            XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Group timetable")
+            XCTAssertTrue(app.descendants(matching: .any)["time-poll-cell-0"].label.hasSuffix(", 4"))
         }
         let banner = XCUIApplication(bundleIdentifier: "com.apple.springboard").descendants(matching: .any)["NotificationShortLookView"].firstMatch
         if banner.exists { banner.swipeUp() }

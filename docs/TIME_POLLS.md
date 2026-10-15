@@ -39,7 +39,7 @@ a fully selected cell clears both, and Undo restores the exact original IDs.
 An old range ending on an odd quarter retains its shorter boundary cell. Groups
 never cross dates or discontinuous intervals; repeated DST rows keep their IDs.
 Heatmap counts require each person to be available throughout the whole displayed
-cell. Recommendations, invitation duration, and response ownership are unchanged.
+cell. The group result is the full timetable, without recommendation cards.
 New native collection-hour pickers use half-hour steps.
 
 ## Data and saving
@@ -56,11 +56,15 @@ Creator deletion/account deletion cascades through owned polls and responses.
 Dates, time range and IANA zone determine immutable UTC intervals. Selection is
 an array of slot IDs validated against those intervals. Repeated DST wall times
 have separate row IDs and offset labels. Responses with zero selected slots still
-count in the denominator. Legacy polls merge highest-attendance intervals only when the same people are
-available throughout. New plans specify a duration and expected count; their
-recommendations require the same attendees throughout that complete duration,
-and a common result requires the expected response count. Ties remain separate recommendations, ordered
-by date/time. With zero attendance, no recommendation is invented. Blocked creators
+count in the denominator. Collection does not require an activity duration. The
+full read-only heatmap and response count let friends decide when and how long to
+spend together. Common-time and maximum-attendance cards are removed from both
+current clients. Existing API summary/window fields remain for older clients;
+their original complete-duration and attendance intersection semantics are retained.
+The creator manually chooses a date, start/end and roster before inviting. The
+range initially covers that configured day; half/full-day ranges are supported.
+Explicit invitation end is persisted through confirmation and Calendar projection;
+omitting it keeps the older duration/60-minute fallback. Blocked creators
 are unavailable; blocked participants are excluded from visible data/statistics.
 
 The client binds each autosave queue to its original login generation, serializes
@@ -88,7 +92,7 @@ previews a rectangular paint/erase range, release commits, cancellation discards
 and the last change can be undone. Date headers select/clear their configured day
 without changing other dates. Teal/amber states use the native color values;
 the public page follows the browser's Light/Dark appearance. Group results shows
-the same recommendations and a read-only per-slot attendance heatmap.
+the same full timetable and a read-only per-slot attendance heatmap, with no recommendation cards.
 
 At desktop viewport widths of 1024 CSS pixels and above, the shared page expands
 to a maximum of 1440 pixels and gives the timetable the remaining width beside a
