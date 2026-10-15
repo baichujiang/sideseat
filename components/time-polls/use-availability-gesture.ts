@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 
-type Point = { column: number; row: number; id: number };
+type Point = { column: number; row: number; slotIds: number[] };
 type Drag = { start: Point; original: number[]; selecting: boolean; value: number[] };
 
 // Keep native scrolling until a deliberate hold. A non-passive DOM listener can
@@ -21,7 +21,7 @@ export function useAvailabilityGesture({ enabled, selected, position, rectangle,
   const begin = (x: number, y: number) => {
     const c = current.current, start = c.position(x, y, false);
     if (!c.enabled || !start) return false;
-    const selecting = !c.selected.includes(start.id);
+    const selecting = !start.slotIds.every((id) => c.selected.includes(id));
     const value = c.rectangle(start, start, c.selected, selecting);
     drag.current = { start, original: c.selected, selecting, value };
     setPreview(value); c.onEditingChange(true); return true;
@@ -84,10 +84,10 @@ export function useAvailabilityGesture({ enabled, selected, position, rectangle,
     };
   }, [enabled]);
   return { surface, preview,
-    onClick: (id: number, keyboard: boolean) => {
+    onClick: (ids: number[], keyboard: boolean) => {
       if (current.current.enabled && (keyboard || performance.now() >= suppressClickUntil.current)) {
         const value = current.current.selected;
-        current.current.onChange(value.includes(id) ? value.filter((item) => item !== id) : [...value, id]);
+        current.current.onChange(ids.every((id) => value.includes(id)) ? value.filter((item) => !ids.includes(item)) : [...new Set([...value, ...ids])]);
       }
     },
     onPointerDown: (event: PointerEvent<HTMLDivElement>) => {

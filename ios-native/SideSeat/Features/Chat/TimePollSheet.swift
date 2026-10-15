@@ -139,12 +139,12 @@ struct TimePollCreateView: View {
                 Text("Choose up to 31 dates.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Daily time range") {
-                Picker("From", selection: $startMinute) { ForEach(Array(stride(from: 0, to: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
+                Picker("From", selection: $startMinute) { ForEach(Array(stride(from: 0, to: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) } }
                     .accessibilityIdentifier("time-poll-from")
-                Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 15, through: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
+                Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) } }
                     .accessibilityIdentifier("time-poll-until")
                 LabeledContent("Time zone", value: TimeZone.current.identifier)
-                Text("Everyone sees the same dates and time zone. Each cell is 15 minutes.").font(.caption).foregroundStyle(.secondary)
+                Text("Everyone sees the same dates and time zone. Each cell is 30 minutes.").font(.caption).foregroundStyle(.secondary)
             }
             }
             if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
@@ -343,11 +343,14 @@ private struct TimePollGrid: View {
 
     var body: some View {
         let rows = poll.rows
-        let lookup = Dictionary(uniqueKeysWithValues: poll.slots.map { ("\($0.date)|\($0.row)", $0) })
+        let cells = poll.cells
+        let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
+        let participantSelections = poll.participants.map { Set($0.slotIds) }
+        let timeFormatter = timePollClockFormatter(poll.timeZone)
         VStack(spacing: SideSeatTheme.spaceSM) {
             if !results {
                 HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-                    Text("Swipe to scroll. Tap a day for all its times, or tap/hold cells to edit. Changes save automatically.")
+                    Text("Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically.")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 0)
                     Button {
@@ -366,7 +369,7 @@ private struct TimePollGrid: View {
                     Label { Text("Selected slots") } icon: {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill)
                     }
-                    Label { Text("Partial day") } icon: {
+                    Label { Text("Partially selected") } icon: {
                         Image(systemName: "minus.circle.fill").foregroundStyle(SideSeatTheme.Availability.onPartial)
                     }
                     Label("Unselected slots", systemImage: "circle")
@@ -405,20 +408,22 @@ private struct TimePollGrid: View {
                                         HStack(spacing: 0) {
                                             ForEach(poll.dates, id: \.self) { date in
                                                 if let slot = lookup["\(date)|\(row)"] {
-                                                    let count = poll.summary.counts[slot.id]
-                                                    let active = (preview ?? selected).contains(slot.id)
+                                                    let count = slot.availableCount(in: participantSelections)
+                                                    let active = slot.slotIds.isSubset(of: preview ?? selected)
+                                                    let partial = !active && !slot.slotIds.isDisjoint(with: preview ?? selected)
                                                     ZStack {
-                                                        Rectangle().fill(results ? SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, poll.summary.participantCount))) : active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.surface)
+                                                        Rectangle().fill(results ? SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, poll.summary.participantCount))) : active ? SideSeatTheme.Availability.selectedFill : partial ? SideSeatTheme.Availability.partialFill : SideSeatTheme.surface)
                                                         Rectangle().strokeBorder(active && !results ? SideSeatTheme.Availability.onSelected.opacity(0.3) : SideSeatTheme.separator, lineWidth: 0.5)
                                                         if results { Text("\(count)").font(.caption.monospacedDigit()).foregroundStyle(.primary) }
                                                         else if active { Image(systemName: "checkmark").font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.Availability.onSelected) }
+                                                        else if partial { Image(systemName: "minus").font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.Availability.onPartial) }
                                                     }.frame(width: cellWidth, height: cellHeight)
                                                     .accessibilityElement()
-                                                    .accessibilityLabel("\(date), \(slot.label), \(results ? String(count) : AppLocalization.string(active ? "Available" : "Unavailable"))")
+                                                    .accessibilityLabel("\(date), \(slot.label)–\(timeFormatter.string(from: slot.end)), \(results ? String(count) : AppLocalization.string(active ? "Available" : partial ? "Some times selected" : "Unavailable"))")
                                                     .accessibilityIdentifier("time-poll-cell-\(slot.id)")
                                                     .accessibilityAddTraits(results ? [] : .isButton)
                                                     .accessibilityAddTraits(active && !results ? .isSelected : [])
-                                                    .accessibilityAction { toggle(slot.id) }
+                                                    .accessibilityAction { toggle(slot) }
                                                 } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
                                             }
                                         }
@@ -429,7 +434,7 @@ private struct TimePollGrid: View {
                                         TimePollTouchSurface(
                                             onTap: { point in
                                                 if let position = position(point, rows: rows, cellWidth: cellWidth),
-                                                   let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot.id) }
+                                                   let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot) }
                                             },
                                             onRange: { state, point in updateRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup) }
                                         ).accessibilityHidden(true)
@@ -476,20 +481,20 @@ private struct TimePollGrid: View {
         .accessibilityIdentifier("time-poll-day-\(date)")
     }
 
-    private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Slot]) {
+    private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
         switch state {
         case .began:
             guard let start = position(point, rows: rows, cellWidth: cellWidth),
                   let slot = lookup["\(poll.dates[start.0])|\(rows[start.1])"] else { return }
             dragStart = start
             original = selected
-            selecting = !selected.contains(slot.id)
-            preview = TimePollSelection.rectangle(slots: poll.slots, dates: poll.dates, rows: rows, from: start, to: start, original: original, selecting: selecting)
+            selecting = !slot.slotIds.isSubset(of: selected)
+            preview = TimePollSelection.rectangle(cells: poll.cells, dates: poll.dates, rows: rows, from: start, to: start, original: original, selecting: selecting)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         case .changed:
             guard let start = dragStart,
                   let end = position(point, rows: rows, cellWidth: cellWidth, clamped: true) else { return }
-            preview = TimePollSelection.rectangle(slots: poll.slots, dates: poll.dates, rows: rows, from: start, to: end, original: original, selecting: selecting)
+            preview = TimePollSelection.rectangle(cells: poll.cells, dates: poll.dates, rows: rows, from: start, to: end, original: original, selecting: selecting)
         case .ended:
             if let preview { apply(preview) }
             clearPreview()
@@ -499,9 +504,9 @@ private struct TimePollGrid: View {
         }
     }
 
-    private func toggle(_ id: Int) {
+    private func toggle(_ cell: NativeTimePoll.Cell) {
         guard !results else { return }
-        apply(selected.contains(id) ? selected.subtracting([id]) : selected.union([id]))
+        apply(TimePollSelection.toggle(cell, original: selected))
     }
 
     private func apply(_ value: Set<Int>) {
@@ -574,6 +579,10 @@ struct TimePollMessageContent: View {
 }
 
 private func clock(_ minute: Int) -> String { String(format: "%02d:%02d", minute / 60, minute % 60) }
+private func timePollClockFormatter(_ timeZone: String) -> DateFormatter {
+    let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_GB"); formatter.timeZone = TimeZone(identifier: timeZone); formatter.dateFormat = "HH:mm"
+    return formatter
+}
 private func dateLabel(_ key: String) -> String {
     let parser = DateFormatter(); parser.locale = Locale(identifier: "en_US_POSIX"); parser.dateFormat = "yyyy-MM-dd"
     guard let date = parser.date(from: key) else { return key }

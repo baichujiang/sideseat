@@ -43,12 +43,15 @@ import XCTest
 
     func testDeliberateRangeTapEraseAndUndoPersist() {
         openEmptyPoll()
-        let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-3"]
+        let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-2"]
+        XCTAssertFalse(app.buttons["time-poll-cell-1"].exists)
+        XCTAssertTrue(app.staticTexts["09:30"].exists)
+        XCTAssertFalse(app.staticTexts["09:15"].exists)
         first.press(forDuration: 0.6, thenDragTo: last)
         assertSaved([0, 1, 2, 3])
         capture("one-hour-selected")
         last.tap()
-        assertSaved([0, 1, 2])
+        assertSaved([0, 1])
         app.buttons["time-poll-undo"].tap()
         assertSaved([0, 1, 2, 3])
         first.press(forDuration: 0.6, thenDragTo: last)
@@ -58,7 +61,7 @@ import XCTest
         app.terminate()
         launch()
         openPlan()
-        for id in 0...3 { XCTAssertTrue(app.buttons["time-poll-cell-\(id)"].isSelected) }
+        for id in [0, 2] { XCTAssertTrue(app.buttons["time-poll-cell-\(id)"].isSelected) }
         capture("reopened-saved-selection")
     }
 
@@ -76,7 +79,7 @@ import XCTest
         day.tap(); assertSaved([0, 1, 2, 3])
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         capture("day-selected")
-        app.buttons["time-poll-cell-0"].tap(); assertSaved([1, 2, 3])
+        app.buttons["time-poll-cell-0"].tap(); assertSaved([2, 3])
         XCTAssertFalse(day.isSelected)
         XCTAssertEqual(day.value as? String, "Some times selected")
         day.tap(); assertSaved([0, 1, 2, 3]); XCTAssertTrue(day.isSelected)
@@ -100,11 +103,30 @@ import XCTest
         capture("day-dark-chinese")
     }
 
+    func testLegacyPartialHalfHourFillsAndUndoesWithoutRounding() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_HALF_HOUR_QA_POLL"]
+        pollToken = try XCTUnwrap(raw)
+        launch(); openPlan()
+        let first = app.buttons["time-poll-cell-0"]
+        XCTAssertTrue(first.label.contains("09:00–09:30"))
+        XCTAssertTrue(first.label.contains("Some times selected"))
+        XCTAssertFalse(first.isSelected)
+        XCTAssertFalse(app.buttons["time-poll-cell-1"].exists)
+        capture("legacy-partial-half-hour")
+        first.tap(); assertSaved([0, 1])
+        app.buttons["time-poll-undo"].tap(); assertSaved([0])
+        XCTAssertTrue(first.label.contains("Some times selected"))
+        app.terminate(); launch(); openPlan()
+        XCTAssertTrue(first.label.contains("Some times selected"))
+        XCTAssertFalse(first.isSelected)
+        capture("legacy-partial-reopened")
+    }
+
     private func openEmptyPoll() {
         launch()
         openPlan()
         XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, "QA102 Gesture regression")
-        for id in 0...3 { XCTAssertFalse(app.buttons["time-poll-cell-\(id)"].isSelected, "Supply a fresh empty QA poll") }
+        for id in [0, 2] { XCTAssertFalse(app.buttons["time-poll-cell-\(id)"].isSelected, "Supply a fresh empty QA poll") }
     }
 
     private func launch(language: String = "en", appearance: String = "light") {
@@ -125,8 +147,8 @@ import XCTest
 
     private func assertSaved(_ slots: [Int]) {
         XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].waitForExistence(timeout: 15))
-        for id in 0...3 where app.buttons["time-poll-cell-\(id)"].isHittable {
-            XCTAssertEqual(app.buttons["time-poll-cell-\(id)"].isSelected, slots.contains(id))
+        for id in [0, 2] where app.buttons["time-poll-cell-\(id)"].isHittable {
+            XCTAssertEqual(app.buttons["time-poll-cell-\(id)"].isSelected, slots.contains(id) && slots.contains(id + 1))
         }
     }
 

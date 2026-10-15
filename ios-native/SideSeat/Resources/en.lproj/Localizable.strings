@@ -2559,3 +2559,9 @@
 "Selected slots" = "Selected slots";
 "Partial day" = "Partial day";
 "Unselected slots" = "Unselected slots";
+
+"Everyone sees the same dates and time zone. Each cell is 30 minutes." = "Everyone sees the same dates and time zone. Each cell is 30 minutes.";
+
+"Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically.";
+
+"Partially selected" = "Partially selected";

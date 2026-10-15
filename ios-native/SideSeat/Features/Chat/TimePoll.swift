@@ -53,6 +53,19 @@ struct NativeTimePoll: Decodable, Sendable {
         let isMe: Bool
         let isGuest: Bool?
     }
+    struct Cell: Sendable, Identifiable {
+        let slots: [Slot]
+        var id: Int { slots[0].id }
+        var date: String { slots[0].date }
+        var row: String { slots[0].row }
+        var label: String { slots[0].label }
+        var end: Date { slots[slots.count - 1].end }
+        var slotIds: Set<Int> { Set(slots.map(\.id)) }
+        func availableCount(in selections: [Set<Int>]) -> Int {
+            let ids = slotIds
+            return selections.filter { ids.isSubset(of: $0) }.count
+        }
+    }
     struct Window: Decodable, Sendable, Identifiable {
         var id: Date { start }
         let start: Date
@@ -67,8 +80,10 @@ struct NativeTimePoll: Decodable, Sendable {
         let common: Bool
         let windows: [Window]
     }
+    var cells: [Cell] { TimePollSelection.cells(slots) }
     var rows: [String] {
-        dates.map { date in slots.filter { $0.date == date } }
+        let cells = self.cells
+        return dates.map { date in cells.filter { $0.date == date } }
             .max(by: { $0.count < $1.count })?.map(\.row) ?? []
     }
 }
@@ -151,14 +166,33 @@ enum TimePollLink {
 }
 
 enum TimePollSelection {
+    /// Group adjacent quarters for display without changing persisted IDs.
+    static func cells(_ slots: [NativeTimePoll.Slot]) -> [NativeTimePoll.Cell] {
+        var cells: [NativeTimePoll.Cell] = []
+        var index = 0
+        while index < slots.count {
+            let first = slots[index]
+            if index + 1 < slots.count, slots[index + 1].date == first.date, first.end == slots[index + 1].start {
+                cells.append(.init(slots: [first, slots[index + 1]]))
+                index += 2
+            } else {
+                cells.append(.init(slots: [first]))
+                index += 1
+            }
+        }
+        return cells
+    }
+    static func toggle(_ cell: NativeTimePoll.Cell, original: Set<Int>) -> Set<Int> {
+        cell.slotIds.isSubset(of: original) ? original.subtracting(cell.slotIds) : original.union(cell.slotIds)
+    }
     /// Paint a rectangle once; revisiting cells during a drag does not toggle them.
-    static func rectangle(slots: [NativeTimePoll.Slot], dates: [String], rows: [String], from: (Int, Int), to: (Int, Int), original: Set<Int>, selecting: Bool) -> Set<Int> {
+    static func rectangle(cells: [NativeTimePoll.Cell], dates: [String], rows: [String], from: (Int, Int), to: (Int, Int), original: Set<Int>, selecting: Bool) -> Set<Int> {
         let columns = min(from.0, to.0)...max(from.0, to.0)
         let rowRange = min(from.1, to.1)...max(from.1, to.1)
-        let ids = Set(slots.filter { slot in
+        let ids = Set(cells.filter { slot in
             guard let column = dates.firstIndex(of: slot.date), let row = rows.firstIndex(of: slot.row) else { return false }
             return columns.contains(column) && rowRange.contains(row)
-        }.map(\.id))
+        }.flatMap(\.slotIds))
         return selecting ? original.union(ids) : original.subtracting(ids)
     }
 }

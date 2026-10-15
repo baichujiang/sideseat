@@ -2558,3 +2558,9 @@
 "Selected slots" = "Ausgewählt";
 "Partial day" = "Tag teilweise";
 "Unselected slots" = "Nicht ausgewählt";
+
+"Everyone sees the same dates and time zone. Each cell is 30 minutes." = "Alle sehen dieselben Daten und dieselbe Zeitzone. Jedes Feld entspricht 30 Minuten.";
+
+"Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "Jedes Feld entspricht 30 Minuten. Zum Scrollen wischen, einen Tag für alle Zeiten antippen oder Felder antippen/gedrückt ziehen. Änderungen werden automatisch gespeichert.";
+
+"Partially selected" = "Teilweise ausgewählt";

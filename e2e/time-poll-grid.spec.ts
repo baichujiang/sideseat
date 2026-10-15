@@ -37,16 +37,16 @@ test("day selection, partial color, undo, keyboard, persistence and read-only he
       await join(page, poll.token);
       const cell = (id: number) => page.getByTestId(`time-poll-cell-${id}`);
       const day = page.getByTestId(`time-poll-day-${poll.dates[0]}`);
-      const first = (await cell(0).boundingBox())!, last = (await cell(7).boundingBox())!;
+      const first = (await cell(0).boundingBox())!, last = (await cell(6).boundingBox())!;
       await page.mouse.move(first.x + first.width / 2, first.y + first.height / 2); await page.mouse.down();
       await page.mouse.move(last.x + last.width / 2, last.y + last.height / 2, { steps: 8 }); await page.mouse.up();
-      for (const id of [0, 1, 2, 3, 4, 5, 6, 7]) await expect(cell(id)).toHaveAttribute("aria-pressed", "true");
+      for (const id of [0, 2, 4, 6]) await expect(cell(id)).toHaveAttribute("aria-pressed", "true");
       await page.getByTestId("time-poll-undo").tap(); await expect(cell(0)).toHaveAttribute("aria-pressed", "false");
       await cell(4).tap(); await cell(0).tap();
       await expect(day).toHaveAttribute("aria-label", /已选中部分时段/);
       await expect(day).toHaveCSS("background-color", "rgb(255, 240, 199)");
       await day.tap(); await expect(day).toHaveAttribute("aria-pressed", "true");
-      for (const id of [0, 1, 2, 3, 4]) await expect(cell(id)).toHaveAttribute("aria-pressed", "true");
+      for (const id of [0, 2, 4]) await expect(cell(id)).toHaveAttribute("aria-pressed", "true");
       await expect(cell(0)).toHaveCSS("background-color", "rgb(20, 117, 92)");
       await day.tap(); await expect(cell(0)).toHaveAttribute("aria-pressed", "false"); await expect(cell(4)).toHaveAttribute("aria-pressed", "true");
       await page.getByTestId("time-poll-undo").tap(); await expect(day).toHaveAttribute("aria-pressed", "true");
@@ -56,8 +56,8 @@ test("day selection, partial color, undo, keyboard, persistence and read-only he
       await cell(0).focus(); await page.keyboard.press("Space");
       await expect(cell(0)).toHaveAttribute("aria-pressed", "false");
       await page.getByRole("button", { name: "大家的结果", exact: true }).tap();
-      await expect(page.getByTestId("time-poll-result-1")).toHaveText("1");
-      await expect(page.getByTestId("time-poll-cell-1")).toHaveCount(0);
+      await expect(page.getByTestId("time-poll-result-2")).toHaveText("1");
+      await expect(page.getByTestId("time-poll-cell-2")).toHaveCount(0);
       await expect(day).toHaveCount(0);
       await page.getByRole("button", { name: "我的时间", exact: true }).tap();
       await page.getByTestId("time-poll-undo").tap(); await expect(cell(0)).toHaveAttribute("aria-pressed", "true");
@@ -67,6 +67,38 @@ test("day selection, partial color, undo, keyboard, persistence and read-only he
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     } finally { await context.close(); await browser.close(); }
   }
+});
+
+test("legacy half selections stay partial and heatmap requires the same person throughout 30 minutes", async ({ browser, request, baseURL }) => {
+  const poll = await create(request, 1, 600);
+  const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  const page = await context.newPage();
+  try {
+    await join(page, poll.token);
+    const path = `/api/public/time-polls/${poll.token}`;
+    const guest = (await (await context.request.get(path)).json()).data;
+    expect((await context.request.put(`${path}/response`, { data: { participantId: guest.viewerId, displayName: guest.myDisplayName, slotIds: [0] } })).status()).toBe(200);
+    expect((await request.put(`/api/v1/time-polls/${poll.token}/response`, { headers, data: { displayName: "Host", slotIds: [1] } })).status()).toBe(200);
+    await page.reload();
+    const first = page.getByTestId("time-poll-cell-0");
+    await expect(first).toHaveAttribute("aria-pressed", "mixed");
+    await expect(first).toHaveAttribute("aria-label", /09:00–09:30/);
+    await expect(first).toHaveCSS("background-color", "rgb(255, 240, 199)");
+    await expect(page.getByTestId("time-poll-cell-1")).toHaveCount(0);
+    const saved = async () => (await (await context.request.get(path)).json()).data.mySlotIds;
+    expect(await saved()).toEqual([0]);
+    await page.getByRole("button", { name: "大家的结果", exact: true }).tap();
+    await expect(page.getByTestId("time-poll-result-0")).toHaveText("0");
+    await page.getByRole("button", { name: "我的时间", exact: true }).tap();
+    await first.tap(); await expect.poll(saved).toEqual([0, 1]);
+    await page.getByTestId("time-poll-undo").tap(); await expect.poll(saved).toEqual([0]);
+    const a = (await first.boundingBox())!, b = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await page.mouse.up();
+    await expect.poll(saved).toEqual([0, 1, 2, 3]);
+    await page.getByTestId("time-poll-undo").tap(); await expect.poll(saved).toEqual([0]);
+    await page.reload(); await expect(first).toHaveAttribute("aria-pressed", "mixed");
+  } finally { await context.close(); }
 });
 
 test("real touch swipes scroll without edits; hold paints, erases and cancels without a premature save", async ({ browser, request, baseURL }) => {
@@ -93,7 +125,7 @@ test("real touch swipes scroll without edits; hold paints, erases and cancels wi
     expect(await saved()).toEqual([]);
     await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
     const first = (await page.getByTestId("time-poll-cell-0").boundingBox())!;
-    const last = (await page.getByTestId("time-poll-cell-3").boundingBox())!;
+    const last = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
     const x = first.x + first.width / 2;
     const hold = async () => {
       await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
@@ -102,18 +134,18 @@ test("real touch swipes scroll without edits; hold paints, erases and cancels wi
       await page.waitForTimeout(450);
     };
     await hold(); await touch("touchMove", x, last.y + last.height / 2);
-    await expect(page.getByTestId("time-poll-cell-3")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("time-poll-cell-2")).toHaveAttribute("aria-pressed", "true");
     expect(await saved()).toEqual([]);
     await touch("touchCancel"); await expect(page.getByTestId("time-poll-cell-0")).toHaveAttribute("aria-pressed", "false");
     expect(await saved()).toEqual([]);
     await hold(); await touch("touchMove", x, last.y + last.height / 2); await touch("touchEnd");
     await expect.poll(saved).toEqual([0, 1, 2, 3]);
     await hold();
-    const eraseEnd = (await page.getByTestId("time-poll-cell-3").boundingBox())!;
+    const eraseEnd = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
     await touch("touchMove", eraseEnd.x + eraseEnd.width / 2, eraseEnd.y + eraseEnd.height / 2); await touch("touchEnd");
     await expect.poll(saved).toEqual([]);
     await page.getByTestId("time-poll-undo").tap(); await expect.poll(saved).toEqual([0, 1, 2, 3]);
-    await page.reload(); await expect(page.getByTestId("time-poll-cell-3")).toHaveAttribute("aria-pressed", "true");
+    await page.reload(); await expect(page.getByTestId("time-poll-cell-2")).toHaveAttribute("aria-pressed", "true");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   } finally { await context.close(); }
 });

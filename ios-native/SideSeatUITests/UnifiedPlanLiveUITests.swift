@@ -86,9 +86,9 @@ import XCTest
         XCTAssertTrue(webName().waitForExistence(timeout: 30), "The share link must open a guest form in Safari")
         webName().tap(); webName().typeText("Guest Lin")
         webButton("Join this plan", "开始参与").tap()
-        // The share page uses the same 15-minute grid as Preview 105.
+        // The share page uses the same 30-minute grid as Preview 106.
         let firstCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
-        let lastCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:45")).firstMatch
+        let lastCell = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
         XCTAssertTrue(firstCell.waitForExistence(timeout: 20))
         for _ in 0..<3 where !lastCell.isHittable { safari.swipeUp() }
         firstCell.press(forDuration: 0.6, thenDragTo: lastCell)
@@ -377,7 +377,7 @@ import XCTest
         XCTAssertTrue(app.textFields["time-poll-name"].waitForExistence(timeout: 20))
     }
     private func paintHour() {
-        let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-3"]
+        let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-2"]
         XCTAssertTrue(first.waitForExistence(timeout: 15)); first.press(forDuration: 0.6, thenDragTo: last)
         XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].waitForExistence(timeout: 20))
     }

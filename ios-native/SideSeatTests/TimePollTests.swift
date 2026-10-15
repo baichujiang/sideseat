@@ -6,12 +6,27 @@ import Testing
 struct TimePollTests {
     @Test("Paint and erase a rectangle without toggling revisited cells")
     func rectangles() {
-        let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-16" : "2026-10-17", row: String(id % 4), label: String(id % 4), start: Date(), end: Date()) }
-        let dates = ["2026-10-16", "2026-10-17"], rows = ["0", "1", "2", "3"]
-        let painted = TimePollSelection.rectangle(slots: slots, dates: dates, rows: rows, from: (0, 0), to: (1, 2), original: [3], selecting: true)
-        #expect(painted == [0, 1, 2, 3, 4, 5, 6])
-        let erased = TimePollSelection.rectangle(slots: slots, dates: dates, rows: rows, from: (1, 2), to: (0, 0), original: painted, selecting: false)
+        let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-16" : "2026-10-17", row: String(id % 4), label: String(id % 4), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        let dates = ["2026-10-16", "2026-10-17"], rows = ["0", "2"]
+        #expect(cells.count == 4)
+        let painted = TimePollSelection.rectangle(cells: cells, dates: dates, rows: rows, from: (0, 0), to: (1, 0), original: [3], selecting: true)
+        #expect(painted == [0, 1, 3, 4, 5])
+        let erased = TimePollSelection.rectangle(cells: cells, dates: dates, rows: rows, from: (1, 0), to: (0, 0), original: painted, selecting: false)
         #expect(erased == [3])
+    }
+
+    @Test("Partial legacy cells fill explicitly and heatmap counts only whole-cell attendees")
+    func legacyHalfHours() {
+        let slots = (0..<5).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-16", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        #expect(cells.count == 3)
+        #expect(cells.flatMap { $0.slots.map(\.id) } == [0, 1, 2, 3, 4])
+        #expect(cells[2].slotIds == [4])
+        #expect(TimePollSelection.toggle(cells[0], original: [0, 3]) == [0, 1, 3])
+        #expect(TimePollSelection.toggle(cells[0], original: [0, 1, 3]) == [3])
+        #expect(cells[0].availableCount(in: [[0], [1], [0, 1]]) == 1)
+        #expect(cells[0].availableCount(in: [[0], [1]]) == 0)
     }
 
     @Test("Invite links use the Sideseat domain and route into the native feature")

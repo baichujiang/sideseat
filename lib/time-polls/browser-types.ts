@@ -9,6 +9,19 @@ export type SharedTimePoll = {
   planningMode: string; phase: string; invitationVersion: number; chosenStart: string | null; chosenEnd: string | null;
   summary: { counts: number[]; participantCount: number; maximum: number; common: boolean; windows: PollWindow[] };
 };
+export type AvailabilityCell = PollSlot & { slotIds: number[] };
+// Keep persisted 15-minute IDs intact, including a legacy trailing quarter-hour.
+export function availabilityCells(slots: PollSlot[]): AvailabilityCell[] {
+  const cells: AvailabilityCell[] = [];
+  for (let index = 0; index < slots.length; index++) {
+    const first = slots[index], next = slots[index + 1];
+    if (next && next.date === first.date && first.end === next.start) {
+      cells.push({ ...first, end: next.end, slotIds: [first.id, next.id] });
+      index++;
+    } else cells.push({ ...first, slotIds: [first.id] });
+  }
+  return cells;
+}
 export function selectedRanges(poll: SharedTimePoll, selected: number[]) {
   const ids = new Set(selected);
   const ranges: { date: string; start: string; end: string; ids: number[] }[] = [];

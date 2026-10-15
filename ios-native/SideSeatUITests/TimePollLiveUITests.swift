@@ -49,14 +49,14 @@ import XCTest
                 openInvite()
             }
             setName("Person \(index + 1)")
-            let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-3"]
+            let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-2"]
             XCTAssertTrue(first.waitForExistence(timeout: 10))
             first.press(forDuration: 0.6, thenDragTo: last)
             waitSaved()
-            app.buttons["time-poll-cell-\(4 + index)"].tap()
+            app.buttons["time-poll-cell-\(4 + index * 2)"].tap()
             waitSaved()
             let own = try poll(auth: (try login(index)).token)
-            XCTAssertEqual(own["mySlotIds"] as? [Int], [0, 1, 2, 3, 4 + index])
+            XCTAssertEqual(own["mySlotIds"] as? [Int], [0, 1, 2, 3, 4 + index * 2, 5 + index * 2])
         }
         showResults()
         XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Everyone can attend")
@@ -67,7 +67,7 @@ import XCTest
         XCTAssertEqual(summary["maximum"] as? Int, 5); XCTAssertEqual(summary["common"] as? Bool, true)
 
         app.buttons["My availability"].tap()
-        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-3"])
+        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-2"])
         waitSaved()
         showResults()
         XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
@@ -82,8 +82,8 @@ import XCTest
             XCTAssertTrue(recent.waitForExistence(timeout: 15)); recent.tap()
             XCTAssertTrue(app.textFields["time-poll-name"].waitForExistence(timeout: 15))
             XCTAssertEqual(app.textFields["time-poll-name"].value as? String, "Person \(index + 1)")
-            let expected = index == 4 ? [8] : [0, 1, 2, 3, 4 + index]
-            for id in 0..<9 {
+            let expected = index == 4 ? [12, 13] : [0, 1, 2, 3, 4 + index * 2, 5 + index * 2]
+            for id in stride(from: 0, through: 12, by: 2) {
                 XCTAssertEqual(app.buttons["time-poll-cell-\(id)"].isSelected, expected.contains(id))
             }
             let reopened = try poll(auth: auth.token)
@@ -109,7 +109,7 @@ import XCTest
             app.terminate(); _ = try? call("/api/v1/time-polls/\(token)", method: "DELETE", auth: ownerAuth)
         } }
         launch(auth); openInvite()
-        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-35"])
+        app.buttons["time-poll-cell-0"].press(forDuration: 0.6, thenDragTo: app.buttons["time-poll-cell-25"])
         waitSaved()
         XCTAssertEqual(try poll(auth: ownerAuth)["mySlotIds"] as? [Int], [0, 1, 2, 3, 32, 33, 34, 35])
         let header = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Oct 16")).firstMatch

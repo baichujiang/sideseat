@@ -2559,3 +2559,9 @@
 "Selected slots" = "已选时段";
 "Partial day" = "当天部分已选";
 "Unselected slots" = "未选时段";
+
+"Everyone sees the same dates and time zone. Each cell is 30 minutes." = "所有人看到相同的日期和时区，每格为 30 分钟。";
+
+"Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically." = "每格 30 分钟。滑动可滚动，点日期选全天；点按或长按拖选，修改自动保存。";
+
+"Partially selected" = "部分已选";
