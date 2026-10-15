@@ -27,12 +27,19 @@ test("guests fill, rename and confirm in the browser while the app shares their 
   expect((await request.put(`${nativePath}/response`, { headers, data: { displayName: "Host", slotIds: [0, 1, 2, 3] } })).status()).toBe(200);
   const guests = await Promise.all([0, 1].map(() => browser.newContext({ baseURL, viewport: { width: 390, height: 844 } })));
   try {
+    await guests[0].addCookies([{ name: "NEXT_LOCALE", value: "en", url: baseURL! }]);
     const pages = await Promise.all(guests.map((context) => context.newPage()));
     const ids: string[] = [];
     for (let n = 0; n < 2; n++) {
       const page = pages[n];
       await page.goto(`/time-polls/${token}`);
       await expect(page.getByRole("heading", { name: "Guest friends at the library" })).toBeVisible();
+      await expect(page.getByLabel("本次计划中的昵称")).toBeVisible();
+      await expect(page.getByRole("main")).toHaveAttribute("lang", "zh-CN");
+      await page.getByRole("button", { name: "Switch to English", exact: true }).click();
+      await page.reload();
+      await expect(page.getByRole("main")).toHaveAttribute("lang", "en");
+      if (n === 0) expect((await guests[0].cookies()).find((cookie) => cookie.name === "NEXT_LOCALE")?.value).toBe("en");
       await page.getByLabel("Your name in this plan").fill(`Guest ${n + 1}`);
       await page.getByRole("button", { name: "Join this plan", exact: true }).click();
       await page.getByRole("button", { name: "Add this time", exact: true }).click();
@@ -83,8 +90,9 @@ test("guests fill, rename and confirm in the browser while the app shares their 
     const fixed = await request.post("/api/v1/time-polls", { headers: { ...headers, "Idempotency-Key": randomUUID() }, data: { title: "Direct-time guest plan", timeZone: "Europe/Berlin", dates: [date], startMinute: 540, endMinute: 720, durationMinutes: 60, expectedCount: 2, planningMode: "FIXED", fixedStart: `${date}T08:00:00.000Z` } });
     expect(fixed.status()).toBe(201);
     const fixedToken = (await fixed.json()).data.token; pollTokens.push(fixedToken);
-    await guests[0].addCookies([{ name: "NEXT_LOCALE", value: "zh-CN", url: baseURL! }]);
+    await pages[0].getByRole("button", { name: "切换为中文", exact: true }).click();
     await pages[0].goto(`/time-polls/${fixedToken}`);
+    await expect(pages[0].getByRole("main")).toHaveAttribute("lang", "zh-CN");
     const directJoin = await guests[0].request.post(`/api/public/time-polls/${fixedToken}/participant`, { data: { displayName: "Lin" } });
     expect(directJoin.status()).toBe(200);
     const directId = (await directJoin.json()).data.viewerId;

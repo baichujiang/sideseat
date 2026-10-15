@@ -6,7 +6,7 @@ import { ArrowUpRight, Check, Pencil, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
 import { useSharedTimePoll } from "@/components/time-polls/use-shared-time-poll";
-import { pollClock, pollDate } from "@/lib/time-polls/browser-types";
+import { POLL_LOCALE_COOKIE, pollClock, pollDate } from "@/lib/time-polls/browser-types";
 
 export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: boolean }) {
   const [zh, setZh] = useState(initialZh);
@@ -25,9 +25,9 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
     const date = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(start));
     return `${pollDate(date, zh)} · ${pollClock(start, poll!.timeZone)}–${pollClock(end, poll!.timeZone)}`;
   };
-  return <main className="min-h-dvh bg-stone-50 px-4 pb-12 pt-5 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:px-6">
+  return <main lang={zh ? "zh-CN" : "en"} className="min-h-dvh bg-stone-50 px-4 pb-12 pt-5 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:px-6">
     <div className="mx-auto max-w-4xl">
-      <header className="mb-8 flex items-center justify-between gap-4"><Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={34} height={34} alt="" className="rounded-lg" />SideSeat</Link><div className="flex items-center gap-4"><button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = `NEXT_LOCALE=${next ? "zh-CN" : "en"}; Path=/; Max-Age=31536000; SameSite=Lax`; }}>{zh ? "English" : "中文"}</button><a href={`sideseat://time-polls/${encodeURIComponent(token)}`} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "在 App 中打开" : "Open in app"}<ArrowUpRight className="h-4 w-4" aria-hidden /></a></div></header>
+      <header className="mb-8 flex items-center justify-between gap-4"><Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={34} height={34} alt="" className="rounded-lg" />SideSeat</Link><div className="flex items-center gap-4"><button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = `${POLL_LOCALE_COOKIE}=${next ? "zh-CN" : "en"}; Path=/time-polls; Max-Age=31536000; SameSite=Lax`; }}>{zh ? "English" : "中文"}</button><a href={`sideseat://time-polls/${encodeURIComponent(token)}`} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "在 App 中打开" : "Open in app"}<ArrowUpRight className="h-4 w-4" aria-hidden /></a></div></header>
       {!poll ? <section className="rounded-2xl border bg-background p-7" aria-live="polite"><h1 className="text-2xl font-semibold">{error ? (zh ? "暂时无法打开计划" : "Plan unavailable") : (zh ? "正在打开计划…" : "Opening your plan…")}</h1>{error ? <p className="mt-3 text-sm text-muted-foreground">{error}</p> : null}</section> : <>
         <div className="mb-7 space-y-2"><p className="text-sm text-muted-foreground">{zh ? "一起找到合适的时间" : "Find a time together"}</p><h1 className="text-3xl font-semibold tracking-tight">{poll.title}</h1><p className="text-sm text-muted-foreground">{poll.durationMinutes ? `${poll.durationMinutes} ${zh ? "分钟" : "minutes"} · ` : ""}{poll.timeZone}{poll.location ? ` · ${poll.location}` : ""}</p></div>
         <div className="grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)]">

@@ -1,4 +1,5 @@
 import type { PollSlot, PollWindow } from "@/lib/time-polls/domain";
+export const POLL_LOCALE_COOKIE = "SIDESEAT_POLL_LOCALE";
 export type SharedTimePoll = {
   token: string; title: string; timeZone: string; dates: string[]; slots: PollSlot[];
   participants: { id: string; displayName: string; slotIds: number[]; isMe: boolean; isGuest: boolean }[];
