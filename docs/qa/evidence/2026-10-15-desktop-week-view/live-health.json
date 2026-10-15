@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-15T22:00:54.064Z",
+  "results": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "status": 200,
+      "contentType": "application/json",
+      "redirect": null,
+      "validJson": true
+    },
+    {
+      "url": "https://api.sideseat.de/.well-known/apple-app-site-association",
+      "status": 200,
+      "contentType": "application/json",
+      "redirect": null
+    },
+    {
+      "url": "https://www.sideseat.de/ios",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "redirect": null
+    },
+    {
+      "url": "https://www.sideseat.de/privacy",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "redirect": null
+    },
+    {
+      "url": "https://www.sideseat.de/support",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "redirect": null
+    },
+    {
+      "url": "https://www.sideseat.de/time-polls/responsive-layout-check",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "redirect": null
+    },
+    {
+      "url": "https://api.sideseat.de/time-polls/responsive-layout-check",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "redirect": null
+    },
+    {
+      "url": "https://sideseat.de/time-polls/responsive-layout-check",
+      "status": 307,
+      "contentType": "text/plain",
+      "redirect": "https://www.sideseat.de/time-polls/responsive-layout-check"
+    }
+  ]
+}

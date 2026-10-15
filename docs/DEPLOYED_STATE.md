@@ -1,6 +1,6 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；最后核验 2026-10-15，Europe/Berlin。
+**状态：** 当前运行清单；最后核验 2026-10-16，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
@@ -10,13 +10,18 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `016fd16` 干净；统一网页选时 `4d208a1` 已推送；原生功能仍为 `f508e64` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (105)` | 原生功能保持 105；本次正式 Safari/Preview/Calendar 完整链路通过（133.722 秒），验收后空参数启动并核对进程 PID 826；[最新交付](./releases/2026-10-15-unified-share-ui.md)，105 浅/深色原生验收继续保留 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `77b7c54` 干净；桌面时间表 `393fc66` 已推送；原生功能仍为 `f508e64` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (105)` | 本次仅网页桌面布局，无原生构建或安装；此前 Safari/Preview/Calendar 完整链路通过（133.722 秒），验收后正常启动 PID 826；[真机交付记录](./releases/2026-10-15-unified-share-ui.md)，105 浅/深色原生验收继续保留 |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 105 连接身份、签名配置及安装清单核验；[验收记录](./qa/2026-10-15-availability-colors.md) |
 | Preview 105 原生源码 | `f508e64` | 已提交并推送；新增选时状态配色，保留 104 当天全选、103 游客、101 单层创建及 102 手势与撤销 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS`，Ready | 本次双域名 inspect、候选及正式选时/游客流程；[交付](./releases/2026-10-15-unified-share-ui.md) |
-| 生产源码 | 此前真实生产 1,336 项逐文件重建；保留 1,333 项原内容，五项网页文件及来源记录共 6 项覆盖；最终 1,339 项上传 SHA-1 全匹配 | 网页来源 `4d208a1`，API/Schema 沿用 103；[发布清单](./qa/evidence/2026-10-15-unified-share-ui/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-unified-share-ui/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF`，Ready | 2026-10-16 双域名 inspect、候选及正式网页布局检查、公开路由健康检查通过；[桌面周视图交付](./releases/2026-10-15-desktop-week-view.md) |
+| 生产源码 | 此前真实生产 1,339 项逐文件重建；保留 1,338 项原内容，仅覆盖页面布局并新增来源记录；最终 1,340 项上传 SHA-1 全匹配 | 桌面网页来源 `393fc66`，手势/API/Schema 保留上一生产版本；[发布清单](./qa/evidence/2026-10-15-desktop-week-view/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-desktop-week-view/upload-verification.json) |
+
+分享网页在电脑宽度 1024px 起优先加宽时间表、收窄参与者栏。候选与正式网页在
+1024/1280/1440/1920px、中/英文、个人/结果视图均可同时显示一周七天而无需左右滑动；
+320/390px 手机宽度及 768px 布局保留，手势代码不变。本次浏览器布局数据由本地响应提供，
+没有生产业务写入或新的真机验收，详见 [桌面周视图 QA](./qa/2026-10-15-desktop-week-view.md)。
 
 分享网页现与 App 使用相同的选时规则：15 分钟时间格点按/长按、当天全选和清空、
 一次撤销、自动保存、相同青绿/琥珀状态色与只读人数热图；结果推荐卡片横向查看。
@@ -40,7 +45,7 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 | --- | --- | --- |
 | 同行 | 我的意愿、自动推荐、主动寻找、私密收藏、带意愿上下文的招呼；回复后继续聊天 | 原生导航/源码、线上配置；本次未重跑完整匹配业务 |
 | 计划 | **计划 → + → 发起计划**；可「一起定时间」或「直接选时间」。征集结果选择参与者后转邀请，逐人确认后写入注册用户日历，游客可在分享网页完成填写与确认。概览/即将进行/已结束共用入口；旧聊天双人计划与其改期/反馈继续保留 | 本次原生创建、填写、邀请、确认、重开及日历联调；[验收记录](./qa/2026-10-15-unified-plans.md) |
-| 游客分享参与 | **分享计划链接 → 网页直接参与**，默认中文、可切 English，无需下载或注册；昵称旁铅笔编辑，与 App 相同的时间格、当天全选、撤销、自动保存及结果热图，网页确认 | 最新候选、正式 API/www 统一选时流程通过，见 [统一选时 QA](./qa/2026-10-15-unified-share-ui.md)；103 历史真机记录继续保留 |
+| 游客分享参与 | **分享计划链接 → 网页直接参与**，默认中文、可切 English，无需下载或注册；昵称旁铅笔编辑，与 App 相同的时间格、当天全选、撤销、自动保存及结果热图，网页确认；电脑端一周加宽 | 本次候选/正式浏览器布局通过，见 [桌面周视图 QA](./qa/2026-10-15-desktop-week-view.md)；此前真实业务及真机见 [统一选时 QA](./qa/2026-10-15-unified-share-ui.md) |
 | 智能约时间 | **聊天 → 发起计划 → 智能约时间**；读取自己的已同步日历空档并填入草稿 | 已安装 Preview 99 实测中文名称；对应 `PlanCreateSheet` / `SmartTimeSuggestionSheet` |
 | 多人时间征集 | **计划 → + → 一起定时间**；消息原入口、邀请链接也打开同一共享计划。15 分钟点按/长按拖选、点星期全选当天、撤销、自动保存、热图、完整时长的共同时间/最多人数推荐、选择名单并邀请 | 本次五账号共同时间与四人推荐、排除第五人及保存重开；Sideseat 原生界面和自有数据服务 |
 | 日历 | 个人日程、课程、已确认计划投影、搜索、智能输入、订阅与导入/导出 | 当前导航/源码、线上配置；本次未逐项重跑 |
@@ -128,3 +133,8 @@ Preview 100 发布曾保留这些生产差异。Preview 103 再从真实生产 `
 统一网页选时继续从上述 1,336 项真实生产源码重建，保留 1,333 项原内容；覆盖五项
 选时网页文件并新增来源记录，全部 1,339 项上传哈希匹配。API、Schema 和旧入口不变，
 没有执行数据库迁移。新部署为 `dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS`，上一版保留为恢复点。
+
+桌面时间表从该部署的 1,339 项真实源码校验重建，保留 1,338 项原内容；只覆盖
+`shared-time-poll.tsx` 并新增来源记录。最终 1,340 项上传全部匹配，数据库迁移显式跳过。
+2026-10-16 候选检查通过后 promote 同一构建至 `dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF`，
+www/API 双域名均已核验，上一统一选时部署保留为恢复点。

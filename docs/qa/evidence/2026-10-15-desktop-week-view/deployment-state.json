@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-15T22:00:54.064Z",
+  "sourceCommit": "393fc66c22d08ebb86d78daa670c11987ac5870b",
+  "sourceBranch": "codex/ios-uxui-20260922",
+  "states": {
+    "candidate": {
+      "id": "dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF",
+      "url": "sideseat-5iu4i65d1-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    "www": {
+      "id": "dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF",
+      "url": "sideseat-5iu4i65d1-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    "api": {
+      "id": "dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF",
+      "url": "sideseat-5iu4i65d1-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    }
+  },
+  "nativePreview": "1.0.0 (105), unchanged; no new device run"
+}

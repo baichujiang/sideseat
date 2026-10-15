@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-16
 
 ## Read this first
 
@@ -61,6 +61,7 @@ Historical build evidence never certifies a newer build.
 | [iPhone 14 Plus guest acceptance](./qa/2026-10-15-iphone14plus-guest-flow.md) | XCTest recovery, real Safari guest/nickname/confirmation/Calendar and physical gesture evidence |
 | [Chinese shared plan pages](./releases/2026-10-15-share-chinese.md) | Live Chinese default, independent language preference, candidate/public guest flow and verified production source |
 | [Unified web/native selection](./releases/2026-10-15-unified-share-ui.md) | Shared grid gestures, day selection, undo, native colors, read-only results and live guest confirmation |
+| [Desktop shared timetable](./releases/2026-10-15-desktop-week-view.md) | Wider desktop week with a compact participant column; mobile layout and gestures preserved |
 | [Preview 1.0.0 (105)](./releases/2026-10-15-preview105-availability-colors.md) | Installed teal/amber availability states and legend; Light/Dark phone acceptance and save/scroll regression pass |
 | [Preview 1.0.0 (104)](./releases/2026-10-15-preview104-day-selection.md) | Installed weekday/day selection shortcut; physical full-day, Undo, persistence and scroll regressions pass |
 | [Preview 1.0.0 (103)](./releases/2026-10-15-preview103-guest-plans.md) | Installed guest/nickname update; later iPhone 14 Plus Safari/native/Calendar, creation and gesture acceptance pass |

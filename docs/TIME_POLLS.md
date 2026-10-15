@@ -80,6 +80,14 @@ without changing other dates. Teal/amber states use the native color values;
 the public page follows the browser's Light/Dark appearance. Group results shows
 the same recommendations and a read-only per-slot attendance heatmap.
 
+At desktop viewport widths of 1024 CSS pixels and above, the shared page expands
+to a maximum of 1440 pixels and gives the timetable the remaining width beside a
+224-pixel participant column. A seven-day poll fits without horizontal scrolling
+at the verified 1024/1280/1440/1920 widths, for both personal selection and group
+results. Below 1024 pixels the existing layout and cell sizes remain unchanged;
+mobile retains horizontal scrolling and the same tap/hold gestures. Longer polls
+can still scroll horizontally.
+
 Guests first enter a name; subsequent selection and confirmation use the same
 persisted plan, slot IDs and lifecycle as the app. Chinese is the default, with
 an independent remembered English/Chinese choice. Browser writes remain

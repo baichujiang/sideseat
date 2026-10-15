@@ -1,0 +1,14 @@
+{
+  "deployment": "dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF",
+  "sourceCommit": "393fc66c22d08ebb86d78daa670c11987ac5870b",
+  "baseDeployment": "dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS",
+  "baseFiles": 1339,
+  "unchangedBaseFiles": 1338,
+  "overlays": 2,
+  "expectedFileCount": 1340,
+  "actualFileCount": 1340,
+  "allSha1Match": true,
+  "archiveFilesUploaded": 0,
+  "databaseMigrations": "explicitly skipped",
+  "buildCommand": "npm run build"
+}
