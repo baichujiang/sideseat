@@ -105,13 +105,25 @@ serialized/coalesced; unsaved work is retained for explicit Retry. Refresh pause
 during an active range preview and cannot overwrite a pending save. Grid cells
 retain a stable touch target while their checkmark changes.
 
-`TimePollGuest` belongs to one poll. A random browser credential is stored only
-in an HttpOnly, SameSite=Lax cookie; PostgreSQL stores its SHA-256 hash. The cookie
-plus the expected participant ID authorizes only that guest's writes. Guest rows
-are not User accounts and cannot access the owner's Calendar or native account
-API. A new browser is a separate participant; returning in the same browser keeps
-one's identity. The UI explains this limitation. Nicknames identify the submitted
-response and are not verified real names.
+`TimePollGuest` belongs to one poll. Owner decision 2026-10-16: shared links are
+for trusted friends/groups, and entering an existing guest name resumes that
+guest's original response, including from another browser or after clearing
+cookies. Names are trimmed and matched case-insensitively within that poll;
+different people should use distinguishable names. A new name creates a guest.
+Joining by name never clears slots, creates another response or resets an invite.
+Concurrent joins serialize on the plan row. Existing duplicate historical guest
+names resolve to the earliest guest; their records are not automatically merged
+or deleted. Account participants cannot be claimed through the guest name entry.
+
+An HttpOnly, SameSite=Lax cookie scoped to `/api/public/time-polls/{token}` remembers
+the selected guest ID. This is a remembered selection for the trusted link's
+name-based access, not proof of a private identity. Each write also checks the
+expected participant ID so an old tab cannot accidentally edit a newly selected
+person. Old random browser credentials remain supported without rotation; an
+additional browser can resume the guest without invalidating the earlier one.
+Guest rows are not User accounts and cannot access the owner's Calendar or native
+account API. Names are not verified real names. No private edit link, registration
+or new database migration is required.
 
 Public endpoints under `/api/public/time-polls/{token}`: GET detail; POST
 `/participant` joins; PATCH `/participant` renames self; PUT `/response` saves
@@ -119,7 +131,12 @@ slots; PUT `/invitation-response` confirms/declines the exact version. Origin an
 rate checks apply. Responses use no-store and the page is noindex. Native PATCH
 `/api/v1/time-polls/{token}/display-name` renames the authenticated participant.
 Nickname edits are allowed while COLLECTING/INVITING, without changing global
-profile names. Guests appear by name with a Guest badge in web/native rosters.
+profile names. Renaming a guest to another guest's existing name prompts the
+person to use Switch participant or a distinct name; it does not overwrite or
+merge either response. Availability saves use the current guest name, preventing
+an older browser from undoing a rename. The webpage offers Start or continue,
+a resumed-record notice and Switch participant; cookies still restore the last
+selection automatically. Guests appear by name with a Guest badge in web/native rosters.
 
 All selected people, including guests, must accept before confirmation. Only
 registered participants receive Sideseat Calendar rows; their companion names

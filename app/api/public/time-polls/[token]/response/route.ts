@@ -10,7 +10,7 @@ export async function PUT(request: Request, context: { params: Promise<{ token: 
     await publicPollGuard(request, token, true);
     const parsed = await parseV1Json(request, saveTimePollResponseSchema.merge(guestParticipantSchema).strict()); if (!parsed.ok) return parsed.response;
     const guest = await publicPollGuest(token, parsed.data.participantId);
-    await saveTimePollResponse(token, { guestId: guest!.id }, parsed.data, requestAppOrigin(request));
+    await saveTimePollResponse(token, { guestId: guest!.id }, { ...parsed.data, displayName: guest!.displayName }, requestAppOrigin(request));
     return v1Success(await publicPollData(token, requestAppOrigin(request)), { request });
   } catch (cause) { return timePollFailure(request, cause); }
 }

@@ -41,14 +41,14 @@ test("guests fill, rename and confirm in the browser while the app shares their 
       await expect(page.getByRole("main")).toHaveAttribute("lang", "en");
       if (n === 0) expect((await guests[0].cookies()).find((cookie) => cookie.name === "NEXT_LOCALE")?.value).toBe("en");
       await page.getByLabel("Your name in this plan").fill(`Guest ${n + 1}`);
-      await page.getByRole("button", { name: "Join this plan", exact: true }).click();
+      await page.getByRole("button", { name: "Start or continue", exact: true }).click();
       for (const id of [0, 2]) await page.getByTestId(`time-poll-cell-${id}`).click();
       await expect(page.getByRole("status")).toHaveText("Saved");
       if (n === 0) await page.screenshot({ path: "/tmp/sideseat-guest103/guest-availability.png", fullPage: true });
       ids.push((await (await guests[n].request.get(publicPath)).json()).data.viewerId);
     }
     const cookies = await guests[0].cookies();
-    expect(cookies.find((cookie) => cookie.name === "sideseat_poll_guest")).toMatchObject({ httpOnly: true, sameSite: "Lax", path: "/api/public/time-polls" });
+    expect(cookies.find((cookie) => cookie.name === "sideseat_poll_participant")).toMatchObject({ httpOnly: true, sameSite: "Lax", path: publicPath });
     await pages[0].getByRole("button", { name: "Edit nickname" }).click();
     await pages[0].getByLabel("Your name in this plan").fill("小林 Lin");
     await pages[0].getByRole("button", { name: "Save name", exact: true }).click();

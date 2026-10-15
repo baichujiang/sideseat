@@ -22,7 +22,7 @@ async function create(request: APIRequestContext, days: number, endMinute: numbe
 async function join(page: Page, token: string) {
   await page.goto(`/time-polls/${token}`);
   await page.getByLabel("本次计划中的昵称").fill("时间格游客");
-  await page.getByRole("button", { name: "开始参与", exact: true }).click();
+  await page.getByRole("button", { name: "开始 / 继续填写", exact: true }).click();
   await expect(page.getByTestId("time-poll-cell-0")).toBeVisible();
 }
 

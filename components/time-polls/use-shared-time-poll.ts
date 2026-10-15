@@ -11,18 +11,20 @@ export function useSharedTimePoll(token: string) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(true);
   const [editingName, setEditingName] = useState(false);
+  const [switchingParticipant, setSwitchingParticipant] = useState(false);
+  const [resumed, setResumed] = useState(false);
   const [editingAvailability, setEditingAvailability] = useState(false);
   const pending = useRef<Draft | null>(null);
   const running = useRef(false);
   const revision = useRef(0);
   const pauseRefresh = useRef(false);
-  pauseRefresh.current = busy || saving || editingName || editingAvailability;
+  pauseRefresh.current = busy || saving || editingName || switchingParticipant || editingAvailability;
   const base = `/api/public/time-polls/${encodeURIComponent(token)}`;
   const call = useCallback(async (suffix = "", method = "GET", body?: unknown) => {
     const response = await fetch(base + suffix, { method, credentials: "same-origin", cache: "no-store", keepalive: method !== "GET", ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}) });
     const value = await response.json();
     if (!response.ok) throw new Error(value.error?.message ?? "The plan could not be loaded or saved.");
-    return value.data as SharedTimePoll;
+    return value.data as SharedTimePoll & { resumed?: boolean };
   }, [base]);
 
   useEffect(() => {
@@ -77,11 +79,16 @@ export function useSharedTimePoll(token: string) {
   const act = async (suffix: string, method: string, body: unknown) => {
     if (running.current || pending.current) return;
     revision.current += 1; setBusy(true); setError("");
-    try { const data = await call(suffix, method, body); setPoll(data); setSelected(data.mySlotIds); setEditingName(false); }
+    try {
+      const data = await call(suffix, method, body);
+      setPoll(data); setSelected(data.mySlotIds); setEditingName(false); setSwitchingParticipant(false);
+      if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);
+    }
     catch (cause) { setError((cause as Error).message); }
     finally { setBusy(false); }
   };
-  return { poll, selected, error, busy, saving, saved, editingName, setEditingName, setEditingAvailability, saveSelection, retry: flush,
+  return { poll, selected, error, busy, saving, saved, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, retry: flush,
+    cancelNameEditing: () => { setEditingName(false); setSwitchingParticipant(false); setError(""); },
     join: (displayName: string) => act("/participant", "POST", { displayName }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),
     reply: (status: string) => act("/invitation-response", "PUT", { participantId: poll?.viewerId, status, version: poll?.invitationVersion }) };

@@ -189,6 +189,9 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
     if (!["COLLECTING", "INVITING"].includes(poll.phase)) throw new TimePollError(409, "This plan is closed for nickname changes.");
+    if (typeof actor !== "string" && await tx.timePollGuest.findFirst({ where: {
+      pollId: poll.id, id: { not: actor.guestId }, displayName: { equals: displayName, mode: "insensitive" },
+    } })) throw new TimePollError(409, "This name already has a response. Switch participant to continue it, or choose a different name.");
     const own = typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId };
     await tx.timePollResponse.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
     await tx.timePollInvitation.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
