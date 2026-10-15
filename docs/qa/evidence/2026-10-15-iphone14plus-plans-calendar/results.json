@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-10-15T16:54:38.225179+00:00",
+  "timezone": "Europe/Berlin",
+  "sourceCommit": "3a2837b8dbc51e80ef4d9507f718de5058c2c464",
+  "nativeSourceCommit": "6d5e6b5137c78e49291805b1a9989ac462fb209f",
+  "appSourceChanged": false,
+  "device": {
+    "model": "iPhone 14 Plus",
+    "os": "26.6.1",
+    "udidSuffix": "C1401E"
+  },
+  "app": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "100",
+    "ordinaryBuild97Preserved": true
+  },
+  "tests": [
+    {
+      "name": "testAvailabilityCreateAutosaveReopenAndDelete",
+      "result": "passed",
+      "seconds": 62.779,
+      "localLog": "/tmp/sideseat-iphone14plus-smoke-20261015/qa-functional.log"
+    },
+    {
+      "name": "testPersonalCalendarCreateEditSearchAndDelete",
+      "result": "passed",
+      "seconds": 58.378,
+      "localLog": "/tmp/sideseat-iphone14plus-smoke-20261015/qa-functional.log"
+    },
+    {
+      "name": "testDirectPlanAcceptAndCalendarRoute",
+      "result": "passed",
+      "seconds": 67.685,
+      "localLog": "/tmp/sideseat-iphone14plus-smoke-20261015/qa-direct-native.log"
+    },
+    {
+      "name": "testReadOnlyNavigationAndDrafts",
+      "result": "passed",
+      "seconds": 64.261,
+      "localLog": "/tmp/sideseat-iphone14plus-smoke-20261015/qa-navigation-final.log"
+    }
+  ],
+  "directPlanLifecycle": {
+    "recordedAt": "2026-10-15T16:51:53.453839+00:00",
+    "confirmedPhase": "CONFIRMED",
+    "calendarRowsAfterConfirmation": [
+      1,
+      1
+    ],
+    "calendarRowsAfterCancellation": [
+      0,
+      0
+    ],
+    "testPlanDeleted": true
+  },
+  "cleanup": {
+    "recordedAt": "2026-10-15T16:53:39.894848+00:00",
+    "temporaryAccounts": 2,
+    "deletedAccounts": 2,
+    "revokedTokens": 2,
+    "pollsRemainingBeforeAccountDeletion": [
+      0,
+      0
+    ]
+  },
+  "normalLaunch": {
+    "arguments": [],
+    "pid": 869,
+    "processPresent": true
+  },
+  "temporaryRunnerRemoved": true,
+  "clientConfigServerTime": "2026-10-15T16:53:57.507Z",
+  "backendDeploymentFromExistingRelease": "dpl_4vBvPch35jxdarqmgnxmvSsGSt6u",
+  "backendRedeployed": false,
+  "screenshotsSHA256": {
+    "two-person-confirmed.png": "2f06d843a02bbead5cdf3d03b947d68b9da9ca13da2fdadf5a554011f4693954",
+    "calendar-shared-plan.png": "21504822edcfc65341d58932364770bc158982bdf460c0ea7f300f9b5b05ec0a",
+    "calendar-edited.png": "bb2095713fd3e00343b1afe9e37a9803492935ec0fc07adeb3efa16c839f73e0"
+  },
+  "rawResultsLocalDirectory": "/tmp/sideseat-iphone14plus-smoke-20261015",
+  "directBeforeConfirmation": {
+    "recordedAt": "2026-10-15T16:49:30.352515+00:00",
+    "phase": "INVITING",
+    "calendarRowsByAccount": [
+      0,
+      0
+    ],
+    "expectedCount": 2
+  },
+  "caseAggregation": "Four selected cases passed across focused runs; initial mixed run also contains corrected test setup failures."
+}

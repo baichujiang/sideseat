@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a5904fc` 与远程 0/0、干净；功能提交 `7657176` 已推送 |
 | 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (100)` | 本次签名校验、设备安装和空参数启动；[本次交付](./releases/2026-10-15-preview100-unified-plans.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 100 | 2026-10-15 重新签名、安装清单、空参数启动与登录首屏；联网授权与登录后业务验证待完成；[新手机安装记录](./releases/2026-10-15-preview100-iphone14plus.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 100 | 2026-10-15 安装与普通启动；独立临时账号的计划、时间征集、个人日历增改删、双人确认与日历跳转实测通过并清理；[安装记录](./releases/2026-10-15-preview100-iphone14plus.md)、[真机验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) |
 | Preview 100 原生源码 | `6d5e6b5137c78e49291805b1a9989ac462fb209f` | 当前分支已提交并推送；本次签名构建来自该源码 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 本次设备应用清单；独立安装，仍保留兼容；本次未重新核验 Apple 当前分发状态 |
 | 生产 API | `https://api.sideseat.de` → `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |

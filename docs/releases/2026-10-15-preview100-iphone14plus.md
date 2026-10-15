@@ -58,3 +58,12 @@ The owner requested the latest app on the newly selected default test phone.
 
 The original feature acceptance and backend provenance remain in the
 [Preview 100 release](./2026-10-15-preview100-unified-plans.md).
+
+## Subsequent authenticated verification
+
+After the owner completed iOS UI Automation authentication, the
+[iPhone 14 Plus Plans/Calendar check](../qa/2026-10-15-iphone14plus-plans-calendar.md)
+verified the described four native cases using two disposable accounts, including
+confirmation and Calendar routing. Both accounts and test data were removed;
+Preview 100 was returned to empty-argument normal launch. This later check does
+not change the startup-only scope recorded above or imply a new app/backend build.
