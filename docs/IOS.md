@@ -116,7 +116,8 @@ depend on a minute-level server cron because iOS controls background execution.
 - Messages offers native SwiftUI time polls through `TimePollSheet`,
   `TimePollStore` and Sideseat's authenticated `/api/v1/time-polls` service.
   Sideseat stores responses and calculates common/highest-attendance windows.
-  The drag/erase grid uses 15-minute slots with automatic save. There is no
+  The drag/erase grid uses 30-minute display/edit cells with automatic save,
+  preserving existing 15-minute IDs and partial responses. There is no
   provider webview, advertising or When2meet save service in the current client.
   See the [time poll contract](./TIME_POLLS.md) and
   [native delivery QA](./qa/2026-10-15-native-time-polls.md).

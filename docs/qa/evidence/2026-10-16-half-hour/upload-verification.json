@@ -1,0 +1,12 @@
+{
+  "deployment": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+  "sourceCommit": "8bea32b50eacbfa111b977b9a9d200091f78aa36",
+  "baseDeployment": "dpl_6JpdrfEay16wvWzMnzPT5o3zxEPF",
+  "baseFileCount": 1340,
+  "preservedBaseFiles": 1337,
+  "overlayCount": 4,
+  "uploadedFileCount": 1341,
+  "allSha1Match": true,
+  "archiveFilesUploaded": 0,
+  "databaseMigrations": "explicitly skipped"
+}

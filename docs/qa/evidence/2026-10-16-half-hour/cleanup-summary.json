@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-15T22:31:17.675Z",
+  "ownedPollsDeleted": 9,
+  "ownedAccountDeleted": true,
+  "publicLinksUnavailable": 9,
+  "oldAccessTokenStatus": 401,
+  "chatOrEmailSent": false,
+  "ownedSimulatorsDeleted": 2,
+  "privateCredentialsAndArtifactsRemoved": true,
+  "localPreviewAndDatabaseStopped": true,
+  "qaRunnerRemoved": true
+}

@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "8bea32b50eacbfa111b977b9a9d200091f78aa36",
+  "states": {
+    "candidate": {
+      "id": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+      "url": "sideseat-cidavcseg-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    "www": {
+      "id": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+      "url": "sideseat-cidavcseg-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    "api": {
+      "id": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+      "url": "sideseat-cidavcseg-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    }
+  }
+}

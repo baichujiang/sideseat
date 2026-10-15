@@ -1,0 +1,34 @@
+{
+  "runtimeSource": "8bea32b50eacbfa111b977b9a9d200091f78aa36",
+  "device": "isolated iPhone 14 Plus simulator",
+  "os": "iOS 26.5",
+  "configuration": "Development (same availability implementation as signed Preview 106)",
+  "initialRun": {
+    "passed": 3,
+    "failed": 1
+  },
+  "initialFailure": "Scroll fixture had no submitted response, so no Saved indicator was expected. Initialize a saved empty response; no product change.",
+  "focusedRerun": {
+    "passed": 1,
+    "failed": 0
+  },
+  "finalCases": {
+    "testDayHeaderSelectsClearsUndoesAndPersists": {
+      "status": "passed",
+      "seconds": 75.641
+    },
+    "testDeliberateRangeTapEraseAndUndoPersist": {
+      "status": "passed",
+      "seconds": 39.876
+    },
+    "testLegacyPartialHalfHourFillsAndUndoesWithoutRounding": {
+      "status": "passed",
+      "seconds": 29.175
+    },
+    "testOrdinarySwipesScrollWithoutEditing": {
+      "status": "passed",
+      "seconds": 22.816
+    }
+  },
+  "physicalAcceptance": "pending phone unlock"
+}

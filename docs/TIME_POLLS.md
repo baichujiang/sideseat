@@ -2,7 +2,7 @@
 
 Owner decision: 2026-10-15. Supersedes the original-page embedding in Preview 98.
 
-SwiftUI creation, 15-minute rectangular paint/erase, immediate preview, automatic
+SwiftUI creation, 30-minute rectangular paint/erase, immediate preview, automatic
 save, participant heatmap and best windows are implemented by Sideseat. No
 When2meet source code or save service is used. Sideseat account authentication
 replaces provider name/password login in the app. The owner also approved a
@@ -11,7 +11,7 @@ poll-scoped browser guest on 2026-10-15; see Guest participation below.
 ## Mobile selection
 
 Ordinary vertical and horizontal swipes over the cells scroll without editing.
-A tap changes one 15-minute cell. Hold for 0.4 seconds for light feedback, then
+A tap changes one 30-minute cell. Hold for 0.4 seconds for light feedback, then
 drag to preview a rectangular range; release applies it and starts autosave.
 Starting on an available cell erases the range. A cancelled gesture discards the
 preview. The most recent committed selection change can be undone once; Undo
@@ -30,7 +30,17 @@ immutable time range or change anybody else's response.
 
 UIKit tap/long-press recognition arbitrates with the enclosing scroll views;
 the zero-distance SwiftUI drag that previously intercepted scrolling is removed.
-The slot model, 15-minute precision and response ownership are unchanged.
+The persisted slot model retains 15-minute IDs for existing data and older clients.
+The current web and native grids group two adjacent slots into one 30-minute cell,
+halving the row count without shrinking the 44-point/pixel touch targets. Edits
+apply to both IDs. Opening an old response never rounds or rewrites it: a cell with
+only one quarter selected is amber/partial; tapping it fills both quarters, tapping
+a fully selected cell clears both, and Undo restores the exact original IDs.
+An old range ending on an odd quarter retains its shorter boundary cell. Groups
+never cross dates or discontinuous intervals; repeated DST rows keep their IDs.
+Heatmap counts require each person to be available throughout the whole displayed
+cell. Recommendations, invitation duration, and response ownership are unchanged.
+New native collection-hour pickers use half-hour steps.
 
 ## Data and saving
 
@@ -71,7 +81,7 @@ against the native replacement.
 ## Guest participation — owner decision 2026-10-15
 
 The public share page lets people enter a recognizable nickname, select the same
-15-minute grid as the native app, edit their nickname and confirm the current
+30-minute grid as the native app, edit their nickname and confirm the current
 invitation without an account or download. Both clients follow the Mobile
 selection rules above: normal swipes scroll, taps toggle one cell, a 400 ms hold
 previews a rectangular paint/erase range, release commits, cancellation discards,

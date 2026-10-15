@@ -1,0 +1,15 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "106",
+  "installation": "success",
+  "signatureAndProfileVerified": true,
+  "physicalTests": "blocked by phone lock; interrupted before acceptance",
+  "ordinaryLaunch": "attempted without QA arguments; blocked by phone lock",
+  "passcodeRequired": true,
+  "qaRunnerRemoved": true,
+  "simulatorUICasesPassed": 4
+}
