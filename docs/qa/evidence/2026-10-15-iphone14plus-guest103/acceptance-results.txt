@@ -1,0 +1,14 @@
+authorized-ui-probe:
+Test Case '-[SideSeatUITests.PlanCreationPresentationUITests testPlansCreateCancelReturnsToPlansInOneStep]' passed (28.808 seconds).
+** TEST EXECUTE SUCCEEDED **
+
+safari-foreground:
+GUEST_PHONE_PHASE awaiting-confirmation
+GUEST_PHONE_PHASE confirmed
+Test Case '-[SideSeatUITests.UnifiedPlanLiveUITests testSafariGuestShareNicknameAndConfirmation]' passed (129.412 seconds).
+** TEST EXECUTE SUCCEEDED **
+
+physical-gestures:
+Test Case '-[SideSeatUITests.AvailabilityGestureUITests testDeliberateRangeTapEraseAndUndoPersist]' passed (56.388 seconds).
+Test Case '-[SideSeatUITests.AvailabilityGestureUITests testOrdinarySwipesScrollWithoutEditing]' passed (23.338 seconds).
+** TEST EXECUTE SUCCEEDED **

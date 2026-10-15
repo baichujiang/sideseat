@@ -1,0 +1,16 @@
+{
+  "before": {
+    "phase": "INVITING",
+    "accepted": 1,
+    "calendarEntries": 0,
+    "guestName": "Lin Xia"
+  },
+  "after": {
+    "phase": "CONFIRMED",
+    "accepted": 2,
+    "calendarEntries": 1,
+    "hostName": "Host Li",
+    "guestName": "Lin Final",
+    "sameGuestResponse": true
+  }
+}

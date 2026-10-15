@@ -78,3 +78,20 @@ local network; installation and normal launch succeeded. No guest, creation or
 gesture test on this physical build is claimed as passing. Simulator and live
 web/API acceptance remain distinct evidence. The earlier 102 physical gesture
 acceptance limitation is not retroactively marked resolved.
+
+## Later physical acceptance — 2026-10-15
+
+The connection limitation above was resolved in a later session after a fresh
+wired device session and the owner's separate XCTest automation authorization.
+On the same default iPhone 14 Plus, the real Safari → Preview → web confirmation
+→ Calendar flow now passes (129.412 s), as do the single-sheet creation/cancel
+regression (28.808 s) and both physical selection/scroll regressions (56.388 s /
+23.338 s). [Physical QA and evidence](../qa/2026-10-15-iphone14plus-guest-flow.md).
+
+Test/reproduction source `3eb3e3184657586cb986fc29320a0c97b95eb48d` is committed
+and pushed. Installed native source remains `827b570`, Preview **103**; backend
+remains `dpl_6Un8qZtCE26v7edqKd2UBexBUHLx` / `2285ad1`. No app feature source,
+new build number or deployment was needed. The temporary account/polls were
+deleted and its token returns 401; QA runner removed. Empty-argument Preview
+launch and its running PID **694** were verified after cleanup, with ordinary
+SideSeat 97 still installed. The earlier failed attempts remain historical facts.

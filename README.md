@@ -43,7 +43,7 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
 Preview 103 是当前已安装开发版；游客可直接在分享网页填写、修改昵称并确认参加。
-交付及实际验收范围见 [Preview 103](./docs/releases/2026-10-15-preview103-guest-plans.md)。
+交付见 [Preview 103](./docs/releases/2026-10-15-preview103-guest-plans.md)；iPhone 14 Plus 已通过 [Safari 游客参与、昵称、确认和日历完整真机验收](./docs/qa/2026-10-15-iphone14plus-guest-flow.md)。
 普通 SideSeat / TestFlight 97 为独立的旧分发版本。
 多人时间征集位于「消息 → 一起定时间」；聊天中的「智能约时间」是个人日历空档推荐。
 

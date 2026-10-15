@@ -56,3 +56,14 @@ The first local browser attempt exposed an origin mismatch between Next's intern
 URL and the actual browser host. The origin check now uses forwarded host/protocol;
 the complete browser flow passed after that fix. Initial Vercel candidate 401 was
 deployment protection; temporary authenticated access was used for acceptance.
+
+## Later physical follow-up — same day
+
+After the owner completed the separate XCTest automation authorization on the
+wired iPhone 14 Plus, the complete Preview/Safari guest UI flow passed in
+129.412 s. Plans creation/cancel (28.808 s) and both physical gesture regressions
+(56.388 s / 23.338 s) also passed. API assertions verified no premature Calendar,
+final edited names, the same guest response and exactly one final Calendar row.
+The original bootstrap failures above remain the initial-delivery verdict.
+See [the new physical record](./2026-10-15-iphone14plus-guest-flow.md) for source,
+passing screenshots, cleanup and normal-launch evidence.

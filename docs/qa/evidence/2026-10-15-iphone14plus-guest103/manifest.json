@@ -1,0 +1,84 @@
+{
+  "files": [
+    {
+      "path": "acceptance-results.txt",
+      "sha256": "e4f173ca353825e3d878f6f3d960c03e00bc612c22796268aaa9599eabad4ce7",
+      "bytes": 720
+    },
+    {
+      "path": "api-verification.json",
+      "sha256": "e8838b21b9fb45a202b24e70f7ae92a0b758151e47dfb4b8414bbbb16f3ad941",
+      "bytes": 295
+    },
+    {
+      "path": "cleanup-summary.json",
+      "sha256": "5b05b14c361940eddcff8217d312d883ab43b83fc322920e13bee1f76c256b69",
+      "bytes": 177
+    },
+    {
+      "path": "creation-xctest-summary.json",
+      "sha256": "5972b6abe0946cace92a3f1384e4741d198d1a7fe01e7aa704fe9753039267ea",
+      "bytes": 962
+    },
+    {
+      "path": "device-and-launch.json",
+      "sha256": "2f5b9fec29bb2c1175e74d1ee44faf6738a2c459563dcb2b421286661dc59025",
+      "bytes": 626
+    },
+    {
+      "path": "gesture-verification.json",
+      "sha256": "a60514188815d6ab92abfa3f80a1d093250cd2d8870c921068d19c904806ac5f",
+      "bytes": 148
+    },
+    {
+      "path": "gesture-xctest-summary.json",
+      "sha256": "396dc8c3a20bade29980db1e2abc08d0ed41d8501a09bdc15aec6b70de343d70",
+      "bytes": 963
+    },
+    {
+      "path": "phone-calendar.png",
+      "sha256": "a322b989cf73f8eca49edf84efa44e61fddfc8e23e8deda010108c5260249698",
+      "bytes": 226944
+    },
+    {
+      "path": "phone-native-confirmed.png",
+      "sha256": "7791b74806bb503e1d558c857346c4bf3e4d2dc2b461b4d246c24462048e4bcf",
+      "bytes": 191704
+    },
+    {
+      "path": "phone-native-results.png",
+      "sha256": "5a48efedba23476622f9c9fdb830d385ab71646af0468444dd276116443ddd25",
+      "bytes": 233394
+    },
+    {
+      "path": "phone-scroll-no-edit.png",
+      "sha256": "87a7dbb3e73f3ce32a1129f961b1553ec06c1999262387f13c2494fd8232fb15",
+      "bytes": 197444
+    },
+    {
+      "path": "phone-selection-reopened.png",
+      "sha256": "bc31d7d67cce6076a6d3a8bd3d22685370e28351199c22488326a4fff643a839",
+      "bytes": 212601
+    },
+    {
+      "path": "phone-web-availability.png",
+      "sha256": "f172079c5499e4bf275f1bff5474a7046c32a6c6b2495751e34ccb6ecc9c97a8",
+      "bytes": 866254
+    },
+    {
+      "path": "phone-web-confirmed.png",
+      "sha256": "797fcdbd359100bd86af7576a0b5fd03352117c75d3ea07e6c970cc372544ff6",
+      "bytes": 600859
+    },
+    {
+      "path": "phone-web-nickname.png",
+      "sha256": "aa51208baecbbbdc3b2620bd82f0a393ab4a98da3a063af763d0f79ca520d57e",
+      "bytes": 860083
+    },
+    {
+      "path": "safari-xctest-summary.json",
+      "sha256": "4d7eeb2f2a42c81cdfa9c19d07d8499c2f3982220aaa95433087b098a17d6306",
+      "bytes": 962
+    }
+  ]
+}
