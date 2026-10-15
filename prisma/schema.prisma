@@ -2782,6 +2782,7 @@ model TimePoll {
   canceledAt DateTime?
   invitations TimePollInvitation[]
   calendarEntries CalendarEntry[]
+  guests TimePollGuest[]
 
   @@index([creatorId, updatedAt])
 }
@@ -2789,29 +2790,50 @@ model TimePoll {
 model TimePollInvitation {
   id String @id @default(cuid())
   pollId String
-  userId String
+  userId String?
+  guestId String?
   displayName String
   status String @default("INVITED")
   version Int
   selected Boolean @default(true)
   updatedAt DateTime @updatedAt
   poll TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guest TimePollGuest? @relation(fields: [guestId], references: [id], onDelete: Cascade)
 
   @@unique([pollId, userId])
+  @@unique([pollId, guestId])
   @@index([userId, updatedAt])
 }
 
 model TimePollResponse {
   id          String   @id @default(cuid())
   pollId      String
-  userId      String
+  userId      String?
+  guestId     String?
   displayName String
   slotIds     Int[]
   updatedAt   DateTime @updatedAt
   poll        TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guest       TimePollGuest? @relation(fields: [guestId], references: [id], onDelete: Cascade)
 
   @@unique([pollId, userId])
+  @@unique([pollId, guestId])
   @@index([userId, updatedAt])
+}
+
+/// A browser's identity in one shared poll; never a SideSeat account or login.
+model TimePollGuest {
+  id String @id @default(cuid())
+  pollId String
+  credentialHash String
+  displayName String @db.VarChar(60)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  poll TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  responses TimePollResponse[]
+  invitations TimePollInvitation[]
+
+  @@unique([pollId, credentialHash])
 }

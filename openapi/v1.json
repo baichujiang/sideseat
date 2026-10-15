@@ -85,7 +85,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -151,7 +151,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7925,7 +7925,7 @@
               "type": "integer",
               "default": 3
             },
-            "description": "Requested count, clamped to 1–5."
+            "description": "Requested count, clamped to 1\u20135."
           }
         ],
         "responses": {
@@ -11223,6 +11223,66 @@
           }
         }
       ]
+    },
+    "/api/v1/time-polls/{token}/display-name": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "operationId": "renameTimePollParticipant",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimePollDisplayNameRequest"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13455,7 +13515,7 @@
         ]
       },
       "IntentTimePreference": {
-        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
+        "description": "EXACT requires 1\u20137 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
         "oneOf": [
           {
             "type": "object",
@@ -22486,6 +22546,10 @@
           },
           "isMe": {
             "type": "boolean"
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "True for a poll-scoped guest participating through the share page."
           }
         }
       },
@@ -22969,6 +23033,10 @@
           },
           "isMe": {
             "type": "boolean"
+          },
+          "isGuest": {
+            "type": "boolean",
+            "description": "True for a poll-scoped guest participating through the share page."
           }
         }
       },
@@ -23030,6 +23098,20 @@
           "version": {
             "type": "integer",
             "minimum": 1
+          }
+        }
+      },
+      "TimePollDisplayNameRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "displayName"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
           }
         }
       }

@@ -1,0 +1,58 @@
+"use client";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { ArrowUpRight, Check, Pencil, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
+import { useSharedTimePoll } from "@/components/time-polls/use-shared-time-poll";
+import { pollClock, pollDate } from "@/lib/time-polls/browser-types";
+
+export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: boolean }) {
+  const [zh, setZh] = useState(initialZh);
+  const state = useSharedTimePoll(token);
+  const { poll, error, busy, saving, saved, selected, editingName } = state;
+  const [name, setName] = useState("");
+  const [view, setView] = useState<"mine" | "group">("mine");
+  const closed = poll?.phase === "CONFIRMED" || poll?.phase === "CANCELLED";
+  const mine = poll?.invitations.find((person) => person.isMe);
+  const included = mine?.selected || poll?.planningMode === "FIXED";
+  const accepted = poll?.invitations.filter((person) => person.selected && person.status === "ACCEPTED").length ?? 0;
+  const target = poll?.planningMode === "FIXED" ? poll.expectedCount : poll?.invitations.filter((person) => person.selected).length;
+  const people = poll?.phase === "COLLECTING" ? poll.participants : poll?.invitations;
+  const disabled = busy || saving || !saved;
+  const formatWindow = (start: string, end: string) => {
+    const date = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(start));
+    return `${pollDate(date, zh)} · ${pollClock(start, poll!.timeZone)}–${pollClock(end, poll!.timeZone)}`;
+  };
+  return <main className="min-h-dvh bg-stone-50 px-4 pb-12 pt-5 text-stone-900 dark:bg-stone-950 dark:text-stone-100 sm:px-6">
+    <div className="mx-auto max-w-4xl">
+      <header className="mb-8 flex items-center justify-between gap-4"><Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={34} height={34} alt="" className="rounded-lg" />SideSeat</Link><div className="flex items-center gap-4"><button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = `NEXT_LOCALE=${next ? "zh-CN" : "en"}; Path=/; Max-Age=31536000; SameSite=Lax`; }}>{zh ? "English" : "中文"}</button><a href={`sideseat://time-polls/${encodeURIComponent(token)}`} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "在 App 中打开" : "Open in app"}<ArrowUpRight className="h-4 w-4" aria-hidden /></a></div></header>
+      {!poll ? <section className="rounded-2xl border bg-background p-7" aria-live="polite"><h1 className="text-2xl font-semibold">{error ? (zh ? "暂时无法打开计划" : "Plan unavailable") : (zh ? "正在打开计划…" : "Opening your plan…")}</h1>{error ? <p className="mt-3 text-sm text-muted-foreground">{error}</p> : null}</section> : <>
+        <div className="mb-7 space-y-2"><p className="text-sm text-muted-foreground">{zh ? "一起找到合适的时间" : "Find a time together"}</p><h1 className="text-3xl font-semibold tracking-tight">{poll.title}</h1><p className="text-sm text-muted-foreground">{poll.durationMinutes ? `${poll.durationMinutes} ${zh ? "分钟" : "minutes"} · ` : ""}{poll.timeZone}{poll.location ? ` · ${poll.location}` : ""}</p></div>
+        <div className="grid items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)]">
+          <div className="space-y-5">
+            {!closed ? <section className="rounded-2xl border bg-background p-5 sm:p-6">
+              {!poll.viewerId || editingName ? <form onSubmit={(event) => { event.preventDefault(); void (poll.viewerId ? state.rename(name.trim()) : state.join(name.trim())); }} className="space-y-3">
+                <label htmlFor="poll-nickname" className="block text-sm font-medium">{zh ? "本次计划中的昵称" : "Your name in this plan"}</label>
+                <input id="poll-nickname" autoComplete="nickname" maxLength={60} required value={name} onChange={(event) => setName(event.target.value)} placeholder={zh ? "让朋友认出你，例如：小林" : "A name your friends will recognize"} className="min-h-12 w-full rounded-xl border bg-background px-3" />
+                <p className="text-xs leading-5 text-muted-foreground">{zh ? "无需下载或注册。请在同一浏览器返回，继续修改自己的填写。" : "No download or account needed. Return in this browser to edit your response."}</p>
+                <div className="flex gap-3"><Button type="submit" disabled={disabled || !name.trim()} className="min-h-11 rounded-xl">{busy ? (zh ? "保存中…" : "Saving…") : poll.viewerId ? (zh ? "保存昵称" : "Save name") : (zh ? "开始参与" : "Join this plan")}</Button>{poll.viewerId ? <Button type="button" variant="ghost" onClick={() => state.setEditingName(false)}>{zh ? "取消" : "Cancel"}</Button> : null}</div>
+              </form> : <div className="flex items-center justify-between gap-3"><div><p className="text-xs text-muted-foreground">{zh ? "本次计划中的昵称" : "Your name in this plan"}</p><p className="mt-1 font-medium">{poll.myDisplayName}<span className="ml-2 text-xs font-normal text-muted-foreground">{zh ? "游客" : "Guest"}</span></p></div><button type="button" disabled={disabled} aria-label={zh ? "编辑昵称" : "Edit nickname"} onClick={() => { setName(poll.myDisplayName); state.setEditingName(true); }} className="flex h-11 w-11 items-center justify-center rounded-xl border"><Pencil className="h-4 w-4" aria-hidden /></button></div>}
+            </section> : null}
+            {error ? <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-stone-900">{error}{!saved ? <button type="button" disabled={saving} onClick={() => void state.retry()} className="ml-3 min-h-11 underline">{zh ? "重试保存" : "Retry save"}</button> : null}</div> : null}
+            {poll.phase === "COLLECTING" ? <section className="rounded-2xl border bg-background p-5 sm:p-6">
+              <div className="mb-6 flex items-center justify-between gap-3"><div className="flex gap-2" role="group" aria-label={zh ? "时间视图" : "Availability view"}>{(["mine", "group"] as const).map((tab) => <button key={tab} type="button" aria-pressed={view === tab} onClick={() => setView(tab)} className={`min-h-11 rounded-xl px-3 text-sm ${view === tab ? "bg-muted font-semibold" : "text-muted-foreground"}`}>{tab === "mine" ? (zh ? "我的时间" : "My availability") : (zh ? "大家的结果" : "Group results")}</button>)}</div><span role="status" className="text-xs text-muted-foreground">{saving ? (zh ? "保存中…" : "Saving…") : saved && poll.didRespond ? (zh ? "已保存" : "Saved") : !saved ? (zh ? "尚未保存" : "Not saved") : ""}</span></div>
+              {view === "mine" ? poll.viewerId ? <AvailabilityEditor poll={poll} selected={selected} onChange={state.saveSelection} disabled={busy || editingName} zh={zh} /> : <p className="py-8 text-sm text-muted-foreground">{zh ? "填写上方昵称后，就可以添加可用时间。" : "Enter your name above to start adding available times."}</p> : <div className="space-y-4"><h2 className="text-lg font-semibold">{poll.summary.common ? (zh ? "所有人都方便的时间" : "Times that work for everyone") : (zh ? "人数最多的时间" : "Best available times")}</h2><p className="text-sm text-muted-foreground">{poll.summary.participantCount}/{poll.expectedCount ?? poll.summary.participantCount} {zh ? "人已填写" : "responses"}</p>{poll.summary.windows.length ? poll.summary.windows.slice(0, 12).map((window) => <div key={window.start} className="rounded-xl border p-4"><p className="font-medium">{formatWindow(window.start, window.end)}</p><p className="mt-2 text-sm text-muted-foreground">{poll.participants.filter((person) => window.attendeeIds.includes(person.id)).map((person) => person.displayName).join(" · ")}</p></div>) : <p className="text-sm text-muted-foreground">{zh ? "还没有可推荐的完整时段。" : "No complete time windows available yet."}</p>}</div>}
+            </section> : <section className="space-y-5 rounded-2xl border bg-background p-5 sm:p-6"><h2 className="text-xl font-semibold">{poll.phase === "CONFIRMED" ? (zh ? "计划已确定" : "Plan confirmed") : poll.phase === "CANCELLED" ? (zh ? "计划已取消" : "Plan cancelled") : (zh ? "请确认这个时间" : "Confirm this time")}</h2>{poll.chosenStart && poll.chosenEnd ? <p className="font-medium">{formatWindow(poll.chosenStart, poll.chosenEnd)}</p> : null}<p className="text-sm text-muted-foreground">{accepted}/{target ?? 0} {zh ? "人已确认" : "confirmed"}</p>
+              {poll.phase === "INVITING" && poll.viewerId ? included ? <><p className="text-sm text-muted-foreground">{zh ? "每个人都确认后，计划才会确定。你可以直接在此网页回复。" : "The plan is confirmed after everyone accepts. Reply directly on this page."}</p><div className="flex flex-col gap-3"><Button disabled={disabled || mine?.status === "ACCEPTED"} onClick={() => void state.reply("ACCEPTED")} className="min-h-12 rounded-xl">{mine?.status === "ACCEPTED" ? (zh ? "你已确认参加" : "You've confirmed") : (zh ? "确认参加" : "Confirm participation")}</Button><Button variant="outline" disabled={disabled || mine?.status === "DECLINED"} onClick={() => void state.reply("DECLINED")} className="min-h-12 rounded-xl">{mine?.status === "DECLINED" ? (zh ? "你已回复无法参加" : "You've declined") : (zh ? "无法参加" : "I can't attend")}</Button></div></> : <p className="text-sm text-muted-foreground">{zh ? "这次邀请未包含你，你的可用时间仍已保存。" : "You aren't included in this invitation. Your availability remains saved."}</p> : null}
+              {poll.phase === "CONFIRMED" ? <p className="text-sm text-muted-foreground">{zh ? "保留此链接即可随时查看活动详情。" : "Keep this link to return to the plan details."}</p> : null}
+            </section>}
+          </div>
+          <aside className="rounded-2xl border bg-background p-5 sm:p-6"><h2 className="flex items-center gap-2 text-base font-semibold"><Users className="h-4 w-4" aria-hidden />{zh ? "参与者" : "Participants"}<span className="text-sm font-normal text-muted-foreground">{people?.length ?? 0}</span></h2><ul className="mt-4 divide-y">{people?.map((person) => <li key={person.id} className="flex items-center justify-between gap-3 py-3"><div><p className="font-medium">{person.displayName}{person.isMe ? <span className="ml-2 text-xs font-normal text-muted-foreground">{zh ? "你" : "You"}</span> : null}</p><p className="mt-0.5 text-xs text-muted-foreground">{person.isGuest ? (zh ? "游客" : "Guest") : "SideSeat"}</p></div>{"status" in person ? <span className="text-xs text-muted-foreground">{person.status === "ACCEPTED" ? <Check className="h-4 w-4" aria-label={zh ? "已确认" : "Confirmed"} /> : person.status === "DECLINED" ? (zh ? "无法参加" : "Declined") : (zh ? "待确认" : "Awaiting reply")}</span> : <span className="text-xs text-muted-foreground">{Math.round(person.slotIds.length * 15 / 60 * 10) / 10} h</span>}</li>)}</ul>{!people?.length ? <p className="mt-4 text-sm text-muted-foreground">{zh ? "还没有人填写，你可以成为第一个。" : "No responses yet. You can be the first."}</p> : null}</aside>
+        </div>
+      </>}
+      <footer className="mt-10 flex gap-5 text-xs text-muted-foreground"><Link href="/privacy">{zh ? "隐私" : "Privacy"}</Link><Link href="/support">{zh ? "帮助" : "Support"}</Link></footer>
+    </div>
+  </main>;
+}

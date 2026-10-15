@@ -12,17 +12,17 @@ PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.
 
-- COLLECTING: immutable candidate slots, one autosaved response/account. Duration
+- COLLECTING: immutable candidate slots, one autosaved response/account or browser guest. Duration
   recommendations intersect the same attendees across every consecutive slot of
   the complete window. Expected but missing respondents prevent `common=true`.
 - INVITING: a chosen future start/end and explicit roster. Creator send is explicit
-  acceptance; each other selected person accepts or declines. For FIXED, signed-in
+  acceptance; each other selected person accepts or declines. For FIXED,
   link holders can join until the target count is filled. Declining that open link
   does not consume a seat. No Calendar entry exists before completion.
 - CONFIRMED: every selected participant accepted the same invitationVersion.
   All projections and companion rows are written atomically in that transaction.
-  Repeated acceptance never duplicates projections. A four-person roster creates
-  exactly four projections; excluded respondents retain history, not membership.
+  Repeated acceptance never duplicates projections. A four-account roster creates
+  exactly four projections; guests confirm on the web and have no personal Calendar row; excluded respondents retain history, not membership.
 - CANCELLED: creator cancellation, Block or affected account deletion removes all
   Calendar projections. Unblock does not restore them. Collecting/cancelled roots
   may be deleted by their creator. Confirmed plans do not support in-place
@@ -45,8 +45,9 @@ Existing `GET/POST /api/v1/time-polls`, `GET/DELETE /{token}` and
 | POST `/cancel` | Owner cancels current version and removes projections |
 
 All use the authenticated v1 envelope and OpenAPI contract. The 192-bit token
-serves as an invite capability for signed-in holders. Anonymous web handoff reveals
-no responses. No third-party code/page/save service is involved.
+serves as an invite capability for link holders. The guest web page shows the
+shared poll and supports filling, nickname editing and confirmation without
+downloading or registering; see [Guest participation](./TIME_POLLS.md#guest-participation--owner-decision-2026-10-15). No third-party code/page/save service is involved.
 
 TimePollInvitation has unique `(pollId,userId)` membership. CalendarEntry has an
 optional cascading TimePoll relation, unique `(userId,timePollId)`, and a relation

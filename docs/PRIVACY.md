@@ -62,10 +62,14 @@ All categories below are currently marked as not used for cross-company tracking
 
 Preview 99 replaces the embedded provider page with SwiftUI and first-party
 API/PostgreSQL storage. Poll-specific display names and selected free-time cells
-are linked to the Sideseat account for response ownership. Authenticated holders
-of the invite link may view the visible responses and derived attendance results.
+are linked to the Sideseat account for response ownership. Holders
+of the invite link may view the shared names, selected slots and attendance results.
 Blocked creators/participants follow the existing visibility restrictions. The
-browser handoff shows no names or availability without authentication.
+owner-approved guest web entry (2026-10-15) uses a poll-scoped nickname and hashed
+browser credential, with the raw credential in an HttpOnly cookie. Guests can
+edit only their own answer and confirm on the web; they do not become accounts
+or gain access to personal Calendar data. The shared link is an access capability
+and should be shared only with intended participants.
 
 No When2meet service, advertising or separate provider password is used by new
 polls. Sideseat stores created/responded polls for reopening until the creator

@@ -3,10 +3,10 @@ import type { Prisma } from "@prisma/client";
 import { userConnectionSafetyLocks } from "@/lib/v2/action-coordination/db-locks";
 
 /** All plan writes take member safety locks before the plan row, matching Block. */
-export async function lockPollPlan(tx: Prisma.TransactionClient, token: string, actorId: string, extraUserIds: string[] = []) {
+export async function lockPollPlan(tx: Prisma.TransactionClient, token: string, actorId: string | null, extraUserIds: string[] = []) {
   const snapshot = await tx.timePoll.findUnique({ where: { token }, include: { invitations: true, responses: true } });
   if (!snapshot) return null;
-  await userConnectionSafetyLocks(tx, [actorId, snapshot.creatorId, ...snapshot.invitations.map((i) => i.userId), ...snapshot.responses.map((r) => r.userId), ...extraUserIds]);
+  await userConnectionSafetyLocks(tx, [actorId, snapshot.creatorId, ...snapshot.invitations.map((i) => i.userId), ...snapshot.responses.map((r) => r.userId), ...extraUserIds].filter((id): id is string => id !== null));
   await tx.$queryRaw`SELECT "id" FROM "TimePoll" WHERE "id" = ${snapshot.id} FOR UPDATE`;
   return tx.timePoll.findUnique({ where: { id: snapshot.id }, include: { invitations: true, responses: true } });
 }

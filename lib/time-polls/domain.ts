@@ -23,6 +23,7 @@ export const saveTimePollResponseSchema = z.object({
   displayName: z.string().trim().min(1).max(60),
   slotIds: z.array(z.number().int().min(0)).max(3100),
 }).strict();
+export const timePollDisplayNameSchema = z.object({ displayName: saveTimePollResponseSchema.shape.displayName }).strict();
 
 export type PollSlot = { id: number; date: string; row: string; label: string; start: string; end: string };
 export type PollParticipant = { id: string; displayName: string; slotIds: number[]; isMe: boolean };

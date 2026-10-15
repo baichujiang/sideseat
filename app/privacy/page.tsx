@@ -54,8 +54,8 @@ export default async function PrivacyPage() {
             <li>
               <span className="font-medium">{zh ? "用户内容" : "User content"}</span>
               {zh
-                ? " — 消息、计划、日程分享、时间征集中的名字和空余时间、发现页帖子与活动、你创建或导入的日历日程，以及你提交的举报。时间征集由 Sideseat 保存，持有征集链接并登录的参与者可以查看答复。"
-                : " — messages, plans, schedule shares, names and availability in time polls, Discover posts and activities, calendar events you create or import, and reports you submit. Sideseat stores time polls; signed-in invite-link holders can view responses."}
+                ? " — 消息、计划、日程分享、时间征集中的名字和空余时间、发现页帖子与活动、你创建或导入的日历日程，以及你提交的举报。时间征集由 Sideseat 保存，持有征集链接的人可以查看昵称、可用时间和结果。游客可直接在网页填写和确认；仅保存在本次计划中的昵称和浏览器参与身份，不创建账号。"
+                : " — messages, plans, schedule shares, names and availability in time polls, Discover posts and activities, calendar events you create or import, and reports you submit. Sideseat stores time polls; invite-link holders can view names, availability and results. Guests can fill and confirm on the web using a poll-specific nickname and browser credential without creating an account."}
             </li>
             <li>
               <span className="font-medium">{zh ? "标识符" : "Identifiers"}</span>
