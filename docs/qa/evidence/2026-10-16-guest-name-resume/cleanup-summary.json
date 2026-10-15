@@ -1,0 +1,28 @@
+{
+  "ownedPollsDeleted": 4,
+  "ownedAccountDeleted": true,
+  "oldTokenStatus": 401,
+  "publicPollStatuses": [
+    {
+      "stage": "candidate",
+      "engine": "chromium",
+      "status": 404
+    },
+    {
+      "stage": "candidate",
+      "engine": "webkit",
+      "status": 404
+    },
+    {
+      "stage": "live",
+      "engine": "chromium",
+      "status": 404
+    },
+    {
+      "stage": "live",
+      "engine": "webkit",
+      "status": 404
+    }
+  ],
+  "checkedAt": "2026-10-15T23:22:08.686Z"
+}

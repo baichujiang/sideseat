@@ -1,0 +1,10 @@
+{
+  "deployment": "dpl_6gNEve6aFMsmzWFD4rJpNgBB4fUH",
+  "sourceCommit": "2dfd3a9601ae9b1690e28ab41c7dca2bc0b99b2a",
+  "expectedFiles": 1342,
+  "uploadedFiles": 1342,
+  "allSha1Matched": true,
+  "overlaidSourceFiles": 6,
+  "unchangedProductionFiles": 1335,
+  "databaseMigration": false
+}

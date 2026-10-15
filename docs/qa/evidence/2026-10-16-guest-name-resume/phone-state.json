@@ -1,0 +1,16 @@
+{
+  "udid": "00008110-001A69110CC1401E",
+  "device": "iPhone 14 Plus",
+  "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "installed": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "name": "SideSeat Preview",
+    "version": "1.0.0",
+    "bundleVersion": "107"
+  },
+  "runtimeSource": "6222c88e89a7d43569afb681a2d34f937f0296e3",
+  "nativeCodeChanged": false,
+  "rebuiltOrReinstalledThisStage": false,
+  "physicalUiTestsThisStage": false,
+  "webBackendOnlyRelease": true
+}

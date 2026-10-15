@@ -1,0 +1,40 @@
+{
+  "baseDeployment": "dpl_JA6CDQp3JCxLfUnMmZaMm5QHRAQ5",
+  "verifiedBaseFiles": 1341,
+  "sourceCommit": "2dfd3a9601ae9b1690e28ab41c7dca2bc0b99b2a",
+  "sourceBranch": "codex/ios-uxui-20260922",
+  "overlays": [
+    {
+      "path": "lib/time-polls/public-session.ts",
+      "beforeSha1": "a1029c23034c8868b1058312b19086ce32bdcd65",
+      "afterSha1": "a51c239f4ed157a24161aae5d965f20fdd81bac0"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "beforeSha1": "6b957149697d4e08af5f84d3f2f8d115ccbc21f8",
+      "afterSha1": "a90d55df6d0de815162663bc06ed01a82447b233"
+    },
+    {
+      "path": "app/api/public/time-polls/[token]/participant/route.ts",
+      "beforeSha1": "a688cf6e52aa70b31fcf86794a229759bd3db548",
+      "afterSha1": "4ba23446d4810f96f0d04d03aececaa827d7af4a"
+    },
+    {
+      "path": "app/api/public/time-polls/[token]/response/route.ts",
+      "beforeSha1": "90ef7585901e76cde28020799e55070c629c5512",
+      "afterSha1": "95b9bd48acdc4b9586d095f9491bbce0c6d50254"
+    },
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "beforeSha1": "3bed543751cab5c1611ba9b8f68ada01760dd290",
+      "afterSha1": "86eee8632d1dbdde07520cffd8e7e3d585012d6a"
+    },
+    {
+      "path": "components/time-polls/use-shared-time-poll.ts",
+      "beforeSha1": "f9e608b17e0a1a2697626328bb84de1edcf43e3d",
+      "afterSha1": "6d141293284a8ecb84efee2ef18496f98219dbee"
+    }
+  ],
+  "schemaChanged": false,
+  "migrationRequired": false
+}

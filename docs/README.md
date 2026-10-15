@@ -65,6 +65,8 @@ Historical build evidence never certifies a newer build.
 | [Preview 106 / half-hour timetable](./releases/2026-10-16-preview106-half-hour.md) | Web/native 30-minute cells, exact legacy availability, partial states, whole-cell heatmap and actual install/test status |
 | [Preview 107 / saved availability label](./releases/2026-10-16-preview107-availability-saved-label.md) | Correct Chinese saved status, installed phone build and focused Light/Dark acceptance |
 | [Half-hour iPhone 14 Plus acceptance](./qa/2026-10-16-half-hour-iphone14plus.md) | Four physical gesture/save regressions, final Preview 107 retest, exact API values and cleanup |
+| [Guest name resume release](./releases/2026-10-16-guest-name-resume.md) | Trusted shared-link name entry resumes the original guest across browsers, with no private edit link |
+| [Guest name resume QA](./qa/2026-10-16-guest-name-resume.md) | Cross-browser/cookie-clear/name switching, preserved responses, confirmation/Calendar and production source verification |
 | [Preview 1.0.0 (105)](./releases/2026-10-15-preview105-availability-colors.md) | Installed teal/amber availability states and legend; Light/Dark phone acceptance and save/scroll regression pass |
 | [Preview 1.0.0 (104)](./releases/2026-10-15-preview104-day-selection.md) | Installed weekday/day selection shortcut; physical full-day, Undo, persistence and scroll regressions pass |
 | [Preview 1.0.0 (103)](./releases/2026-10-15-preview103-guest-plans.md) | Installed guest/nickname update; later iPhone 14 Plus Safari/native/Calendar, creation and gesture acceptance pass |

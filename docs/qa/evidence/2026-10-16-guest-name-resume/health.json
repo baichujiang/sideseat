@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-15T23:22:05.983Z",
+  "checks": [
+    {
+      "name": "config",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "aasa",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "ios",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "privacy",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "support",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "www share",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "api share",
+      "status": 200,
+      "passed": true
+    },
+    {
+      "name": "bare share",
+      "status": 307,
+      "passed": true
+    }
+  ]
+}

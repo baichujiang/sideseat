@@ -1,0 +1,76 @@
+{
+  "sourceCommit": "2dfd3a9601ae9b1690e28ab41c7dca2bc0b99b2a",
+  "localDatabase": "sideseat_ios_test on 127.0.0.1:5433",
+  "serverPort": 3105,
+  "initial": {
+    "cases": [
+      {
+        "name": "day selection, partial color, undo, keyboard, persistence and read-only heatmap match the app in Chromium and WebKit",
+        "file": "time-poll-grid.spec.ts",
+        "status": "passed",
+        "milliseconds": 14952
+      },
+      {
+        "name": "legacy half selections stay partial and heatmap requires the same person throughout 30 minutes",
+        "file": "time-poll-grid.spec.ts",
+        "status": "passed",
+        "milliseconds": 4266
+      },
+      {
+        "name": "real touch swipes scroll without edits; hold paints, erases and cancels without a premature save",
+        "file": "time-poll-grid.spec.ts",
+        "status": "passed",
+        "milliseconds": 3750
+      },
+      {
+        "name": "guests fill, rename and confirm in the browser while the app shares their names and calendar outcome",
+        "file": "time-poll-guests.spec.ts",
+        "status": "passed",
+        "milliseconds": 11142
+      },
+      {
+        "name": "chromium: same name resumes across browsers, clears cookies, renames and confirms without another vote",
+        "file": "time-poll-name-resume.spec.ts",
+        "status": "failed",
+        "milliseconds": 5031
+      },
+      {
+        "name": "webkit: same name resumes across browsers, clears cookies, renames and confirms without another vote",
+        "file": "time-poll-name-resume.spec.ts",
+        "status": "failed",
+        "milliseconds": 7525
+      },
+      {
+        "name": "concurrent names reuse one guest; legacy credentials and poll isolation remain usable",
+        "file": "time-poll-name-resume.spec.ts",
+        "status": "passed",
+        "milliseconds": 484
+      }
+    ],
+    "passed": 5,
+    "failed": 2,
+    "failureCause": "New test alert selector also matched the Next.js route announcer; both product alert messages were correct."
+  },
+  "focusedRetry": {
+    "cases": [
+      {
+        "name": "chromium: same name resumes across browsers, clears cookies, renames and confirms without another vote",
+        "file": "time-poll-name-resume.spec.ts",
+        "status": "passed",
+        "milliseconds": 7014
+      },
+      {
+        "name": "webkit: same name resumes across browsers, clears cookies, renames and confirms without another vote",
+        "file": "time-poll-name-resume.spec.ts",
+        "status": "passed",
+        "milliseconds": 7448
+      }
+    ],
+    "passed": 2,
+    "failed": 0,
+    "change": "Filter the alert by its text; canceling name editing also clears the displayed error."
+  },
+  "distinctCasesFinallyPassed": 7,
+  "typecheck": "passed",
+  "targetedEslint": "passed"
+}

@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-10-15T23:21:20.482Z",
+  "results": [
+    {
+      "stage": "live",
+      "engine": "chromium",
+      "result": "passed",
+      "crossBrowserSameGuest": true,
+      "clearCookiesResume": true,
+      "responseIdPreserved": true,
+      "originalBrowserStillWorks": true,
+      "renamePreserved": true,
+      "guestCount": 2,
+      "totalResponses": 3,
+      "mySlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "confirmationsAccepted": 2,
+      "registeredCalendarEntries": 1,
+      "cancelledAfterVerification": true,
+      "guestCalendarVerification": "Guests have no account; no guest Calendar rows in local DB integration. Production checked owner schedule only."
+    },
+    {
+      "stage": "live",
+      "engine": "webkit",
+      "result": "passed",
+      "crossBrowserSameGuest": true,
+      "clearCookiesResume": true,
+      "responseIdPreserved": true,
+      "originalBrowserStillWorks": true,
+      "renamePreserved": true,
+      "guestCount": 2,
+      "totalResponses": 3,
+      "mySlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "confirmationsAccepted": 2,
+      "registeredCalendarEntries": 1,
+      "cancelledAfterVerification": true,
+      "guestCalendarVerification": "Guests have no account; no guest Calendar rows in local DB integration. Production checked owner schedule only."
+    }
+  ]
+}
