@@ -17,4 +17,4 @@ mkdir -p "$ss_project_dir"
 trap 'xcrun devicectl device process launch --device "$ss_device_udid" --terminate-existing app.sideseat.mobile.preview >/dev/null 2>&1 || true' EXIT
 xcodebuild -project "$ss_project_dir/NativeTimePollPhone99.xcodeproj" -scheme NativeTimePollPhone99 \
   -destination "platform=iOS,id=$ss_device_udid" -derivedDataPath "$ss_ios_dir/DerivedData-NativePoll-Phone99" \
-  -allowProvisioningUpdates -resultBundlePath "$ss_result" test
+  -allowProvisioningUpdates -resultBundlePath "$ss_result" test "$@"

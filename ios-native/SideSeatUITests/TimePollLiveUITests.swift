@@ -2,7 +2,7 @@ import XCTest
 
 /// Uses five isolated QA accounts and real Sideseat API/storage. No chat is sent.
 @MainActor final class TimePollLiveUITests: XCTestCase {
-    private var app = XCUIApplication()
+    private var app = XCUIApplication(bundleIdentifier: "app.sideseat.mobile")
     private var api = ""
     private var accounts: [[String: String]] = []
     private var token = ""
@@ -92,8 +92,10 @@ import XCTest
             XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "Best available times")
             XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label == %@", "4 of 5 available")).firstMatch.exists)
         }
+        let banner = XCUIApplication(bundleIdentifier: "com.apple.springboard").descendants(matching: .any)["NotificationShortLookView"].firstMatch
+        if banner.exists { banner.swipeUp() }
         app.buttons["time-poll-menu"].tap()
-        XCTAssertTrue(app.buttons["Copy link"].exists); XCTAssertTrue(app.buttons["Share poll"].exists)
+        XCTAssertTrue(app.buttons["Copy link"].waitForExistence(timeout: 10)); XCTAssertTrue(app.buttons["Share poll"].exists)
         attach("reopened")
     }
 
