@@ -2540,3 +2540,9 @@
 
 "Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically." = "Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically.";
 "Undo last change" = "Undo last change";
+
+// Guest participation in shared plans
+"Guest" = "Guest";
+"Edit nickname" = "Edit nickname";
+"Your name in this plan" = "Your name in this plan";
+"Synced to Sideseat calendars" = "Synced to Sideseat calendars";

@@ -2540,3 +2540,9 @@
 
 "Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically." = "滑动查看时间，点按选择单格；长按后拖动可连选或擦除。修改会自动保存。";
 "Undo last change" = "撤销上次修改";
+
+// Guest participation in shared plans
+"Guest" = "游客";
+"Edit nickname" = "编辑昵称";
+"Your name in this plan" = "本次计划中的昵称";
+"Synced to Sideseat calendars" = "已同步到 Sideseat 日历";

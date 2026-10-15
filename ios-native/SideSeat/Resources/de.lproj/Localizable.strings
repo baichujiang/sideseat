@@ -2539,3 +2539,9 @@
 
 "Swipe to scroll. Tap a cell, or hold and drag to select. Changes save automatically." = "Wische zum Scrollen. Tippe auf ein Feld oder halte es gedrückt und ziehe zum Auswählen. Änderungen werden automatisch gespeichert.";
 "Undo last change" = "Letzte Änderung rückgängig machen";
+
+// Guest participation in shared plans
+"Guest" = "Gast";
+"Edit nickname" = "Namen bearbeiten";
+"Your name in this plan" = "Dein Name in diesem Plan";
+"Synced to Sideseat calendars" = "Mit Sideseat-Kalendern synchronisiert";

@@ -209,11 +209,16 @@ struct TimePollDetailView: View {
                     }.pickerStyle(.segmented).accessibilityIdentifier("time-poll-mode").disabled(choosingAgain)
                     if results { summary(poll) }
                     else {
+                        Text("Your name in this plan").font(.caption).foregroundStyle(.secondary)
                         HStack {
                             TextField("Your name", text: $store.displayName)
                                 .focused($nameFocused).submitLabel(.done)
                                 .onSubmit { store.save(session: session); nameFocused = false }
                                 .accessibilityIdentifier("time-poll-name")
+                            Button { nameFocused = true } label: { Image(systemName: "pencil") }
+                                .frame(minWidth: 44, minHeight: 44)
+                                .accessibilityLabel("Edit nickname")
+                                .accessibilityIdentifier("time-poll-edit-name")
                             saveStatus
                         }
                         if !poll.didRespond && store.selected.isEmpty {
@@ -307,7 +312,7 @@ struct TimePollDetailView: View {
                     }
                 }.scrollIndicators(.hidden)
             }
-            Text(poll.participants.map(\.displayName).joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
+            Text(poll.participants.map { $0.displayName + ($0.isGuest == true ? " (" + AppLocalization.string("Guest") + ")" : "") }.joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
                 .accessibilityIdentifier("time-poll-participants")
         }.accessibilityElement(children: .contain)
     }

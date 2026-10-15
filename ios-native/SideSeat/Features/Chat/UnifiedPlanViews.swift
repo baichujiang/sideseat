@@ -36,6 +36,7 @@ struct UnifiedPlanInviteView: View {
                                 Image(systemName: selected.contains(person.id) ? "checkmark.circle.fill" : "circle")
                                 VStack(alignment: .leading) {
                                     Text(person.displayName).foregroundStyle(SideSeatTheme.textPrimary)
+                                    if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
                                     Text(window.attendeeIds.contains(person.id) ? "Available for the full activity" : "Not available for the full activity")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
@@ -75,6 +76,8 @@ struct UnifiedPlanConfirmationView: View {
     @Bindable var store: TimePollStore
     let chooseAnotherTime: () -> Void
     @State private var showsCancel = false
+    @State private var showsName = false
+    @State private var draftName = ""
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
     private var canReply: Bool { poll.planningPhase == "INVITING" && !poll.isOwner && (mine != nil || poll.planningMode == "FIXED") }
@@ -92,14 +95,23 @@ struct UnifiedPlanConfirmationView: View {
                     Text(statusTitle).font(.headline).accessibilityIdentifier("unified-plan-phase")
                     Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
                         .accessibilityIdentifier("unified-plan-confirmation-count")
-                    Text(poll.planningPhase == "CONFIRMED" ? "Synced to participants' calendars" : poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed." : "The plan is added to calendars after everyone included confirms.")
+                    Text(poll.planningPhase == "CONFIRMED" ? "Synced to Sideseat calendars" : poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed." : "The plan is added to calendars after everyone included confirms.")
                         .font(.footnote).foregroundStyle(.secondary)
                         .accessibilityIdentifier("unified-plan-calendar-status")
+                }
+                if poll.planningPhase == "INVITING", mine != nil {
+                    Button {
+                        draftName = poll.myDisplayName; showsName = true
+                    } label: { Label("Edit nickname", systemImage: "pencil") }
+                        .frame(minHeight: 44).accessibilityIdentifier("time-poll-edit-name")
                 }
                 ForEach(poll.allInvitations) { person in
                     HStack {
                         Image(systemName: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock")
-                        Text(person.displayName)
+                        VStack(alignment: .leading) {
+                            Text(person.displayName)
+                            if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
+                        }
                         Spacer()
                         Text(AppLocalization.string(person.status == "ACCEPTED" ? "Confirmed" : person.status == "DECLINED" ? "Declined" : "Awaiting confirmation"))
                             .font(.subheadline).foregroundStyle(.secondary)
@@ -136,6 +148,29 @@ struct UnifiedPlanConfirmationView: View {
             Button("Cancel plan", role: .destructive) {
                 Task { await store.mutate("cancel", body: CancelPollPlanRequest(version: poll.invitationVersion ?? 0), session: session) }
             }
+        }
+        .sheet(isPresented: $showsName) {
+            NavigationStack {
+                Form {
+                    Section("Your name in this plan") {
+                        TextField("Your name", text: $draftName).textContentType(.nickname)
+                            .accessibilityIdentifier("time-poll-edit-name-field")
+                    }
+                    if let error = store.error { Text(error).foregroundStyle(SideSeatTheme.danger) }
+                }
+                .navigationTitle("Edit nickname").navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsName = false }.disabled(store.acting) }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            Task {
+                                await store.mutate("display-name", method: .patch, body: TimePollDisplayNameRequest(displayName: draftName.trimmingCharacters(in: .whitespacesAndNewlines)), session: session)
+                                if store.error == nil { showsName = false }
+                            }
+                        }.disabled(!store.canMutate || draftName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftName.count > 60)
+                    }
+                }
+            }.presentationDetents([.medium, .large])
         }
     }
     private var statusTitle: String {

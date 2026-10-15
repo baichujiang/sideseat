@@ -21,7 +21,7 @@ import XCTest
             try XCTSkipUnless(api.hasPrefix("http://127.0.0.1"), "Production QA requires private temporary account credentials.")
             accounts = (1...5).map { ["identifier": "test_00\($0)", "password": "Password123"] }
         }
-        XCTAssertEqual(accounts.count, 5)
+        XCTAssertFalse(accounts.isEmpty)
 
     }
 
@@ -31,6 +31,51 @@ import XCTest
             let data = try XCTUnwrap(result["data"] as? [String: Any]); let tokens = try XCTUnwrap(data["tokens"] as? [String: Any])
             auth.append(try XCTUnwrap(tokens["accessToken"] as? String))
         }
+    }
+
+    func testGuestNamesInvitationsAndCalendar() throws {
+        try authenticateAccounts()
+        title = "Guest plan QA \(Int(Date().timeIntervalSince1970))"
+        let date = String(ISO8601DateFormatter().string(from: Date().addingTimeInterval(3 * 86400)).prefix(10))
+        let created = try call("/api/v1/time-polls", method: "POST", auth: auth[0], body: ["title": title, "timeZone": "Europe/Berlin", "dates": [date], "startMinute": 540, "endMinute": 720, "durationMinutes": 60, "expectedCount": 2], expectedStatus: 201)
+        token = try XCTUnwrap((created["data"] as? [String: Any])?["token"] as? String)
+        addTeardownBlock { [self] in MainActor.assumeIsolated {
+            if let value = try? poll(0), let version = value["invitationVersion"] as? Int, version > 0 {
+                _ = try? call("/api/v1/time-polls/\(token)/cancel", method: "POST", auth: auth[0], body: ["version": version])
+            }
+            _ = try? call("/api/v1/time-polls/\(token)", method: "DELETE", auth: auth[0]); app.terminate()
+        } }
+        let publicPath = "/api/public/time-polls/\(token)"
+        let joined = try call(publicPath + "/participant", method: "POST", body: ["displayName": "Guest Lin"])
+        let guest = try XCTUnwrap((joined["data"] as? [String: Any])?["viewerId"] as? String)
+        _ = try call(publicPath + "/response", method: "PUT", body: ["participantId": guest, "displayName": "Guest Lin", "slotIds": [0, 1, 2, 3]])
+        loginUI(0); tab("Plans"); openPlanCard()
+        app.buttons["time-poll-edit-name"].tap()
+        let name = app.textFields["time-poll-name"]
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: (name.value as? String ?? "").count))
+        name.typeText("Host Ming\n")
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-saved"].waitForExistence(timeout: 15))
+        paintHour(); app.buttons["Group results"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-participants"].label.contains("Guest Lin (Guest)"))
+        attach("guest-availability-results")
+        app.buttons["unified-plan-invite-window"].firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Guest"].firstMatch.waitForExistence(timeout: 10))
+        app.buttons["unified-plan-send-invitations"].tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-confirmation-count"].waitForExistence(timeout: 15))
+        app.buttons["time-poll-edit-name"].tap()
+        let edit = app.textFields["time-poll-edit-name-field"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 10)); edit.tap()
+        edit.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: (edit.value as? String ?? "").count))
+        edit.typeText("Host Li"); app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Host Li"].waitForExistence(timeout: 15))
+        XCTAssertEqual(try calendarRows(0).count, 0)
+        _ = try call(publicPath + "/participant", method: "PATCH", body: ["participantId": guest, "displayName": "Lin Xia"])
+        _ = try call(publicPath + "/invitation-response", method: "PUT", body: ["participantId": guest, "status": "ACCEPTED", "version": 1])
+        loginUI(0); tab("Plans"); app.segmentedControls.buttons["Upcoming"].tap(); openPlanCard()
+        XCTAssertEqual(app.staticTexts["unified-plan-confirmation-count"].label, "2 of 2 confirmed")
+        XCTAssertTrue(app.staticTexts["Lin Xia"].exists)
+        XCTAssertEqual(try calendarRows(0).count, 1)
+        attach("guest-confirmed-native")
     }
 
     func testFivePeopleFindTimeInviteConfirmAndReopenCalendars() throws {

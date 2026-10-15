@@ -623,6 +623,9 @@ internal protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /api/v1/time-polls/{token}/cancel`.
     /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/cancel/post(cancelPollPlan)`.
     func cancelPollPlan(_ input: Operations.CancelPollPlan.Input) async throws -> Operations.CancelPollPlan.Output
+    /// - Remark: HTTP `PATCH /api/v1/time-polls/{token}/display-name`.
+    /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)`.
+    func renameTimePollParticipant(_ input: Operations.RenameTimePollParticipant.Input) async throws -> Operations.RenameTimePollParticipant.Output
 }
 
 /// Convenience overloads for operation inputs.
@@ -2702,6 +2705,19 @@ extension APIProtocol {
         body: Operations.CancelPollPlan.Input.Body
     ) async throws -> Operations.CancelPollPlan.Output {
         try await cancelPollPlan(Operations.CancelPollPlan.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `PATCH /api/v1/time-polls/{token}/display-name`.
+    /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)`.
+    internal func renameTimePollParticipant(
+        path: Operations.RenameTimePollParticipant.Input.Path,
+        headers: Operations.RenameTimePollParticipant.Input.Headers = .init(),
+        body: Operations.RenameTimePollParticipant.Input.Body
+    ) async throws -> Operations.RenameTimePollParticipant.Output {
+        try await renameTimePollParticipant(Operations.RenameTimePollParticipant.Input(
             path: path,
             headers: headers,
             body: body
@@ -21180,6 +21196,10 @@ internal enum Components {
             internal var slotIds: [Swift.Int]
             /// - Remark: Generated from `#/components/schemas/TimePollParticipant/isMe`.
             internal var isMe: Swift.Bool
+            /// True for a poll-scoped guest participating through the share page.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimePollParticipant/isGuest`.
+            internal var isGuest: Swift.Bool?
             /// Creates a new `TimePollParticipant`.
             ///
             /// - Parameters:
@@ -21187,22 +21207,26 @@ internal enum Components {
             ///   - displayName:
             ///   - slotIds:
             ///   - isMe:
+            ///   - isGuest: True for a poll-scoped guest participating through the share page.
             internal init(
                 id: Swift.String,
                 displayName: Swift.String,
                 slotIds: [Swift.Int],
-                isMe: Swift.Bool
+                isMe: Swift.Bool,
+                isGuest: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.displayName = displayName
                 self.slotIds = slotIds
                 self.isMe = isMe
+                self.isGuest = isGuest
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
                 case displayName
                 case slotIds
                 case isMe
+                case isGuest
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -21222,11 +21246,16 @@ internal enum Components {
                     Swift.Bool.self,
                     forKey: .isMe
                 )
+                self.isGuest = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isGuest
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "id",
                     "displayName",
                     "slotIds",
-                    "isMe"
+                    "isMe",
+                    "isGuest"
                 ])
             }
         }
@@ -22153,6 +22182,10 @@ internal enum Components {
             internal var selected: Swift.Bool
             /// - Remark: Generated from `#/components/schemas/TimePollInvitation/isMe`.
             internal var isMe: Swift.Bool
+            /// True for a poll-scoped guest participating through the share page.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimePollInvitation/isGuest`.
+            internal var isGuest: Swift.Bool?
             /// Creates a new `TimePollInvitation`.
             ///
             /// - Parameters:
@@ -22161,18 +22194,21 @@ internal enum Components {
             ///   - status:
             ///   - selected:
             ///   - isMe:
+            ///   - isGuest: True for a poll-scoped guest participating through the share page.
             internal init(
                 id: Swift.String,
                 displayName: Swift.String,
                 status: Components.Schemas.TimePollInvitation.StatusPayload,
                 selected: Swift.Bool,
-                isMe: Swift.Bool
+                isMe: Swift.Bool,
+                isGuest: Swift.Bool? = nil
             ) {
                 self.id = id
                 self.displayName = displayName
                 self.status = status
                 self.selected = selected
                 self.isMe = isMe
+                self.isGuest = isGuest
             }
             internal enum CodingKeys: String, CodingKey {
                 case id
@@ -22180,6 +22216,7 @@ internal enum Components {
                 case status
                 case selected
                 case isMe
+                case isGuest
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -22203,12 +22240,17 @@ internal enum Components {
                     Swift.Bool.self,
                     forKey: .isMe
                 )
+                self.isGuest = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .isGuest
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "id",
                     "displayName",
                     "status",
                     "selected",
-                    "isMe"
+                    "isMe",
+                    "isGuest"
                 ])
             }
         }
@@ -22326,6 +22368,31 @@ internal enum Components {
                 )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "version"
+                ])
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TimePollDisplayNameRequest`.
+        internal struct TimePollDisplayNameRequest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TimePollDisplayNameRequest/displayName`.
+            internal var displayName: Swift.String
+            /// Creates a new `TimePollDisplayNameRequest`.
+            ///
+            /// - Parameters:
+            ///   - displayName:
+            internal init(displayName: Swift.String) {
+                self.displayName = displayName
+            }
+            internal enum CodingKeys: String, CodingKey {
+                case displayName
+            }
+            internal init(from decoder: any Swift.Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.displayName = try container.decode(
+                    Swift.String.self,
+                    forKey: .displayName
+                )
+                try decoder.ensureNoAdditionalProperties(knownKeys: [
+                    "displayName"
                 ])
             }
         }
@@ -70197,6 +70264,279 @@ internal enum Operations {
             /// Stable API error.
             ///
             /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/cancel/post(cancelPollPlan)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            internal var internalServerError: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        internal enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            internal init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            internal var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            internal static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `PATCH /api/v1/time-polls/{token}/display-name`.
+    /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)`.
+    internal enum RenameTimePollParticipant {
+        internal static let id: Swift.String = "renameTimePollParticipant"
+        internal struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/path`.
+            internal struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/path/token`.
+                internal var token: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - token:
+                internal init(token: Swift.String) {
+                    self.token = token
+                }
+            }
+            internal var path: Operations.RenameTimePollParticipant.Input.Path
+            /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/header`.
+            internal struct Headers: Sendable, Hashable {
+                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RenameTimePollParticipant.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RenameTimePollParticipant.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            internal var headers: Operations.RenameTimePollParticipant.Input.Headers
+            /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/requestBody`.
+            internal enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.TimePollDisplayNameRequest)
+            }
+            internal var body: Operations.RenameTimePollParticipant.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            internal init(
+                path: Operations.RenameTimePollParticipant.Input.Path,
+                headers: Operations.RenameTimePollParticipant.Input.Headers = .init(),
+                body: Operations.RenameTimePollParticipant.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        internal enum Output: Sendable, Hashable {
+            internal struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/responses/200/content`.
+                internal enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/api/v1/time-polls/{token}/display-name/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TimePollEnvelope)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    internal var json: Components.Schemas.TimePollEnvelope {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                internal var body: Operations.RenameTimePollParticipant.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                internal init(body: Operations.RenameTimePollParticipant.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Time poll data scoped to the signed-in account.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RenameTimePollParticipant.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            internal var ok: Operations.RenameTimePollParticipant.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            internal var unauthorized: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            internal var forbidden: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            internal var notFound: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            internal var conflict: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses._Error)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            internal var unprocessableContent: Components.Responses._Error {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Stable API error.
+            ///
+            /// - Remark: Generated from `#/paths//api/v1/time-polls/{token}/display-name/patch(renameTimePollParticipant)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Components.Responses._Error)

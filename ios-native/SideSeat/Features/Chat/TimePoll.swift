@@ -35,6 +35,7 @@ struct NativeTimePoll: Decodable, Sendable {
         let status: String
         let selected: Bool
         let isMe: Bool
+        let isGuest: Bool?
     }
 
     struct Slot: Decodable, Sendable, Identifiable {
@@ -50,6 +51,7 @@ struct NativeTimePoll: Decodable, Sendable {
         let displayName: String
         let slotIds: [Int]
         let isMe: Bool
+        let isGuest: Bool?
     }
     struct Window: Decodable, Sendable, Identifiable {
         var id: Date { start }
@@ -121,6 +123,7 @@ struct SendPollInvitationsRequest: Encodable, Sendable {
 }
 struct RespondPollInvitationRequest: Encodable, Sendable { let status: String; let version: Int }
 struct CancelPollPlanRequest: Encodable, Sendable { let version: Int }
+struct TimePollDisplayNameRequest: Encodable, Sendable { let displayName: String }
 
 struct SaveTimePollRequest: Codable, Sendable, Equatable {
     let displayName: String
