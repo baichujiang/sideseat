@@ -1,0 +1,18 @@
+{
+  "rangeSlots": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "scrollSlots": [],
+  "daySelection": {
+    "selectedCount": 49,
+    "firstDayCount": 48,
+    "otherDayCount": 1,
+    "exactSlotsMatched": true,
+    "configuredHours": "09:00–21:00",
+    "datesPreserved": true
+  },
+  "verifiedAt": "2026-10-15T19:50:40.788Z"
+}

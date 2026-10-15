@@ -59,6 +59,7 @@ Historical build evidence never certifies a newer build.
 | [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |
 | [Deployment and retirement audit](./qa/2026-10-15-deployment-and-retirement.md) | Live deployment/source comparison, phone entry audit, compatibility classification and archive verification |
 | [iPhone 14 Plus guest acceptance](./qa/2026-10-15-iphone14plus-guest-flow.md) | XCTest recovery, real Safari guest/nickname/confirmation/Calendar and physical gesture evidence |
+| [Preview 1.0.0 (104)](./releases/2026-10-15-preview104-day-selection.md) | Installed weekday/day selection shortcut; physical full-day, Undo, persistence and scroll regressions pass |
 | [Preview 1.0.0 (103)](./releases/2026-10-15-preview103-guest-plans.md) | Installed guest/nickname update; later iPhone 14 Plus Safari/native/Calendar, creation and gesture acceptance pass |
 | [Preview 1.0.0 (102)](./releases/2026-10-15-preview102-availability-gestures.md) | Installed availability interaction update; Simulator gestures/autosave verified, final physical acceptance awaiting phone unlock |
 | [Preview 1.0.0 (101)](./releases/2026-10-15-preview101-plan-creation.md) | Previous delivery: single-sheet plan creation, physical iPhone 14 Plus regression and save-flow checks |

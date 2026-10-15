@@ -1,0 +1,39 @@
+{
+  "files": [
+    {
+      "path": "acceptance-results.txt",
+      "sha256": "c357ee13c37ba7b25fef66107349e2093bcb680b55e2291437ef79d5c308cdbe",
+      "bytes": 403
+    },
+    {
+      "path": "api-verification.json",
+      "sha256": "c9de62eac37ed5fa3bc69037a0c65f3c7e6e81f5dc56a7c13dea77a03b8a1ad7",
+      "bytes": 315
+    },
+    {
+      "path": "cleanup-summary.json",
+      "sha256": "07d6d2b09954ca3fb14123966fc08eedc52506d2eeea2c256088b785ae00ce69",
+      "bytes": 172
+    },
+    {
+      "path": "device-and-launch.json",
+      "sha256": "59568cbd67e0da9b44d3d794ff5397ac764a4c6a453a0dfadc7e4fd74599ebaa",
+      "bytes": 728
+    },
+    {
+      "path": "phone-day-reopened-chinese.png",
+      "sha256": "b8d63e5c67ca9a5d0ea701a69ed34de9009b8691fb1944eb99f3022e62d81ae2",
+      "bytes": 237406
+    },
+    {
+      "path": "phone-day-selected.png",
+      "sha256": "42773d96fa9379c827c26e3f7add3f1595dd31a7beb33310a2bf8997818a6893",
+      "bytes": 234630
+    },
+    {
+      "path": "xctest-summary.json",
+      "sha256": "a98df78017b7ee5aa818b4d7773f7245e5c5d56c7576165eb280431ae9f40c92",
+      "bytes": 963
+    }
+  ]
+}

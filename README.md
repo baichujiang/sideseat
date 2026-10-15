@@ -42,8 +42,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview 103 是当前已安装开发版；游客可直接在分享网页填写、修改昵称并确认参加。
-交付见 [Preview 103](./docs/releases/2026-10-15-preview103-guest-plans.md)；iPhone 14 Plus 已通过 [Safari 游客参与、昵称、确认和日历完整真机验收](./docs/qa/2026-10-15-iphone14plus-guest-flow.md)。
+Preview 104 是当前已安装开发版；点星期/日期标题即可全选当天，再点清空，支持撤销与自动保存。
+交付及真机验收见 [Preview 104](./docs/releases/2026-10-15-preview104-day-selection.md)。
+游客分享、昵称和网页确认沿用 103；[完整真机验收](./docs/qa/2026-10-15-iphone14plus-guest-flow.md)保留为独立记录。
 普通 SideSeat / TestFlight 97 为独立的旧分发版本。
 多人时间征集位于「消息 → 一起定时间」；聊天中的「智能约时间」是个人日历空档推荐。
 
