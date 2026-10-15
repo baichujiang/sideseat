@@ -42,17 +42,23 @@ final class TimePollStore {
         error = nil
         guard !saving else { return }
         saving = true
+        let generation = session.authorizationGeneration
+        let userID = session.currentUser?.id
         // Keep a serial queue alive after the sheet closes. The newest drag wins.
         Task {
+            defer { saving = false }
             while let request = pending {
+                guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
                 pending = nil
                 do {
                     let result: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                         "/api/v1/time-polls/\(token)/response", method: .put, body: request
                     )
+                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
                     poll = result.data
                     saved = pending == nil
                 } catch {
+                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
                     self.error = error.localizedDescription
                     saved = false
                     // Preserve the latest draft for an explicit retry.
@@ -60,7 +66,6 @@ final class TimePollStore {
                     break
                 }
             }
-            saving = false
         }
     }
 }

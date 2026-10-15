@@ -29,6 +29,7 @@ final class SessionStore {
     var accessTokenForStreaming: String? { accessToken }
     var canPresentAppShell: Bool { currentUser != nil && phase != .signedOut }
     var canMakeAuthenticatedRequests: Bool { phase == .signedIn && accessToken != nil }
+    var authorizationGeneration: UInt64 { sessionEpoch }
     var shouldAutomaticallyRetryConnection: Bool {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-offline-cached-launch") {
@@ -350,7 +351,10 @@ final class SessionStore {
         guard phase == .signedIn else {
             throw SessionError.authenticationRequired
         }
+        let requestGeneration = sessionEpoch
+        let requestUserID = currentUser?.id
         let accessToken = try await authenticatedAccessToken()
+        guard sessionEpoch == requestGeneration, currentUser?.id == requestUserID else { throw SessionError.authenticationRequired }
 
         do {
             return try await apiClient.send(
@@ -366,7 +370,9 @@ final class SessionStore {
             guard error.isUnauthorized else { throw error }
         }
 
+        guard sessionEpoch == requestGeneration, currentUser?.id == requestUserID else { throw SessionError.authenticationRequired }
         let refreshedAccessToken = try await refreshAccessToken()
+        guard sessionEpoch == requestGeneration, currentUser?.id == requestUserID else { throw SessionError.authenticationRequired }
         return try await apiClient.send(
             path,
             method: method,

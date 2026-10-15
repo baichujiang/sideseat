@@ -41,22 +41,55 @@ struct TimePollTests {
         #expect(store.selected == [1, 2]); #expect(store.poll?.mySlotIds == [1, 2])
         #expect(await transport.writes == [[0], [1, 2]])
     }
+
+    @Test("Switching accounts drops queued availability from the previous account")
+    @MainActor
+    func autosaveAccountScope() async throws {
+        for status in [200, 401] {
+        let transport = PollSaveTransport(firstStatus: status)
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll")
+        store.displayName = "Ming"; store.selected = [0]; store.save(session: session)
+        await transport.waitUntilFirstStarted()
+        store.selected = [1, 2]; store.save(session: session)
+        await session.login(identifier: "other", password: "test")
+        #expect(session.currentUser?.id == "other-user")
+        await transport.finishFirst()
+        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(!store.saving); #expect(!store.saved)
+        #expect(await transport.writes == [[0]])
+        #expect(await transport.refreshCount == 0)
+        }
+    }
 }
 
 private actor PollSaveTransport: APITransport {
     private(set) var writes: [[Int]] = []
     private var firstStarted: CheckedContinuation<Void, Never>?
     private var firstPending: CheckedContinuation<Void, Never>?
+    private let firstStatus: Int
+    private(set) var refreshCount = 0
+    init(firstStatus: Int = 200) { self.firstStatus = firstStatus }
     func waitUntilFirstStarted() async {
         if writes.isEmpty { await withCheckedContinuation { firstStarted = $0 } }
     }
     func finishFirst() { firstPending?.resume(); firstPending = nil }
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        if request.url?.path == "/api/v1/auth/login" || request.url?.path == "/api/v1/auth/refresh" {
+            if request.url?.path == "/api/v1/auth/refresh" { refreshCount += 1 }
+            let body = #"{"data":{"user":{"id":"other-user","username":"other","nickname":"Other","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"other-access","accessExpiresIn":900,"refreshToken":"other-refresh","refreshExpiresAt":"2026-10-17T00:00:00Z"}}}"#
+            return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+        }
         let input = try JSONDecoder().decode(SaveTimePollRequest.self, from: request.httpBody!)
         writes.append(input.slotIds)
         if writes.count == 1 {
             await withCheckedContinuation { continuation in
                 firstPending = continuation; firstStarted?.resume(); firstStarted = nil
+            }
+            if firstStatus == 401 {
+                let body = #"{"error":{"code":"AUTH_REQUIRED","message":"Expired QA session","retryable":false}}"#
+                return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 401, httpVersion: nil, headerFields: nil)!)
             }
         }
         let data = try JSONSerialization.data(withJSONObject: ["data": [

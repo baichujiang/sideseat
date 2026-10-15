@@ -23,7 +23,9 @@ people are available throughout. Ties remain separate recommendations, ordered
 by date/time. With zero attendance, no recommendation is invented. Blocked creators
 are unavailable; blocked participants are excluded from visible data/statistics.
 
-The client serializes autosave writes and coalesces newer pending gestures. It
+The client binds each autosave queue to its original login generation, serializes
+writes and coalesces newer pending gestures. Account switches drop old queued
+changes, and unauthorized JSON requests cannot retry under a replacement session. It
 keeps the draft on save failure and offers Retry. Server refresh cannot replace a
 pending draft. Detail views refresh visible responses every ten seconds while
 active; closing a view cancels refresh, while a pending save retains its store until
