@@ -9,7 +9,7 @@
 The dated Build 34–40 rollout diary, expired demo instructions and previous
 roadmap are preserved in the [frozen historical copy](../archive/2026-10-15-retired/docs/ROADMAP-2026-09-09.md).
 Do not use its old “current release”, phone-update tasks or QA windows as today's
-work queue. Current development delivery is Preview 102; ordinary SideSeat 97 is
+work queue. Current development delivery is Preview 103; ordinary SideSeat 97 is
 a separate supported older client. This roadmap records dependency gates, not
 fresh acceptance of every implemented feature.
 
@@ -69,7 +69,9 @@ Calendar projections. Native implementation and verification are tracked in
 [Unified plans](./UNIFIED_PLANS.md); actual backend/Preview delivery belongs in
 [Deployed state](./DEPLOYED_STATE.md). This manual link-based coordination is not
 the gated discovery Pod or old group-chat product and creates no repeat/Outcome
-credit. The mature native grid/autosave mechanism and archived boundary remain.
+credit. The native grid/autosave mechanism and archived boundary remain. The owner also
+approved poll-scoped guest filling, editable nicknames and confirmation directly
+on the share page without downloading or registering; see [Time polls](./TIME_POLLS.md).
 
 Calendar reliability, smart input, search and import/export maintenance may
 continue within current authority. Read-only EventKit Busy/Available remains

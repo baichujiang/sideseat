@@ -38,13 +38,21 @@ accept, the creator may choose another time/roster; this increments the invitati
 version and requires new confirmations. Already confirmed plans can be cancelled.
 
 For a direct-time plan, creation confirms the creator's time. Share the private
-Sideseat link; signed-in holders explicitly join/accept until the requested count
+Sideseat link; account holders or browser guests explicitly join/accept until the requested count
 is filled. This uses the same per-person confirmation view and final calendar rule.
-The browser offers an app/login handoff without displaying respondents' details.
+The browser share page shows the shared names, availability and results. Guests
+enter a recognizable nickname, add ranges using a date and From/Until selectors,
+and save automatically. The pencil edits **Your name in this plan** without
+changing a global profile. In the same browser they can return to edit their own
+response or confirm/decline the latest invitation; no download or registration is
+required. A different browser is a separate guest identity. An optional Open in
+app link remains. Web and native participant lists mark guests explicitly.
 
 **Overview** includes collection and pending invitations. **Upcoming** includes
-confirmed plans for the selected viewer. Each selected person's Calendar receives
-one projection only after everyone selected has accepted. Reopening Plans or
+confirmed plans for the selected viewer. Each selected account holder's Calendar receives
+one projection only after everyone selected, including guests, has accepted. Guests
+return to the shared web page for plan details, and appear as named companions in
+registered participants' calendars. Reopening Plans or
 Calendar loads persisted server data. Shared calendar details are read-only and
 **Manage Plan** opens the original plan; cancellation removes all its projections.
 **Ended** retains cancelled, past or excluded records. Creator deletion is allowed

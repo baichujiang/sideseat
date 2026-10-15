@@ -1,0 +1,10 @@
+{
+  "createdAt": "2026-10-15T18:33:43.202Z",
+  "pathname": "release-backups/2026-10-15-guest-plans103/1753178227a04639c9615dbc2a0e8ca922bf6b2f071159f0a9702b2212f853bc.json.gz",
+  "sha256": "1753178227a04639c9615dbc2a0e8ca922bf6b2f071159f0a9702b2212f853bc",
+  "bytes": 1413340,
+  "tables": 101,
+  "totalRows": 29760,
+  "appliedMigrations": 150,
+  "privateReadbackVerified": true
+}

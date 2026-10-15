@@ -43,9 +43,15 @@ common complete-duration window only after all five respond; otherwise recommend
 the complete-duration windows with the highest attendance. The creator explicitly
 selects a time and invitees; sending confirms the creator's participation. Every
 selected invitee must explicitly accept that invitation version before the same
-plan appears in each selected person's Calendar. A maximum-attendance result
+plan appears in each selected registered person's Sideseat Calendar. A maximum-attendance result
 never silently includes an unavailable person. Declines remain pending; choosing
 a new time/roster resets acceptance. Cancellation removes Calendar projections.
+
+The owner also approved browser guest participation on 2026-10-15: invite-link
+holders can enter/edit their poll nickname, fill availability and confirm
+participation on the share page without a download or registration. Guests must
+confirm alongside account holders; they remain poll-scoped and receive no personal
+Calendar row. Their names appear as companions for registered participants.
 
 This approves manually shared 2–20-person plans, including five-person collection;
 it does not activate discovery-driven Pod formation, group chat, matching, repeat

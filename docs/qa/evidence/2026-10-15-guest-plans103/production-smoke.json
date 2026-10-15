@@ -1,0 +1,9 @@
+{
+  "base": "https://api.sideseat.de",
+  "guestFill": true,
+  "rename": true,
+  "nativeRoster": true,
+  "webConfirmation": true,
+  "noPrematureCalendar": true,
+  "oneAccountCalendarWithTwoGuests": true
+}

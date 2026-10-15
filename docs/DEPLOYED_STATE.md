@@ -10,18 +10,17 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a5904fc` 与远程 0/0、干净；功能提交 `7657176` 已推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (102)` | 可用时间手势调整；签名、安装及版本清单已核验，最终真机交互/普通启动待手机解锁；[本次交付](./releases/2026-10-15-preview102-availability-gestures.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 102 | 102 最终真机测试被锁屏阻塞；交互及保存已在 iOS 26.5 Simulator 验证；[本次记录](./qa/2026-10-15-preview102-availability-gestures.md)。[101 真机验证](./qa/2026-10-15-preview101-plan-creation.md)、[100 计划/日历验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) 保留为历史证据 |
-| Preview 102 原生源码 | `f3a54be21f9b0eb715129fc4ea217a57d65fb45a` | 当前分支已提交并推送；最终签名构建与该源码一致 |
-| 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 本次设备应用清单；独立安装，仍保留兼容；本次未重新核验 Apple 当前分发状态 |
-| 生产 API | `https://api.sideseat.de` → `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |
-| 生产源码 | 1,323 个上传文件均与受控发布目录 SHA-1 一致；基于原生产部署保留差异，22 项覆盖来自功能提交；排除 7 个归档原路径 | [发布清单](./qa/evidence/2026-10-15-unified-plans/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-unified-plans/uploaded-source-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a791f45` 干净；后端 `2285ad1`、原生 `827b570` 已推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (103)` | 游客参与、昵称编辑；已签名、安装并以空参数正常启动（PID 918）；真机交互验收未通过连接阶段，见 [本次交付](./releases/2026-10-15-preview103-guest-plans.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 本次连接身份、签名配置及安装清单核验；[验收记录](./qa/2026-10-15-guest-plans.md) |
+| Preview 103 原生源码 | `827b570` | 已提交并推送；保留 101 单层创建、102 手势与撤销修复 |
+| 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_6Un8qZtCE26v7edqKd2UBexBUHLx`，Ready | 本次双域名 inspect、候选及正式网页端到端验证 |
+| 生产源码 | 1,335 个上传文件均与受控发布目录 SHA-1 一致；基于此前真实生产保留差异，20 项明确覆盖 | 后端来源 `2285ad1`；[发布清单](./qa/evidence/2026-10-15-guest-plans103/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-guest-plans103/upload-verification.json) |
 
-Preview 102 调整可用时间网格：普通滑动滚动，点按单格，长按后连续选择/擦除，并可撤销；模拟器及真实 API 保存检查通过，最终真机交互和普通启动待解锁。Preview 101 的单层新增计划修复继续保留。后端未重新发布；下面的后端、开关和生产源码核验仍来自 Preview 100 的有日期记录。
+Preview 103 增加免下载、免注册的游客分享网页，可填写可用时间、编辑本次计划中的昵称并直接确认参加。网页与 App 共用昵称、参与者、邀请版本和结果；所有选中人员（包括游客）确认后，注册用户的 Sideseat 日历才写入计划，游客保留网页链接查看。102 的滚动/长按选择/撤销及 101 的单层新增修复继续保留。当前真机与模拟器的实际验收范围分别记录，不把安装等同于交互验证。
 
-此前审计与归档没有产生发布。之后用户明确批准统一计划，本次增加两项向前迁移、
-发布后端并安装 Preview 100；没有上传 TestFlight/App Store。
+此前审计与归档没有产生发布。Preview 100 阶段按授权增加统一计划的两项向前迁移、发布后端并安装手机；本次 Preview 103 仅增加游客迁移，没有上传 TestFlight/App Store。
 Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview99-native-time-polls.md)。
 
 ## 当前功能和实际入口
@@ -29,7 +28,8 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 | 功能 | 当前入口/行为 | 核验范围 |
 | --- | --- | --- |
 | 同行 | 我的意愿、自动推荐、主动寻找、私密收藏、带意愿上下文的招呼；回复后继续聊天 | 原生导航/源码、线上配置；本次未重跑完整匹配业务 |
-| 计划 | **计划 → + → 发起计划**；可「一起定时间」或「直接选时间」。征集结果选择参与者后转邀请，逐人确认后写入各自日历。概览/即将进行/已结束共用入口；旧聊天双人计划与其改期/反馈继续保留 | 本次原生创建、填写、邀请、确认、重开及日历联调；[验收记录](./qa/2026-10-15-unified-plans.md) |
+| 计划 | **计划 → + → 发起计划**；可「一起定时间」或「直接选时间」。征集结果选择参与者后转邀请，逐人确认后写入注册用户日历，游客可在分享网页完成填写与确认。概览/即将进行/已结束共用入口；旧聊天双人计划与其改期/反馈继续保留 | 本次原生创建、填写、邀请、确认、重开及日历联调；[验收记录](./qa/2026-10-15-unified-plans.md) |
+| 游客分享参与 | **分享计划链接 → 网页直接参与**，无需下载或注册；昵称旁铅笔编辑、日期/起止时间添加、网页确认 | 本次候选部署、正式 API 域名及 www 分享域名均通过两个独立浏览器流程；原生联调见本次 QA |
 | 智能约时间 | **聊天 → 发起计划 → 智能约时间**；读取自己的已同步日历空档并填入草稿 | 已安装 Preview 99 实测中文名称；对应 `PlanCreateSheet` / `SmartTimeSuggestionSheet` |
 | 多人时间征集 | **计划 → + → 一起定时间**；消息原入口、邀请链接也打开同一共享计划。15 分钟拖选/擦除、自动保存、热图、完整时长的共同时间/最多人数推荐、选择名单并邀请 | 本次五账号共同时间与四人推荐、排除第五人及保存重开；Sideseat 原生界面和自有数据服务 |
 | 日历 | 个人日程、课程、已确认计划投影、搜索、智能输入、订阅与导入/导出 | 当前导航/源码、线上配置；本次未逐项重跑 |
@@ -39,7 +39,7 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 | 公开网页与管理后台 | iPhone 引导、隐私/支持、批准的分享/征集链接、AASA；后台及其登录保留 | 线上 HTTP、middleware allowlist；未进行管理员登录 |
 
 「一起定时间」现已纳入「计划」，与直接定时间共用邀请、确认和取消生命周期。
-填写有空不等于确认；仅全部选中的参与者接受同一版邀请后，才同步到各自 Sideseat 日历。
+填写有空不等于确认；仅全部选中的参与者接受同一版邀请后，才同步到已注册参与者的 Sideseat 日历；游客不创建账号或个人日历记录。
 人数最多的四人结果由发起者明确选择四人邀请，第五人保留答复、不获得日历记录。
 「智能约时间」继续是聊天双人计划中读取自己日历空档的独立辅助工具。
 新的手动多人计划不激活 Discovery Pod、旧群聊、双人 Outcome 或 Repeat 资格。
@@ -106,6 +106,5 @@ TypeScript、ESLint、Vercel 输入中排除，原生目标仅读取 `ios-native
 其余为 `.vercelignore`、`AGENTS.md`、`README.md`、`eslint.config.mjs`、日历时区检查脚本
 和仅线上存在的发布来源 JSON。完整路径/哈希及所需源码快照见
 [审计记录](./qa/2026-10-15-deployment-and-retirement.md)。此前归档没有覆盖这些生产文件。
-本次发布从该生产源码逐项校验重建，保留运行库差异，再覆盖本次 22 项依赖；
-上传后全部 1,323 文件的 SHA-1 均与发布目录一致。后续发布继续从当前线上部署对照，
+Preview 100 发布曾保留这些生产差异。Preview 103 再从真实生产 `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u` 的 1,323 个文件逐项校验重建，覆盖 20 项本次依赖；上传的 1,335 个文件全部匹配受控目录。后续发布继续从当前线上部署对照，
 不可把整个 Git 工作区直接当作生产快照。

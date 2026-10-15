@@ -1,0 +1,9 @@
+{
+  "base": "https://sideseat-devoivzdz-baichus-projects.vercel.app",
+  "guestFill": true,
+  "rename": true,
+  "nativeRoster": true,
+  "webConfirmation": true,
+  "noPrematureCalendar": true,
+  "oneAccountCalendarWithTwoGuests": true
+}

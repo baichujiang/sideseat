@@ -1,0 +1,36 @@
+{
+  "backendSourceCommit": "2285ad17c2d9a91a4f9a530816e170b2c26da271",
+  "nativeSourceCommit": "827b570",
+  "previewVersion": "1.0.0",
+  "previewBuild": "103",
+  "bundleId": "app.sideseat.mobile.preview",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "backendDeployment": "dpl_6Un8qZtCE26v7edqKd2UBexBUHLx",
+  "committed": true,
+  "pushed": true,
+  "backendDeployed": true,
+  "installed": true,
+  "normalLaunch": {
+    "pid": 918,
+    "arguments": [],
+    "runningProcessVerified": true
+  },
+  "ordinaryBuild97Retained": true,
+  "localApiBrowserTestsPassed": 5,
+  "domainTestsPassed": 5,
+  "nativeUnitTestsPassed": 4,
+  "simulatorGuestUiSeconds": 63.668,
+  "physicalUiAcceptance": {
+    "passed": false,
+    "attempts": 3,
+    "testCasesEntered": 0,
+    "reason": "XCTest runner bootstrap: IDE disconnection, exit 74, refused XCTestDriverInterface channel"
+  },
+  "qaCleanup": {
+    "temporaryAccountsDeleted": 1,
+    "remainingQAPolls": 0,
+    "deletedAccountTokenStatus": 401,
+    "fixturePollsDeleted": 2
+  }
+}
