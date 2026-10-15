@@ -1,0 +1,185 @@
+{
+  "date": "2026-10-15",
+  "timeZone": "Europe/Berlin",
+  "sourceCommit": "f3a54be21f9b0eb715129fc4ea217a57d65fb45a",
+  "phoneBundle": "app.sideseat.mobile.preview",
+  "phoneBuild": "102",
+  "baselinePhone101": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64e",
+          "deviceId": "00008110-001A69110CC1401E",
+          "deviceName": "iPhone (4)",
+          "modelName": "iPhone 14 Plus",
+          "osBuildNumber": "23G83",
+          "osVersion": "26.6.1",
+          "platform": "iOS"
+        },
+        "expectedFailures": 0,
+        "failedTests": 1,
+        "passedTests": 0,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "AvailabilityQA · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 1,
+    "finishTime": 1792086385.317,
+    "passedTests": 0,
+    "result": "Failed",
+    "skippedTests": 0,
+    "startTime": 1792086351.279,
+    "statistics": [],
+    "testFailures": [
+      {
+        "failureText": "XCTAssertFalse failed - A normal swipe over time cells must scroll the grid",
+        "targetName": "AvailabilityUITests",
+        "testIdentifier": 1,
+        "testIdentifierString": "AvailabilityGestureUITests/testOrdinarySwipesScrollWithoutEditing()",
+        "testIdentifierURL": "test://com.apple.xcode/AvailabilityQA/AvailabilityUITests/AvailabilityGestureUITests/testOrdinarySwipesScrollWithoutEditing",
+        "testName": "testOrdinarySwipesScrollWithoutEditing()"
+      }
+    ],
+    "title": "Test - AvailabilityQA",
+    "topInsights": [],
+    "totalTestCount": 1
+  },
+  "baselineAccidentalSelection": {
+    "slots": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "didRespond": true
+  },
+  "finalSimulatorUI": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "386193D3-AB27-41F4-8B13-4DB3ACEE3907",
+          "deviceName": "iPhone 17 Pro",
+          "modelName": "iPhone 17 Pro",
+          "osBuildNumber": "23F77",
+          "osVersion": "26.5",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 2,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "AvailabilityQA · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1792087246.893,
+    "passedTests": 2,
+    "result": "Passed",
+    "skippedTests": 0,
+    "startTime": 1792087115.348,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - AvailabilityQA",
+    "topInsights": [],
+    "totalTestCount": 2
+  },
+  "existingUnitTests": {
+    "devicesAndConfigurations": [
+      {
+        "device": {
+          "architecture": "arm64",
+          "deviceId": "386193D3-AB27-41F4-8B13-4DB3ACEE3907",
+          "deviceName": "iPhone 17 Pro",
+          "modelName": "iPhone 17 Pro",
+          "osBuildNumber": "23F77",
+          "osVersion": "26.5",
+          "platform": "iOS Simulator"
+        },
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "passedTests": 4,
+        "skippedTests": 0,
+        "testPlanConfiguration": {
+          "configurationId": "1",
+          "configurationName": "Test Scheme Action"
+        }
+      }
+    ],
+    "environmentDescription": "SideSeat-Development · Built with macOS 26.3.1",
+    "expectedFailures": 0,
+    "failedTests": 0,
+    "finishTime": 1792087052.136,
+    "passedTests": 4,
+    "result": "Passed",
+    "skippedTests": 0,
+    "startTime": 1792086960.95,
+    "statistics": [],
+    "testFailures": [],
+    "title": "Test - SideSeat-Development",
+    "topInsights": [],
+    "totalTestCount": 4
+  },
+  "independentAPI": {
+    "poll": {
+      "title": "QA102 Gesture regression",
+      "mySlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "didRespond": true
+    },
+    "scrollPoll": {
+      "title": "QA102 Gesture regression",
+      "mySlotIds": [],
+      "didRespond": true
+    }
+  },
+  "cleanup": {
+    "isolatedAccountCount": 1,
+    "persistedPlans": [
+      {
+        "title": "QA102 Gesture regression",
+        "planningMode": null,
+        "phase": "COLLECTING"
+      },
+      {
+        "title": "QA102 Gesture regression",
+        "planningMode": null,
+        "phase": "COLLECTING"
+      }
+    ],
+    "remainingPlans": 0,
+    "accountDeleted": true,
+    "deletedAccountTokenStatus": 401
+  },
+  "finalPhysicalStatus": {
+    "installed": true,
+    "appInventoryVerified": true,
+    "normalLaunchVerified": false,
+    "gestureExecutionVerified": false,
+    "reason": "Xcode destination preparation requires device unlock; CoreDevice passcodeRequired is true",
+    "device": "iPhone 14 Plus",
+    "UDID": "00008110-001A69110CC1401E",
+    "os": "26.6.1"
+  }
+}

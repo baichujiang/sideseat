@@ -9,7 +9,7 @@
 The dated Build 34–40 rollout diary, expired demo instructions and previous
 roadmap are preserved in the [frozen historical copy](../archive/2026-10-15-retired/docs/ROADMAP-2026-09-09.md).
 Do not use its old “current release”, phone-update tasks or QA windows as today's
-work queue. Current development delivery is Preview 100; ordinary SideSeat 97 is
+work queue. Current development delivery is Preview 102; ordinary SideSeat 97 is
 a separate supported older client. This roadmap records dependency gates, not
 fresh acceptance of every implemented feature.
 

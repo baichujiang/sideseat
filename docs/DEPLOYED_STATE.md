@@ -11,14 +11,14 @@
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a5904fc` 与远程 0/0、干净；功能提交 `7657176` 已推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (101)` | 单层新增计划修复；签名校验、设备安装和空参数启动；[本次交付](./releases/2026-10-15-preview101-plan-creation.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 101 | 2026-10-15 新增计划取消/下滑关闭、两种创建方式及消息创建实测；临时数据已清理；[本次验证](./qa/2026-10-15-preview101-plan-creation.md)。此前 [Preview 100 计划/日历验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) 保留为历史证据 |
-| Preview 101 原生源码 | `f3def22fcd9e70ecd5dcae12a42087b6aac7f349` | 当前分支已提交并推送；本次签名构建与该源码一致 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (102)` | 可用时间手势调整；签名、安装及版本清单已核验，最终真机交互/普通启动待手机解锁；[本次交付](./releases/2026-10-15-preview102-availability-gestures.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1，已安装 Preview 102 | 102 最终真机测试被锁屏阻塞；交互及保存已在 iOS 26.5 Simulator 验证；[本次记录](./qa/2026-10-15-preview102-availability-gestures.md)。[101 真机验证](./qa/2026-10-15-preview101-plan-creation.md)、[100 计划/日历验证](./qa/2026-10-15-iphone14plus-plans-calendar.md) 保留为历史证据 |
+| Preview 102 原生源码 | `f3a54be21f9b0eb715129fc4ea217a57d65fb45a` | 当前分支已提交并推送；最终签名构建与该源码一致 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 本次设备应用清单；独立安装，仍保留兼容；本次未重新核验 Apple 当前分发状态 |
 | 生产 API | `https://api.sideseat.de` → `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |
 | 生产源码 | 1,323 个上传文件均与受控发布目录 SHA-1 一致；基于原生产部署保留差异，22 项覆盖来自功能提交；排除 7 个归档原路径 | [发布清单](./qa/evidence/2026-10-15-unified-plans/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-unified-plans/uploaded-source-verification.json) |
 
-Preview 101 只修复新增计划的双重弹窗；一次取消/下滑直接回到计划页，创建后在同一弹窗显示详情。后端未重新发布；下面的后端、开关和生产源码核验仍来自 Preview 100 的有日期记录。
+Preview 102 调整可用时间网格：普通滑动滚动，点按单格，长按后连续选择/擦除，并可撤销；模拟器及真实 API 保存检查通过，最终真机交互和普通启动待解锁。Preview 101 的单层新增计划修复继续保留。后端未重新发布；下面的后端、开关和生产源码核验仍来自 Preview 100 的有日期记录。
 
 此前审计与归档没有产生发布。之后用户明确批准统一计划，本次增加两项向前迁移、
 发布后端并安装 Preview 100；没有上传 TestFlight/App Store。
