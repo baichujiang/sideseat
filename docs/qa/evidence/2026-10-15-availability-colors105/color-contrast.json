@@ -1,0 +1,54 @@
+{
+  "selectedLight": {
+    "fill": [
+      0.08,
+      0.46,
+      0.36
+    ],
+    "foreground": [
+      1,
+      1,
+      1
+    ],
+    "contrastRatio": 5.61
+  },
+  "selectedDark": {
+    "fill": [
+      0.23,
+      0.62,
+      0.5
+    ],
+    "foreground": [
+      0.02,
+      0.12,
+      0.09
+    ],
+    "contrastRatio": 5.28
+  },
+  "partialLight": {
+    "fill": [
+      1,
+      0.94,
+      0.78
+    ],
+    "foreground": [
+      0.48,
+      0.3,
+      0.02
+    ],
+    "contrastRatio": 6.42
+  },
+  "partialDark": {
+    "fill": [
+      0.31,
+      0.22,
+      0.09
+    ],
+    "foreground": [
+      1,
+      0.83,
+      0.54
+    ],
+    "contrastRatio": 7.84
+  }
+}

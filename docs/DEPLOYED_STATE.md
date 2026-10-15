@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；104 实现前 fetch，基线 `1526424` 干净；原生 `b314a90` 已推送；后端沿用 `2285ad1` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (104)` | 点星期全选当天、再次清空；已签名、安装并空参数正常启动（PID 731）；三项真机选时/撤销/重开/滚动测试通过，见 [104 交付](./releases/2026-10-15-preview104-day-selection.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 104 连接身份、签名配置及安装清单核验；[验收记录](./qa/2026-10-15-day-selection.md) |
-| Preview 104 原生源码 | `b314a90` | 已提交并推送；新增当天全选快捷入口，保留 103 游客、101 单层创建及 102 手势与撤销 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；105 实现前 fetch，基线 `470c47d` 干净；原生 `f508e64` 已推送；后端沿用 `2285ad1` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (105)` | 选时青绿/部分日期琥珀配色及图例；已签名、安装并空参数正常启动（PID 765）；浅/深色、选时/保存/滚动真机验证通过，见 [105 交付](./releases/2026-10-15-preview105-availability-colors.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 105 连接身份、签名配置及安装清单核验；[验收记录](./qa/2026-10-15-availability-colors.md) |
+| Preview 105 原生源码 | `f508e64` | 已提交并推送；新增选时状态配色，保留 104 当天全选、103 游客、101 单层创建及 102 手势与撤销 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_6Un8qZtCE26v7edqKd2UBexBUHLx`，Ready | 本次双域名 inspect、候选及正式网页端到端验证 |
 | 生产源码 | 1,335 个上传文件均与受控发布目录 SHA-1 一致；基于此前真实生产保留差异，20 项明确覆盖 | 后端来源 `2285ad1`；[发布清单](./qa/evidence/2026-10-15-guest-plans103/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-guest-plans103/upload-verification.json) |
+
+Preview 105 使用青绿标识已选时段/全天全选，用琥珀标识当天部分已选；未选时段保留空白，提供图例、勾选/部分图标及浅深色配色。默认 iPhone 14 Plus 的浅/深色选时、撤销、重开、保存与普通滑动验证通过，见 [105 QA](./qa/2026-10-15-availability-colors.md)。本次没有后端发布。
 
 Preview 104 增加星期/日期标题的当天全选和取消全选：部分选择时补全当天，其他日期保持不变，支持撤销、自动保存及重开。全选覆盖计划中配置的当天时段；结果页仍只读。已在默认 iPhone 14 Plus 通过三项真机回归及真实 API 持久化核验，见 [104 QA](./qa/2026-10-15-day-selection.md)。本次没有后端发布。
 

@@ -1,0 +1,3 @@
+Test Case '-[SideSeatUITests.AvailabilityGestureUITests testDayHeaderSelectsClearsUndoesAndPersists]' passed (83.108 seconds).
+Test Case '-[SideSeatUITests.AvailabilityGestureUITests testOrdinarySwipesScrollWithoutEditing]' passed (25.111 seconds).
+** TEST EXECUTE SUCCEEDED **

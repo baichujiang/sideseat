@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "path": "acceptance-results.txt",
+      "sha256": "f557ba7e9b2218e71445733f5e2d58b0b301521103dcb78b132fec4b0cc414a1",
+      "bytes": 278
+    },
+    {
+      "path": "api-verification.json",
+      "sha256": "b005b16cae4474b39cc78e88ebddb1ca7c9a7d6c003e4781d6f482d81ecd56ec",
+      "bytes": 220
+    },
+    {
+      "path": "cleanup-summary.json",
+      "sha256": "86135482deedbe66f88b9010ab733c40d5e0390601705eccd52599c86dacaacf",
+      "bytes": 172
+    },
+    {
+      "path": "color-contrast.json",
+      "sha256": "b7aab8eac05c299362fce512801819dea9e208a586a9a31f81d0950b2676699a",
+      "bytes": 662
+    },
+    {
+      "path": "device-and-launch.json",
+      "sha256": "5156d4d21a927bfd02738d04737fd0fb11fe9e91b851d3655b1cf3dadeee6013",
+      "bytes": 728
+    },
+    {
+      "path": "phone-colors-dark.png",
+      "sha256": "06b19621b726d8edbd1c1f311573ba0eeb88a267babee67b76abe4dc936adc75",
+      "bytes": 245361
+    },
+    {
+      "path": "phone-colors-light.png",
+      "sha256": "9608825eee45a8fe18bffc2aed542e9b00b039c7d2c82691685d363e59a28d74",
+      "bytes": 248828
+    },
+    {
+      "path": "xctest-summary.json",
+      "sha256": "00e76995991306792c2d30e164c3a2e5715bf05ec868c752a8062a88b5c7ad92",
+      "bytes": 962
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "daySelection": {
+    "firstDayCount": 48,
+    "otherDayCount": 1,
+    "exactSlotsMatched": true,
+    "configuredHours": "09:00–21:00"
+  },
+  "ordinaryScrollSlots": [],
+  "verifiedAt": "2026-10-15T20:13:20.600Z"
+}

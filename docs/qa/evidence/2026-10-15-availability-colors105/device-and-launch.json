@@ -1,0 +1,27 @@
+{
+  "source": "f508e646df9851750881c2c90eae35c900558359",
+  "device": {
+    "udid": "00008110-001A69110CC1401E",
+    "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "model": "iPhone 14 Plus",
+    "os": "26.6.1",
+    "osBuild": "23G83",
+    "transport": "wired"
+  },
+  "installed": {
+    "app.sideseat.mobile": "97",
+    "app.sideseat.mobile.preview": "105"
+  },
+  "normalLaunch": {
+    "arguments": [],
+    "processIdentifier": 765,
+    "runningProcessVerified": true
+  },
+  "qaRunnerRemoved": true,
+  "signatureVerified": true,
+  "signingTeam": "V4238R5R53",
+  "profileIncludesDefaultPhone": true,
+  "backendSource": "2285ad1",
+  "backendDeployment": "dpl_6Un8qZtCE26v7edqKd2UBexBUHLx",
+  "backendChanged": false
+}
