@@ -2553,3 +2553,8 @@
 "No times selected" = "Keine Zeiten ausgewählt";
 "Deselect all times for this day" = "Alle Zeiten dieses Tages abwählen";
 "Select all times for this day" = "Alle Zeiten dieses Tages auswählen";
+
+// Availability state legend
+"Selected slots" = "Ausgewählt";
+"Partial day" = "Tag teilweise";
+"Unselected slots" = "Nicht ausgewählt";

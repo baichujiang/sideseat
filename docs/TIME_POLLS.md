@@ -23,7 +23,9 @@ for that date within the plan's configured hours. A partially selected day becom
 fully selected; tapping a fully selected day clears it. Other dates are preserved.
 The header shows empty, partial and full states, including accessible values and
 select/clear hints. This change uses the same one-step Undo and autosave queue.
-Group results keeps noninteractive date labels. This does not extend the poll's
+Selected cells/full-day headers use teal; partially selected day headers use
+amber. A compact legend, checkmarks/minus symbols and accessible values accompany
+the colors in Light and Dark. Group results keeps noninteractive date labels. This does not extend the poll's
 immutable time range or change anybody else's response.
 
 UIKit tap/long-press recognition arbitrates with the enclosing scroll views;

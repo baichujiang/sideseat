@@ -93,6 +93,11 @@ import XCTest
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         XCTAssertEqual(day.value as? String, "已选中当天全部时段")
         capture("day-reopened-chinese")
+        app.terminate()
+        launch(language: "zh-Hans", appearance: "dark"); openPlan(tab: "计划")
+        XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
+        XCTAssertEqual(day.value as? String, "已选中当天全部时段")
+        capture("day-dark-chinese")
     }
 
     private func openEmptyPoll() {
@@ -102,9 +107,10 @@ import XCTest
         for id in 0...3 { XCTAssertFalse(app.buttons["time-poll-cell-\(id)"].isSelected, "Supply a fresh empty QA poll") }
     }
 
-    private func launch(language: String = "en") {
+    private func launch(language: String = "en", appearance: String = "light") {
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
-            "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)"]
+            "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
+            "--ui-testing-appearance=\(appearance)"]
         app.launchEnvironment["SIDESEAT_QA_ACCESS_TOKEN"] = token
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))

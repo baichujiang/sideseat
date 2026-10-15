@@ -2554,3 +2554,8 @@
 "No times selected" = "No times selected";
 "Deselect all times for this day" = "Deselect all times for this day";
 "Select all times for this day" = "Select all times for this day";
+
+// Availability state legend
+"Selected slots" = "Selected slots";
+"Partial day" = "Partial day";
+"Unselected slots" = "Unselected slots";

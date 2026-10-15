@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-10-02
+**Last updated:** 2026-10-15
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -69,6 +69,17 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 
 Do not add Feature-local hex values, duplicated radii or an additional visual
 framework without an explicit design-system decision.
+
+### Availability state colors — owner decision 2026-10-15
+
+The time-poll editor uses `SideSeatTheme.Availability` to distinguish actual
+selection states. Selected cells and fully selected day headers use teal with a
+paired contrasting foreground. A partly selected day uses amber with a minus
+symbol; unselected time remains an empty adaptive surface. A compact legend and
+the existing checkmarks/accessibility values explain these states without relying
+on color alone. Both appearances have explicit paired colors. This scoped owner
+request updates availability editing; routine navigation and filters retain their
+neutral tokens, and the existing group heatmap continues to encode attendance.
 
 ## 4. Components
 

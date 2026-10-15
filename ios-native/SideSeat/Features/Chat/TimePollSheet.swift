@@ -362,6 +362,18 @@ private struct TimePollGrid: View {
                     .accessibilityLabel("Undo last change")
                     .accessibilityIdentifier("time-poll-undo")
                 }.padding(.horizontal, SideSeatTheme.spaceMD)
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                    Label { Text("Selected slots") } icon: {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill)
+                    }
+                    Label { Text("Partial day") } icon: {
+                        Image(systemName: "minus.circle.fill").foregroundStyle(SideSeatTheme.Availability.onPartial)
+                    }
+                    Label("Unselected slots", systemImage: "circle")
+                }
+                .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, SideSeatTheme.spaceMD)
             }
             GeometryReader { geometry in
                 let cellWidth = max(88, (geometry.size.width - labelWidth) / CGFloat(max(1, min(4, poll.dates.count))))
@@ -396,10 +408,10 @@ private struct TimePollGrid: View {
                                                     let count = poll.summary.counts[slot.id]
                                                     let active = (preview ?? selected).contains(slot.id)
                                                     ZStack {
-                                                        Rectangle().fill(results ? SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, poll.summary.participantCount))) : active ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.surface)
-                                                        Rectangle().strokeBorder(SideSeatTheme.separator, lineWidth: 0.5)
+                                                        Rectangle().fill(results ? SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, poll.summary.participantCount))) : active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.surface)
+                                                        Rectangle().strokeBorder(active && !results ? SideSeatTheme.Availability.onSelected.opacity(0.3) : SideSeatTheme.separator, lineWidth: 0.5)
                                                         if results { Text("\(count)").font(.caption.monospacedDigit()).foregroundStyle(.primary) }
-                                                        else if active { Image(systemName: "checkmark").font(.caption.weight(.medium)).foregroundStyle(.primary) }
+                                                        else if active { Image(systemName: "checkmark").font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.Availability.onSelected) }
                                                     }.frame(width: cellWidth, height: cellHeight)
                                                     .accessibilityElement()
                                                     .accessibilityLabel("\(date), \(slot.label), \(results ? String(count) : AppLocalization.string(active ? "Available" : "Unavailable"))")
@@ -447,8 +459,11 @@ private struct TimePollGrid: View {
             }
             .font(.caption.weight(.semibold))
             .frame(width: width - 6, height: headerHeight - 4)
-            .background(allSelected ? SideSeatTheme.ControlSelection.fill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
-            .overlay { RoundedRectangle(cornerRadius: 8).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }
+            .foregroundStyle(allSelected ? SideSeatTheme.Availability.onSelected : partlySelected ? SideSeatTheme.Availability.onPartial : SideSeatTheme.textPrimary)
+            .background(allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.partialFill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8).strokeBorder(allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.onPartial.opacity(0.5) : SideSeatTheme.separator, lineWidth: 0.5)
+            }
             .frame(width: width, height: headerHeight)
             .contentShape(Rectangle())
         }

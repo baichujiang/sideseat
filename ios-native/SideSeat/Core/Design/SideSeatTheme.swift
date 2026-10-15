@@ -189,6 +189,31 @@ enum SideSeatTheme {
         })
     }
 
+    /// Owner-requested availability states (2026-10-15), scoped to time editing.
+    /// Checkmarks and partial-day symbols accompany color in both appearances.
+    enum Availability {
+        static let selectedFill = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.23, green: 0.62, blue: 0.50, alpha: 1)
+                : UIColor(red: 0.08, green: 0.46, blue: 0.36, alpha: 1)
+        })
+        static let onSelected = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.02, green: 0.12, blue: 0.09, alpha: 1)
+                : .white
+        })
+        static let partialFill = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 0.31, green: 0.22, blue: 0.09, alpha: 1)
+                : UIColor(red: 1.0, green: 0.94, blue: 0.78, alpha: 1)
+        })
+        static let onPartial = Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 1.0, green: 0.83, blue: 0.54, alpha: 1)
+                : UIColor(red: 0.48, green: 0.30, blue: 0.02, alpha: 1)
+        })
+    }
+
     /// Neutral selected surfaces keep filters, tabs and private saves readable without a pink wash.
     enum ControlSelection {
         static let fill = Color(uiColor: UIColor { traits in

@@ -2554,3 +2554,8 @@
 "No times selected" = "尚未选择时段";
 "Deselect all times for this day" = "取消选择当天全部时段";
 "Select all times for this day" = "选择当天全部时段";
+
+// Availability state legend
+"Selected slots" = "已选时段";
+"Partial day" = "当天部分已选";
+"Unselected slots" = "未选时段";
