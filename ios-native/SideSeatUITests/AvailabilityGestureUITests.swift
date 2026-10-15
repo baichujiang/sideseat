@@ -190,6 +190,10 @@ import XCTest
             "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
             "--ui-testing-appearance=\(appearance)"]
         app.launchEnvironment["SIDESEAT_QA_ACCESS_TOKEN"] = token
+        if let localAPI = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_GESTURE_QA_API"] {
+            app.launchArguments.append("--ui-testing-local-api")
+            app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = localAPI
+        }
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
     }
