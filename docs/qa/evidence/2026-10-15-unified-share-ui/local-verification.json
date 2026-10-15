@@ -1,0 +1,28 @@
+{
+  "sourceCommit": "4d208a1b35f33938fde48302948e68567567ead9",
+  "activeCheckout": "/Users/baichu/Desktop/\u9879\u76ee/app\u5f00\u53d1\u9879\u76ee/Sideseat-ios-uxui",
+  "server": "http://127.0.0.1:3105",
+  "serverWorkingDirectoryVerified": true,
+  "database": "isolated sideseat_ios_test on 127.0.0.1:5433",
+  "passedTests": 3,
+  "durationSeconds": 22.9,
+  "browserEngines": [
+    "Chromium",
+    "WebKit"
+  ],
+  "realTouchInput": "Chromium CDP; ordinary vertical/horizontal scroll without edits, 400ms hold, preview, cancellation, paint, erase and undo",
+  "otherChecks": [
+    "two-date rectangular mouse drag",
+    "partial/full/empty day states and untouched other dates",
+    "single-step undo preserved across result view",
+    "keyboard Space",
+    "Light/Dark matching native colors",
+    "read-only count heatmap",
+    "guest rename, versioned confirmation and Calendar",
+    "English/Chinese preference regression"
+  ],
+  "typeScript": "passed",
+  "focusedEslint": "passed without warnings",
+  "reactReview": "scoped DOM listeners with cancellation/cleanup; stable touch target; refresh pauses during preview; serialized/coalesced save retained",
+  "ownedLocalServerAndDatabaseStopped": true
+}

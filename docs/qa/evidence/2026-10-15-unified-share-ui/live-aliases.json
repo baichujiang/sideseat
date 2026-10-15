@@ -1,0 +1,16 @@
+[
+  {
+    "alias": "api.sideseat.de",
+    "deploymentId": "dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS",
+    "url": "sideseat-mo7m9icte-baichus-projects.vercel.app",
+    "state": "READY",
+    "target": "production"
+  },
+  {
+    "alias": "www.sideseat.de",
+    "deploymentId": "dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS",
+    "url": "sideseat-mo7m9icte-baichus-projects.vercel.app",
+    "state": "READY",
+    "target": "production"
+  }
+]

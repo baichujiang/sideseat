@@ -1,0 +1,29 @@
+{
+  "webSourceCommit": "4d208a1b35f33938fde48302948e68567567ead9",
+  "testSourceCommit": "5554c2c17ccd625a4ad5d3da005349239d9cd937",
+  "test": "UnifiedPlanLiveUITests/testSafariGuestShareNicknameAndConfirmation",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": "105",
+  "passedTests": 1,
+  "failedTests": 0,
+  "durationSeconds": 133.722,
+  "result": "Passed",
+  "browser": "real iPhone Safari",
+  "initialAttempt": {
+    "result": "Failed",
+    "durationSeconds": 63.019,
+    "cause": "Safari exposes aria-pressed grid cells as Switch, not Button; test selector corrected; fresh fixture used"
+  },
+  "coverage": [
+    "native Copy link",
+    "Safari nickname and 15-minute long-hold range",
+    "Undo and reselect",
+    "guest name edit while collecting",
+    "native shared roster and invitation",
+    "host and guest nickname edit while inviting",
+    "Safari acceptance",
+    "native confirmed details and Calendar search/Manage plan"
+  ]
+}

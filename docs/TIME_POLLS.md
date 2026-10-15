@@ -70,10 +70,22 @@ against the native replacement.
 
 ## Guest participation — owner decision 2026-10-15
 
-The public share page lets people enter a recognizable nickname, add date/time
-ranges, edit their own nickname and confirm the current invitation without an
-account or download. Ordinary scrolling never edits availability. Browser writes
-are serialized/coalesced; unsaved work is retained for explicit Retry.
+The public share page lets people enter a recognizable nickname, select the same
+15-minute grid as the native app, edit their nickname and confirm the current
+invitation without an account or download. Both clients follow the Mobile
+selection rules above: normal swipes scroll, taps toggle one cell, a 400 ms hold
+previews a rectangular paint/erase range, release commits, cancellation discards,
+and the last change can be undone. Date headers select/clear their configured day
+without changing other dates. Teal/amber states use the native color values;
+the public page follows the browser's Light/Dark appearance. Group results shows
+the same recommendations and a read-only per-slot attendance heatmap.
+
+Guests first enter a name; subsequent selection and confirmation use the same
+persisted plan, slot IDs and lifecycle as the app. Chinese is the default, with
+an independent remembered English/Chinese choice. Browser writes remain
+serialized/coalesced; unsaved work is retained for explicit Retry. Refresh pauses
+during an active range preview and cannot overwrite a pending save. Grid cells
+retain a stable touch target while their checkmark changes.
 
 `TimePollGuest` belongs to one poll. A random browser credential is stored only
 in an HttpOnly, SameSite=Lax cookie; PostgreSQL stores its SHA-256 hash. The cookie

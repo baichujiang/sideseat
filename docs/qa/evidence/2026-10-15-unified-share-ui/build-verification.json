@@ -1,0 +1,11 @@
+{
+  "deploymentId": "dpl_Eq19xTZsKQCckjdv8Py6x94E2jtS",
+  "databaseMigrationsSkipped": true,
+  "oneShotReleasePreflightExecuted": false,
+  "messages": [
+    "2026-10-15T21:08:57.207Z  [build] Skipping prisma migrate deploy because SKIP_DATABASE_MIGRATIONS=1.",
+    "2026-10-15T21:09:26.704Z  \u2713 Compiled successfully in 23.2s",
+    "2026-10-15T21:10:47.382Z  Build Completed in /vercel/output [2m]",
+    "status\t\u25cf Ready"
+  ]
+}

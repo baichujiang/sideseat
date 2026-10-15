@@ -1,0 +1,33 @@
+{
+  "shareRedirectStatus": 307,
+  "sharePathPreserved": true,
+  "targetHost": "www.sideseat.de",
+  "retainedRoutes": [
+    {
+      "path": "/discover",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/profile",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/courses",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/calendar",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/chats",
+      "status": 307,
+      "target": "/ios"
+    }
+  ],
+  "clientConfigStatus": 200
+}

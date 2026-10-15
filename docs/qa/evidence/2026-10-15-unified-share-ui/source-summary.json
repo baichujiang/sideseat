@@ -1,0 +1,39 @@
+{
+  "baseDeployment": "dpl_63iB9RynVCpBdPi68S3SmAezuTND",
+  "overlays": [
+    {
+      "path": "components/time-polls/availability-editor.tsx",
+      "sha1": "801f9266e7586799079d9274695dc9389c2fa2a5",
+      "source": "4d208a1b35f33938fde48302948e68567567ead9"
+    },
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "sha1": "c1b4492c9705a79bdaecd184d889beeabd3b4793",
+      "source": "4d208a1b35f33938fde48302948e68567567ead9"
+    },
+    {
+      "path": "components/time-polls/shared-time-poll.module.css",
+      "sha1": "e9289d5120c441a83e10c877e5810322b5f03fb7",
+      "source": "4d208a1b35f33938fde48302948e68567567ead9"
+    },
+    {
+      "path": "components/time-polls/use-availability-gesture.ts",
+      "sha1": "21a79ca24b8b89a43de115094da84358d81106f6",
+      "source": "4d208a1b35f33938fde48302948e68567567ead9"
+    },
+    {
+      "path": "components/time-polls/use-shared-time-poll.ts",
+      "sha1": "f9e608b17e0a1a2697626328bb84de1edcf43e3d",
+      "source": "4d208a1b35f33938fde48302948e68567567ead9"
+    },
+    {
+      "path": ".sideseat-unified-share-source.json",
+      "sha1": "69d8677d502da34c08f38cc012fdf655fbff6d0d",
+      "source": "release provenance"
+    }
+  ],
+  "sourceCommit": "4d208a1b35f33938fde48302948e68567567ead9",
+  "sourceBranch": "codex/ios-uxui-20260922",
+  "verifiedBaseFiles": 1336,
+  "preservedProductionFiles": 1333
+}

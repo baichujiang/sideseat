@@ -1,0 +1,17 @@
+{
+  "stage": "www",
+  "browser": "WebKit",
+  "base": "https://www.sideseat.de",
+  "defaultChinese": true,
+  "dayPartialFullClearUndo": true,
+  "otherDayPreserved": true,
+  "reloadPersistence": true,
+  "darkNativeColors": true,
+  "readOnlyHeatmap": true,
+  "languageChoicePersists": true,
+  "guestRenameConfirmAndCalendar": true,
+  "noPrematureCalendar": true,
+  "pageErrors": [],
+  "serverErrors": [],
+  "verifiedAt": "2026-10-15T21:12:03.204Z"
+}

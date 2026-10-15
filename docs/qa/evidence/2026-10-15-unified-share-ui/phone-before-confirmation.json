@@ -1,0 +1,13 @@
+{
+  "phase": "INVITING",
+  "calendarEntriesBeforeGuestConfirmation": 0,
+  "guestSlotIds": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "guestNickname": "Lin Xia",
+  "accepted": 1,
+  "selected": 2
+}

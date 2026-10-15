@@ -1,0 +1,17 @@
+{
+  "stage": "candidate",
+  "browser": "Chromium",
+  "base": "https://sideseat-mo7m9icte-baichus-projects.vercel.app",
+  "defaultChinese": true,
+  "dayPartialFullClearUndo": true,
+  "otherDayPreserved": true,
+  "reloadPersistence": true,
+  "darkNativeColors": true,
+  "readOnlyHeatmap": true,
+  "languageChoicePersists": true,
+  "guestRenameConfirmAndCalendar": true,
+  "noPrematureCalendar": true,
+  "pageErrors": [],
+  "serverErrors": [],
+  "verifiedAt": "2026-10-15T21:11:15.136Z"
+}

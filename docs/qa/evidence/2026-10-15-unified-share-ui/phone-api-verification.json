@@ -1,0 +1,14 @@
+{
+  "phase": "CONFIRMED",
+  "sameSlotIds": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "hostName": "Host Li",
+  "guestName": "Lin Final",
+  "calendarEntries": 1,
+  "calendarGuestName": true,
+  "sameGuestIdentityAfterRename": true
+}
