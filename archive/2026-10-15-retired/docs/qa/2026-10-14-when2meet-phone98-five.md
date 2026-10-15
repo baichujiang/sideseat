@@ -1,5 +1,7 @@
 # Preview 98 真机五人时间征集验收
 
+> ARCHIVED 2026-10-15 — historical evidence only. Do not run the old commands or use this document as current product/release guidance. See [archive policy](../../README.md).
+
 2026-10-14，Europe/Berlin。iPhone 16 Pro Max / iOS 26.0.1。
 
 直接操作手机原有 `app.sideseat.mobile.preview / 1.0.0 (98)`。

@@ -1,5 +1,7 @@
 # Together QA demo — test_001
 
+> ARCHIVED 2026-10-15 — historical evidence only. Do not run the old commands or use this document as current product/release guidance. See [archive policy](../README.md).
+
 Updated: 2026-09-08. Owner-authorized internal fixture, not organic pilot data.
 
 ## Ready on the existing internal app

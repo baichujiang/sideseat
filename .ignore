@@ -1,0 +1,4 @@
+# Frozen archives stay out of ordinary ripgrep/source discovery.
+# Use explicit recovery authority and paths when inspecting historical material.
+/archive/
+/docs/archive/

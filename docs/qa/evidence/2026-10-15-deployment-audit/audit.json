@@ -1,0 +1,136 @@
+{
+  "checkedOn": "2026-10-15",
+  "recordedAtUTC": "2026-10-15T09:14:30.547748+00:00",
+  "recordedAtBerlin": "2026-10-15T11:14:30.547748+02:00",
+  "baselineCommit": "e168acf2a94ce066b20077da5a8ef134b813e758",
+  "branch": "codex/ios-uxui-20260922",
+  "gitRemoteComparedAtStart": {
+    "ahead": 0,
+    "behind": 0,
+    "workingTreeClean": true
+  },
+  "backend": {
+    "id": "dpl_7osq5AhK8d7Bsxh3hs2tQUHE4vRi",
+    "url": "https://sideseat-g0yhl8r7e-baichus-projects.vercel.app",
+    "api": "https://api.sideseat.de",
+    "target": "production",
+    "status": "READY",
+    "sourceFiles": 1322,
+    "matchingBaselineSourceFiles": 1313,
+    "differentOrMissingBaselineSourceFiles": 9,
+    "productionFilesChangedByAudit": 0
+  },
+  "device": {
+    "model": "iPhone 16 Pro Max",
+    "preview": {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "version": "1.0.0",
+      "build": "99",
+      "nativeSourceCommit": "02300a46027c8f0a1952561098f0169d98cbe9be"
+    },
+    "ordinary": {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "version": "1.0.0",
+      "build": "97"
+    },
+    "newInstallPerformedByAudit": false,
+    "ownerKeychainChanged": false
+  },
+  "installedPreviewUI": {
+    "verifiedAtBerlin": "2026-10-15T10:57:05+02:00",
+    "test": "PlanEntryAudit.testInstalledPreviewEntryPoints",
+    "result": "passed",
+    "durationSeconds": 23.708,
+    "resultBundle": "/tmp/sideseat-plan-entry-audit-20261015/result-clear-pip.xcresult",
+    "checks": [
+      "Plans tab has no plan-smart-time or inbox-time-poll entry",
+      "Messages inbox-time-poll opens native poll sheet with create control",
+      "Existing chat Plan editor exposes plan-smart-time with label 智能约时间"
+    ],
+    "writes": [
+      "none: no message, invitation, response, poll or calendar mutation"
+    ],
+    "rawScreenshotsKeptPrivate": true,
+    "earlierAttempt": {
+      "result": "interrupted at poll entry",
+      "cause": "existing picture-in-picture overlay intercepted toolbar touch",
+      "rerun": "overlay collapsed; same installed app process; all entry assertions passed"
+    },
+    "temporaryRunnerUninstalled": true
+  },
+  "archive": {
+    "manifest": "archive/2026-10-15-retired/MANIFEST.json",
+    "movedTrackedFiles": 63,
+    "recoveredHistoricalSourceFiles": 4,
+    "historicalRoadmapCopies": 1,
+    "totalManifestFiles": 68
+  },
+  "productionSourceSnapshots": [
+    {
+      "deploymentPath": "lib/analytics/layer2-outcome-pilot.ts",
+      "snapshotPath": "production-source/lib/analytics/layer2-outcome-pilot.ts.txt",
+      "sha1": "f2fc80138f91bfaf866fc765572bea30dd65ce7b",
+      "sha256": "a1898840e97c7badbca016a1533856e207c6415447bc35a673f6dd8c8caf201e"
+    },
+    {
+      "deploymentPath": "lib/calendar/smart-input-policy.ts",
+      "snapshotPath": "production-source/lib/calendar/smart-input-policy.ts.txt",
+      "sha1": "072d551c64eac4e80ef622dced9f5210bd9d652d",
+      "sha256": "fb8d494514fde944d686745af803dd36c24851f0cad78a9723aee3e2bc15a810"
+    },
+    {
+      "deploymentPath": "lib/media/private-blob.ts",
+      "snapshotPath": "production-source/lib/media/private-blob.ts.txt",
+      "sha1": "a5699c514bb1ba5227c01008ff3c0cc33e8febaf",
+      "sha256": "0c585766594579c8cd20db8380c2ebed1395c37c8c487be9a67bbe3411291f67"
+    },
+    {
+      "deploymentPath": "scripts/test-calendar-parser-timezones.mjs",
+      "snapshotPath": "production-source/scripts/test-calendar-parser-timezones.mjs.txt",
+      "sha1": "63822622f00caa1a43391010486f585f9f1186a6",
+      "sha256": "3d65617fd2f7b187e2e3407d30e405b285d6cdb6a0c86d82b8f265c7ea3bbadf"
+    },
+    {
+      "deploymentPath": "share-expiry-release-source.json",
+      "snapshotPath": "production-source/share-expiry-release-source.json.txt",
+      "sha1": "24cbbfb019fbe545660b1eaa954cbf59af34319e",
+      "sha256": "a2c0b15f7ce1a830d89bb779b80feda49eb4ffd6466e90e462801eba99b51f1d"
+    }
+  ],
+  "limitations": [
+    "No new authenticated five-account flow: see native time-poll release QA for its exact build evidence.",
+    "Feature flags and source reachability are distinguished from end-to-end acceptance.",
+    "Apple current distribution status was not queried.",
+    "No production source, data, migrations, flags or installed client versions changed."
+  ],
+  "verification": {
+    "openapiOperationsMatched": 187,
+    "focusedTests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "openapiContractTests": {
+      "passed": 13,
+      "failed": 0
+    },
+    "initialFindings": [
+      "Expired Together demo E2E imported the retired catalog; archived together with the fixture.",
+      "Active AASA regression expected the old Preview path set; updated its expectation to the already-deployed time-poll path."
+    ],
+    "runtimeSourceChanges": false,
+    "archiveFilesHashVerified": 68,
+    "typeScriptNoEmit": "passed",
+    "eslint": {
+      "errors": 0,
+      "existingWarnings": 1,
+      "warningPath": "tests/v2/explore-examples-postgres.test.ts:40"
+    },
+    "archiveCompilerInputs": 0,
+    "markdown": {
+      "files": 230,
+      "newMissingLinks": 0,
+      "existingHistoricalMissingLinks": 25
+    },
+    "diffWhitespace": "passed"
+  }
+}

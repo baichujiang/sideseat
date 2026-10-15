@@ -1,0 +1,52 @@
+[
+  {
+    "path": "/ios",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/privacy",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/support",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/.well-known/apple-app-site-association",
+    "status": 200,
+    "location": null
+  },
+  {
+    "path": "/discover",
+    "status": 307,
+    "location": "/ios"
+  },
+  {
+    "path": "/profile",
+    "status": 307,
+    "location": "/ios"
+  },
+  {
+    "path": "/courses",
+    "status": 307,
+    "location": "/ios"
+  },
+  {
+    "path": "/calendar",
+    "status": 307,
+    "location": "/ios"
+  },
+  {
+    "path": "/chats",
+    "status": 307,
+    "location": "/ios"
+  },
+  {
+    "path": "/api/v1/time-polls",
+    "status": 401,
+    "location": null
+  }
+]

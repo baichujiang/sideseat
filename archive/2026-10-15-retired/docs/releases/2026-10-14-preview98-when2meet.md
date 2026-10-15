@@ -1,5 +1,7 @@
 # Preview 98：嵌入 When2meet 原机制
 
+> ARCHIVED 2026-10-15 — historical evidence only. Do not run the old commands or use this document as current product/release guidance. See [archive policy](../../README.md).
+
 2026-10-14，Europe/Berlin。
 
 消息页右上角的日历时钟按钮和已有群聊菜单增加「一起定时间」。App 内加载

@@ -11,6 +11,8 @@ const config = [
       ".next/**",
       ".next-*/**",
       ".local-postgres/**",
+      "archive/**",
+      "docs/archive/**",
       "ios/**",
       "ios-native/**/DerivedData/**",
       "ios-native/DerivedData-*/**",

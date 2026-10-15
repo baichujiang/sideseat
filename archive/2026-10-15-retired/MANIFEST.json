@@ -1,0 +1,551 @@
+{
+  "archivedOn": "2026-10-15",
+  "baselineCommit": "e168acf2a94ce066b20077da5a8ef134b813e758",
+  "policy": "Frozen historical material; no execution, maintenance or restoration without a new explicit owner request.",
+  "files": [
+    {
+      "originalPath": "capacitor.config.ts",
+      "archivedPath": "archive/2026-10-15-retired/capacitor.config.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "51cfe876b2b009d7cb9872db632b4b9e02c4ab843e38d83776ac21aac4ae0b76",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "51cfe876b2b009d7cb9872db632b4b9e02c4ab843e38d83776ac21aac4ae0b76"
+    },
+    {
+      "originalPath": "docs/TOGETHER_QA_DEMO.md",
+      "archivedPath": "archive/2026-10-15-retired/docs/TOGETHER_QA_DEMO.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "e4749b51a0d9f8cec62ac1383c0b3b2004621107d0bbf87c09434f2e87cb7bc7",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "1396c23093f14802bce002e047fe41442cf67c827af82bd6b85c8aabe865e239"
+    },
+    {
+      "originalPath": "docs/qa/2026-10-14-when2meet-phone98-five.md",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/2026-10-14-when2meet-phone98-five.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "ec7e826e6006a06ce6ba3d62f6c706ccc857cf9788cbc45a65391b4328b1f032",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "ce76ef53756b188e7424eb0f5527129115280e85e3366135ceb3c5692362b7b7"
+    },
+    {
+      "originalPath": "docs/qa/2026-10-14-when2meet.md",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/2026-10-14-when2meet.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "3997f83e7cfc9ef6400c3b8ee90699c73f9fe52b267fc2cca7f9f3fb2497b89d",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "53cce933fd3932acf1bb07b7f5a1dc2c9a5771530cf71e360741c32b56aee1b8"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/device-and-results.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/device-and-results.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "30f831cd6e36c8799bcbf696d0ad7ad925b6c82a8756be66efef90d7a4e66e2e",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "30f831cd6e36c8799bcbf696d0ad7ad925b6c82a8756be66efef90d7a4e66e2e"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-common-0900-1000.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-common-0900-1000.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "f0f27797e44fe05fe93eb33cdacc57559ea00e263d4fb43a9652feaba81494cf",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "f0f27797e44fe05fe93eb33cdacc57559ea00e263d4fb43a9652feaba81494cf"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-no-common-best-four-0900-1000.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-no-common-best-four-0900-1000.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "e4540cfd901b79595d2f2caa7707c0d661ae3098db1ad27c63b4a2ab3a76da14",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "e4540cfd901b79595d2f2caa7707c0d661ae3098db1ad27c63b4a2ab3a76da14"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-server-reload-confirmed.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-five-server-reload-confirmed.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "62697fbcfbf6fb514b622cd1eff4cccdf87e62c57022a35343af811ef03bab8a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "62697fbcfbf6fb514b622cd1eff4cccdf87e62c57022a35343af811ef03bab8a"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-no-common-best-four.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-no-common-best-four.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "f28b878a44a3f05688cb73435c3e8ca55c9ca33c0a6c4ed8f914e845a5df4732",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "f28b878a44a3f05688cb73435c3e8ca55c9ca33c0a6c4ed8f914e845a5df4732"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-1-saved.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-1-saved.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "6236b822aacb207f7124fac35b987e9e9cd0e451e182bd0e92ad64f064d1822c",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "6236b822aacb207f7124fac35b987e9e9cd0e451e182bd0e92ad64f064d1822c"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-2-saved.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-2-saved.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "a6ac8ce6a533055a3c984a78ff7cd344a0262a7bf1b281fdea7c26220f521992",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "a6ac8ce6a533055a3c984a78ff7cd344a0262a7bf1b281fdea7c26220f521992"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-3-saved.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-3-saved.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "1faa0141f010a1c067d50eec408c7c4979b27f6ec7a9da0245f89cf3f597ed59",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "1faa0141f010a1c067d50eec408c7c4979b27f6ec7a9da0245f89cf3f597ed59"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-4-saved.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-4-saved.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "e7931c22260fba9464d4af764b8b83c54238604d6a3606c3e447fc45ca505011",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "e7931c22260fba9464d4af764b8b83c54238604d6a3606c3e447fc45ca505011"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-5-saved.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-participant-5-saved.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "c998741c10c81183ba2aeb70cc6436279bd3b7cc6ce89c73072c975eaa4936d1",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "c998741c10c81183ba2aeb70cc6436279bd3b7cc6ce89c73072c975eaa4936d1"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-1.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-1.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "d40a5455751bb7b463e0d3266c03bf78d2fccf121ee4c3f535c4adeb665793bd",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "d40a5455751bb7b463e0d3266c03bf78d2fccf121ee4c3f535c4adeb665793bd"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-2.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-2.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "055c7ffee3de64d8dadd9d9e7784d1b796d5ca404228d7fcbe5c0e50a96fdc79",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "055c7ffee3de64d8dadd9d9e7784d1b796d5ca404228d7fcbe5c0e50a96fdc79"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-3.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-3.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "e21b9ed43c7e278d0d21f143aa673d11c6b1804ac3b7f1081698bf7ab3fde0e2",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "e21b9ed43c7e278d0d21f143aa673d11c6b1804ac3b7f1081698bf7ab3fde0e2"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-4.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-4.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "d4410755d946c951272945ac19be0fa0921fe0c37fa6c1d545c9ca602cc3cdbd",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "d4410755d946c951272945ac19be0fa0921fe0c37fa6c1d545c9ca602cc3cdbd"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-5.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/phone98-server-reload-5.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "2d2d5bc6243f5f46e02dae5c782d8a864d646a9877da822562ad52f47775636a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "2d2d5bc6243f5f46e02dae5c782d8a864d646a9877da822562ad52f47775636a"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet-phone98-five/test-summary.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet-phone98-five/test-summary.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "e09b7de7b1dc4da48ccbbe67eb39b0b708e20900008b8035ec845b494b55e19e",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "e09b7de7b1dc4da48ccbbe67eb39b0b708e20900008b8035ec845b494b55e19e"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/appearance-test-summary.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/appearance-test-summary.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "062bf79af228cd99006f5f294eea042971a537aa6576cef7e616a76168328ab2",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "062bf79af228cd99006f5f294eea042971a537aa6576cef7e616a76168328ab2"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/create-dark-large.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/create-dark-large.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "fa6b8e53aa2efd322e83e827fd212a960a0d42487b2cd05c1d8da8bb4c6a67c2",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "fa6b8e53aa2efd322e83e827fd212a960a0d42487b2cd05c1d8da8bb4c6a67c2"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/create-light.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/create-light.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "5242e1ef6193f2e945dff862127a81152b575e2864f3069cd6923dc576643c6c",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "5242e1ef6193f2e945dff862127a81152b575e2864f3069cd6923dc576643c6c"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/delivery.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/delivery.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "bda32100f008b03b6faa0fa82c0a7a5b6971ead813b19f5a888819901ec2a8db",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "bda32100f008b03b6faa0fa82c0a7a5b6971ead813b19f5a888819901ec2a8db"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/drag-and-autosave.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/drag-and-autosave.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "879e94e33e7436d31497898d3c5db037f999bdeae439508452e1b181302a0da3",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "879e94e33e7436d31497898d3c5db037f999bdeae439508452e1b181302a0da3"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/manual-plan.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/manual-plan.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "f8249f78c4efdbb8ea686a8415aa58480d8bd81fe86c76bedb1eef901e179942",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "f8249f78c4efdbb8ea686a8415aa58480d8bd81fe86c76bedb1eef901e179942"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/server-reload.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/server-reload.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "eebf43484b78a6218e6385e33b9365f53967f3a7f83300cdde27880e5ea60c18",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "eebf43484b78a6218e6385e33b9365f53967f3a7f83300cdde27880e5ea60c18"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/two-participants-no-common.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/two-participants-no-common.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "a164f0412ae432b3d7902ad8266804b079d729c787e8323eef24f71fa754a782",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "a164f0412ae432b3d7902ad8266804b079d729c787e8323eef24f71fa754a782"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/two-participants-shared.png",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/two-participants-shared.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "c6b65e6323160153fb01c4cee31b657fd71ee58245e79476f90525af6837a6e0",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "c6b65e6323160153fb01c4cee31b657fd71ee58245e79476f90525af6837a6e0"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/ui-test-summary.json",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/ui-test-summary.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "8569669843b9d5eef529043a619d289f85abbcbe350ca000a7d36e725309c3bd",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "8569669843b9d5eef529043a619d289f85abbcbe350ca000a7d36e725309c3bd"
+    },
+    {
+      "originalPath": "docs/qa/evidence/2026-10-14-when2meet/unit-tests.txt",
+      "archivedPath": "archive/2026-10-15-retired/docs/qa/evidence/2026-10-14-when2meet/unit-tests.txt",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "a5b839eeb0b013413269cbb56c06201a236bd980a6ef1a76edcdd9644dc1a5ce",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "a5b839eeb0b013413269cbb56c06201a236bd980a6ef1a76edcdd9644dc1a5ce"
+    },
+    {
+      "originalPath": "docs/releases/2026-10-14-preview98-when2meet.md",
+      "archivedPath": "archive/2026-10-15-retired/docs/releases/2026-10-14-preview98-when2meet.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "449ed5a2908352d0a785b16ecfd29cc2b427a551d0112793ce328a298bf35c54",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "7e610d1291f37c623654dbda2031d707e6c6c8df7fedad457bcb331666a5ef32"
+    },
+    {
+      "originalPath": "ios-native/phone-qa/when2meet98/Tests/When2meetFiveParticipantPhoneUITests.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/phone-qa/when2meet98/Tests/When2meetFiveParticipantPhoneUITests.swift",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "ab8f555815f4f245f94d598285382e5cab2b5494eae52d8619ec011037848a49",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "ab8f555815f4f245f94d598285382e5cab2b5494eae52d8619ec011037848a49"
+    },
+    {
+      "originalPath": "ios-native/phone-qa/when2meet98/project.yml",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/phone-qa/when2meet98/project.yml",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "133526443aa11b530e85197de1c462fc491ba3f015cd494bb5b012338848db84",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "133526443aa11b530e85197de1c462fc491ba3f015cd494bb5b012338848db84"
+    },
+    {
+      "originalPath": "ios-native/phone-qa/when2meet98/run.sh",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/phone-qa/when2meet98/run.sh",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "73d65d1aaaa6bfe362c9cf6942c5a592c1e21cdbcf07507a8398a157ac71ecf1",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "73d65d1aaaa6bfe362c9cf6942c5a592c1e21cdbcf07507a8398a157ac71ecf1"
+    },
+    {
+      "originalPath": "ios-shell/www/index.html",
+      "archivedPath": "archive/2026-10-15-retired/ios-shell/www/index.html",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "82983cd235342d0689da85337f55c00db132353b8aea1b58717e23104408cb70",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "82983cd235342d0689da85337f55c00db132353b8aea1b58717e23104408cb70"
+    },
+    {
+      "originalPath": "ios/.gitignore",
+      "archivedPath": "archive/2026-10-15-retired/ios/.gitignore",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "2b7132a9943d2622e51e656897ca5162f56b121b40b423dedce1fbc699dba88a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "2b7132a9943d2622e51e656897ca5162f56b121b40b423dedce1fbc699dba88a"
+    },
+    {
+      "originalPath": "ios/App/App.xcodeproj/project.pbxproj",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App.xcodeproj/project.pbxproj",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "3561e690c88c23e4af9c0ec7e4a00405b4dcfb6d6da839474f866e44d6da4ecb",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "3561e690c88c23e4af9c0ec7e4a00405b4dcfb6d6da839474f866e44d6da4ecb"
+    },
+    {
+      "originalPath": "ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542"
+    },
+    {
+      "originalPath": "ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "3805fbd4fce990188b400a98d5d2b0ff9bc1af41da8a30cf6c37993b5771a2cf",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "3805fbd4fce990188b400a98d5d2b0ff9bc1af41da8a30cf6c37993b5771a2cf"
+    },
+    {
+      "originalPath": "ios/App/App/AppDelegate.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/AppDelegate.swift",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "abf7818202c44bcc6f4d5c2076d131816b859b30bfc2eb856df5b07c0989bdb8",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "abf7818202c44bcc6f4d5c2076d131816b859b30bfc2eb856df5b07c0989bdb8"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "29e4777e319de3ee5a52c3a8004ec19d0568414004257e36d7c94a077d71c93b",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "29e4777e319de3ee5a52c3a8004ec19d0568414004257e36d7c94a077d71c93b"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "5c09bec6eede599b14fa9e4c44b03e7febebc930615a0cd70f02981c09dfe48a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "5c09bec6eede599b14fa9e4c44b03e7febebc930615a0cd70f02981c09dfe48a"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/Contents.json",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/Contents.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "972ec1fd42325872438eb085ac29e94f51c10788ec18ec5549439950866c541d",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "972ec1fd42325872438eb085ac29e94f51c10788ec18ec5549439950866c541d"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/Splash.imageset/Contents.json",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/Splash.imageset/Contents.json",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "041481917eb249533ac6dd63d283bc6190b2d0642a93deda11b2ed0f6f7b605a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "041481917eb249533ac6dd63d283bc6190b2d0642a93deda11b2ed0f6f7b605a"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-1.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732-2.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "originalPath": "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "1b5002b74a5500e697298ced06ca2811ac33f2771f236f3c720ff23243890530"
+    },
+    {
+      "originalPath": "ios/App/App/Base.lproj/LaunchScreen.storyboard",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Base.lproj/LaunchScreen.storyboard",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "87a42e842164d75f39cca56a2cf743652f4d8e858f2eba12ae21a8ddcd9a21c6",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "87a42e842164d75f39cca56a2cf743652f4d8e858f2eba12ae21a8ddcd9a21c6"
+    },
+    {
+      "originalPath": "ios/App/App/Base.lproj/Main.storyboard",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Base.lproj/Main.storyboard",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "7b7dc7acc67134bfaa80e5ce9c9068ba53db5369b9b70248aa7439fc2b09daae",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "7b7dc7acc67134bfaa80e5ce9c9068ba53db5369b9b70248aa7439fc2b09daae"
+    },
+    {
+      "originalPath": "ios/App/App/Info.plist",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/App/Info.plist",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "539431fdd30608d3d667ef219a174d41867198ee1c6f41f9828dbfc2bc39c56e",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "539431fdd30608d3d667ef219a174d41867198ee1c6f41f9828dbfc2bc39c56e"
+    },
+    {
+      "originalPath": "ios/App/CapApp-SPM/.gitignore",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/CapApp-SPM/.gitignore",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "4b958e2b4dd57319aadef2551153c74b9cb5ffe9f89d6e3e491122a94913f016",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "4b958e2b4dd57319aadef2551153c74b9cb5ffe9f89d6e3e491122a94913f016"
+    },
+    {
+      "originalPath": "ios/App/CapApp-SPM/Package.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/CapApp-SPM/Package.swift",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "74ed3fc37437a132add89f854f74cfd2a8bbc7f9e8c5a67febe9a0e637ab70cb",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "74ed3fc37437a132add89f854f74cfd2a8bbc7f9e8c5a67febe9a0e637ab70cb"
+    },
+    {
+      "originalPath": "ios/App/CapApp-SPM/README.md",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/CapApp-SPM/README.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "42c535861f4a866e35f85764ed6af1ea046d6a409bf9852ecb00e5d292a1626e",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "5d91585af4a0ec7574856c08301b6c8afed60a1df54847e1699efe8d14283f22"
+    },
+    {
+      "originalPath": "ios/App/CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios/App/CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "70bf9dafddc35e3877dfb133a996f5be7ccd1e132897a98fdbf4869ff605ece9",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "70bf9dafddc35e3877dfb133a996f5be7ccd1e132897a98fdbf4869ff605ece9"
+    },
+    {
+      "originalPath": "ios/debug.xcconfig",
+      "archivedPath": "archive/2026-10-15-retired/ios/debug.xcconfig",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "4838938a72b913b99cfda54a43bbe73f05893071dc6e3702b0adc44794b64272",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "4838938a72b913b99cfda54a43bbe73f05893071dc6e3702b0adc44794b64272"
+    },
+    {
+      "originalPath": "scripts/add-chat-planning-demo.ts",
+      "archivedPath": "archive/2026-10-15-retired/scripts/add-chat-planning-demo.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "78b20d454ad79aab8102975efa83b394a21c6f1b3d0fb04ea4ee28f556c8f7b9",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "78b20d454ad79aab8102975efa83b394a21c6f1b3d0fb04ea4ee28f556c8f7b9"
+    },
+    {
+      "originalPath": "scripts/lib/together-demo-catalog.ts",
+      "archivedPath": "archive/2026-10-15-retired/scripts/lib/together-demo-catalog.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "f0752022793382c61919c44320b4637d170c562a8360a734678d86c052bb414d",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "f0752022793382c61919c44320b4637d170c562a8360a734678d86c052bb414d"
+    },
+    {
+      "originalPath": "scripts/seed-demo.ts",
+      "archivedPath": "archive/2026-10-15-retired/scripts/seed-demo.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "a703f3f56393e61f13976a002f1931b801f141981b8937ae6470a240517f7044",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "a703f3f56393e61f13976a002f1931b801f141981b8937ae6470a240517f7044"
+    },
+    {
+      "originalPath": "scripts/seed-discover-showcase.ts",
+      "archivedPath": "archive/2026-10-15-retired/scripts/seed-discover-showcase.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "5e8669dd686fc288810b773efd62373fe5c72790474541ec56f0b48030d33e8a",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "5e8669dd686fc288810b773efd62373fe5c72790474541ec56f0b48030d33e8a"
+    },
+    {
+      "originalPath": "scripts/seed-together-demo.ts",
+      "archivedPath": "archive/2026-10-15-retired/scripts/seed-together-demo.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "6ff8deacfc44acc4cc2eee0269f2f8aa752c34f95d4e5cbd7f78eb7729b997a2",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "6ff8deacfc44acc4cc2eee0269f2f8aa752c34f95d4e5cbd7f78eb7729b997a2"
+    },
+    {
+      "originalPath": "tests/v2/together-demo-catalog.test.ts",
+      "archivedPath": "archive/2026-10-15-retired/tests/v2/together-demo-catalog.test.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "41c76219639927163e2bda1abb204467629fe20972e6e4a2124d804b70033d99",
+      "origin": "moved-tracked-file",
+      "archivedSHA256": "41c76219639927163e2bda1abb204467629fe20972e6e4a2124d804b70033d99"
+    },
+    {
+      "originalPath": "ios-native/SideSeat/Features/Chat/When2meet.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/SideSeat/Features/Chat/When2meet.swift",
+      "sourceCommit": "ba8a92b",
+      "originalSHA256": "6a732a76ae440fdbe977ccb3867690bfd5b07015e1a87bcbb815b087b85a3f0d",
+      "origin": "historical-git-source",
+      "archivedSHA256": "6a732a76ae440fdbe977ccb3867690bfd5b07015e1a87bcbb815b087b85a3f0d"
+    },
+    {
+      "originalPath": "ios-native/SideSeat/Features/Chat/When2meetSheet.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/SideSeat/Features/Chat/When2meetSheet.swift",
+      "sourceCommit": "ba8a92b",
+      "originalSHA256": "39e564899df1c1519f5755ca0a75bcd8674b8a0a9bd3e7d825b8024fc7878984",
+      "origin": "historical-git-source",
+      "archivedSHA256": "39e564899df1c1519f5755ca0a75bcd8674b8a0a9bd3e7d825b8024fc7878984"
+    },
+    {
+      "originalPath": "ios-native/SideSeatTests/When2meetTests.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/SideSeatTests/When2meetTests.swift",
+      "sourceCommit": "ba8a92b",
+      "originalSHA256": "9da2de8b53edcba21b35f7b920c7415d6d0e6a6cf6adb31bbe53f3be0d7b6873",
+      "origin": "historical-git-source",
+      "archivedSHA256": "9da2de8b53edcba21b35f7b920c7415d6d0e6a6cf6adb31bbe53f3be0d7b6873"
+    },
+    {
+      "originalPath": "ios-native/SideSeatUITests/When2meetLiveUITests.swift",
+      "archivedPath": "archive/2026-10-15-retired/ios-native/SideSeatUITests/When2meetLiveUITests.swift",
+      "sourceCommit": "ba8a92b",
+      "originalSHA256": "5a76c50222c3174bd17b20c161dbce2ebd9246dc7b1e91336356b9ac1a6efff7",
+      "origin": "historical-git-source",
+      "archivedSHA256": "5a76c50222c3174bd17b20c161dbce2ebd9246dc7b1e91336356b9ac1a6efff7"
+    },
+    {
+      "originalPath": "docs/ROADMAP.md",
+      "archivedPath": "archive/2026-10-15-retired/docs/ROADMAP-2026-09-09.md",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "db914544a6e1065161fa3a00d3f01368102e46ef8c20bae39f6873a477d4dc27",
+      "origin": "historical-snapshot",
+      "archivedSHA256": "ad0ecbb506089891d9a7c0805947b4cc317c0fef66fcbb99dd30c90bc54a48b0"
+    },
+    {
+      "originalPath": "e2e/api-together-demo.spec.ts",
+      "archivedPath": "archive/2026-10-15-retired/e2e/api-together-demo.spec.ts",
+      "sourceCommit": "e168acf",
+      "originalSHA256": "60fe1a7561e4495f6f609dbf8ee81a7b50b79e45534aee8740067337bd34b415",
+      "archivedSHA256": "60fe1a7561e4495f6f609dbf8ee81a7b50b79e45534aee8740067337bd34b415",
+      "origin": "moved-tracked-file"
+    }
+  ]
+}

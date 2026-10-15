@@ -9,7 +9,8 @@
 The active reading path is intentionally short:
 
 ```text
-PRODUCT
+DEPLOYED_STATE (version, live flags, actual entries and archive boundaries)
+→ PRODUCT
 → USER_FLOW
 → ROADMAP
 → relevant engineering or platform document
@@ -31,6 +32,7 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Deployed state](./DEPLOYED_STATE.md) | Current phone/backend versions, actual feature entries, live flags, retained compatibility and frozen archive boundaries |
 | [Product](./PRODUCT.md) | Positioning, product objects, navigation, invariants and non-goals |
 | [User Flow](./USER_FLOW.md) | Current user-visible Intent → Opportunity → Plan flow and repeat boundary |
 | [Calendar smart input](./CALENDAR_SMART_INPUT.md) | Event extraction, missing-information completion, duration defaults, uniform preview and acceptance examples; implemented policy, shared defaults and verification boundaries |
@@ -54,21 +56,22 @@ Historical build evidence never certifies a newer build.
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |
 | [Storage lifecycle and cost audit](./qa/2026-09-30-storage-lifecycle-and-cost.md) | Sequential fixes, local verification, production follow-up and Vercel Pro cost scenarios |
 | [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |
-| [Preview 1.0.0 (98)](./releases/2026-10-14-preview98-when2meet.md) | Original When2meet integration, live provider verification, signed phone installation and launch status |
-| [TestFlight 1.0.0 (97)](./releases/2026-10-08-testflight97.md) | Current local snapshot, profile appearance backend dependency, signed archive and distribution evidence |
+| [Deployment and retirement audit](./qa/2026-10-15-deployment-and-retirement.md) | Live deployment/source comparison, phone entry audit, compatibility classification and archive verification |
+| [Preview 1.0.0 (99)](./releases/2026-10-15-preview99-native-time-polls.md) | Current development delivery: native time polls and Sideseat-owned API/storage |
+| [TestFlight 1.0.0 (97)](./releases/2026-10-08-testflight97.md) | Separate supported older distribution: dated source, backend, signing and internal distribution evidence |
 | [TestFlight 1.0.0 (29)](./releases/2026-09-02-testflight-29.md) | Immutable facts and missing evidence for one uploaded build |
 | [TestFlight 1.0.0 (30)](./releases/2026-09-07-testflight-30.md) | Distributed Layer 2 build and physical acceptance evidence |
 | [TestFlight 1.0.0 (31)](./releases/2026-09-07-testflight-31.md) | Localization-complete internal pilot build and focused smoke plan |
 | [TestFlight 1.0.0 (32)](./releases/2026-09-07-testflight-32.md) | Layer 2 Plan and Outcome attention-badge pilot build |
-| [Browser workspace](./releases/2026-09-21-web-calendar.md) | App-based browser rebuild, calendar delivery, legacy UI removal and local verification |
+| [Frozen retired implementations](../archive/2026-10-15-retired/README.md) | Capacitor, When2meet/Preview 98, expired demos, old roadmap; do not execute, maintain or restore |
 | `archive/visual-qa-pre-together/` | Historical screenshots from the old navigation; not current sign-off |
 
 Compatibility material cannot reintroduce public Discover, publishing, city
 filters, saved posts, people browsing or creator-selected candidate pools into
 Together.
 
-`ios/App/CapApp-SPM/README.md` is generated package-host documentation for the
-legacy Capacitor rollback project. Do not treat it as product authority.
+The former `ios/App/CapApp-SPM/README.md` belongs to the archived Capacitor
+project. Its generated host instructions have no current build authority.
 
 ## Lifecycle labels
 
@@ -77,6 +80,8 @@ legacy Capacitor rollback project. Do not treat it as product authority.
 - **Implemented:** code/schema/API exists but still needs build-specific testing.
 - **Compatibility:** preserved only for old records, clients, migrations or rollback.
 - **Historical:** named-date/build evidence, never current status.
+- **Archived / frozen:** retired material; do not edit, execute, build, deploy or
+  reactivate without a new explicit owner request for that item.
 - **Release record:** immutable facts for one build plus explicit missing evidence.
 - **Generated:** tool-owned content, not a decision source.
 

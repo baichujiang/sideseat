@@ -2,7 +2,7 @@
 
 **Status:** Compatibility only
 
-**Last updated:** 2026-09-02
+**Last updated:** 2026-10-15
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -13,6 +13,13 @@
 This document preserves only rules needed by existing records, old TestFlight
 clients, migrations and rollback. It must not reintroduce Discover, a publisher,
 city filters, saved posts, response pools or public people discovery into Together.
+
+Owner instruction 2026-10-15: retained compatibility is frozen in place. Do not
+modify, redesign, reactivate or remove these surfaces during unrelated work.
+Consult [deployed state](./DEPLOYED_STATE.md) for actual flags and route reachability.
+The old Capacitor app and provider time-poll implementation are separately
+[archived](../archive/2026-10-15-retired/README.md); they are no longer rollback
+build targets. Historical dates alone do not make shared API/data code removable.
 
 ## 1. Versioned policies
 
@@ -92,8 +99,13 @@ The native iPhone app is the product client. Production keeps only:
 - `/api/**`;
 - `/.well-known/apple-app-site-association`;
 - approved public event/schedule share and app-handoff routes;
-- `/ios`, `/privacy` and `/support`.
+- `/ios`, `/xhs`, `/privacy` and `/support`;
+- the authorized admin interface and its `/login` / `/forgot-password` entry paths.
 
-Other legacy page routes redirect to the iPhone handoff. Local development and
-regression tests may enable the legacy UI. `SIDESEAT_ENABLE_LEGACY_WEB=true` is an
-emergency rollback switch, not the normal production configuration.
+Sideseat's `/time-polls/` app handoff is also allowed. The exact path policy is
+`lib/nav/legacy-web-freeze.ts`; admin and shared API dependencies are still active.
+
+Other legacy page routes redirect to the iPhone handoff. Local regression code
+can still render the legacy UI; do not treat a local browser page as the current
+phone product. `SIDESEAT_ENABLE_LEGACY_WEB=true` is a retained emergency switch;
+this audit did not change it and does not authorize enabling it.

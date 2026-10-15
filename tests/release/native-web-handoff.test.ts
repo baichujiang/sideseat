@@ -70,7 +70,7 @@ test("legacy web is frozen in production while native and admin routes remain", 
   assert.equal(isNativeWebPath("/signup"), false);
 });
 
-test("Xiaohongshu callbacks reach the signed apps without a web login", async () => {
+test("signed app links include Xiaohongshu callbacks and native time polls", async () => {
   const response = getAppleAppSiteAssociation();
   const { applinks } = await response.json();
   const production = applinks.details.find((entry: { appIDs: string[] }) =>
@@ -80,7 +80,7 @@ test("Xiaohongshu callbacks reach the signed apps without a web login", async ()
     entry.appIDs.includes("V4238R5R53.app.sideseat.mobile.preview"),
   );
   assert.ok(production.components.some((entry: { "/": string }) => entry["/"] === "/xhs/*"));
-  assert.deepEqual(preview.components.map((entry: { "/": string }) => entry["/"]), ["/xhs/*"]);
+  assert.deepEqual(preview.components.map((entry: { "/": string }) => entry["/"]), ["/xhs/*", "/time-polls/*"]);
   for (const path of ["/xhs", "/xhs/", "/xhs/sdk/callback"]) {
     assert.equal(isPublicAppPath(path), true);
     assert.equal(isNativeWebPath(path), true);

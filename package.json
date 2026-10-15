@@ -58,11 +58,6 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "seed:test-accounts": "tsx scripts/seed-test-accounts.ts",
-    "seed:discover-showcase": "node --env-file=.env --import tsx scripts/seed-discover-showcase.ts",
-    "cap:sync": "cap sync ios",
-    "cap:open:ios": "cap open ios",
-    "cap:run:ios": "cap run ios",
-    "ios:dev": "CAPACITOR_SERVER_URL=http://localhost:3000 cap sync ios && cap open ios",
     "ios:device-preflight": "ios-native/scripts/verify-device-build.sh",
     "ios:test-performance": "ios-native/scripts/run-performance-gates.sh"
   },

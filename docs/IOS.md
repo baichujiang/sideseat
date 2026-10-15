@@ -2,7 +2,7 @@
 
 **Status:** Current platform guide
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-15
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -11,7 +11,8 @@
 ## 1. Architecture
 
 `ios-native/` is the production SwiftUI iPhone client. The legacy Capacitor
-project is rollback/regression material only.
+project is [archived and frozen](../archive/2026-10-15-retired/README.md).
+Check [deployed state](./DEPLOYED_STATE.md) before using a dated build record.
 
 - minimum platform: iOS 17;
 - project source: `ios-native/project.yml`;
@@ -39,7 +40,7 @@ runtime versions are pinned by the workspace.
 
 ## 3. Environments
 
-Development, Staging and Production configuration live in
+Development, Preview, Staging and Production configuration live in
 `ios-native/Configuration/`.
 
 - Development defaults to `https://api.sideseat.de` for Simulator/device use.
@@ -111,26 +112,22 @@ depend on a minute-level server cron because iOS controls background execution.
 
 ## 6. Platform integrations
 
-- Messages embeds When2meet through `When2meetSheet`/WKWebView. Original provider
-  pages and save endpoints remain authoritative; only presentation/accessibility
-  is adapted with `SideSeatTheme`. Exact HTTPS event-host validation keeps pasted
-  links in the provider surface; clicked external links use the system browser.
-  No SideSeat bearer token, password, profile or Calendar data is injected.
-  `When2meetLiveUITests` is opt-in through
-  `SIDESEAT_WHEN2MEET_LIVE_UI_TESTS=1`; it creates only an anonymous QA poll and
-  verifies real provider persistence. DEBUG-only observations return the original
-  fetch Promise without changing save payloads or endpoints.
-  Physical five-participant QA uses the standalone runner at
-  `ios-native/phone-qa/when2meet98/run.sh`, enabled by
-  `SIDESEAT_WHEN2MEET_PHONE_QA=1`. It operates the installed Preview 98 and returns
-  to its ordinary session afterward; it builds no SideSeat app target. See the
-  [physical acceptance record](./qa/2026-10-14-when2meet-phone98-five.md).
-
+- Messages offers native SwiftUI time polls through `TimePollSheet`,
+  `TimePollStore` and Sideseat's authenticated `/api/v1/time-polls` service.
+  Sideseat stores responses and calculates common/highest-attendance windows.
+  The drag/erase grid uses 15-minute slots with automatic save. There is no
+  provider webview, advertising or When2meet save service in the current client.
+  See the [time poll contract](./TIME_POLLS.md) and
+  [native delivery QA](./qa/2026-10-15-native-time-polls.md).
+- Opt-in native five-account physical QA is at
+  `ios-native/phone-qa/native-time-poll99/run.sh`; use isolated temporary accounts
+  and explicit task authority. Preview 98's provider code and runner are
+  [archived](../archive/2026-10-15-retired/README.md) and must not be executed.
+- The Plan editor's Chinese entry is **智能约时间**. It uses
+  `SmartTimeSuggestionSheet` to recommend the current user's calendar windows.
+  The Messages entry **一起定时间** opens the separate multi-person time poll.
+  There is no conversion from a poll result to a confirmed Plan yet.
 - `PrivacyInfo.xcprivacy` describes required manifest APIs.
-- The When2meet input adapter suppresses iOS compatibility mouse events after a
-  grid touch, which otherwise toggles a tapped slot twice. Original touch handlers
-  and save requests are unchanged. Live verification counts one save per gesture
-  and rereads the provider's stored selections.
 - Associated Domains and AASA provide approved Universal Links.
 - APNs device registration uses `/api/v1/push/devices` after sign-in.
 - Sentry starts only when a crash DSN is configured and default PII is disabled.
@@ -142,13 +139,17 @@ secrets—not Git.
 
 ## 7. Current release state
 
-Version `1.0.0` build `97` was uploaded, processed and distributed to the existing
-`SideSeat Internal` group on 2026-10-08. See its
-[release record](./releases/2026-10-08-testflight97.md). Preview `1.0.0 (98)` was
-installed on 2026-10-14 with the original When2meet integration. Normal foreground
-launch and the running process were verified after the owner unlocked the phone.
-See its
-[delivery record](./releases/2026-10-14-preview98-when2meet.md).
-TestFlight upload is not
-App Store approval and does not replace current physical-device, privacy, APNs or
-tester acceptance gates.
+Preview `1.0.0 (99)` is installed with native time polls and Sideseat-owned
+storage. The native source is `02300a46027c8f0a1952561098f0169d98cbe9be`.
+The production API deployment is `dpl_7osq5AhK8d7Bsxh3hs2tQUHE4vRi`.
+Installation, ordinary launch and five-account phone verification are recorded in
+the [Preview 99 delivery](./releases/2026-10-15-preview99-native-time-polls.md).
+The [deployment audit](./qa/2026-10-15-deployment-and-retirement.md) independently
+rechecked installed versions, live configuration and the actual entry locations.
+
+Ordinary SideSeat `1.0.0 (97)` is independently installed on the same phone.
+Its upload/processing/internal distribution was recorded on 2026-10-08 in the
+[TestFlight 97 record](./releases/2026-10-08-testflight97.md). This audit did not
+re-query Apple distribution status. Preview 98 is superseded and archived.
+TestFlight distribution does not establish App Store approval or replace current
+physical-device, privacy, APNs or tester acceptance gates.

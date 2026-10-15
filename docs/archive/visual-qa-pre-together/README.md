@@ -63,29 +63,9 @@ Record the exact version/build, simulator or device model, iOS version and any
 known fixture limitations. Do not change the historical verdicts below to imply
 that an uncaptured current screen passed.
 
-## Historical follow-up
+## Frozen archive boundary — 2026-10-15
 
-1. **Physical device** — still outstanding for §8 quality sign-off. Plug in an iPhone, then:
-   `ios-native/scripts/capture-visual-qa.sh --device`
-   Appearance is forced via `--ui-testing-appearance=` (no `simctl` on hardware). Overwrite this folder’s PNGs and update the Device line above.
-
-The historical simulator matrix had no unresolved clipping or overlap findings.
-That result does not cover Together or the current navigation.
-
-## Capture a new current baseline
-
-The commands below write to `docs/visual-qa/`; they do not overwrite this archive.
-
-```sh
-# Simulator (default)
-ios-native/scripts/capture-visual-qa.sh
-
-# Physical iPhone (真机 §8)
-ios-native/scripts/capture-visual-qa.sh --device
-# or: DEVICE_UDID=<udid> ios-native/scripts/capture-visual-qa.sh --device
-```
-
-Automatic device discovery intentionally selects only a hardware iPhone listed
-by Xcode before the Simulator section. iPad and CoreDevice UUID fallbacks are not
-accepted because this app targets iPhone only and `xcodebuild` requires the
-hardware UDID.
+The owner has frozen this historical material. Do not overwrite these PNGs,
+execute former capture instructions from this archive or use this verdict as
+current sign-off. New current evidence belongs in a new dated QA record outside
+this directory. See [deployed state](../../DEPLOYED_STATE.md).

@@ -1,0 +1,10 @@
+{
+  "baselineDeployment": "dpl_56ce6g2JaUMRuQMCbofBftrMMq1s",
+  "fixCommit": "5ec86688ecfe1b289d649e01b971a751efbb3279",
+  "baselineFilesCompared": 1860,
+  "changedFiles": [
+    "lib/v2/weekly-intents.ts"
+  ],
+  "migrationsUnchanged": true,
+  "targetFileSHA256": "ae36c7946014d422fa99b2f53402ee2cfcb138f5dcf4f7b5d7ab1ecb68812c55"
+}

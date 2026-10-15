@@ -1,5 +1,34 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Active version and archive boundary — owner instruction 2026-10-15
+
+- The active checkout is `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`,
+  branch `codex/ios-uxui-20260922`. Use this checkout explicitly. Do not switch to
+  another Sideseat checkout, old chat working directory, release build directory
+  or snapshot to infer the current product.
+- Before editing, verify the repository root and working tree, fetch the remote,
+  and preserve the current branch and unrelated work.
+- Read `docs/DEPLOYED_STATE.md` before discussing or changing a deployed feature.
+  Check installation, live deployment/flags, route reachability and visible labels;
+  a source declaration or dated QA record alone does not prove a current entry.
+- `archive/**` and `docs/archive/**` are frozen historical material. Do not edit,
+  execute, build, deploy, restore or reuse their implementations/fixtures unless
+  the owner explicitly requests recovery of that named archived feature. Do not
+  fix archived code to satisfy current compilation, lint or tests.
+- Retained compatibility surfaces listed in `docs/DEPLOYED_STATE.md` stay in place
+  for existing clients/data and shared dependencies. Do not redesign, expose,
+  reactivate, migrate or remove them as incidental cleanup. A direct owner request
+  for that compatibility surface is required before changing it.
+- Preview 99 is the current development delivery; ordinary SideSeat/TestFlight 97
+  is a separate supported older client. Do not uninstall it or drop its API/data
+  compatibility as part of archival work.
+- The deployed backend contains preserved production differences from this Git
+  snapshot. Use the recorded comparison before a future release; never replace
+  production with the entire local checkout on the assumption that they match.
+- Keep dated release and QA verdicts as evidence. Add new verification records;
+  do not promote old screenshots, disabled flags or proposed designs to deployed
+  functionality. The time-poll → Plan conversion is still a proposal.
+
 ## Owner delivery rule — 2026-10-03
 
 The owner requires every completed modification stage to be traceable in Git and

@@ -5,6 +5,8 @@ node_modules/
 /ios-native/
 /ios/
 /ios-shell/
+/archive/
+/docs/archive/
 
 docs/ios-native/visual-qa/
 playwright-report/

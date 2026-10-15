@@ -40,7 +40,13 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Messages**：招呼与回复、持续聊天，以及 Plan 提议、接受、改期与取消。
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
-旧 Next.js 页面和 Capacitor 工程仅作为回归及紧急兼容路径，不是当前正式用户界面。
+当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
+Preview 99 是当前开发交付，普通 SideSeat / TestFlight 97 为独立的旧分发版本。
+多人时间征集位于「消息 → 一起定时间」；聊天中的「智能约时间」是个人日历空档推荐。
+
+旧 Capacitor 工程、When2meet 网页实现及过期演示工具已移入
+[只读归档](./archive/2026-10-15-retired/README.md)，停止开发与执行。
+旧网页、客户端接口和历史数据依赖按功能清单标为保留兼容，默认冻结。
 
 2026-10-02 控件用色约定：普通按钮、分页、筛选和收藏使用清晰的中性色；
 深红底白字仅用于少数强调操作，避免浅粉底红字。品牌标志与语义状态色保留。
@@ -64,11 +70,12 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 
 开始产品或工程修改前先阅读：
 
-1. [AGENTS.md](./AGENTS.md) — 本仓库开发方式。
-2. [Documentation index](./docs/README.md) — 文档状态和权威顺序。
-3. [Product](./docs/PRODUCT.md) — 定位、对象、导航、冻结规则与非目标。
-4. [User Flow](./docs/USER_FLOW.md) — 当前完整交互逻辑。
-5. [Roadmap](./docs/ROADMAP.md) — 当前实施顺序和进入下一阶段的门槛。
+1. [AGENTS.md](./AGENTS.md) — 本仓库开发方式与归档边界。
+2. [Deployed state](./docs/DEPLOYED_STATE.md) — 真实安装、部署、开关、入口与兼容清单。
+3. [Documentation index](./docs/README.md) — 文档状态和权威顺序。
+4. [Product](./docs/PRODUCT.md) — 定位、对象、导航、冻结规则与非目标。
+5. [User Flow](./docs/USER_FLOW.md) — 当前完整交互逻辑。
+6. [Roadmap](./docs/ROADMAP.md) — 当前实施顺序和进入下一阶段的门槛。
 
 实现状态以当前代码、Schema、OpenAPI 和可复现测试结果为准。带日期的历史测试或
 发布记录不能替代当前验证。
