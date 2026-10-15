@@ -73,8 +73,9 @@ Physical-device compile/signing preflight:
 npm run ios:device-preflight
 ```
 
-Set `DEVICE_UDID` to choose a paired hardware iPhone. Native migration/integration
-tests must use an isolated database, never a shared production database.
+Set `DEVICE_UDID` to choose a paired hardware iPhone. Local migration/integration tests must use an isolated database. Explicitly
+owner-authorized release smoke/phone QA may use fresh disposable production
+accounts, with no shared seed fixtures or real-user mutations.
 
 ## 5. Calendar synchronization
 
@@ -153,3 +154,12 @@ Its upload/processing/internal distribution was recorded on 2026-10-08 in the
 re-query Apple distribution status. Preview 98 is superseded and archived.
 TestFlight distribution does not establish App Store approval or replace current
 physical-device, privacy, APNs or tester acceptance gates.
+
+## Unified planning delivery — Preview 100
+
+Plans → + offers availability collection and direct-time creation. Both use the
+same manual invitation/confirmation view and persisted shared plan. Calendar
+projections are read-only and Manage Plan returns to that root. Existing chat
+plans remain visible under their existing consent rules. See
+[Unified plans](./UNIFIED_PLANS.md), [QA](./qa/2026-10-15-unified-plans.md) and
+[release receipt](./releases/2026-10-15-preview100-unified-plans.md).

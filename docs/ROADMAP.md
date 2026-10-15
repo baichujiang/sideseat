@@ -9,7 +9,7 @@
 The dated Build 34–40 rollout diary, expired demo instructions and previous
 roadmap are preserved in the [frozen historical copy](../archive/2026-10-15-retired/docs/ROADMAP-2026-09-09.md).
 Do not use its old “current release”, phone-update tasks or QA windows as today's
-work queue. Current development delivery is Preview 99; ordinary SideSeat 97 is
+work queue. Current development delivery is Preview 100; ordinary SideSeat 97 is
 a separate supported older client. This roadmap records dependency gates, not
 fresh acceptance of every implemented feature.
 
@@ -58,7 +58,8 @@ signed acceptance or proof of repeat-encounter quality.
 `v2SmallGroupPilot` is currently OFF. Pod remains behind the one-to-one repeat
 gate and requires a separate Group Commitment and Group Safety contract before
 schema or rollout. Existing compatibility group-chat code does not authorize a
-new group formation or confirmed group-Plan product.
+discovery Pod formation. Separately approved manual link-based planning follows
+[Unified plans](./UNIFIED_PLANS.md).
 
 ## Supporting coordination and Calendar work
 

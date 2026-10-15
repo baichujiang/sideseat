@@ -10,36 +10,39 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；审计开始前 fetch，基线 `e168acf` 与远程 0/0，干净 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (99)` | 本次设备应用清单；同日对已安装应用进行入口实测 |
-| Preview 99 原生源码 | `02300a46027c8f0a1952561098f0169d98cbe9be` | [交付收据](./qa/evidence/2026-10-15-native-time-polls/delivery.json)；其后至审计基线没有原生功能源码变化 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；本次实现前 fetch，基线 `a5904fc` 与远程 0/0、干净；功能提交 `7657176` 已推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (100)` | 本次签名校验、设备安装和空参数启动；[本次交付](./releases/2026-10-15-preview100-unified-plans.md) |
+| Preview 100 原生源码 | `6d5e6b5137c78e49291805b1a9989ac462fb209f` | 当前分支已提交并推送；本次签名构建来自该源码 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 本次设备应用清单；独立安装，仍保留兼容；本次未重新核验 Apple 当前分发状态 |
-| 生产 API | `https://api.sideseat.de` → `dpl_7osq5AhK8d7Bsxh3hs2tQUHE4vRi`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |
-| 生产源码 | 1,322 个上传源文件；与审计基线 1,313 个相同、9 个不同/缺失 | [逐文件 SHA-1 对照](./qa/evidence/2026-10-15-deployment-audit/source-comparison.json) |
+| 生产 API | `https://api.sideseat.de` → `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`，Ready | 本次 Vercel inspect、公开配置与 HTTP 检查 |
+| 生产源码 | 1,323 个上传文件均与受控发布目录 SHA-1 一致；基于原生产部署保留差异，22 项覆盖来自功能提交；排除 7 个归档原路径 | [发布清单](./qa/evidence/2026-10-15-unified-plans/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-unified-plans/uploaded-source-verification.json) |
 
-审计与归档不产生新的 App 构建、生产部署、数据库迁移或 TestFlight 上传。
-Preview 99 的原生时间征集交付见 [发布记录](./releases/2026-10-15-preview99-native-time-polls.md)。
+此前审计与归档没有产生发布。之后用户明确批准统一计划，本次增加两项向前迁移、
+发布后端并安装 Preview 100；没有上传 TestFlight/App Store。
+Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview99-native-time-polls.md)。
 
 ## 当前功能和实际入口
 
 | 功能 | 当前入口/行为 | 核验范围 |
 | --- | --- | --- |
 | 同行 | 我的意愿、自动推荐、主动寻找、私密收藏、带意愿上下文的招呼；回复后继续聊天 | 原生导航/源码、线上配置；本次未重跑完整匹配业务 |
-| 计划 | 概览、即将进行、已结束；查看/回应邀请、改期、取消与结束反馈 | 已安装 Preview 99 的「计划」页实测；计划仍以双人明确接受为基础 |
+| 计划 | **计划 → + → 发起计划**；可「一起定时间」或「直接选时间」。征集结果选择参与者后转邀请，逐人确认后写入各自日历。概览/即将进行/已结束共用入口；旧聊天双人计划与其改期/反馈继续保留 | 本次原生创建、填写、邀请、确认、重开及日历联调；[验收记录](./qa/2026-10-15-unified-plans.md) |
 | 智能约时间 | **聊天 → 发起计划 → 智能约时间**；读取自己的已同步日历空档并填入草稿 | 已安装 Preview 99 实测中文名称；对应 `PlanCreateSheet` / `SmartTimeSuggestionSheet` |
-| 多人时间征集 | **消息右上角日历时钟 → 一起定时间**；创建/填写、15 分钟拖选/擦除、自动保存、热图、共同时间/人数最多时段、链接与历史 | 已安装 Preview 99 实测入口；[原生五人端到端验收](./qa/2026-10-15-native-time-polls.md)为该交付的既有证据 |
+| 多人时间征集 | **计划 → + → 一起定时间**；消息原入口、邀请链接也打开同一共享计划。15 分钟拖选/擦除、自动保存、热图、完整时长的共同时间/最多人数推荐、选择名单并邀请 | 本次五账号共同时间与四人推荐、排除第五人及保存重开；Sideseat 原生界面和自有数据服务 |
 | 日历 | 个人日程、课程、已确认计划投影、搜索、智能输入、订阅与导入/导出 | 当前导航/源码、线上配置；本次未逐项重跑 |
 | 消息 | 新招呼、已有双人聊天、计划协商、分享链接与原生时间征集入口 | 当前导航/源码，实际消息页与征集入口实测 |
 | 我 | 资料、学生认证、课程管理、语言、外观、会员、隐私、安全和设置 | 当前导航/源码；会员身份与邀请码不等于 StoreKit 已启用 |
 | 原生账号、远程通知 | 账号 API 与 APNs 开关已开启 | 公开线上配置；本次没有重做登录写入、通知投递和符号化测试 |
 | 公开网页与管理后台 | iPhone 引导、隐私/支持、批准的分享/征集链接、AASA；后台及其登录保留 | 线上 HTTP、middleware allowlist；未进行管理员登录 |
 
-「计划」底部页面本身没有“一起找时间”。「智能约时间」和「一起定时间」是两个功能。
-目前时间征集没有“用所选时间创建 Plan”的联动，也不会自动确认参加或写入日历。
-多人邀请/逐人确认的正式 Plan 流程属于此前讨论的设计建议，尚未实现。
+「一起定时间」现已纳入「计划」，与直接定时间共用邀请、确认和取消生命周期。
+填写有空不等于确认；仅全部选中的参与者接受同一版邀请后，才同步到各自 Sideseat 日历。
+人数最多的四人结果由发起者明确选择四人邀请，第五人保留答复、不获得日历记录。
+「智能约时间」继续是聊天双人计划中读取自己日历空档的独立辅助工具。
+新的手动多人计划不激活 Discovery Pod、旧群聊、双人 Outcome 或 Repeat 资格。
 
 `CommunityChatView` 内有征集菜单的源码，但当前 `MVPRoutePolicy` 阻止群聊/课程群聊
-路由；不能把这段源码算作 Preview 99 已开放的群聊入口。消息页的征集和邀请链接可用。
+路由；不能把这段源码算作 Preview 100 已开放的群聊入口。消息页的征集和邀请链接可用。
 
 ## 线上开关
 
@@ -99,5 +102,7 @@ TypeScript、ESLint、Vercel 输入中排除，原生目标仅读取 `ios-native
 
 其余为 `.vercelignore`、`AGENTS.md`、`README.md`、`eslint.config.mjs`、日历时区检查脚本
 和仅线上存在的发布来源 JSON。完整路径/哈希及所需源码快照见
-[审计记录](./qa/2026-10-15-deployment-and-retirement.md)。没有覆盖其中任何生产文件。
-后续后端发布应再次取当前部署作对照，明确合入所需差异后再构建。
+[审计记录](./qa/2026-10-15-deployment-and-retirement.md)。此前归档没有覆盖这些生产文件。
+本次发布从该生产源码逐项校验重建，保留运行库差异，再覆盖本次 22 项依赖；
+上传后全部 1,323 文件的 SHA-1 均与发布目录一致。后续发布继续从当前线上部署对照，
+不可把整个 Git 工作区直接当作生产快照。

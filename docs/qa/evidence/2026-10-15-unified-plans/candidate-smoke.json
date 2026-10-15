@@ -1,0 +1,9 @@
+{
+  "base": "https://sideseat-jmi9xysst-baichus-projects.vercel.app",
+  "passed": true,
+  "checks": [
+    "five saved responses, 5/5 common, 4/5 maximum, five-account reopen/list",
+    "explicit four-person invitation, excluded fifth, individual confirmation, four calendar/search projections, read-only shared facts",
+    "direct-time five-person invitation completes the same lifecycle; cancellation cleans all projections"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-10-15T12:13:28.578786+00:00",
+  "branch": "codex/ios-uxui-20260922",
+  "backendSourceCommit": "76571765decce2a3cdee4cdfb15faf8330cfcd5a",
+  "nativeSourceCommit": "6d5e6b5137c78e49291805b1a9989ac462fb209f",
+  "sourceCommitsPushed": true,
+  "backend": {
+    "deploymentId": "dpl_4vBvPch35jxdarqmgnxmvSsGSt6u",
+    "url": "https://sideseat-jmi9xysst-baichus-projects.vercel.app",
+    "productionOrigins": [
+      "https://api.sideseat.de",
+      "https://www.sideseat.de"
+    ],
+    "status": "READY",
+    "candidateAndProductionSmokesPassed": true,
+    "uploadedFilesVerified": 1323
+  },
+  "native": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "100",
+    "apiOrigin": "https://api.sideseat.de",
+    "signatureVerified": true,
+    "executableSHA256": "9de9997bdce42190b48b6797ea180c9fc76d7880d21d3d20fd9d6d1fd45d9b91",
+    "installed": true,
+    "normalLaunchArguments": [],
+    "normalLaunchPID": 32089,
+    "processPresentAfterLaunch": true,
+    "ordinarySideSeatBuildPreserved": "97",
+    "temporaryRunnerRemoved": true
+  },
+  "qa": {
+    "physicalFiveAccountFlowSource": "76571765decce2a3cdee4cdfb15faf8330cfcd5a",
+    "physicalFiveAccountFlowSeconds": 321.509,
+    "physicalDirectAndChineseDarkSeconds": 60.562,
+    "physicalFailures": 0,
+    "postPhysicalNativePatch": "one UI-only calendar guidance line changes Messages to Plans; no server or commitment change",
+    "postPatchNativeSwiftTestingCases": 394,
+    "postPatchSimulatorCalendarRouteTestPassed": true,
+    "postPatchSignedBuildInstalledAndLaunched": true,
+    "accountsDeleted": 5,
+    "remainingQaPollsBeforeDeletion": 0,
+    "deletedAccountTokensRejected": 5,
+    "testFlightOrAppStoreUpload": false
+  }
+}

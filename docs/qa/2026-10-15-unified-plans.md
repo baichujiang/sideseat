@@ -33,8 +33,24 @@ with production limits unchanged.
 
 ## Delivery verification
 
-Backend candidate/production and actual Preview 100 phone results are added after
-execution in the release receipt. Local success alone does not prove delivery.
+Backend candidate and production five-account smoke both pass. Exact deployment:
+`dpl_4vBvPch35jxdarqmgnxmvSsGSt6u`; both production domains resolve there.
+All 1,323 uploaded source hashes match the controlled context; archives and seven
+retired original source paths are excluded.
+
+Physical Preview 100 acceptance: five-account full flow **321.509 s**, direct-time
+and Chinese dark/accessibility **60.562 s**, zero failures. Result bundle:
+`/tmp/sideseat-unified-phone100-flow.xcresult`. These tests used source `7657176`.
+The later native-only caption correction `6d5e6b5` passed 394 Swift Testing cases
+and the live simulator Calendar route/caption test (**27.108 s**); final signed
+Preview 100 was reinstalled and launched with empty arguments, PID **32089**.
+Full five-person phone flow was not repeated for that single text correction.
+
+Five temporary accounts and all QA polls were removed, and all five deleted-account
+tokens returned 401. Ordinary SideSeat 97 remains; the temporary QA runner was
+removed. See the [release](../releases/2026-10-15-preview100-unified-plans.md),
+[receipt](./evidence/2026-10-15-unified-plans/delivery.json) and
+[phone screenshots](./evidence/2026-10-15-unified-plans/phone/five-confirmed.png).
 All screenshots/fixtures are synthetic QA and not product engagement evidence.
 Calendar sync in this acceptance is Sideseat Calendar; external Apple/Google
 write-back is not enabled by this feature.

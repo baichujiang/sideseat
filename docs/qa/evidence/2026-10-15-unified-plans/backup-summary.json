@@ -1,0 +1,10 @@
+{
+  "createdAt": "2026-10-15T11:52:20.681Z",
+  "pathname": "release-backups/2026-10-15-unified-plans100/44a01d0bd121086a8cab4fbafb9667689b749d72861a1853ec6b84a78d5d4df6.json.gz",
+  "sha256": "44a01d0bd121086a8cab4fbafb9667689b749d72861a1853ec6b84a78d5d4df6",
+  "bytes": 1394961,
+  "tables": 100,
+  "totalRows": 29722,
+  "appliedMigrations": 148,
+  "privateReadbackVerified": true
+}

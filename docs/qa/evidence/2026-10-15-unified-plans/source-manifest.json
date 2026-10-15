@@ -1,0 +1,5414 @@
+{
+  "baseDeployment": "dpl_7osq5AhK8d7Bsxh3hs2tQUHE4vRi",
+  "verifiedBaseFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha1": "84313d1a22cd3cccaf98cb404dc3691bd091fd0a"
+    },
+    {
+      "path": ".vercelignore",
+      "sha1": "30b0f506705b81b81e71969a305282ffa4b45605"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha1": "414debe1bae564a21c24aa7be5d68ab6a382da2e"
+    },
+    {
+      "path": "README.md",
+      "sha1": "b184b08146dad69ea0cd0a1c13d60d06149fc179"
+    },
+    {
+      "path": "app/(admin)/admin/invitations/page.tsx",
+      "sha1": "f078e87906af0e64f04641f35d50c08c683b060c"
+    },
+    {
+      "path": "app/(admin)/admin/page.tsx",
+      "sha1": "e035b17469d1d8ebd3d8dada07d6b407a4ba91c8"
+    },
+    {
+      "path": "app/(app)/about/page.tsx",
+      "sha1": "3ab1c1fccc5afc4ff64139942de88a7a614a15c6"
+    },
+    {
+      "path": "app/(app)/admin/feedback/page.tsx",
+      "sha1": "c15bc4b254cd48ab6e0ffadddb5afc92a5f78334"
+    },
+    {
+      "path": "app/(app)/admin/reports/page.tsx",
+      "sha1": "48fb180dbdad1502ba84feac134ab9a28201043c"
+    },
+    {
+      "path": "app/(app)/admin/social-groups/page.tsx",
+      "sha1": "194932e0a925161fbd3ab1f82e206deb71ae0676"
+    },
+    {
+      "path": "app/(app)/admin/users/[userId]/page.tsx",
+      "sha1": "05e4c24423ba7ea8fdf2c893a95f26ecc71dccda"
+    },
+    {
+      "path": "app/(app)/admin/users/page.tsx",
+      "sha1": "fefe4a65290fca09d24bab5ce7b05995dd5cf982"
+    },
+    {
+      "path": "app/(app)/admin/verifications/page.tsx",
+      "sha1": "160485e9c752e366dbe0a827f9f659548d18a17e"
+    },
+    {
+      "path": "app/(app)/connections/[connectionId]/page.tsx",
+      "sha1": "c9d6eea772f86906244b0a19312cf844033e892f"
+    },
+    {
+      "path": "app/(app)/courses/[courseId]/chat/page.tsx",
+      "sha1": "8a090411f9717beaa9a11df70eab1185142bcdf0"
+    },
+    {
+      "path": "app/(app)/courses/[courseId]/page.tsx",
+      "sha1": "e588cd5463d77a5079438eaa601f81418eb363f2"
+    },
+    {
+      "path": "app/(app)/courses/add/page.tsx",
+      "sha1": "99b5d02092917f28c2d2e8e9205a52ecea82e1ad"
+    },
+    {
+      "path": "app/(app)/courses/loading.tsx",
+      "sha1": "fa4ea2de0c2ac4e5e24f0602614f3ab41c650d78"
+    },
+    {
+      "path": "app/(app)/courses/page.tsx",
+      "sha1": "1422b0709693f4a8e627d2288f52b90c29c93912"
+    },
+    {
+      "path": "app/(app)/discover/activities/[id]/page.tsx",
+      "sha1": "3b506c762b14e92c527565ed893a623a75e7e822"
+    },
+    {
+      "path": "app/(app)/discover/loading.tsx",
+      "sha1": "f68800a65b3f0edab5f88671a0074636e31ff008"
+    },
+    {
+      "path": "app/(app)/discover/page.tsx",
+      "sha1": "f1cb9ff5fe4a59b32d12455c779427893cdab11e"
+    },
+    {
+      "path": "app/(app)/discover/posts/[postId]/page.tsx",
+      "sha1": "cf72f3db1f064809ed58931203ebc6b5b2e4560d"
+    },
+    {
+      "path": "app/(app)/groups/[groupChatId]/info/page.tsx",
+      "sha1": "edb5f6e6e582bf7f48c4a7d6504df13bc6c702a0"
+    },
+    {
+      "path": "app/(app)/groups/[groupChatId]/page.tsx",
+      "sha1": "e1b86d9c2cfcc43bbaf9c38e8d27b0e322522c17"
+    },
+    {
+      "path": "app/(app)/home/loading.tsx",
+      "sha1": "7d0ce54f1a8785079c0bda96fc2fe70840aee799"
+    },
+    {
+      "path": "app/(app)/home/page.tsx",
+      "sha1": "b91fbe5cd91f4fe5f4ff9f552e7d63da10b18154"
+    },
+    {
+      "path": "app/(app)/inbox/contacts/page.tsx",
+      "sha1": "6fb1531b2a1c007e7004ebc89c497004101ed145"
+    },
+    {
+      "path": "app/(app)/inbox/course-chats/page.tsx",
+      "sha1": "31230542f8b98fac674d7dfd66d9983ef95f409f"
+    },
+    {
+      "path": "app/(app)/inbox/from-you/page.tsx",
+      "sha1": "ae988fc045b1ba39e23879a119dc0a8cde83ec61"
+    },
+    {
+      "path": "app/(app)/inbox/loading.tsx",
+      "sha1": "d367e1b45a3fe48ad3f5aad1f5d3c888a7aecc90"
+    },
+    {
+      "path": "app/(app)/inbox/my-posts/page.tsx",
+      "sha1": "5af36a7a664529bfff0ced638abc00bf572d0549"
+    },
+    {
+      "path": "app/(app)/inbox/page.tsx",
+      "sha1": "da29d5a4e787fcec3ecc7ead946060a596a9890b"
+    },
+    {
+      "path": "app/(app)/inbox/plans/page.tsx",
+      "sha1": "431a0005f1b97a573fdaa625900bcad35e33b9d1"
+    },
+    {
+      "path": "app/(app)/inbox/schedule-requests/page.tsx",
+      "sha1": "b3e2a8de050791beb85f77407c795b1542b87033"
+    },
+    {
+      "path": "app/(app)/inbox/study-groups/page.tsx",
+      "sha1": "2b95a3049508b9ef8a2de2fd44a078c80ab1ef3f"
+    },
+    {
+      "path": "app/(app)/inbox/to-reply/page.tsx",
+      "sha1": "e7fa9e87225ace56c043b0834e34d791f9c5e944"
+    },
+    {
+      "path": "app/(app)/inbox/unread/page.tsx",
+      "sha1": "94fce7ceb6b77f0375c4604f27f3913ce684fc0e"
+    },
+    {
+      "path": "app/(app)/layout.tsx",
+      "sha1": "9fde7f4854575ce56086513248bfe06fb6316de4"
+    },
+    {
+      "path": "app/(app)/loading.tsx",
+      "sha1": "f9b37510904238900c634cd35cbd2f619d4a9085"
+    },
+    {
+      "path": "app/(app)/onboarding/page.tsx",
+      "sha1": "00e98215402b7a349b35115870cfadd9f7f548ab"
+    },
+    {
+      "path": "app/(app)/profile/academic/page.tsx",
+      "sha1": "9a640249f3a46d30946ad2ec4742de8c569fabfe"
+    },
+    {
+      "path": "app/(app)/profile/account/delete/page.tsx",
+      "sha1": "e4ef34752909bec0bf3abdad3e46e15798d7bd49"
+    },
+    {
+      "path": "app/(app)/profile/account/login-email/page.tsx",
+      "sha1": "e3bf043947feb0a6f3602383b5ff7e69be69d85b"
+    },
+    {
+      "path": "app/(app)/profile/account/login-username/page.tsx",
+      "sha1": "39031c2ae92f5059301499372e3c3b72770fd426"
+    },
+    {
+      "path": "app/(app)/profile/account/page.tsx",
+      "sha1": "268add35d8591c9d3b9022a32dc99412c600a3ac"
+    },
+    {
+      "path": "app/(app)/profile/account/password/page.tsx",
+      "sha1": "3f94366091b32ec8f8c8fd57af03e7103d546bf8"
+    },
+    {
+      "path": "app/(app)/profile/avatar/page.tsx",
+      "sha1": "30e1610e03541e9bfd9a2c8cb053a702b22cad54"
+    },
+    {
+      "path": "app/(app)/profile/bio/page.tsx",
+      "sha1": "b0e2de595112fa671a3246595f6d21c962587fe7"
+    },
+    {
+      "path": "app/(app)/profile/blocked/page.tsx",
+      "sha1": "3f53c7a658bf16d791563cdcd1f72e2cace17659"
+    },
+    {
+      "path": "app/(app)/profile/discover-city/page.tsx",
+      "sha1": "bcc2a00b2ddf0625e7624a41610c14d82acf95be"
+    },
+    {
+      "path": "app/(app)/profile/edit/page.tsx",
+      "sha1": "3be64e40a28ac7b67fb748454d82c8895d219960"
+    },
+    {
+      "path": "app/(app)/profile/gender/page.tsx",
+      "sha1": "09d89bf927fe2ced2a2e7693c06e4b337047d2a5"
+    },
+    {
+      "path": "app/(app)/profile/identity/page.tsx",
+      "sha1": "8664519df3c5c2e417aa21b85f43b97a3022bee8"
+    },
+    {
+      "path": "app/(app)/profile/info/page.tsx",
+      "sha1": "225546f975d51ab3a4fc7a31c5e19a9a64596661"
+    },
+    {
+      "path": "app/(app)/profile/languages/page.tsx",
+      "sha1": "58aa9c6e7576f939aa55923d5bf4465dd5e01e82"
+    },
+    {
+      "path": "app/(app)/profile/life-photos/page.tsx",
+      "sha1": "c4e1bb5073286a0f5f2e7e0a765024680527ef46"
+    },
+    {
+      "path": "app/(app)/profile/loading.tsx",
+      "sha1": "27eb00099ab560db83b884acdf89aa02f6aa2972"
+    },
+    {
+      "path": "app/(app)/profile/my-activities/page.tsx",
+      "sha1": "3467ffe297ffa9791b9c99106a9e656949a3da13"
+    },
+    {
+      "path": "app/(app)/profile/my-plan/page.tsx",
+      "sha1": "0e5e055566330c7e1565a0213703914deebf1608"
+    },
+    {
+      "path": "app/(app)/profile/my-posts/page.tsx",
+      "sha1": "c078b9f2ffbd72939b83eb78ae49d286e4267023"
+    },
+    {
+      "path": "app/(app)/profile/name/page.tsx",
+      "sha1": "0a440d0664e539edb4dd82ebfb5a9adcb419df1e"
+    },
+    {
+      "path": "app/(app)/profile/page.tsx",
+      "sha1": "5e19801604673d4f605d35224821c12529816abd"
+    },
+    {
+      "path": "app/(app)/profile/saved-posts/page.tsx",
+      "sha1": "d894627a63afb7ea9313d8875defc1f3419628df"
+    },
+    {
+      "path": "app/(app)/profile/verification/page.tsx",
+      "sha1": "4d51d81212983b532c9b83b5fd086836005d8a3e"
+    },
+    {
+      "path": "app/(app)/settings/page.tsx",
+      "sha1": "e1ac3217681df11d7decc70be15dfdc69a6fdd6e"
+    },
+    {
+      "path": "app/(app)/users/[userId]/page.tsx",
+      "sha1": "b39b3e6e477393095249b108ec4880a6d1dd97b6"
+    },
+    {
+      "path": "app/(auth)/forgot-password/page.tsx",
+      "sha1": "349a056309e5f8b2475767ae40c22567969b89ba"
+    },
+    {
+      "path": "app/(auth)/layout.tsx",
+      "sha1": "61ecfe6f5a67650741a11e34adce6024cb2777e5"
+    },
+    {
+      "path": "app/(auth)/login/page.tsx",
+      "sha1": "ec52d7381d8ff08e5d8e8850a2375baf4c1cb429"
+    },
+    {
+      "path": "app/(auth)/signup/page.tsx",
+      "sha1": "b004a312b9071c30fb5dc158b729d8e37ed130c3"
+    },
+    {
+      "path": "app/.well-known/apple-app-site-association/route.ts",
+      "sha1": "fcebd4e05dc62de81d30e7a530783e4aefadd2ed"
+    },
+    {
+      "path": "app/api/account/delete/route.ts",
+      "sha1": "3567ad7fa66c67ec8cc74f4569677e67ae70a1a3"
+    },
+    {
+      "path": "app/api/admin/membership-invites/[batchId]/route.ts",
+      "sha1": "cf609ae5b652c5dfd8c3664ce3384aa55d390670"
+    },
+    {
+      "path": "app/api/admin/membership-invites/route.ts",
+      "sha1": "02a2a380f07faa0752d1d149e9b2b6c93a45c783"
+    },
+    {
+      "path": "app/api/admin/reports/[reportId]/block/route.ts",
+      "sha1": "c6fb2562ef8c182971d68c4f2d4f05de13c6820c"
+    },
+    {
+      "path": "app/api/admin/reports/[reportId]/route.ts",
+      "sha1": "cfac9008ad403dbf5519562eca8e834c948bc70c"
+    },
+    {
+      "path": "app/api/admin/social-group-opportunities/[opportunityId]/approve/route.ts",
+      "sha1": "10f6ee766d5f2dbdd9e40f5947629f551a6aa9d4"
+    },
+    {
+      "path": "app/api/admin/social-group-opportunities/[opportunityId]/cancel/route.ts",
+      "sha1": "ecd140a6ab663ec906c0f2bd0759913ca8ef82c0"
+    },
+    {
+      "path": "app/api/admin/social-group-opportunities/candidates/route.ts",
+      "sha1": "f4d5ba9cc962794ac0eedddc9b80bf0b9eccf65e"
+    },
+    {
+      "path": "app/api/admin/social-group-opportunities/route.ts",
+      "sha1": "06fe33c1adf17611dae4abf020adff3b5be925dc"
+    },
+    {
+      "path": "app/api/admin/users/[userId]/route.ts",
+      "sha1": "2865bffc6c607bdf8bc970b0798abfdf0474b9c8"
+    },
+    {
+      "path": "app/api/admin/verifications/[userId]/proof/route.ts",
+      "sha1": "673de42a9b568b995bf27fde1f4b1bb0a329b9e6"
+    },
+    {
+      "path": "app/api/admin/verifications/[userId]/route.ts",
+      "sha1": "b9263fce2b8caf1716d74ab654328eabca012e11"
+    },
+    {
+      "path": "app/api/auth/email/send-otp/route.ts",
+      "sha1": "cf26ffde604b0069472d0b229c0e5f1b8e285024"
+    },
+    {
+      "path": "app/api/auth/end-guest/route.ts",
+      "sha1": "6a35a21440a6f4b48dfc36c52304a0f1c1976e06"
+    },
+    {
+      "path": "app/api/auth/ensure-guest/route.ts",
+      "sha1": "dae0e83dd5da012c12168accced18e35844d2399"
+    },
+    {
+      "path": "app/api/auth/forgot-password/reset/route.ts",
+      "sha1": "856900cd4dbeb279439c5913aad5edcdf4b879e7"
+    },
+    {
+      "path": "app/api/auth/forgot-password/send-otp/route.ts",
+      "sha1": "5ecc63e7af0b95a6635d574d94599b9c29140e4d"
+    },
+    {
+      "path": "app/api/auth/guest/route.ts",
+      "sha1": "05aa4fbd4abf4b039605dd592bfa1c6dd0ca4701"
+    },
+    {
+      "path": "app/api/auth/login/route.ts",
+      "sha1": "f4d048ca6aa460c432727c81c611036af4c943bd"
+    },
+    {
+      "path": "app/api/auth/logout/route.ts",
+      "sha1": "fe9ccbc3ce379a2b9e2267382be7bd29549079b2"
+    },
+    {
+      "path": "app/api/auth/phone/send-otp/route.ts",
+      "sha1": "c0b95c9a039fdcd4fabf171a07849fbc864c14a5"
+    },
+    {
+      "path": "app/api/auth/refresh/route.ts",
+      "sha1": "afe990f74ddc9ca72e3b275fc555c19bf37818f1"
+    },
+    {
+      "path": "app/api/auth/signup-email/route.ts",
+      "sha1": "21fd5452c6b067d8e910db43aa881480a049c9a1"
+    },
+    {
+      "path": "app/api/auth/signup-phone/route.ts",
+      "sha1": "9aca81428e34c00847774b6afbd6899dd4708975"
+    },
+    {
+      "path": "app/api/auth/signup/route.ts",
+      "sha1": "5b3f7cb83741fed57dbcd1579fbbc78b304b6157"
+    },
+    {
+      "path": "app/api/auth/username-availability/route.ts",
+      "sha1": "a35983304b45da64665ddbe3e5b81abcc16c8ce2"
+    },
+    {
+      "path": "app/api/availability-shares/[shareId]/plan-requests/route.ts",
+      "sha1": "83a2c219eacd1b2ba77ec48a77815ce3c0d768ad"
+    },
+    {
+      "path": "app/api/availability-shares/[shareId]/revoke/route.ts",
+      "sha1": "d6038f570e4c783d255fe8438b0b59b170ec30e0"
+    },
+    {
+      "path": "app/api/availability-shares/[shareId]/route.ts",
+      "sha1": "f8af7e1392c46c6c7e9b01c0b5f6f079537a65ea"
+    },
+    {
+      "path": "app/api/blocks/[blockedId]/route.ts",
+      "sha1": "09b1ae1424bdb80383b2b0497b540ca7ea3a90da"
+    },
+    {
+      "path": "app/api/blocks/route.ts",
+      "sha1": "97c9117eced8465f2eb59de78718505da8941203"
+    },
+    {
+      "path": "app/api/calendar/categories/[categoryId]/route.ts",
+      "sha1": "004f035fc3b6d45b06247c8fa7603e8f92b966db"
+    },
+    {
+      "path": "app/api/calendar/categories/route.ts",
+      "sha1": "e74ade0ec5cdd765967fdbcb53f4e719868f3568"
+    },
+    {
+      "path": "app/api/calendar/courses/route.ts",
+      "sha1": "5f068c253c381b2264d816021a7648cb27ac3ee2"
+    },
+    {
+      "path": "app/api/calendar/events/[eventId]/route.ts",
+      "sha1": "982314ea2ec4fd62a56842f2d9676e7699ac1fb6"
+    },
+    {
+      "path": "app/api/calendar/events/batch/route.ts",
+      "sha1": "85c739860054c45dc0b8ba89fdb784a858c3bbb6"
+    },
+    {
+      "path": "app/api/calendar/events/route.ts",
+      "sha1": "190570394633cd5754a9551815728721ad1d11bb"
+    },
+    {
+      "path": "app/api/calendar/export/route.ts",
+      "sha1": "639efd696ddfee9a5e8fa877841a56331791e9b6"
+    },
+    {
+      "path": "app/api/calendar/import/route.ts",
+      "sha1": "ee57c59644111aeabc1932c0a44a4db9a4c6e722"
+    },
+    {
+      "path": "app/api/calendar/mirror-course-sessions/route.ts",
+      "sha1": "6f4122efdb5dd4fc4e1a19e6762c8aec64b76d6a"
+    },
+    {
+      "path": "app/api/calendar/parse-natural/route.ts",
+      "sha1": "1131867ddb6a3b8ee0ff8c808d66856b377e1d8f"
+    },
+    {
+      "path": "app/api/classmate-posts/[postId]/insights/route.ts",
+      "sha1": "fed6a70e7282b69c6ed11ea2cb9ff6210fbab7c8"
+    },
+    {
+      "path": "app/api/classmate-posts/[postId]/save/route.ts",
+      "sha1": "111dd75aaae32864930ac94cedea3b28e2363cf8"
+    },
+    {
+      "path": "app/api/classmate-posts/route.ts",
+      "sha1": "c1d5fcd460b6274db94c7509742906a25d7d29c1"
+    },
+    {
+      "path": "app/api/classmate-posts/saved/route.ts",
+      "sha1": "b1534aeafeb7818590b8bbc8fdc4cbba21541e05"
+    },
+    {
+      "path": "app/api/client-build/route.ts",
+      "sha1": "49ec2b15b908467d8f0536e2a4c357e2b24d6836"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/availability-shares/route.ts",
+      "sha1": "a3d3fd94a1ef706be482162e78aaff28ed6161df"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/chat-images/route.ts",
+      "sha1": "91b7c521052d59f6d2048615efb67b46d428f726"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/contact-exchange/route.ts",
+      "sha1": "7692ce3531176a18d843f0ead08d2b3babb7f5a7"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/contact-remark/route.ts",
+      "sha1": "501d7c52fd0d8d0faf9bfe3a497e8e64ed48d0c9"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/end/route.ts",
+      "sha1": "0ccdf94f64162d08ccef87ade3a762e97e98c0fd"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/friend-link/route.ts",
+      "sha1": "126268e38773b9b8f69f9ba0273d51a44852e630"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/messages/[messageId]/image/route.ts",
+      "sha1": "ba8b5c43b01e7327fb4148e1643e5838634e7c1d"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/messages/[messageId]/route.ts",
+      "sha1": "f21182da2bfdcf90475df7d2f3ffad2af0ea961d"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/messages/latest/route.ts",
+      "sha1": "c7708e77f28cd92f914600b0aacf97348f323ce9"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/messages/route.ts",
+      "sha1": "02daede3f2d98a9fc75969def57c23ee8d176bc4"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/messages/stream/route.ts",
+      "sha1": "dddb4657bc9529feb85d9f5fa48d385f176fe4d4"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/pin/route.ts",
+      "sha1": "06aac192ebd934322d2ae01bb422a700f2dbc86c"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/plan-requests/route.ts",
+      "sha1": "548ce14a5e420fd0f9d3b54b46d3c00bf0f0b231"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/proposals/[proposalId]/route.ts",
+      "sha1": "f2a173809385a4707c1a2e7ae67a2830db528ab0"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/proposals/route.ts",
+      "sha1": "902e0fafc280984b632df97157fd386cc67db712"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/read/route.ts",
+      "sha1": "5d7d9e41658e6bdb60c320c3b936cc8c138cdf75"
+    },
+    {
+      "path": "app/api/connections/[connectionId]/schedule-shares/route.ts",
+      "sha1": "25243de6135cb02b3e64a9475dac2f5958e0691d"
+    },
+    {
+      "path": "app/api/connections/open/route.ts",
+      "sha1": "41b1fc561cb50690e72a3a630fe42feca8142b41"
+    },
+    {
+      "path": "app/api/connections/start/route.ts",
+      "sha1": "8b53161175dd24304cc8eb4c110bdbddfb27f5b1"
+    },
+    {
+      "path": "app/api/contacts/add/route.ts",
+      "sha1": "edd20b02e1cf410fb42f15f99ad6efccdc878597"
+    },
+    {
+      "path": "app/api/contacts/search/route.ts",
+      "sha1": "cc79248c53ca83a549f1a26621c2936802877283"
+    },
+    {
+      "path": "app/api/courses/[courseId]/chat/messages/[messageId]/route.ts",
+      "sha1": "a75fb086681b974a084d0122b58bceb74bf9a643"
+    },
+    {
+      "path": "app/api/courses/[courseId]/chat/messages/latest/route.ts",
+      "sha1": "8a47dd4c1779c79807b9441983675da93a0cf652"
+    },
+    {
+      "path": "app/api/courses/[courseId]/chat/messages/route.ts",
+      "sha1": "a5b2d5c02ebc213e6903201b19cccc4a13d59c52"
+    },
+    {
+      "path": "app/api/courses/[courseId]/chat/messages/stream/route.ts",
+      "sha1": "77bd24eb29a91915e1595948e8fb9a1afea39de2"
+    },
+    {
+      "path": "app/api/courses/[courseId]/chat/read/route.ts",
+      "sha1": "5a68224a8bf821a6e441e3bc9b64361b887dcf7a"
+    },
+    {
+      "path": "app/api/courses/[courseId]/enroll/route.ts",
+      "sha1": "c06f209f13a98cd077f70d6b95e76262d0eadc5d"
+    },
+    {
+      "path": "app/api/courses/[courseId]/inbox-hide/route.ts",
+      "sha1": "3157bd64eedfbf8a3c99869f9108676a672f3114"
+    },
+    {
+      "path": "app/api/courses/[courseId]/inbox-pin/route.ts",
+      "sha1": "f9d5e6ea85e717f86036f4f2500b8682cb3c4488"
+    },
+    {
+      "path": "app/api/courses/[courseId]/inbox-restore/route.ts",
+      "sha1": "7b21e0e1772df0147e03bc91c7918c0605a81a4e"
+    },
+    {
+      "path": "app/api/courses/[courseId]/route.ts",
+      "sha1": "5ede320ba9c05fa82ea4aa6056ab288802e0e7f4"
+    },
+    {
+      "path": "app/api/courses/route.ts",
+      "sha1": "756cfa10cc3841a4c0524edcf09d9936c0187124"
+    },
+    {
+      "path": "app/api/courses/saved/route.ts",
+      "sha1": "b3586c2b18ffc1188c517752bcfc0f53bcf18c98"
+    },
+    {
+      "path": "app/api/courses/schedule-variants/route.ts",
+      "sha1": "c76222d7ebe50e04a021e2044bb72514ff5ebfc2"
+    },
+    {
+      "path": "app/api/courses/search/route.ts",
+      "sha1": "7dda0ed9b9e63842edb7965271f0430fd49d4737"
+    },
+    {
+      "path": "app/api/cron/calendar-reminders/route.ts",
+      "sha1": "3d663aa4dd41003f8f1b56326ef803969c5c0ca7"
+    },
+    {
+      "path": "app/api/cron/chat-realtime-retention/route.ts",
+      "sha1": "345ce57e7ef3bd92491153d8a741eb9c95861f2c"
+    },
+    {
+      "path": "app/api/cron/lmu-course-catalog/route.ts",
+      "sha1": "db87fb0f1c497eab73763976cea2e3fcbc324453"
+    },
+    {
+      "path": "app/api/cron/product-funnel-retention/route.ts",
+      "sha1": "8ae0ee3b8b0f41aa428b7a1e708be8d6eff1b46c"
+    },
+    {
+      "path": "app/api/cron/social-group-expiration/route.ts",
+      "sha1": "70eabb919ede5117a49808ef8e9a39ee049f9ae1"
+    },
+    {
+      "path": "app/api/cron/student-verification-retention/route.ts",
+      "sha1": "ed499f396caa17247315ae7c7be632b9a4b73132"
+    },
+    {
+      "path": "app/api/cron/tum-course-catalog/route.ts",
+      "sha1": "b68cbd84303e63c57eb06b6afce955f4f70ad252"
+    },
+    {
+      "path": "app/api/discover-activities/[id]/add-to-calendar/route.ts",
+      "sha1": "a2767a64bfa4373e8a2e78e68f624677e05c64b6"
+    },
+    {
+      "path": "app/api/discover-activities/[id]/cancel/route.ts",
+      "sha1": "965695a34836bc7f81854f60b5f4dbf6b36fcfc5"
+    },
+    {
+      "path": "app/api/discover-activities/[id]/close/route.ts",
+      "sha1": "6ada1459eb53635080c12fb255d9853208df55ab"
+    },
+    {
+      "path": "app/api/discover-activities/[id]/route.ts",
+      "sha1": "7b44072087a2fa3dc75f22cd184830e5260689a7"
+    },
+    {
+      "path": "app/api/discover-activities/[id]/signups/route.ts",
+      "sha1": "29bdce488e0102e91b3be91f91aa53a2de77609f"
+    },
+    {
+      "path": "app/api/discover-activities/route.ts",
+      "sha1": "ec491fe6ecba1f6fa8e94fb8f9a85fb35fb60502"
+    },
+    {
+      "path": "app/api/discover/route.ts",
+      "sha1": "e06ed1d17f783c45777decb401849908062e73cb"
+    },
+    {
+      "path": "app/api/feedback/[feedbackId]/comments/route.ts",
+      "sha1": "ac09a286d45421078bc0dd48002cb2920d3d9bf8"
+    },
+    {
+      "path": "app/api/feedback/[feedbackId]/vote/route.ts",
+      "sha1": "08aff75662aa7448374b0235a22ef4cff5982c70"
+    },
+    {
+      "path": "app/api/feedback/route.ts",
+      "sha1": "bbb72a4d45a42f1360d03c8b6806ed6a64733448"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/inbox-hide/route.ts",
+      "sha1": "e23d623dd443e9c2e5e2eb3f8526dee2eb34f6b7"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/inbox-pin/route.ts",
+      "sha1": "e32020baa87c448064f3faf095bf2fab9fbe3b19"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/inbox-restore/route.ts",
+      "sha1": "738565525da910df4b6be7a18d21d7da40452463"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/messages/[messageId]/route.ts",
+      "sha1": "4954b530647ee31434a35d3b550518b9f93df925"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/messages/latest/route.ts",
+      "sha1": "9bf2eae08779598a11a1d905247c14a2fdbdbd5f"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/messages/route.ts",
+      "sha1": "ef48c6137b831267575d03c249d4dff4939bc817"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/messages/stream/route.ts",
+      "sha1": "5e3346e6f0da99f147f2024600b8cbfc39a52a33"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/participants/route.ts",
+      "sha1": "46160f7834f2ea9472efd90f0f90905bdfc73d11"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/read/route.ts",
+      "sha1": "7f2f7ea73539e898805556521ed5611abedc4941"
+    },
+    {
+      "path": "app/api/group-chats/[groupChatId]/route.ts",
+      "sha1": "92c29341dd911641b441642f0fc6e3fb401a0d6f"
+    },
+    {
+      "path": "app/api/group-chats/route.ts",
+      "sha1": "d033ec82b6a0265e9ebfead17d577733d2afb698"
+    },
+    {
+      "path": "app/api/home/schedule/ics-subscriptions/route.ts",
+      "sha1": "05c605a46db803c31173ac3a102b317e71147590"
+    },
+    {
+      "path": "app/api/home/schedule/route.ts",
+      "sha1": "b058c8ec4b87b858cc27d950a75d665103f0ff71"
+    },
+    {
+      "path": "app/api/inbox/state/route.ts",
+      "sha1": "6de98b321e806f04d12c770c587b37827307f79a"
+    },
+    {
+      "path": "app/api/inbox/unread-total/route.ts",
+      "sha1": "5afb3bbb5f584742cadbd851f51df243a73b6d16"
+    },
+    {
+      "path": "app/api/locale/route.ts",
+      "sha1": "4fcf41cd4db0d247ed0c27e11fe1e06aaf15b506"
+    },
+    {
+      "path": "app/api/maps/static/route.ts",
+      "sha1": "11ddf993925a1726ed05ed8824a6685d86edb417"
+    },
+    {
+      "path": "app/api/plan-requests/[requestId]/accept/route.ts",
+      "sha1": "b5d57e81b0d16e99bca0fc08615fd1741ab50e82"
+    },
+    {
+      "path": "app/api/plan-requests/[requestId]/counter-propose/route.ts",
+      "sha1": "59db1c93caa200b2a62a4dfee5fdaafc32bed593"
+    },
+    {
+      "path": "app/api/plan-requests/[requestId]/decline/route.ts",
+      "sha1": "f1ef6f7edb93c2a22de92397114556a56e8b0f1f"
+    },
+    {
+      "path": "app/api/profile/avatar/route.ts",
+      "sha1": "0a412a03cd3d43da1f2dee3a7cd89fc718ad60bd"
+    },
+    {
+      "path": "app/api/profile/avatar/upload/route.ts",
+      "sha1": "26fbd8a6729a45481e0986b1012850e6934950e4"
+    },
+    {
+      "path": "app/api/profile/discover-city/route.ts",
+      "sha1": "f32b834f6913fd68e8365c509e8b2ce91c67017e"
+    },
+    {
+      "path": "app/api/profile/gender/route.ts",
+      "sha1": "48ba1fa7fef06cc1196fa82b37575d622b2ea664"
+    },
+    {
+      "path": "app/api/profile/life-photos/[photoId]/route.ts",
+      "sha1": "1e6381e4f35f02f25917e1ff1ee78fb94134d136"
+    },
+    {
+      "path": "app/api/profile/life-photos/route.ts",
+      "sha1": "7649c3a303f78a69530be6c3c77f78e8c183382b"
+    },
+    {
+      "path": "app/api/profile/life-photos/upload/route.ts",
+      "sha1": "e846d7261bfc9e8246cb344dd93d4388349c021d"
+    },
+    {
+      "path": "app/api/profile/login-email/route.ts",
+      "sha1": "27adfe973c520640135f0442b5a8985373d434e8"
+    },
+    {
+      "path": "app/api/profile/login-email/send-otp/route.ts",
+      "sha1": "931a09c1e0fb47766b81f4f2d6870c116b5f5d5e"
+    },
+    {
+      "path": "app/api/profile/password/route.ts",
+      "sha1": "855c4d8e7af831e14e30aeab81030220ec9d0a36"
+    },
+    {
+      "path": "app/api/profile/privacy/route.ts",
+      "sha1": "d6613ac532dd8fee9d5d093c42a7377fc11fd00c"
+    },
+    {
+      "path": "app/api/profile/quick/route.ts",
+      "sha1": "c52befa3af82d7ad53c2e6f28cd59d603e98d25d"
+    },
+    {
+      "path": "app/api/profile/route.ts",
+      "sha1": "afe4a6107dda2c719593f191b77e609ca978854f"
+    },
+    {
+      "path": "app/api/profile/username/route.ts",
+      "sha1": "3d877e1aa4263cd99211c1b8d28d1dc04c22d0cc"
+    },
+    {
+      "path": "app/api/public/calendar-subscriptions/[token]/route.ts",
+      "sha1": "efd969ec091e27ec4b1c5cb8f98ed3a30064fa78"
+    },
+    {
+      "path": "app/api/public/event-shares/[token]/route.ts",
+      "sha1": "c96ad72c8e9b56041f50e23bf33ba766dd08b783"
+    },
+    {
+      "path": "app/api/public/intent-share/[token]/events/route.ts",
+      "sha1": "ad25c7794e929c8b03e7088a872a4e13f6754d15"
+    },
+    {
+      "path": "app/api/public/intent-share/[token]/route.ts",
+      "sha1": "243543a8b719b93fb5e60b3f497b47996889cf51"
+    },
+    {
+      "path": "app/api/public/schedule-shares/[token]/my-proposal/route.ts",
+      "sha1": "be23e0380e79677fb54c5281b5921b856acaced8"
+    },
+    {
+      "path": "app/api/public/schedule-shares/[token]/proposals/route.ts",
+      "sha1": "785196dfe46b5510af6629d2880923fdd1165b89"
+    },
+    {
+      "path": "app/api/public/schedule-shares/[token]/route.ts",
+      "sha1": "9a86ada86218f8a178e2dbe4b418cdd1800ab1e9"
+    },
+    {
+      "path": "app/api/push/native-register/route.ts",
+      "sha1": "c2de85f0b722691604b234c2d2f2e507aec3eeab"
+    },
+    {
+      "path": "app/api/push/subscribe/route.ts",
+      "sha1": "cf6eacd1245bbd47bd5b2b24d6c8b1ea7b959fc1"
+    },
+    {
+      "path": "app/api/push/vapid-public/route.ts",
+      "sha1": "d9db5eeca777c6c4d303252ba2534b37a9a50e17"
+    },
+    {
+      "path": "app/api/reports/route.ts",
+      "sha1": "da9292c2ec09a99054250250009d984ce0d10040"
+    },
+    {
+      "path": "app/api/schedule-share-proposals/[proposalId]/accept/route.ts",
+      "sha1": "0b0380304296511ed0c819ac87019e528b1085a6"
+    },
+    {
+      "path": "app/api/schedule-share-proposals/[proposalId]/decline/route.ts",
+      "sha1": "54411ec5e28f4d653bb26449743e1a9ff79d8b08"
+    },
+    {
+      "path": "app/api/schedule-share-proposals/route.ts",
+      "sha1": "dadc3dacdf1f10921a369609d938a1429f6884b7"
+    },
+    {
+      "path": "app/api/schedule-shares/[linkId]/revoke/route.ts",
+      "sha1": "5ce3d821b991ab341a273b8d4e507197b3b65b40"
+    },
+    {
+      "path": "app/api/schedule-shares/by-token/[token]/route.ts",
+      "sha1": "b16a2a983e3a75a120f08433e7e2b2174c411062"
+    },
+    {
+      "path": "app/api/schedule-shares/chat-preview/[token]/route.ts",
+      "sha1": "9c57f1ff3dcb1a769a51ce659c52beeb55d5e40f"
+    },
+    {
+      "path": "app/api/schedule-shares/owner-preview/route.ts",
+      "sha1": "2a6578f40157a4376790cc319abbdc3e73a4fa38"
+    },
+    {
+      "path": "app/api/schedule-shares/route.ts",
+      "sha1": "e2b3ed9b9dff57b43f73e4ca6e890928e2f944bf"
+    },
+    {
+      "path": "app/api/student-verification/manual-review/route.ts",
+      "sha1": "d89e09b7c507161d8624aba3a60ced9087de7c05"
+    },
+    {
+      "path": "app/api/student-verification/request/route.ts",
+      "sha1": "0bf07711684a708e67785a97c0985453bf505342"
+    },
+    {
+      "path": "app/api/student-verification/verify/route.ts",
+      "sha1": "d785ef039b25cd83058e9b6febf72635c0ed5ad6"
+    },
+    {
+      "path": "app/api/tip/checkout/route.ts",
+      "sha1": "0891da889ef0f1d9a590e55131d81c1aa8267948"
+    },
+    {
+      "path": "app/api/user/product-tutorial/dismiss/route.ts",
+      "sha1": "668921182538dd8860a00b33a39fdc4f810b9d4b"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/_plan-route.ts",
+      "sha1": "29d319028a8c7568311d9b30e38450feedc659a6"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/actions/[actionId]/interest/route.ts",
+      "sha1": "8862ea09f32e26312a48e97ec09f8c9356c14fcd"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/actions/[actionId]/responses/seen/route.ts",
+      "sha1": "c56d17db0926a239941cadeec820094c60271f29"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/contexts/[contextId]/plans/route.ts",
+      "sha1": "e53075b62a936f3f5ac6747f44ab5b6de087567c"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/interests/[interestId]/presentation/route.ts",
+      "sha1": "e77a641cdf1acc64728c1b0ed4cb4c66c364bb06"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/interests/[interestId]/reactivate/route.ts",
+      "sha1": "e27d239c1bc1edbe8a4c813ebd5e1536387d09c2"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/interests/[interestId]/reservations/route.ts",
+      "sha1": "37d13ba52a58e311df52a17eaa7eebf5669937cb"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/interests/[interestId]/route.ts",
+      "sha1": "2584c8716adfc00e6a45a3ae332714a37c2a4a30"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/me/interests/route.ts",
+      "sha1": "a2bf652bb60d464c7dc8876c096a698e3a96c652"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/plans/[revisionId]/accept/route.ts",
+      "sha1": "be5ca72e0e49a51fa35d38329a640b9c461e2c4b"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/plans/[revisionId]/counter/route.ts",
+      "sha1": "99d9a3d3900232c055758fc6501642deb138431b"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/plans/[revisionId]/decline/route.ts",
+      "sha1": "73ceee38600ca1fbdbd640561a85fba441ca016f"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/plans/[revisionId]/route.ts",
+      "sha1": "136c502a5055e49410a5bc8e1d980f7cf2c76ce6"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/reservations/[reservationId]/activate/route.ts",
+      "sha1": "c7fcc38d354660ba8b66f21bc8696e9fcc0160cd"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/reservations/[reservationId]/heartbeat/route.ts",
+      "sha1": "40d448d4c4786ce43ae1473c39593f1ea7982687"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/reservations/[reservationId]/route.ts",
+      "sha1": "f7a2b75ef2554df151e068faf98ed0a00ecb5418"
+    },
+    {
+      "path": "app/api/v1/action-coordination/v2/responses/route.ts",
+      "sha1": "c67a2b6a2ab97fd2773aaa7b9de1f1b3b3fffc1b"
+    },
+    {
+      "path": "app/api/v1/analytics/events/route.ts",
+      "sha1": "df87984984656c8deb7014f766c926162cef2974"
+    },
+    {
+      "path": "app/api/v1/auth/login/route.ts",
+      "sha1": "26a90d23e50ead39f94d171ec0f76add9eb3305f"
+    },
+    {
+      "path": "app/api/v1/auth/logout/route.ts",
+      "sha1": "662dd80e6715bb95bd3b9079f9dfb8867c26f777"
+    },
+    {
+      "path": "app/api/v1/auth/refresh/route.ts",
+      "sha1": "0b152353512c8bf3689811c567778689beebf4d7"
+    },
+    {
+      "path": "app/api/v1/auth/sessions/[familyId]/route.ts",
+      "sha1": "4ec527f71b8c0ffd3a6f83b7b35f482da437ebaa"
+    },
+    {
+      "path": "app/api/v1/auth/sessions/route.ts",
+      "sha1": "d0bab530da741843e942d25bd8f8f61e3f3a7564"
+    },
+    {
+      "path": "app/api/v1/calendar/categories/[categoryId]/route.ts",
+      "sha1": "a707b9dfd561cb913b9cb6ca10a014e31c61323b"
+    },
+    {
+      "path": "app/api/v1/calendar/categories/route.ts",
+      "sha1": "1f0974dbffac23e46d98fb02e9b6dcb437ebbe79"
+    },
+    {
+      "path": "app/api/v1/calendar/events/[eventId]/route.ts",
+      "sha1": "0bf25cde26312f18af15e8d7001a1fd97ccffb5c"
+    },
+    {
+      "path": "app/api/v1/calendar/events/[eventId]/shares/route.ts",
+      "sha1": "19dae305daa93b31d176d3106694b1125f38e9c5"
+    },
+    {
+      "path": "app/api/v1/calendar/events/batch/route.ts",
+      "sha1": "9dabad5204334549c94eb184bd7ae1996974d1f9"
+    },
+    {
+      "path": "app/api/v1/calendar/events/route.ts",
+      "sha1": "9b4280318132e7509de6302592c789be9723f0ca"
+    },
+    {
+      "path": "app/api/v1/calendar/export/route.ts",
+      "sha1": "347ff81a67d3b72ec033fe711759df661b5b079e"
+    },
+    {
+      "path": "app/api/v1/calendar/import/route.ts",
+      "sha1": "fd1c8dcd988708a30767aba68b4149eda0cfe5f7"
+    },
+    {
+      "path": "app/api/v1/calendar/parse-natural/route.ts",
+      "sha1": "45f857d383108517e137f9145c633249ee038b48"
+    },
+    {
+      "path": "app/api/v1/calendar/search/route.ts",
+      "sha1": "822c7a3f3a9f406d32e1bb507647bf1064346b5b"
+    },
+    {
+      "path": "app/api/v1/calendar/subscriptions/[linkId]/route.ts",
+      "sha1": "422821dcabd0aef769b182cb5ac8927e4d65723c"
+    },
+    {
+      "path": "app/api/v1/calendar/subscriptions/route.ts",
+      "sha1": "7706c61a92630954c66fd4c0986fdef421f8d2c5"
+    },
+    {
+      "path": "app/api/v1/client-config/route.ts",
+      "sha1": "65185970339457e4cf3bff57e7807c186e5e9ade"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/actions/route.ts",
+      "sha1": "f53fc15a9875e52612eee85478043729e8543f04"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/block/route.ts",
+      "sha1": "92a66bd43dbc6067cf027dcf8bd84ec5aa634f3a"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/contact-exchange/route.ts",
+      "sha1": "3c06a7e9f37f4302c627233d1b232b8973a88b21"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/contact-remark/route.ts",
+      "sha1": "206a5f64a2c9a916cba4faaef4658a480d66e3c7"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/end/route.ts",
+      "sha1": "ee8a10e333831e7d6e1bec3413fc66cd9e12176d"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/events/route.ts",
+      "sha1": "75173375ded56e5be7b7f23559ffd9561d080b28"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/friend-link/route.ts",
+      "sha1": "9018346ba5549a43da65b30d101d7864da26de43"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/messages/route.ts",
+      "sha1": "74c4c5f6db20fb00800686f2a3fb19f06dcff2ae"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/pin/route.ts",
+      "sha1": "49fba9516ca858de9e5034b29d83184afebc6651"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/plans/route.ts",
+      "sha1": "a344ad1dedf40e63d4be414b488bf3203f0d910d"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/read/route.ts",
+      "sha1": "511e007a842a27846bbc19698935467a5155f8ac"
+    },
+    {
+      "path": "app/api/v1/connections/[connectionId]/schedule-shares/route.ts",
+      "sha1": "6676af7fb790322c40310f105d5414b19d15d706"
+    },
+    {
+      "path": "app/api/v1/connections/open/route.ts",
+      "sha1": "3938f5f039ca96c7b4345c28c260af82a2620c35"
+    },
+    {
+      "path": "app/api/v1/contacts/route.ts",
+      "sha1": "947ea0deab85101b0063a942db97aeb439a923b8"
+    },
+    {
+      "path": "app/api/v1/contacts/search/route.ts",
+      "sha1": "b0f64f5b520bce7a539b310fadf1b71b09425be3"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/archive/route.ts",
+      "sha1": "c8cec9a5fbda858b4638a9f69998ac521f413d56"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/enrollment/route.ts",
+      "sha1": "1ace5aecc89aa4c3f31696fb661ae3fb7cd7fb30"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/events/route.ts",
+      "sha1": "0ed5cd4aa90c50c171df61e711d7599bfc46c9c3"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/inbox-hide/route.ts",
+      "sha1": "176a7005d28f0114b5f07e998f927fde173f15d0"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/inbox-pin/route.ts",
+      "sha1": "33baea14c87ece46df684d95aefcc16bac6e261d"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/inbox-restore/route.ts",
+      "sha1": "295c0f053aa7fb9fd218139b9e78d6f3b4c17b7d"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/messages/route.ts",
+      "sha1": "784cf87709a1a97cf05ee76c6b3030d24269581c"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/read/route.ts",
+      "sha1": "dc72a17f0c41534bcff8569723b494c39c80bf5d"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/route.ts",
+      "sha1": "c87f9572d562500aa4a9fd19558d8537c4ae3a75"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/saved/route.ts",
+      "sha1": "94cc17d09cb91ea0fc68cf792aaf091a7f5a5192"
+    },
+    {
+      "path": "app/api/v1/courses/[courseId]/schedule/route.ts",
+      "sha1": "d3880725a0f2e99d6ef73ba3be72d1ec701ef55b"
+    },
+    {
+      "path": "app/api/v1/courses/manual/route.ts",
+      "sha1": "5b0da21a48347265685f9ce20179aa07443d2a93"
+    },
+    {
+      "path": "app/api/v1/courses/match/route.ts",
+      "sha1": "58d61dc8f56145f798088239e371f984bc9c0a6c"
+    },
+    {
+      "path": "app/api/v1/courses/route.ts",
+      "sha1": "4ae490514cee44a067f3992fc0e689846b888a7c"
+    },
+    {
+      "path": "app/api/v1/courses/semester-review/route.ts",
+      "sha1": "5d5e8b2eeb2f9193f4d9aebc124d9fe6582d47c5"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/calendar/route.ts",
+      "sha1": "2d1bae0630d9d0e55311d88145275d063d9a1323"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/messages/[commentId]/route.ts",
+      "sha1": "6f18d1029eef87f9500b1e6087dbd21e3fa90291"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/messages/route.ts",
+      "sha1": "9bf01177b1e7b303242a5ac0609f0fdfe2284d77"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/route.ts",
+      "sha1": "66a1a3cc18a5a312f1e1e1ccaf9825624b06cf8d"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/signup/route.ts",
+      "sha1": "e708ee9ccb6ee327ff6877612232bae78b1708cc"
+    },
+    {
+      "path": "app/api/v1/discover/activities/[activityId]/status/route.ts",
+      "sha1": "b4efcc00f6052f6f10758da7733ba60ad13d7715"
+    },
+    {
+      "path": "app/api/v1/discover/activities/route.ts",
+      "sha1": "61df8d566a0b51a25b74eb87510a3a6da2980e50"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/interest/route.ts",
+      "sha1": "e1d27d000f62ac4a21f6246686b584fe005a34e1"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/questions/[commentId]/route.ts",
+      "sha1": "9b2d560015e9a38d5ad723b3d24825fe6b417794"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/questions/route.ts",
+      "sha1": "78b5082c64dac13f0ecac4c49bfadc04f431b020"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/route.ts",
+      "sha1": "e10db84d2ff29477788e02336cd4e66f7041f42c"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/saved/route.ts",
+      "sha1": "7b5135ed61c241a0e968f92ec32245379b70d439"
+    },
+    {
+      "path": "app/api/v1/discover/posts/[postId]/status/route.ts",
+      "sha1": "579a578ed25b6274e6c71bc03df52e6bd9db373f"
+    },
+    {
+      "path": "app/api/v1/discover/posts/images/route.ts",
+      "sha1": "4b0c707db79956abe1c523e8504cac167aa06fc3"
+    },
+    {
+      "path": "app/api/v1/discover/posts/route.ts",
+      "sha1": "1df2dc46b6768026f2d8a51f4a0789f526141bff"
+    },
+    {
+      "path": "app/api/v1/discover/recommendations/route.ts",
+      "sha1": "40903b9a8eba3ca6c06bfee2907675e25a4a18c0"
+    },
+    {
+      "path": "app/api/v1/discover/route.ts",
+      "sha1": "49cbf700fd6579ced1ea5e3c431801f73b1074fb"
+    },
+    {
+      "path": "app/api/v1/event-shares/[token]/add/route.ts",
+      "sha1": "dfc3a3b97e883af5cc1fbcd64c88aa898b8d670e"
+    },
+    {
+      "path": "app/api/v1/event-shares/[token]/route.ts",
+      "sha1": "5e960b5b9c4a1a1ae74e5a2106cc421412f14cfb"
+    },
+    {
+      "path": "app/api/v1/explore/intents/[intentId]/contact/route.ts",
+      "sha1": "4d11b547f2da33e2de99b5b09bd8f2840a59b5c0"
+    },
+    {
+      "path": "app/api/v1/explore/intents/[intentId]/interest/route.ts",
+      "sha1": "c576aab36c9f0bbf6b6310606ad13042eb713558"
+    },
+    {
+      "path": "app/api/v1/explore/intents/route.ts",
+      "sha1": "6878f42bb1865ccb16ec088ffeb025d2297967df"
+    },
+    {
+      "path": "app/api/v1/feedback/[feedbackId]/comments/route.ts",
+      "sha1": "74eb5480bfef43e3e75e7c806f2793d736a6a60e"
+    },
+    {
+      "path": "app/api/v1/feedback/[feedbackId]/route.ts",
+      "sha1": "03799e4744700bebc6b9fe9f8d5bac7797205769"
+    },
+    {
+      "path": "app/api/v1/feedback/[feedbackId]/vote/route.ts",
+      "sha1": "f63808219bf00a4925439232ed2567d7c34e7c0b"
+    },
+    {
+      "path": "app/api/v1/feedback/route.ts",
+      "sha1": "b837d08486c65692f06b18bf35cfc8f01806954d"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/events/route.ts",
+      "sha1": "a9d4e7a10493cd0568f25a52fde8c5e8ba981849"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/inbox-hide/route.ts",
+      "sha1": "bb65038a950a14bf737b00d25ff81f48b2757bec"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/inbox-pin/route.ts",
+      "sha1": "56e39165f53327723510abeb6611ff83720b007b"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/inbox-restore/route.ts",
+      "sha1": "92120fcadaec489529c9875fff8bd21524869a17"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/messages/route.ts",
+      "sha1": "9714e251717ab8ab61213d6e19089e7c88676063"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/participants/route.ts",
+      "sha1": "66f2604d0c9c416206ae717ba1cd4ef206a676a4"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/read/route.ts",
+      "sha1": "6be31d28984f80f8ab3eadc0f47b945df66ac4d1"
+    },
+    {
+      "path": "app/api/v1/group-chats/[groupChatId]/route.ts",
+      "sha1": "34a9e060f47ba58c17b89a77bdc4ba4d61882890"
+    },
+    {
+      "path": "app/api/v1/group-chats/route.ts",
+      "sha1": "6bf77362f67807234030b6b1125e430b48645a05"
+    },
+    {
+      "path": "app/api/v1/home/schedule/ics-subscriptions/route.ts",
+      "sha1": "fa3aaa067347f2c2feb98a7e5bdf8eec02724e62"
+    },
+    {
+      "path": "app/api/v1/home/schedule/route.ts",
+      "sha1": "7a009a2b860fdbdd5782716535cdf5a30a6c6ee9"
+    },
+    {
+      "path": "app/api/v1/inbox/route.ts",
+      "sha1": "53b7fec1782fd4ac151b4c013a29f81b65765ec6"
+    },
+    {
+      "path": "app/api/v1/me/avatar/route.ts",
+      "sha1": "ed06a7317c14e4207511aa613c8c7dcd53256238"
+    },
+    {
+      "path": "app/api/v1/me/blocks/[blockedId]/route.ts",
+      "sha1": "4052de265318a1719d11c6ae06120b0d3078dd96"
+    },
+    {
+      "path": "app/api/v1/me/blocks/route.ts",
+      "sha1": "99f69338f17d2c26156b96ce8238705e791d5885"
+    },
+    {
+      "path": "app/api/v1/me/experiments/route.ts",
+      "sha1": "027e6bbf7c5275df3dfa839ebbd946487c374dbe"
+    },
+    {
+      "path": "app/api/v1/me/languages/route.ts",
+      "sha1": "85886d68af0ad37b4770c3c221b73dbe1281aa02"
+    },
+    {
+      "path": "app/api/v1/me/life-photos/[photoId]/route.ts",
+      "sha1": "6aacf447217df5e7c0e4f901467bc45dcbf81a16"
+    },
+    {
+      "path": "app/api/v1/me/life-photos/route.ts",
+      "sha1": "b28f712fc02633fe3be999ae512e18726a66368c"
+    },
+    {
+      "path": "app/api/v1/me/membership/redeem/route.ts",
+      "sha1": "7f08a1c642296c5e280ff2d8565355556be60361"
+    },
+    {
+      "path": "app/api/v1/me/membership/route.ts",
+      "sha1": "b1bb57c87b91267145b9971aa043e9f4c7d14ead"
+    },
+    {
+      "path": "app/api/v1/me/mutual-opportunities/[opportunityId]/decision/route.ts",
+      "sha1": "f4b35cc795ff2e50878f72d8b0f1fa5ddba51253"
+    },
+    {
+      "path": "app/api/v1/me/mutual-opportunities/[opportunityId]/interaction/route.ts",
+      "sha1": "68d67369fe03fbd256c1ca9fe038b8793de2e9fa"
+    },
+    {
+      "path": "app/api/v1/me/mutual-opportunities/[opportunityId]/route.ts",
+      "sha1": "660e45bf186d6b614196b9028eba17f3ce49f103"
+    },
+    {
+      "path": "app/api/v1/me/mutual-opportunities/route.ts",
+      "sha1": "89c7dba177f6458dc368b14dc4b9daa36e4d47ad"
+    },
+    {
+      "path": "app/api/v1/me/plan-cancellations/[noticeId]/route.ts",
+      "sha1": "5b9e356196b5c3cccf007cb1302faa99713d0cf7"
+    },
+    {
+      "path": "app/api/v1/me/plan-cancellations/route.ts",
+      "sha1": "ab06d5d97af5eaecbdb02e97a39f41badba32fbd"
+    },
+    {
+      "path": "app/api/v1/me/posts/route.ts",
+      "sha1": "93854e54680393c1fa74a427f0f99fb0d1f0a88e"
+    },
+    {
+      "path": "app/api/v1/me/product-tutorial/dismiss/route.ts",
+      "sha1": "3f4c4390ac97e3689a24abf93f51e4c4cf90775f"
+    },
+    {
+      "path": "app/api/v1/me/profile/route.ts",
+      "sha1": "102d3acb865b38a8763439549e7918d06acbe6a3"
+    },
+    {
+      "path": "app/api/v1/me/route.ts",
+      "sha1": "45a799f7368cb6b41c618bb9d4a9d8596ddd0571"
+    },
+    {
+      "path": "app/api/v1/me/saved-posts/route.ts",
+      "sha1": "3f4eba3d64ef2b9695c56dbf2a19a30534f7397c"
+    },
+    {
+      "path": "app/api/v1/me/social-preferences/route.ts",
+      "sha1": "37cb2cf5e6ba906d08619268f3c0b942476bec7e"
+    },
+    {
+      "path": "app/api/v1/me/together-matching-session/route.ts",
+      "sha1": "335955e0270de467035baef24861698bda6f588f"
+    },
+    {
+      "path": "app/api/v1/me/username/route.ts",
+      "sha1": "bfd7e306c2096e7d7975136cbb19ee01f2a6b3c1"
+    },
+    {
+      "path": "app/api/v1/me/weekly-intents/[intentId]/route.ts",
+      "sha1": "91938910a2fad9cf4fd88a23e1002083882c5033"
+    },
+    {
+      "path": "app/api/v1/me/weekly-intents/[intentId]/share/route.ts",
+      "sha1": "fc3c15a54236f8ab2704846b3f43bdc91d016d8c"
+    },
+    {
+      "path": "app/api/v1/me/weekly-intents/route.ts",
+      "sha1": "59517cc5a42103651b445180558d98aff77aa84f"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/accept/route.ts",
+      "sha1": "e7f07161b1db631b04679f3e22110f3134a68d37"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/cancel/route.ts",
+      "sha1": "cdd4ed35922bcdde9b5b97c358b01f1202916383"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/counter/route.ts",
+      "sha1": "3330be1a6f884e4844648a8c02baa87923c99864"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/decline/route.ts",
+      "sha1": "f835dd038f4190d1050a1b344ae54e3a96e112ed"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/meet-again/route.ts",
+      "sha1": "e1a8e1d4a0b094be63279430798b0fa543dd2cbd"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/outcome/route.ts",
+      "sha1": "7e94a428e4003d028c3913a7463c1fb17d5466f3"
+    },
+    {
+      "path": "app/api/v1/plans/[planId]/route.ts",
+      "sha1": "0b2800476e8c1eadcf33a50d30f1b24753be1580"
+    },
+    {
+      "path": "app/api/v1/plans/route.ts",
+      "sha1": "f86f6ee1d20bbb1441cf5579822efadd4abfb217"
+    },
+    {
+      "path": "app/api/v1/push/devices/route.ts",
+      "sha1": "1ad43f9d4ab0364ef60ed16f0b22bf967728724b"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/chat-preview/[token]/route.ts",
+      "sha1": "f01ff1e5ecb34337d780066d3710ca32ec99524d"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/owner-preview/route.ts",
+      "sha1": "dbcfbf2408e84d4a5b599374ab15bfe18c613405"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/owner/[linkId]/route.ts",
+      "sha1": "c29171c612047c7cb7f493c6453d1793654e8315"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/recipient/[token]/my-proposal/route.ts",
+      "sha1": "2ba518a14af0ea0190baaec06d85ebe2c54cf2d8"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/recipient/[token]/proposals/route.ts",
+      "sha1": "83c5954b1f6a3d0bd93ff5e68cf09203f5b66c17"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/recipient/[token]/route.ts",
+      "sha1": "32740c1c902ad69671f29d667f5b3d0e6d749171"
+    },
+    {
+      "path": "app/api/v1/schedule-shares/route.ts",
+      "sha1": "2bfaa230bbf20d7bd17e41704400fc57eeb90c76"
+    },
+    {
+      "path": "app/api/v1/social-group-opportunities/[opportunityId]/outcome/route.ts",
+      "sha1": "b7a76531996f78c7c1d53f33cb522ddc2a1b70a8"
+    },
+    {
+      "path": "app/api/v1/social-group-opportunities/[opportunityId]/response/route.ts",
+      "sha1": "f13a13e3d41d6951b7e7f784fd95815fce170d22"
+    },
+    {
+      "path": "app/api/v1/social-group-opportunities/route.ts",
+      "sha1": "411000b78d94c1536284cec9c9017c3183986aa5"
+    },
+    {
+      "path": "app/api/v1/storekit/products/route.ts",
+      "sha1": "2c5dd847c9ca73ea48a6f464d9d7a42e8e152349"
+    },
+    {
+      "path": "app/api/v1/storekit/transactions/acknowledge/route.ts",
+      "sha1": "303ac5c97f07581994a068a6c3caad8a8d5c7d27"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/response/route.ts",
+      "sha1": "56bf946f4169bde7c5d60ef1659958ec839e00c6"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/route.ts",
+      "sha1": "1470628e39d5515251d236417f1641d1fb04a3d1"
+    },
+    {
+      "path": "app/api/v1/time-polls/route.ts",
+      "sha1": "2dda58fb34205cbd9ef51536ae642e1d5527c0c0"
+    },
+    {
+      "path": "app/api/v1/users/[userId]/profile/route.ts",
+      "sha1": "e6f66ebcbcd7a0550d4ceca5c987629085a4a253"
+    },
+    {
+      "path": "app/globals.css",
+      "sha1": "b2ac619704ae7891e70d811ab38ab4d66a6f7eca"
+    },
+    {
+      "path": "app/ios/page.tsx",
+      "sha1": "cba660f11c91621d6b1bdea2680dc13efb7ce7c1"
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha1": "a0a476cb3645021b85cfc6cc55dceea8aac7f0a2"
+    },
+    {
+      "path": "app/manifest.ts",
+      "sha1": "b008e8492aac68ff8021c0e18b7b93764ac865b6"
+    },
+    {
+      "path": "app/page.tsx",
+      "sha1": "30a9e03181990eb0f835ea730744c07c7babae5d"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "sha1": "42a18ad6b50f01c97a4516f99a8e827b70a1483b"
+    },
+    {
+      "path": "app/share/event/[token]/page.tsx",
+      "sha1": "9233e28464acc865c68dde56b521b87cb65076d4"
+    },
+    {
+      "path": "app/share/intent/[token]/page.tsx",
+      "sha1": "d71f63293ac33ad81801c963dc1387ef5a897b55"
+    },
+    {
+      "path": "app/share/intent/[token]/share-client.tsx",
+      "sha1": "140ca7f6b2fe2d4c9c4f9dd2847c7c0464d5eb66"
+    },
+    {
+      "path": "app/share/intent/[token]/share.module.css",
+      "sha1": "1d4e79ddb60ed383e69305a4a86d7714cdbd9e0d"
+    },
+    {
+      "path": "app/share/schedule/[token]/page.tsx",
+      "sha1": "84a37cad6c6e59a6c6b2dabb032948cfc233f54b"
+    },
+    {
+      "path": "app/share/view/[token]/page.tsx",
+      "sha1": "6e34194e0c7b784bfbf1823954eb18ad8590be7e"
+    },
+    {
+      "path": "app/support/page.tsx",
+      "sha1": "8ad00c32113b822fa384abaa70bb649ff131b59a"
+    },
+    {
+      "path": "app/time-polls/[token]/page.tsx",
+      "sha1": "e5f446c2ba5cbc1d05e3db9472f4f5076d7d31c0"
+    },
+    {
+      "path": "app/xhs/[[...callback]]/page.tsx",
+      "sha1": "715a53187be33edb656e0a52630d202eb3f7b224"
+    },
+    {
+      "path": "components/admin/admin-block-button.tsx",
+      "sha1": "7667f7ea7884c3643e78ff7eab22edf564490107"
+    },
+    {
+      "path": "components/admin/admin-user-edit-form.tsx",
+      "sha1": "eec3c256a3ce9264a96dc561396c76552b377528"
+    },
+    {
+      "path": "components/admin/membership-invite-admin.tsx",
+      "sha1": "87deabbeb3283e3bfb18ab425d07ca1b82cc0c62"
+    },
+    {
+      "path": "components/admin/report-detail-drawer.tsx",
+      "sha1": "cd5fc1a2afeaca0b95281cae3b80185a929d5b96"
+    },
+    {
+      "path": "components/admin/report-filter-bar.tsx",
+      "sha1": "d6d8c7bab9f3339c5232f43c114830aee1597028"
+    },
+    {
+      "path": "components/admin/report-review-form.tsx",
+      "sha1": "f98b56534b8ae5d5de63d18e729729b0ce851ab8"
+    },
+    {
+      "path": "components/admin/student-verification-review.tsx",
+      "sha1": "53c50fb7202b97ad519b59bfdc20a442cbc8e7a9"
+    },
+    {
+      "path": "components/app/app-entry-gate.tsx",
+      "sha1": "4496a1417af0a4c8a1fcd9061d161ec64ba29da2"
+    },
+    {
+      "path": "components/app/chunk-load-recovery.tsx",
+      "sha1": "d96f7b97790986ea2c3c004e7359fe4ac2068efd"
+    },
+    {
+      "path": "components/app/guest-app-cta.tsx",
+      "sha1": "4378579e5ca166c591a1530630507eef254738ea"
+    },
+    {
+      "path": "components/app/guest-auth-bar.tsx",
+      "sha1": "f5999d518f378ba4a1c543b3d50f61419d41f800"
+    },
+    {
+      "path": "components/app/onboarding-continue-cta.tsx",
+      "sha1": "e0211234b73d75f8701e994cde4af724dccf252f"
+    },
+    {
+      "path": "components/app/product-tutorial-gate.tsx",
+      "sha1": "0d70da91793c0907945bbc4ef957618dc7a8c820"
+    },
+    {
+      "path": "components/auth/auth-bootstrap.tsx",
+      "sha1": "e4328c2b396351d7e9ee17ad616466fdce869b12"
+    },
+    {
+      "path": "components/auth/auth-login-footer.tsx",
+      "sha1": "1eb5d837507ac7d66dceab3ef0a0bbeffee46f75"
+    },
+    {
+      "path": "components/auth/auth-signup-footer.tsx",
+      "sha1": "322da6189b9136c34ae8eeffe5f3fe3ba065aff2"
+    },
+    {
+      "path": "components/auth/guest-browse-button.tsx",
+      "sha1": "49cb1488d297a2cf2be9de75ea083e69b7de0e47"
+    },
+    {
+      "path": "components/auth/logout-form.tsx",
+      "sha1": "f3edffb2c1100c29c949fde8c1c78042f6e894bb"
+    },
+    {
+      "path": "components/auth/sign-in-prompt-dialog.tsx",
+      "sha1": "817dee912c34db0097a1b9996c319d60e9ad080f"
+    },
+    {
+      "path": "components/calendar/category-picker-row.tsx",
+      "sha1": "eb8258bb48478e9faf2700236560cad5ebd2e7f5"
+    },
+    {
+      "path": "components/calendar/schedule-date-nav-controls.tsx",
+      "sha1": "f5a0fc3cb8331c74d8ef7c35687a02e8df22fe82"
+    },
+    {
+      "path": "components/calendar/week-calendar.tsx",
+      "sha1": "15b31bcfe4e45cefed3125cb16125aa388a3ae64"
+    },
+    {
+      "path": "components/calendar/week-event-edit-toolbar.tsx",
+      "sha1": "76bc11ba927413f09f1b2f760a307969dab8d853"
+    },
+    {
+      "path": "components/calendar/week-visible-days-bar.tsx",
+      "sha1": "858375460b5e1007e96d3dab39fa6ddd4c97e76e"
+    },
+    {
+      "path": "components/capacitor/capacitor-bootstrap.tsx",
+      "sha1": "99fe173ecd8ec6c2c9aa216a14d4fd0d689daf58"
+    },
+    {
+      "path": "components/cards/person-card.tsx",
+      "sha1": "bd2b8a56035cdc010bd4703992546cacc79c7a59"
+    },
+    {
+      "path": "components/chat/availability-card-message.tsx",
+      "sha1": "abb00f6a10e32cf29b847267983a7cee1aa930c9"
+    },
+    {
+      "path": "components/chat/availability-viewer.tsx",
+      "sha1": "3ad0187eed12425154e8398c38d98eea5da3facd"
+    },
+    {
+      "path": "components/chat/chat-action-bar.tsx",
+      "sha1": "62fb61828cbdaf44a9a789b2a67c10639b2ef5c1"
+    },
+    {
+      "path": "components/chat/chat-attachment-menu.tsx",
+      "sha1": "9a2105343b8b5f3e8e53b22bb529ef223f24c590"
+    },
+    {
+      "path": "components/chat/chat-composer-chrome.tsx",
+      "sha1": "3668b19b3594cc6aa9641653f989148bdd0d515d"
+    },
+    {
+      "path": "components/chat/chat-composer.tsx",
+      "sha1": "5b73412ca8156ddcd39a77972d915965ddab480e"
+    },
+    {
+      "path": "components/chat/chat-location-link-preview.tsx",
+      "sha1": "424659afa41c7939a11cf2d12840f2719274b47c"
+    },
+    {
+      "path": "components/chat/chat-message-bubble.tsx",
+      "sha1": "16a23d6372cd7a72a3b3e6126173f73c81cb91e7"
+    },
+    {
+      "path": "components/chat/chat-message-image.tsx",
+      "sha1": "98985a7a5fcdc9ee048b4e52046812ba7a19dac2"
+    },
+    {
+      "path": "components/chat/chat-message-input.tsx",
+      "sha1": "528c2bb42542c83acd4452103ad6f14dea864e7a"
+    },
+    {
+      "path": "components/chat/chat-message-selection.tsx",
+      "sha1": "6a4c1268d5d13e06c6a820aa43318f8ec34b204e"
+    },
+    {
+      "path": "components/chat/chat-realtime-refresh.tsx",
+      "sha1": "c92f7789c4211dc398b911291a292a732664cc49"
+    },
+    {
+      "path": "components/chat/chat-reply-context.tsx",
+      "sha1": "6341768031ca4045f9dfb7de4d9c2916124a99ed"
+    },
+    {
+      "path": "components/chat/chat-scroll-container.tsx",
+      "sha1": "b8770d44db801fd4fedca07a0d03242e6f2f3536"
+    },
+    {
+      "path": "components/chat/chat-thread-search-button.tsx",
+      "sha1": "6532281e996841a7c49cd5fe2a82f3b9e8a49aca"
+    },
+    {
+      "path": "components/chat/contact-remark-editor.tsx",
+      "sha1": "1f681ad59eab8b8b27fc0d269cff2bfb780de1ce"
+    },
+    {
+      "path": "components/chat/course-chat-composer.tsx",
+      "sha1": "2ec493b478e450fc51a05ab2d96b86f5e362cf60"
+    },
+    {
+      "path": "components/chat/direct-message-list.tsx",
+      "sha1": "7c6177ff82473f89a2fb891198755f808ee92f50"
+    },
+    {
+      "path": "components/chat/first-message-composer.tsx",
+      "sha1": "4ea29a1f9aee4f0a19231490bba62d3e12ad09dc"
+    },
+    {
+      "path": "components/chat/group-chat-composer.tsx",
+      "sha1": "cbc2494eaef148d3ddde45a7eb494a9b10fa5655"
+    },
+    {
+      "path": "components/chat/message-action-menu.tsx",
+      "sha1": "606673f31e1a3fda2b10fbd9b7f77e53a61d97da"
+    },
+    {
+      "path": "components/chat/message-bubble-content.tsx",
+      "sha1": "6697c53424088c8371ce8a7fd1f614635fd47ded"
+    },
+    {
+      "path": "components/chat/plan-request-card-message.tsx",
+      "sha1": "d3fccf2143b99432c1beb25e86f9cf361960cfe0"
+    },
+    {
+      "path": "components/chat/plan-request-modal.tsx",
+      "sha1": "c540e10f44af9810fb39b22b381db1968c1c1eee"
+    },
+    {
+      "path": "components/chat/refocus-chat-input.ts",
+      "sha1": "1c7129c59d939c4ad15284bd35dec5241636b443"
+    },
+    {
+      "path": "components/chat/schedule-share-card-message.tsx",
+      "sha1": "3a5c7cc1058c88ba852640d501ca8dad6cfd6e5c"
+    },
+    {
+      "path": "components/chat/share-availability-modal.tsx",
+      "sha1": "c926f7bf11e99172f3bab9da2504f9ab7ce1443c"
+    },
+    {
+      "path": "components/chat/study-session-card.tsx",
+      "sha1": "14960ecc449e4a88bcc1b327ba83f48131d7d83b"
+    },
+    {
+      "path": "components/chat/study-session-sheet.tsx",
+      "sha1": "92aa08fe7d5dde2e3e3375982e3f7301694ff3d8"
+    },
+    {
+      "path": "components/classmates/classmates-person-row.tsx",
+      "sha1": "2d183ddb43244211f4611253b8220596362f9c79"
+    },
+    {
+      "path": "components/courses/course-classmates-count-chip.tsx",
+      "sha1": "2a5a933de4b52fbf9c0f15c969651db3e11a7c8d"
+    },
+    {
+      "path": "components/courses/course-member-list.tsx",
+      "sha1": "7d1357eb8c77bbf0dac36a6676b5aa1d7cf56fde"
+    },
+    {
+      "path": "components/courses/course-page-menu.tsx",
+      "sha1": "37aadb1307fd502a815dc2ac3a950b4fef452db4"
+    },
+    {
+      "path": "components/courses/course-search-surface.tsx",
+      "sha1": "20c8beeab2479e2c9a7bfa3e7fd3fe6bdd8e609f"
+    },
+    {
+      "path": "components/courses/course-setup-panel.tsx",
+      "sha1": "f2cf1998f1703f565b6d610672f72afe3972a059"
+    },
+    {
+      "path": "components/courses/course-share-link-action.tsx",
+      "sha1": "a3ce2d49a638666f4e47903751d9bb49ed8671e5"
+    },
+    {
+      "path": "components/courses/course-unenroll-footer.tsx",
+      "sha1": "5f7ae62a02844e32ac96a93792a04e736de6cfe8"
+    },
+    {
+      "path": "components/courses/courses-entry-tabs.tsx",
+      "sha1": "ab5b433bccf73acc9bcc09a5bc314a5c3127aac1"
+    },
+    {
+      "path": "components/courses/courses-page-client.tsx",
+      "sha1": "2147e69631cacb787cdb5925e4b871898b8710fe"
+    },
+    {
+      "path": "components/courses/courses-page-top.tsx",
+      "sha1": "ec20b1c9ed840e736756ca5c09b23d90f85f8084"
+    },
+    {
+      "path": "components/courses/courses-school-select.tsx",
+      "sha1": "789f0b7f8fb4fd5cc8c2780bf1480b24c98d21d3"
+    },
+    {
+      "path": "components/courses/courses-tab-restore.tsx",
+      "sha1": "d735ccc97480f8a30b09dc6def895fca0fddee8b"
+    },
+    {
+      "path": "components/courses/enrolled-course-card.tsx",
+      "sha1": "7feebdea63938b3a68816a890de872f13de31a64"
+    },
+    {
+      "path": "components/courses/mini-workweek-course-grid.tsx",
+      "sha1": "9e20339c402886f3ea578d19be0e5812e5eaefeb"
+    },
+    {
+      "path": "components/courses/popular-course-card.tsx",
+      "sha1": "820c12f91904f3c4034d0a5e8c8c2f22050cbe09"
+    },
+    {
+      "path": "components/courses/quick-enroll-button.tsx",
+      "sha1": "f38f03e44800aad4f89017fa37166057f578cef8"
+    },
+    {
+      "path": "components/courses/save-bookmark-button.tsx",
+      "sha1": "8859ff6c02aaf3633f036f5e5c150de7d2325958"
+    },
+    {
+      "path": "components/courses/saved-courses-panel.tsx",
+      "sha1": "cf61296d03a8275712662447e060cf07fd5a1541"
+    },
+    {
+      "path": "components/discover/buddy-request-card.tsx",
+      "sha1": "81d307a525ff7398f44a6710ab129c08d348e55d"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/buddy-request-bottom-bar.tsx",
+      "sha1": "7e26522e6ea6ea6002d10fafc0016510d35e1cd7"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/buddy-request-content.tsx",
+      "sha1": "a326f367306ab2ac7d18e28f0b4ac9c37475fa64"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/buddy-request-detail-shell.tsx",
+      "sha1": "b56543483501b0d8a8432cc2bf4613ef223d7391"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/buddy-request-media-carousel.tsx",
+      "sha1": "2fcad7c971970fcc80da749cdace2dbf66b34f9a"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/buddy-request-top-bar.tsx",
+      "sha1": "cb0cadccf1c8ec0eaff64ccdb318ebf5113615ac"
+    },
+    {
+      "path": "components/discover/buddy-request-detail/plan-details-card.tsx",
+      "sha1": "33ea39b769410fa94f31df7481380f6aaaa22c60"
+    },
+    {
+      "path": "components/discover/classmate-post-detail-header-actions.tsx",
+      "sha1": "5215a252140f7c75cc9c66da53f41735864c24d8"
+    },
+    {
+      "path": "components/discover/classmate-post-detail-share-menu.tsx",
+      "sha1": "1de62ceaf5e45889888bd2004c2d759456528160"
+    },
+    {
+      "path": "components/discover/classmate-post-detail-view-beacon.tsx",
+      "sha1": "3d8e75a31e4d267eb07676e975b0020877f9650f"
+    },
+    {
+      "path": "components/discover/classmate-post-images-gallery.tsx",
+      "sha1": "233224b6d3a87f0475f19333279f1c4d9a52f5ae"
+    },
+    {
+      "path": "components/discover/classmate-post-save-button.tsx",
+      "sha1": "e7db719752e0a794b31e489b373cec4d5e0d9a99"
+    },
+    {
+      "path": "components/discover/classmate-post-text-cover.tsx",
+      "sha1": "83b49b90ecc265caca131597f4a1eb03cf814313"
+    },
+    {
+      "path": "components/discover/discover-activity-card.tsx",
+      "sha1": "d0ad15963b5bc6d546eb2291c578090ac0a1ecd3"
+    },
+    {
+      "path": "components/discover/discover-activity-detail/discover-activity-add-calendar.tsx",
+      "sha1": "b4b87ab9295662861a6c0bdcf863b04450624c79"
+    },
+    {
+      "path": "components/discover/discover-activity-detail/discover-activity-bottom-bar.tsx",
+      "sha1": "ed61b447e073871d70dce861bc92d11237c09c2e"
+    },
+    {
+      "path": "components/discover/discover-activity-detail/discover-activity-content.tsx",
+      "sha1": "efee8f6d02324c765d545e5b1a18d05e45c7058e"
+    },
+    {
+      "path": "components/discover/discover-activity-list.tsx",
+      "sha1": "458d30523925c77939f03d4336cef8be2b7fba06"
+    },
+    {
+      "path": "components/discover/discover-create-action-sheet.tsx",
+      "sha1": "b4619c5efeef45cb928f5f180f555e63aa01f861"
+    },
+    {
+      "path": "components/discover/discover-create-activity-sheet.tsx",
+      "sha1": "0a564c24e5988f594eaeee0a851b23a4e28e2ff2"
+    },
+    {
+      "path": "components/discover/discover-feed.tsx",
+      "sha1": "f257b74ac163ef772e81e4880bbde52f8e0efd5b"
+    },
+    {
+      "path": "components/discover/discover-list.tsx",
+      "sha1": "327b5a7482024b2b5f3f91a319e8e3a77541609e"
+    },
+    {
+      "path": "components/discover/discover-message-button.tsx",
+      "sha1": "72fb21f81bd562be7eafbb5e79516a98156a62f1"
+    },
+    {
+      "path": "components/discover/discover-post-card.tsx",
+      "sha1": "b3f68087ca1a8123e92026665c3c523295b4eeef"
+    },
+    {
+      "path": "components/discover/discover-post-posted-time.tsx",
+      "sha1": "dc3539fb601209187f5709913d080c6d3d161c39"
+    },
+    {
+      "path": "components/discover/discover-zone-tabs.tsx",
+      "sha1": "fbd63684dae929f3072f149b1418d8d76815f9f5"
+    },
+    {
+      "path": "components/discover/language-exchange-post-fields.tsx",
+      "sha1": "7257aefd20836d63504916dcdf3d2cba58c3afdb"
+    },
+    {
+      "path": "components/discover/share-platform-menu.tsx",
+      "sha1": "5fdd7cd0ecf763aa68a9f14b7e260be3b3aefd78"
+    },
+    {
+      "path": "components/discover/sports-post-field-combobox.tsx",
+      "sha1": "345aa6395471dead5721810409d3e09dab4100ba"
+    },
+    {
+      "path": "components/forms/auth-form.tsx",
+      "sha1": "9cc1de36384a7c26a77b3a3362e959257d1c59e2"
+    },
+    {
+      "path": "components/forms/avatar-picker.tsx",
+      "sha1": "1be8bf3db527691707b137d94dfbe54175f4009b"
+    },
+    {
+      "path": "components/forms/course-form.tsx",
+      "sha1": "110b0839ca9da1528720f1f79af1511e10a0d532"
+    },
+    {
+      "path": "components/forms/course-remove-button.tsx",
+      "sha1": "20f1d51642ee28cbc21462378368f7f4d9801901"
+    },
+    {
+      "path": "components/forms/forgot-password-form.tsx",
+      "sha1": "60c59435a854103007ef120462bc78f1e5fbfcfc"
+    },
+    {
+      "path": "components/forms/form-message.tsx",
+      "sha1": "2da5c369418efa91b98ae796ffc8cfb8947abb35"
+    },
+    {
+      "path": "components/forms/message-form.tsx",
+      "sha1": "6760419e13a2c20de5d48515438d56331ac974cb"
+    },
+    {
+      "path": "components/forms/profile-form.tsx",
+      "sha1": "fd14bd078a174bfe4c152083cedac55d6d7def46"
+    },
+    {
+      "path": "components/forms/searchable-select.tsx",
+      "sha1": "8e00141c4fe66e31936554504e507d24af5807ca"
+    },
+    {
+      "path": "components/forms/student-verification-form.tsx",
+      "sha1": "2cfa4b85f609a113a2c28aeea341d0e193141d54"
+    },
+    {
+      "path": "components/groups/group-chat-add-members.tsx",
+      "sha1": "47fe993cf7728ff232e905f75fbffb0c13e2364f"
+    },
+    {
+      "path": "components/groups/group-chat-title-editor.tsx",
+      "sha1": "c7114bf2e7023eae31b7d2705199fdab9b46b174"
+    },
+    {
+      "path": "components/home/calendar-category-color-popover.tsx",
+      "sha1": "ac870ddc9e0e9812f57ea3d52ad2e339a31f06c2"
+    },
+    {
+      "path": "components/home/home-hero.tsx",
+      "sha1": "563c850c34e48b9b4fe54cc2b24b7693edd5e58f"
+    },
+    {
+      "path": "components/home/home-now-card.tsx",
+      "sha1": "1bbe65d190d3678fbc3cc663fb473f0122369294"
+    },
+    {
+      "path": "components/home/home-schedule-client.tsx",
+      "sha1": "bac83b48f42ed3b996cab03570c16d4b3de689a6"
+    },
+    {
+      "path": "components/home/natural-schedule-sheet.tsx",
+      "sha1": "2855feb881c721aff8af372b9eaa4f92f7f71647"
+    },
+    {
+      "path": "components/home/schedule-add-action-sheet.tsx",
+      "sha1": "a7c9ca26b9a96234eaa57682a10f7ae334788bb6"
+    },
+    {
+      "path": "components/home/schedule-add-panel.tsx",
+      "sha1": "83110c770b5885c3719f9426de8f2d79bceb23cc"
+    },
+    {
+      "path": "components/home/schedule-calendar-category-manager.tsx",
+      "sha1": "97b2934f99a36b179c36663a6a872c36dc49c49c"
+    },
+    {
+      "path": "components/home/schedule-day-event-list.tsx",
+      "sha1": "6b37581f59bfb7bd9d03da534af4eaca89d2e177"
+    },
+    {
+      "path": "components/home/schedule-day-timeline.tsx",
+      "sha1": "cc93ae192ea2623aaf10e85417e61ca15ee444a3"
+    },
+    {
+      "path": "components/home/schedule-item-detail-popover.tsx",
+      "sha1": "58af7027ab651e5f8b502b56b815613a0c141ba2"
+    },
+    {
+      "path": "components/home/schedule-item-detail-sheet.tsx",
+      "sha1": "bdc534a30937bbac5882402353041ad037b48f49"
+    },
+    {
+      "path": "components/home/schedule-month-view.tsx",
+      "sha1": "434b278e94fa843037fc14061169894d238db224"
+    },
+    {
+      "path": "components/home/schedule-surface.tsx",
+      "sha1": "65ef7cdbea78aaf79bf9b055fb58aea065c0ded0"
+    },
+    {
+      "path": "components/i18n/locale-provider.tsx",
+      "sha1": "b5c8d85891f06959711406f68e8554eb360ed4d9"
+    },
+    {
+      "path": "components/inbox/course-inbox-row.tsx",
+      "sha1": "19b3e9b2d00879ee5857acd181843e0d853082ca"
+    },
+    {
+      "path": "components/inbox/direct-inbox-row.tsx",
+      "sha1": "6f31a00d20f0af793dad0177d9d40f1581d39c5a"
+    },
+    {
+      "path": "components/inbox/group-inbox-row.tsx",
+      "sha1": "816b7be3e4c5f565281b476eaa5124a66b920b77"
+    },
+    {
+      "path": "components/inbox/inbox-chats-view.tsx",
+      "sha1": "ea221b67d8b88ba3eda11f68f5fe91623cb24446"
+    },
+    {
+      "path": "components/inbox/inbox-conversation-tile.ts",
+      "sha1": "4223f3bd0be28ec58741b40fd8a6f9e7eae6964e"
+    },
+    {
+      "path": "components/inbox/inbox-create-sheet.tsx",
+      "sha1": "b43d38913925ad4cb15b7b04429d58eb40e648d4"
+    },
+    {
+      "path": "components/inbox/inbox-direct-message-preview.tsx",
+      "sha1": "44d09e9408b52aeda6ac016924077d980f92eee6"
+    },
+    {
+      "path": "components/inbox/inbox-quick-chips.tsx",
+      "sha1": "73304d5b7b10a0f02b6828908afaf82732e58d98"
+    },
+    {
+      "path": "components/inbox/inbox-realtime-refresh.tsx",
+      "sha1": "ebeebb2eff994a6cd08873f3beafc262b8c1bce9"
+    },
+    {
+      "path": "components/inbox/inbox-row-timestamp.tsx",
+      "sha1": "da40eb46aaf155085ae2e00d5f6c3247af57e48b"
+    },
+    {
+      "path": "components/inbox/inbox-session-bootstrap.tsx",
+      "sha1": "20fbd614602f24a0af939721802fda0e47c8792e"
+    },
+    {
+      "path": "components/inbox/inbox-swipe-row.tsx",
+      "sha1": "537d102c61229057e5516d658c5592f3c5e703ab"
+    },
+    {
+      "path": "components/inbox/inbox-unread-badge.tsx",
+      "sha1": "918ae1a0b639c6293f083bbd1ed7c696607425c1"
+    },
+    {
+      "path": "components/inbox/my-posts-header-share-menu.tsx",
+      "sha1": "af97e3037da4db7f277e7cbf19d55d2c1a4f6fb8"
+    },
+    {
+      "path": "components/layout/app-shell.tsx",
+      "sha1": "d2385d77c9b9e4773eccb4cd54360dab916dcec0"
+    },
+    {
+      "path": "components/layout/browser-swipe-back-guard.tsx",
+      "sha1": "e43fd32d2fde169b9ae317305f422055cf612476"
+    },
+    {
+      "path": "components/layout/section-header.tsx",
+      "sha1": "fe7bcb6d2a093ebba94805749c00afd1d21e777e"
+    },
+    {
+      "path": "components/layout/tab-keep-alive.tsx",
+      "sha1": "21627c89b3269a2a8d67aea3e97b4043f96086ee"
+    },
+    {
+      "path": "components/loading/app-tab-skeletons.tsx",
+      "sha1": "9d80c582a8fb2d2077fcb52fabf7326fab9e21eb"
+    },
+    {
+      "path": "components/native/native-app-handoff.tsx",
+      "sha1": "980e98c897b807f2c923f7b546df81fe33591038"
+    },
+    {
+      "path": "components/nav/back-link.tsx",
+      "sha1": "9ae1039c802b6d8c2b95b3ad8d9efdd36fd30e24"
+    },
+    {
+      "path": "components/offline/offline-banner.tsx",
+      "sha1": "d4131d3c05ff752b212f7758dea1a701d831c014"
+    },
+    {
+      "path": "components/offline/offline-state-card.tsx",
+      "sha1": "ea95be93340e2bdf7327df3fcb425bcd62cf0913"
+    },
+    {
+      "path": "components/profile/avatar-crop-editor.tsx",
+      "sha1": "1954d82582840ea591596c293b1cfb5a30df74a9"
+    },
+    {
+      "path": "components/profile/change-password-card.tsx",
+      "sha1": "2ed57a929c4ed4a6c63724fcbf049d2fdb5f31e1"
+    },
+    {
+      "path": "components/profile/delete-account-form.tsx",
+      "sha1": "5baca97eabc942ca7926f16be377401684735c52"
+    },
+    {
+      "path": "components/profile/discover-posts-masonry.tsx",
+      "sha1": "7faa4f8f98521bb40216ee862cf81f90562761ee"
+    },
+    {
+      "path": "components/profile/edit/profile-avatar-editor.tsx",
+      "sha1": "1af16c6a6b4d646edf9a04a3b161f1579da6552a"
+    },
+    {
+      "path": "components/profile/edit/profile-bio-editor.tsx",
+      "sha1": "abf441aedc07059c6b9315f86fd93f5690772ded"
+    },
+    {
+      "path": "components/profile/edit/profile-discover-city-editor.tsx",
+      "sha1": "b0f63ba3102c1f1b9b26bcf755bdcb9737fff3d4"
+    },
+    {
+      "path": "components/profile/edit/profile-gender-editor.tsx",
+      "sha1": "3f637ba67a39da4ae79693d2899d2ccbf0df2c6f"
+    },
+    {
+      "path": "components/profile/edit/profile-nickname-editor.tsx",
+      "sha1": "df3745357dd5d22a976042cb08b775eff83a5247"
+    },
+    {
+      "path": "components/profile/feedback-form-card.tsx",
+      "sha1": "8a5017f3d4076388ff021121a66b4c411ce102b6"
+    },
+    {
+      "path": "components/profile/login-email-card.tsx",
+      "sha1": "5d29e6dad1356bd794df7d5e8147f0bae3a3a622"
+    },
+    {
+      "path": "components/profile/login-username-card.tsx",
+      "sha1": "dea3b9ca9d5000ecdbe39cb4b680765c3fd9e2ea"
+    },
+    {
+      "path": "components/profile/me-discover-city-select.tsx",
+      "sha1": "69272d7207c8f0130e63ce90280cd7129e551ef0"
+    },
+    {
+      "path": "components/profile/me-guest-screen.tsx",
+      "sha1": "5b10d63e9a6b7dedf86b234eb3229abb3ad33222"
+    },
+    {
+      "path": "components/profile/me-page-section.tsx",
+      "sha1": "423d057b4417963e04c80308c47a34cbb4d67539"
+    },
+    {
+      "path": "components/profile/me-settings-row.tsx",
+      "sha1": "fa1a8f0bee874946c83e654c9fa0982646bf44f6"
+    },
+    {
+      "path": "components/profile/my-activities-tabs.tsx",
+      "sha1": "774e5d2f5aba527d314934e73524416c243d031b"
+    },
+    {
+      "path": "components/profile/my-post-buddy-card.tsx",
+      "sha1": "0f6c09b64f613c4ab0b09e3733357823900db746"
+    },
+    {
+      "path": "components/profile/peer-profile-menu.tsx",
+      "sha1": "c851ac984f582d0fc895e4b706e2d47e73e561d3"
+    },
+    {
+      "path": "components/profile/peer-profile-view.tsx",
+      "sha1": "3aa7d9fdf4a01d20b56b704d43604f40193d4391"
+    },
+    {
+      "path": "components/profile/profile-identity-sheets.tsx",
+      "sha1": "6483621bed2c6119050c4cde19beef3fd045f175"
+    },
+    {
+      "path": "components/profile/profile-info-row.tsx",
+      "sha1": "f1600db0e8224eb54d4b39a74d97728ea37d727a"
+    },
+    {
+      "path": "components/profile/profile-life-photos-editor.tsx",
+      "sha1": "8b22aec9dedc1da41395947bba1e009d88f96b49"
+    },
+    {
+      "path": "components/profile/profile-me-display-card.tsx",
+      "sha1": "9833e725b5a17800fae16291b5063bb7526c2cd9"
+    },
+    {
+      "path": "components/profile/profile-me-header-display.tsx",
+      "sha1": "854e5444fd64a14765820d2a51bbe22579939275"
+    },
+    {
+      "path": "components/profile/profile-me-info-card.tsx",
+      "sha1": "e29a8b26e442abeebcc2f5f19924f4bc0c41cba6"
+    },
+    {
+      "path": "components/profile/profile-me-top-block.tsx",
+      "sha1": "66f0c77004f9a14387379007f282615967704789"
+    },
+    {
+      "path": "components/profile/profile-message-button.tsx",
+      "sha1": "b0c9fd62d9a131a45eadfe061132b30821eeda8c"
+    },
+    {
+      "path": "components/profile/profile-page-client.tsx",
+      "sha1": "bbe9a4d2ffacd979758bda496c075e09ee70647d"
+    },
+    {
+      "path": "components/profile/profile-privacy-card.tsx",
+      "sha1": "97e0a7f103c43f5cb259846bad07f731f7f22536"
+    },
+    {
+      "path": "components/profile/profile-subpage-shell.tsx",
+      "sha1": "1510bded634f952b4d01aa7cd9d9469b99c3b8d3"
+    },
+    {
+      "path": "components/profile/push-notifications-card.tsx",
+      "sha1": "d0df9b47f0f19802236eaf93483b0a76012e1f13"
+    },
+    {
+      "path": "components/profile/push-notifications-native-card.tsx",
+      "sha1": "a68aac44f10336d36713441272e3dce680c58e78"
+    },
+    {
+      "path": "components/profile/replay-tutorial-account-row.tsx",
+      "sha1": "46586db3541f4ba0c0ccc20328eb60b86d4f25ed"
+    },
+    {
+      "path": "components/profile/saved-posts-buddy-feed.tsx",
+      "sha1": "6204fef0c0afccc10bcfc4a73f694914df3ff74b"
+    },
+    {
+      "path": "components/profile/tip-support-card.tsx",
+      "sha1": "ec6604cf10b65e4ea412cccc1927c3c74f641766"
+    },
+    {
+      "path": "components/pwa/me-page-install-card.tsx",
+      "sha1": "05c271164c1e1498ec1f25dadc9453ccd792b6b8"
+    },
+    {
+      "path": "components/pwa/pwa-install-bar.tsx",
+      "sha1": "f89430a8c2628208433748967c2f761036612b51"
+    },
+    {
+      "path": "components/pwa/pwa-ios-install-steps.tsx",
+      "sha1": "0d1e385f06da1986d3787ac096f5ce322dd7567c"
+    },
+    {
+      "path": "components/pwa/pwa-register.tsx",
+      "sha1": "e33c92952002a9f3b0251f530b1608106f88c0c7"
+    },
+    {
+      "path": "components/pwa/pwa-update-prompt.tsx",
+      "sha1": "4c0f10aafb39bd51367c5cc4ad0cd1f60b5a4686"
+    },
+    {
+      "path": "components/schedule-share/create-schedule-share-dialog.tsx",
+      "sha1": "dbf1fcc49ea9b6bb3cc26165c4163fd5a998bb0e"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-card-thumbnail.tsx",
+      "sha1": "6c8e992eb1fc19c88836cc7fda5aa0b86bfee7fc"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-guest-proposal-row.tsx",
+      "sha1": "1d38e479859e678189e8419bdfc72846d0f72877"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-guest-viewer.tsx",
+      "sha1": "d20fd14444c227d76f488b42941329961c737a82"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-links-panel.tsx",
+      "sha1": "1b7d313c68866f9a95e01d545223eb76f93e9941"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-my-proposal-card.tsx",
+      "sha1": "300f0e2289c482aed4a91920c5a19d76462d1208"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-options-form.tsx",
+      "sha1": "1bdf1cae38fc482ff7e0ec47d85c202a8064b171"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-owner-client.tsx",
+      "sha1": "1f19d8b6a08f2c5d5c6afa95edc3d7f24a4aff70"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-owner-inline-controls.tsx",
+      "sha1": "d7fb684413dfd5eb1ef4284af26fd8a6e471bd87"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-owner-preview.tsx",
+      "sha1": "a0a5aeba6d7d259c8304616d877487b7cdfc3ef7"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-page-loading.tsx",
+      "sha1": "d7cf1790e829da95ea9fd03360450c8ab03d30f2"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-proposal-auth-sheet.tsx",
+      "sha1": "0aa364b21c8991570a0c27a4e80e8fb8dc91e469"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-proposal-panel.tsx",
+      "sha1": "66cc2f5c3322082d90fb4774dfd927bb6141e916"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-recipient-page.tsx",
+      "sha1": "51387b59d508203802ce94878652d9ef9f8d5efa"
+    },
+    {
+      "path": "components/schedule-share/schedule-share-reveal-category-chips.tsx",
+      "sha1": "2f5ddefc0542e7f6f5f1b552a171b17f74c32f86"
+    },
+    {
+      "path": "components/schedule-share/share-day-quick-select-buttons.tsx",
+      "sha1": "46bb30007fdb7d36960ba8cf05b8aabd9fc3e7f8"
+    },
+    {
+      "path": "components/schedule-share/use-home-calendar-minute-scale.ts",
+      "sha1": "9ef42bfee78f0c373112c2e90c31922c93c24b5d"
+    },
+    {
+      "path": "components/schedule-share/use-share-week-calendar-max-body.ts",
+      "sha1": "bf9b6c75be74e426c3e7b8019439ba869b187333"
+    },
+    {
+      "path": "components/schedule/event-datetime-pickers.tsx",
+      "sha1": "f3c51997e7ccd2a58a9f13c669c19032ddb40858"
+    },
+    {
+      "path": "components/settings/language-preference-card.tsx",
+      "sha1": "ffa0f845df7b4d0e24e0ee2211b6c047cdb11337"
+    },
+    {
+      "path": "components/social/contact-exchange-panel.tsx",
+      "sha1": "c8f4eb7c393c1e0bc3ea49ddf8d66e471a401350"
+    },
+    {
+      "path": "components/social/friend-link-panel.tsx",
+      "sha1": "178dfc89006b2f02d0300b08c9a47ee30e8acdc7"
+    },
+    {
+      "path": "components/ui/app-push-layer.tsx",
+      "sha1": "9f491f679d7cdf90c9635901052f658f3f20a27f"
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "sha1": "c2cba84ecd7d30d5c12850214918eb0ff036a549"
+    },
+    {
+      "path": "components/ui/button-variants.ts",
+      "sha1": "e1a5b121c6dcd7f9e4e17768fa4e296cd6c18212"
+    },
+    {
+      "path": "components/ui/button.tsx",
+      "sha1": "a0a4d466f49dc61798d7560fa4e3d73100a5e46f"
+    },
+    {
+      "path": "components/ui/card.tsx",
+      "sha1": "448658c34eb7be0990081b90e55a11fd80dda311"
+    },
+    {
+      "path": "components/ui/checkbox.tsx",
+      "sha1": "a50154e437b2b36ae6eeb72125412dacca43f303"
+    },
+    {
+      "path": "components/ui/course-avatar.tsx",
+      "sha1": "9bcc7b41861ffd14680dee8539d38aac110e6059"
+    },
+    {
+      "path": "components/ui/empty-state.tsx",
+      "sha1": "39c82de7591124460a5e16462cbd5cf408aa1cea"
+    },
+    {
+      "path": "components/ui/group-chat-avatar-collage.tsx",
+      "sha1": "203cbe9d45c5f794fe401a6885211fc2585bbf81"
+    },
+    {
+      "path": "components/ui/input.tsx",
+      "sha1": "caeadd51c428f85f57aa8b1f9d9f02aa872ebae0"
+    },
+    {
+      "path": "components/ui/link-button.tsx",
+      "sha1": "095c9298cb0b2c72cb36799ff98b2f0472d55779"
+    },
+    {
+      "path": "components/ui/popover.tsx",
+      "sha1": "9c64828524bc0509111c4ee7003704fb0d49ade9"
+    },
+    {
+      "path": "components/ui/preset-avatar.tsx",
+      "sha1": "ec67ae535faeb66bc334228b29b5c9c3d800c3e6"
+    },
+    {
+      "path": "components/ui/stat-card.tsx",
+      "sha1": "d734e622525b68cde0feb843468fe7498cff070c"
+    },
+    {
+      "path": "components/ui/status-badge.tsx",
+      "sha1": "13caa927db235ead67b1dd8f250525688f1bcba3"
+    },
+    {
+      "path": "components/ui/textarea.tsx",
+      "sha1": "a30591a511ecbfaf5890f79646861cab5ed76d10"
+    },
+    {
+      "path": "components/ui/user-gender-icon.tsx",
+      "sha1": "e321a0c195b1615e3d9ad9688ce11cb42386acf9"
+    },
+    {
+      "path": "components/ui/verified-badge.tsx",
+      "sha1": "056dd63ae7de677e82989535658b950bab27a48b"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha1": "b3dc7320f1059145a87f086bde23e2075f87d7cb"
+    },
+    {
+      "path": "hooks/use-app-locale.ts",
+      "sha1": "9be64447eb127a798ca3e47ee3a9ad1f9bb99b8d"
+    },
+    {
+      "path": "hooks/use-capacitor-native.ts",
+      "sha1": "fb3f7125420b695b828ba389d6e4a6d7d6161fc4"
+    },
+    {
+      "path": "hooks/use-online-status.ts",
+      "sha1": "75a38ed1df3ab61068bd4e98e7a893b3f68dbfbe"
+    },
+    {
+      "path": "hooks/use-session-hint.ts",
+      "sha1": "8c72ee18de5d2d5d521d9a73303fbf80d39ffd7b"
+    },
+    {
+      "path": "lib/analytics/layer2-outcome-pilot.ts",
+      "sha1": "f2fc80138f91bfaf866fc765572bea30dd65ce7b"
+    },
+    {
+      "path": "lib/api/chat-planning.ts",
+      "sha1": "28417e6d0417f56e720bc55e981534e3161e5555"
+    },
+    {
+      "path": "lib/api/v1/account-service.ts",
+      "sha1": "2fe161a6c24085f795b2564d7849fc8cc138dadb"
+    },
+    {
+      "path": "lib/api/v1/auth-schemas.ts",
+      "sha1": "ab1de2df4e1808f6b39c66044eb53e8a7d275936"
+    },
+    {
+      "path": "lib/api/v1/auth.ts",
+      "sha1": "348e74073077cad005bdd079ace0a155de0601e4"
+    },
+    {
+      "path": "lib/api/v1/blocks-service.ts",
+      "sha1": "249e7a624c37840a93ec1b85af809d424bb5b38a"
+    },
+    {
+      "path": "lib/api/v1/calendar-category-route.ts",
+      "sha1": "15fbd4b38323921f117c8bad2cfa421b983e5609"
+    },
+    {
+      "path": "lib/api/v1/calendar-event-service.ts",
+      "sha1": "2c7a5ab7efafb231021507c33dde4bb9ab93ba91"
+    },
+    {
+      "path": "lib/api/v1/calendar-search-service.ts",
+      "sha1": "4b5fa7ab9ea63842a5d743b9ff68e8d71aa2d887"
+    },
+    {
+      "path": "lib/api/v1/chat-dto.ts",
+      "sha1": "7bc3c2986d1e2aa5a746a0026aedd4635384d4f9"
+    },
+    {
+      "path": "lib/api/v1/chat-realtime-retention.ts",
+      "sha1": "4c46f3e607f03472847f6b678e332dd707130cb5"
+    },
+    {
+      "path": "lib/api/v1/chat-realtime-service.ts",
+      "sha1": "f3f3aa3f137a89556fe03af4a7f8294e7893c80f"
+    },
+    {
+      "path": "lib/api/v1/chat-realtime.ts",
+      "sha1": "51edf6f72b2fa423964776991b716f19f9d6e89f"
+    },
+    {
+      "path": "lib/api/v1/chat-schemas.ts",
+      "sha1": "96222b5b7d422120f4ef1e816e6b05549d04506a"
+    },
+    {
+      "path": "lib/api/v1/community-chat-dto.ts",
+      "sha1": "8e438ede97e490680a62e15584ed5ef155fe1754"
+    },
+    {
+      "path": "lib/api/v1/connection-actions-service.ts",
+      "sha1": "bebb9f248b1a054a0f2aca231b00f6f8c977e3c1"
+    },
+    {
+      "path": "lib/api/v1/connection-block-transaction.ts",
+      "sha1": "91cec749948a31b7083b6aaeb758973ae5995494"
+    },
+    {
+      "path": "lib/api/v1/contacts-service.ts",
+      "sha1": "46b4dc7d3675302c3424e611a0eb8b4dab972ecf"
+    },
+    {
+      "path": "lib/api/v1/course-mutation.ts",
+      "sha1": "0d78eebcc50e274dd0241e95e217d4aed49e1706"
+    },
+    {
+      "path": "lib/api/v1/course-route.ts",
+      "sha1": "8ba925d5a9f0eb008f99276584e48a471ed4056f"
+    },
+    {
+      "path": "lib/api/v1/course-service.ts",
+      "sha1": "f7d76ecb6931ef3f409660530400cc4a4b81a04c"
+    },
+    {
+      "path": "lib/api/v1/discover-activity-message-service.ts",
+      "sha1": "4992cd36afb7e27b6673733d888d2ba8546bc1e1"
+    },
+    {
+      "path": "lib/api/v1/discover-question-service.ts",
+      "sha1": "0ba54bab7b358766faf43c80d60d0bb605ea6a9f"
+    },
+    {
+      "path": "lib/api/v1/discover-route.ts",
+      "sha1": "3a9b67c138219ef2bef641b713d8cc9a9aca304e"
+    },
+    {
+      "path": "lib/api/v1/discover-service.ts",
+      "sha1": "ab668ac02f4a68a51a53d6af91fc7b35c0a8a07d"
+    },
+    {
+      "path": "lib/api/v1/feedback-service.ts",
+      "sha1": "b388e1b16619c12395fc6bd15cdebbc607058812"
+    },
+    {
+      "path": "lib/api/v1/group-chat-manage-service.ts",
+      "sha1": "6eded7ec98a3b58100a897ee71ec80cdb3826d0c"
+    },
+    {
+      "path": "lib/api/v1/http.ts",
+      "sha1": "ec25e992ee9fe7526e1951d1324a8155704d940a"
+    },
+    {
+      "path": "lib/api/v1/idempotency.ts",
+      "sha1": "d426dfafdccefae887a56374722cfcda70990a7f"
+    },
+    {
+      "path": "lib/api/v1/idempotent-mutation.ts",
+      "sha1": "5bbb8d52c22131df820e79fa5095e827d22b62dc"
+    },
+    {
+      "path": "lib/api/v1/ids.ts",
+      "sha1": "eaebfc898db205d062eb38b426111954027dfea7"
+    },
+    {
+      "path": "lib/api/v1/inbox-dto.ts",
+      "sha1": "cf819a23a09729a1a4541125e052b6ad49f72f0f"
+    },
+    {
+      "path": "lib/api/v1/inbox-preference-route.ts",
+      "sha1": "9ce21b4be1eb2e54795f8f52f1c556409d021eb7"
+    },
+    {
+      "path": "lib/api/v1/inbox-preference-service.ts",
+      "sha1": "acad344fad1168a1cc0bf0977b84c6084a17e2b3"
+    },
+    {
+      "path": "lib/api/v1/mutation.ts",
+      "sha1": "6641aa61494c64e79ed0dab5db3a9cefc7387a0a"
+    },
+    {
+      "path": "lib/api/v1/mvp-readiness.ts",
+      "sha1": "3212cb2b83e2ce4b77c0cd853ff7ba622981415b"
+    },
+    {
+      "path": "lib/api/v1/native-discover-serializer.ts",
+      "sha1": "8b3f268d7d165a6204f0ad0872b7560d8e15b246"
+    },
+    {
+      "path": "lib/api/v1/pair-block-transaction.ts",
+      "sha1": "6028fe885718312f584da74de7b7dbbe56ef7c44"
+    },
+    {
+      "path": "lib/api/v1/persistent-intents.ts",
+      "sha1": "c00d24922700338734eefe9a7fe6ccf22cbef2b5"
+    },
+    {
+      "path": "lib/api/v1/plan-cancellations.ts",
+      "sha1": "e4727891fbdcf82db090bf8a238fd7f437b2a751"
+    },
+    {
+      "path": "lib/api/v1/plans-dto.ts",
+      "sha1": "b04d22db87745de6e6e6788095846b9173efcd5e"
+    },
+    {
+      "path": "lib/api/v1/plans-service.ts",
+      "sha1": "d6bcbd73649a4d40a1dd722b6e0c750b45db6642"
+    },
+    {
+      "path": "lib/api/v1/profile-service.ts",
+      "sha1": "fa4a5716bb70fb8188b03150e2e8c9f0df6e752f"
+    },
+    {
+      "path": "lib/api/v1/rate-limit.ts",
+      "sha1": "a691b92ca39fe89d926fa05e0ea3bd072b1c145e"
+    },
+    {
+      "path": "lib/api/v1/schedule-share-service.ts",
+      "sha1": "fa9fb3f90509855713e252b007ff4fa44e90144e"
+    },
+    {
+      "path": "lib/api/v1/storekit-apple-env.ts",
+      "sha1": "e7a432f6d3758ce36ed2e8a487ba5f980b96cdf5"
+    },
+    {
+      "path": "lib/api/v1/storekit-apple-verify.ts",
+      "sha1": "7f8b6135818e776ea4f2ecd31cff0d90eb032272"
+    },
+    {
+      "path": "lib/api/v1/storekit-catalog.ts",
+      "sha1": "0226557883ff527fa75be1076e55a0a650cf482d"
+    },
+    {
+      "path": "lib/api/v1/storekit-service.ts",
+      "sha1": "051ff9edcafe8e1fc372b422cf74cf87203c258b"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "sha1": "269214743c238018f09892d0f3de23845fc5874d"
+    },
+    {
+      "path": "lib/api/v1/user-dto.ts",
+      "sha1": "4dbe00a68337b4506d9069e2c8bd57a1a6b25d7a"
+    },
+    {
+      "path": "lib/auth/access-token.ts",
+      "sha1": "7b39efa03947244c4269dd714858ecbc9cfed8e8"
+    },
+    {
+      "path": "lib/auth/api-fetch.ts",
+      "sha1": "fdaa067d8897b5a0d1f76ea2eb925703d1f44a2d"
+    },
+    {
+      "path": "lib/auth/client-access-token.ts",
+      "sha1": "411439955789ac6d55de7c1dc4a783ba85beaa2f"
+    },
+    {
+      "path": "lib/auth/email-otp-error-codes.ts",
+      "sha1": "eb30b36b6892947f47b510e41db08f7c13ad3b01"
+    },
+    {
+      "path": "lib/auth/email-otp.ts",
+      "sha1": "646f31b86370a6d0ac33952f432ece1e79d9b386"
+    },
+    {
+      "path": "lib/auth/guards.ts",
+      "sha1": "3a698a16ebc16d1eaf326a04491d49e1a0b56db9"
+    },
+    {
+      "path": "lib/auth/login-email-change-error-codes.ts",
+      "sha1": "22d11ec3de1e909d89f7901bde3fdace2e487f4e"
+    },
+    {
+      "path": "lib/auth/lookup-user.ts",
+      "sha1": "5215e11c04e69bfca0f33d1da88d46b249d1e9ef"
+    },
+    {
+      "path": "lib/auth/map-auth-api-errors.ts",
+      "sha1": "a2ffc99d07f2d9258adc1b1429e9198e1c69913c"
+    },
+    {
+      "path": "lib/auth/map-login-email-errors.ts",
+      "sha1": "8a4ab05d3cf6b76bf13a9a12919ea674b8a55acb"
+    },
+    {
+      "path": "lib/auth/map-password-change-errors.ts",
+      "sha1": "27405454f9be64d99570d5e4d0bd26f62d938f3c"
+    },
+    {
+      "path": "lib/auth/native-session.ts",
+      "sha1": "932a8a2525f8eb410de9c46b374b51f5dba231a4"
+    },
+    {
+      "path": "lib/auth/nickname-fields.ts",
+      "sha1": "87baa234e8c15b78fa54b68daa95157c3cf4fc12"
+    },
+    {
+      "path": "lib/auth/nickname-key.ts",
+      "sha1": "ef8f693568776f4a7f96c75825ca70347484846d"
+    },
+    {
+      "path": "lib/auth/normalize-email.ts",
+      "sha1": "f8bbdf9da3a4f67f72e19b5d32cac73649628a21"
+    },
+    {
+      "path": "lib/auth/password-change-error-codes.ts",
+      "sha1": "7ea05eafb08415bf27059a3b4da7f0b7567f893c"
+    },
+    {
+      "path": "lib/auth/password-reset-error-codes.ts",
+      "sha1": "5fb2d8e12e6549072bcb904cf213f10d2016c9f4"
+    },
+    {
+      "path": "lib/auth/password.ts",
+      "sha1": "a7f685adb933d8bcfa2d5b22db5bfd50220f1b11"
+    },
+    {
+      "path": "lib/auth/phone-otp.ts",
+      "sha1": "8e667d1b8e20121decdbfc2c750312ab64380fc2"
+    },
+    {
+      "path": "lib/auth/phone.ts",
+      "sha1": "b7a2f7d7943516f21f1043f6a5b98973a175a250"
+    },
+    {
+      "path": "lib/auth/random-username.ts",
+      "sha1": "12339c33b4e7323913dabc91671235d3db0ec1d9"
+    },
+    {
+      "path": "lib/auth/retired-system-users.ts",
+      "sha1": "2e8f4df7e64612067cf793ea0971cca77173577a"
+    },
+    {
+      "path": "lib/auth/session.ts",
+      "sha1": "80baa2eccdb512672cbdf68fd65255b2a891245a"
+    },
+    {
+      "path": "lib/auth/signup-defaults.ts",
+      "sha1": "5bafdd04f90cd86bb3924ff5f66a015912752ac0"
+    },
+    {
+      "path": "lib/auth/signup-error-codes.ts",
+      "sha1": "2c4b8adbb9dded31b9c073a9666e6733f15daef2"
+    },
+    {
+      "path": "lib/auth/system-username.ts",
+      "sha1": "22a62a54f0bb3994635acae9f6092205a234b8cd"
+    },
+    {
+      "path": "lib/auth/use-username-availability.ts",
+      "sha1": "ef355cb6b21dd9063e31fa7dc7de27feacfb752f"
+    },
+    {
+      "path": "lib/auth/username-availability.ts",
+      "sha1": "cc35642fa453a09288ceb8ca6c6c23660aa036f4"
+    },
+    {
+      "path": "lib/calendar/CalendarSmartInputPolicy.json",
+      "sha1": "e0b950df13b0018bc00d4e5d4e928e9298ac8c27"
+    },
+    {
+      "path": "lib/calendar/calendar-category-colors.ts",
+      "sha1": "e1422d444e968de12595c8bef14c9f770ac895a6"
+    },
+    {
+      "path": "lib/calendar/calendar-category-service.ts",
+      "sha1": "cfdab024a3e70d021723607a496fa18c266878e4"
+    },
+    {
+      "path": "lib/calendar/calendar-clipboard.ts",
+      "sha1": "aeb550f401504d0db21665e6f047f945cce9157a"
+    },
+    {
+      "path": "lib/calendar/calendar-course-mirror.ts",
+      "sha1": "c2e84ab579f195dc3fce9ef614d417627d26587f"
+    },
+    {
+      "path": "lib/calendar/calendar-export-window.ts",
+      "sha1": "34ab8c8bc1fc6830ba94cdc3c99634d6e39985f6"
+    },
+    {
+      "path": "lib/calendar/calendar-occurrence-id.ts",
+      "sha1": "5060f4b2cf2c0f345b51d6e84e34bd54b415e104"
+    },
+    {
+      "path": "lib/calendar/calendar-recurrence.ts",
+      "sha1": "564b927ead5e4522a8b9d6bcb903eed9dc3179cc"
+    },
+    {
+      "path": "lib/calendar/calendar-search-ranking.ts",
+      "sha1": "76cd44f9d7b866083e0a1089fe0688037a9b6fd5"
+    },
+    {
+      "path": "lib/calendar/calendar-subscription-feed.ts",
+      "sha1": "17455fb3f3ca9786695d23fb41fc834cb9f1f3bb"
+    },
+    {
+      "path": "lib/calendar/calendar-subscription-service.ts",
+      "sha1": "5bd9742b8b345089a1205aa0dc597695a642de9a"
+    },
+    {
+      "path": "lib/calendar/category-preset.ts",
+      "sha1": "08892a6a2486f3d2cb1adfe9f48c621bbfa72772"
+    },
+    {
+      "path": "lib/calendar/category-visual.ts",
+      "sha1": "f34518cec62e5e6dd2e4baef608fb81a18cf5f5e"
+    },
+    {
+      "path": "lib/calendar/course-calendar-short-label.ts",
+      "sha1": "d7ecf0e3c82be59275fa4130ce8cd0647c7892d8"
+    },
+    {
+      "path": "lib/calendar/course-schedule-mirror.ts",
+      "sha1": "52e7dc82736c4cb592a68bbd9953bf40844a229f"
+    },
+    {
+      "path": "lib/calendar/create-calendar-event.ts",
+      "sha1": "269690a454cd0f0f3c13fd40ef2ddfc4d6bedd45"
+    },
+    {
+      "path": "lib/calendar/create-calendar-events-batch.ts",
+      "sha1": "75a091371d0f3648a1075c69695a67f7d4bcedc1"
+    },
+    {
+      "path": "lib/calendar/default-user-calendar-categories.ts",
+      "sha1": "f6af38eee45a80de5853523313684674b3a7613d"
+    },
+    {
+      "path": "lib/calendar/draft-preview-block.ts",
+      "sha1": "744c2ba7f122791618d2af469fde25830e37153a"
+    },
+    {
+      "path": "lib/calendar/event-overlap-layout.ts",
+      "sha1": "577aa20a2f4e8371d38487860c2d87bb10782b57"
+    },
+    {
+      "path": "lib/calendar/fetch-ics-subscription.ts",
+      "sha1": "1d4d437ea31f85972fe0c44959e6cb2a6ad8473d"
+    },
+    {
+      "path": "lib/calendar/home-calendar-preferences.ts",
+      "sha1": "84f858b0195f8c6e0136f18d59c3256012da3a41"
+    },
+    {
+      "path": "lib/calendar/ical-export.ts",
+      "sha1": "6b46546e1361f6d658cde42229ed6fd2767d138f"
+    },
+    {
+      "path": "lib/calendar/ical-import-parse.ts",
+      "sha1": "0d134437a4f5336a72fd662cda548674f7c9a03a"
+    },
+    {
+      "path": "lib/calendar/ical-shared.ts",
+      "sha1": "db80f39c45b84a9f1c818695c0df2446098ea291"
+    },
+    {
+      "path": "lib/calendar/ics-feed-event-id.ts",
+      "sha1": "dc4bd6a4a96f4af299ddbd039ed203d7bd38f6bb"
+    },
+    {
+      "path": "lib/calendar/import-ics-events.ts",
+      "sha1": "675a9143bd66b2e02178622854b1f73b168b36ee"
+    },
+    {
+      "path": "lib/calendar/load-calendar-entry-occurrences.ts",
+      "sha1": "820f09248c60f1003d61599f97a53f66e6207d9f"
+    },
+    {
+      "path": "lib/calendar/load-calendar-ics-export.ts",
+      "sha1": "c285a1d97a42fa154e9419edfe28da6d37c56c10"
+    },
+    {
+      "path": "lib/calendar/load-ics-subscription-entries.ts",
+      "sha1": "87949f78a4e059113c798ed606c28dc60beb2fd9"
+    },
+    {
+      "path": "lib/calendar/long-calendar-block.ts",
+      "sha1": "ae05495e2e028df64c16501470c5399cbec56d85"
+    },
+    {
+      "path": "lib/calendar/natural-language-schema.ts",
+      "sha1": "4da09763dabc622c6abd05719c0258fc89f9103d"
+    },
+    {
+      "path": "lib/calendar/parse-natural-language.ts",
+      "sha1": "d12d6fa528989b2f7ff9bb0f9eafa6b8b9674a04"
+    },
+    {
+      "path": "lib/calendar/plan-invite-from-event.ts",
+      "sha1": "8ce9c093ea83191ef90bd6a213e49ce4da56a4cd"
+    },
+    {
+      "path": "lib/calendar/schedule-berlin.ts",
+      "sha1": "b033ddebe0e8b1bb1dd3f22e87d0c8dada461deb"
+    },
+    {
+      "path": "lib/calendar/smart-input-policy.ts",
+      "sha1": "072d551c64eac4e80ef622dced9f5210bd9d652d"
+    },
+    {
+      "path": "lib/calendar/subscription-url.ts",
+      "sha1": "12bd4c1e24cdb448784dd75294772382935a6673"
+    },
+    {
+      "path": "lib/calendar/today-chrome.ts",
+      "sha1": "65ea19fed059b88b507bef5b4d2f5507a6f110c6"
+    },
+    {
+      "path": "lib/calendar/week-calendar-constants.ts",
+      "sha1": "02b1f13c9ca3972078b1df9f780f5df5dcbe5f30"
+    },
+    {
+      "path": "lib/calendar/week-calendar-day-columns.ts",
+      "sha1": "1a368ad341d3d9aba29564623f074a265c27bd06"
+    },
+    {
+      "path": "lib/calendar/week-calendar-share-selection-chrome.ts",
+      "sha1": "dd74151b9cee8ae13089f50e6710e3f9fe34baac"
+    },
+    {
+      "path": "lib/calendar/week-calendar-virtual-strip.ts",
+      "sha1": "a0bf887160e9a40117115e83a1cde9c049dafc4d"
+    },
+    {
+      "path": "lib/capacitor/open-ios-app-settings.ts",
+      "sha1": "c4220729fe02ecc517a3bf7cf6df1ac7db43c547"
+    },
+    {
+      "path": "lib/capacitor/platform.ts",
+      "sha1": "2be970f47907dd739c7885c0ca157045a76ffb61"
+    },
+    {
+      "path": "lib/chat/chat-message-dom-id.ts",
+      "sha1": "f1ae9daaea5f9febeb574ba4acffb33202eec51f"
+    },
+    {
+      "path": "lib/chat/community-chat-service.ts",
+      "sha1": "82408a765c43edf67b82ae9564048c880d1a2f60"
+    },
+    {
+      "path": "lib/chat/direct-message-preview.ts",
+      "sha1": "7ed45bd8c48595d5f3a04bdc232b39c2be4ffa5c"
+    },
+    {
+      "path": "lib/chat/direct-message-read-service.ts",
+      "sha1": "419383ae3d0dc5368887fde3eaa7f195fbc7240d"
+    },
+    {
+      "path": "lib/chat/direct-message-service.ts",
+      "sha1": "e38a8cd1e71d4b112a10a77ac8451c64884bdc39"
+    },
+    {
+      "path": "lib/chat/dismiss-chat-input-mode.ts",
+      "sha1": "af4b7db7f733959256d335fd21cc43587cc81692"
+    },
+    {
+      "path": "lib/chat/format-plan-when.ts",
+      "sha1": "5a74f261ec884cf7eff4bc6785cce0dc32265e3a"
+    },
+    {
+      "path": "lib/chat/inbox-direct-preview.ts",
+      "sha1": "e2424d3e8fd7a3434782df84897cffdec8c35137"
+    },
+    {
+      "path": "lib/chat/latest-message-id-sse.ts",
+      "sha1": "3b698dda669b89dff5140a43838227a2e60a5dce"
+    },
+    {
+      "path": "lib/chat/thread-search-index.ts",
+      "sha1": "9a5eacb0b6065c9b31e0707605de425adb95ea1c"
+    },
+    {
+      "path": "lib/chat/unreplied-direct-message-limit.ts",
+      "sha1": "cee76b09f60640531366a94d61f698215e64d71c"
+    },
+    {
+      "path": "lib/connections/canonical-connection.ts",
+      "sha1": "18c4c9c4b73afe8ffc712ff00eda2815e323a4e3"
+    },
+    {
+      "path": "lib/connections/contact-remark.ts",
+      "sha1": "c708a37ca28832ddb82546a4c65594a291a728d9"
+    },
+    {
+      "path": "lib/connections/moderation-block-transaction.ts",
+      "sha1": "f765ad1038978ab551ae81771285dd11a242d346"
+    },
+    {
+      "path": "lib/connections/open-conversation.ts",
+      "sha1": "0f3f2426096d0b9c4de431ad572af8bd18cf54bf"
+    },
+    {
+      "path": "lib/connections/self-notes-title.ts",
+      "sha1": "bacef969adc4615645e46f7804f72f03bce42d8b"
+    },
+    {
+      "path": "lib/constants/activities.ts",
+      "sha1": "d44e4167044ee4012491bc915d91e4336cfdf3f0"
+    },
+    {
+      "path": "lib/constants/app.ts",
+      "sha1": "124b12a72ea1e8dfd8accf80b2d4560253cb0bd3"
+    },
+    {
+      "path": "lib/constants/avatars.ts",
+      "sha1": "9a82b699da42e9322eecb40dfe6e57d39cad8f0d"
+    },
+    {
+      "path": "lib/constants/chat-media.ts",
+      "sha1": "fa2847f941be7e7c4c7d2b37d190bf3cf2aa483a"
+    },
+    {
+      "path": "lib/constants/classmate-post-media.ts",
+      "sha1": "a641379df562f4f5771b7eccfd5499395df6ebf9"
+    },
+    {
+      "path": "lib/constants/discover-activity.ts",
+      "sha1": "df8c559185bab5d9e63f93d79da7fc3b5891aded"
+    },
+    {
+      "path": "lib/constants/gender.ts",
+      "sha1": "b0360953fe23a7da90c6e8c4947dda968d4d72a1"
+    },
+    {
+      "path": "lib/constants/languages.ts",
+      "sha1": "fbd7e184c9031cb93654641cf7f171de98b8c1e2"
+    },
+    {
+      "path": "lib/constants/lmu-semester.ts",
+      "sha1": "1973dd15e91db24d2066476d4eb011e488095d3a"
+    },
+    {
+      "path": "lib/constants/majors.ts",
+      "sha1": "77a15a5f029300c57057991242fcd77f3c18d919"
+    },
+    {
+      "path": "lib/constants/schools.ts",
+      "sha1": "4608cd8d92f8e5e9bc83655974279b931aaaae72"
+    },
+    {
+      "path": "lib/constants/semester.ts",
+      "sha1": "08471bc14654b05516945c2af549d1e81433d790"
+    },
+    {
+      "path": "lib/constants/support.ts",
+      "sha1": "3d775139fce221075db6c226b7e480b5d14676bd"
+    },
+    {
+      "path": "lib/constants/user-life-photo-media.ts",
+      "sha1": "bb93c39b8d0f1ae4ba91357d173710aa763f1a08"
+    },
+    {
+      "path": "lib/constants/verification.ts",
+      "sha1": "15058ab3e1a3701eda297c1118d5960eefcf3978"
+    },
+    {
+      "path": "lib/constants/vorlesungszeit.ts",
+      "sha1": "1287f9f6b80c41d6aa39f1e650676f31f020ece8"
+    },
+    {
+      "path": "lib/courses/active-membership.ts",
+      "sha1": "8acbc0727fa9c0895bb4ace4c867c0632ad69f2a"
+    },
+    {
+      "path": "lib/courses/archived-course.ts",
+      "sha1": "cb0411501d08e7f734a3675b610be4c412e8ac9e"
+    },
+    {
+      "path": "lib/courses/course-code-label.ts",
+      "sha1": "38dc11fb432c0d4bc8da1df41a42aef623fe602f"
+    },
+    {
+      "path": "lib/courses/course-identity.ts",
+      "sha1": "428d2dd8e77896500d7264fa6d60963da62e8cb6"
+    },
+    {
+      "path": "lib/courses/courses-tab.ts",
+      "sha1": "31c889bd5f2f4cd05e8c4c0d1298bc05afb64110"
+    },
+    {
+      "path": "lib/courses/lmu-catalog-sync.ts",
+      "sha1": "227748875f88fb19018fcf7cc976a91c55258444"
+    },
+    {
+      "path": "lib/courses/official-schedule.ts",
+      "sha1": "f599c8cb44dd0ae0e7b15ac51333a81cd60928d5"
+    },
+    {
+      "path": "lib/courses/shared-active-courses.ts",
+      "sha1": "8a54e5c1e987d71fd17024d88796e25d3a6bed76"
+    },
+    {
+      "path": "lib/courses/tum-catalog-sync.ts",
+      "sha1": "e872aa335f45e95f1739bc86c41e5b5c8ad562e8"
+    },
+    {
+      "path": "lib/db/prisma-errors.ts",
+      "sha1": "024d567e8accf67702e35906a30f501ca1ad20ee"
+    },
+    {
+      "path": "lib/db/prisma.ts",
+      "sha1": "67cb719e477333ea9c9495c875e7036a6fd83697"
+    },
+    {
+      "path": "lib/discover/buddy-request-detail-meta.ts",
+      "sha1": "45e442ef3eef2136bac910ead0862aa7246b4c01"
+    },
+    {
+      "path": "lib/discover/buddy-request-status.ts",
+      "sha1": "e72560db21be4eed4a40fbc18cffd02e8409476d"
+    },
+    {
+      "path": "lib/discover/buddy-type-labels.ts",
+      "sha1": "a22417ba2e7febae564e52a819ccb338173427ad"
+    },
+    {
+      "path": "lib/discover/city-school-scope.ts",
+      "sha1": "b611a839fcffbf13c96ef5bb7d1d879444375bbc"
+    },
+    {
+      "path": "lib/discover/classmate-post-display-images.ts",
+      "sha1": "46832d55011e6ef23f02e98763fb5db1f21e89bd"
+    },
+    {
+      "path": "lib/discover/classmate-post-share-payload.ts",
+      "sha1": "beb8a1d73849148b7980077c7dbc87575f5b5b37"
+    },
+    {
+      "path": "lib/discover/create-classmate-post.ts",
+      "sha1": "39f541052c342a46ba27e345b8c792f1a74ae9d1"
+    },
+    {
+      "path": "lib/discover/create-discover-activity.ts",
+      "sha1": "338d715f64d40bc45a27d6c1d01a59127ee8dc79"
+    },
+    {
+      "path": "lib/discover/dev-example-classmate-posts.ts",
+      "sha1": "e16b3e2081762e48dcd9ecd123dc70de1a8a9fb3"
+    },
+    {
+      "path": "lib/discover/discover-activity-api-messages.ts",
+      "sha1": "20c166580d73637c4c5f7e2025f2521d6d29f0c3"
+    },
+    {
+      "path": "lib/discover/discover-activity-category-labels.ts",
+      "sha1": "4838e37bf1b4f201c8bb9c4554026b9b3dfafa5b"
+    },
+    {
+      "path": "lib/discover/discover-activity-row.ts",
+      "sha1": "3b6918f95177e657abe4fe2184545b815cbd0ea1"
+    },
+    {
+      "path": "lib/discover/discover-activity-server.ts",
+      "sha1": "b542677b155e2dc2134e24583dcd7efa1296b022"
+    },
+    {
+      "path": "lib/discover/discover-activity-signup-service.ts",
+      "sha1": "461c8087cdd01967eeae1d18379718785b8443b2"
+    },
+    {
+      "path": "lib/discover/discover-activity-state.ts",
+      "sha1": "0b1a2cda0c1614d3111b48cd9622201ba864b650"
+    },
+    {
+      "path": "lib/discover/discover-city-display.ts",
+      "sha1": "b5a7d5e9d75221f96161aa88736ce3aca8958c3b"
+    },
+    {
+      "path": "lib/discover/discover-city-name-keys.ts",
+      "sha1": "7a08fe964aa1f794884f77fe82326522d7a67014"
+    },
+    {
+      "path": "lib/discover/discover-city-preference.ts",
+      "sha1": "2b564dd499c19afede34e13346f4b68c5f7434a8"
+    },
+    {
+      "path": "lib/discover/discover-feed-kind.ts",
+      "sha1": "f3406c3008d9645443df714ab98b0e02b40d18b8"
+    },
+    {
+      "path": "lib/discover/discover-post-row.ts",
+      "sha1": "ba53d2f32e71c50518229e38636c416ed01ae7ca"
+    },
+    {
+      "path": "lib/discover/discover-served-cities.ts",
+      "sha1": "62ba4792692c4402928ea3a0137b14cfc79bbe09"
+    },
+    {
+      "path": "lib/discover/discover-zone.ts",
+      "sha1": "21d63d36cf15e821632fe833c3f73ea0ca5e49bc"
+    },
+    {
+      "path": "lib/discover/format-post-venue-line.ts",
+      "sha1": "fdf14e3f81f253d7a1a6b72b4e783d05e67670d5"
+    },
+    {
+      "path": "lib/discover/load-active-discover-activities-for-city.ts",
+      "sha1": "ed937ae86f761aa206fa99eb4b4082daa335b6d3"
+    },
+    {
+      "path": "lib/discover/load-active-discover-posts.ts",
+      "sha1": "442ce14f32b9eea3b992c3f2528a23b6d029ce76"
+    },
+    {
+      "path": "lib/discover/mobile-native-share-kick.ts",
+      "sha1": "195420d7a4bd3f8b186ddbe7b1193ec59f1836e5"
+    },
+    {
+      "path": "lib/discover/prisma-classmate-post-for-discover.ts",
+      "sha1": "e8cf3533c68c5c7f0307083fe9ae69fc1ae84c83"
+    },
+    {
+      "path": "lib/discover/prisma-discover-activity-for-discover.ts",
+      "sha1": "8645650b1ddd7e314e91f4ee80056c1e6b6493c7"
+    },
+    {
+      "path": "lib/discover/public-discover-post-row.ts",
+      "sha1": "11aea11f0e57d7f1d048c4b0c62332e165766790"
+    },
+    {
+      "path": "lib/discover/scene-palette.ts",
+      "sha1": "b4036893e7292322475a86ad73b49181b29c0e7c"
+    },
+    {
+      "path": "lib/discover/share-classmate-post-to-wechat.ts",
+      "sha1": "5dec49fc44459f5adb80f8eec3a089e7dd2ff8e6"
+    },
+    {
+      "path": "lib/discover/share-classmate-post-to-xhs.ts",
+      "sha1": "50f2ecc0f7747fe5a47e7088a81a940e075bddd9"
+    },
+    {
+      "path": "lib/discover/study-meta-labels.ts",
+      "sha1": "fe633c40a3e5f3fd8a2a19755a0e8a9b3aa51c48"
+    },
+    {
+      "path": "lib/discover/viewer-course-match.ts",
+      "sha1": "a8e17ad1195a2d7b1773ff7523732b47bd94ac65"
+    },
+    {
+      "path": "lib/email/resend.ts",
+      "sha1": "194a525c49f623376190e980e41ec26d41cb9629"
+    },
+    {
+      "path": "lib/email/send-login-email-change-code.ts",
+      "sha1": "8245b9d8ac769af7befcc908e765d657f0916112"
+    },
+    {
+      "path": "lib/email/send-password-reset-code.ts",
+      "sha1": "0032e7f115927a81e51a4572c374d03535c381fe"
+    },
+    {
+      "path": "lib/email/send-product-feedback.ts",
+      "sha1": "a0fbeafd8bd39fc1f0265ee6cbc328f91c9a1b6d"
+    },
+    {
+      "path": "lib/email/send-signup-verification-code.ts",
+      "sha1": "7d5f28f86dd02d9d13a4b1b857b05212cb1a80e4"
+    },
+    {
+      "path": "lib/email/send-student-verification.ts",
+      "sha1": "7a3737381d4f1a271b0ada81da4a524fcb171a9c"
+    },
+    {
+      "path": "lib/event-share/event-share-service.ts",
+      "sha1": "bc3bd2f12d1703fadac5b5a950922fec978a3809"
+    },
+    {
+      "path": "lib/feedback/ranking.ts",
+      "sha1": "5b7eccc660fe99fc7a31fc38ebc8b38011868f4d"
+    },
+    {
+      "path": "lib/format/list-relative-time.ts",
+      "sha1": "37f14d292e3b56e5dd340ba0b4dc2dac3e892c9f"
+    },
+    {
+      "path": "lib/group-chats/constants.ts",
+      "sha1": "c2e4bc233d63be3737f576ec843414cdd40f99e0"
+    },
+    {
+      "path": "lib/group-chats/contact-gate.ts",
+      "sha1": "8835af4d881da12c0b62e6501ae33e20ad621177"
+    },
+    {
+      "path": "lib/group-chats/title.ts",
+      "sha1": "a00f6861abe53cbdf2d9aea74773a3d98570afc6"
+    },
+    {
+      "path": "lib/home/home-schedule-constants.ts",
+      "sha1": "8c639722c1ca005e3c423234644e0a41000e2a07"
+    },
+    {
+      "path": "lib/home/home-schedule-dto.ts",
+      "sha1": "f81218f333255ff5508ee8bae8cd29d894e5c119"
+    },
+    {
+      "path": "lib/home/load-home-schedule-payload.ts",
+      "sha1": "425dfe643520fb2e36441d5c3e2184a4c386a617"
+    },
+    {
+      "path": "lib/http.ts",
+      "sha1": "f3590000a2f06f3e2586be88dda4bc1ebaced988"
+    },
+    {
+      "path": "lib/http/request-app-origin.ts",
+      "sha1": "8bf29b3f317728b4b76f8bfcfab3c273f9b05cea"
+    },
+    {
+      "path": "lib/i18n/app-locale.ts",
+      "sha1": "ab1ecd66f6889b2c3596f556fe1b67c88b420c97"
+    },
+    {
+      "path": "lib/i18n/format-classmate-post-expiry.ts",
+      "sha1": "f34e68005a5a02961290ddabeeac8108e3e66e0a"
+    },
+    {
+      "path": "lib/i18n/messages/discover-city-name-keys.ts",
+      "sha1": "e9375b74854623bfb207dd7a326d1799b0c9c7fd"
+    },
+    {
+      "path": "lib/i18n/messages/en.ts",
+      "sha1": "e5ea7df0dc28922586835daede5cdc7b32a440e2"
+    },
+    {
+      "path": "lib/i18n/messages/index.ts",
+      "sha1": "dbfea347527c4f658c47e4767b66ffea1b2ff7a8"
+    },
+    {
+      "path": "lib/i18n/messages/types.ts",
+      "sha1": "e6a9f44380f3057567faab6eaf3d855fa4e4af21"
+    },
+    {
+      "path": "lib/i18n/messages/zh-CN.ts",
+      "sha1": "1b8f7aa39523acaff748d928132ec0e90cf2c47c"
+    },
+    {
+      "path": "lib/i18n/server-locale.ts",
+      "sha1": "74e84e71363aaeca8e9909e11b53bb355ade9164"
+    },
+    {
+      "path": "lib/inbox/inbox-chat-search.ts",
+      "sha1": "30f8981f24a45297c72cf214b1d9881d4baa6fda"
+    },
+    {
+      "path": "lib/inbox/inbox-list-version.ts",
+      "sha1": "b26850cef418f22e9e672187b6c0059bec7163c9"
+    },
+    {
+      "path": "lib/inbox/inbox-merged-pinned.ts",
+      "sha1": "b4293027fc0e6f9c1c34051f59918444c59c9f0a"
+    },
+    {
+      "path": "lib/inbox/partition-inbox-sections.ts",
+      "sha1": "0b577a08ddb048deace8c589f2466ea058ac600b"
+    },
+    {
+      "path": "lib/integrations/lmu-lsf-catalog.ts",
+      "sha1": "17ae9ab2a8fcef31e79135264a3f6222d156242d"
+    },
+    {
+      "path": "lib/integrations/tum-course-catalog.ts",
+      "sha1": "64d1e058e1fbe4217d0cfb25600e1e69c084f492"
+    },
+    {
+      "path": "lib/integrations/tum-exam-catalog.ts",
+      "sha1": "28297bf256efa1b834c672195a1f4f22f43ecbdc"
+    },
+    {
+      "path": "lib/integrations/tum-official-schedule.ts",
+      "sha1": "8119d04fe0598e0e679d77f23753306acd58b3bb"
+    },
+    {
+      "path": "lib/intent-share/copy.ts",
+      "sha1": "53c9e5b05244d8e5a715222aa7a37dbf41fdbbcf"
+    },
+    {
+      "path": "lib/intent-share/locale.ts",
+      "sha1": "c3c30e7c8b2dcebd9472a99c0f5444c05b1755da"
+    },
+    {
+      "path": "lib/intent-share/service.ts",
+      "sha1": "007bdedc506059775d8400fce26a7d3e7aac71d7"
+    },
+    {
+      "path": "lib/intent-share/time-selection.ts",
+      "sha1": "b9cc34ee2cfe50baf18eefb3e628ca8cb337a361"
+    },
+    {
+      "path": "lib/layout/desktop-browser-layout.ts",
+      "sha1": "0b1a5451a8dbab20842d2c9a1dd9f68952140d21"
+    },
+    {
+      "path": "lib/llm/dashscope.ts",
+      "sha1": "7009a6a5e9ea7889959fd33574de6ff5ed1159ff"
+    },
+    {
+      "path": "lib/maps/osm-stitch-preview.ts",
+      "sha1": "13733bbd7657df445980e2d4d9f486ea9f0cdf07"
+    },
+    {
+      "path": "lib/maps/osm-tile.ts",
+      "sha1": "4371853dc3c7500342b1751938e3e330e0e9e871"
+    },
+    {
+      "path": "lib/media/chat-image-access.ts",
+      "sha1": "dfbddb6e240cba5f6091beb7f2f3e8eefcb07e1b"
+    },
+    {
+      "path": "lib/media/chat-image-storage.ts",
+      "sha1": "ce69613c132e8343ad0aa726ba0a92cdd442023c"
+    },
+    {
+      "path": "lib/media/lifecycle.ts",
+      "sha1": "2b664fd0d885b4ee19bd60c8624559055f51b62e"
+    },
+    {
+      "path": "lib/media/migrate-chat-images.ts",
+      "sha1": "1611696a45d97bb351eaf7e95594f44afc18489e"
+    },
+    {
+      "path": "lib/media/native-image-upload.ts",
+      "sha1": "742ca89a39ad47336bd98711939aa4161622c4c6"
+    },
+    {
+      "path": "lib/media/private-blob.ts",
+      "sha1": "a5699c514bb1ba5227c01008ff3c0cc33e8febaf"
+    },
+    {
+      "path": "lib/media/storage.ts",
+      "sha1": "7a53db9bfc5b784e16acfb362227ba4a32d44128"
+    },
+    {
+      "path": "lib/media/upload-allowance.ts",
+      "sha1": "3724e40d1ec44721d4d751c5e7e1d6f873780e40"
+    },
+    {
+      "path": "lib/media/verification-proof-storage.ts",
+      "sha1": "b48181626f62d72ec93530f5e416918e80057ee4"
+    },
+    {
+      "path": "lib/membership/admin-http.ts",
+      "sha1": "14590279729708e537ffebe1e678eb4d70a9f14a"
+    },
+    {
+      "path": "lib/membership/admin.ts",
+      "sha1": "afd54f6682229de9142e61aca9cedf5d9353ca70"
+    },
+    {
+      "path": "lib/membership/invite-code.ts",
+      "sha1": "78182e180011d54f3e08c5c1e4eebc3bb7cafebd"
+    },
+    {
+      "path": "lib/membership/service.ts",
+      "sha1": "4934a32c724a734551b22bccef31047302c2d6a9"
+    },
+    {
+      "path": "lib/membership/status.ts",
+      "sha1": "19d54d72827b4faaeba81cb7e3d855df32cbd1cb"
+    },
+    {
+      "path": "lib/nav/auto-guest-path.ts",
+      "sha1": "046a6bd97bce78a132815254ca866ff425ee27af"
+    },
+    {
+      "path": "lib/nav/back.ts",
+      "sha1": "89971a016352a85ec9a166ed18837ec30e5d30bc"
+    },
+    {
+      "path": "lib/nav/legacy-web-freeze.ts",
+      "sha1": "d189c6cbea0feaa61501acf1929a643c7c751636"
+    },
+    {
+      "path": "lib/nav/public-app-path.ts",
+      "sha1": "86f25681f42ad43c815db4a7f590c65b4750523a"
+    },
+    {
+      "path": "lib/ops/cron-monitor-config.ts",
+      "sha1": "1a311769061629fa630c30f556532c709f879168"
+    },
+    {
+      "path": "lib/ops/cron-observability.ts",
+      "sha1": "e3712e4215ab2b89823ee4884d999da0ecf3297d"
+    },
+    {
+      "path": "lib/plans/legacy-plan-commitment-compat.ts",
+      "sha1": "bb3db9f9115d996262c099ec315c3a4187c92d87"
+    },
+    {
+      "path": "lib/plans/repeat-eligibility.ts",
+      "sha1": "79b3d21a44105412d0ad39dff5b0d9eb64d04e79"
+    },
+    {
+      "path": "lib/product-tutorial/storage.ts",
+      "sha1": "d167902ac38cd3217989b215a84c2f660a7e683d"
+    },
+    {
+      "path": "lib/profile/appearance.ts",
+      "sha1": "216f35cbe8aca57d6d613dae0620853161c6fc44"
+    },
+    {
+      "path": "lib/profile/build-school-summary.ts",
+      "sha1": "92b78de2b69ab37f2e1dc698ac2b3a0cb97ccc0e"
+    },
+    {
+      "path": "lib/profile/nickname-api-errors.ts",
+      "sha1": "a8bd59efab9549745675e7fc252e038aa6336e3a"
+    },
+    {
+      "path": "lib/profile/school-change.ts",
+      "sha1": "3cd2c933b61154f80f563d7bd07bff4daf59d03d"
+    },
+    {
+      "path": "lib/profile/school-summary-line.ts",
+      "sha1": "786d09a791454c227337dc925e24964efb691ad8"
+    },
+    {
+      "path": "lib/profile/upload-avatar.ts",
+      "sha1": "06ebe613a8559ae95e0fff69d62ebb0f80521130"
+    },
+    {
+      "path": "lib/profile/upload-life-photo.ts",
+      "sha1": "d1c3b186eab1cfbdee004cf7dec0cc22edcf266a"
+    },
+    {
+      "path": "lib/profile/username-change-policy.ts",
+      "sha1": "cebc530057e180941a12cb3e3460c80715aafff4"
+    },
+    {
+      "path": "lib/push/apns-env.ts",
+      "sha1": "a827fc3840d821ce14e6f79c5298f71049601ef7"
+    },
+    {
+      "path": "lib/push/apns-payload.ts",
+      "sha1": "f7dff50cfe39aa3e3ac17019dbd16d76fe406b60"
+    },
+    {
+      "path": "lib/push/apns-send.ts",
+      "sha1": "0c431e9ef478af4b5cf4de823376ddfeb3ab8f9c"
+    },
+    {
+      "path": "lib/push/calendar-reminder-cron.ts",
+      "sha1": "0dcb47054d7660aac1b8ae63eb3b9f4cf99b1c3d"
+    },
+    {
+      "path": "lib/push/capacitor-native-push.ts",
+      "sha1": "5820ca1e781b20a4225dc29cffaa16ea91887969"
+    },
+    {
+      "path": "lib/push/notify-user.ts",
+      "sha1": "b3486748be1ab7eca038fd1be2518c4375a470d6"
+    },
+    {
+      "path": "lib/push/url-base64.ts",
+      "sha1": "6cab7726f1c98ae915cad81fc494b179f6684712"
+    },
+    {
+      "path": "lib/push/vapid-env.ts",
+      "sha1": "2c5d2661d7516811a6172ef7fbce6a0f9535ed26"
+    },
+    {
+      "path": "lib/push/web-push-server.ts",
+      "sha1": "45fa754d6a67554ae5c2f773ce761c056506946d"
+    },
+    {
+      "path": "lib/pwa/deferred-install.ts",
+      "sha1": "b888c9196975502647f0981eb9061abb29239dd4"
+    },
+    {
+      "path": "lib/pwa/ios-share-for-install.ts",
+      "sha1": "4a763f8ffd4a4fdee9f213510e72a32ebd7644af"
+    },
+    {
+      "path": "lib/pwa/pwa-environment.ts",
+      "sha1": "e80c007c223f89e98e50cafda782bf8cffd824c3"
+    },
+    {
+      "path": "lib/queries/chat-planning.ts",
+      "sha1": "c414c9f119d0bea0e6b48ff2bde4752897ef97ca"
+    },
+    {
+      "path": "lib/queries/classmate-post-detail.ts",
+      "sha1": "fafe586bc9b8476265bc81ae471c87ac3fa86fca"
+    },
+    {
+      "path": "lib/queries/classmate-post-insight-counts.ts",
+      "sha1": "8ecab1d10e5177269819841735030ce2d692a1d0"
+    },
+    {
+      "path": "lib/queries/contact-exchange.ts",
+      "sha1": "cc0e4befb49119dea7117153188e236315fcc837"
+    },
+    {
+      "path": "lib/queries/direct-contacts.ts",
+      "sha1": "f021d54e459b0bcf8f2bf3b900fa7abcc8b2e89b"
+    },
+    {
+      "path": "lib/queries/discovery.ts",
+      "sha1": "c786a74e738f8223a2206b3e1edb72ddf3619798"
+    },
+    {
+      "path": "lib/queries/inbox-merge.ts",
+      "sha1": "934852928668c225c4185510fdd14e2b3a711c8e"
+    },
+    {
+      "path": "lib/queries/inbox-order.ts",
+      "sha1": "c9a590053b0e04e92ff04200b5fbf0254ed27a7f"
+    },
+    {
+      "path": "lib/queries/inbox-unread-counts.ts",
+      "sha1": "40f2ac5914c042b9f7e96d3aae919490bd259ba0"
+    },
+    {
+      "path": "lib/queries/schedule-overlap.ts",
+      "sha1": "b932afc135286b614a6bf22ef9a0ae023d0d5345"
+    },
+    {
+      "path": "lib/queries/self-notes-connection.ts",
+      "sha1": "8249720f93cb3fc384dd78e88788de9cc14bf481"
+    },
+    {
+      "path": "lib/queries/study-sessions.ts",
+      "sha1": "984c129ea0ee950a00e9de227ef3b9585879847f"
+    },
+    {
+      "path": "lib/schedule-event-card-tone.ts",
+      "sha1": "edf5959f69243ad61d78bc237ca8932d0cb844fe"
+    },
+    {
+      "path": "lib/schedule-share/build-schedule-share-snapshot.ts",
+      "sha1": "3566248cf065a7cf8ff949aefaf5861ff6fda4f8"
+    },
+    {
+      "path": "lib/schedule-share/chat-preview-access.ts",
+      "sha1": "318d07e903abbbeb5f9441d3d5e3002a8b8a5365"
+    },
+    {
+      "path": "lib/schedule-share/chat-preview-types.ts",
+      "sha1": "7f3112cd2fa370bc34d41e6a1a9e98729c17e46b"
+    },
+    {
+      "path": "lib/schedule-share/connection-errors.ts",
+      "sha1": "7aa08b551ba4c0d47581dbe32972af9c3f9a8459"
+    },
+    {
+      "path": "lib/schedule-share/constants.ts",
+      "sha1": "22f766513cad35bcbfdcb05e48e466f138876859"
+    },
+    {
+      "path": "lib/schedule-share/create-plan-from-guest-proposal.ts",
+      "sha1": "b22029e50357e86caa21995c5ebe7aa7f3c1035a"
+    },
+    {
+      "path": "lib/schedule-share/create-schedule-share-client.ts",
+      "sha1": "5e4e5ea9d3b0e2e6abec76e84266518affcee6ee"
+    },
+    {
+      "path": "lib/schedule-share/create-schedule-share-link-server.ts",
+      "sha1": "792ed9d6af6aee9a034721b484504cd71c3f67fb"
+    },
+    {
+      "path": "lib/schedule-share/default-create-payload.ts",
+      "sha1": "dda624fa20d8fb8277eb00630fa1c5e9db400d06"
+    },
+    {
+      "path": "lib/schedule-share/ensure-connection-for-schedule-share.ts",
+      "sha1": "3ce54bceb2d809afe2a85b271c20bf2a9ff7a507"
+    },
+    {
+      "path": "lib/schedule-share/format-share-create-summary.ts",
+      "sha1": "19b76d6ea27aa48d7d0529cc7afa4ae5ea8b4549"
+    },
+    {
+      "path": "lib/schedule-share/format-share-public-headline.ts",
+      "sha1": "9b248a39a8df2a21b8fc746836ef7ab63655dd9d"
+    },
+    {
+      "path": "lib/schedule-share/infer-range-preset.ts",
+      "sha1": "c0b8bd4163ab4bd7f9bda18b77391101daadb166"
+    },
+    {
+      "path": "lib/schedule-share/load-chat-preview-server.ts",
+      "sha1": "a75fed302d2ba22aea28f259a50fab43c0ee1c9d"
+    },
+    {
+      "path": "lib/schedule-share/load-chat-preview.ts",
+      "sha1": "0ac3931bc51a129cd7c3ae703f15058b0b242945"
+    },
+    {
+      "path": "lib/schedule-share/load-initial-viewer-proposal.ts",
+      "sha1": "f37833ef7f54e4b5511603b6638704a1017b2d65"
+    },
+    {
+      "path": "lib/schedule-share/load-recipient-page.ts",
+      "sha1": "ff0a8080ccb335b6ca85838cb897ad6f4b3d194e"
+    },
+    {
+      "path": "lib/schedule-share/persist-schedule-share-link.ts",
+      "sha1": "fb7b0a98bb69a806ee0fd7394d8fde113e1cd763"
+    },
+    {
+      "path": "lib/schedule-share/proposal-draft-storage.ts",
+      "sha1": "c6dab78e22da2a5faad09ab3044ac6e0281053f9"
+    },
+    {
+      "path": "lib/schedule-share/proposal-selection.ts",
+      "sha1": "7fa199f429fdaf0856b1e04c13e931711fe0f530"
+    },
+    {
+      "path": "lib/schedule-share/proposer-display-name.ts",
+      "sha1": "c665cf77d36aca9a123e91d6e807607b26332e4d"
+    },
+    {
+      "path": "lib/schedule-share/public-blocks-to-week-calendar.ts",
+      "sha1": "4a4a90e05956565ff073ec7ac6a8c686f074e652"
+    },
+    {
+      "path": "lib/schedule-share/public-errors.ts",
+      "sha1": "76c56187a8a90a1c0cae4a1df67b9000a6ed0e22"
+    },
+    {
+      "path": "lib/schedule-share/public-share-origin.ts",
+      "sha1": "3a3bc22bb2689ce411bd5867f4500f4ae32ee9e5"
+    },
+    {
+      "path": "lib/schedule-share/public-snapshot.ts",
+      "sha1": "6779fb784cfe9dddb460e0e4df077076990f7b7e"
+    },
+    {
+      "path": "lib/schedule-share/rate-limit.ts",
+      "sha1": "59f91e1989273d7ce051954de3f4c97beccb0992"
+    },
+    {
+      "path": "lib/schedule-share/recommended-candidates.ts",
+      "sha1": "fcbacf086e8b0f8b654fc788a668f0056aa40c19"
+    },
+    {
+      "path": "lib/schedule-share/resolve-link.ts",
+      "sha1": "27a65170277b1a20b725b1a1814be5256a94f46d"
+    },
+    {
+      "path": "lib/schedule-share/reveal-category-selection.ts",
+      "sha1": "9ab860265ab8b7bd56800fbf440027408adbc0a6"
+    },
+    {
+      "path": "lib/schedule-share/reveal-config.ts",
+      "sha1": "6c55afa0d97e3f9413a5d4a69c91bd658d6c6f1c"
+    },
+    {
+      "path": "lib/schedule-share/schedule-share-form-state.ts",
+      "sha1": "a599abbb70fba686d124b0e0a0ec896b91263b53"
+    },
+    {
+      "path": "lib/schedule-share/share-link-status.ts",
+      "sha1": "a67049a3f7203c0d066c815933460a89969a39dc"
+    },
+    {
+      "path": "lib/schedule-share/share-link-urls.ts",
+      "sha1": "bb50765b64f9e0841166294bf71b47c4bd0cb91d"
+    },
+    {
+      "path": "lib/schedule-share/share-range-presets.ts",
+      "sha1": "e44c579ad19186cdfe0380aa244a7b7d9a0c385d"
+    },
+    {
+      "path": "lib/schedule-share/share-selected-days.ts",
+      "sha1": "589e0214b96b2a914daa442bebfbe361ca80b656"
+    },
+    {
+      "path": "lib/schedule-share/token.ts",
+      "sha1": "6080209a2113eae4ca71469462460810a45844f7"
+    },
+    {
+      "path": "lib/schedule-share/usage-limit.ts",
+      "sha1": "5d0bbb6f0bb326c06b02492a23d4d31a6dcba273"
+    },
+    {
+      "path": "lib/schedule-share/validation.ts",
+      "sha1": "24e82274df72ea7f2906a3b32660d0bb76622bc2"
+    },
+    {
+      "path": "lib/schedule-share/viewer-proposal.ts",
+      "sha1": "ffe43fdf7dc6ea2ec07c9fa4e6fa944a20b38815"
+    },
+    {
+      "path": "lib/time-polls/domain.ts",
+      "sha1": "05f11eb45cf937abdc1fe085fdace8adf4b83611"
+    },
+    {
+      "path": "lib/ui/profile-section-label.ts",
+      "sha1": "edbe5a165b290a4fd7d7fc17650ad59a43e575e3"
+    },
+    {
+      "path": "lib/ui/profile-settings-control.ts",
+      "sha1": "f95f4efc7e446f8a20d246f8b2561612b62c859b"
+    },
+    {
+      "path": "lib/ui/suppress-ghost-click.ts",
+      "sha1": "b1eea057673ebbe96fd3559d599e272345bfb322"
+    },
+    {
+      "path": "lib/utils.ts",
+      "sha1": "0a84d014ad800a785311783179323e5f289bbbdd"
+    },
+    {
+      "path": "lib/v2/action-context-snapshot.ts",
+      "sha1": "ec32f7edee92111574a2f59402bf1277a72fd791"
+    },
+    {
+      "path": "lib/v2/action-coordination/action-fields.ts",
+      "sha1": "d56e9757535781aa21308fb17b9f8c4d6e4b8ea7"
+    },
+    {
+      "path": "lib/v2/action-coordination/activation-service.ts",
+      "sha1": "719684103094f0446a509273409766b967acbb8a"
+    },
+    {
+      "path": "lib/v2/action-coordination/capability.ts",
+      "sha1": "71ac8cf7174bbd561487f63688e23f4b401ca914"
+    },
+    {
+      "path": "lib/v2/action-coordination/command.ts",
+      "sha1": "671696dedeca6606f843dc84f92bce6f420c118d"
+    },
+    {
+      "path": "lib/v2/action-coordination/db-locks.ts",
+      "sha1": "8410a21506cbe407e6cfc6032c8f09fb375ab7d2"
+    },
+    {
+      "path": "lib/v2/action-coordination/dto.ts",
+      "sha1": "581b9925745b36a4fe68c5c62e0b53e5b21d6f38"
+    },
+    {
+      "path": "lib/v2/action-coordination/eligibility.ts",
+      "sha1": "fc100cf2e8a7cd43e2ddf874d78b6480019ad66f"
+    },
+    {
+      "path": "lib/v2/action-coordination/errors.ts",
+      "sha1": "4306278b53165914f9d6e0787d9ff81097ddfcb6"
+    },
+    {
+      "path": "lib/v2/action-coordination/index.ts",
+      "sha1": "fbcfe42f4a8abd945ea29d21ec95297ecc239b2b"
+    },
+    {
+      "path": "lib/v2/action-coordination/interest-service.ts",
+      "sha1": "ba8e2bd07f65d7430edfd9c3d6abd9ddfe11e1d0"
+    },
+    {
+      "path": "lib/v2/action-coordination/plan-service.ts",
+      "sha1": "5a62c52d1718d117879e276af1c0e4bcf491591b"
+    },
+    {
+      "path": "lib/v2/action-coordination/policy-snapshot.ts",
+      "sha1": "a687f936de5ba1aab81b5d5e8f41d98eda50b299"
+    },
+    {
+      "path": "lib/v2/action-coordination/read-model.ts",
+      "sha1": "26329b5231c9eb2b408b1e69c744f72cf2984952"
+    },
+    {
+      "path": "lib/v2/action-coordination/reservation-service.ts",
+      "sha1": "6e71eafb7833525a67deb61575aa9b3acb858f97"
+    },
+    {
+      "path": "lib/v2/action-coordination/response-service.ts",
+      "sha1": "0d79f28251f4d2368054bebf86ab0ea1edac9312"
+    },
+    {
+      "path": "lib/v2/action-coordination/route-adapter.ts",
+      "sha1": "176e9a678b68ba7fa3568a2d6c80af35c7d03900"
+    },
+    {
+      "path": "lib/v2/action-coordination/safety-terminalizer.ts",
+      "sha1": "6dfaddc3a4d714e5d2f6027e7a8725c4a7467610"
+    },
+    {
+      "path": "lib/v2/action-interest.ts",
+      "sha1": "22110759dadf318e3a3246ec7f4f1dea9ab4fd37"
+    },
+    {
+      "path": "lib/v2/action-lifecycle-finalizer.ts",
+      "sha1": "9a47648b097cca756b11e56e29f41a1a15c79fe8"
+    },
+    {
+      "path": "lib/v2/activity-fit.ts",
+      "sha1": "8afc3873a8eedc751531a7af66896cd5f0600a94"
+    },
+    {
+      "path": "lib/v2/direct-v1-context-sync.ts",
+      "sha1": "f18f345748ca9784854040c6c60c4e326e690819"
+    },
+    {
+      "path": "lib/v2/direct-v1-coordination-backfill.ts",
+      "sha1": "5cf8fd32d3dfec19d77fb7499e2a25303ed85fd6"
+    },
+    {
+      "path": "lib/v2/discovery-fit.ts",
+      "sha1": "ec60d4df92ecec1f1f70fa291238af8488726ec8"
+    },
+    {
+      "path": "lib/v2/experiment-bucketing.ts",
+      "sha1": "20cae8bf3df7c17a300d9fd585c63b460e10b274"
+    },
+    {
+      "path": "lib/v2/experiments.ts",
+      "sha1": "877d603239ff730026dbbcfa6f165cdf222038a8"
+    },
+    {
+      "path": "lib/v2/explore-example-catalog.ts",
+      "sha1": "2b3ae7d6471ebda4fd354b6dfbc7b29220c1bfdf"
+    },
+    {
+      "path": "lib/v2/explore-intent-access.ts",
+      "sha1": "e85b1289ea44972abaabce2862ea39d7018cf493"
+    },
+    {
+      "path": "lib/v2/explore-intents.ts",
+      "sha1": "c991299e00d4e31853f1d3c69d8722c3f7d87f08"
+    },
+    {
+      "path": "lib/v2/feature-flags.ts",
+      "sha1": "2b40027e64b9a3647120384b988bb21f6195e19a"
+    },
+    {
+      "path": "lib/v2/funnel-event-producer.ts",
+      "sha1": "4bba4b1b53d30b2a8799b7f495107e85e9fe489f"
+    },
+    {
+      "path": "lib/v2/funnel-events.ts",
+      "sha1": "cab9286da4b422e51a97a4e827a305044d1f5693"
+    },
+    {
+      "path": "lib/v2/intent-timing.ts",
+      "sha1": "30de4f72710dd977d879fecabab287904364d762"
+    },
+    {
+      "path": "lib/v2/lifecycle-finalizers.ts",
+      "sha1": "d9c571e8a5022a8118bd8f7c10000b69f0133adf"
+    },
+    {
+      "path": "lib/v2/mutual-opportunities.ts",
+      "sha1": "21a66fdd419efa1af3ce6fab44a16bf7f14932c9"
+    },
+    {
+      "path": "lib/v2/mutual-opportunity-activity-compatibility.ts",
+      "sha1": "72472628126e128b9b0866cb9e0038b12f4e3839"
+    },
+    {
+      "path": "lib/v2/mutual-opportunity-auto-match.ts",
+      "sha1": "bfbbd66f45b2103eceb5bd042997c72f64a7346d"
+    },
+    {
+      "path": "lib/v2/mutual-opportunity-plan-lifecycle.ts",
+      "sha1": "5d43d3fef7d828d9340b621ea2bebd02433d984c"
+    },
+    {
+      "path": "lib/v2/notification-outbox-producer.ts",
+      "sha1": "596c065d1d207720e7d754d29c7480ca5c206707"
+    },
+    {
+      "path": "lib/v2/notification-outbox.ts",
+      "sha1": "430d92376417901190c891ec319d77929ac64fe1"
+    },
+    {
+      "path": "lib/v2/plan-lifecycle-finalizer.ts",
+      "sha1": "9808bf2346cae12b982a8f88244692b36fef3654"
+    },
+    {
+      "path": "lib/v2/plan-safety-terminalizer.ts",
+      "sha1": "35ef9be7c0337a3e569270b3919d2f1df3858e4b"
+    },
+    {
+      "path": "lib/v2/recommendations.ts",
+      "sha1": "28a3ab9b1f9a77ad4d8e360779bdc4b87c542078"
+    },
+    {
+      "path": "lib/v2/social-groups.ts",
+      "sha1": "a7f6b2c3a37825be648010f2246ddfb936a44e97"
+    },
+    {
+      "path": "lib/v2/social-preferences.ts",
+      "sha1": "69587d0639816f654884326330c23248efaf6707"
+    },
+    {
+      "path": "lib/v2/together-matching-session.ts",
+      "sha1": "a1871db18da987d23b68a5587890dfc33b9747cc"
+    },
+    {
+      "path": "lib/v2/weekly-intent-policy.ts",
+      "sha1": "8bb6370b075c06a9d85b123fd3dc436453fc4d97"
+    },
+    {
+      "path": "lib/v2/weekly-intents.ts",
+      "sha1": "716bf05acffc89e44817f950158b52629d175ace"
+    },
+    {
+      "path": "lib/validators/admin-user.ts",
+      "sha1": "7a6a9b119c1ac611e9e1af664d037f7bd78dda1d"
+    },
+    {
+      "path": "lib/validators/auth.ts",
+      "sha1": "fd730fdae473bf0cc42e53671693951f0a32712e"
+    },
+    {
+      "path": "lib/validators/calendar-natural.ts",
+      "sha1": "b5b2db358fa67b9e3fee9cc46dc1646270ec6533"
+    },
+    {
+      "path": "lib/validators/calendar.ts",
+      "sha1": "5178110681b9bb021d31f39bc8e876131294fa79"
+    },
+    {
+      "path": "lib/validators/chat-directory.ts",
+      "sha1": "7cb908f2cf8ac006c648c83e3e6a17e08be7a1c6"
+    },
+    {
+      "path": "lib/validators/chat-planning.ts",
+      "sha1": "d23c3702a2ecb7f6071ff27fbf0050bdbf15a5d8"
+    },
+    {
+      "path": "lib/validators/classmate-posts.ts",
+      "sha1": "53c3244d09842ac712725fd36907a2653ca35ac8"
+    },
+    {
+      "path": "lib/validators/connection.ts",
+      "sha1": "9c299d9d0b3472dfc3759632bb8433ab787170f9"
+    },
+    {
+      "path": "lib/validators/course.ts",
+      "sha1": "997f99b99c4502dbe24766b9a3f7263c62ea8b59"
+    },
+    {
+      "path": "lib/validators/discover-activity.ts",
+      "sha1": "b2449a9877cf0c069e7fd0c9361a57fc47b10e54"
+    },
+    {
+      "path": "lib/validators/invitation.ts",
+      "sha1": "f285142d687242650d086c273baa41160d3e2b27"
+    },
+    {
+      "path": "lib/validators/mutual-opportunity.ts",
+      "sha1": "de73b7865edb8129ce0feeba78cb50d6b910249a"
+    },
+    {
+      "path": "lib/validators/native-push-device.ts",
+      "sha1": "90370efda804a48575e09476a170832e1df20d1b"
+    },
+    {
+      "path": "lib/validators/product-funnel.ts",
+      "sha1": "cc5a1035e4245f346cb99585d004ae7b68d185dc"
+    },
+    {
+      "path": "lib/validators/profile.ts",
+      "sha1": "12b542202655a96a7a991374b1a404446705d74c"
+    },
+    {
+      "path": "lib/validators/push-subscription.ts",
+      "sha1": "00ee037d7985b970d3f383282a2ad878354454ef"
+    },
+    {
+      "path": "lib/validators/social-group.ts",
+      "sha1": "df3e5a20ce95ce4e10ae87f991129c60e427a9f0"
+    },
+    {
+      "path": "lib/validators/social-preferences.ts",
+      "sha1": "b5339731c74f042dea7b4eacbffe3d1f5a57dd2c"
+    },
+    {
+      "path": "lib/validators/study-session.ts",
+      "sha1": "73201dc67034b9b7fbb8d3d095d11dea6cc7c55d"
+    },
+    {
+      "path": "lib/validators/verification.ts",
+      "sha1": "051ece703e5c307f688f98e5fb6d2bf4d686092b"
+    },
+    {
+      "path": "lib/validators/weekly-intent.ts",
+      "sha1": "4cd0690542e231865a651a368edf0de56b61d238"
+    },
+    {
+      "path": "lib/verification/default-school-email-input.ts",
+      "sha1": "698ce87903fbe850f9ba0e8e3f90faf9124c4950"
+    },
+    {
+      "path": "lib/verification/policy.ts",
+      "sha1": "ff839bef1039e2a3268d884f3a53338c19f27335"
+    },
+    {
+      "path": "lib/verification/retention.ts",
+      "sha1": "8232fee77425b99f43dcc55ceaea177ad7eb8164"
+    },
+    {
+      "path": "lib/verification/school-state.ts",
+      "sha1": "b1dc167576fd62dd346cf825f9e0246bb78ea037"
+    },
+    {
+      "path": "lib/verification/student-verification-display.ts",
+      "sha1": "e0d4873c451b9928e86154c1151ae306afc24df0"
+    },
+    {
+      "path": "middleware.ts",
+      "sha1": "e16bd6342bc1b794a3feb1102efe22f3144951b8"
+    },
+    {
+      "path": "next-env.d.ts",
+      "sha1": "79ea33d5bd6bf5319667f287c6aec3a5e0ce256a"
+    },
+    {
+      "path": "next.config.ts",
+      "sha1": "0321742063da2ab0353bccaaf2ec771eb628f1fe"
+    },
+    {
+      "path": "openapi/v1.json",
+      "sha1": "634ec74ccfc4679d2a705f50df319bb70747b575"
+    },
+    {
+      "path": "package-lock.json",
+      "sha1": "76d7540d07e8cbcf2b6b57ca0cddc85d2666f951"
+    },
+    {
+      "path": "package.json",
+      "sha1": "2256deb928524816dd8b4fa8db7c5048502153a8"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha1": "c2a52680fcf808558c266a1a5fa3938c74819f90"
+    },
+    {
+      "path": "postcss.config.js",
+      "sha1": "81781ed39dc8e6d6521ae1d63a67e46894acc2eb"
+    },
+    {
+      "path": "prisma/migrations/20260215180000_schedule_share_mvp/migration.sql",
+      "sha1": "c2d9dd4d7ad9326418896066d2e96075ea2e8e3c"
+    },
+    {
+      "path": "prisma/migrations/20260417121453_init/migration.sql",
+      "sha1": "4b96e4ca73f95fd089276b132de9970633e43cdd"
+    },
+    {
+      "path": "prisma/migrations/20260417122231_add_report_moderation_fields/migration.sql",
+      "sha1": "63aa4dfb8b6005c0206749b62d886a2358022597"
+    },
+    {
+      "path": "prisma/migrations/20260417160003_add_admin_moderation_history/migration.sql",
+      "sha1": "5bab3c65315f432d6faa341bae641dc3912a9b2e"
+    },
+    {
+      "path": "prisma/migrations/20260419172233_add_report_unblock_action/migration.sql",
+      "sha1": "891034fc07adcacdffaf267297788d8b1b871be4"
+    },
+    {
+      "path": "prisma/migrations/20260419181231_add_student_verification/migration.sql",
+      "sha1": "8f6a4bf35ecd0de975ff9b82978209742f4aaf70"
+    },
+    {
+      "path": "prisma/migrations/20260419204613_add_client_signals/migration.sql",
+      "sha1": "248c158c81fe95af5943bf1154c095b7d48e3a54"
+    },
+    {
+      "path": "prisma/migrations/20260420120000_username_guest_optional_email/migration.sql",
+      "sha1": "34ff8b35bb9cf7a1f20ad4b01f7ea54e35fad80c"
+    },
+    {
+      "path": "prisma/migrations/20260420200000_add_course_code/migration.sql",
+      "sha1": "8b34f91627fc6bf921a6c0adba90b475b70f7b79"
+    },
+    {
+      "path": "prisma/migrations/20260421052619_friend_link/migration.sql",
+      "sha1": "724ddb419c6b12f132a54d263006ded1475f0b77"
+    },
+    {
+      "path": "prisma/migrations/20260421100000_merge_email_fields/migration.sql",
+      "sha1": "949e0d2913b4ab2902655a12e3dd1eab3a39d917"
+    },
+    {
+      "path": "prisma/migrations/20260421120000_preset_avatars/migration.sql",
+      "sha1": "4c3dda5eaf564a08a9ccc29cbb6859c77e87e666"
+    },
+    {
+      "path": "prisma/migrations/20260421140000_add_degree_level/migration.sql",
+      "sha1": "a0c46ac5de285d2befa9ac7e40766f8e69af00a0"
+    },
+    {
+      "path": "prisma/migrations/20260421150000_drop_phd_degree_level/migration.sql",
+      "sha1": "185beae5dfe85b3a5d09b8570db660c5bf438b4c"
+    },
+    {
+      "path": "prisma/migrations/20260421160000_drop_client_signals_add_manual_review/migration.sql",
+      "sha1": "36edb35fe86f95cfbd1b2909fcc141e676a7323d"
+    },
+    {
+      "path": "prisma/migrations/20260422100000_add_course_sessions/migration.sql",
+      "sha1": "49f1a275b7a39075473839fb0c64c0545bcb25b6"
+    },
+    {
+      "path": "prisma/migrations/20260422200000_sessions_per_user_course/migration.sql",
+      "sha1": "114d7e0a59905e04420c5d2a7409171a624851fa"
+    },
+    {
+      "path": "prisma/migrations/20260422300000_add_user_last_active_at/migration.sql",
+      "sha1": "312a978658aba42d4170327ab865039502f3daeb"
+    },
+    {
+      "path": "prisma/migrations/20260423120000_add_saved_course/migration.sql",
+      "sha1": "a56b70dbca43dc10282e0b17db7768107ed87b86"
+    },
+    {
+      "path": "prisma/migrations/20260424024000_calendar_entry_companions/migration.sql",
+      "sha1": "a0bd57ec8ea660ced8716c932e0a455455e719b4"
+    },
+    {
+      "path": "prisma/migrations/20260424120000_course_room_message/migration.sql",
+      "sha1": "8cba5d301735878d190062929ccc2b92688cf7ea"
+    },
+    {
+      "path": "prisma/migrations/20260425120000_connection_origin_course/migration.sql",
+      "sha1": "7675602c9ffd2c6a5792b2ceb78b2b772c42276a"
+    },
+    {
+      "path": "prisma/migrations/20260426120000_message_actions_and_push/migration.sql",
+      "sha1": "cbb4ee4317ed186a19e1c8a54bdbd516fe555fed"
+    },
+    {
+      "path": "prisma/migrations/20260426220000_calendar_entry_repeat_metadata/migration.sql",
+      "sha1": "34a0252c36bc1af282aef8bdc19ebd5b1c7460eb"
+    },
+    {
+      "path": "prisma/migrations/20260427120000_study_session_proposals/migration.sql",
+      "sha1": "c9451e58346dfe6a7996cdc25e8046bbb2422c19"
+    },
+    {
+      "path": "prisma/migrations/20260428120000_activity_proposals/migration.sql",
+      "sha1": "3bc399ac408399611f91ed8cc8a0ecc4c1c45d57"
+    },
+    {
+      "path": "prisma/migrations/20260428120000_calendar_entry_companions/migration.sql",
+      "sha1": "f74d935177838011ee082a4bbe56623517edb5b8"
+    },
+    {
+      "path": "prisma/migrations/20260428220000_calendar_entry_note/migration.sql",
+      "sha1": "d08f479c6fac92dc72e1c9622be38e6cbf1afae8"
+    },
+    {
+      "path": "prisma/migrations/20260503120000_availability_share_included_dates/migration.sql",
+      "sha1": "5b960055b0e9e518529b54d56965d076bd6c8002"
+    },
+    {
+      "path": "prisma/migrations/20260503193000_connection_pins/migration.sql",
+      "sha1": "f642244a3bf76fd83d9a37e2405c1236ca4b9de1"
+    },
+    {
+      "path": "prisma/migrations/20260503201500_classmate_posts/migration.sql",
+      "sha1": "868da987d8be35fe52f271a497e0095c9ac8445b"
+    },
+    {
+      "path": "prisma/migrations/20260503203000_user_course_inbox_prefs/migration.sql",
+      "sha1": "2c63423b74e3cfe2888cba2d2fcae32462d3b9c5"
+    },
+    {
+      "path": "prisma/migrations/20260504120000_calendar_entry_push_reminder/migration.sql",
+      "sha1": "5e501abfdddb984a816a8c4014383c8bb1fb392e"
+    },
+    {
+      "path": "prisma/migrations/20260504143000_connection_contact_notes/migration.sql",
+      "sha1": "ebcb3f1a5ec9b26bfaa5da1d09e29576ef06380e"
+    },
+    {
+      "path": "prisma/migrations/20260504160000_connection_contact_alias_rename/migration.sql",
+      "sha1": "c68324573e893aa3366c7e864ab32f10abcf2b25"
+    },
+    {
+      "path": "prisma/migrations/20260504180000_connection_contact_remark/migration.sql",
+      "sha1": "f65fe61ca63bfe11d8b3b0c67aa34f557e5efa2f"
+    },
+    {
+      "path": "prisma/migrations/20260504200000_user_language_proficiency/migration.sql",
+      "sha1": "277f911bcbd1c3d8c23e5afdd839c1edf0cd3206"
+    },
+    {
+      "path": "prisma/migrations/20260504210000_user_gender/migration.sql",
+      "sha1": "50e4fa778769630decf1506b7cabf3ac81ab2280"
+    },
+    {
+      "path": "prisma/migrations/20260506140000_group_chats_and_contact_search/migration.sql",
+      "sha1": "5266b855eb1b72870071db377be806790ae4456a"
+    },
+    {
+      "path": "prisma/migrations/20260506170000_school_scoped_verification_state/migration.sql",
+      "sha1": "1d2da38dd8416df50ff0780744fe5b36e84b6e1b"
+    },
+    {
+      "path": "prisma/migrations/20260507042200_classmate_post_courses/migration.sql",
+      "sha1": "6ff67d10d5bbabb0f4003cd1cf6c30bd1520aa8a"
+    },
+    {
+      "path": "prisma/migrations/20260507103000_classmate_post_shared_courses/migration.sql",
+      "sha1": "9179a5cea85c102d7a4d422291930bcc6f0eec07"
+    },
+    {
+      "path": "prisma/migrations/20260507140000_message_image_location/migration.sql",
+      "sha1": "902075cfdacfd77f29e03254c5fdcc211039021e"
+    },
+    {
+      "path": "prisma/migrations/20260508120000_product_feedback/migration.sql",
+      "sha1": "7f3379012e35c12894413b13451ca2a268ed780e"
+    },
+    {
+      "path": "prisma/migrations/20260509140000_group_chat_participant_inbox_prefs/migration.sql",
+      "sha1": "c34e10541ceac26e6e82e2f58d504db3e94e400e"
+    },
+    {
+      "path": "prisma/migrations/20260510180000_classmate_post_insights/migration.sql",
+      "sha1": "4865c585041159c926fe8d3235fdc58ee80148ca"
+    },
+    {
+      "path": "prisma/migrations/20260511120000_classmate_post_study/migration.sql",
+      "sha1": "ba858aab67652e9064026f551bd6f95a6a60bab6"
+    },
+    {
+      "path": "prisma/migrations/20260511130000_user_calendar_ics_subscription_url/migration.sql",
+      "sha1": "d65a39204a7e1f182dfea8a424af92cfc19a5aa0"
+    },
+    {
+      "path": "prisma/migrations/20260511140000_user_product_tutorial_dismissed/migration.sql",
+      "sha1": "16610b4366aa20ac0bd2d9f6fafdcb6a91fe7c2f"
+    },
+    {
+      "path": "prisma/migrations/20260511180000_user_phone_and_otp/migration.sql",
+      "sha1": "ca3187e5e195adc0b9307c6a2035a82fbf627b5b"
+    },
+    {
+      "path": "prisma/migrations/20260512140000_calendar_entry_recurrence_group_id/migration.sql",
+      "sha1": "86fbd94a0cb531157e1c7c9b605d8fde41dfb1aa"
+    },
+    {
+      "path": "prisma/migrations/20260512143000_classmate_post_meals/migration.sql",
+      "sha1": "12c43ef9c70bc2cf30d5e2586120fb32e55002c8"
+    },
+    {
+      "path": "prisma/migrations/20260512144000_classmate_post_language/migration.sql",
+      "sha1": "863d16f7e30b133f24b5cea2b37d4501a060a6de"
+    },
+    {
+      "path": "prisma/migrations/20260512145000_classmate_post_sport/migration.sql",
+      "sha1": "fbbe5633eadf205fb2aeaf42f036b8d26ade2b1a"
+    },
+    {
+      "path": "prisma/migrations/20260513120000_classmate_post_save/migration.sql",
+      "sha1": "e3ffaf865e8f330d87021089fab4c3b4d42442f0"
+    },
+    {
+      "path": "prisma/migrations/20260513180000_classmate_post_images/migration.sql",
+      "sha1": "c0c15c3d92eb88b8f7092a5bed090ac8cdf7cebe"
+    },
+    {
+      "path": "prisma/migrations/20260516170000_schedule_share_tables_idempotent/migration.sql",
+      "sha1": "4f4a346bb2225dae233deac0cfcfcba5199f75bc"
+    },
+    {
+      "path": "prisma/migrations/20260516180000_schedule_share_one_pending_per_user/migration.sql",
+      "sha1": "7034f20baaaa71ebe773bc2c32884cb18ab09dc5"
+    },
+    {
+      "path": "prisma/migrations/20260517120000_schedule_share_usage_limit/migration.sql",
+      "sha1": "8c088d530661d4ddd6e936364e8a1f8f022e29bc"
+    },
+    {
+      "path": "prisma/migrations/20260518120000_plan_request_schedule_share/migration.sql",
+      "sha1": "7435d983f733e1fb512d1074fd2fa96597d5f2b6"
+    },
+    {
+      "path": "prisma/migrations/20260520120000_user_nickname_key_unique/migration.sql",
+      "sha1": "44bb3b27a6e1c82149ebb2777a648218b154a154"
+    },
+    {
+      "path": "prisma/migrations/20260521140000_user_calendar_category_ics_backfill/migration.sql",
+      "sha1": "cefaacdd220f9a871086624192cae1ed0bc029f0"
+    },
+    {
+      "path": "prisma/migrations/20260521180000_course_official_schedule/migration.sql",
+      "sha1": "7b14081d9d0d597e8a096a276b40e34da2fd374c"
+    },
+    {
+      "path": "prisma/migrations/20260523120000_discover_activities/migration.sql",
+      "sha1": "f920421375feb4a5b34b25f9641d824c484fdc39"
+    },
+    {
+      "path": "prisma/migrations/20260523120000_native_push_device/migration.sql",
+      "sha1": "818bd3d21f4e3888231cf4b9d344a7172301b6d8"
+    },
+    {
+      "path": "prisma/migrations/20260524120000_discover_activity_description/migration.sql",
+      "sha1": "c6992bcf74dfe220a3d613bc4d8da17da269cdab"
+    },
+    {
+      "path": "prisma/migrations/20260524180000_optional_discover_categories/migration.sql",
+      "sha1": "ecced35b3e3190ab926f55fee24aee1c9e8e1ba5"
+    },
+    {
+      "path": "prisma/migrations/20260525120000_user_life_photos/migration.sql",
+      "sha1": "c36c43acd4de5ad9646d2b9172c415ef7c1ca44f"
+    },
+    {
+      "path": "prisma/migrations/20260603120000_user_calendar_category/migration.sql",
+      "sha1": "e1c690f7d348397707940207da97398596c9ca8c"
+    },
+    {
+      "path": "prisma/migrations/20260603120100_user_calendar_category_ics_backfill/migration.sql",
+      "sha1": "134974dd67811c488a0833764b77c5e27c9cc205"
+    },
+    {
+      "path": "prisma/migrations/20260603130000_course_instructor_summary/migration.sql",
+      "sha1": "dcbe7f4d102e22be6aa8fc391f4169ab17265cee"
+    },
+    {
+      "path": "prisma/migrations/20260603140000_user_visibility_flags/migration.sql",
+      "sha1": "7e0fc5cebffa4da57af806028855aba84f2ed692"
+    },
+    {
+      "path": "prisma/migrations/20260603150000_chat_read_cursors/migration.sql",
+      "sha1": "e5c653cb559acc88a36ce67cf840e5830eeb5b3a"
+    },
+    {
+      "path": "prisma/migrations/20260607180000_calendar_entry_course_schedule_mirror_key/migration.sql",
+      "sha1": "9a6314fe57d2ced26b73d20687ccbbcd27be83a5"
+    },
+    {
+      "path": "prisma/migrations/20260609120000_unify_course_mirror_entry_category/migration.sql",
+      "sha1": "ea7ad82e2baf2db6ad7bac8bb1bfe68bca38054a"
+    },
+    {
+      "path": "prisma/migrations/20260610120000_message_schedule_share_card/migration.sql",
+      "sha1": "b830fa6ae232b5970575de698517c78a85b30fef"
+    },
+    {
+      "path": "prisma/migrations/20260619120000_user_discovery_privacy_flags/migration.sql",
+      "sha1": "4694c84f9f4b3eef377a18c3c83fa9364eb73dd5"
+    },
+    {
+      "path": "prisma/migrations/20260619130000_email_otp_challenge/migration.sql",
+      "sha1": "b96c27befa5fc77eff23b177ea9820d0fc56fbb4"
+    },
+    {
+      "path": "prisma/migrations/20260619140000_user_email_normalized_unique/migration.sql",
+      "sha1": "6b79f2d9f45f04197f8f8f9a45946f07837a8b3a"
+    },
+    {
+      "path": "prisma/migrations/20260620120000_nickname_not_unique/migration.sql",
+      "sha1": "38292bf0ba267ae8f505a8d39e4d99b57b6d08cc"
+    },
+    {
+      "path": "prisma/migrations/20260620130000_user_username_change_cooldown/migration.sql",
+      "sha1": "af4d26e551bc247a26ca6c9b6f29187e86bf387e"
+    },
+    {
+      "path": "prisma/migrations/20260620140000_feedback_forum/migration.sql",
+      "sha1": "c6f83f4821aa742891badc315f4e34445f77ebf1"
+    },
+    {
+      "path": "prisma/migrations/20260620150000_remove_legacy_activity_calendar_presets/migration.sql",
+      "sha1": "3dfd6b45a9ca076135566b3570640cdccfe6005b"
+    },
+    {
+      "path": "prisma/migrations/20260716190000_native_refresh_sessions/migration.sql",
+      "sha1": "ec01fa4a7d00717e6eb67c5548de24dc0991f0db"
+    },
+    {
+      "path": "prisma/migrations/20260716194000_api_rate_limit_counters/migration.sql",
+      "sha1": "2f6ec75b95a2334e1ee079c76ca501f3c16c5005"
+    },
+    {
+      "path": "prisma/migrations/20260716200000_api_idempotency_records/migration.sql",
+      "sha1": "274c9642100c217f8727b0715c90d25a969fabf6"
+    },
+    {
+      "path": "prisma/migrations/20260716210000_chat_realtime_events/migration.sql",
+      "sha1": "96e096ce0f6b3e9c89ab39defde43d7e813ac104"
+    },
+    {
+      "path": "prisma/migrations/20260716211000_chat_realtime_event_sender/migration.sql",
+      "sha1": "80db5b161e36ab7486310646d8d3b73687db72da"
+    },
+    {
+      "path": "prisma/migrations/20260716212000_chat_realtime_retention/migration.sql",
+      "sha1": "1c4dd0b17bf882e669100f171e72058b067b0ea4"
+    },
+    {
+      "path": "prisma/migrations/20260718120000_storekit_transactions/migration.sql",
+      "sha1": "13ce2ae87af720641fd672411b04e4a245d53eb7"
+    },
+    {
+      "path": "prisma/migrations/20260802182000_buddy_post_trust_controls/migration.sql",
+      "sha1": "2d22227603c335ff2756b3b56e29cf5dd6f96634"
+    },
+    {
+      "path": "prisma/migrations/20260803100000_unified_public_plans/migration.sql",
+      "sha1": "1fffbb213d5c039a0d8af93e71e1e0315a26b39d"
+    },
+    {
+      "path": "prisma/migrations/20260803235000_student_status_and_graduation_year/migration.sql",
+      "sha1": "e728e146adc0f161f20a8db04249b66047a4b248"
+    },
+    {
+      "path": "prisma/migrations/20260804001000_content_report_targets/migration.sql",
+      "sha1": "552eef9bd390c5031f28149e667ef34aab885ed1"
+    },
+    {
+      "path": "prisma/migrations/20260804143000_active_course_memberships/migration.sql",
+      "sha1": "1aed3d98f0dd351cd54d3f480426da39b4f01cc6"
+    },
+    {
+      "path": "prisma/migrations/20260804173000_direct_message_pagination_index/migration.sql",
+      "sha1": "2f1a232ab2cf7846774735b4ad5d90f6c12b5e9a"
+    },
+    {
+      "path": "prisma/migrations/20260804190000_course_catalog_sync_runs/migration.sql",
+      "sha1": "f7ce03d6ec7473676d82f26863880d1bc99f77a0"
+    },
+    {
+      "path": "prisma/migrations/20260804200000_classmate_post_questions/migration.sql",
+      "sha1": "81f72453dd69290a562f261e883c326e87a57af6"
+    },
+    {
+      "path": "prisma/migrations/20260804203000_course_semester_review/migration.sql",
+      "sha1": "38cd1eeef2d8e82e22ae221c6040266d266a0d0b"
+    },
+    {
+      "path": "prisma/migrations/20260804212000_community_submitted_courses/migration.sql",
+      "sha1": "00097fc7e240808fd54d1b38d3d9cc6b6cd877d4"
+    },
+    {
+      "path": "prisma/migrations/20260805173000_lightweight_school_verification/migration.sql",
+      "sha1": "000ef4b7150ead9d764ed896cb8ead7df0fe9c19"
+    },
+    {
+      "path": "prisma/migrations/20260805193000_unlock_direct_chat_after_mutual_reply/migration.sql",
+      "sha1": "bff8222b864fb8291039e6987813eb2d96cffffc"
+    },
+    {
+      "path": "prisma/migrations/20260807120000_username_change_weekly_limit/migration.sql",
+      "sha1": "94e0c08681aacb4a389dcdd19872153ff6d84e5c"
+    },
+    {
+      "path": "prisma/migrations/20260807143000_classmate_post_closure_reason/migration.sql",
+      "sha1": "77069068cbf1855527646caa157ad19366747646"
+    },
+    {
+      "path": "prisma/migrations/20260808010000_native_push_device_environment/migration.sql",
+      "sha1": "5721cda234c7225e93213d4138b0e5c4dc4404db"
+    },
+    {
+      "path": "prisma/migrations/20260808210000_calendar_category_templates/migration.sql",
+      "sha1": "d04cd3b94160000f956068e61fcb720c01d6f0c0"
+    },
+    {
+      "path": "prisma/migrations/20260812183000_discover_activity_comments/migration.sql",
+      "sha1": "644624d4270f55c56e69bf0f73d925a174af186e"
+    },
+    {
+      "path": "prisma/migrations/20260828120000_backfill_study_calendar_category/migration.sql",
+      "sha1": "b0f44ddc6c1ea092091d891c248c72f9823f7dfb"
+    },
+    {
+      "path": "prisma/migrations/20260829120000_windowed_calendar_recurrence/migration.sql",
+      "sha1": "fbd66192964ff8e4ae21d7dd8d28cb27930906cf"
+    },
+    {
+      "path": "prisma/migrations/20260829180000_event_share_links/migration.sql",
+      "sha1": "71f9d3fa7b62039753b0a3640c4ec53fbde1bc1f"
+    },
+    {
+      "path": "prisma/migrations/20260829191500_calendar_subscription_links/migration.sql",
+      "sha1": "67f99f07951b72ccc979bf40676b6ceca9e0d203"
+    },
+    {
+      "path": "prisma/migrations/20260829193000_action_to_plan_v2/migration.sql",
+      "sha1": "39a5fb16a45adea78b749017cf6c4cd347fa1264"
+    },
+    {
+      "path": "prisma/migrations/20260830203000_reconcile_schema_history/migration.sql",
+      "sha1": "45bba49a9cea412b943aacc8703c02d08a11fece"
+    },
+    {
+      "path": "prisma/migrations/20260830210000_blight_coordination_enums/migration.sql",
+      "sha1": "8547b3d25f94971eaec433501de763c180f375c9"
+    },
+    {
+      "path": "prisma/migrations/20260830211000_blight_coordination_expand/migration.sql",
+      "sha1": "4d0a1500776aec51a3c52155d11dcc36db02d26c"
+    },
+    {
+      "path": "prisma/migrations/20260830220000_blight_plan_commitment_enums/migration.sql",
+      "sha1": "39878fecd390f2514b1e86401303189ee60c7f28"
+    },
+    {
+      "path": "prisma/migrations/20260830221000_blight_plan_commitment_expand/migration.sql",
+      "sha1": "c560346ba1d3c53a589641d90af987d97404ee37"
+    },
+    {
+      "path": "prisma/migrations/20260830230000_blight_plan_safety_enums/migration.sql",
+      "sha1": "504f7070f98d344dd3887d82a924d1ccfb42b335"
+    },
+    {
+      "path": "prisma/migrations/20260830231000_blight_plan_safety_expand/migration.sql",
+      "sha1": "12b28d0ecb2eabb7d1ff7048d8233b4a5e0da6ba"
+    },
+    {
+      "path": "prisma/migrations/20260830232000_blight_analytics_event_enums/migration.sql",
+      "sha1": "cafe05e2509cbc4ae87122e319391723a781d595"
+    },
+    {
+      "path": "prisma/migrations/20260830233000_blight_direct_context_compatibility/migration.sql",
+      "sha1": "f29bc717b0fcabcc4e823d84c3de829c32624939"
+    },
+    {
+      "path": "prisma/migrations/20260830234000_blight_experiment_eligibility_history/migration.sql",
+      "sha1": "ec9fa5a9178985f047e53885ddb619075065c045"
+    },
+    {
+      "path": "prisma/migrations/20260831010000_blight_canonical_connection_hardening/migration.sql",
+      "sha1": "9ab23784ef2a90fa91f14fb23b75495696a2e85e"
+    },
+    {
+      "path": "prisma/migrations/20260831020000_blight_plan_commitment_backfill_constraints/migration.sql",
+      "sha1": "9f6f8233918a55e406d42c758b153f497a576ac8"
+    },
+    {
+      "path": "prisma/migrations/20260831120000_weekly_intent_foundation/migration.sql",
+      "sha1": "859e9cb159b82783af461ef248e82a667d2d988d"
+    },
+    {
+      "path": "prisma/migrations/20260831210000_mutual_opportunity_v1/migration.sql",
+      "sha1": "1a1de5e762155b9d0ba42efc29d4f2024b991879"
+    },
+    {
+      "path": "prisma/migrations/20260901120000_weekly_intent_sport_context/migration.sql",
+      "sha1": "f5f37ef16283c752a8b8339100fad1e0aacfb8cc"
+    },
+    {
+      "path": "prisma/migrations/20260901150000_together_mode_study_goal/migration.sql",
+      "sha1": "6a2720329da893265827e15a8581987ce45bfd77"
+    },
+    {
+      "path": "prisma/migrations/20260901170000_together_matching_session/migration.sql",
+      "sha1": "a6e316811240f0ed5164af0f8dc02fbfa7a89cdc"
+    },
+    {
+      "path": "prisma/migrations/20260902120000_weekly_intent_general_activity/migration.sql",
+      "sha1": "a3c874a38621549e0ea69fca85e17d77f0953ca4"
+    },
+    {
+      "path": "prisma/migrations/20260907120000_shared_encounter/migration.sql",
+      "sha1": "f520ae1a510da7ab5603e18c474690caef8509a1"
+    },
+    {
+      "path": "prisma/migrations/20260908010000_meet_again_repeat/migration.sql",
+      "sha1": "3d04762375be79a1c3f5f05d5704d13566f7730d"
+    },
+    {
+      "path": "prisma/migrations/20260909010000_flexible_intent_timing/migration.sql",
+      "sha1": "a86aee875ed053b2027f5534d0734f3c4f69024c"
+    },
+    {
+      "path": "prisma/migrations/20260909020000_intent_driven_matching/migration.sql",
+      "sha1": "9cc2aa6acd23bb6e40b09c6bf41c4b5c3fecd1b7"
+    },
+    {
+      "path": "prisma/migrations/20260911001000_explore_intent_visibility/migration.sql",
+      "sha1": "459a52bc71c3f2e93c3c5ca3ae27e8959c5ec5f3"
+    },
+    {
+      "path": "prisma/migrations/20260912010000_persistent_intentions/migration.sql",
+      "sha1": "01601bc65bdb55884d948be1ffc44a206a16aeba"
+    },
+    {
+      "path": "prisma/migrations/20260912020000_explore_mutual_interest/migration.sql",
+      "sha1": "6196181caeed0a91b4951b4a9ecda7c36b81e8de"
+    },
+    {
+      "path": "prisma/migrations/20260926120000_opportunity_message_requests/migration.sql",
+      "sha1": "f9c797c0952d477a8dbd983e1c05e15547fecce9"
+    },
+    {
+      "path": "prisma/migrations/20260926130000_explore_contact_drafts/migration.sql",
+      "sha1": "3b0500972d64dd680d810bfe441cd65a14fb6f53"
+    },
+    {
+      "path": "prisma/migrations/20260926130100_explore_draft_activation_constraint/migration.sql",
+      "sha1": "51d0dce6015be3552131fbf0888b818315fa7ef5"
+    },
+    {
+      "path": "prisma/migrations/20260926160000_membership_invite_codes/migration.sql",
+      "sha1": "e6d1236f851405e5f506044589749754c1c18e4d"
+    },
+    {
+      "path": "prisma/migrations/20260926180000_membership_invite_admin/migration.sql",
+      "sha1": "d0aab570afd868070493cafd3a1cf881e6ec990c"
+    },
+    {
+      "path": "prisma/migrations/20260926210000_intention_time_deadlines/migration.sql",
+      "sha1": "31b2a9389031f50fa9fea97ed871746f25f9b269"
+    },
+    {
+      "path": "prisma/migrations/20260927010000_plan_cancellation_notices/migration.sql",
+      "sha1": "e653c0595125b6e976a76b4c7e8ac2a0ec80f74c"
+    },
+    {
+      "path": "prisma/migrations/20260930190000_media_lifecycle/migration.sql",
+      "sha1": "a4b0ee24e307d88ade4cf249ae2f8349bde95b0a"
+    },
+    {
+      "path": "prisma/migrations/20261002140000_profile_appearance/migration.sql",
+      "sha1": "179d6474e487243ad56fbc3923f21c770423ba1a"
+    },
+    {
+      "path": "prisma/migrations/20261002200000_intent_share/migration.sql",
+      "sha1": "a4ec4a80e730e6071b2dc025be522cd2c206c63f"
+    },
+    {
+      "path": "prisma/migrations/20261015093000_native_time_polls/migration.sql",
+      "sha1": "1b4087a5bde893abe9bc3f036e9da2c30500f515"
+    },
+    {
+      "path": "prisma/migrations/migration_lock.toml",
+      "sha1": "4e645320de2551d1097ca37e246bc6de904a4832"
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha1": "21f9dd28d1d84196439a6054e78b6121016802c9"
+    },
+    {
+      "path": "prisma/seed.ts",
+      "sha1": "7a4c34574a5784e7be0f9f5fde26fcbd7131fae6"
+    },
+    {
+      "path": "public/avatars/companions-v1/p01.svg",
+      "sha1": "dc1451c66c47189562e8ac109b7be43fb650e548"
+    },
+    {
+      "path": "public/avatars/companions-v1/p02.svg",
+      "sha1": "ed844d1cedfe50ff7c9b9142fdd40f06f7bfa970"
+    },
+    {
+      "path": "public/avatars/companions-v1/p03.svg",
+      "sha1": "0a2cf48fb66a744984a061a3a4c425f119075ef6"
+    },
+    {
+      "path": "public/avatars/companions-v1/p04.svg",
+      "sha1": "e9cb3fcc08d5de17f6ce31810e97217e176235ac"
+    },
+    {
+      "path": "public/avatars/companions-v1/p05.svg",
+      "sha1": "44ca210b467d2b540b28e163d45ed11cceef6555"
+    },
+    {
+      "path": "public/avatars/companions-v1/p06.svg",
+      "sha1": "8cbd6e80c3c305ee709e64ba5ddb23f491ce3e3b"
+    },
+    {
+      "path": "public/avatars/companions-v1/p07.svg",
+      "sha1": "1150897731a0b183eabc16cfdd6e03b76ee285d4"
+    },
+    {
+      "path": "public/avatars/companions-v1/p08.svg",
+      "sha1": "d8ba021c70301532978dcde4cd7ea2041aa0e79c"
+    },
+    {
+      "path": "public/avatars/companions-v1/p09.svg",
+      "sha1": "39c56314254bc5d922e10fefb34ab334e6705f44"
+    },
+    {
+      "path": "public/avatars/companions-v1/p10.svg",
+      "sha1": "d48e05232de2f066ec0040cb046cf67650f1a059"
+    },
+    {
+      "path": "public/avatars/companions-v1/p11.svg",
+      "sha1": "9e05200768cd08dd1f776223e9cb9315c55dc356"
+    },
+    {
+      "path": "public/avatars/companions-v1/p12.svg",
+      "sha1": "d1f2ef96ff8b4b5280162107eba83fa7e2c37f6c"
+    },
+    {
+      "path": "public/avatars/companions-v1/p13.svg",
+      "sha1": "8d56f113b30bce869bd3fd87157ef54bfa7a9a7e"
+    },
+    {
+      "path": "public/avatars/companions-v1/p14.svg",
+      "sha1": "f64b996c165234d03398a25473641a20b9bcf135"
+    },
+    {
+      "path": "public/avatars/companions-v1/p15.svg",
+      "sha1": "dc298ad620b4a964cd8ae98175f61c53d569dcab"
+    },
+    {
+      "path": "public/avatars/companions-v1/p16.svg",
+      "sha1": "fe504b2c726d09400deaafa6bf2868c2720b01a5"
+    },
+    {
+      "path": "public/avatars/companions-v1/p17.svg",
+      "sha1": "3ba54e7e9809637db261e1397d6dc97f39542084"
+    },
+    {
+      "path": "public/avatars/companions-v1/p18.svg",
+      "sha1": "cc5460fbf71d688909bc43dc5bf0bc8906dc1349"
+    },
+    {
+      "path": "public/avatars/companions-v1/p19.svg",
+      "sha1": "ea98618f4bc01d89f051a621fc4cff4367f3024c"
+    },
+    {
+      "path": "public/avatars/companions-v1/p20.svg",
+      "sha1": "19cfee982da2a4df3d6804c5c6356902fcf225b1"
+    },
+    {
+      "path": "public/avatars/p01.jpeg",
+      "sha1": "b5732747cdc8bf802eb1f5055a599660819b6feb"
+    },
+    {
+      "path": "public/avatars/p02.jpeg",
+      "sha1": "551d06fd878da766f73787c88d5c2c5833479385"
+    },
+    {
+      "path": "public/avatars/p03.jpeg",
+      "sha1": "0b90ae1377633ee77263337b6bd8b8802b2d5967"
+    },
+    {
+      "path": "public/avatars/p04.jpeg",
+      "sha1": "9ee4e68351b6078e6288d3d0a9c7d158b1519dda"
+    },
+    {
+      "path": "public/avatars/p05.jpeg",
+      "sha1": "77653c6e5ea5f3f5e915d612ccff04bb15821a9f"
+    },
+    {
+      "path": "public/avatars/p06.jpeg",
+      "sha1": "84641f0482d14d857ee640cd02285707e28212ce"
+    },
+    {
+      "path": "public/avatars/p07.jpeg",
+      "sha1": "94ab61140d0cd20fc29b96bc92e9c6525ca9114e"
+    },
+    {
+      "path": "public/avatars/p08.jpeg",
+      "sha1": "80e0dc760dc795e8bb2457cacbc79c82fd840d54"
+    },
+    {
+      "path": "public/avatars/p09.jpeg",
+      "sha1": "4668649e7cf97d5017262a549870c22b45c23e86"
+    },
+    {
+      "path": "public/avatars/p10.jpeg",
+      "sha1": "89f1cec12c1c53db383d8bdb3bd2d04579c3220c"
+    },
+    {
+      "path": "public/avatars/p11.jpeg",
+      "sha1": "8fe7b226fcd446c6ac7af30f67b19891f4c5c991"
+    },
+    {
+      "path": "public/avatars/p12.jpeg",
+      "sha1": "fe5650f655b45466885e98e4c6f846008cb5c214"
+    },
+    {
+      "path": "public/avatars/p13.jpeg",
+      "sha1": "961afb4c2d5a8ff72ffbda580472153bd97b45dd"
+    },
+    {
+      "path": "public/avatars/p14.jpeg",
+      "sha1": "a81d3d969e5541385413b0e2ee80c8b064c95f3b"
+    },
+    {
+      "path": "public/avatars/p15.jpeg",
+      "sha1": "4b624df98f36468ea7c50cd749c0f8a36b8d8bed"
+    },
+    {
+      "path": "public/avatars/p16.jpeg",
+      "sha1": "f456bff7f5580dbcfe4bde99414c80d1c4d67c1e"
+    },
+    {
+      "path": "public/avatars/p17.jpeg",
+      "sha1": "7e699e02b2d9025553841f4706e09a9bed5c96c0"
+    },
+    {
+      "path": "public/avatars/p18.jpeg",
+      "sha1": "e0c2cf72dd8688107c72179de309b627a6a2af4d"
+    },
+    {
+      "path": "public/avatars/p19.jpeg",
+      "sha1": "495faafdd67eff461066706c0bcedbed601afa60"
+    },
+    {
+      "path": "public/avatars/p20.jpeg",
+      "sha1": "da7f9336c39c98c31cb03adddfd66c29883569a5"
+    },
+    {
+      "path": "public/icons/app-icon.png",
+      "sha1": "89ee94f4341fd1072ca925efa645e95089b18c0f"
+    },
+    {
+      "path": "public/schools/lmu.svg",
+      "sha1": "9f9c941ffeca35c43297976ccf7a7a34d24dd809"
+    },
+    {
+      "path": "public/schools/tum.svg",
+      "sha1": "797d673e57acda2a6727b53152c9969520f844fd"
+    },
+    {
+      "path": "public/sw.js",
+      "sha1": "fff9f204c38b29bd6733d17215e28ca52b6a3a22"
+    },
+    {
+      "path": "scripts/add-lmu-test-user.ts",
+      "sha1": "6672f0bdb91a7942b6eb0c1251f5ed6b2187e8b6"
+    },
+    {
+      "path": "scripts/add-unverified-test-user.ts",
+      "sha1": "d2a721724880627a3fa321b4f41d581dabac0757"
+    },
+    {
+      "path": "scripts/audit-b-light-deployment.d.mts",
+      "sha1": "82adf1576afde10561f50d1902f5243becdf6e48"
+    },
+    {
+      "path": "scripts/audit-b-light-deployment.mjs",
+      "sha1": "a052566957c4fc15832a070bd25bf290e7c95736"
+    },
+    {
+      "path": "scripts/audit-b-light-invariants.d.mts",
+      "sha1": "744dc96d8c6e53011e0f26d49bdd4bc2aeb2d713"
+    },
+    {
+      "path": "scripts/audit-b-light-invariants.mjs",
+      "sha1": "a11ad58547d41fc31aa0ce6d24b156f5e22983e7"
+    },
+    {
+      "path": "scripts/backfill-b-light-direct-v1.ts",
+      "sha1": "835793708544542acb892dd2d694b63d8ac671de"
+    },
+    {
+      "path": "scripts/backfill-schedule-share-plan-requests.ts",
+      "sha1": "2d9f42877f35bf238c100ed1f88d325f1049cbaf"
+    },
+    {
+      "path": "scripts/build-database-policy.d.mts",
+      "sha1": "295223331e93f674c5295d4e1a47a3a2486f6883"
+    },
+    {
+      "path": "scripts/build-database-policy.mjs",
+      "sha1": "f05aca91347257d0e013e42bbc720b8f83c4c647"
+    },
+    {
+      "path": "scripts/build.mjs",
+      "sha1": "e68f00410c35b15ae7354235fdad8b1cd1ba34cf"
+    },
+    {
+      "path": "scripts/check-openapi-v1.d.mts",
+      "sha1": "6c09b99f9c42207b00351e0a5b07a12b69044a2e"
+    },
+    {
+      "path": "scripts/check-openapi-v1.mjs",
+      "sha1": "8e82f9436206bd5cd0769f6bacc08f7e4f263830"
+    },
+    {
+      "path": "scripts/check-production-readiness.mjs",
+      "sha1": "405664a0e61441c440eaa985e1adaf7d296baf9e"
+    },
+    {
+      "path": "scripts/create-mutual-smoke-accounts.ts",
+      "sha1": "afa4abc7fa61d6b2b11ed18bfb62b95f57d31512"
+    },
+    {
+      "path": "scripts/dedupe-user-emails.ts",
+      "sha1": "d54f67cbb160b556d73f929daba8b01ab2ddfd74"
+    },
+    {
+      "path": "scripts/join-empty-to-ml.ts",
+      "sha1": "d68d57f57ea4061765e750ad0cfbf1141a1d0527"
+    },
+    {
+      "path": "scripts/lib/b-light-audit-core.d.mts",
+      "sha1": "526dbde293bcdc1f3d993e0f1256645ea0585d95"
+    },
+    {
+      "path": "scripts/lib/b-light-audit-core.mjs",
+      "sha1": "b08e4082477b87bf9a27d70fc0bb74092057ea82"
+    },
+    {
+      "path": "scripts/lib/direct-v1-backfill-cli.ts",
+      "sha1": "25f32fc71a20395e1ff6a87bb612a0180614d695"
+    },
+    {
+      "path": "scripts/lib/direct-v1-backfill-runner.ts",
+      "sha1": "456cf0dedf9088deeb6fcb78a4430fcaf66b9cd5"
+    },
+    {
+      "path": "scripts/make-empty-user.ts",
+      "sha1": "924f5d8bf4ada532eef87dcbb784ecf04af170d4"
+    },
+    {
+      "path": "scripts/membership-invites.ts",
+      "sha1": "9dbb4230b8e255361cda91bbd38162b06c01e55a"
+    },
+    {
+      "path": "scripts/migrate-chat-media.ts",
+      "sha1": "d8b28c6ba2066ad57383b22605334b45d6fb5175"
+    },
+    {
+      "path": "scripts/pad-course-members.ts",
+      "sha1": "59308fef7161c52badd8bc4bf8ff5949a4437a36"
+    },
+    {
+      "path": "scripts/print-e2e-course-id.ts",
+      "sha1": "42b2c5bd5b7b49362d5b234755147def6105f3a4"
+    },
+    {
+      "path": "scripts/purge-old-semester.ts",
+      "sha1": "bc90aa03887aea691fd3c2a318bc543452296aae"
+    },
+    {
+      "path": "scripts/qa-closed-loop.ts",
+      "sha1": "566d41a8e0b750c47628f30b4721f5df35d77eb7"
+    },
+    {
+      "path": "scripts/qa-conversation-plans.ts",
+      "sha1": "798b3181461b998affae300b4d84342fb239350e"
+    },
+    {
+      "path": "scripts/qa-invite-admin.ts",
+      "sha1": "8128b45dffcfdac157d409b8d5452c158df81479"
+    },
+    {
+      "path": "scripts/qa-membership.ts",
+      "sha1": "d708d2b681998d3ca9cc29af4101d4abb1c5ff37"
+    },
+    {
+      "path": "scripts/qa-new-intent-loop.ts",
+      "sha1": "bfb262ab6281e3c24af330d564551f28b8ef0ad6"
+    },
+    {
+      "path": "scripts/qa-plan-cancellation.ts",
+      "sha1": "d9238982462b6ef432d0e63aeac6eb725a4bc36d"
+    },
+    {
+      "path": "scripts/qa-same-peer-loop.ts",
+      "sha1": "5e1b198c8120a96b3d9d450fee8900fd05ec40eb"
+    },
+    {
+      "path": "scripts/qa-share-acquisition.ts",
+      "sha1": "13e36324952c10a737f705de7f698797fb7df231"
+    },
+    {
+      "path": "scripts/report-layer2-outcome-pilot.ts",
+      "sha1": "43385ddcbed5f2483c8eedd2000b5ae37e7c469f"
+    },
+    {
+      "path": "scripts/run-share-acquisition-native.py",
+      "sha1": "6254e2bf4211b4da5b1d966dbd7f052c26d8639c"
+    },
+    {
+      "path": "scripts/run-user-flow-e2e.sh",
+      "sha1": "e6b18dc1dd8b3f90895aa1e4978c6571920650f8"
+    },
+    {
+      "path": "scripts/seed-course-chat.ts",
+      "sha1": "7c0c95a6fc65ddd3a40288fefabbd918addb9951"
+    },
+    {
+      "path": "scripts/seed-explore-examples.ts",
+      "sha1": "b394f25b2043824405b9108ee1a8b17ec055407d"
+    },
+    {
+      "path": "scripts/seed-intent-share-preview.ts",
+      "sha1": "26a4ef468d5720164ee857fc23e35431df5a4035"
+    },
+    {
+      "path": "scripts/seed-test-accounts.ts",
+      "sha1": "2c14f55483a8b9e0fd6d0df02a014376ada5935b"
+    },
+    {
+      "path": "scripts/smoke-auth.ts",
+      "sha1": "99edd870bd2aaf625b5784f605f30180a1dc68ea"
+    },
+    {
+      "path": "scripts/smoke-mutual-opportunity.mjs",
+      "sha1": "3a677459ef06b5a65884fc171860eccd9dd129d8"
+    },
+    {
+      "path": "scripts/start-local-db.mjs",
+      "sha1": "d95a9027c13a4a3e935807341322b4e6323e5a36"
+    },
+    {
+      "path": "scripts/sync-course-instructors.ts",
+      "sha1": "6ddde42d71bc77496926c43aa4f5177beb19b821"
+    },
+    {
+      "path": "scripts/sync-lmu-lsf-catalog.ts",
+      "sha1": "bf27477960e4a2a38116047c3a3054cc7edef535"
+    },
+    {
+      "path": "scripts/sync-tum-course-catalog.ts",
+      "sha1": "e1ac7cca87ef519bddacea6d568cb5a71fabf1b8"
+    },
+    {
+      "path": "scripts/sync-tum-exam-catalog.ts",
+      "sha1": "a34b2a79e35efaba1d955dd027be4839ce6cc187"
+    },
+    {
+      "path": "scripts/sync-tum-official-schedules.ts",
+      "sha1": "52fe8e678c349322be5c371c4914320881ec02dd"
+    },
+    {
+      "path": "scripts/test-calendar-parser-timezones.mjs",
+      "sha1": "63822622f00caa1a43391010486f585f9f1186a6"
+    },
+    {
+      "path": "scripts/test-discover-activity-state.ts",
+      "sha1": "91aaf76dcc23c1baab7e649b7ef208eb7bf993c0"
+    },
+    {
+      "path": "scripts/test-resend-otp.ts",
+      "sha1": "d34d5bfd653f576f4d5630227874a81daee2c2bb"
+    },
+    {
+      "path": "scripts/verify-b-light-direct-v1.ts",
+      "sha1": "5642f9bfbffe62a7e95742efcc34b1e4a26ec0c0"
+    },
+    {
+      "path": "scripts/verify-chat-realtime-migrations.mjs",
+      "sha1": "d94b880f69ca84482fd8578e6104f1c8e434b8cd"
+    },
+    {
+      "path": "scripts/with-local-test-db.mjs",
+      "sha1": "a04f59cd50325b1e3e161595c88153fb788eb2b4"
+    },
+    {
+      "path": "share-expiry-release-source.json",
+      "sha1": "24cbbfb019fbe545660b1eaa954cbf59af34319e"
+    },
+    {
+      "path": "tailwind.config.ts",
+      "sha1": "6c2f3164a6d6fa56a5b9c57e15a911196479631e"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha1": "cf91db1c8901767c9338cb813225ac462a7163da"
+    },
+    {
+      "path": "vercel.json",
+      "sha1": "1bce0e7c4ea688c9918ce60bcdc2bb698b4bbd83"
+    }
+  ],
+  "prunedRetiredFiles": [
+    {
+      "path": "capacitor.config.ts",
+      "sha1": "f227806e58e5d9c354433b2c0e5018978a977c66"
+    },
+    {
+      "path": "ios-shell/www/index.html",
+      "sha1": "9b2d82b80da53c4c14826975804506d61d0e8fcf"
+    },
+    {
+      "path": "scripts/add-chat-planning-demo.ts",
+      "sha1": "1796166818234bcf8bc228d3c9db87146272ca50"
+    },
+    {
+      "path": "scripts/lib/together-demo-catalog.ts",
+      "sha1": "0c7e7668ebca807b82f8b9349a8448707285cb95"
+    },
+    {
+      "path": "scripts/seed-demo.ts",
+      "sha1": "3078695be791abc56b2a4138d000055811b038ad"
+    },
+    {
+      "path": "scripts/seed-discover-showcase.ts",
+      "sha1": "7716a0eeb1e84dadfbd48c40af4a68245ab55a4e"
+    },
+    {
+      "path": "scripts/seed-together-demo.ts",
+      "sha1": "c363d21e6407e5e8b0aa1c1550c65470ad7ed3fe"
+    }
+  ],
+  "overlays": [
+    {
+      "path": ".vercelignore",
+      "sha256": "93e29cce1ded4c68947ad0df88a1104bf4cd57cd7aa58cb7c1cba29e91376609",
+      "source": "active checkout"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/cancel/route.ts",
+      "sha256": "0a6423e4c870d34d8f28a35e96e0047425abc81e294a614c3ab2b5274eeffd11",
+      "source": "active checkout"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/invitation-response/route.ts",
+      "sha256": "952c985cf37cabd1335eabe446381678df2ba9a89a63c7f5d0e5456624c8175c",
+      "source": "active checkout"
+    },
+    {
+      "path": "app/api/v1/time-polls/[token]/invitations/route.ts",
+      "sha256": "5c38156c215fcc994a24d371257222cdaba7932ffbdce1ddb24b384b1c9ea65b",
+      "source": "active checkout"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "d6f4aa29712e73fc68cf3e5a574b2f27a738839f5289c1d2d4a010d56db5ed0e",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/api/v1/account-service.ts",
+      "sha256": "05ae866ce5b4b435c7e55a5ad5fa2ffe2c8029a69f6e3610362655f5107d83fb",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/api/v1/calendar-event-service.ts",
+      "sha256": "eb62918492adf0a02948d3931ce9cf56bbaea61ae576677d5816f7a285cc64ff",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/api/v1/calendar-search-service.ts",
+      "sha256": "a752634dff7e3adbd4a947c0cafcc5ffb43547c0365988dfaf472ad736a6f308",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/api/v1/connection-block-transaction.ts",
+      "sha256": "e527da00e493eaf43245babf576ca00bf2e7ed3f72008e36579b1b2f3b1ae321",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "sha256": "fd62155db19b104cdc4bcf4051414f6cc198302358779a7f578bdbf945642be3",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/calendar/load-calendar-entry-occurrences.ts",
+      "sha256": "db1be4c486ebd651b151c3d8d3ef1c610af79f50284cfd35d884d50b993c923c",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/home/home-schedule-dto.ts",
+      "sha256": "c2ac43636adbf79856e22a8e30d286c5c4f6df3b17314a8f10f6f1e07f69037b",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/time-polls/domain.ts",
+      "sha256": "76d8b53a9272c6613844babafc3ec35b7c95b7e25f6ded9dae19c3509a8b7dc4",
+      "source": "active checkout"
+    },
+    {
+      "path": "lib/time-polls/planning.ts",
+      "sha256": "5125630e7b1b938e5746fe62049872e8503da131b0ab5a938b295a3c0105fcee",
+      "source": "active checkout"
+    },
+    {
+      "path": "openapi/v1.json",
+      "sha256": "a18954ba5ece78fadd7da37da485319788fbdb7a81ec0c675bdd2fd8166f7ebf",
+      "source": "active checkout"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "20b33881eb758a944c57a9bd9474f29578a0d4e36b1d15cb8a475523fd764e54",
+      "source": "active checkout"
+    },
+    {
+      "path": "package.json",
+      "sha256": "34bfbc3f1947519035b1748fb78c38de49f1ffdd961e0452dcd92842dfb15059",
+      "source": "active checkout"
+    },
+    {
+      "path": "prisma/migrations/20261015120000_unified_planning/migration.sql",
+      "sha256": "2916be26b8e2095dfb0feda4cefa95c5657f45d53164c847bbe90894e68caf61",
+      "source": "active checkout"
+    },
+    {
+      "path": "prisma/migrations/20261015123000_unified_planning_calendar_index/migration.sql",
+      "sha256": "71660d22b515c7204fcc66dddc7183b602836ab516a052590fe9f85aca622777",
+      "source": "active checkout"
+    },
+    {
+      "path": "prisma/schema.prisma",
+      "sha256": "6fab358d5240f9a91c4276e97a453fd595b6643f83a85d62fb1d2949bf5550bb",
+      "source": "active checkout"
+    },
+    {
+      "path": "scripts/release-unified-plans100.mjs",
+      "sha256": "28b4d12ca5e910f4cdb0cd647646c26177954d92d631e8c096acd56462ab9564",
+      "source": "active checkout"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "f3db1f0f247dfdca2f419184656dc2d5c18cbe4dfaa5edb020094cc493c7122d",
+      "source": "active checkout"
+    }
+  ],
+  "releaseConfiguration": {
+    "path": "vercel.json",
+    "buildCommand": "node scripts/release-unified-plans100.mjs && npm run build",
+    "sha256": "eeebe2920a3dfe7ee72082de7549a6c67023ef9ca82490f8948c70c7fd2562e2"
+  },
+  "sourceCommit": "76571765decce2a3cdee4cdfb15faf8330cfcd5a",
+  "sourceBranch": "codex/ios-uxui-20260922"
+}

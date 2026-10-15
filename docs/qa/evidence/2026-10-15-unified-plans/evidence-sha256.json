@@ -1,0 +1,66 @@
+[
+  {
+    "path": "backup-summary.json",
+    "sha256": "51e884cbde8ab6735e4ec1513b69272b26980ca4ee058bb6bcc8df013cf68dff"
+  },
+  {
+    "path": "candidate-smoke.json",
+    "sha256": "0975e0da9f057504b7ceaaab51d326bff496eef54fb39e604806a298789011cc"
+  },
+  {
+    "path": "cleanup.json",
+    "sha256": "4a5422adada1398b71ada57c5be9501442817bae664d55876d141acc571df78f"
+  },
+  {
+    "path": "delivery.json",
+    "sha256": "a74b47e17cb0c7267e0452ff952bc0863e076e9370497a4a3fc344cae1ab5449"
+  },
+  {
+    "path": "migration-summary.json",
+    "sha256": "e3e3314fc495e938cdf34fc9d4e5cd36ed741823ef58303497498db43a987007"
+  },
+  {
+    "path": "phone/chinese-dark-creation.png",
+    "sha256": "86102d3e36cc071ea7151c82c18028358934e2e413c10d79723c1cb22edf428e"
+  },
+  {
+    "path": "phone/chinese-dark-timing.png",
+    "sha256": "2a0a07f66549a71276feec78113c305c30550bfe43f9a8234fc02f16ee32e1fa"
+  },
+  {
+    "path": "phone/create-plan.png",
+    "sha256": "00a27dce143504ddf1226771abe59fb3532a25768b00e808829769efb60b4cd7"
+  },
+  {
+    "path": "phone/five-common.png",
+    "sha256": "e917a5d9e1bc27cd275d502cf51891ccb1773ccc8954c863a80c3992ca34dcf2"
+  },
+  {
+    "path": "phone/five-confirmed.png",
+    "sha256": "03ef342ace283d97e9ee8f2c0753ca88530eea87707d28d309f6be4c996f1f46"
+  },
+  {
+    "path": "phone/four-person-recommendation.png",
+    "sha256": "f01e44e57d2f5abb6e9224ebdc2679277d0f7536579d9d62f9c108c7343a72d4"
+  },
+  {
+    "path": "phone/individual-confirmation.png",
+    "sha256": "8aaa90e88a1aa69f7b6f5edaa41419f395abb7b16956a2f24e8594891dd93821"
+  },
+  {
+    "path": "production-smoke.json",
+    "sha256": "132779da4292e45b2819c7a7d9c96bd8b543be6987ee82633ff836e8399f128d"
+  },
+  {
+    "path": "simulator/calendar-guidance.png",
+    "sha256": "063fe7c4163ac273fca6f9f1ffdfd983bbb35e75b912f35d2bb81f1000623c53"
+  },
+  {
+    "path": "source-manifest.json",
+    "sha256": "e2783b05ad871efb2e1aceddc5f4b4ff926c49fee8953302e1020e6af302721c"
+  },
+  {
+    "path": "uploaded-source-verification.json",
+    "sha256": "793c36a6d6da8600dee67149148057d3f438dfdf0903687433b4894ce2f7b473"
+  }
+]

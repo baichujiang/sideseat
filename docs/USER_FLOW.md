@@ -11,8 +11,7 @@
 ## Unified manual plans — owner-approved 2026-10-15
 
 **Plans → + → Create a plan** starts one shared plan. Enter title, optional place,
-duration and participant count (default five). Choose **Collect everyone's
-availability** or **Choose a time directly**. The existing Messages coordination
+duration and participant count (default five). Choose **Collect availability** or **Set a time**. The existing Messages coordination
 entry and shared links open these same plans in the Plans tab.
 
 For collection, select candidate dates and daily hours; the creation time zone
