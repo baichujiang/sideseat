@@ -18,50 +18,71 @@ struct TimePollSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Button { showsCreate = true } label: { Label("Create a plan", systemImage: "plus") }
-                        .accessibilityIdentifier("time-poll-create")
-                    Button { showsOpen = true } label: { Label("Open a poll link", systemImage: "link") }
-                }
-                Section("Your plans") {
-                    if loading { ProgressView() }
-                    if polls.isEmpty && !loading { Text("Create a poll and invite people to mark their free time.").foregroundStyle(.secondary) }
-                    ForEach(polls) { poll in
-                        Button { openToken = poll.token } label: {
-                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                                Text(poll.title).font(.headline)
-                                Text(poll.statusLabel).font(.subheadline).foregroundStyle(.secondary)
-                            }.padding(.vertical, SideSeatTheme.spaceXS)
+            if initiallyCreating {
+                if let openToken {
+                    TimePollDetailView(token: openToken)
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") { dismiss() }
+                            }
                         }
-                        .accessibilityIdentifier("time-poll-recent-\(poll.token)")
-                    }
+                } else {
+                    TimePollCreateView { poll in openToken = poll.token }
                 }
-                if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
+            } else {
+                pollList
             }
-            .navigationTitle("Plan together")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .navigationDestination(item: $openToken) { TimePollDetailView(token: $0) }
-            .sheet(isPresented: $showsCreate, onDismiss: { Task { await load() } }) {
-                TimePollCreateView { poll in openToken = poll.token }
-            }
-            .alert("Open a poll link", isPresented: $showsOpen) {
-                TextField("Sideseat poll link", text: $link).textInputAutocapitalization(.never).autocorrectionDisabled()
-                Button("Open") {
-                    if let token = TimePollLink.token(from: link) { openToken = token; error = nil }
-                    else { error = AppLocalization.string("Enter a Sideseat time poll link.") }
-                }
-                Button("Cancel", role: .cancel) {}
-            }
-            .refreshable { await load() }
-            .task {
-                openToken = initialToken
-                showsCreate = initiallyCreating
-                await load()
-            }
-            .onChange(of: openToken) { _, token in if token == nil { Task { await load() } } }
         }.tint(SideSeatTheme.utilityAction)
+    }
+
+    private var pollList: some View {
+        List {
+            Section {
+                Button { showsCreate = true } label: { Label("Create a plan", systemImage: "plus") }
+                    .accessibilityIdentifier("time-poll-create")
+                Button { showsOpen = true } label: { Label("Open a poll link", systemImage: "link") }
+            }
+            Section("Your plans") {
+                if loading { ProgressView() }
+                if polls.isEmpty && !loading { Text("Create a poll and invite people to mark their free time.").foregroundStyle(.secondary) }
+                ForEach(polls) { poll in
+                    Button { openToken = poll.token } label: {
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                            Text(poll.title).font(.headline)
+                            Text(poll.statusLabel).font(.subheadline).foregroundStyle(.secondary)
+                        }.padding(.vertical, SideSeatTheme.spaceXS)
+                    }
+                    .accessibilityIdentifier("time-poll-recent-\(poll.token)")
+                }
+            }
+            if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
+        }
+        .navigationTitle("Plan together")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        .navigationDestination(item: $openToken) { TimePollDetailView(token: $0) }
+        .sheet(isPresented: $showsCreate, onDismiss: { Task { await load() } }) {
+            NavigationStack {
+                TimePollCreateView { poll in
+                    openToken = poll.token
+                    showsCreate = false
+                }
+            }.tint(SideSeatTheme.utilityAction)
+        }
+        .alert("Open a poll link", isPresented: $showsOpen) {
+            TextField("Sideseat poll link", text: $link).textInputAutocapitalization(.never).autocorrectionDisabled()
+            Button("Open") {
+                if let token = TimePollLink.token(from: link) { openToken = token; error = nil }
+                else { error = AppLocalization.string("Enter a Sideseat time poll link.") }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .refreshable { await load() }
+        .task {
+            openToken = initialToken
+            await load()
+        }
+        .onChange(of: openToken) { _, token in if token == nil { Task { await load() } } }
     }
 
     private func load() async {
@@ -91,57 +112,55 @@ struct TimePollCreateView: View {
     let onCreate: (NativeTimePoll) -> Void
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Plan details") {
-                    TextField("For example: Friday dinner", text: $title).accessibilityIdentifier("time-poll-title")
-                    TextField("Location (optional)", text: $location).accessibilityIdentifier("unified-plan-location")
-                    Picker("Activity duration", selection: $durationMinutes) {
-                        ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) { Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0) }
-                    }.accessibilityIdentifier("unified-plan-duration")
-                    Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
-                        .accessibilityIdentifier("unified-plan-participant-count")
-                }
-                Section("Choose the time") {
-                    Picker("Timing method", selection: $planningMode) {
-                        Text("Collect availability").tag("COLLECT")
-                        Text("Set a time").tag("FIXED")
-                    }.pickerStyle(.segmented).accessibilityIdentifier("unified-plan-timing-method")
-                    if planningMode == "FIXED" {
-                        DatePicker("Starts", selection: $fixedStart, in: Date()...).accessibilityIdentifier("unified-plan-fixed-start")
-                        Text("Creating confirms your participation. Share the link so others can confirm before calendars are updated.").font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                if planningMode == "COLLECT" {
-                Section("Candidate dates") {
-                    MultiDatePicker("Choose dates", selection: $dates)
-                        .accessibilityIdentifier("time-poll-dates")
-                    Text("Choose up to 31 dates.").font(.caption).foregroundStyle(.secondary)
-                }
-                Section("Daily time range") {
-                    Picker("From", selection: $startMinute) { ForEach(Array(stride(from: 0, to: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
-                        .accessibilityIdentifier("time-poll-from")
-                    Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 15, through: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
-                        .accessibilityIdentifier("time-poll-until")
-                    LabeledContent("Time zone", value: TimeZone.current.identifier)
-                    Text("Everyone sees the same dates and time zone. Each cell is 15 minutes.").font(.caption).foregroundStyle(.secondary)
-                }
-                }
-                if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
+        Form {
+            Section("Plan details") {
+                TextField("For example: Friday dinner", text: $title).accessibilityIdentifier("time-poll-title")
+                TextField("Location (optional)", text: $location).accessibilityIdentifier("unified-plan-location")
+                Picker("Activity duration", selection: $durationMinutes) {
+                    ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) { Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0) }
+                }.accessibilityIdentifier("unified-plan-duration")
+                Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
+                    .accessibilityIdentifier("unified-plan-participant-count")
             }
-            .navigationTitle("Create a plan").navigationBarTitleDisplayMode(.inline)
-            .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { Task { await create() } } label: {
-                        if creating { ProgressView() } else { Text(planningMode == "FIXED" ? "Create invitation" : "Create") }
-                    }
-                    .disabled(creating || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || dates.isEmpty || dates.count > 31 || endMinute <= startMinute)
-                    .accessibilityIdentifier("time-poll-create-confirm")
+            Section("Choose the time") {
+                Picker("Timing method", selection: $planningMode) {
+                    Text("Collect availability").tag("COLLECT")
+                    Text("Set a time").tag("FIXED")
+                }.pickerStyle(.segmented).accessibilityIdentifier("unified-plan-timing-method")
+                if planningMode == "FIXED" {
+                    DatePicker("Starts", selection: $fixedStart, in: Date()...).accessibilityIdentifier("unified-plan-fixed-start")
+                    Text("Creating confirms your participation. Share the link so others can confirm before calendars are updated.").font(.caption).foregroundStyle(.secondary)
                 }
             }
-        }.tint(SideSeatTheme.utilityAction)
+            if planningMode == "COLLECT" {
+            Section("Candidate dates") {
+                MultiDatePicker("Choose dates", selection: $dates)
+                    .accessibilityIdentifier("time-poll-dates")
+                Text("Choose up to 31 dates.").font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Daily time range") {
+                Picker("From", selection: $startMinute) { ForEach(Array(stride(from: 0, to: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
+                    .accessibilityIdentifier("time-poll-from")
+                Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 15, through: 1440, by: 15)), id: \.self) { Text(clock($0)).tag($0) } }
+                    .accessibilityIdentifier("time-poll-until")
+                LabeledContent("Time zone", value: TimeZone.current.identifier)
+                Text("Everyone sees the same dates and time zone. Each cell is 15 minutes.").font(.caption).foregroundStyle(.secondary)
+            }
+            }
+            if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
+        }
+        .navigationTitle("Create a plan").navigationBarTitleDisplayMode(.inline)
+        .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
+            ToolbarItem(placement: .confirmationAction) {
+                Button { Task { await create() } } label: {
+                    if creating { ProgressView() } else { Text(planningMode == "FIXED" ? "Create invitation" : "Create") }
+                }
+                .disabled(creating || title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || dates.isEmpty || dates.count > 31 || endMinute <= startMinute)
+                .accessibilityIdentifier("time-poll-create-confirm")
+            }
+        }
     }
 
     private func create() async {
@@ -158,7 +177,7 @@ struct TimePollCreateView: View {
                 body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: durationMinutes, expectedCount: expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil),
                 idempotencyKey: createKey
             )
-            onCreate(response.data); dismiss()
+            onCreate(response.data)
         } catch { self.error = error.localizedDescription }
     }
 }

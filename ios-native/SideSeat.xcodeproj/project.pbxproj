@@ -81,6 +81,7 @@
 		570A443A005F73126E88612A /* SmartTimeScheduling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404AFC630C3200DF37360B09 /* SmartTimeScheduling.swift */; };
 		587B4155F909D66AE1A09ABC /* ChatReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F21B276F08D07BF4858A80A4 /* ChatReportSheet.swift */; };
 		5BBB72BE33DFF1E4A0CC70C9 /* ChatStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5929F6766FF38C93D6016E1F /* ChatStoreTests.swift */; };
+		5CDB8905DCC9731CE4806DFA /* PlanCreationPresentationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5ED6A12BCFE19FCCC15803 /* PlanCreationPresentationUITests.swift */; };
 		5CE226134F2A1AAE599D0C4F /* SSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D718DD32E95C9B343AA7F4 /* SSCard.swift */; };
 		5DEBB822D48BDEF8C0060622 /* HomeScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD6E43D6350D929117151777 /* HomeScheduleTests.swift */; };
 		5E1C6664F8A6497D386F9471 /* ExploreIntentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B5CEA5BA2004D2FAC864A8 /* ExploreIntentModels.swift */; };
@@ -397,6 +398,7 @@
 		CAC02EF84D2731B1C13E4F1B /* VisualQAScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualQAScreenshotUITests.swift; sourceTree = "<group>"; };
 		CD6E43D6350D929117151777 /* HomeScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScheduleTests.swift; sourceTree = "<group>"; };
 		CDB10D0772B9B7A53A6AB6FA /* SideSeatTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SideSeatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE5ED6A12BCFE19FCCC15803 /* PlanCreationPresentationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanCreationPresentationUITests.swift; sourceTree = "<group>"; };
 		CEC905827C24F6CC783D7D4C /* DiscoverStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverStores.swift; sourceTree = "<group>"; };
 		CF0D8FA9E2DF899C1CA0A97D /* CalendarChrome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarChrome.swift; sourceTree = "<group>"; };
 		CF3A0E7F015CCE6FC2772477 /* SSPlusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSPlusBadge.swift; sourceTree = "<group>"; };
@@ -610,6 +612,7 @@
 				7301DBAEBCC79573895478FE /* LiveLoginSmokeUITests.swift */,
 				6D3D43D06D8F59ED1468DB84 /* MembershipBadgeUITests.swift */,
 				50815624BB3031A64ACBCAC5 /* PlanCancellationUITests.swift */,
+				CE5ED6A12BCFE19FCCC15803 /* PlanCreationPresentationUITests.swift */,
 				E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */,
 				0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */,
 				E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */,
@@ -1316,6 +1319,7 @@
 				9210AB46B48F229A8BD52454 /* LiveLoginSmokeUITests.swift in Sources */,
 				0837487E783800A799143F1D /* MembershipBadgeUITests.swift in Sources */,
 				4F5F7BC65A341DF5A2679E75 /* PlanCancellationUITests.swift in Sources */,
+				5CDB8905DCC9731CE4806DFA /* PlanCreationPresentationUITests.swift in Sources */,
 				9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */,
 				80F89555CBB966F96DB9BBDF /* SmartTimeSchedulingUITests.swift in Sources */,
 				CC138832AECB7E02E9FE6DAF /* TimePollLiveUITests.swift in Sources */,

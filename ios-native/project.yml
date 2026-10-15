@@ -180,9 +180,14 @@ schemes:
     build:
       targets:
         SideSeat: all
+        SideSeatUITests: [test]
     run:
       config: Preview
       storeKitConfiguration: Configuration/SideSeat.storekit
+    test:
+      config: Preview
+      targets:
+        - SideSeatUITests
     analyze:
       config: Preview
     archive:
