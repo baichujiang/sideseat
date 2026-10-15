@@ -94,8 +94,13 @@ test("real touch swipes scroll without edits; hold paints, erases and cancels wi
     await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
     const first = (await page.getByTestId("time-poll-cell-0").boundingBox())!;
     const last = (await page.getByTestId("time-poll-cell-3").boundingBox())!;
-    const x = first.x + first.width / 2, y = first.y + first.height / 2;
-    const hold = async () => { await touch("touchStart", x, y); await page.waitForTimeout(450); };
+    const x = first.x + first.width / 2;
+    const hold = async () => {
+      await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
+      const box = (await page.getByTestId("time-poll-cell-0").boundingBox())!;
+      await touch("touchStart", box.x + box.width / 2, box.y + box.height / 2);
+      await page.waitForTimeout(450);
+    };
     await hold(); await touch("touchMove", x, last.y + last.height / 2);
     await expect(page.getByTestId("time-poll-cell-3")).toHaveAttribute("aria-pressed", "true");
     expect(await saved()).toEqual([]);
@@ -103,7 +108,9 @@ test("real touch swipes scroll without edits; hold paints, erases and cancels wi
     expect(await saved()).toEqual([]);
     await hold(); await touch("touchMove", x, last.y + last.height / 2); await touch("touchEnd");
     await expect.poll(saved).toEqual([0, 1, 2, 3]);
-    await hold(); await touch("touchMove", x, last.y + last.height / 2); await touch("touchEnd");
+    await hold();
+    const eraseEnd = (await page.getByTestId("time-poll-cell-3").boundingBox())!;
+    await touch("touchMove", eraseEnd.x + eraseEnd.width / 2, eraseEnd.y + eraseEnd.height / 2); await touch("touchEnd");
     await expect.poll(saved).toEqual([]);
     await page.getByTestId("time-poll-undo").tap(); await expect.poll(saved).toEqual([0, 1, 2, 3]);
     await page.reload(); await expect(page.getByTestId("time-poll-cell-3")).toHaveAttribute("aria-pressed", "true");
