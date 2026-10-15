@@ -70,6 +70,8 @@ and verified against its file SHA-1 before storing non-executable `.txt` evidenc
 The other four differences are `.vercelignore`, `AGENTS.md`, `README.md`, and
 `eslint.config.mjs`. No deployed file or rollout flag was overwritten to reconcile
 this snapshot. Future releases must compare against the then-current deployment.
+The verbatim source snapshots preserve original EOF whitespace; `.gitattributes`
+exempts only this evidence subtree from whitespace normalization/check warnings.
 
 ## Retirement and validation
 
