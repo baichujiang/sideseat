@@ -10,13 +10,17 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 工作区与 Git 根目录核对；105 实现前 fetch，基线 `470c47d` 干净；原生 `f508e64` 已推送；后端沿用 `2285ad1` |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `e068708` 干净；分享网页 `d3a787c` 已推送；原生仍为 `f508e64` |
 | 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (105)` | 选时青绿/部分日期琥珀配色及图例；已签名、安装并空参数正常启动（PID 765）；浅/深色、选时/保存/滚动真机验证通过，见 [105 交付](./releases/2026-10-15-preview105-availability-colors.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 105 连接身份、签名配置及安装清单核验；[验收记录](./qa/2026-10-15-availability-colors.md) |
 | Preview 105 原生源码 | `f508e64` | 已提交并推送；新增选时状态配色，保留 104 当天全选、103 游客、101 单层创建及 102 手势与撤销 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_6Un8qZtCE26v7edqKd2UBexBUHLx`，Ready | 本次双域名 inspect、候选及正式网页端到端验证 |
-| 生产源码 | 1,335 个上传文件均与受控发布目录 SHA-1 一致；基于此前真实生产保留差异，20 项明确覆盖 | 后端来源 `2285ad1`；[发布清单](./qa/evidence/2026-10-15-guest-plans103/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-guest-plans103/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_63iB9RynVCpBdPi68S3SmAezuTND`，Ready | 本次双域名 inspect、候选及正式中文游客端到端验证；[交付](./releases/2026-10-15-share-chinese.md) |
+| 生产源码 | 此前真实生产 1,335 项逐文件重建；三个语言文件、发布配置及来源记录共 5 项覆盖，最终 1,336 项上传 SHA-1 全匹配 | 分享网页来源 `d3a787c`，API/Schema 沿用 103；[发布清单](./qa/evidence/2026-10-15-share-chinese/source-manifest.json)、[上传核对](./qa/evidence/2026-10-15-share-chinese/upload-verification.json) |
+
+分享网页现默认中文，不再受网站已有英文设置影响；保留 English 切换并单独记忆。
+候选及正式 www/API 双域名的中文填写、昵称修改、网页确认与日历姓名验证通过，
+见 [中文分享 QA](./qa/2026-10-15-share-chinese.md)。本次没有数据库迁移或原生重装，手机仍为 Preview 105。
 
 Preview 105 使用青绿标识已选时段/全天全选，用琥珀标识当天部分已选；未选时段保留空白，提供图例、勾选/部分图标及浅深色配色。默认 iPhone 14 Plus 的浅/深色选时、撤销、重开、保存与普通滑动验证通过，见 [105 QA](./qa/2026-10-15-availability-colors.md)。本次没有后端发布。
 
@@ -33,7 +37,7 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 | --- | --- | --- |
 | 同行 | 我的意愿、自动推荐、主动寻找、私密收藏、带意愿上下文的招呼；回复后继续聊天 | 原生导航/源码、线上配置；本次未重跑完整匹配业务 |
 | 计划 | **计划 → + → 发起计划**；可「一起定时间」或「直接选时间」。征集结果选择参与者后转邀请，逐人确认后写入注册用户日历，游客可在分享网页完成填写与确认。概览/即将进行/已结束共用入口；旧聊天双人计划与其改期/反馈继续保留 | 本次原生创建、填写、邀请、确认、重开及日历联调；[验收记录](./qa/2026-10-15-unified-plans.md) |
-| 游客分享参与 | **分享计划链接 → 网页直接参与**，无需下载或注册；昵称旁铅笔编辑、日期/起止时间添加、网页确认 | 候选、正式 API/www 双浏览器流程通过；后续同一台 iPhone 14 Plus 的 Safari/Preview 完整流程通过，见 [真机 QA](./qa/2026-10-15-iphone14plus-guest-flow.md) |
+| 游客分享参与 | **分享计划链接 → 网页直接参与**，默认中文、可切 English，无需下载或注册；昵称旁铅笔编辑、日期/起止时间添加、网页确认 | 最新候选、正式 API/www 中文流程通过，见 [中文 QA](./qa/2026-10-15-share-chinese.md)；103 的同一台 iPhone 14 Plus Safari/Preview 完整流程见 [真机 QA](./qa/2026-10-15-iphone14plus-guest-flow.md) |
 | 智能约时间 | **聊天 → 发起计划 → 智能约时间**；读取自己的已同步日历空档并填入草稿 | 已安装 Preview 99 实测中文名称；对应 `PlanCreateSheet` / `SmartTimeSuggestionSheet` |
 | 多人时间征集 | **计划 → + → 一起定时间**；消息原入口、邀请链接也打开同一共享计划。15 分钟点按/长按拖选、点星期全选当天、撤销、自动保存、热图、完整时长的共同时间/最多人数推荐、选择名单并邀请 | 本次五账号共同时间与四人推荐、排除第五人及保存重开；Sideseat 原生界面和自有数据服务 |
 | 日历 | 个人日程、课程、已确认计划投影、搜索、智能输入、订阅与导入/导出 | 当前导航/源码、线上配置；本次未逐项重跑 |
@@ -112,3 +116,8 @@ TypeScript、ESLint、Vercel 输入中排除，原生目标仅读取 `ios-native
 [审计记录](./qa/2026-10-15-deployment-and-retirement.md)。此前归档没有覆盖这些生产文件。
 Preview 100 发布曾保留这些生产差异。Preview 103 再从真实生产 `dpl_4vBvPch35jxdarqmgnxmvSsGSt6u` 的 1,323 个文件逐项校验重建，覆盖 20 项本次依赖；上传的 1,335 个文件全部匹配受控目录。后续发布继续从当前线上部署对照，
 不可把整个 Git 工作区直接当作生产快照。
+
+分享页中文修复继续从真实生产 `dpl_6Un8qZtCE26v7edqKd2UBexBUHLx` 的 1,335 项
+逐文件校验重建，保留 1,331 项原内容；覆盖三个语言文件和发布配置，新增来源记录。
+最终 1,336 项上传哈希均匹配。旧发布前置脚本不执行，构建显式跳过迁移，Schema 不变；
+新部署为 `dpl_63iB9RynVCpBdPi68S3SmAezuTND`，支持游客的上一版部署保留为恢复点。

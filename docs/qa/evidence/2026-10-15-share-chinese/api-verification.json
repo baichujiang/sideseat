@@ -1,0 +1,14 @@
+{
+  "stage": "api",
+  "base": "https://api.sideseat.de",
+  "defaultChineseWithEnglishBrowserAndOldCookie": true,
+  "englishChoiceSurvivesReload": true,
+  "globalCookieUnchanged": true,
+  "chineseChoiceSurvivesReload": true,
+  "guestFillRenameConfirmInChinese": true,
+  "noCalendarBeforeConfirmation": true,
+  "calendarWithGuestName": true,
+  "pageErrors": [],
+  "serverErrors": [],
+  "verifiedAt": "2026-10-15T20:48:14.195Z"
+}

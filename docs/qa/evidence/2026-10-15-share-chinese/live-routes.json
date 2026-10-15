@@ -1,0 +1,43 @@
+{
+  "nakedShareRedirect": {
+    "status": 307,
+    "preservesPollPath": true,
+    "targetHost": "www.sideseat.de"
+  },
+  "frozenRoutes": [
+    {
+      "path": "/discover",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/profile",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/courses",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/calendar",
+      "status": 307,
+      "target": "/ios"
+    },
+    {
+      "path": "/chats",
+      "status": 307,
+      "target": "/ios"
+    }
+  ],
+  "clientConfigStatus": 200,
+  "clientConfigKeys": [
+    "apiVersion",
+    "serverTime",
+    "ios",
+    "features",
+    "discover",
+    "links"
+  ]
+}

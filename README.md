@@ -45,6 +45,7 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 Preview 105 是当前已安装开发版：可用时间以青绿表示已选、琥珀表示当天部分已选，提供图例并适配深色模式。
 点星期/日期可全选当天，再点清空，支持撤销与自动保存；交付及真机验收见 [Preview 105](./docs/releases/2026-10-15-preview105-availability-colors.md)。
 游客分享、昵称和网页确认沿用 103；[完整真机验收](./docs/qa/2026-10-15-iphone14plus-guest-flow.md)保留为独立记录。
+分享网页已默认中文，保留 English 切换并单独记住选择；[线上交付与验收](./docs/releases/2026-10-15-share-chinese.md)。
 普通 SideSeat / TestFlight 97 为独立的旧分发版本。
 多人时间征集位于「消息 → 一起定时间」；聊天中的「智能约时间」是个人日历空档推荐。
 

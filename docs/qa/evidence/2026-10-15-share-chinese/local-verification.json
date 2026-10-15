@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "d3a787c2c5f79b60f46a7367836e7f97f2400a73",
+  "activeCheckout": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui",
+  "server": "http://127.0.0.1:3105",
+  "serverWorkingDirectoryVerified": true,
+  "database": "isolated local sideseat_ios_test at 127.0.0.1:5433",
+  "guestIntegration": { "file": "e2e/time-poll-guests.spec.ts", "passed": 1, "durationSeconds": 21.7 },
+  "coverage": [
+    "Chinese default on first load, including English browser and old global English cookie",
+    "Explicit English persists on reload without changing global cookie",
+    "Switch back to Chinese persists on a different shared plan",
+    "Two guests fill availability, rename, accept exact invitation and appear as Calendar companions",
+    "No Calendar entry before every selected guest confirms",
+    "Direct-time guest decline and acceptance",
+    "Existing guest identity and origin checks"
+  ],
+  "typeScript": "passed",
+  "focusedEslint": "passed",
+  "reactReview": "No new effects, client/server mixing, or hydration-time locale switch; language chosen during server rendering",
+  "ownedServerAndLocalDatabaseStopped": true
+}
