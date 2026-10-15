@@ -145,6 +145,34 @@ import XCTest
         app.swipeUp(); attach("chinese-dark-accessibility-timing")
     }
 
+    func testCalendarSharedPlanCaptionAndCanonicalRoute() throws {
+        try authenticateAccounts()
+        title = "Calendar plan QA \(Int(Date().timeIntervalSince1970))"
+        let date = String(ISO8601DateFormatter().string(from: Date().addingTimeInterval(2 * 86400)).prefix(10))
+        let created = try call("/api/v1/time-polls", method: "POST", auth: auth[0], body: ["title": title, "timeZone": "Europe/Berlin", "dates": [date], "startMinute": 540, "endMinute": 1020, "durationMinutes": 60, "expectedCount": 2, "planningMode": "FIXED", "fixedStart": date + "T12:00:00Z"], expectedStatus: 201)
+        token = try XCTUnwrap((created["data"] as? [String: Any])?["token"] as? String)
+        addTeardownBlock { [self] in MainActor.assumeIsolated {
+            _ = try? call("/api/v1/time-polls/\(token)/cancel", method: "POST", auth: auth[0], body: ["version": 1])
+            _ = try? call("/api/v1/time-polls/\(token)", method: "DELETE", auth: auth[0]); app.terminate()
+        } }
+        _ = try call("/api/v1/time-polls/\(token)/invitation-response", method: "PUT", auth: auth[4], body: ["version": 1, "status": "ACCEPTED"])
+        loginUI(4); tab("Calendar"); app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(title)
+        let eventID = try XCTUnwrap(try calendarRows(4).first?["id"] as? String)
+        let result = app.buttons["calendar-search-result-\(eventID)"]
+        XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()
+        let manage = app.buttons["calendar-manage-plan"]
+        for _ in 0..<4 where !manage.exists || !manage.isHittable { app.swipeUp() }
+        XCTAssertTrue(manage.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["Shared Plan details are managed in Messages."].exists)
+        XCTAssertTrue(app.staticTexts["Shared plan details are managed in Plans."].firstMatch.exists)
+        attach("calendar-caption-verified")
+        manage.tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-confirmation-count"].waitForExistence(timeout: 15))
+        XCTAssertEqual(app.staticTexts["unified-plan-confirmation-count"].label, "2 of 2 confirmed")
+    }
+
     private func loginUI(_ n: Int, language: String = "en", appearance: String = "light", accessibility: Bool = false) {
         app.terminate()
         app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)"]
@@ -187,7 +215,7 @@ import XCTest
     private func attach(_ name: String) {
         let image = XCTAttachment(screenshot: app.screenshot()); image.name = "unified-plan-" + name; image.lifetime = .keepAlways; add(image)
     }
-    private func call(_ path: String, method: String = "GET", auth: String? = nil, body: [String: Any]? = nil) throws -> [String: Any] {
+    private func call(_ path: String, method: String = "GET", auth: String? = nil, body: [String: Any]? = nil, expectedStatus: Int = 200) throws -> [String: Any] {
         var request = URLRequest(url: URL(string: api + path)!); request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type"); request.setValue(UUID().uuidString, forHTTPHeaderField: "Idempotency-Key")
         if let auth { request.setValue("Bearer \(auth)", forHTTPHeaderField: "Authorization") }
@@ -196,7 +224,7 @@ import XCTest
         URLSession.shared.dataTask(with: request) { data, response, error in box.data = data; box.status = (response as? HTTPURLResponse)?.statusCode; box.error = error; done.fulfill() }.resume()
         wait(for: [done], timeout: 30)
         if let error = box.error { throw error }
-        XCTAssertEqual(box.status, 200)
+        XCTAssertEqual(box.status, expectedStatus)
         return try JSONSerialization.jsonObject(with: XCTUnwrap(box.data)) as? [String: Any] ?? [:]
     }
 }

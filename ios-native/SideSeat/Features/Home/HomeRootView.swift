@@ -733,6 +733,7 @@ struct HomeRootView: View {
     }
 
     private func readOnlyFooter(for item: HomeAgendaItem) -> LocalizedStringKey? {
+        if item.timePollToken != nil { return "Shared plan details are managed in Plans." }
         if item.context == .plan {
             return "Shared Plan details are managed in Messages."
         }
