@@ -2578,3 +2578,29 @@
 "Darker cells mean more people are available. Numbers show attendance per slot." = "Je dunkler das Feld, desto mehr Personen haben Zeit. Die Zahlen zeigen die Verfügbarkeit je Zeitfenster.";
 
 "Plan date" = "Datum";
+
+"Collecting availability" = "Verfügbarkeiten sammeln";
+
+"All times in %@" = "Alle Zeiten in %@";
+
+"Filling in as" = "Ausfüllen als";
+
+"Your availability is saved. You can edit it anytime." = "Deine Verfügbarkeit ist gespeichert. Du kannst sie jederzeit ändern.";
+
+"Couldn't save" = "Speichern fehlgeschlagen";
+
+"Availability saved automatically" = "Automatisch gespeichert";
+
+"Choose when you're free" = "Wähle deine verfügbaren Zeiten";
+
+"Your choices are kept. Please retry." = "Deine Auswahl bleibt erhalten. Bitte erneut versuchen.";
+
+"Finish once saving completes" = "Nach dem Speichern abschließen";
+
+"Changes save automatically" = "Änderungen werden automatisch gespeichert";
+
+"Done selecting" = "Auswahl abschließen";
+
+"%d days · %@ hours selected" = "%d Tage · %@ Stunden ausgewählt";
+
+"30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll." = "30 Minuten pro Feld. Tippe auf einen Tag für alle Zeiten oder tippe/halte Felder zum Bearbeiten. Wische zum Scrollen.";

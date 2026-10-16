@@ -44,6 +44,16 @@ New native collection-hour pickers use half-hour steps.
 
 ## Data and saving
 
+The detail header separates collection status, plan title, date range, optional
+location and the explicitly labelled time zone. Name editing stays compact and
+separate from availability controls. While editing, a persistent bottom bar shows
+the actual save state: choose times, saving, saved automatically, or failed with
+Retry. The saved summary includes selected days and total hours. Success appears
+only after the existing serialized queue is acknowledged; failures retain the draft.
+Done selecting becomes available after a response is saved and opens Group results
+with a completion notice. Users can return to My availability and keep editing.
+This completion action does not confirm participation or create a Calendar entry.
+
 API: `GET/POST /api/v1/time-polls`, `GET/DELETE /api/v1/time-polls/{token}`,
 `PUT /api/v1/time-polls/{token}/response`. Contract: `openapi/v1.json`.
 Create uses an idempotency key. A random 192-bit invite token grants link holders

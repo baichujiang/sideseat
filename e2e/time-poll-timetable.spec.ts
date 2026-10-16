@@ -32,7 +32,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       await page.getByLabel("本次计划中的昵称").fill("整天有空的朋友");
       await page.getByRole("button", { name: "开始 / 继续填写", exact: true }).click();
       await page.getByTestId(`time-poll-day-${dates[0]}`).click();
-      await expect(page.getByRole("status")).toHaveText("已保存");
+      await expect(page.getByRole("status")).toHaveText("已自动保存");
       const joined = await guestB.request.post(`${publicPath}/participant`, { data: { displayName: "上午有空的朋友" } });
       const idB = (await joined.json()).data.viewerId;
       expect((await guestB.request.put(`${publicPath}/response`, { data: { participantId: idB, displayName: "上午有空的朋友", slotIds: fullDay.slice(0, 16) } })).status()).toBe(200);

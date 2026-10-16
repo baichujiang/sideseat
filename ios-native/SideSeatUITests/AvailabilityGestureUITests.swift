@@ -24,6 +24,32 @@ import XCTest
 
     override func tearDown() async throws { await MainActor.run { app?.terminate() } }
 
+    func testClearAvailabilityFeedbackAndCompletion() throws {
+        pollToken = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_FEEDBACK_QA_POLL"])
+        launch(language: "zh-Hans"); openPlan(tab: "计划")
+        XCTAssertTrue(app.staticTexts["time-poll-date-range"].exists)
+        let finish = app.buttons["time-poll-finish"]
+        XCTAssertTrue(finish.isHittable)
+        XCTAssertFalse(finish.isEnabled)
+        XCTAssertTrue(app.staticTexts["time-poll-save-state"].label.contains("选择你有空的时间"))
+        capture("feedback-before-selection")
+        app.buttons["time-poll-cell-0"].tap()
+        assertSaved([0, 1])
+        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已自动保存")
+        XCTAssertTrue(finish.isEnabled)
+        capture("feedback-saved")
+        finish.tap()
+        XCTAssertTrue(app.staticTexts["time-poll-completed"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "大家的时间表")
+        XCTAssertFalse(finish.exists)
+        app.buttons["我的时间"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+        app.terminate(); launch(language: "zh-Hans", appearance: "dark"); openPlan(tab: "计划")
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已自动保存")
+        capture("feedback-reopened-dark")
+    }
+
     func testTimetableResultsAndManualHalfDayInvitation() throws {
         let raw = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_TIMETABLE_HALF_DAY_POLL"])
         pollToken = raw
@@ -150,13 +176,13 @@ import XCTest
         launch(language: "zh-Hans"); openPlan(tab: "计划")
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         XCTAssertEqual(day.value as? String, "已选中当天全部时段")
-        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已保存")
+        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已自动保存")
         capture("day-reopened-chinese")
         app.terminate()
         launch(language: "zh-Hans", appearance: "dark"); openPlan(tab: "计划")
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         XCTAssertEqual(day.value as? String, "已选中当天全部时段")
-        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已保存")
+        XCTAssertEqual(app.staticTexts["time-poll-saved"].label, "已自动保存")
         capture("day-dark-chinese")
     }
 

@@ -1282,7 +1282,7 @@
 "The buddy post could not be closed. Please try again." = "无法关闭这条搭子帖，请重试。";
 
 /* 日程分享图片 */
-"My availability" = "我的可约时间";
+"My availability" = "我的时间";
 "%@'s availability" = "%@ 的可约时间";
 "Scan to view and choose a time" = "扫码查看并选择时间";
 "Live schedule on sideseat.de" = "在 sideseat.de 查看实时日程";
@@ -2579,3 +2579,29 @@
 "Darker cells mean more people are available. Numbers show attendance per slot." = "颜色越深，有空的人越多。数字是每个时段的可用人数。";
 
 "Plan date" = "日期";
+
+"Collecting availability" = "正在征集时间";
+
+"All times in %@" = "所有时间以 %@ 为准";
+
+"Filling in as" = "填写人";
+
+"Your availability is saved. You can edit it anytime." = "你的可用时间已保存，可随时返回修改。";
+
+"Couldn't save" = "保存失败";
+
+"Availability saved automatically" = "已自动保存";
+
+"Choose when you're free" = "选择你有空的时间";
+
+"Your choices are kept. Please retry." = "选择仍保留，请重试";
+
+"Finish once saving completes" = "保存后即可完成填写";
+
+"Changes save automatically" = "修改会自动保存";
+
+"Done selecting" = "完成填写";
+
+"%d days · %@ hours selected" = "已选 %d 天 · %@ 小时";
+
+"30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll." = "每格 30 分钟 · 点日期选全天，点按或长按拖选。滑动可滚动。";

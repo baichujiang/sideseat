@@ -43,7 +43,7 @@ test("guests fill, rename and confirm in the browser while the app shares their 
       await page.getByLabel("Your name in this plan").fill(`Guest ${n + 1}`);
       await page.getByRole("button", { name: "Start or continue", exact: true }).click();
       for (const id of [0, 2]) await page.getByTestId(`time-poll-cell-${id}`).click();
-      await expect(page.getByRole("status")).toHaveText("Saved");
+      await expect(page.getByRole("status")).toHaveText("Saved automatically");
       if (n === 0) await page.screenshot({ path: "/tmp/sideseat-guest103/guest-availability.png", fullPage: true });
       ids.push((await (await guests[n].request.get(publicPath)).json()).data.viewerId);
     }

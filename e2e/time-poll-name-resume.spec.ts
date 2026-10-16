@@ -36,7 +36,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       const [a, b, c] = await Promise.all(contexts.map((context) => context.newPage()));
       await a.goto(`/time-polls/${poll.token}`); await enter(a, "小林");
       for (const id of [0, 2]) await a.getByTestId(`time-poll-cell-${id}`).click();
-      await expect(a.getByRole("status")).toHaveText("已保存");
+      await expect(a.getByRole("status")).toHaveText("已自动保存");
       const first = (await (await contexts[0].request.get(publicPath)).json()).data;
       const responseId = first.participants.find((p: { isMe: boolean }) => p.isMe).id;
       await b.goto(`/time-polls/${poll.token}`); await enter(b, "  小林  ");
@@ -45,7 +45,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       const resumed = (await (await contexts[1].request.get(publicPath)).json()).data;
       expect(resumed.viewerId).toBe(first.viewerId); expect(resumed.participants).toHaveLength(2);
       expect(resumed.participants.find((p: { isMe: boolean }) => p.isMe).id).toBe(responseId);
-      await b.getByTestId("time-poll-cell-2").click(); await expect(b.getByRole("status")).toHaveText("已保存");
+      await b.getByTestId("time-poll-cell-2").click(); await expect(b.getByRole("status")).toHaveText("已自动保存");
       await a.reload(); await expect(a.getByTestId("time-poll-cell-2")).toHaveAttribute("aria-pressed", "false");
       expect((await (await contexts[0].request.get(publicPath)).json()).data.mySlotIds).toEqual([0, 1]);
       await b.getByRole("button", { name: "编辑昵称", exact: true }).click();
@@ -56,9 +56,9 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       expect((await (await contexts[0].request.get(publicPath)).json()).data.myDisplayName).toBe("小林（同班）");
       await b.getByRole("button", { name: "切换填写人", exact: true }).click(); await enter(b, "小周");
       for (const id of [0, 2]) await b.getByTestId(`time-poll-cell-${id}`).click();
-      await expect(b.getByRole("status")).toHaveText("已保存");
+      await expect(b.getByRole("status")).toHaveText("已自动保存");
       await b.getByRole("button", { name: "切换填写人", exact: true }).click(); await enter(b, "小林（同班）");
-      await b.getByTestId("time-poll-cell-2").click(); await expect(b.getByRole("status")).toHaveText("已保存");
+      await b.getByTestId("time-poll-cell-2").click(); await expect(b.getByRole("status")).toHaveText("已自动保存");
       await contexts[1].clearCookies(); await b.reload(); await enter(b, "小林（同班）");
       for (const id of [0, 2]) await expect(b.getByTestId(`time-poll-cell-${id}`)).toHaveAttribute("aria-pressed", "true");
       await b.getByRole("button", { name: "编辑昵称", exact: true }).click();

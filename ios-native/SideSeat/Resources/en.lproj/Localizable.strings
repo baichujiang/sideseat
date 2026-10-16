@@ -2579,3 +2579,29 @@
 "Darker cells mean more people are available. Numbers show attendance per slot." = "Darker cells mean more people are available. Numbers show attendance per slot.";
 
 "Plan date" = "Date";
+
+"Collecting availability" = "Collecting availability";
+
+"All times in %@" = "All times in %@";
+
+"Filling in as" = "Filling in as";
+
+"Your availability is saved. You can edit it anytime." = "Your availability is saved. You can edit it anytime.";
+
+"Couldn't save" = "Couldn't save";
+
+"Availability saved automatically" = "Saved automatically";
+
+"Choose when you're free" = "Choose when you're free";
+
+"Your choices are kept. Please retry." = "Your choices are kept. Please retry.";
+
+"Finish once saving completes" = "Finish once saving completes";
+
+"Changes save automatically" = "Changes save automatically";
+
+"Done selecting" = "Done selecting";
+
+"%d days · %@ hours selected" = "%d days · %@ hours selected";
+
+"30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll." = "30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll.";

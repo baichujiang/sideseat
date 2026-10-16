@@ -50,7 +50,7 @@ test("day selection, partial color, undo, keyboard, persistence and read-only he
       await expect(cell(0)).toHaveCSS("background-color", "rgb(20, 117, 92)");
       await day.tap(); await expect(cell(0)).toHaveAttribute("aria-pressed", "false"); await expect(cell(4)).toHaveAttribute("aria-pressed", "true");
       await page.getByTestId("time-poll-undo").tap(); await expect(day).toHaveAttribute("aria-pressed", "true");
-      await expect(page.getByRole("status")).toHaveText("已保存");
+      await expect(page.getByRole("status")).toHaveText("已自动保存");
       await page.screenshot({ path: `/tmp/sideseat-unified-share-qa/${name}-day-selected.png`, fullPage: true });
       await page.reload(); await expect(cell(0)).toHaveAttribute("aria-pressed", "true"); await expect(cell(4)).toHaveAttribute("aria-pressed", "true");
       await cell(0).focus(); await page.keyboard.press("Space");
@@ -123,22 +123,34 @@ test("real touch swipes scroll without edits; hold paints, erases and cancels wi
     await expect.poll(() => grid.evaluate((el) => el.scrollLeft)).toBeGreaterThan(30);
     const saved = async () => (await (await context.request.get(`/api/public/time-polls/${poll.token}`)).json()).data.mySlotIds;
     expect(await saved()).toEqual([]);
+    // Native touch scrolling can still be decelerating after touchEnd. Measure
+    // the hold targets only once the viewport has settled.
+    await grid.evaluate((el) => new Promise<void>((resolve) => {
+      let last = `${el.scrollTop}|${el.scrollLeft}`, stable = 0;
+      const frame = () => {
+        const next = `${el.scrollTop}|${el.scrollLeft}`;
+        stable = next === last ? stable + 1 : 0; last = next;
+        if (stable >= 8) resolve(); else requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }));
     await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
-    const first = (await page.getByTestId("time-poll-cell-0").boundingBox())!;
-    const last = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
-    const x = first.x + first.width / 2;
     const hold = async () => {
       await grid.evaluate((el) => { el.scrollTop = 0; el.scrollLeft = 0; });
       const box = (await page.getByTestId("time-poll-cell-0").boundingBox())!;
       await touch("touchStart", box.x + box.width / 2, box.y + box.height / 2);
       await page.waitForTimeout(450);
     };
-    await hold(); await touch("touchMove", x, last.y + last.height / 2);
+    await hold();
+    const end = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
+    await touch("touchMove", end.x + end.width / 2, end.y + end.height / 2);
     await expect(page.getByTestId("time-poll-cell-2")).toHaveAttribute("aria-pressed", "true");
     expect(await saved()).toEqual([]);
     await touch("touchCancel"); await expect(page.getByTestId("time-poll-cell-0")).toHaveAttribute("aria-pressed", "false");
     expect(await saved()).toEqual([]);
-    await hold(); await touch("touchMove", x, last.y + last.height / 2); await touch("touchEnd");
+    await hold();
+    const paintEnd = (await page.getByTestId("time-poll-cell-2").boundingBox())!;
+    await touch("touchMove", paintEnd.x + paintEnd.width / 2, paintEnd.y + paintEnd.height / 2); await touch("touchEnd");
     await expect.poll(saved).toEqual([0, 1, 2, 3]);
     await hold();
     const eraseEnd = (await page.getByTestId("time-poll-cell-2").boundingBox())!;

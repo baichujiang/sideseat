@@ -146,6 +146,15 @@ the entire control excludes horizontal page changes.
 
 ### Together and Plan card template
 
+Shared availability details use a clear status → title → dates/place → labelled
+time-zone hierarchy. Keep name tools compact and separate from selection guidance.
+My availability has a persistent bottom save status and Done selecting action on
+web and native. Show a spinner while saving, a teal icon and explicit saved label
+after acknowledgement, and retained-choice/Retry feedback on failure. Pair status
+with text and selected days/hours. Done selecting opens results with a saved notice;
+it remains distinct from accepting a later invitation. Use neutral primary actions
+and adaptive white/ink surfaces, preserving the established teal/amber grid colors.
+
 Use one anatomy across owner Intent, Opportunity, mutual chat source, Plan list
 and chat Plan cards: context/status → concrete title → time/place/person → action.
 The shared surface uses a 22pt radius, 16pt content inset, neutral adaptive fill

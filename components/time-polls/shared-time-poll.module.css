@@ -2,6 +2,12 @@
   color-scheme: light;
   background: #fafaf9;
   color: #1c1917;
+  --background: 0 0% 100%;
+  --foreground: 20 14% 10%;
+  --muted: 60 5% 96%;
+  --muted-foreground: 25 5% 42%;
+  --border: 20 6% 89%;
+  --input: 20 6% 89%;
   --poll-selected: #14755c;
   --poll-on-selected: #fff;
   --poll-partial: #fff0c7;
@@ -36,4 +42,18 @@
     --poll-partial: #4f3817;
     --poll-on-partial: #ffd48a;
   }
+}
+
+.phase, .savedNotice {
+  background: color-mix(in srgb, var(--poll-selected) 10%, transparent);
+  color: var(--poll-selected);
+}
+.savedText { color: var(--poll-selected); }
+.saveBar { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+.page .finishButton { background: #1c1917; color: #fafaf9; }
+.page .finishButton:hover { background: #292524; }
+@media (prefers-color-scheme: dark) {
+  .page .finishButton { background: #f5f5f4; color: #1c1917; }
+  .page .finishButton:hover { background: #e7e5e4; }
 }

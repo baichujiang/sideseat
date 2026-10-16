@@ -20,7 +20,9 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
       lookup: new Map(cells.map((slot) => [slot.date + "|" + slot.row, slot])),
       labels: new Map(longest.map((slot) => [slot.row, slot.label])) };
   }, [pollDates, pollSlots]);
-  const dates = poll.dates.map((date) => ({ date, label: pollDate(date, zh), ids: poll.slots.filter((slot) => slot.date === date).map((slot) => slot.id) }));
+  const dates = poll.dates.map((date) => ({ date, label: pollDate(date, zh),
+    day: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", month: "short", day: "numeric" }).format(new Date(date + "T12:00:00Z")),
+    weekday: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", weekday: "short" }).format(new Date(date + "T12:00:00Z")), ids: poll.slots.filter((slot) => slot.date === date).map((slot) => slot.id) }));
   const apply = (value: number[]) => {
     const next = [...new Set(value)].sort((a, b) => a - b);
     if (next.length === selected.length && next.every((id) => selected.includes(id))) return;
@@ -53,7 +55,7 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={results ? (zh ? "大家的时间热图" : "Group availability heatmap") : (zh ? "我的可用时间" : "My availability")}>
     {!results ? <>
-      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格 30 分钟。滑动可滚动，点日期选全天；点按或长按拖选，修改自动保存。" : "Each cell is 30 minutes. Swipe to scroll, tap a day for all its times, or tap/hold cells to edit. Changes save automatically."}</p>
+      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格 30 分钟 · 点日期选全天，点按或长按拖选。滑动可滚动。" : "30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll."}</p>
         <button type="button" aria-label={zh ? "撤销上次修改" : "Undo last change"} data-testid="time-poll-undo" disabled={!undo || disabled || gesture.preview !== null} onClick={() => { if (undo) { onChange(undo); setUndo(null); } }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border disabled:opacity-35"><Undo2 className="h-4 w-4" aria-hidden /></button>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
@@ -66,13 +68,13 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
       <div style={{ minWidth: 56 + dates.length * 88 }}>
         <div className="sticky top-0 z-20 grid bg-background" style={columns}>
           <div className="sticky left-0 z-30 flex h-14 items-center justify-center border-b bg-background text-xs">{zh ? "时间" : "Time"}</div>
-          {dates.map(({ date, label, ids }) => {
+          {dates.map(({ date, label, day, weekday, ids }) => {
             const count = ids.filter((id) => selected.includes(id)).length;
             const all = count === ids.length && count > 0, partial = count > 0 && !all;
             const state = all ? (zh ? "已选中当天全部时段" : "All times selected") : partial ? (zh ? "已选中部分时段" : "Some times selected") : (zh ? "未选中时段" : "No times selected");
-            return results ? <div key={date} className="flex h-14 items-center justify-center border-b px-1 text-center text-xs font-semibold">{label}</div> : <div key={date} className="h-14 border-b p-1">
+            return results ? <div key={date} className="flex h-14 flex-col items-center justify-center gap-0.5 border-b px-1 text-center text-xs font-semibold"><span className="whitespace-nowrap">{day}</span><span className="font-normal">{weekday}</span></div> : <div key={date} className="h-14 border-b p-1">
               <button type="button" data-testid={`time-poll-day-${date}`} aria-label={`${label}, ${state}`} aria-pressed={all} title={state} disabled={disabled || gesture.preview !== null} onClick={() => apply(all ? selected.filter((id) => !ids.includes(id)) : [...selected, ...ids])} className={`flex h-full w-full items-center justify-center gap-1 rounded-lg border px-1 text-xs font-semibold ${all ? styles.selected : partial ? styles.partial : "border-border bg-background"}`}>
-                <span>{label}</span>{all ? <Check className="h-3.5 w-3.5 shrink-0" aria-hidden /> : partial ? <Minus className="h-3.5 w-3.5 shrink-0" aria-hidden /> : <Circle className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+                <span><span className="block whitespace-nowrap">{day}</span><span className="block font-normal">{weekday}</span></span>{all ? <Check className="h-3.5 w-3.5 shrink-0" aria-hidden /> : partial ? <Minus className="h-3.5 w-3.5 shrink-0" aria-hidden /> : <Circle className="h-3.5 w-3.5 shrink-0" aria-hidden />}
               </button>
             </div>;
           })}
