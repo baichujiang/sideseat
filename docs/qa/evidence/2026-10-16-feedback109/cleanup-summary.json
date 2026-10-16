@@ -1,0 +1,42 @@
+{
+  "ownedPollsDeleted": 8,
+  "ownedAccountsDeleted": 2,
+  "oldTokenStatuses": [
+    401,
+    401
+  ],
+  "publicPollStatuses": [
+    {
+      "case": "feedback-initial",
+      "status": 404
+    },
+    {
+      "case": "scroll",
+      "status": 404
+    },
+    {
+      "case": "feedback-initial",
+      "status": 404
+    },
+    {
+      "case": "feedback",
+      "status": 404
+    },
+    {
+      "case": "candidate-chromium",
+      "status": 404
+    },
+    {
+      "case": "candidate-webkit",
+      "status": 404
+    },
+    {
+      "case": "live-chromium",
+      "status": 404
+    },
+    {
+      "case": "live-webkit",
+      "status": 404
+    }
+  ]
+}

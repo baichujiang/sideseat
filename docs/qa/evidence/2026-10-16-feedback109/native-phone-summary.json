@@ -1,0 +1,23 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "build": "109",
+  "sourceCommit": "167cb5fe2ecea115de0c9e406c0dfde27c4060ee",
+  "passedTests": 2,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "cases": [
+    {
+      "name": "testClearAvailabilityFeedbackAndCompletion",
+      "status": "passed",
+      "seconds": 34.747
+    },
+    {
+      "name": "testOrdinarySwipesScrollWithoutEditing",
+      "status": "passed",
+      "seconds": 24.208
+    }
+  ],
+  "initialRun": "New flow reached completion; the return-tab assertion exposed the old Chinese My availability label. Unified it with the web label. The scroll fixture also needed an explicitly saved empty response. Both corrected and rerun successfully."
+}

@@ -10,20 +10,25 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `b17ad89` 干净；完整时间表源码 `8750249`、测试辅助 `dc9a874`、最终原生日期语言修正 `362daab` 均已推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (108)` | 签名/设备描述文件及实际安装核验通过；三项真机检查通过，日期语言修正后全天邀请单项复查通过；空参数普通启动 PID 968 已核验运行；[108 交付状态](./releases/2026-10-16-preview108-timetable.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `ba495a7` 干净；顶部/保存反馈源码 `167cb5f`、最终原生按钮对比修正 `4ed4e2f` 均已推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (109)` | 签名/设备描述文件及实际安装核验通过；填写完成与普通滑动两项真机检查通过，按钮对比修正后浅深色完成流程单项复查通过；空参数普通启动 PID 999 已核验运行；[109 交付状态](./releases/2026-10-16-preview109-availability-feedback.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；用户解锁后实际执行通过 |
-| Preview 108 原生源码 | `362daab`（基于完整时间表源码 `8750249`） | 已提交并推送；移除结果推荐卡片，征集不设活动时长，邀请手选日期和起止时间；新日期栏和摘要遵循所选 App 语言。30 分钟选时、旧填写、配色和手势保留 |
+| Preview 109 原生源码 | `4ed4e2f`（基于顶部/保存反馈源码 `167cb5f`） | 已提交并推送；日期/标题/状态分层，底部保存状态、天数/小时汇总与完成填写；浅深色按钮使用成对语义配色。108 完整时间表与邀请范围保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s`，Ready | 双域名 inspect、候选及正式 Chromium/WebKit 的完整时间表、半天/全天邀请、游客确认及精确日历检查通过；[108 交付](./releases/2026-10-16-preview108-timetable.md) |
-| 生产源码 | 真实生产 1,342 项逐文件校验重建；保留 1,338 项原内容，覆盖四个本次源码文件并新增来源记录；最终 1,343 项上传 SHA-1 全匹配 | 本次来源 `8750249`，保留 30 分钟选时、名字继续填写及既有生产差异，Schema 不变；[发布清单](./qa/evidence/2026-10-16-timetable108/source-manifest.json)、[上传核对](./qa/evidence/2026-10-16-timetable108/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1`，Ready | 双域名 inspect、候选及正式 Chromium/WebKit 的保存/完成/返回修改、昵称、邀请确认和两账号日历核验；[109 交付](./releases/2026-10-16-preview109-availability-feedback.md) |
+| 生产源码 | 真实生产 1,343 项校验重建；保留 1,340 项原内容，仅覆盖三个 UI 文件并新增来源记录；最终 1,344 项上传 SHA-1 全匹配 | 网页来源 `167cb5f`；无 API/Schema 变化，迁移显式跳过；[发布清单](./qa/evidence/2026-10-16-feedback109/source-manifest.json)、[上传核对](./qa/evidence/2026-10-16-feedback109/upload-verification.json) |
+
+109 重新排列共享计划顶部的状态、标题、日期、地点和时区，收紧昵称区并统一「我的时间」。
+选时底部持续显示实际保存状态及天数/小时汇总；服务器确认后才能「完成填写」，进入结果并提示可返回修改。
+填写完成不等于接受邀请，不改变征集阶段。慢保存/失败重试、两种浏览器及真机浅深色完成流程通过；
+普通滑动仍不改选时，见 [当前验收](./qa/2026-10-16-availability-feedback109.md)。
 
 108 的结果页直接展示「大家的时间表」和每格人数，移除共同时间/人数最多推荐卡片。
 征集不再要求活动时长；发起人看表后选择日期、开始和结束时间及受邀名单，半天、全天均可。
 邀请确认后，日历按实际起止时间保存。候选/正式两种浏览器、独立模拟器三项、真机三项
 及日期语言修正后单项复查通过；实际 API 核对 4 小时和 12 小时日历，本地另验 24 小时跨日。
 九个线上临时计划和两个账号已回收，QA runner 已卸载，108 已普通启动；
-见 [当前验收](./qa/2026-10-16-timetable108.md)。
+见 [108 验收](./qa/2026-10-16-timetable108.md)。
 
 时间表现以 30 分钟为显示和编辑单位：09:00–21:00 从 48 行减为 24 行，保留 44px/pt
 触控高度。旧 15 分钟填写不自动改写；半格选中显示琥珀/部分状态，点按补齐整格，
@@ -179,3 +184,8 @@ promote 同一生产构建至 `dpl_6gNEve6aFMsmzWFD4rJpNgBB4fUH`。上一 30 分
 1,343 项 SHA-1 全匹配。Schema 不变，构建显式跳过迁移；候选完整流程通过后 promote
 同一生产构建至 `dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s`，上一名字继续填写部署保留为恢复点。
 原生最终源码 `362daab` 的日期语言修正不增加后端依赖。
+
+保存反馈发布从上述 1,343 项真实源码校验重建，仅覆盖共享页面、CSS、时间表编辑组件三项 UI 文件，
+保留 1,340 项原内容，新增来源记录。最终 1,344 项上传 SHA-1 全匹配，迁移显式跳过；
+候选验证后 promote 同一生产构建至 `dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1`。
+上一完整时间表部署保留为恢复点；最终原生 `4ed4e2f` 的按钮文字对比修正无后端依赖。

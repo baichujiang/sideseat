@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "label": "client config",
+      "status": 200
+    },
+    {
+      "label": "AASA",
+      "status": 200
+    },
+    {
+      "label": "iOS entry",
+      "status": 200
+    },
+    {
+      "label": "privacy",
+      "status": 200
+    },
+    {
+      "label": "support",
+      "status": 200
+    },
+    {
+      "label": "www shared plan",
+      "status": 200
+    },
+    {
+      "label": "API shared plan",
+      "status": 200
+    },
+    {
+      "label": "bare shared plan",
+      "status": 307
+    }
+  ]
+}

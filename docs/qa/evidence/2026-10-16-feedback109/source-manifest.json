@@ -1,0 +1,27 @@
+{
+  "baseDeployment": "dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s",
+  "verifiedBaseFiles": 1343,
+  "preservedFiles": 1340,
+  "sourceCommit": "167cb5fe2ecea115de0c9e406c0dfde27c4060ee",
+  "sourceBranch": "codex/ios-uxui-20260922",
+  "overlays": [
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "beforeSha1": "ad153d8914a37e398e5f99e0f93d25a50c2a00cd",
+      "afterSha1": "8ff46e45e5ba7e70fc6f843758e9bfcf6b6a4516"
+    },
+    {
+      "path": "components/time-polls/shared-time-poll.module.css",
+      "beforeSha1": "e9289d5120c441a83e10c877e5810322b5f03fb7",
+      "afterSha1": "c009b9b742de87a3034eebeceea741d162778b5e"
+    },
+    {
+      "path": "components/time-polls/availability-editor.tsx",
+      "beforeSha1": "a930a2cbfbd4cb483e93d015af5f78ee2c7f1973",
+      "afterSha1": "ac08253d42cc1aa9ac7b484286ddc69f5bb358b1"
+    }
+  ],
+  "nativePreviewBuild": "109",
+  "schemaChanged": false,
+  "migrationRequired": false
+}

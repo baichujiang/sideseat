@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "stage": "candidate",
+      "engine": "chromium",
+      "result": "passed",
+      "headerDatesLocationZone": true,
+      "savedSummary": "1 day / 0.5 hours",
+      "explicitCompletion": true,
+      "completionKeepsCollecting": true,
+      "returnAndReloadPreserved": true,
+      "nicknameEdit": true,
+      "desktopSevenDaysFit": true,
+      "mobileActionVisible": true,
+      "guestAccepted": true,
+      "registeredCalendarEntries": 2,
+      "calendarHours": 12,
+      "calendarStartEndMatched": true
+    },
+    {
+      "stage": "candidate",
+      "engine": "webkit",
+      "result": "passed",
+      "headerDatesLocationZone": true,
+      "savedSummary": "1 day / 0.5 hours",
+      "explicitCompletion": true,
+      "completionKeepsCollecting": true,
+      "returnAndReloadPreserved": true,
+      "nicknameEdit": true,
+      "desktopSevenDaysFit": true,
+      "mobileActionVisible": true,
+      "guestAccepted": true,
+      "registeredCalendarEntries": 2,
+      "calendarHours": 12,
+      "calendarStartEndMatched": true
+    }
+  ]
+}

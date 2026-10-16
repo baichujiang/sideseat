@@ -1,0 +1,12 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "build": "109",
+  "sourceCommit": "4ed4e2f8d24eb576b4e213c6e53a1e56d1e3e07c",
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "case": "testClearAvailabilityFeedbackAndCompletion",
+  "seconds": 35.964,
+  "scope": "Focused Light/Dark completion flow after paired button foreground/fill correction"
+}

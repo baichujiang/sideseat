@@ -1,0 +1,11 @@
+{
+  "build": "109",
+  "source": "4ed4e2f",
+  "selectedSlots": [
+    0,
+    1
+  ],
+  "phase": "COLLECTING",
+  "didRespond": true,
+  "completionDidNotConfirmParticipation": true
+}

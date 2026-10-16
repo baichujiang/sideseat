@@ -1,0 +1,20 @@
+{
+  "checks": [
+    {
+      "case": "feedback",
+      "selectedSlots": [
+        0,
+        1
+      ],
+      "phase": "COLLECTING",
+      "didRespond": true
+    },
+    {
+      "case": "scroll",
+      "selectedSlots": [],
+      "phase": "COLLECTING",
+      "didRespond": true
+    }
+  ],
+  "completionDidNotConfirmParticipation": true
+}
