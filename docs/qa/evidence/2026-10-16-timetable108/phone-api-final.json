@@ -1,0 +1,18 @@
+{
+  "mode": "phone",
+  "results": [
+    {
+      "case": "full",
+      "result": "passed",
+      "collectDuration": null,
+      "chosenStart": "2026-10-19T07:00:00.000Z",
+      "chosenEnd": "2026-10-19T19:00:00.000Z",
+      "hours": 12,
+      "invitationCount": 2,
+      "ownerCalendarEntries": 1,
+      "ownerCalendarRangeMatched": true
+    }
+  ],
+  "uiCreatedCollections": 1,
+  "uiCreatedDuration": null
+}

@@ -1,0 +1,57 @@
+{
+  "ownedPollsDeleted": 8,
+  "discardedRetryPollsAlreadyDeleted": 1,
+  "ownedAccountsDeleted": 2,
+  "oldTokenStatuses": [
+    401,
+    401
+  ],
+  "publicPollStatuses": [
+    {
+      "stage": "candidate",
+      "case": "chromium",
+      "status": 404
+    },
+    {
+      "stage": "candidate",
+      "case": "webkit",
+      "status": 404
+    },
+    {
+      "stage": "live",
+      "case": "chromium",
+      "status": 404
+    },
+    {
+      "stage": "live",
+      "case": "webkit",
+      "status": 404
+    },
+    {
+      "stage": "phone",
+      "case": "half",
+      "status": 404
+    },
+    {
+      "stage": "phone",
+      "case": "full",
+      "status": 404
+    },
+    {
+      "stage": "phone",
+      "case": "creation",
+      "status": 404
+    },
+    {
+      "stage": "phone",
+      "case": "localized-full",
+      "status": 404
+    },
+    {
+      "stage": "candidate",
+      "case": "chromium",
+      "status": 404
+    }
+  ],
+  "checkedAt": "2026-10-16T00:07:32.196Z"
+}

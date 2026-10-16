@@ -1,0 +1,31 @@
+{
+  "baseDeployment": "dpl_6gNEve6aFMsmzWFD4rJpNgBB4fUH",
+  "verifiedBaseFiles": 1342,
+  "sourceCommit": "87502492a3d3152873ded9c92c66cff0abacb2bc",
+  "sourceBranch": "codex/ios-uxui-20260922",
+  "overlays": [
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "beforeSha1": "86eee8632d1dbdde07520cffd8e7e3d585012d6a",
+      "afterSha1": "ad153d8914a37e398e5f99e0f93d25a50c2a00cd"
+    },
+    {
+      "path": "lib/time-polls/domain.ts",
+      "beforeSha1": "afa56ade7c3da86a584f6e57a0038ac02abf0077",
+      "afterSha1": "ad1d75e1175afcbb821f94ea8f6a4493abed108e"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "beforeSha1": "a90d55df6d0de815162663bc06ed01a82447b233",
+      "afterSha1": "1f6305f289e9cc3f17edaf8cbf934d73bf00f972"
+    },
+    {
+      "path": "openapi/v1.json",
+      "beforeSha1": "9829c9f6ce8c5eb4a4b33a3661a909d05e1f637b",
+      "afterSha1": "c4b43afb6ac3b4b04fe2a48b4f3dbdbba81d0035"
+    }
+  ],
+  "nativePreviewBuild": "108",
+  "schemaChanged": false,
+  "migrationRequired": false
+}

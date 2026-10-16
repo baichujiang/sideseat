@@ -1,0 +1,20 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "build": "108",
+  "runtimeSource": "362daaba13a1724defd12db9caaab081a32530a1",
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "cases": [
+    {
+      "name": "testManualFullDayInvitationInDarkMode",
+      "status": "passed",
+      "seconds": 21.332
+    }
+  ],
+  "localizedDateLabel": "日期",
+  "dateSummaryUsesSelectedLanguage": true,
+  "scope": "Focused full-day/Chinese date-label retest after the three initial phone cases passed."
+}

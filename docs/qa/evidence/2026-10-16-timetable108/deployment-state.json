@@ -1,0 +1,20 @@
+{
+  "aliases": [
+    {
+      "host": "api.sideseat.de",
+      "deployment": "dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s",
+      "state": "READY",
+      "url": "sideseat-aq0wg7r5f-baichus-projects.vercel.app"
+    },
+    {
+      "host": "www.sideseat.de",
+      "deployment": "dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s",
+      "state": "READY",
+      "url": "sideseat-aq0wg7r5f-baichus-projects.vercel.app"
+    }
+  ],
+  "previousDeployment": "dpl_6gNEve6aFMsmzWFD4rJpNgBB4fUH",
+  "promotedTestedProductionBuild": true,
+  "schemaChanged": false,
+  "migrationRequired": false
+}

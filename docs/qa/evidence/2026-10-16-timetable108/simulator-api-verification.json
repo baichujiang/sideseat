@@ -1,0 +1,29 @@
+{
+  "mode": "simulator",
+  "results": [
+    {
+      "case": "half",
+      "result": "passed",
+      "collectDuration": null,
+      "chosenStart": "2026-10-18T07:00:00.000Z",
+      "chosenEnd": "2026-10-18T11:00:00.000Z",
+      "hours": 4,
+      "invitationCount": 2,
+      "ownerCalendarEntries": 1,
+      "ownerCalendarRangeMatched": true
+    },
+    {
+      "case": "full",
+      "result": "passed",
+      "collectDuration": null,
+      "chosenStart": "2026-10-18T07:00:00.000Z",
+      "chosenEnd": "2026-10-18T19:00:00.000Z",
+      "hours": 12,
+      "invitationCount": 2,
+      "ownerCalendarEntries": 1,
+      "ownerCalendarRangeMatched": true
+    }
+  ],
+  "uiCreatedCollections": 1,
+  "uiCreatedDuration": null
+}

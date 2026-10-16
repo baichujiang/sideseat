@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-15T23:55:19.172Z",
+  "results": [
+    {
+      "stage": "candidate",
+      "engine": "chromium",
+      "result": "passed",
+      "collectDuration": null,
+      "headingChinese": "大家的时间表",
+      "recommendationCards": 0,
+      "counts": {
+        "at0900": 3,
+        "at1300": 2
+      },
+      "desktopSevenDaysFit": true,
+      "mobileHorizontalScroll": true,
+      "guestNameResumePreserved": true,
+      "legacyFallbackMinutes": 60,
+      "manualHalfDayHours": 4,
+      "manualFullDayHours": 12,
+      "registeredCalendarEntries": 2,
+      "calendarStartEndMatched": true,
+      "cancelledAfterVerification": true
+    },
+    {
+      "stage": "candidate",
+      "engine": "webkit",
+      "result": "passed",
+      "collectDuration": null,
+      "headingChinese": "大家的时间表",
+      "recommendationCards": 0,
+      "counts": {
+        "at0900": 3,
+        "at1300": 2
+      },
+      "desktopSevenDaysFit": true,
+      "mobileHorizontalScroll": true,
+      "guestNameResumePreserved": true,
+      "legacyFallbackMinutes": 60,
+      "manualHalfDayHours": 4,
+      "manualFullDayHours": 12,
+      "registeredCalendarEntries": 2,
+      "calendarStartEndMatched": true,
+      "cancelledAfterVerification": true
+    }
+  ]
+}

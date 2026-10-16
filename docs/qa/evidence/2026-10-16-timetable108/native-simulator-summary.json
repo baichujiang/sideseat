@@ -1,0 +1,28 @@
+{
+  "mode": "simulator",
+  "device": "iPhone 14 Plus",
+  "os": "iOS 26.5",
+  "build": "108",
+  "runtimeSource": "87502492a3d3152873ded9c92c66cff0abacb2bc",
+  "testSource": "dc9a8742b5fc02943a50af1b6fe96d79fd626e8d",
+  "passedTests": 3,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "cases": [
+    {
+      "name": "testCollectCreationDoesNotRequireActivityDuration",
+      "status": "passed",
+      "seconds": 21.17
+    },
+    {
+      "name": "testManualFullDayInvitationInDarkMode",
+      "status": "passed",
+      "seconds": 21.673
+    },
+    {
+      "name": "testTimetableResultsAndManualHalfDayInvitation",
+      "status": "passed",
+      "seconds": 26.69
+    }
+  ]
+}

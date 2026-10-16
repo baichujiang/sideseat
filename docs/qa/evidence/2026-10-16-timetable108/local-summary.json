@@ -1,0 +1,38 @@
+{
+  "initialStats": {
+    "startTime": "2026-10-15T23:42:42.175Z",
+    "duration": 71625.396,
+    "expected": 10,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  },
+  "initialFailure": "Two new Calendar assertions used startTime/endTime rather than the actual startAt/endAt fields. Both were corrected and rerun.",
+  "focusedRetryStats": {
+    "startTime": "2026-10-15T23:44:31.534Z",
+    "duration": 11521.657,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "full24HourStats": {
+    "startTime": "2026-10-15T23:46:51.965Z",
+    "duration": 3046.531,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "distinctCasesFinallyPassed": 13,
+  "typecheck": "passed",
+  "targetedEslint": "passed",
+  "openapiOperationCount": 191,
+  "openapiValidation": "passed",
+  "nativeStrings": [
+    "en",
+    "zh-Hans",
+    "de"
+  ],
+  "signedBuild": "Preview 108"
+}

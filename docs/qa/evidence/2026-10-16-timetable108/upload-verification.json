@@ -1,0 +1,9 @@
+{
+  "deployment": "dpl_HHqbc44TnSUitJCAgKUjNrCxNt4s",
+  "expectedFiles": 1343,
+  "uploadedFiles": 1343,
+  "allSha1Matched": true,
+  "overlaidSourceFiles": 4,
+  "unchangedProductionFiles": 1338,
+  "databaseMigration": false
+}

@@ -42,7 +42,8 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview 107 是当前已安装开发版：网页与 App 时间表以 30 分钟为一格，行数减半；旧 15 分钟填写保留，半格显示部分已选，支持精确撤销。默认 iPhone 14 Plus 的拖选、全天全选、撤销、保存重开和普通滑动检查通过，保存提示修正为「已保存」。[最新交付](./docs/releases/2026-10-16-preview107-availability-saved-label.md)、[真机验收](./docs/qa/2026-10-16-half-hour-iphone14plus.md)。
+Preview 108 是当前已安装开发版：结果页直接展示大家的完整时间表和每格人数，移除共同时间/人数最多推荐卡片。征集无需预设活动时长，发起人看表后手选日期与起止时间，支持半天、全天；确认后按实际范围写入日历。网页已同步发布，默认 iPhone 14 Plus 验证通过。[最新交付](./docs/releases/2026-10-16-preview108-timetable.md)、[验收记录](./docs/qa/2026-10-16-timetable108.md)。
+时间表继续以 30 分钟为一格；旧 15 分钟填写保留，半格显示部分已选，支持精确撤销。拖选、全天全选、撤销、保存重开和普通滑动的既有真机记录见 [30 分钟验收](./docs/qa/2026-10-16-half-hour-iphone14plus.md)。
 可用时间以青绿表示已选、琥珀表示部分已选，提供图例并适配深色模式。
 点星期/日期可全选当天，再点清空，支持撤销与自动保存；交付及真机验收见 [Preview 105](./docs/releases/2026-10-15-preview105-availability-colors.md)。
 游客分享、昵称和网页确认沿用 103；[完整真机验收](./docs/qa/2026-10-15-iphone14plus-guest-flow.md)保留为独立记录。
