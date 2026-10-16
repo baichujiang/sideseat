@@ -1,0 +1,9 @@
+{
+  "suite": "NavigationTests",
+  "device": "isolated iPhone 14 Plus Simulator / iOS 26.5",
+  "passedTests": 21,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "includes": "sharedPlanHasOneCanonicalLevel",
+  "isolatedSimulatorRemoved": true
+}

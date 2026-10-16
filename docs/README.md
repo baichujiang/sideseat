@@ -71,6 +71,8 @@ Historical build evidence never certifies a newer build.
 | [Full timetable acceptance](./qa/2026-10-16-timetable108.md) | Local integration, candidate/live browsers, simulator/phone UI, exact Calendar ranges and cleanup |
 | [Preview 109 / availability feedback](./releases/2026-10-16-preview109-availability-feedback.md) | Clear plan header, persistent acknowledged save feedback, Done selecting and installed Preview |
 | [Availability feedback acceptance](./qa/2026-10-16-availability-feedback109.md) | Slow/failing saves, completion/return, responsive browser and Light/Dark physical-device verification |
+| [Preview 110 / first-level Plans](./releases/2026-10-16-preview110-plans-root.md) | Redesigned Plans overview and canonical single-level detail/return across card, creation, messages and links |
+| [Plans navigation acceptance](./qa/2026-10-16-plans110.md) | Physical reproduction on 109, seven final UI cases, 21 navigation unit tests, installed 110 and cleanup |
 | [Preview 1.0.0 (105)](./releases/2026-10-15-preview105-availability-colors.md) | Installed teal/amber availability states and legend; Light/Dark phone acceptance and save/scroll regression pass |
 | [Preview 1.0.0 (104)](./releases/2026-10-15-preview104-day-selection.md) | Installed weekday/day selection shortcut; physical full-day, Undo, persistence and scroll regressions pass |
 | [Preview 1.0.0 (103)](./releases/2026-10-15-preview103-guest-plans.md) | Installed guest/nickname update; later iPhone 14 Plus Safari/native/Calendar, creation and gesture acceptance pass |

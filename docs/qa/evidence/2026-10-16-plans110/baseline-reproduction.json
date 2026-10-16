@@ -1,0 +1,10 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "runtimeBuild": "109",
+  "runtimeSource": "fed9ab2",
+  "test": "testPlansCompletionAndBackReturnToFirstLevel",
+  "outcome": "failed as expected",
+  "seconds": 27.875,
+  "failure": "Back after completing availability exposed a second Plan together list; the first-level Plans create button was not hittable."
+}

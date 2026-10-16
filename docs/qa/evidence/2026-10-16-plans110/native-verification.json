@@ -1,0 +1,63 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "os": "iOS 26.6.1",
+  "previewBuild": "110",
+  "finalSource": "01d6350ff34dca300cd58e5ef85caf7eb0832d2f",
+  "initialBatch": {
+    "passed": 4,
+    "failed": 3,
+    "skipped": 0,
+    "passedCases": [
+      {
+        "name": "testCreatePlanDetailBackHasNoIntermediateList",
+        "seconds": 23.893,
+        "status": "passed"
+      },
+      {
+        "name": "testMessagesEntryUsesFirstLevelPlans",
+        "seconds": 16.056,
+        "status": "passed"
+      },
+      {
+        "name": "testPlansCreateCancelReturnsToPlansInOneStep",
+        "seconds": 31.998,
+        "status": "passed"
+      },
+      {
+        "name": "testTimingModesAndSwipeDismissReturnToPlans",
+        "seconds": 30.402,
+        "status": "passed"
+      }
+    ]
+  },
+  "initialIssues": [
+    "New section containers propagated accessibility identifiers to child controls. Explicit containment restores distinct controls. The card test also needed to scroll lazy content into view.",
+    "Deep-link detail now hides the tab bar; the launch helper must wait for detail rather than a hidden tab bar."
+  ],
+  "focusedFinal": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "name": "testPlansCompletionAndBackReturnToFirstLevel",
+        "seconds": 26.593,
+        "status": "passed"
+      },
+      {
+        "name": "testPlansDashboardLinkAndMessageEntry",
+        "seconds": 36.18,
+        "status": "passed"
+      },
+      {
+        "name": "testSharedPlanDeepLinkBackAndDarkDashboard",
+        "seconds": 14.507,
+        "status": "passed"
+      }
+    ]
+  },
+  "distinctCasesFinallyPassed": 7,
+  "signedBuild": "passed",
+  "threeNativeLocales": "passed"
+}

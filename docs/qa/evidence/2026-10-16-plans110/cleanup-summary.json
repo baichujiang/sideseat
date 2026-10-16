@@ -1,0 +1,30 @@
+{
+  "ownedPollsDeleted": 5,
+  "ownedAccountsDeleted": 2,
+  "publicPollStatuses": [
+    {
+      "case": "collect",
+      "status": 404
+    },
+    {
+      "case": "inviting",
+      "status": 404
+    },
+    {
+      "case": "confirmed",
+      "status": 404
+    },
+    {
+      "case": "cancelled",
+      "status": 404
+    },
+    {
+      "case": "created-in-ui",
+      "status": 404
+    }
+  ],
+  "oldTokenStatuses": [
+    401,
+    401
+  ]
+}

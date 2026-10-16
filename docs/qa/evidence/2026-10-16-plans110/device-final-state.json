@@ -1,0 +1,16 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": "110",
+  "sourceCommit": "01d6350ff34dca300cd58e5ef85caf7eb0832d2f",
+  "ordinaryRetainedBuild": "97",
+  "normalLaunch": {
+    "pid": 1026,
+    "arguments": [],
+    "runningProcessVerified": true
+  },
+  "qaRunnerUninstalled": true,
+  "storeUpload": false,
+  "backendUnchanged": "dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1"
+}

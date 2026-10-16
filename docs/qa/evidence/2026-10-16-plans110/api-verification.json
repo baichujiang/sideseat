@@ -1,0 +1,43 @@
+{
+  "checks": [
+    {
+      "case": "collect",
+      "phase": "COLLECTING",
+      "selectedSlots": [],
+      "responded": 2,
+      "expectedCount": 3
+    },
+    {
+      "case": "inviting",
+      "phase": "INVITING",
+      "selectedSlots": [],
+      "responded": 2,
+      "expectedCount": 3
+    },
+    {
+      "case": "confirmed",
+      "phase": "CONFIRMED",
+      "selectedSlots": [],
+      "responded": 2,
+      "expectedCount": 3
+    },
+    {
+      "case": "cancelled",
+      "phase": "CANCELLED",
+      "selectedSlots": [],
+      "responded": 2,
+      "expectedCount": 3
+    },
+    {
+      "case": "created-in-ui",
+      "phase": "COLLECTING",
+      "selectedSlots": [
+        0,
+        1
+      ],
+      "responded": 1,
+      "expectedCount": 5
+    }
+  ],
+  "uiCreatedSavedSlotsMatched": true
+}
