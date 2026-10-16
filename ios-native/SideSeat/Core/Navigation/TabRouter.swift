@@ -10,6 +10,11 @@ final class RouterPath {
         path.append(route)
     }
 
+    /// Shared plans always sit one level above the Plans root.
+    func openPlan(token: String) {
+        path = [.timePoll(token: token)]
+    }
+
     func replaceTop(with route: AppRoute) {
         if path.isEmpty { path = [route] } else { path[path.count - 1] = route }
     }

@@ -400,8 +400,14 @@ struct AppShellView: View {
         enteredFromLink = true
         productTutorial.evaluateAutoShow(for: nil)
         selectedTab = tab
-        if let route, route != .plans {
-            routers.router(for: tab).navigate(to: route)
+        if let route {
+            switch route {
+            case .plans: routers.router(for: .plans).reset()
+            case .timePoll(let token): routers.router(for: .plans).openPlan(token: token)
+            default: routers.router(for: tab).navigate(to: route)
+            }
+        } else if tab == .plans {
+            routers.router(for: .plans).reset()
         }
     }
 }
@@ -438,6 +444,7 @@ private extension View {
                     ScheduleShareRecipientView(token: token)
                 case .timePoll(let token):
                     TimePollDetailView(token: token)
+                        .toolbar(.hidden, for: .tabBar)
                 case .eventShare(let token):
                     CalendarEventShareRecipientView(token: token)
                 case .messageRequests:

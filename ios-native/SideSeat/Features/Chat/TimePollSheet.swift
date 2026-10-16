@@ -625,16 +625,15 @@ private final class TimePollTouchView: UIView {
 }
 
 struct TimePollMessageContent: View {
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     let text: String
-    @State private var showsPoll = false
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             Text(text)
             if let token = TimePollLink.firstToken(in: text) {
-                Button { showsPoll = true } label: { Label("Open time poll", systemImage: "calendar.badge.clock") }
+                Button { deepLinkRouter.handleAppRoute(.timePoll(token: token)) } label: { Label("Open time poll", systemImage: "calendar.badge.clock") }
                     .buttonStyle(SSPressButtonStyle())
                     .accessibilityIdentifier("time-poll-message-link")
-                    .sheet(isPresented: $showsPoll) { TimePollSheet(initialToken: token) }
             }
         }
     }

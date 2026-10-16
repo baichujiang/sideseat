@@ -76,6 +76,7 @@ final class TimePollStore {
                     guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
                     poll = result.data
                     saved = pending == nil
+                    if saved { NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil) }
                 } catch {
                     guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
                     self.error = error.localizedDescription

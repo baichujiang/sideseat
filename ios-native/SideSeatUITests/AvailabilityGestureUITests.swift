@@ -24,6 +24,92 @@ import XCTest
 
     override func tearDown() async throws { await MainActor.run { app?.terminate() } }
 
+    func testPlansCompletionAndBackReturnToFirstLevel() throws {
+        pollToken = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_PLANS_NAVIGATION_QA_POLL"])
+        launch(language: "zh-Hans")
+        app.tabBars.buttons["计划"].tap()
+        for complete in [true, false] {
+            let card = app.buttons["plans-coordinated-\(pollToken)"]
+            revealPlan(card)
+            card.tap()
+            XCTAssertTrue(app.buttons["time-poll-finish"].waitForExistence(timeout: 15))
+            if complete {
+                app.buttons["time-poll-finish"].tap()
+                XCTAssertTrue(app.staticTexts["time-poll-completed"].waitForExistence(timeout: 10))
+            }
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            capture(complete ? "plans-after-complete-back" : "plans-after-ordinary-back")
+            let root = app.buttons["plans-create-unified"]
+            XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: root)], timeout: 8) == .completed, "Back must return to the first-level Plans page")
+            XCTAssertFalse(app.buttons["time-poll-create"].exists, "The secondary poll-list sheet must not appear")
+        }
+    }
+
+    func testPlansDashboardLinkAndMessageEntry() throws {
+        let env = ProcessInfo.processInfo.environment
+        pollToken = try XCTUnwrap(env["SIDESEAT_PLANS_NAVIGATION_QA_POLL"])
+        let confirmed = try XCTUnwrap(env["SIDESEAT_PLANS_CONFIRMED_QA_POLL"])
+        let cancelled = try XCTUnwrap(env["SIDESEAT_PLANS_CANCELLED_QA_POLL"])
+        launch(language: "zh-Hans"); app.tabBars.buttons["计划"].tap()
+        XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        let inviting = try XCTUnwrap(env["SIDESEAT_PLANS_INVITING_QA_POLL"])
+        XCTAssertTrue(app.buttons["plans-coordinated-" + inviting].waitForExistence(timeout: 15))
+        capture("plans-dashboard")
+        app.buttons["plans-open-link"].tap()
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.textFields.firstMatch.tap(); alert.textFields.firstMatch.typeText("https://www.sideseat.de/time-polls/" + pollToken)
+        alert.buttons["打开"].tap()
+        XCTAssertTrue(app.buttons["time-poll-finish"].waitForExistence(timeout: 15))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        let picker = app.segmentedControls["plans-segmented-control"]
+        picker.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(app.buttons["plans-coordinated-" + confirmed].waitForExistence(timeout: 10))
+        capture("plans-upcoming")
+        picker.buttons.element(boundBy: 2).tap()
+        XCTAssertTrue(app.buttons["plans-coordinated-" + cancelled].waitForExistence(timeout: 10))
+        capture("plans-ended")
+        picker.buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons["消息"].tap()
+        let entry = app.buttons["inbox-time-poll"]
+        XCTAssertTrue(entry.waitForExistence(timeout: 10)); entry.tap()
+        XCTAssertTrue(app.tabBars.buttons["计划"].isSelected)
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        XCTAssertFalse(app.buttons["time-poll-create"].exists)
+    }
+
+    func testCreatePlanDetailBackHasNoIntermediateList() {
+        launch(language: "zh-Hans"); app.tabBars.buttons["计划"].tap()
+        app.buttons["plans-create-unified"].tap()
+        let field = app.textFields["time-poll-title"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText("QA110 新计划返回\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+        app.buttons["time-poll-cell-0"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
+        app.buttons["time-poll-finish"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-completed"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        XCTAssertFalse(app.buttons["time-poll-create"].exists)
+        capture("plans-created-return")
+    }
+
+    func testSharedPlanDeepLinkBackAndDarkDashboard() throws {
+        pollToken = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_PLANS_NAVIGATION_QA_POLL"])
+        launch(language: "zh-Hans", appearance: "dark", deepLink: "/time-polls/" + pollToken)
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.tabBars.buttons["计划"].isSelected)
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        XCTAssertFalse(app.buttons["time-poll-create"].exists)
+        let inviting = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_PLANS_INVITING_QA_POLL"])
+        XCTAssertTrue(app.buttons["plans-coordinated-" + inviting].waitForExistence(timeout: 15))
+        capture("plans-dashboard-dark")
+    }
+
     func testClearAvailabilityFeedbackAndCompletion() throws {
         pollToken = try XCTUnwrap(ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_FEEDBACK_QA_POLL"])
         launch(language: "zh-Hans"); openPlan(tab: "计划")
@@ -205,6 +291,14 @@ import XCTest
         capture("legacy-partial-reopened")
     }
 
+    private func revealPlan(_ card: XCUIElement) {
+        for _ in 0..<5 {
+            if card.waitForExistence(timeout: 2) && card.isHittable { return }
+            app.scrollViews["plans-scroll-waitingResponse"].firstMatch.swipeUp(velocity: .slow)
+        }
+        XCTAssertTrue(card.isHittable, "The plan must be reachable in the first-level list")
+    }
+
     private func openEmptyPoll() {
         launch()
         openPlan()
@@ -212,17 +306,19 @@ import XCTest
         for id in [0, 2] { XCTAssertFalse(app.buttons["time-poll-cell-\(id)"].isSelected, "Supply a fresh empty QA poll") }
     }
 
-    private func launch(language: String = "en", appearance: String = "light") {
+    private func launch(language: String = "en", appearance: String = "light", deepLink: String? = nil) {
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
             "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
             "--ui-testing-appearance=\(appearance)"]
+        if let deepLink { app.launchArguments.append("--ui-testing-deep-link=" + deepLink) }
         app.launchEnvironment["SIDESEAT_QA_ACCESS_TOKEN"] = token
         if let localAPI = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_GESTURE_QA_API"] {
             app.launchArguments.append("--ui-testing-local-api")
             app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = localAPI
         }
         app.launch()
-        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
+        if deepLink == nil { XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20)) }
+        else { XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20)) }
     }
 
     private func openPlan(tab: String = "Plans") {

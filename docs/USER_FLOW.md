@@ -14,9 +14,19 @@
 and participant count (default five). Choose **Collect availability** or **Set a time**; only the direct-time route asks for a duration. The existing Messages coordination
 entry and shared links open these same plans in the Plans tab.
 
-The Plans **+** opens the creation form directly in one sheet. One Cancel or
-downward dismissal returns to Plans. Successful creation shows the new plan's
-details in that same sheet; Done returns to Plans.
+The first-level Plans overview provides **Create a plan** and **Open a shared
+link**, followed by awaiting confirmations, availability collections and the next
+confirmed activity. Cards show dates, response/confirmation counts and a concrete
+next action. Upcoming and Ended retain their separate sections; conversation plans
+remain available with their existing consent and feedback rules.
+
+The Plans **+** or primary creation action opens one creation sheet. One Cancel or
+downward dismissal returns to Plans. Successful creation closes that sheet and
+opens the same canonical detail route as an existing card or shared link.
+Details sit one level above the first-level Plans page. Back returns there both
+before and after Done selecting; it never exposes a second hidden poll list.
+The Messages coordination shortcut hands off to Plans, and message/shared links
+open that same detail route without stacking duplicate copies.
 
 For collection, select candidate dates and daily hours; the creation time zone
 fixes the actual instants. Swipe over the grid to scroll, tap to toggle one

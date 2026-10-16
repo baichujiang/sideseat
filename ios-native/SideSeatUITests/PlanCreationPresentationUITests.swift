@@ -49,17 +49,15 @@ import XCTest
         assertHittable(app.buttons["plans-create-unified"], "Creation should reopen and close normally after a swipe")
     }
 
-    func testMessagesCreateCancelReturnsToItsPlanList() {
+    func testMessagesEntryUsesFirstLevelPlans() {
         app.tabBars.buttons["消息"].tap()
         let entry = app.buttons["inbox-time-poll"]
         XCTAssertTrue(entry.waitForExistence(timeout: 10)); entry.tap()
-        let create = app.buttons["time-poll-create"]
-        XCTAssertTrue(create.waitForExistence(timeout: 10)); create.tap()
-        XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
-        cancel().tap()
-        assertHittable(create, "Messages should retain its explicitly opened plan list")
-        app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["完成", "Done"])).firstMatch.tap()
-        assertHittable(entry, "Closing the plan list should return to Messages")
+        assertHittable(app.buttons["plans-create-unified"], "Messages must hand off to first-level Plans")
+        XCTAssertTrue(app.tabBars.buttons["计划"].isSelected)
+        XCTAssertFalse(app.buttons["time-poll-create"].exists)
+        openCreation(); cancel().tap()
+        assertHittable(app.buttons["plans-create-unified"], "Creation Cancel returns directly to Plans")
     }
 
     private func openCreation() {

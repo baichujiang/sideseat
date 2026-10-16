@@ -12,6 +12,13 @@ PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.
 
+The native first-level Plans page owns creation, shared-link entry, confirmation
+progress and availability collections. An existing card, successful creation,
+message link or external deep link opens one canonical detail above that root.
+Back returns directly to Plans, including after Done selecting. Creation alone
+uses a dismissible form sheet; the secondary TimePollSheet list is not part of
+current Plans or Messages navigation. Root cards refresh after saved responses.
+
 - COLLECTING: immutable candidate slots, one autosaved response/account or browser guest.
   The complete heatmap and response count are primary. No duration is required,
   and no common-time/maximum-attendance cards are shown. The older summary/window

@@ -126,6 +126,9 @@ Me / 我
   private bookmarks and later Pod formation.
 - **Plans** owns availability collection, manual invitations, waiting proposals,
   upcoming commitments and ended-plan feedback for conversation-bound Plans.
+  Its first-level overview includes creation and shared-link entry, grouped
+  collection/confirmation progress and the next confirmed activity. Manual plan
+  details use one canonical level above that overview across all entry points.
 - **Calendar** owns personal scheduling, courses, confirmed Plan projections,
   retrieval and Apple Calendar interoperability.
 - **Messages** owns contextual first-message requests, ongoing communication after a

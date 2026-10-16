@@ -4,6 +4,18 @@ import Testing
 
 @Suite("Navigation")
 struct NavigationTests {
+    @MainActor @Test("Shared plan entry always returns directly to the Plans root")
+    func sharedPlanHasOneCanonicalLevel() {
+        let router = RouterPath()
+        router.path = [.plans, .timePoll(token: "old")]
+        router.openPlan(token: "new")
+        #expect(router.path == [.timePoll(token: "new")])
+        router.openPlan(token: "new")
+        #expect(router.path.count == 1)
+        router.path.removeLast()
+        #expect(router.path.isEmpty)
+    }
+
     @Test("Section paging needs deliberate horizontal travel and never wraps")
     func sectionPagingBoundariesAndDirection() {
         func target(_ index: Int, _ dx: CGFloat, _ dy: CGFloat = 0, velocity: CGFloat = 0) -> Int {

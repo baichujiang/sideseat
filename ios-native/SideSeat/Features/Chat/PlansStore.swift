@@ -20,7 +20,8 @@ final class PlansStore {
         }
 
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated")
+            && !ProcessInfo.processInfo.arguments.contains("--ui-testing-time-poll-live") {
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plan-navigation") {
                 plans = UITestingChatFixtures.planNavigationPage(connectionID: "ui-connection").messages.compactMap(\.planRequest)
                 return
