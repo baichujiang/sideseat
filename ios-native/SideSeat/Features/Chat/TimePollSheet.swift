@@ -323,7 +323,7 @@ struct TimePollDetailView: View {
                 }.accessibilityElement(children: .contain)
             }
             Spacer(minLength: 0)
-            Button(failed ? "Retry" : "Done selecting") {
+            Button {
                 if failed { store.save(session: session) }
                 else {
                     nameFocused = false
@@ -331,9 +331,12 @@ struct TimePollDetailView: View {
                         finishWhenSaved = true; store.save(session: session)
                     } else { completed = true; results = true }
                 }
+            } label: {
+                Text(failed ? "Retry" : "Done selecting")
+                    .foregroundStyle(SideSeatTheme.ProductAction.foreground)
             }
             .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
-            .buttonStyle(.borderedProminent).tint(SideSeatTheme.utilityAction)
+            .buttonStyle(.borderedProminent).tint(SideSeatTheme.ProductAction.fill)
             .disabled(store.saving || store.acting || (!failed && !store.saved))
             .accessibilityIdentifier("time-poll-finish")
         }
