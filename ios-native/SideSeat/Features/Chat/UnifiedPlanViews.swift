@@ -2,6 +2,7 @@ import SwiftUI
 
 func unifiedPlanTimeLabel(start: Date, end: Date, timeZone: String) -> String {
     let formatter = DateFormatter()
+    formatter.locale = AppLocalization.selectedLanguage.locale
     formatter.timeZone = TimeZone(identifier: timeZone)
     formatter.dateStyle = .medium; formatter.timeStyle = .short
     return formatter.string(from: start) + " – " + formatter.string(from: end)
@@ -48,7 +49,7 @@ struct UnifiedPlanInviteView: View {
                     if let location = poll.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
                 }
                 Section("Choose the time") {
-                    Picker("Date", selection: Binding(get: { date }, set: { value in
+                    Picker("Plan date", selection: Binding(get: { date }, set: { value in
                         date = value
                         let day = poll.cells.filter { $0.date == value }
                         starts = day.first?.slots[0].start ?? starts; ends = day.last?.end ?? ends

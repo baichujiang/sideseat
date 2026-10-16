@@ -51,6 +51,7 @@ import XCTest
         XCTAssertEqual(app.staticTexts["time-poll-result-heading"].label, "大家的时间表")
         app.buttons["unified-plan-invite-window"].tap()
         XCTAssertTrue(app.staticTexts["unified-plan-chosen-range"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["unified-plan-invite-date"].label.contains("日期"))
         XCTAssertTrue(app.buttons["unified-plan-invite-from"].label.contains("09:00"))
         XCTAssertTrue(app.buttons["unified-plan-invite-until"].label.contains("21:00"))
         capture("manual-full-day-dark")

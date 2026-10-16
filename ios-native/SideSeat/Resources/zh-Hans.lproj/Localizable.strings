@@ -2577,3 +2577,5 @@
 "Choose the hours you want to spend together, including half a day or a full day." = "按大家商量的安排选择起止时间，半天、一天都可以。";
 
 "Darker cells mean more people are available. Numbers show attendance per slot." = "颜色越深，有空的人越多。数字是每个时段的可用人数。";
+
+"Plan date" = "日期";
