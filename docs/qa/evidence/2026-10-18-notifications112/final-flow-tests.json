@@ -1,0 +1,42 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "FD9217DD-8D2A-4A7A-BF9C-548A339B7ADB",
+        "deviceName" : "SideSeat Notifications 112 QA",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 9,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "SideSeat-Development · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1792279656.33,
+  "passedTests" : 9,
+  "result" : "Passed",
+  "skippedTests" : 0,
+  "startTime" : 1792279602.442,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - SideSeat-Development",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 9
+}

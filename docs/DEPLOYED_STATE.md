@@ -1,6 +1,6 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；原生最后核验 2026-10-18，线上部署/开关保留 2026-10-16 的核验范围，Europe/Berlin。
+**状态：** 当前运行清单；原生与公开配置最后核验 2026-10-18，生产部署 ID 保留 2026-10-16 的核验范围，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
@@ -10,13 +10,18 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对，基线 `cbb128f` 干净；计划图标源码 `ae32524` 已提交并推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (111)` | 圆形勾选计划图标；21 项导航测试及模拟器浅深色/最大字号核对通过；严格签名、安装、无测试参数启动（计划 URL）及运行 PID 2127 已核验；[111 交付](./releases/2026-10-18-preview111-plan-icon.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对，基线 `8a774c1` 干净；消息通知源码 `ebb8dcd` 已提交并推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (112)` | 新招呼/通知并排、未读与详情跳转；模拟器验证通过，严格签名、安装及普通启动 PID 2134 已核验。真机 UI runner 连接前 exit 74，未执行用例；[112 交付与限制](./releases/2026-10-18-preview112-message-notifications.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；用户解锁后实际执行通过 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1`，Ready | 双域名 inspect、候选及正式 Chromium/WebKit 的保存/完成/返回修改、昵称、邀请确认和两账号日历核验；[109 交付](./releases/2026-10-16-preview109-availability-feedback.md) |
 | 生产源码 | 真实生产 1,343 项校验重建；保留 1,340 项原内容，仅覆盖三个 UI 文件并新增来源记录；最终 1,344 项上传 SHA-1 全匹配 | 网页来源 `167cb5f`；无 API/Schema 变化，迁移显式跳过；[发布清单](./qa/evidence/2026-10-16-feedback109/source-manifest.json)、[上传核对](./qa/evidence/2026-10-16-feedback109/upload-verification.json) |
+
+112 在消息页顶部并排提供「新招呼」与「通知」，通知支持未读角标、逐条/全部已读和详情跳转。
+复用现有认证接口，本机记录计划提醒及观察到的认证结果/用户名更新，按账号保存已读状态。
+已安装并普通启动于默认 iPhone 14 Plus；32 个不同模拟器用例累计通过。
+真机自动化连接在用例执行前失败，未取得本次真机交互验收，见[完整记录](./releases/2026-10-18-preview112-message-notifications.md)。
 
 111 将导航栏「计划」的横向列表图标替换为简洁圆形勾选，已更新默认 iPhone 14 Plus 的 Preview。
 本次仅修改原生图标，未部署后端；[交付及本次验证范围](./releases/2026-10-18-preview111-plan-icon.md)。
@@ -88,7 +93,7 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 | 智能约时间 | **聊天 → 发起计划 → 智能约时间**；读取自己的已同步日历空档并填入草稿 | 已安装 Preview 99 实测中文名称；对应 `PlanCreateSheet` / `SmartTimeSuggestionSheet` |
 | 多人时间征集 | **计划 → + → 一起定时间**；消息原入口、邀请链接也打开同一共享计划。30 分钟点按/长按拖选、旧填写部分状态、点星期全选当天、撤销、自动保存；结果直接看完整人数热图，发起人手选日期、起止时间及名单并邀请 | 当前网页、原生创建/结果/半天全天邀请和日历见 [108 QA](./qa/2026-10-16-timetable108.md)；既有手势记录见 [30 分钟真机 QA](./qa/2026-10-16-half-hour-iphone14plus.md) |
 | 日历 | 个人日程、课程、已确认计划投影、搜索、智能输入、订阅与导入/导出 | 当前导航/源码、线上配置；本次未逐项重跑 |
-| 消息 | 新招呼、已有双人聊天、计划协商、分享链接与原生时间征集入口 | 当前导航/源码，实际消息页与征集入口实测 |
+| 消息 | 新招呼与通知并排；通知含计划邀请/变更/确认/取消及观察到的认证结果、用户名更新，按账号保存本机已读；已有双人聊天、计划协商和分享入口保留 | [112 模拟器验证、真机安装/启动及自动化连接限制](./releases/2026-10-18-preview112-message-notifications.md) |
 | 我 | 资料、学生认证、课程管理、语言、外观、会员、隐私、安全和设置 | 当前导航/源码；会员身份与邀请码不等于 StoreKit 已启用 |
 | 原生账号、远程通知 | 账号 API 与 APNs 开关已开启 | 公开线上配置；本次没有重做登录写入、通知投递和符号化测试 |
 | 公开网页与管理后台 | iPhone 引导、隐私/支持、批准的分享/征集链接、AASA；后台及其登录保留 | 线上 HTTP、middleware allowlist；未进行管理员登录 |
@@ -104,8 +109,8 @@ Preview 99 的既有交付保留为[历史记录](./releases/2026-10-15-preview9
 
 ## 线上开关
 
-本次读取 `/api/v1/client-config`；值和原始服务器时间保存在
-[client-config.json](./qa/evidence/2026-10-15-deployment-audit/client-config.json)。
+2026-10-18 重新读取 `/api/v1/client-config`；值和原始服务器时间保存在
+[client-config.json](./qa/evidence/2026-10-18-notifications112/client-config.json)。
 
 | 状态 | 开关 |
 | --- | --- |

@@ -1,0 +1,31 @@
+{
+  "device": "iPhone 14 Plus",
+  "osVersion": "26.6.1",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "apps": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "name": "SideSeat",
+      "version": "1.0.0",
+      "bundleVersion": "97"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "name": "SideSeat Preview",
+      "version": "1.0.0",
+      "bundleVersion": "112"
+    }
+  ],
+  "launchArguments": [],
+  "launchPayloadURL": "sideseat://inbox",
+  "launchPID": 2134,
+  "runningProcessVerified": true,
+  "signatureVerified": true,
+  "team": [
+    "V4238R5R53"
+  ],
+  "defaultDeviceProvisioned": true,
+  "qaRunnerRemoved": true,
+  "physicalUITests": "Runner exited with code 74 before establishing XCTest connection; no physical test cases executed."
+}

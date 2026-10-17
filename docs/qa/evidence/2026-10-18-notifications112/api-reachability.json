@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/api/v1/plans",
+    "unauthenticatedStatus": 401
+  },
+  {
+    "path": "/api/v1/time-polls",
+    "unauthenticatedStatus": 401
+  },
+  {
+    "path": "/api/v1/me",
+    "unauthenticatedStatus": 401
+  }
+]
