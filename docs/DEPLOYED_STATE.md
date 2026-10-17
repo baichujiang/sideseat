@@ -1,6 +1,6 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；最后核验 2026-10-16，Europe/Berlin。
+**状态：** 当前运行清单；原生最后核验 2026-10-18，线上部署/开关保留 2026-10-16 的核验范围，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
@@ -10,13 +10,16 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本次工作区/Git 根目录/fetch 核对，基线 `fed9ab2` 干净；一级计划页和统一导航源码 `01d6350` 已提交并推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (110)` | 默认真机复现 109 返回隐藏列表后完成修正；七个不同 UI 用例最终通过，21 项导航单元测试通过；严格签名、安装及空参数普通启动 PID 1026 已核验；[110 交付](./releases/2026-10-16-preview110-plans-root.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对，基线 `cbb128f` 干净；计划图标源码 `ae32524` 已提交并推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (111)` | 圆形勾选计划图标；21 项导航测试及模拟器浅深色/最大字号核对通过；严格签名、安装、无测试参数启动（计划 URL）及运行 PID 2127 已核验；[111 交付](./releases/2026-10-18-preview111-plan-icon.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；用户解锁后实际执行通过 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1`，Ready | 双域名 inspect、候选及正式 Chromium/WebKit 的保存/完成/返回修改、昵称、邀请确认和两账号日历核验；[109 交付](./releases/2026-10-16-preview109-availability-feedback.md) |
 | 生产源码 | 真实生产 1,343 项校验重建；保留 1,340 项原内容，仅覆盖三个 UI 文件并新增来源记录；最终 1,344 项上传 SHA-1 全匹配 | 网页来源 `167cb5f`；无 API/Schema 变化，迁移显式跳过；[发布清单](./qa/evidence/2026-10-16-feedback109/source-manifest.json)、[上传核对](./qa/evidence/2026-10-16-feedback109/upload-verification.json) |
+
+111 将导航栏「计划」的横向列表图标替换为简洁圆形勾选，已更新默认 iPhone 14 Plus 的 Preview。
+本次仅修改原生图标，未部署后端；[交付及本次验证范围](./releases/2026-10-18-preview111-plan-icon.md)。
 
 110 将共享计划集中在一级「计划」页：发起计划、打开分享链接、等待确认、一起定时间和下一次安排。
 原卡片打开的 `TimePollSheet` 隐藏列表已从当前入口移除；现有卡片、新建成功、消息/分享链接共用
