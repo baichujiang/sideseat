@@ -28,8 +28,8 @@ enum AppShellNavigation {
         .init(
             tab: .plans,
             title: "Plans",
-            systemImage: "list.bullet.rectangle",
-            selectedSystemImage: "list.bullet.rectangle.fill"
+            systemImage: "checkmark.circle",
+            selectedSystemImage: "checkmark.circle.fill"
         ),
         .init(
             tab: .home,
