@@ -2623,3 +2623,19 @@
 "View plan" = "View plan";
 
 "Create a plan or open a friend’s shared link to get started." = "Create a plan or open a friend’s shared link to get started.";
+
+/* Messages notification inbox */
+"A plan is waiting for you" = "A plan is waiting for you";
+"Plan time updated" = "Plan time updated";
+"Plan cancelled" = "Plan cancelled";
+"Student verification approved" = "Student verification approved";
+"Student verification needs attention" = "Student verification needs attention";
+"Account updated" = "Account updated";
+"Notifications could not be refreshed. Please try again." = "Notifications could not be refreshed. Please try again.";
+"Loading notifications" = "Loading notifications";
+"No notifications" = "No notifications";
+"Plan invitations, changes and account updates will appear here." = "Plan invitations, changes and account updates will appear here.";
+"Read" = "Read";
+"Unread" = "Unread";
+"Open related details" = "Open related details";
+"Mark all as read" = "Mark all as read";

@@ -578,13 +578,17 @@ or stroke; display names and body text keep semantic foregrounds. Product-wide
 action colors remain unchanged. Light/dark/system is a device preference.
 See [Profile personalization](PROFILE_PERSONALIZATION.md) for entitlement and persistence.
 
-### Messages greeting shortcut
+### Messages greeting and notification shortcuts
 
-The New greetings entrance uses a compact blue waving-hand tile, a label underneath and
-a count badge at its top-right corner. It is left-aligned above the continuous conversation
-list, without a full-width card or disclosure arrow. `Chat.greetingTile` and
+New greetings and Notifications use matching compact blue waving-hand/bell tiles, with labels underneath
+and count badges at their top-right corners. They sit side by side, left-aligned above the continuous conversation
+list, with separate hit targets. `Chat.greetingTile` and
 `Chat.greetingIcon` scope this requested color treatment to this shortcut. The count remains
-the total greetings in the existing request list; the Messages tab retains its unread policy.
+the total greetings in the existing request list; Notifications counts only unread notification items.
+The Messages tab retains its existing unread policy. Decorative tiles cap at 76pt and count glyphs remain
+compact at accessibility sizes; labels wrap and each button exposes its complete count to accessibility.
+The notification list uses semantic text, a leading event icon, timestamp and unread dot, with a separate
+read/unread accessibility value. Empty, loading and retry states remain distinct.
 
 
 ### Same-person follow-up and conversation arrangement — 2026-10-03

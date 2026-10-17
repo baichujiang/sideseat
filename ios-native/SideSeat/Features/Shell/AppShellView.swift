@@ -61,6 +61,7 @@ struct AppShellView: View {
     @State private var selectedTab: AppTab = .discover
     @State private var routers = TabRouter()
     @State private var inboxStore = InboxStore()
+    @State private var notifications = InboxNotificationsStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var productTutorial = ProductTutorialController()
     @State private var cancellationNotices = PlanCancellationNoticeStore()
@@ -104,8 +105,16 @@ struct AppShellView: View {
         } message: { notice in Text(notice.summary) }
     }
 
-    var body: some View {
+    private var notificationAwareSurface: some View {
         cancellationAwareSurface
+        .environment(notifications)
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
+            Task { await notifications.refresh(using: session) }
+        }
+    }
+
+    var body: some View {
+        notificationAwareSurface
         .task {
             routePendingDeepLink()
         }
@@ -120,6 +129,7 @@ struct AppShellView: View {
                 cancellationNotices.reset()
                 dismissForegroundPush()
                 inboxStore.reset()
+                notifications.reset()
                 v2Store.resetAssignment()
                 routers.resetAll()
                 selectedTab = .discover
@@ -136,12 +146,16 @@ struct AppShellView: View {
             }
         }
         .onChange(of: session.currentUser?.id) {
+            notifications.activate(accountID: session.currentUser?.id)
             guard session.phase == .signedIn else { return }
             evaluateTutorial()
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, session.canMakeAuthenticatedRequests else { return }
-            Task { await inboxStore.load(using: session) }
+            Task {
+                await inboxStore.load(using: session)
+                await notifications.refresh(using: session)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatInboxConversationRead)) { note in
             if let id = note.userInfo?["conversationID"] as? String {
@@ -200,8 +214,10 @@ struct AppShellView: View {
             )
         ) {
             guard session.canMakeAuthenticatedRequests else { return }
+            notifications.activate(accountID: session.currentUser?.id)
             await inboxStore.load(using: session)
             await v2Store.loadAssignment(using: session)
+            await notifications.refresh(using: session)
         }
     }
 
@@ -449,6 +465,8 @@ private extension View {
                     CalendarEventShareRecipientView(token: token)
                 case .messageRequests:
                     MessageRequestsView(store: inboxStore)
+                case .notifications:
+                    InboxNotificationsView()
                 case .intentionChat(let opportunity):
                     IntentionChatView(opportunity: opportunity)
                         .toolbar(.hidden, for: .tabBar)

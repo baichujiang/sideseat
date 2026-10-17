@@ -352,7 +352,7 @@ enum SideSeatTheme {
         static var inboxSeparator: Color {
             adaptiveBubbleColor(light: 0xEAEAEA, dark: 0x2C2C2C)
         }
-        /// Color is scoped to the compact greeting shortcut requested for Messages.
+        /// Color is scoped to the compact greeting and notification shortcuts in Messages.
         static var greetingTile: Color {
             adaptiveBubbleColor(light: 0xEAF1FF, dark: 0x1C2F4A)
         }

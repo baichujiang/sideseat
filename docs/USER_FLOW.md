@@ -255,12 +255,18 @@ buttons vertically so their labels remain readable.
   **View chat** button. Cards saved during browsing remain in place until an explicit
   refresh or new search; removing a bookmark restores an otherwise eligible,
   uncontacted card on later requests.
-- **Messages** keeps active conversations in the main list. The **New greetings** shortcut sits below search, above the conversation rows,
+- **Messages** keeps active conversations in the main list. **New greetings** and **Notifications** sit side by side below search, above the conversation rows,
   leaving the navigation title uncluttered. It has a blue waving-hand tile with the label below,
   aligned to the left, and shows the total greeting count as an icon corner badge and opens a separate list grouped into **Waiting for
   your reply** and **Awaiting their response**. Each list has its own search. Pinned conversations
   have an adaptive blue-gray background; ordinary chats keep the standard background.
   Both appear in one continuous list, with pinned chats first and no Pinned/Recent section headings.
+- **Notifications** opens a separate list of plan invitations, time changes, confirmations and cancellations,
+  plus observed student-verification results and username changes. Each item opens the related Plan,
+  conversation, profile or settings. Its badge counts unread notifications; opening an item marks only
+  that item read, and **Mark all as read** clears the remaining notification count. Read state and the
+  observed history are remembered per account on this device. Reading and accepting an invitation are
+  separate actions. Failed refreshes show a retry state while retaining previously loaded items.
 - The conversation is available in **Messages → New greetings** for both participants. Before a reply,
   the sender can read it while the input area says to wait for the recipient's reply.
   The recipient can reply directly in the chat or ignore it. Incoming pending requests

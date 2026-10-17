@@ -10,6 +10,7 @@ struct ChatsRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
+    @Environment(InboxNotificationsStore.self) private var notifications
     @Bindable var store: InboxStore
     @ScaledMetric(relativeTo: .body) private var greetingTileSize: CGFloat = 54
 
@@ -17,7 +18,7 @@ struct ChatsRootView: View {
         ZStack {
             if store.payload != nil {
                 List {
-                    messageRequestsEntry
+                    messageShortcuts
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 12, trailing: 16))
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
@@ -128,48 +129,63 @@ struct ChatsRootView: View {
         }
     }
 
-    private var messageRequestsEntry: some View {
-        Button { router.navigate(to: .messageRequests) } label: {
-            HStack(alignment: .top, spacing: 0) {
-                VStack(spacing: 8) {
-                    Image(systemName: "hand.wave.fill")
-                        .font(.title2.weight(.medium))
-                        .foregroundStyle(SideSeatTheme.Chat.greetingIcon)
-                        .frame(width: greetingTileSize, height: greetingTileSize)
-                        .background(SideSeatTheme.Chat.greetingTile,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
-                        .overlay(alignment: .topTrailing) {
-                            if let count = InboxStore.badgeLabel(for: store.messageRequests.count) {
-                                Text(count)
-                                    .font(.caption2.weight(.semibold).monospacedDigit())
-                                    .foregroundStyle(SideSeatTheme.onAttention)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 3)
-                                    .background(SideSeatTheme.attention, in: Capsule())
-                                    .overlay(Capsule().stroke(SideSeatTheme.bg, lineWidth: 2))
-                                    .offset(x: 8, y: -5)
-                            }
-                        }
-                    Text("New greetings")
-                        .font(.footnote.weight(.medium))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.vertical, 6)
-                .frame(width: max(96, greetingTileSize + 28))
-                Spacer(minLength: 0)
+    private var messageShortcuts: some View {
+        HStack(alignment: .top, spacing: 16) {
+            messageShortcut(title: "New greetings", symbol: "hand.wave.fill",
+                count: store.messageRequests.count, identifier: "inbox-message-requests") {
+                router.navigate(to: .messageRequests)
             }
+            messageShortcut(title: "Notifications", symbol: "bell.fill",
+                count: notifications.unreadCount, identifier: "inbox-notifications") {
+                router.navigate(to: .notifications)
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("inbox-shortcuts")
+    }
+
+    private func messageShortcut(title: LocalizedStringKey, symbol: String, count: Int,
+                                 identifier: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: symbol)
+                    .font(.system(size: min(greetingTileSize * 0.44, 32), weight: .medium))
+                    .foregroundStyle(SideSeatTheme.Chat.greetingIcon)
+                    .frame(width: min(greetingTileSize, 76), height: min(greetingTileSize, 76))
+                    .background(SideSeatTheme.Chat.greetingTile,
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+                    .overlay(alignment: .topTrailing) {
+                        if let count = InboxStore.badgeLabel(for: count) {
+                            Text(count)
+                                .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                                .foregroundStyle(SideSeatTheme.onAttention)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 3)
+                                .background(SideSeatTheme.attention, in: Capsule())
+                                .overlay(Capsule().stroke(SideSeatTheme.bg, lineWidth: 2))
+                                .offset(x: 8, y: -5)
+                        }
+                    }
+                Text(title)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 6)
+            .frame(width: max(96, min(greetingTileSize, 76) + 28))
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
-        .accessibilityLabel("New greetings")
-        .accessibilityValue(String(store.messageRequests.count))
-        .accessibilityIdentifier("inbox-message-requests")
+        .accessibilityLabel(title)
+        .accessibilityValue(String(count))
+        .accessibilityIdentifier(identifier)
     }
 
     private func loadInboxAndPrefetch() async {
         await store.load(using: session)
+        await notifications.refresh(using: session)
         guard let payload = store.payload else { return }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {

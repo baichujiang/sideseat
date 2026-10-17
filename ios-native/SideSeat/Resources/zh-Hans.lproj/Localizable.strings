@@ -2623,3 +2623,19 @@
 "View plan" = "查看计划";
 
 "Create a plan or open a friend’s shared link to get started." = "发起一个计划，或打开朋友发来的分享链接。";
+
+/* Messages notification inbox */
+"A plan is waiting for you" = "有计划待你确认";
+"Plan time updated" = "计划时间有更新";
+"Plan cancelled" = "计划已取消";
+"Student verification approved" = "学生认证已通过";
+"Student verification needs attention" = "学生认证需要处理";
+"Account updated" = "账号信息已更新";
+"Notifications could not be refreshed. Please try again." = "通知暂时无法更新，请重试。";
+"Loading notifications" = "正在加载通知";
+"No notifications" = "暂无通知";
+"Plan invitations, changes and account updates will appear here." = "计划邀请、安排变更和账号提醒会显示在这里。";
+"Read" = "已读";
+"Unread" = "未读";
+"Open related details" = "打开相关详情";
+"Mark all as read" = "全部已读";
