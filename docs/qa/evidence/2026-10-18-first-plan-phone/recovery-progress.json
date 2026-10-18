@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-18T01:45:35.504869+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "fullSystemRebootRequested": true,
+  "ownerConfirmedUnlocked": true,
+  "physicalUSBEnumeration": {
+    "dataType": "SPUSBHostDataType",
+    "defaultUDIDMatched": true
+  },
+  "connectionTransport": "wired",
+  "freshBuild": "compiled and signed; same connection refusal",
+  "guiScheme": "SideSeat-Preview",
+  "guiDestination": "iPhone (4), default UDID verified in selector",
+  "developmentPairingRenewed": true,
+  "afterPairingRenewal": "Timed out while enabling automation mode",
+  "interactionCasesExecuted": 0,
+  "pending": [
+    "Owner completes iPhone XCTest automation authorization",
+    "Owner unlocks Mac for Xcode UI inspection"
+  ],
+  "systemSecurityPoliciesChanged": false,
+  "appFeatureChanges": false,
+  "previewBuild": 114
+}

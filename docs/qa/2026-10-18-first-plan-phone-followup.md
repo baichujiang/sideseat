@@ -40,3 +40,23 @@ CoreDevice 同时报告 `localNetwork`，不能单凭此字段断言没有连接
 测试 runner 已移除，Preview 114 已恢复普通启动，普通 SideSeat 97 保留；
 [手机回执](./evidence/2026-10-18-first-plan-phone/device-final.json)。
 没有发布新 Preview 版本，不能把重新构建测试解释为产品交付完成。
+
+## 同日继续：连接握手恢复，等待系统授权
+
+机主回复已重启解锁后，绑定 runner 仍在 DTX 驱动通道处被拒绝。检查后执行一次工具可追踪的完整系统重启，机主再次确认开机解锁；故障仍可复现。此前仅凭 `xcdevice` 的 `usb` 字段判断物理连接不够可靠：macOS 26 使用 `SPUSBHostDataType`，旧 `SPUSBDataType` 返回空列表不能作为设备证据。
+
+实际硬件枚举最初没有手机，后来明确匹配默认 UDID，CoreDevice 同步从 `localNetwork` 切换为 `wired`。有线、新构建目录直接运行、重新建立有线 Mac 设备会话及 Xcode GUI 单条测试，均仍在用例开始前失败。GUI 已明确选择当前 checkout、`SideSeat-Preview` 和默认 `iPhone (4)`，没有向另一个手机运行测试。
+
+随后通过 `devicectl manage unpair/pair` 刷新同一 Mac 与默认手机的开发配对，两个操作成功；当前连接再次核验为 wired。**下一次测试已不再报通道拒绝，而是进入 UI 测试初始化后报 `Timed out while enabling automation mode`。** 这证明故障推进到系统自动化授权阶段，不能据此认定用例已运行。
+
+此时 Mac 已锁屏，CUA 明确报告无法继续操作 Xcode。已请求机主在手机直接完成 XCTest 密码/启用 UI 自动化提示，并解锁 Mac；没有读取或自动输入密码，没有修改系统安全授权策略。`DevToolsSecurity -status` 的 disabled 仅表示调试工具可能需要管理员授权，按本机手册不能直接认定它是此次远程握手故障的原因，未执行 enable。
+
+当前实际交互用例仍为 **0 项**，完整首次使用流程尚未验收。产品代码、后端和 Preview 版本没有新变化，仍为 114。准备的一次性账号已删除，旧令牌 401，本阶段没有创建 QA 计划；后续授权完成后重新准备账号并继续连续流程。
+
+[恢复过程](./evidence/2026-10-18-first-plan-phone/recovery-progress.json)、
+[完整重启后](./evidence/2026-10-18-first-plan-phone/after-full-reboot.json)、
+[有线配对前](./evidence/2026-10-18-first-plan-phone/wired-before-repair.json)、
+[全新有线构建](./evidence/2026-10-18-first-plan-phone/clean-wired-session.json)、
+[Xcode 界面启动](./evidence/2026-10-18-first-plan-phone/gui-smoke.json)、
+[配对恢复后等待授权](./evidence/2026-10-18-first-plan-phone/after-pairing-renewal.json)、
+[准备账号清理](./evidence/2026-10-18-first-plan-phone/prepared-account-cleanup.json)。
