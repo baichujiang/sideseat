@@ -1,0 +1,12 @@
+{
+  "acceptedPresentationCases": 4,
+  "acceptedRealAPISimulatorFlows": 1,
+  "historicalPresentationFixtureFailures": 1,
+  "resolvedFailure": "The first-use test now explicitly uses an empty Plans fixture; its original UI assertions remain.",
+  "nativeFlowDurationSeconds": 280.006,
+  "realAPICheckpoints": 12,
+  "physicalUITestsExecuted": 0,
+  "physicalAutomationInitializationFailures": 2,
+  "userUnlockState": "Unlocked",
+  "physicalPreviewInstalled": "124"
+}

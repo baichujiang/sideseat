@@ -1,0 +1,70 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "AEBD816E-53A7-4012-B76A-FEF82CF02A6B",
+      "deviceName" : "SideSeat UX QA",
+      "modelName" : "iPhone 17 Pro",
+      "osBuildNumber" : "23F77",
+      "osVersion" : "26.5",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "18秒",
+                  "durationInSeconds" : 18.37943208217621,
+                  "name" : "testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanCreationPresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanCreationPresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "4分钟40秒",
+                  "durationInSeconds" : 280.00624895095825,
+                  "name" : "testNativeParticipantDirectTimetableInviteConfirmAndCalendar()",
+                  "nodeIdentifier" : "PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanFirstUsePhoneUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanFirstUsePhoneUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "SideSeatUITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "SideSeat-Development",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

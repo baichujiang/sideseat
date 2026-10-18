@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-18T20:39:24.675130+00:00",
+  "sourceCommit": "d887c335637dd98a05de3a137fed2519623c6c93",
+  "sourcePushed": true,
+  "branch": "codex/ios-uxui-20260922",
+  "flowBaselineCommit": "4e61c282",
+  "backendDeployment": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "backendOrWebChanged": false,
+  "device": {
+    "model": "iPhone 14 Plus",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "osVersion": "26.6.1"
+  },
+  "apps": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "bundleVersion": "97",
+      "version": "1.0.0",
+      "name": "SideSeat"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "bundleVersion": "124",
+      "version": "1.0.0",
+      "name": "SideSeat Preview"
+    }
+  ],
+  "strictSignatureAndBuildPassed": true,
+  "installVerified": true,
+  "normalLaunch": {
+    "pid": 1606,
+    "pidVerified": true,
+    "arguments": [],
+    "qaEnvironmentVariables": [],
+    "terminatedPreviousProcess": true,
+    "payloadURL": "sideseat://plans"
+  },
+  "physicalUIInteractionPassed": false,
+  "physicalUITestBlocker": "Timed out while enabling automation mode before test cases in two attempts; device was unlocked.",
+  "simulatorRealAPIFlowPassed": true,
+  "qaRunnerRemoved": true,
+  "privateFixturesRemoved": true,
+  "testFlightOrAppStoreUpload": false
+}

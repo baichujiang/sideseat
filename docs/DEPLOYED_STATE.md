@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对；123 原生 `b438a858`、分享网页 `e484b774` 已提交推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (123)` | 受邀时间表高亮最终时段，明确确认；25 项 Swift 单元、原生重跑 253.634 秒及 Safari 147.349 秒完整真机、12+8 阶段 API、深色最大字号通过；严格签名/安装/普通启动 PID 1585 核验；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；123 两条最终完整流程及深色最大字号受邀表格通过，首轮失败及修正独立保存，QA runner 已移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 124 卡片来源 `d887c335`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (124)` | 计划列表、详情与聊天卡片信息层级更新；10 项单元、4 个模拟器呈现及真实 API 模拟器完整链路 280.006 秒、12 个 API 阶段通过；本轮真机 UI 初始化超时，未执行用例。严格签名/安装/普通启动 PID 1606 已核验；[124 交付](./releases/2026-10-18-preview124-plan-cards.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 真机命令均指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`。124 安装和普通启动通过，UI 自动化两次在用例前超时；123 为最近完整真机通过，不能代替 124 交互验收；QA runner 已移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn`，Ready | 受邀时段表格与明确确认统一；候选两轮各 8 组、正式 8 组真实浏览器流程、手机 Safari 147.349 秒及八阶段 API 通过，7 项健康 HTTP 200；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
 | 生产源码 | 原生产 1,349 项校验重建，保留 1,346 项；三个网页文件更新，新增组件及来源记录；1,351 项上传 SHA-1 全匹配 | 网页来源 `e484b774`；API/Schema 保留，迁移显式跳过；同一生产候选验证后原样提升；[清单](./qa/evidence/2026-10-18-plans123/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans123/upload-verification.json) |
+
+124 保存 userflow 基准版本 1 后重排计划相关卡片：状态与活动分层、日期和起止独立、参与进度与主要入口集中；已有计划的首页入口紧凑并排，首次使用说明保留。10 项单元、4 个不同模拟器呈现用例、280.006 秒真实账号模拟器完整链路及 12 个 API 阶段通过。初始呈现中的首用例 fixture 错误已修正复验；真机两次在用例前因自动化初始化超时，不能算交互通过。2 个账号、1 个计划/链接回收，QA runner 移除，124 普通启动 PID 1606 核验。无 API、Schema、迁移或网页发布。[完整 QA](./qa/2026-10-18-plans124.md)。
 
 123 将 App 与分享网页的最终邀请统一为只读时间表：实际时段高亮、活动名和地点临近展示，明确确认后才进入日历。25 项 Swift 单元、3 项网页计算、12 组布局、候选两轮各 8 组及正式 8 组真实流程通过；Safari 真机 147.349 秒、原生修正后 253.634 秒和 8+12 个 API 阶段通过，普通/深色最大字号关键截图已复核。初始锁屏及首轮原生 ID 覆盖/检查时序失败单独保存；修正后以新账号完整重跑通过。5 个一次性账号、15 个计划/链接均回收，QA runner 移除，123 普通启动 PID 1585 核验；普通版 97 保留。[完整 QA](./qa/2026-10-18-plans123.md)。
 

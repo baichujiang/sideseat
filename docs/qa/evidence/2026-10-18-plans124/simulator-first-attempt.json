@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "AEBD816E-53A7-4012-B76A-FEF82CF02A6B",
+        "deviceName" : "SideSeat UX QA",
+        "modelName" : "iPhone 17 Pro",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 3,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "SideSeat-Development · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792355354.272,
+  "passedTests" : 3,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792355259.138,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack",
+      "testName" : "testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()"
+    }
+  ],
+  "title" : "Test - SideSeat-Development",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 4
+}

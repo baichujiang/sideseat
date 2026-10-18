@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "d887c335637dd98a05de3a137fed2519623c6c93",
+  "filesSHA256": {
+    "ios-native/Configuration/Preview.xcconfig": "51479507cc463bc3618ae4148cc36e677eebd5fbf37d031bebcdeee258496f05",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "99acc481bcc578483b382680f905c6a33d70db7a64edb270087f2b7b6a391777",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "5eebe0c88f9bc7286a793c6da6c8477d6024e471c63bb385a2ac3b460c03a498",
+    "ios-native/SideSeat/Features/Chat/PlanCardView.swift": "bf65a216fbbf8dbd40f5dc197991565a11821e7e3316aaa1cdbad1da7350bdc4",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "b888dd66d7a325e69c1853328b5d195622bb710c52a21393d916c3591dbb5b07",
+    "ios-native/SideSeat/Features/Chat/ConversationPlans.swift": "3433d09debe201df98965ff0d5ac6eb4a11cb419dc94121462075aaa6254545e"
+  },
+  "finalIconOnlyAmendmentAfterIntegration": "Replaced unavailable person.2.badge.checkmark with person.2, already shown in collection screenshots; final phone build/sign/install verified."
+}
