@@ -152,7 +152,7 @@ struct UnifiedPlanConfirmationView: View {
                 .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
                 .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
-                    InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, needsConfirmation: canReply && mine?.status != "ACCEPTED")
+                    InvitationTimetableView(title: poll.title, location: poll.location, start: start, end: end, timeZone: poll.timeZone, needsConfirmation: canReply && mine?.status != "ACCEPTED")
                 }
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                     HStack {
@@ -271,6 +271,8 @@ struct UnifiedPlanConfirmationView: View {
 
 
 private struct InvitationTimetableView: View {
+    let title: String
+    let location: String?
     let start: Date
     let end: Date
     let timeZone: String
@@ -282,7 +284,11 @@ private struct InvitationTimetableView: View {
         let rows = TimePollInvitationRow.rows(start: start, end: end, timeZone: timeZone)
         let dates = rows.map(\.date).reduce(into: [String]()) { if $0.last != $1 { $0.append($1) } }
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Text("Invited timetable").font(.headline)
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                Text("Invited timetable").font(.subheadline.weight(.semibold))
+                Text(title).font(.headline)
+                if let location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.caption) }
+            }.id("invitation-timetable-focus")
             Text(LocalizedStringKey(needsConfirmation ? "The highlighted time is the invitation. Review it, then confirm participation below." : "Highlighted cells show the final activity time."))
                 .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             ForEach(dates, id: \.self) { date in
@@ -296,7 +302,7 @@ private struct InvitationTimetableView: View {
                             .font(.caption.monospacedDigit())
                         Text(timeZone).font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceSM)
-                        .id(date == dates.first ? "invitation-timetable-focus" : date)
+                        .id(date)
                     ForEach(dayRows) { row in
                         HStack(spacing: 0) {
                             Text(row.label).font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)

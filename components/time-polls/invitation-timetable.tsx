@@ -4,8 +4,8 @@ import { CalendarDays } from "lucide-react";
 import { invitationTimetableRows, pollClock, pollDate } from "@/lib/time-polls/browser-types";
 import styles from "./shared-time-poll.module.css";
 
-export function InvitationTimetable({ start, end, timeZone, zh, needsConfirmation }: {
-  start: string; end: string; timeZone: string; zh: boolean; needsConfirmation: boolean;
+export function InvitationTimetable({ title, location, start, end, timeZone, zh, needsConfirmation }: {
+  title: string; location: string | null; start: string; end: string; timeZone: string; zh: boolean; needsConfirmation: boolean;
 }) {
   const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => { if (scroll.current) scroll.current.scrollTop = 0; }, [start, end]);
@@ -13,6 +13,8 @@ export function InvitationTimetable({ start, end, timeZone, zh, needsConfirmatio
   const dates = [...new Set(rows.map(row => row.date))];
   return <section className="space-y-3" aria-label={zh ? "受邀时间表" : "Invited timetable"} data-testid="plan-invitation-timetable">
     <h3 className="text-lg font-semibold">{zh ? "受邀时间表" : "Invited timetable"}</h3>
+    <p className="break-words font-semibold">{title}</p>
+    {location ? <p className="break-words text-sm text-muted-foreground">{location}</p> : null}
     <p className="text-sm leading-6 text-muted-foreground">{needsConfirmation ? (zh ? "高亮部分是受邀时段。看清时间后，再点击下方「确认参加」。" : "The highlighted time is the invitation. Review it, then confirm participation below.") : (zh ? "高亮部分表示最终活动时段。" : "Highlighted cells show the final activity time.")}</p>
     <div ref={scroll} className="max-h-[min(44dvh,360px)] overflow-auto rounded-xl border bg-background" tabIndex={0} aria-label={zh ? "只读受邀时间表，可滚动查看" : "Read-only invited timetable; scroll to view"}>
       {dates.map(date => {
