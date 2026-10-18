@@ -308,6 +308,7 @@ struct TimePollDetailView: View {
     @State private var showsCancelPlan = false
     @State private var deleting = false
     @State private var showsInvite = false
+    @State private var showsPeople = false
     @State private var pickingFinalTime = false
     @State private var finalRange: TimePollFinalRange?
     @State private var invitationRoster = Set<String>()
@@ -373,6 +374,25 @@ struct TimePollDetailView: View {
             Button("Delete poll", role: .destructive) { Task { await delete() } }
         }
         .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster).dynamicTypeSize(typeSize) } }
+        .sheet(isPresented: $showsPeople) {
+            if let poll = store.poll {
+                NavigationStack {
+                    Form {
+                        Section {
+                            Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
+                            Text(poll.participants.map { $0.displayName + ($0.isGuest == true ? " (" + AppLocalization.string("Guest") + ")" : "") }.joined(separator: "\n"))
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("time-poll-participants")
+                            Text("Filling in free time doesn't confirm attendance.").font(.footnote).foregroundStyle(.secondary)
+                        }
+                    }
+                    .navigationTitle("Group timetable").navigationBarTitleDisplayMode(.inline)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { showsPeople = false }.accessibilityIdentifier("plan-people-done")
+                    } }
+                }.dynamicTypeSize(typeSize)
+            }
+        }
         .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false; pickingFinalTime = false; finalRange = nil }
         .onChange(of: nameFocused) { old, new in if old && !new && store.displayName.trimmingCharacters(in: .whitespacesAndNewlines) != store.poll?.myDisplayName { store.save(session: session) } }
         .task {
@@ -408,21 +428,10 @@ struct TimePollDetailView: View {
 
     private func collectionHeader(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            PlanStatusBadge(status: poll.presentation(at: now).status, needsYou: poll.presentation(at: now).nextStep.needsYou)
-            HStack(alignment: .firstTextBaseline) {
-                Text(poll.title).font(.headline)
-                    .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-detail-title")
-                Spacer(minLength: 4)
-            }
+            PlanDetailHeading(poll: poll)
+            Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
             summary(poll)
-            Text(LocalizedStringKey(pickingFinalTime
-                ? "Choose the final time in the timetable, then review who to invite."
-                : !poll.isOwner
-                ? "Tap when you're free; tap again to clear. See everyone's availability here."
-                : !poll.participants.contains(where: { !$0.isMe })
-                    ? "Tap the timetable to add your free time, or share it with friends."
-                    : "Look for times with the most people, then choose a time below."))
-                .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             if editsTimetable(poll) {
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     Text("Your name").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -438,13 +447,6 @@ struct TimePollDetailView: View {
                             .font(.caption).accessibilityIdentifier("time-poll-none")
                     }
                 }
-            }
-            Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .accessibilityIdentifier("time-poll-date-range")
-            if !poll.isOwner {
-                Text("After the organizer picks a time, come back here to confirm participation. Filling in free time doesn't confirm attendance.")
-                    .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .accessibilityIdentifier("plan-participant-guidance")
             }
         }.padding(.horizontal, SideSeatTheme.spaceMD)
     }
@@ -475,13 +477,11 @@ struct TimePollDetailView: View {
                 if editsTimetable(poll) { saveStatus(poll) }
                 if poll.isOwner {
                     if poll.participants.contains(where: { !$0.isMe }) {
-                        Text("Friends have filled in. Choose the final time directly in the timetable.")
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         SSPrimaryButton(title: AppLocalization.string("Choose final time"), fill: .product,
                                         accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
                             .disabled(!store.canMutate || poll.slots.isEmpty)
                     }
-                    PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }))
+                    PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }), compact: true)
                 } else {
                     Text("Wait for the organizer's invitation")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -514,7 +514,7 @@ struct TimePollDetailView: View {
                 .foregroundStyle(failed ? SideSeatTheme.danger : store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong) }
             VStack(alignment: .leading, spacing: 3) {
                 Text(store.saving ? "Saving…" : failed ? "Couldn't save" : store.saved ? "Availability saved automatically" : "Choose when you're free")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textPrimary)
                     .accessibilityIdentifier(store.saved ? "time-poll-saved" : "time-poll-save-state")
                 Text(failed ? AppLocalization.string("Your choices are kept. Please retry.") : store.saving ? AppLocalization.string("Changes save automatically") : store.saved ? selectionSummary(poll) : AppLocalization.string("Changes save automatically"))
@@ -539,16 +539,16 @@ struct TimePollDetailView: View {
     }
 
     private func summary(_ poll: NativeTimePoll) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack {
+        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
                 Text("Group timetable").font(.headline).accessibilityIdentifier("time-poll-result-heading")
-                Spacer()
-                Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
-                    .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            }
-            Text(poll.participants.map { $0.displayName + ($0.isGuest == true ? " (" + AppLocalization.string("Guest") + ")" : "") }.joined(separator: " · "))
-                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong).lineLimit(2)
-                .accessibilityIdentifier("time-poll-participants")
+            Spacer(minLength: 0)
+            Button { showsPeople = true } label: {
+                HStack(spacing: SideSeatTheme.spaceXS) {
+                    Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Image(systemName: "chevron.down").accessibilityHidden(true)
+                }.font(.caption).frame(minHeight: 44)
+            }.accessibilityIdentifier("plan-people-open")
         }.accessibilityElement(children: .contain)
     }
 

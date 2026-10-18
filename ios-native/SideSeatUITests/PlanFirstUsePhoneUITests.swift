@@ -145,8 +145,12 @@ import XCTest
         capture(safari, "07-guest-results")
 
         app.activate()
+        let responses = app.buttons["plan-people-open"]
+        XCTAssertTrue(responses.waitForExistence(timeout: 15)); responses.tap()
         let people = app.staticTexts["time-poll-participants"]
         wait(people, labelContains: "Guest Lin")
+        capture(app, "detail-guest-responses")
+        app.buttons["plan-people-done"].tap()
         let sharedCell = app.buttons["time-poll-cell-0"]
         wait(sharedCell, labelContains: ", 2")
         sharedCell.tap()
@@ -227,6 +231,9 @@ import XCTest
         app.buttons["plan-create-next"].tap()
         app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
+        XCTAssertGreaterThan(app.scrollViews["time-poll-grid"].frame.height, app.frame.height * 0.35,
+                             "The timetable should be the main working area on first entry")
+        XCTAssertLessThan(app.staticTexts["time-poll-detail-title"].frame.minY, app.scrollViews["time-poll-grid"].frame.minY)
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         nativeWaitSaved(); nativePhase("owner-ready"); capture(app, "native-01-owner-table")
         app.buttons["plan-copy-link"].tap()
@@ -260,6 +267,13 @@ import XCTest
         nativeWaitSaved(); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         wait(first, labelContains: ", 2")
         nativePhase("participant-saved"); capture(app, "native-03-participant-saved")
+        app.buttons["plan-people-open"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-participants"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["time-poll-participants"].label.contains("Host Ming"))
+        XCTAssertTrue(app.staticTexts["time-poll-participants"].label.contains("Peer Lin"))
+        capture(app, "detail-people-responses")
+        app.buttons["plan-people-done"].tap()
+        XCTAssertTrue(first.waitForExistence(timeout: 10)); XCTAssertTrue(first.isSelected)
         app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected)
         wait(first, labelContains: ", 2")
@@ -337,6 +351,17 @@ import XCTest
         XCTAssertTrue(invited.waitForExistence(timeout: 10)); XCTAssertTrue(invited.isSelected)
         XCTAssertFalse(app.buttons["plan-invitation-cell-1"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["plan-invitation-cell-0"].firstMatch.isSelected)
+        XCTAssertTrue(app.staticTexts["time-poll-detail-title"].isHittable)
+        XCTAssertLessThan(app.staticTexts["time-poll-detail-title"].frame.minY, invited.frame.minY)
+        XCTAssertLessThan(invited.frame.maxY, accept.frame.minY,
+                          "The highlighted final time must be visible above the confirmation action")
+        let people = app.buttons["plan-people-open"]
+        for _ in 0..<3 where !people.isHittable { app.swipeUp() }
+        people.tap()
+        XCTAssertTrue(app.staticTexts["Host Ming"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Peer Lin"].exists)
+        capture(app, "detail-people-invitations")
+        app.buttons["plan-people-done"].tap()
         invited.tap(); XCTAssertTrue(accept.isEnabled)
         nativePhase("invitation-reviewed"); capture(app, "native-08-participant-invitation")
         nativeInvitedTimetableLarge(participant: participant, route: route, bundle: fixture.bundle)

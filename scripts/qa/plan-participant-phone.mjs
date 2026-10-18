@@ -30,7 +30,7 @@ if (mode === 'prepare') {
   const fixture = { title: `Native participant ${suffix}`, bundle: 'app.sideseat.mobile.preview', accounts: [] };
   await fs.writeFile(privatePath, JSON.stringify(fixture), { mode: 0o600 });
   for (const [role, displayName] of [['owner', 'Host Ming'], ['participant', 'Peer Lin']]) {
-    const account = { role, identifier: `planqa_native125_${role === 'owner' ? 'host' : 'peer'}_${suffix}`, password: randomBytes(22).toString('base64url') };
+    const account = { role, identifier: `planqa_native126_${role === 'owner' ? 'host' : 'peer'}_${suffix}`, password: randomBytes(22).toString('base64url') };
     const response = await fetch(base + '/api/auth/signup', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios' },
       body: JSON.stringify({ username: account.identifier, password: account.password, displayName, school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }),
@@ -46,7 +46,7 @@ if (mode === 'prepare') {
 } else {
   const fixture = JSON.parse(await fs.readFile(privatePath, 'utf8'));
   for (const account of fixture.accounts) {
-    assert(account.identifier.startsWith('planqa_native125_'));
+    assert(account.identifier.startsWith('planqa_native126_'));
     if (!account.accessToken) await login(account);
   }
   const owner = fixture.accounts.find(a => a.role === 'owner');

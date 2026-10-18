@@ -34,6 +34,18 @@ example still available. Empty accounts keep the full introduction. The next
 meet-up uses a compact date summary; complete Upcoming and Past views retain
 their existing cards and actions.
 
+Manual plan detail is organized around the timetable. A flat `PlanDetailHeading`
+contains the activity, current status, role and optional location. Collection
+keeps the editable name, date range and response count close to the grid, with the
+full names behind the response-count control. Invitation/confirmed detail shows
+the activity once, then the read-only highlighted timetable, confirmation count
+and Calendar explanation. Selected attendees and their individual replies open
+from Who's joining. Neither participant sheet changes selections or attendance.
+The bottom action area emphasizes the current share, choose-time, explicit
+confirmation or Calendar action; copying is a secondary labeled icon control.
+Rescheduling and nickname editing stay secondary, with destructive management
+in the existing menu. No duplicate summary/attendee cards precede the timetable.
+
 | Display status | Viewer's next step |
 | --- | --- |
 | Finding a time | Organizer can view/share immediately and edit own availability directly in the timetable, then choose a time after friends respond; other participants fill availability and wait for the organizer |

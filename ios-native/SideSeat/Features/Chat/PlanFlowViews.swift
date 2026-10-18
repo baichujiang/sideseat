@@ -180,10 +180,11 @@ struct PlanJourneyProgress: View {
 struct PlanShareActions: View {
     let poll: NativeTimePoll
     var prominent = false
+    var compact = false
     @State private var copied = false
 
     var body: some View {
-        let layout = prominent ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        let layout = prominent && !compact ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
         layout {
             ShareLink(item: poll.shareUrl) {
                 Label(poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation", systemImage: "square.and.arrow.up")
@@ -199,9 +200,15 @@ struct PlanShareActions: View {
                 UIPasteboard.general.url = poll.shareUrl
                 copied = true
             } label: {
-                Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
+                Group {
+                    if compact {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                    } else {
+                        Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    }
+                }
                     .font(.subheadline.weight(.medium))
-                    .frame(maxWidth: prominent ? .infinity : nil, minHeight: 48)
+                    .frame(maxWidth: prominent && !compact ? .infinity : nil, minHeight: 48)
                     .padding(.horizontal, SideSeatTheme.spaceMD)
                     .background(SideSeatTheme.bgGrouped, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             }
@@ -209,6 +216,35 @@ struct PlanShareActions: View {
             .accessibilityLabel(copied ? "Link copied" : "Copy link")
             .accessibilityIdentifier("plan-copy-link")
         }
+    }
+}
+
+/// A flat identity header keeps the timetable as the dominant detail surface.
+struct PlanDetailHeading: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let poll: NativeTimePoll
+    var statusIdentifier = "plan-display-status"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
+            layout {
+                Text(poll.title).font(.title3.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("time-poll-detail-title")
+                PlanStatusBadge(status: poll.presentation(at: Date()).status,
+                    needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier)
+            }
+            Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
+                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            if let location = poll.location, !location.isEmpty {
+                Label(location, systemImage: "mappin.and.ellipse").font(.caption)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+            }
+        }.frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
