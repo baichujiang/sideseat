@@ -1,0 +1,10 @@
+{
+  "result": "Passed",
+  "totalTestCount": 5,
+  "passedTests": 5,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 115,
+  "resultBundle": "/tmp/sideseat-plans115-presentation.xcresult"
+}
