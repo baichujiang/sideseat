@@ -274,8 +274,12 @@ import XCTest
         XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
         XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         let grid = app.scrollViews["time-poll-grid"].firstMatch
-        grid.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.8)).press(forDuration: 0.05,
-            thenDragTo: grid.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.2)))
+        let swipeOrigin = app.coordinate(withNormalizedOffset: .zero)
+        let swipeX = first.frame.midX
+        let swipeStartY = app.staticTexts["time-poll-saved"].frame.minY - 24
+        let swipeEndY = max(grid.frame.minY + 24, first.frame.minY + 24)
+        swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeStartY)).press(forDuration: 0.05,
+            thenDragTo: swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeEndY)))
         XCTAssertFalse(first.isHittable, "An ordinary swipe must scroll rather than change free time")
         app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
@@ -293,7 +297,7 @@ import XCTest
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
         let detailScroll = app.scrollViews["time-poll-detail-scroll"]
         XCTAssertTrue(detailScroll.waitForExistence(timeout: 10))
-        for _ in 0..<8 where !first.isHittable {
+        for _ in 0..<10 where !first.isHittable || first.frame.maxY >= app.staticTexts["time-poll-saved"].frame.minY - 20 {
             let origin = app.coordinate(withNormalizedOffset: .zero)
             let startY = min(app.frame.height * 0.6, app.staticTexts["time-poll-saved"].frame.minY - 24)
             let endY = app.navigationBars.firstMatch.frame.maxY + 100
@@ -301,6 +305,8 @@ import XCTest
                 thenDragTo: origin.withOffset(CGVector(dx: 80, dy: endY)))
         }
         XCTAssertTrue(first.isHittable, "The timetable remains reachable with maximum accessibility text")
+        XCTAssertLessThan(first.frame.maxY, app.staticTexts["time-poll-saved"].frame.minY - 20, "The full time cell must sit above the save bar")
+        XCTAssertGreaterThan(first.frame.minY, app.navigationBars.firstMatch.frame.maxY)
         XCTAssertTrue(first.isSelected)
         XCTAssertTrue(app.staticTexts["plan-participant-next-step"].isHittable)
         nativeAssertInline(); capture(app, "native-06-participant-dark-large")

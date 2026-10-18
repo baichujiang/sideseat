@@ -390,15 +390,12 @@ struct TimePollDetailView: View {
 
     @ViewBuilder private func collectionSurface(_ poll: NativeTimePoll) -> some View {
         if typeSize.isAccessibilitySize {
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(spacing: SideSeatTheme.spaceMD) {
-                        collectionHeader(poll)
-                        TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll)) { store.save(session: session) }
-                            .frame(height: max(500, geometry.size.height))
-                    }
-                }.accessibilityIdentifier("time-poll-detail-scroll")
-            }
+            ScrollView {
+                VStack(spacing: SideSeatTheme.spaceMD) {
+                    collectionHeader(poll)
+                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll)) { store.save(session: session) }
+                }
+            }.accessibilityIdentifier("time-poll-detail-scroll")
         } else {
             collectionHeader(poll)
             TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll)) { store.save(session: session) }
@@ -464,6 +461,7 @@ struct TimePollDetailView: View {
                     .accessibilityIdentifier("plan-participant-next-step")
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
         .overlay(alignment: .top) { Divider() }
     }
@@ -536,15 +534,14 @@ private struct TimePollGrid: View {
     @State private var selecting = true
     @State private var undoSelection: Set<Int>?
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
-    private let labelWidth: CGFloat = 60
-    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? 88 : 48 }
+    private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
+    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? 128 : 48 }
 
     var body: some View {
         let rows = poll.rows
         let cells = poll.cells
         let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
         let participantSelections = poll.timetableSelections(ownSelection: editable ? preview ?? selected : nil)
-        let timeFormatter = timePollClockFormatter(poll.timeZone)
         VStack(spacing: SideSeatTheme.spaceSM) {
             if editable {
                 HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
@@ -583,81 +580,91 @@ private struct TimePollGrid: View {
                     .padding(.horizontal, SideSeatTheme.spaceMD)
             }
             GeometryReader { geometry in
-                let cellWidth = max(88, (geometry.size.width - labelWidth) / CGFloat(max(1, min(4, poll.dates.count))))
-                ScrollView(.vertical) {
-                    HStack(alignment: .top, spacing: 0) {
-                        VStack(spacing: 0) {
-                            Text("Time").font(.caption).frame(width: labelWidth, height: headerHeight)
-                            ForEach(rows, id: \.self) { row in
-                                Text(poll.slots.first { $0.row == row }?.label ?? "")
-                                    .font(.caption2.monospacedDigit())
-                                    .minimumScaleFactor(0.7)
-                                    .frame(width: labelWidth, height: cellHeight)
-                            }
-                        }
-                        ScrollView(.horizontal) {
-                            VStack(spacing: 0) {
-                                HStack(spacing: 0) {
-                                    ForEach(poll.dates, id: \.self) { date in
-                                        if !editable {
-                                            Text(timePollDateLabel(date)).font(.caption.weight(.semibold))
-                                                .frame(width: cellWidth, height: headerHeight)
-                                        } else {
-                                            dayButton(date, width: cellWidth)
-                                        }
-                                    }
-                                }
-                                VStack(spacing: 0) {
-                                    ForEach(rows, id: \.self) { row in
-                                        HStack(spacing: 0) {
-                                            ForEach(poll.dates, id: \.self) { date in
-                                                if let slot = lookup["\(date)|\(row)"] {
-                                                    let count = slot.availableCount(in: participantSelections)
-                                                    let active = slot.slotIds.isSubset(of: preview ?? selected)
-                                                    let partial = !active && !slot.slotIds.isDisjoint(with: preview ?? selected)
-                                                    ZStack {
-                                                        Rectangle().fill(SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, participantSelections.count))))
-                                                        Rectangle().strokeBorder(editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: editable && (active || partial) ? 2 : 0.5)
-                                                        HStack(spacing: 5) {
-                                                            if editable && (active || partial) {
-                                                                Image(systemName: active ? "checkmark.circle.fill" : "minus.circle.fill")
-                                                                    .foregroundStyle(active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
-                                                            }
-                                                            Text("\(count)").monospacedDigit().foregroundStyle(.primary)
-                                                        }.font(.caption.weight(.semibold))
-                                                    }.frame(width: cellWidth, height: cellHeight)
-                                                    .accessibilityElement()
-                                                    .accessibilityLabel("\(date), \(slot.label)–\(timeFormatter.string(from: slot.end)), \(count)")
-                                                    .accessibilityValue(editable ? AppLocalization.string(active ? "Available" : partial ? "Some times selected" : "Unavailable") : "")
-                                                    .accessibilityIdentifier("time-poll-cell-\(slot.id)")
-                                                    .accessibilityAddTraits(editable ? .isButton : [])
-                                                    .accessibilityAddTraits(active && editable ? .isSelected : [])
-                                                    .accessibilityAction { toggle(slot) }
-                                                } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
-                                            }
-                                        }
-                                    }
-                                }
-                                .overlay {
-                                    if editable {
-                                        TimePollTouchSurface(
-                                            onTap: { point in
-                                                if let position = position(point, rows: rows, cellWidth: cellWidth),
-                                                   let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot) }
-                                            },
-                                            onRange: { state, point in updateRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup) }
-                                        ).accessibilityHidden(true)
-                                    }
-                                }
-                            }
-                        }.frame(width: max(0, geometry.size.width - labelWidth), height: headerHeight + cellHeight * CGFloat(rows.count))
-                    }
+                if typeSize.isAccessibilitySize {
+                    timetable(rows: rows, lookup: lookup, participantSelections: participantSelections, width: geometry.size.width)
+                        .accessibilityIdentifier("time-poll-grid")
+                } else {
+                    ScrollView(.vertical) {
+                        timetable(rows: rows, lookup: lookup, participantSelections: participantSelections, width: geometry.size.width)
+                    }.accessibilityIdentifier("time-poll-grid")
                 }
-                .accessibilityIdentifier("time-poll-grid")
             }
+            .frame(height: typeSize.isAccessibilitySize ? headerHeight + cellHeight * CGFloat(rows.count) : nil)
         }
         .onChange(of: editable) { _, _ in clearPreview() }
         .onDisappear { clearPreview() }
+    }
+
+    private func timetable(rows: [String], lookup: [String: NativeTimePoll.Cell], participantSelections: [Set<Int>], width: CGFloat) -> some View {
+        let cellWidth = typeSize.isAccessibilitySize ? max(280, width - labelWidth) : max(88, (width - labelWidth) / CGFloat(max(1, min(4, poll.dates.count))))
+        let timeFormatter = timePollClockFormatter(poll.timeZone)
+        return HStack(alignment: .top, spacing: 0) {
+            VStack(spacing: 0) {
+                Text("Time").font(.caption).lineLimit(1).minimumScaleFactor(0.7).frame(width: labelWidth, height: headerHeight)
+                ForEach(rows, id: \.self) { row in
+                    Text(poll.slots.first { $0.row == row }?.label ?? "")
+                        .font(.caption2.monospacedDigit())
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                        .frame(width: labelWidth, height: cellHeight)
+                }
+            }
+            ScrollView(.horizontal) {
+                VStack(spacing: 0) {
+                    HStack(spacing: 0) {
+                        ForEach(poll.dates, id: \.self) { date in
+                            if !editable {
+                                Text(timePollDateLabel(date)).font(.caption.weight(.semibold)).lineLimit(2).minimumScaleFactor(0.75)
+                                    .frame(width: cellWidth, height: headerHeight)
+                            } else {
+                                dayButton(date, width: cellWidth)
+                            }
+                        }
+                    }
+                    VStack(spacing: 0) {
+                        ForEach(rows, id: \.self) { row in
+                            HStack(spacing: 0) {
+                                ForEach(poll.dates, id: \.self) { date in
+                                    if let slot = lookup["\(date)|\(row)"] {
+                                        let count = slot.availableCount(in: participantSelections)
+                                        let active = slot.slotIds.isSubset(of: preview ?? selected)
+                                        let partial = !active && !slot.slotIds.isDisjoint(with: preview ?? selected)
+                                        ZStack {
+                                            Rectangle().fill(SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, participantSelections.count))))
+                                            Rectangle().strokeBorder(editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: editable && (active || partial) ? 2 : 0.5)
+                                            HStack(spacing: 5) {
+                                                if editable && (active || partial) {
+                                                    Image(systemName: active ? "checkmark.circle.fill" : "minus.circle.fill")
+                                                        .foregroundStyle(active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
+                                                }
+                                                Text("\(count)").monospacedDigit().foregroundStyle(.primary)
+                                            }.font(.caption.weight(.semibold))
+                                        }.frame(width: cellWidth, height: cellHeight)
+                                        .accessibilityElement()
+                                        .accessibilityLabel("\(date), \(slot.label)–\(timeFormatter.string(from: slot.end)), \(count)")
+                                        .accessibilityValue(editable ? AppLocalization.string(active ? "Available" : partial ? "Some times selected" : "Unavailable") : "")
+                                        .accessibilityIdentifier("time-poll-cell-\(slot.id)")
+                                        .accessibilityAddTraits(editable ? .isButton : [])
+                                        .accessibilityAddTraits(active && editable ? .isSelected : [])
+                                        .accessibilityAction { toggle(slot) }
+                                    } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
+                                }
+                            }
+                        }
+                    }
+                    .overlay {
+                        if editable {
+                            TimePollTouchSurface(
+                                onTap: { point in
+                                    if let position = position(point, rows: rows, cellWidth: cellWidth),
+                                       let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot) }
+                                },
+                                onRange: { state, point in updateRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup) }
+                            ).accessibilityHidden(true)
+                        }
+                    }
+                }
+            }.frame(width: max(0, width - labelWidth), height: headerHeight + cellHeight * CGFloat(rows.count))
+        }
     }
 
     private func dayButton(_ date: String, width: CGFloat) -> some View {
@@ -668,7 +675,7 @@ private struct TimePollGrid: View {
             apply(allSelected ? selected.subtracting(slots) : selected.union(slots))
         } label: {
             HStack(spacing: 4) {
-                Text(timePollDateLabel(date)).multilineTextAlignment(.center)
+                Text(timePollDateLabel(date)).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
                 Image(systemName: allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle")
             }
             .font(.caption.weight(.semibold))

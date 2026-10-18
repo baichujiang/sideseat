@@ -27,6 +27,9 @@ remain visible together, with tap/hold, date selection, undo, and the existing
 serialized autosave queue. No personal/group switch, completion button or saved-only
 handoff remains. Save feedback and a compact next-step notice stay at the bottom:
 wait for the organizer's final invitation, then explicitly confirm here.
+The save bar fills the screen width. Accessibility text uses one vertically
+scrollable page and wider time/date columns so complete time labels and editable
+cells can be brought above the fixed save bar.
 This supersedes the participant waiting-screen descriptions in earlier dated
 sections. Invitation review and terminal phases retain their read-only/consent rules;
 no data, API, identity, invitation-version or Calendar contract is merged or changed.
