@@ -74,8 +74,14 @@ full heatmap and response count let friends decide when and how long to
 spend together. Common-time and maximum-attendance cards are removed from both
 current clients. Existing API summary/window fields remain for older clients;
 their original complete-duration and attendance intersection semantics are retained.
-The creator manually chooses a date, start/end and roster before inviting. The
-range initially covers that configured day; half/full-day ranges are supported.
+In Preview 122 the creator starts Choose final time on the same timetable, taps
+start/end or holds and drags a continuous range within one candidate date, then
+reviews the roster before sending. The date header selects the whole configured
+day, preserving half/full-day support and exact legacy boundary instants. An unsent
+draft is separate from availability; cancelling or adjusting it does not modify
+responses or invitations. New invitation drafts start empty; rescheduling prefills
+the existing range. The review keeps roster selections when returning to the table
+and no longer contains separate date/from/until pickers.
 Explicit invitation end is persisted through confirmation and Calendar projection;
 omitting it keeps the older duration/60-minute fallback. Blocked creators
 are unavailable; blocked participants are excluded from visible data/statistics.

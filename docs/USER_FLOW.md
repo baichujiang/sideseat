@@ -64,9 +64,9 @@ everyone covering the full half hour. Draft counts replace the organizer's saved
 response once, leaving other responses intact. Date selection, undo and autosave
 remain available. Saving and reopening keep this editable timetable; no edit-mode
 switch or completion step is required. The name is prefilled and editable.
-Sharing/copying are always available; once friends respond, **Set time and send
-invitations** is added. The inviter can only send after pending saves complete.
-Choosing another invitation time remains a read-only review of collected replies.
+Sharing/copying are always available; once friends respond, the final-time action
+is added. The inviter can only send after pending saves complete. Preview 122 below
+supersedes the separate time pickers and read-only rescheduling table.
 
 Availability editing focuses on one task: **Tap the times you're free**.
 **Participant amendment — 2026-10-18 / Preview 121:** native participants also
@@ -79,10 +79,21 @@ share page follows the same direct editing flow after a name is entered/resumed.
 Availability never accepts an invitation. Invitation/confirmed/cancelled/expired
 surfaces retain their existing confirmation and read-only rules.
 
-The creator selects **Set time and send invitations**, chooses a date and start/end from
-the configured hours, reviews the explicit participant list and sends. The initial
-range covers the configured day, with no one-hour limit. Availability labels update
-for the chosen range; they do not automatically remove people from the reviewed roster.
+**Final-time amendment — 2026-10-18 / Preview 122:** the creator selects
+**Choose final time** on the existing timetable. This explicitly changes the table's
+interaction to a local invitation-time draft, with a distinct outline/icon and an
+unsent label. Tap the first and last cells, or hold and drag within one date to
+choose a continuous range. Tap a date to choose all its configured hours. The
+draft starts empty for a new invitation; selecting another date starts a new range.
+Ordinary swipes still scroll. This does not save availability, send an invitation,
+or create Calendar entries. Cancel restores the normal availability table.
+**Next: review invitation list** becomes enabled after choosing a valid range and
+pending saves finish. The review shows that exact time, timezone and each person's
+availability. **Adjust time** returns to the table with the range and checked roster
+preserved. The review has no separate date/from/until pickers. Availability labels
+do not automatically remove anyone from the reviewed roster. The same table selection
+is used for choosing another invitation time, initially showing the existing range;
+cancelling keeps the existing invitation/version unchanged.
 The creator's send action confirms their own participation; other
 selected people see **Confirm participation** / **Can't attend**. A four-person
 roster may invite four explicitly; the fifth remains outside the roster

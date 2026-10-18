@@ -189,6 +189,27 @@ enum TimePollLink {
     }
 }
 
+/// One continuous, candidate-backed invitation window; never an availability response.
+struct TimePollFinalRange: Equatable, Sendable {
+    let date: String
+    let start: Date
+    let end: Date
+
+    func contains(_ cell: NativeTimePoll.Cell) -> Bool {
+        cell.date == date && cell.slots[0].start >= start && cell.end <= end
+    }
+
+    static func spanning(_ first: NativeTimePoll.Cell, _ last: NativeTimePoll.Cell, cells: [NativeTimePoll.Cell]) -> Self? {
+        guard first.date == last.date else { return nil }
+        let start = min(first.slots[0].start, last.slots[0].start), end = max(first.end, last.end)
+        let range = cells.filter { $0.date == first.date && $0.slots[0].start >= start && $0.end <= end }
+            .sorted { $0.slots[0].start < $1.slots[0].start }
+        guard range.first?.slots[0].start == start, range.last?.end == end,
+              zip(range, range.dropFirst()).allSatisfy({ pair in pair.0.end == pair.1.slots[0].start }) else { return nil }
+        return .init(date: first.date, start: start, end: end)
+    }
+}
+
 enum TimePollSelection {
     /// Group adjacent quarters for display without changing persisted IDs.
     static func cells(_ slots: [NativeTimePoll.Slot]) -> [NativeTimePoll.Cell] {

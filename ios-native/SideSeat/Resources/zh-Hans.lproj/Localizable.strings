@@ -2848,3 +2848,35 @@
 "Tap when you're free; tap again to clear. See everyone's availability here." = "直接点选你有空的时间，再点一次取消，也能同时看到大家的空闲。";
 
 "After the organizer picks a time, come back here to confirm participation. Filling in free time doesn't confirm attendance." = "等发起人选定最终时间后，请回到这里确认参加。填写空闲不代表确认参加。";
+
+"Choose final time" = "选择最终时间";
+
+"Choose the final time in the timetable, then review who to invite." = "在时间表中选好最终时段，再确认邀请谁参加。";
+
+"Friends have filled in. Choose the final time directly in the timetable." = "朋友已填写，直接在时间表里选最终时段。";
+
+"Tap the first and last time cells, or hold and drag." = "点选开始和结束的时间格，也可长按拖选。";
+
+"Tap the first and last time cells, or hold and drag. Tap a date to select that day." = "点选开始和结束的时间格，也可长按拖选；点日期可选整天。";
+
+"Next: review invitation list" = "下一步：确认邀请名单";
+
+"Cancel time selection" = "取消选时";
+
+"Final time · not sent yet" = "正在选最终时间 · 尚未发送邀请";
+
+"Numbers show how many people are free. Your availability stays unchanged." = "数字表示有空人数，选最终时间不会改动你的空闲。";
+
+"Final time selected" = "已选为最终时间";
+
+"Select final time" = "选择最终时间";
+
+"Select this day as the final time" = "选择当天全部时段作为最终时间";
+
+"Final time" = "最终时间";
+
+"Adjust time" = "调整时间";
+
+"Confirm invitation list" = "确认邀请名单";
+
+"Back to timetable" = "返回时间表";

@@ -29,6 +29,38 @@ struct TimePollTests {
         #expect(cells[0].availableCount(in: [[0], [1]]) == 0)
     }
 
+    @Test("Final time spans continuous half-hour cells in either direction without changing replies")
+    func finalTimeRange() {
+        let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        let forward = TimePollFinalRange.spanning(cells[0], cells[2], cells: cells)
+        let reverse = TimePollFinalRange.spanning(cells[2], cells[0], cells: cells)
+        #expect(forward == reverse)
+        #expect(forward?.start == slots[0].start)
+        #expect(forward?.end == slots[5].end)
+        #expect(forward?.contains(cells[1]) == true)
+        #expect(forward?.contains(cells[3]) == false)
+        #expect(cells.flatMap { $0.slots.map(\.id) } == Array(0..<8))
+    }
+
+    @Test("Final time cannot span different dates or gaps")
+    func finalTimeBoundaries() {
+        let slots = (0..<6).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-19" : "2026-10-20", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        #expect(TimePollFinalRange.spanning(cells[0], cells[2], cells: cells) == nil)
+        let separated = [cells[0], NativeTimePoll.Cell(slots: [.init(id: 10, date: "2026-10-19", row: "10", label: "10", start: Date(timeIntervalSince1970: 9000), end: Date(timeIntervalSince1970: 9900))])]
+        #expect(TimePollFinalRange.spanning(separated[0], separated[1], cells: separated) == nil)
+    }
+
+    @Test("Whole-day final time preserves midnight and an odd legacy boundary")
+    func finalTimeWholeDay() {
+        let slots = (0..<95).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        #expect(TimePollFinalRange.spanning(cells.first!, cells.last!, cells: cells)?.end == slots.last!.end)
+        let last = NativeTimePoll.Cell(slots: [.init(id: 95, date: "2026-10-19", row: "95", label: "23:45", start: slots.last!.end, end: Date(timeIntervalSince1970: 86400))])
+        #expect(TimePollFinalRange.spanning(cells[0], last, cells: cells + [last])?.end == Date(timeIntervalSince1970: 86400))
+    }
+
     @Test("Invite links use the Sideseat domain and route into the native feature")
     func links() {
         let token = String(repeating: "a", count: 32)

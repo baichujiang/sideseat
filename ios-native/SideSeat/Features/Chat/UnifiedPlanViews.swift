@@ -38,61 +38,33 @@ struct UnifiedPlanInviteView: View {
     @Environment(\.dismiss) private var dismiss
     let poll: NativeTimePoll
     @Bindable var store: TimePollStore
-    @State private var date: String
-    @State private var starts: Date
-    @State private var ends: Date
-    @State private var selected: Set<String>
+    let range: TimePollFinalRange
+    @Binding var selected: Set<String>
 
-    init(poll: NativeTimePoll, store: TimePollStore) {
-        self.poll = poll; self.store = store
-        let date = poll.slots.first(where: { $0.start == poll.chosenStart })?.date ?? poll.dates.first ?? ""
-        let cells = poll.cells.filter { $0.date == date }
-        let start = cells.first(where: { $0.slots[0].start == poll.chosenStart })?.slots[0].start ?? cells.first?.slots[0].start ?? Date()
-        let end = cells.first(where: { $0.end == poll.chosenEnd && $0.end > start })?.end ?? cells.last?.end ?? start
-        _date = State(initialValue: date); _starts = State(initialValue: start); _ends = State(initialValue: end)
-        _selected = State(initialValue: Set(poll.participants.map(\.id)))
+    init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>) {
+        self.poll = poll; self.store = store; self.range = range
+        _selected = selected
     }
 
-    private var cells: [NativeTimePoll.Cell] { poll.cells.filter { $0.date == date } }
     private var rangeIds: Set<Int> {
-        Set(poll.slots.filter { $0.date == date && $0.start >= starts && $0.end <= ends }.map(\.id))
+        Set(poll.slots.filter { $0.date == range.date && $0.start >= range.start && $0.end <= range.end }.map(\.id))
     }
     private func available(_ person: NativeTimePoll.Participant) -> Bool {
         !rangeIds.isEmpty && rangeIds.isSubset(of: Set(person.slotIds))
-    }
-    private func endLabel(_ cell: NativeTimePoll.Cell) -> String {
-        if let next = cells.first(where: { $0.slots[0].start == cell.end }) { return next.label }
-        return poll.endMinute == 1440 ? "24:00" : timePollClockFormatter(poll.timeZone).string(from: cell.end)
     }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section(poll.title) {
-                    Text(unifiedPlanTimeLabel(start: starts, end: ends, timeZone: poll.timeZone))
+                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
                         .accessibilityIdentifier("unified-plan-chosen-range")
                     if let location = poll.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
                 }
-                Section("Choose the time") {
-                    Picker("Plan date", selection: Binding(get: { date }, set: { value in
-                        date = value
-                        let day = poll.cells.filter { $0.date == value }
-                        starts = day.first?.slots[0].start ?? starts; ends = day.last?.end ?? ends
-                    })) {
-                        ForEach(poll.dates, id: \.self) { Text(timePollDateLabel($0).replacingOccurrences(of: "\n", with: " ")).tag($0) }
-                    }.accessibilityIdentifier("unified-plan-invite-date")
-                    Picker("From", selection: Binding(get: { starts }, set: { value in
-                        starts = value
-                        if ends <= value { ends = cells.first(where: { $0.end > value })?.end ?? ends }
-                    })) {
-                        ForEach(cells) { Text($0.label).tag($0.slots[0].start) }
-                    }.accessibilityIdentifier("unified-plan-invite-from")
-                    Picker("Until", selection: $ends) {
-                        ForEach(cells.filter { $0.end > starts }) { Text(endLabel($0)).tag($0.end) }
-                    }.accessibilityIdentifier("unified-plan-invite-until")
+                Section("Final time") {
                     LabeledContent("Time zone", value: poll.timeZone)
-                    Text("Choose the hours you want to spend together, including half a day or a full day.")
-                        .font(.footnote).foregroundStyle(.secondary)
+                    Button("Adjust time") { dismiss() }
+                        .accessibilityIdentifier("unified-plan-adjust-time")
                 }
                 Section("Choose who to invite") {
                     ForEach(poll.participants) { person in
@@ -127,15 +99,15 @@ struct UnifiedPlanInviteView: View {
                     SSPrimaryButton(title: AppLocalization.string("Send invitations"), isLoading: store.acting, fill: .product,
                                     accessibilityID: "unified-plan-send-invitations") {
                         Task {
-                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: starts), end: ISO8601DateFormatter().string(from: ends), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
+                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
                             if store.error == nil && store.poll?.planningPhase == "INVITING" { dismiss() }
                         }
                     }
-                    .disabled(!store.canMutate || ends <= starts || !poll.participants.contains { !$0.isMe && selected.contains($0.id) })
+                    .disabled(!store.canMutate || !poll.participants.contains { !$0.isMe && selected.contains($0.id) })
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
             }
-            .navigationTitle("Invite participants").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(store.acting) } }
+            .navigationTitle("Confirm invitation list").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(store.acting) } }
         }.tint(SideSeatTheme.utilityAction)
     }
 }

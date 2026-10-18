@@ -308,6 +308,9 @@ struct TimePollDetailView: View {
     @State private var showsCancelPlan = false
     @State private var deleting = false
     @State private var showsInvite = false
+    @State private var pickingFinalTime = false
+    @State private var finalRange: TimePollFinalRange?
+    @State private var invitationRoster = Set<String>()
     @State private var choosingAgain = false
     @State private var now = Date()
     @FocusState private var nameFocused: Bool
@@ -330,6 +333,7 @@ struct TimePollDetailView: View {
                 } else {
                     UnifiedPlanConfirmationView(poll: poll, store: store) {
                         choosingAgain = true
+                        beginFinalSelection(poll)
                     }
                 }
             } else if let error = store.error {
@@ -368,8 +372,8 @@ struct TimePollDetailView: View {
         .confirmationDialog("Delete this poll and all responses?", isPresented: $showsDelete, titleVisibility: .visible) {
             Button("Delete poll", role: .destructive) { Task { await delete() } }
         }
-        .sheet(isPresented: $showsInvite) { if let poll = store.poll { UnifiedPlanInviteView(poll: poll, store: store).dynamicTypeSize(typeSize) } }
-        .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false }
+        .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster).dynamicTypeSize(typeSize) } }
+        .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false; pickingFinalTime = false; finalRange = nil }
         .onChange(of: nameFocused) { old, new in if old && !new && store.displayName.trimmingCharacters(in: .whitespacesAndNewlines) != store.poll?.myDisplayName { store.save(session: session) } }
         .task {
             await store.load(session: session)
@@ -385,7 +389,7 @@ struct TimePollDetailView: View {
     }
 
     private func editsTimetable(_ poll: NativeTimePoll) -> Bool {
-        poll.planningPhase == "COLLECTING" && !choosingAgain
+        poll.planningPhase == "COLLECTING" && !choosingAgain && !pickingFinalTime
     }
 
     @ViewBuilder private func collectionSurface(_ poll: NativeTimePoll) -> some View {
@@ -393,12 +397,12 @@ struct TimePollDetailView: View {
             ScrollView {
                 VStack(spacing: SideSeatTheme.spaceMD) {
                     collectionHeader(poll)
-                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll)) { store.save(session: session) }
+                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) { store.save(session: session) }
                 }
             }.accessibilityIdentifier("time-poll-detail-scroll")
         } else {
             collectionHeader(poll)
-            TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll)) { store.save(session: session) }
+            TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) { store.save(session: session) }
         }
     }
 
@@ -411,7 +415,9 @@ struct TimePollDetailView: View {
                 Spacer(minLength: 4)
             }
             summary(poll)
-            Text(LocalizedStringKey(!poll.isOwner
+            Text(LocalizedStringKey(pickingFinalTime
+                ? "Choose the final time in the timetable, then review who to invite."
+                : !poll.isOwner
                 ? "Tap when you're free; tap again to clear. See everyone's availability here."
                 : !poll.participants.contains(where: { !$0.isMe })
                     ? "Tap the timetable to add your free time, or share it with friends."
@@ -445,25 +451,59 @@ struct TimePollDetailView: View {
 
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            if editsTimetable(poll) { saveStatus(poll) }
-            if poll.isOwner {
-                if poll.participants.contains(where: { !$0.isMe }) {
-                    Text("Friends have filled in. Pick the final time and send an invitation.")
+            if pickingFinalTime {
+                Text("Choose final time").font(.subheadline.weight(.semibold)).accessibilityIdentifier("time-poll-final-heading")
+                if let finalRange {
+                    Text(timePollDateLabel(finalRange.date).replacingOccurrences(of: "\n", with: " "))
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    SSPrimaryButton(title: AppLocalization.string("Set time and send invitations"), fill: .product,
-                                    accessibilityID: "unified-plan-invite-window") { showsInvite = true }
-                        .disabled(!store.canMutate || poll.slots.isEmpty)
+                    Text(timePollClockFormatter(poll.timeZone).string(from: finalRange.start) + " – " + timePollClockFormatter(poll.timeZone).string(from: finalRange.end))
+                        .font(.subheadline.monospacedDigit()).fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("time-poll-final-range")
+                } else {
+                    Text("Tap the first and last time cells, or hold and drag.")
+                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
-                PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }))
+                SSPrimaryButton(title: AppLocalization.string("Next: review invitation list"), fill: .product,
+                                accessibilityID: "unified-plan-review-roster") { showsInvite = true }
+                    .disabled(finalRange == nil || !store.canMutate)
+                Button("Cancel time selection") {
+                    pickingFinalTime = false; finalRange = nil
+                    if choosingAgain { choosingAgain = false }
+                }.font(.caption).frame(maxWidth: .infinity, minHeight: 44)
+                    .accessibilityIdentifier("time-poll-cancel-final")
             } else {
-                Text("Wait for the organizer's invitation")
-                    .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .accessibilityIdentifier("plan-participant-next-step")
+                if editsTimetable(poll) { saveStatus(poll) }
+                if poll.isOwner {
+                    if poll.participants.contains(where: { !$0.isMe }) {
+                        Text("Friends have filled in. Choose the final time directly in the timetable.")
+                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        SSPrimaryButton(title: AppLocalization.string("Choose final time"), fill: .product,
+                                        accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
+                            .disabled(!store.canMutate || poll.slots.isEmpty)
+                    }
+                    PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }))
+                } else {
+                    Text("Wait for the organizer's invitation")
+                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .accessibilityIdentifier("plan-participant-next-step")
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
         .overlay(alignment: .top) { Divider() }
+    }
+
+    private func beginFinalSelection(_ poll: NativeTimePoll) {
+        nameFocused = false
+        invitationRoster = Set(poll.participants.map(\.id))
+        finalRange = nil
+        if let start = poll.chosenStart, let end = poll.chosenEnd,
+           let first = poll.cells.first(where: { $0.slots[0].start == start }),
+           let last = poll.cells.first(where: { $0.end == end }) {
+            finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells)
+        }
+        pickingFinalTime = true
     }
 
     private func saveStatus(_ poll: NativeTimePoll) -> some View {
@@ -526,6 +566,8 @@ private struct TimePollGrid: View {
     let poll: NativeTimePoll
     @Binding var selected: Set<Int>
     let editable: Bool
+    let pickingFinalTime: Bool
+    @Binding var finalRange: TimePollFinalRange?
     let onSave: () -> Void
     @State private var dragStart: (Int, Int)?
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -533,6 +575,8 @@ private struct TimePollGrid: View {
     @State private var preview: Set<Int>?
     @State private var selecting = true
     @State private var undoSelection: Set<Int>?
+    @State private var finalAnchor: NativeTimePoll.Cell?
+    @State private var originalFinalRange: TimePollFinalRange?
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
     private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? 128 : 48 }
@@ -543,7 +587,16 @@ private struct TimePollGrid: View {
         let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
         let participantSelections = poll.timetableSelections(ownSelection: editable ? preview ?? selected : nil)
         VStack(spacing: SideSeatTheme.spaceSM) {
-            if editable {
+            if pickingFinalTime {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    Label("Final time · not sent yet", systemImage: "calendar.badge.clock")
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                    Text("Tap the first and last time cells, or hold and drag. Tap a date to select that day.")
+                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    Text("Numbers show how many people are free. Your availability stays unchanged.")
+                        .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, SideSeatTheme.spaceMD)
+            } else if editable {
                 HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
                     Text("Tap your free time. Each cell is 30 minutes. Tap a date to select the day.")
                         .font(.caption).foregroundStyle(.secondary)
@@ -591,7 +644,8 @@ private struct TimePollGrid: View {
             }
             .frame(height: typeSize.isAccessibilitySize ? headerHeight + cellHeight * CGFloat(rows.count) : nil)
         }
-        .onChange(of: editable) { _, _ in clearPreview() }
+        .onChange(of: editable) { _, _ in clearPreview(); finalAnchor = nil }
+        .onChange(of: pickingFinalTime) { _, _ in clearPreview(); finalAnchor = nil }
         .onDisappear { clearPreview() }
     }
 
@@ -612,7 +666,7 @@ private struct TimePollGrid: View {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
                         ForEach(poll.dates, id: \.self) { date in
-                            if !editable {
+                            if !editable && !pickingFinalTime {
                                 Text(timePollDateLabel(date)).font(.caption.weight(.semibold)).lineLimit(2).minimumScaleFactor(0.75)
                                     .frame(width: cellWidth, height: headerHeight)
                             } else {
@@ -628,11 +682,15 @@ private struct TimePollGrid: View {
                                         let count = slot.availableCount(in: participantSelections)
                                         let active = slot.slotIds.isSubset(of: preview ?? selected)
                                         let partial = !active && !slot.slotIds.isDisjoint(with: preview ?? selected)
+                                        let finalActive = pickingFinalTime && finalRange?.contains(slot) == true
                                         ZStack {
                                             Rectangle().fill(SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, participantSelections.count))))
-                                            Rectangle().strokeBorder(editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: editable && (active || partial) ? 2 : 0.5)
+                                            if finalActive { Rectangle().fill(SideSeatTheme.utilityAction.opacity(0.18)) }
+                                            Rectangle().strokeBorder(finalActive ? SideSeatTheme.utilityAction : editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: finalActive || editable && (active || partial) ? 2 : 0.5)
                                             HStack(spacing: 5) {
-                                                if editable && (active || partial) {
+                                                if finalActive {
+                                                    Image(systemName: "calendar.badge.checkmark").foregroundStyle(SideSeatTheme.textPrimary)
+                                                } else if editable && (active || partial) {
                                                     Image(systemName: active ? "checkmark.circle.fill" : "minus.circle.fill")
                                                         .foregroundStyle(active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
                                                 }
@@ -641,10 +699,10 @@ private struct TimePollGrid: View {
                                         }.frame(width: cellWidth, height: cellHeight)
                                         .accessibilityElement()
                                         .accessibilityLabel("\(date), \(slot.label)–\(timeFormatter.string(from: slot.end)), \(count)")
-                                        .accessibilityValue(editable ? AppLocalization.string(active ? "Available" : partial ? "Some times selected" : "Unavailable") : "")
+                                        .accessibilityValue(pickingFinalTime ? AppLocalization.string(finalActive ? "Final time selected" : "Select final time") : editable ? AppLocalization.string(active ? "Available" : partial ? "Some times selected" : "Unavailable") : "")
                                         .accessibilityIdentifier("time-poll-cell-\(slot.id)")
-                                        .accessibilityAddTraits(editable ? .isButton : [])
-                                        .accessibilityAddTraits(active && editable ? .isSelected : [])
+                                        .accessibilityAddTraits(editable || pickingFinalTime ? .isButton : [])
+                                        .accessibilityAddTraits(finalActive || active && editable ? .isSelected : [])
                                         .accessibilityAction { toggle(slot) }
                                     } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
                                 }
@@ -652,7 +710,7 @@ private struct TimePollGrid: View {
                         }
                     }
                     .overlay {
-                        if editable {
+                        if editable || pickingFinalTime {
                             TimePollTouchSurface(
                                 onTap: { point in
                                     if let position = position(point, rows: rows, cellWidth: cellWidth),
@@ -671,19 +729,23 @@ private struct TimePollGrid: View {
         let slots = Set(poll.slots.filter { $0.date == date }.map(\.id))
         let allSelected = !slots.isEmpty && slots.isSubset(of: selected)
         let partlySelected = !allSelected && !slots.isDisjoint(with: selected)
+        let day = poll.cells.filter { $0.date == date }
         return Button {
-            apply(allSelected ? selected.subtracting(slots) : selected.union(slots))
+            if pickingFinalTime {
+                if let first = day.first, let last = day.last { finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells) }
+                finalAnchor = nil
+            } else { apply(allSelected ? selected.subtracting(slots) : selected.union(slots)) }
         } label: {
             HStack(spacing: 4) {
                 Text(timePollDateLabel(date)).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
-                Image(systemName: allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle")
+                Image(systemName: pickingFinalTime ? "calendar" : allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle")
             }
             .font(.caption.weight(.semibold))
             .frame(width: width - 6, height: headerHeight - 4)
-            .foregroundStyle(allSelected ? SideSeatTheme.Availability.onSelected : partlySelected ? SideSeatTheme.Availability.onPartial : SideSeatTheme.textPrimary)
-            .background(allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.partialFill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
+            .foregroundStyle(pickingFinalTime ? SideSeatTheme.textPrimary : allSelected ? SideSeatTheme.Availability.onSelected : partlySelected ? SideSeatTheme.Availability.onPartial : SideSeatTheme.textPrimary)
+            .background(pickingFinalTime ? Color.clear : allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.partialFill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
             .overlay {
-                RoundedRectangle(cornerRadius: 8).strokeBorder(allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.onPartial.opacity(0.5) : SideSeatTheme.separator, lineWidth: 0.5)
+                RoundedRectangle(cornerRadius: 8).strokeBorder(pickingFinalTime ? SideSeatTheme.separator : allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.onPartial.opacity(0.5) : SideSeatTheme.separator, lineWidth: 0.5)
             }
             .frame(width: width, height: headerHeight)
             .contentShape(Rectangle())
@@ -691,13 +753,17 @@ private struct TimePollGrid: View {
         .buttonStyle(.plain)
         .disabled(slots.isEmpty || dragStart != nil)
         .accessibilityLabel(timePollDateLabel(date).replacingOccurrences(of: "\n", with: ", "))
-        .accessibilityValue(AppLocalization.string(allSelected ? "All times selected" : partlySelected ? "Some times selected" : "No times selected"))
-        .accessibilityHint(AppLocalization.string(allSelected ? "Deselect all times for this day" : "Select all times for this day"))
-        .accessibilityAddTraits(allSelected ? .isSelected : [])
+        .accessibilityValue(pickingFinalTime ? "" : AppLocalization.string(allSelected ? "All times selected" : partlySelected ? "Some times selected" : "No times selected"))
+        .accessibilityHint(AppLocalization.string(pickingFinalTime ? "Select this day as the final time" : allSelected ? "Deselect all times for this day" : "Select all times for this day"))
+        .accessibilityAddTraits(!pickingFinalTime && allSelected ? .isSelected : [])
         .accessibilityIdentifier("time-poll-day-\(date)")
     }
 
     private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
+        if pickingFinalTime {
+            updateFinalRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup)
+            return
+        }
         switch state {
         case .began:
             guard let start = position(point, rows: rows, cellWidth: cellWidth),
@@ -720,7 +786,39 @@ private struct TimePollGrid: View {
         }
     }
 
+    private func updateFinalRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
+        switch state {
+        case .began:
+            guard let start = position(point, rows: rows, cellWidth: cellWidth),
+                  let cell = lookup["\(poll.dates[start.0])|\(rows[start.1])"] else { return }
+            originalFinalRange = finalRange; dragStart = start; finalAnchor = nil
+            finalRange = TimePollFinalRange.spanning(cell, cell, cells: poll.cells)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        case .changed:
+            guard let start = dragStart,
+                  let end = position(point, rows: rows, cellWidth: cellWidth, clamped: true),
+                  let first = lookup["\(poll.dates[start.0])|\(rows[start.1])"],
+                  let last = lookup["\(poll.dates[start.0])|\(rows[end.1])"] else { return }
+            finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells)
+        case .ended:
+            clearPreview()
+        case .cancelled, .failed:
+            finalRange = originalFinalRange; clearPreview()
+        default: break
+        }
+    }
+
     private func toggle(_ cell: NativeTimePoll.Cell) {
+        if pickingFinalTime {
+            if let anchor = finalAnchor, anchor.date == cell.date {
+                finalRange = TimePollFinalRange.spanning(anchor, cell, cells: poll.cells)
+                finalAnchor = nil
+            } else {
+                finalRange = TimePollFinalRange.spanning(cell, cell, cells: poll.cells)
+                finalAnchor = cell
+            }
+            return
+        }
         guard editable else { return }
         apply(TimePollSelection.toggle(cell, original: selected))
     }

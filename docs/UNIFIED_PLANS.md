@@ -19,6 +19,19 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Final-time selection in the timetable — Preview 122
+
+The organizer explicitly starts **Choose final time**, then picks a continuous
+candidate-backed range in the same timetable by tapping start/end or holding and
+dragging. A date selects all configured hours for that date. An unsent label,
+calendar icon and separate outline distinguish this draft from personal availability;
+counts stay visible and no response is changed. New invitations start without a
+preselected range. The next action opens a roster-only review with exact time and
+availability labels. Adjusting time retains both the range and checked roster.
+Only Send invitations mutates the existing invitation API/version. Cancelling a
+draft changes nothing; rescheduling uses the same selection with the old range
+prefilled. Existing identity, consent and Calendar rules remain unchanged.
+
 ## Native participant timetable — Preview 121
 
 Native participants now use the same editable group timetable from their first

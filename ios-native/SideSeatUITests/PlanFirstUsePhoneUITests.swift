@@ -161,13 +161,8 @@ import XCTest
         XCTAssertTrue(sharedCell.isSelected)
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
         phase("owner-restored")
-        let invite = app.buttons["unified-plan-invite-window"]
-        XCTAssertTrue(invite.isHittable); capture(app, "08-owner-results"); invite.tap()
+        reviewFinalHour()
         let send = app.buttons["unified-plan-send-invitations"]
-        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isHittable)
-        app.buttons["unified-plan-invite-until"].tap()
-        let ten = app.buttons.matching(NSPredicate(format: "label IN %@", ["10:00", "10:00 AM", "10:00\u{202f}AM"])).firstMatch
-        XCTAssertTrue(ten.waitForExistence(timeout: 5)); ten.tap()
         capture(app, "09-review-invitation"); send.tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "1/2 人已确认")
@@ -311,17 +306,20 @@ import XCTest
         XCTAssertTrue(app.staticTexts["plan-participant-next-step"].isHittable)
         nativeAssertInline(); capture(app, "native-06-participant-dark-large")
 
+        nativeFinalTimeLargeText(owner: owner, route: route, bundle: fixture.bundle)
         nativeSignIn(owner, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap(); nativeOpenCard()
-        let invite = app.buttons["unified-plan-invite-window"]
-        XCTAssertTrue(invite.waitForExistence(timeout: 15)); invite.tap()
-        let send = app.buttons["unified-plan-send-invitations"]
-        XCTAssertTrue(send.waitForExistence(timeout: 10))
-        app.buttons["unified-plan-invite-until"].tap()
-        let ten = app.buttons.matching(NSPredicate(format: "label IN %@", ["10:00", "10:00 AM", "10:00\u{202f}AM"])).firstMatch
-        XCTAssertTrue(ten.waitForExistence(timeout: 5)); ten.tap(); send.tap()
+        reviewFinalHour(mark: nativePhase)
+        app.buttons["unified-plan-send-invitations"].tap()
         wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "1/2 人已确认")
         nativePhase("awaiting-confirmation"); capture(app, "native-07-organizer-invited")
+        app.buttons["unified-plan-choose-again"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+        XCTAssertTrue(app.buttons["time-poll-cell-2"].isSelected)
+        app.buttons["time-poll-cancel-final"].tap()
+        wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "1/2 人已确认")
+        nativePhase("reschedule-cancelled")
 
         nativeSignIn(participant, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap(); nativeOpenCard()
@@ -344,6 +342,76 @@ import XCTest
         XCTAssertTrue(manage.waitForExistence(timeout: 10)); capture(app, "native-10-participant-calendar")
         manage.tap(); wait(count, labelContains: "2/2 人已确认")
         nativePhase("calendar-verified"); capture(app, "native-11-calendar-to-plan")
+    }
+
+    private func reviewFinalHour(mark: (String) -> Void = { _ in }) {
+        let choose = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(choose.waitForExistence(timeout: 15)); choose.tap()
+        let review = app.buttons["unified-plan-review-roster"]
+        XCTAssertTrue(review.waitForExistence(timeout: 10)); XCTAssertFalse(review.isEnabled)
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertFalse(first.isSelected, "Final time starts empty even if my availability is selected")
+        first.tap(); XCTAssertTrue(first.isSelected); XCTAssertFalse(second.isSelected)
+        second.tap(); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        XCTAssertTrue(app.staticTexts["time-poll-final-range"].label.contains("10:00"))
+        mark("owner-final-picked"); capture(app, "final-01-tap-range")
+        app.buttons["time-poll-cancel-final"].tap()
+        XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        wait(first, labelContains: ", 2")
+        choose.tap(); XCTAssertFalse(review.isEnabled)
+        let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).firstMatch
+        day.tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
+        first.press(forDuration: 0.6, thenDragTo: second)
+        XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
+        review.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isEnabled)
+        XCTAssertTrue(app.staticTexts["unified-plan-chosen-range"].label.contains("10:00"))
+        XCTAssertFalse(app.buttons["unified-plan-invite-from"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-invite-until"].exists)
+        let peers = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-invite-person-'")).allElementsBoundByIndex
+        let peer = peers.first { $0.isEnabled }
+        XCTAssertNotNil(peer); peer?.tap(); XCTAssertFalse(send.isEnabled)
+        app.buttons["unified-plan-adjust-time"].tap()
+        XCTAssertTrue(first.waitForExistence(timeout: 10)); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        capture(app, "final-02-drag-range")
+        review.tap(); XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertFalse(send.isEnabled, "Adjusting time must preserve the invitation roster")
+        peer?.tap(); XCTAssertTrue(send.isEnabled)
+        mark("roster-reviewed"); capture(app, "final-03-roster-review")
+    }
+
+    private func nativeFinalTimeLargeText(owner: NativeAccount, route: String, bundle: String) {
+        app.terminate()
+        app = XCUIApplication(bundleIdentifier: bundle)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-time-poll-live", "--ui-testing-deep-link=\(route)", "--ui-testing-language=zh-Hans",
+            "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+        app.launch()
+        let choose = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(choose.waitForExistence(timeout: 20)); XCTAssertTrue(choose.isHittable); choose.tap()
+        let review = app.buttons["unified-plan-review-roster"]
+        XCTAssertTrue(review.waitForExistence(timeout: 10)); XCTAssertFalse(review.isEnabled)
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        let footer = app.staticTexts["time-poll-final-heading"]
+        for _ in 0..<12 where !second.isHittable || second.frame.maxY >= footer.frame.minY - 20 {
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let startY = min(app.frame.height * 0.6, footer.frame.minY - 24)
+            let endY = app.navigationBars.firstMatch.frame.maxY + 80
+            origin.withOffset(CGVector(dx: 80, dy: startY)).press(forDuration: 0.05,
+                thenDragTo: origin.withOffset(CGVector(dx: 80, dy: endY)))
+        }
+        XCTAssertTrue(first.isHittable); XCTAssertTrue(second.isHittable)
+        XCTAssertLessThan(second.frame.maxY, footer.frame.minY - 20)
+        first.tap(); second.tap(); XCTAssertTrue(review.isEnabled)
+        XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        capture(app, "final-04-dark-large-range")
+        review.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isHittable)
+        capture(app, "final-05-dark-large-roster")
     }
 
     private func nativeSignIn(_ account: NativeAccount, bundle: String) {

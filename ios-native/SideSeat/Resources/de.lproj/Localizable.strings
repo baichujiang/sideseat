@@ -2847,3 +2847,35 @@
 "Tap when you're free; tap again to clear. See everyone's availability here." = "Tippe auf deine freien Zeiten und erneut zum Abwählen. Hier siehst du auch die Verfügbarkeit aller anderen.";
 
 "After the organizer picks a time, come back here to confirm participation. Filling in free time doesn't confirm attendance." = "Komm hierher zurück, um deine Teilnahme zu bestätigen, sobald die Zeit feststeht. Freie Zeiten einzutragen bestätigt noch keine Teilnahme.";
+
+"Choose final time" = "Endgültige Zeit wählen";
+
+"Choose the final time in the timetable, then review who to invite." = "Wähle die endgültige Zeit im Zeitplan und prüfe dann, wen du einladen möchtest.";
+
+"Friends have filled in. Choose the final time directly in the timetable." = "Deine Freunde haben geantwortet. Wähle die endgültige Zeit direkt im Zeitplan.";
+
+"Tap the first and last time cells, or hold and drag." = "Tippe auf die erste und letzte Zeitzelle oder halte und ziehe.";
+
+"Tap the first and last time cells, or hold and drag. Tap a date to select that day." = "Tippe auf die erste und letzte Zeitzelle oder halte und ziehe. Tippe auf ein Datum, um den ganzen Tag zu wählen.";
+
+"Next: review invitation list" = "Weiter: Einladungsliste prüfen";
+
+"Cancel time selection" = "Zeitauswahl abbrechen";
+
+"Final time · not sent yet" = "Endgültige Zeit · noch nicht gesendet";
+
+"Numbers show how many people are free. Your availability stays unchanged." = "Die Zahlen zeigen, wie viele Zeit haben. Deine Verfügbarkeit bleibt unverändert.";
+
+"Final time selected" = "Als endgültige Zeit ausgewählt";
+
+"Select final time" = "Endgültige Zeit auswählen";
+
+"Select this day as the final time" = "Alle Zeiten dieses Tages als endgültige Zeit wählen";
+
+"Final time" = "Endgültige Zeit";
+
+"Adjust time" = "Zeit anpassen";
+
+"Confirm invitation list" = "Einladungsliste prüfen";
+
+"Back to timetable" = "Zurück zum Zeitplan";

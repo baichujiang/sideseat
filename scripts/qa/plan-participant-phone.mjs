@@ -30,7 +30,7 @@ if (mode === 'prepare') {
   const fixture = { title: `Native participant ${suffix}`, bundle: 'app.sideseat.mobile.preview', accounts: [] };
   await fs.writeFile(privatePath, JSON.stringify(fixture), { mode: 0o600 });
   for (const [role, displayName] of [['owner', 'Host Ming'], ['participant', 'Peer Lin']]) {
-    const account = { role, identifier: `planqa_native121_${role === 'owner' ? 'host' : 'peer'}_${suffix}`, password: randomBytes(22).toString('base64url') };
+    const account = { role, identifier: `planqa_native122_${role === 'owner' ? 'host' : 'peer'}_${suffix}`, password: randomBytes(22).toString('base64url') };
     const response = await fetch(base + '/api/auth/signup', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios' },
       body: JSON.stringify({ username: account.identifier, password: account.password, displayName, school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }),
@@ -46,7 +46,7 @@ if (mode === 'prepare') {
 } else {
   const fixture = JSON.parse(await fs.readFile(privatePath, 'utf8'));
   for (const account of fixture.accounts) {
-    assert(account.identifier.startsWith('planqa_native121_'));
+    assert(account.identifier.startsWith('planqa_native122_'));
     if (!account.accessToken) await login(account);
   }
   const owner = fixture.accounts.find(a => a.role === 'owner');
@@ -84,9 +84,10 @@ if (mode === 'prepare') {
       assert.equal(ownerCalendar.length, 1); assert.equal(participantCalendar.length, 1);
       assert.equal(new Date(detail.chosenEnd) - new Date(detail.chosenStart), 3600000);
     } else {
-      assert.equal(detail.phase, phase === 'awaiting-confirmation' ? 'INVITING' : 'COLLECTING');
+      assert.equal(detail.phase, ['awaiting-confirmation', 'reschedule-cancelled'].includes(phase) ? 'INVITING' : 'COLLECTING');
       assert.equal(ownerCalendar.length, 0); assert.equal(participantCalendar.length, 0);
-      if (phase === 'awaiting-confirmation') assert.equal(accepted, 1);
+      if (['awaiting-confirmation', 'reschedule-cancelled'].includes(phase)) { assert.equal(accepted, 1); assert.equal(detail.invitationVersion, 1); }
+      if (['owner-final-picked', 'roster-reviewed'].includes(phase)) assert.equal(detail.chosenStart ?? null, null, 'A local time/roster draft must not send an invitation.');
     }
     return { phase, checkedAt: new Date().toISOString(), actualPhase: detail.phase, participantCount: detail.participants.length,
       ownSlotIds: peer.mySlotIds, organizerSlotIds: detail.mySlotIds, acceptedCount: accepted, ownerCalendarEntries: ownerCalendar.length, participantCalendarEntries: participantCalendar.length };
