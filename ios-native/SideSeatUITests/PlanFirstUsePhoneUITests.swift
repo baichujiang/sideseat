@@ -196,6 +196,179 @@ import XCTest
         capture(app, "16-calendar-to-plan"); phase("calendar-verified")
     }
 
+    private struct NativeAccount: Decodable {
+        let role: String
+        let identifier: String
+        let password: String
+        let accessToken: String
+    }
+    private struct NativeFixture: Decodable {
+        let title: String
+        let bundle: String
+        let accounts: [NativeAccount]
+    }
+
+    func testNativeParticipantDirectTimetableInviteConfirmAndCalendar() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires two fresh disposable native accounts.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let participant = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        app.buttons["plan-mode-collect"].tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["plan-create-next"].tap()
+        app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        nativeWaitSaved(); nativePhase("owner-ready"); capture(app, "native-01-owner-table")
+        app.buttons["plan-copy-link"].tap()
+        XCTAssertEqual(app.buttons["plan-copy-link"].label, "链接已复制")
+
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let open = app.buttons["plans-open-link"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20)); open.tap()
+        let linkField = app.alerts.textFields.firstMatch
+        XCTAssertTrue(linkField.waitForExistence(timeout: 10)); linkField.tap()
+        linkField.typeKey("v", modifierFlags: .command)
+        let allowPaste = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
+        if allowPaste.waitForExistence(timeout: 2) { allowPaste.tap() }
+        let copiedLink = try XCTUnwrap(linkField.value as? String)
+        XCTAssertTrue(copiedLink.contains("sideseat.de/time-polls/"))
+        app.alerts.buttons["打开"].tap()
+        let heading = app.staticTexts["time-poll-result-heading"]
+        XCTAssertTrue(heading.waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        XCTAssertEqual(app.textFields["time-poll-name"].value as? String, "Peer Lin")
+        nativeAssertInline()
+        XCTAssertTrue(app.staticTexts["plan-participant-next-step"].isHittable)
+        XCTAssertFalse(app.buttons["unified-plan-invite-window"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        nativePhase("participant-opened"); capture(app, "native-02-participant-first-open")
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertFalse(first.isSelected); wait(first, labelContains: ", 1")
+        XCTAssertTrue(first.isHittable); XCTAssertTrue(second.isHittable)
+        first.press(forDuration: 0.6, thenDragTo: second)
+        nativeWaitSaved(); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        wait(first, labelContains: ", 2")
+        nativePhase("participant-saved"); capture(app, "native-03-participant-saved")
+        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected)
+        wait(first, labelContains: ", 2")
+        first.tap(); nativeWaitSaved(); XCTAssertFalse(first.isSelected); wait(first, labelContains: ", 1")
+        nativePhase("participant-edited"); capture(app, "native-04-organizer-time-preserved")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        nativeOpenCard()
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertFalse(first.isSelected)
+        wait(first, labelContains: ", 1"); first.tap(); nativeWaitSaved()
+        wait(first, labelContains: ", 2")
+        let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).firstMatch
+        day.tap(); XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
+        app.buttons["time-poll-undo"].tap(); nativeWaitSaved()
+        XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
+        XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        let grid = app.scrollViews["time-poll-grid"].firstMatch
+        grid.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.8)).press(forDuration: 0.05,
+            thenDragTo: grid.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.2)))
+        XCTAssertFalse(first.isHittable, "An ordinary swipe must scroll rather than change free time")
+        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        wait(first, labelContains: ", 2"); nativeAssertInline()
+        nativePhase("participant-reopened"); capture(app, "native-05-participant-reopened")
+
+        // Same real participant/token; the main journey above and below uses real UI logins.
+        app.terminate()
+        let route = try XCTUnwrap(URL(string: copiedLink)?.path)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-time-poll-live", "--ui-testing-deep-link=\(route)", "--ui-testing-language=zh-Hans",
+            "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": participant.accessToken]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
+        let detailScroll = app.scrollViews["time-poll-detail-scroll"]
+        XCTAssertTrue(detailScroll.waitForExistence(timeout: 10))
+        for _ in 0..<8 where !first.isHittable {
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let startY = min(app.frame.height * 0.6, app.staticTexts["time-poll-saved"].frame.minY - 24)
+            let endY = app.navigationBars.firstMatch.frame.maxY + 100
+            origin.withOffset(CGVector(dx: 80, dy: startY)).press(forDuration: 0.05,
+                thenDragTo: origin.withOffset(CGVector(dx: 80, dy: endY)))
+        }
+        XCTAssertTrue(first.isHittable, "The timetable remains reachable with maximum accessibility text")
+        XCTAssertTrue(first.isSelected)
+        XCTAssertTrue(app.staticTexts["plan-participant-next-step"].isHittable)
+        nativeAssertInline(); capture(app, "native-06-participant-dark-large")
+
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        let invite = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(invite.waitForExistence(timeout: 15)); invite.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10))
+        app.buttons["unified-plan-invite-until"].tap()
+        let ten = app.buttons.matching(NSPredicate(format: "label IN %@", ["10:00", "10:00 AM", "10:00\u{202f}AM"])).firstMatch
+        XCTAssertTrue(ten.waitForExistence(timeout: 5)); ten.tap(); send.tap()
+        wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "1/2 人已确认")
+        nativePhase("awaiting-confirmation"); capture(app, "native-07-organizer-invited")
+
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 20))
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].exists, "An invitation is a separate explicit confirmation")
+        capture(app, "native-08-participant-invitation"); accept.tap()
+        let count = app.staticTexts["unified-plan-confirmation-count"]
+        wait(count, labelContains: "2/2 人已确认")
+        nativePhase("confirmed"); capture(app, "native-09-participant-confirmed")
+        app.buttons["plan-view-calendar"].tap()
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
+        app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.title)
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()
+        let manage = app.buttons["calendar-manage-plan"]
+        for _ in 0..<4 where !manage.isHittable { app.swipeUp() }
+        XCTAssertTrue(manage.waitForExistence(timeout: 10)); capture(app, "native-10-participant-calendar")
+        manage.tap(); wait(count, labelContains: "2/2 人已确认")
+        nativePhase("calendar-verified"); capture(app, "native-11-calendar-to-plan")
+    }
+
+    private func nativeSignIn(_ account: NativeAccount, bundle: String) {
+        app?.terminate()
+        app = XCUIApplication(bundleIdentifier: bundle)
+        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
+        app.launchEnvironment = [:]
+        app.launch()
+        let identifier = app.textFields["login-identifier"]
+        XCTAssertTrue(identifier.waitForExistence(timeout: 20)); identifier.tap(); identifier.typeText(account.identifier)
+        let password = app.secureTextFields["login-password"]
+        password.tap(); password.typeText(account.password)
+        app.buttons["login-submit"].tap()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
+    }
+    private func nativeOpenCard() {
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20))
+        for _ in 0..<8 where !card.isHittable { app.swipeUp() }
+        XCTAssertTrue(card.isHittable); card.tap()
+    }
+    private func nativeAssertInline() {
+        XCTAssertFalse(app.buttons["time-poll-switch-view"].exists)
+        XCTAssertFalse(app.buttons["plan-edit-availability"].exists)
+        XCTAssertFalse(app.buttons["time-poll-finish"].exists)
+        XCTAssertFalse(app.staticTexts["plan-handoff-guidance"].exists)
+    }
+    private func nativeWaitSaved() { XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20)) }
+    private func nativePhase(_ value: String) { print("NATIVE_PARTICIPANT_PHASE \(value)") }
+
     private func webButton(_ en: String, _ zh: String) -> XCUIElement {
         safari.buttons.matching(NSPredicate(format: "label IN %@", [en, zh])).firstMatch
     }

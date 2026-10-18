@@ -50,11 +50,12 @@ separate from availability controls. While editing, a persistent bottom bar show
 the actual save state: choose times, saving, saved automatically, or failed with
 Retry. The saved summary includes selected days and total hours. Success appears
 only after the existing serialized queue is acknowledged; failures retain the draft.
-The native organizer (119) and public share page edit directly in the group
-timetable, keeping total counts and own checkmarks visible without a completion
-or personal/group switch. Native non-organizer saved/waiting screens retain their
-existing completion action. Availability does not confirm participation or create
-a Calendar entry.
+Native organizers and participants (121), and the public share page, edit directly
+in the group timetable, keeping total counts and own checkmarks visible without a
+completion or personal/group switch. A participant's saved response keeps the table
+visible with a next-step notice to wait for the organizer and explicitly confirm
+the final invitation. Availability does not confirm participation or create a
+Calendar entry.
 
 API: `GET/POST /api/v1/time-polls`, `GET/DELETE /api/v1/time-polls/{token}`,
 `PUT /api/v1/time-polls/{token}/response`. Contract: `openapi/v1.json`.

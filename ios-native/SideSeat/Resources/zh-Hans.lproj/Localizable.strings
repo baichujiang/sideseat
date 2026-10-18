@@ -2844,3 +2844,7 @@
 "My free time" = "我的空闲";
 
 "Numbers include everyone available" = "数字表示有空总人数";
+
+"Tap when you're free; tap again to clear. See everyone's availability here." = "直接点选你有空的时间，再点一次取消，也能同时看到大家的空闲。";
+
+"After the organizer picks a time, come back here to confirm participation. Filling in free time doesn't confirm attendance." = "等发起人选定最终时间后，请回到这里确认参加。填写空闲不代表确认参加。";

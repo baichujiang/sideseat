@@ -69,13 +69,15 @@ invitations** is added. The inviter can only send after pending saves complete.
 Choosing another invitation time remains a read-only review of collected replies.
 
 Availability editing focuses on one task: **Tap the times you're free**.
-Native participants retain a dedicated saved/waiting screen explaining that a
-separate invitation still needs confirmation, with an optional group-timetable
-view. On the public share page, entering a name opens one editable group timetable:
-checkmarks indicate the viewer's selections, counts include everyone, and edits
-autosave in place. Saving and reopening keep the table visible, with no personal/
-group switch or completion action. A persistent next-step notice explains that
-availability is not attendance and the final invitation requires explicit confirmation.
+**Participant amendment — 2026-10-18 / Preview 121:** native participants also
+open directly on this editable group timetable before their first response, after
+autosave and on reopening. Own checkmarks and everyone's counts are visible
+together; tap/hold, date selection and undo work without personal/group or
+completion switches. A persistent save summary and next-step notice explain that
+the organizer picks the final time, then the participant confirms here. The public
+share page follows the same direct editing flow after a name is entered/resumed.
+Availability never accepts an invitation. Invitation/confirmed/cancelled/expired
+surfaces retain their existing confirmation and read-only rules.
 
 The creator selects **Set time and send invitations**, chooses a date and start/end from
 the configured hours, reviews the explicit participant list and sends. The initial

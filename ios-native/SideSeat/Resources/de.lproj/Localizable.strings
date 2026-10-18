@@ -2843,3 +2843,7 @@
 "My free time" = "Meine freie Zeit";
 
 "Numbers include everyone available" = "Zahlen zeigen alle verfügbaren Personen";
+
+"Tap when you're free; tap again to clear. See everyone's availability here." = "Tippe auf deine freien Zeiten und erneut zum Abwählen. Hier siehst du auch die Verfügbarkeit aller anderen.";
+
+"After the organizer picks a time, come back here to confirm participation. Filling in free time doesn't confirm attendance." = "Komm hierher zurück, um deine Teilnahme zu bestätigen, sobald die Zeit feststeht. Freie Zeiten einzutragen bestätigt noch keine Teilnahme.";

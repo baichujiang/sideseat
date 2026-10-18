@@ -19,6 +19,18 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Native participant timetable — Preview 121
+
+Native participants now use the same editable group timetable from their first
+visit through saving and reopening. Own selection checkmarks and total counts
+remain visible together, with tap/hold, date selection, undo, and the existing
+serialized autosave queue. No personal/group switch, completion button or saved-only
+handoff remains. Save feedback and a compact next-step notice stay at the bottom:
+wait for the organizer's final invitation, then explicitly confirm here.
+This supersedes the participant waiting-screen descriptions in earlier dated
+sections. Invitation review and terminal phases retain their read-only/consent rules;
+no data, API, identity, invitation-version or Calendar contract is merged or changed.
+
 ## Shared web timetable — 2026-10-18
 
 After entering or resuming a guest name, the public share page keeps one editable
