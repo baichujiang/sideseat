@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-18T13:38:40.610466+00:00",
+  "sourceCommit": "15d9bd471998e3979219f331f6a6b674879b2e5e",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "apps": [
+    {
+      "name": "SideSeat",
+      "bundleIdentifier": "app.sideseat.mobile",
+      "version": "1.0.0",
+      "bundleVersion": "97"
+    },
+    {
+      "name": "SideSeat Preview",
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "version": "1.0.0",
+      "bundleVersion": "119"
+    }
+  ],
+  "ordinaryLaunch": {
+    "processIdentifier": 1271,
+    "processVerifiedRunning": true,
+    "arguments": [],
+    "environmentVariables": {
+      "TERM": "dumb"
+    }
+  },
+  "qaRunnerRemoved": true,
+  "strictCodeSignatureVerified": true,
+  "backendDeployment": "dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB",
+  "backendChanged": false
+}
