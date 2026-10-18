@@ -23,7 +23,7 @@ persisted records. `PlanStatusBadge`, `PlanNextStepSummary` and
 
 | Display status | Viewer's next step |
 | --- | --- |
-| Finding a time | Organizer can view/share immediately and optionally fill own availability, then choose a time after friends respond; other participants fill availability and wait for the organizer |
+| Finding a time | Organizer can view/share immediately and edit own availability directly in the timetable, then choose a time after friends respond; other participants fill availability and wait for the organizer |
 | Awaiting confirmations | Invited viewer explicitly confirms; an accepting participant waits; manual organizer reviews replies/shares; bilateral sender waits for the recipient |
 | Awaiting confirmations, viewer declined | Own reply is saved; no claim that this viewer is waiting to attend |
 | Awaiting confirmations, viewer not selected | Explain exclusion and retain saved availability; no confirmation action for a closed roster |

@@ -39,6 +39,21 @@ struct TimePollTests {
         #expect(MVPRoutePolicy.tab(for: .timePoll(token: token)) == .plans)
     }
 
+    @Test("Inline timetable counts the current draft once and preserves other replies")
+    func inlineTimetableCounts() throws {
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["participants"] = [
+            ["id": "me", "displayName": "Ming", "slotIds": [0, 1], "isMe": true],
+            ["id": "friend", "displayName": "Lin", "slotIds": [0, 1, 2, 3], "isMe": false],
+        ]
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let poll = try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(poll.timetableSelections(ownSelection: [2, 3]) == [[0, 1, 2, 3], [2, 3]])
+        #expect(poll.timetableSelections(ownSelection: []) == [[0, 1, 2, 3], []])
+        #expect(poll.timetableSelections(ownSelection: nil) == [[0, 1], [0, 1, 2, 3]])
+        #expect(try collectingPoll().timetableSelections(ownSelection: [0, 1]) == [[0, 1]])
+    }
+
     @Test("Quick consecutive drags save in order and leave the latest draft acknowledged")
     @MainActor
     func autosaveOrder() async throws {

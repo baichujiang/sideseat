@@ -89,6 +89,11 @@ struct NativeTimePoll: Decodable, Sendable {
         let windows: [Window]
     }
     var cells: [Cell] { TimePollSelection.cells(slots) }
+    /// Show the current draft once, alongside other people's saved responses.
+    func timetableSelections(ownSelection: Set<Int>?) -> [Set<Int>] {
+        guard let ownSelection else { return participants.map { Set($0.slotIds) } }
+        return participants.filter { !$0.isMe }.map { Set($0.slotIds) } + [ownSelection]
+    }
     var rows: [String] {
         let cells = self.cells
         return dates.map { date in cells.filter { $0.date == date } }

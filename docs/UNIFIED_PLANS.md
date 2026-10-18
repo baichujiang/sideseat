@@ -19,6 +19,17 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Direct timetable editing — Preview 119
+
+The organizer now edits their free time directly in the shared timetable during
+collection. Each cell retains the total availability count and adds a checkmark
+for their own selection; tap again to clear, or use hold/drag, date selection and
+undo. Changes autosave with persistent saving/saved/error feedback. Reopening
+retains the same editable table, with no mode switch or completion button.
+Current draft counts replace only the organizer's response, once. Invitation
+review/rescheduling remains read-only; participant waiting and confirmation flows
+retain their existing rules. This supersedes 118's separate own-availability action.
+
 ## Organizer timetable on creation — Preview 118
 
 The organizer opens directly on the complete timetable, including zero responses.

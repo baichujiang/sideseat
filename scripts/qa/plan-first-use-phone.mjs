@@ -20,7 +20,7 @@ async function call(route, token, method = 'GET', body, expected = 200) {
 if (mode === 'prepare') {
   await assert.rejects(fs.access(privatePath), 'Clean up the previous disposable fixture before creating another.');
   const suffix = randomBytes(4).toString('hex');
-  const identifier = `planqa_phone118_${suffix}`, password = randomBytes(22).toString('base64url');
+  const identifier = `planqa_phone119_${suffix}`, password = randomBytes(22).toString('base64url');
   const signup = await fetch(base + '/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios' }, body: JSON.stringify({ username: identifier, password, displayName: 'Host Ming', school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }) });
   assert.equal(signup.status, 201);
   // Save recovery credentials immediately, even if a subsequent login fails.
@@ -33,7 +33,7 @@ if (mode === 'prepare') {
   console.log('One fresh disposable account ready; initial plans list is empty.');
 } else {
   const fixture = JSON.parse(await fs.readFile(privatePath, 'utf8'));
-  assert(fixture.identifier.startsWith('planqa_phone118_'));
+  assert(fixture.identifier.startsWith('planqa_phone119_'));
   if (!fixture.accessToken) {
     const login = await call('/api/v1/auth/login', null, 'POST', { identifier: fixture.identifier, password: fixture.password, device: { id: randomUUID(), name: 'First plan cleanup', appVersion: '1.0.0', platformVersion: '26.6.1' } });
     fixture.accessToken = login.tokens.accessToken;
@@ -57,7 +57,7 @@ if (mode === 'prepare') {
     const detail = await poll(), entries = await calendar(detail);
     const acceptedCount = detail.invitations.filter(invitation => invitation.selected && invitation.status === 'ACCEPTED').length;
     const host = detail.participants.find(person => person.displayName === 'Host Ming');
-    if (phase !== 'created-empty') { assert(host); assert.deepEqual(host.slotIds, [0, 1, 2, 3]); }
+    if (phase !== 'created-empty') { assert(host); assert.deepEqual(host.slotIds, phase === 'owner-edited' ? [2, 3] : [0, 1, 2, 3]); }
     if (phase === 'created-empty') {
       assert.equal(detail.phase, 'COLLECTING'); assert.equal(detail.participants.length, 0); assert.equal(entries.length, 0);
     } else if (phase === 'created-and-saved') {
@@ -65,7 +65,7 @@ if (mode === 'prepare') {
     } else {
       const guest = detail.participants.find(person => person.displayName === 'Guest Lin');
       assert(guest?.isGuest); assert.deepEqual(guest.slotIds, [0, 1, 2, 3]);
-      if (phase === 'guest-saved') { assert.equal(detail.phase, 'COLLECTING'); assert.equal(entries.length, 0); }
+      if (['guest-saved', 'owner-edited', 'owner-restored'].includes(phase)) { assert.equal(detail.phase, 'COLLECTING'); assert.equal(entries.length, 0); }
       else if (phase === 'awaiting-confirmation') {
         assert.equal(detail.phase, 'INVITING'); assert.equal(acceptedCount, 1); assert.equal(entries.length, 0);
       } else {

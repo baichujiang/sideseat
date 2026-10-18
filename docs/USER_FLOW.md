@@ -52,17 +52,21 @@ Older quarter-hour selections remain visible as partial cells until explicitly e
 Undo reverses the last selection change. A normal swipe does not edit availability.
 Autosave shows Saving / Saved / retryable error; one account owns one response,
 including an explicit empty response. Results show **Group timetable**, the full
-read-only heatmap and response count, without recommendation cards or a required
+heatmap and response count, without recommendation cards or a required
 activity duration. Each number counts people covering that full 30-minute cell.
 Friends use the table to decide the date and hours, including half a day or a full day.
 
-**Owner amendment — 2026-10-18 / Preview 118:** creation opens the organizer's
+**Owner amendment — 2026-10-18 / Preview 119:** creation opens the organizer's
 **Group timetable** immediately, including a real empty grid with zero responses.
-Sharing and copying are already available. **Fill in my availability** switches to
-editing; **Save and continue** returns to the same timetable, even when only the
-organizer has filled in. Reopening also shows the timetable. No friend response
-or organizer response is required to see or share it. Once friends respond,
-**Set time and send invitations** is added while sharing remains available.
+The organizer taps or holds/drags directly on this same timetable to edit their
+own availability. Checkmarks/borders identify their own choices; numbers include
+everyone covering the full half hour. Draft counts replace the organizer's saved
+response once, leaving other responses intact. Date selection, undo and autosave
+remain available. Saving and reopening keep this editable timetable; no edit-mode
+switch or completion step is required. The name is prefilled and editable.
+Sharing/copying are always available; once friends respond, **Set time and send
+invitations** is added. The inviter can only send after pending saves complete.
+Choosing another invitation time remains a read-only review of collected replies.
 
 Availability editing focuses on one task: **Tap the times you're free**.
 Other participants retain a dedicated saved/waiting screen explaining that a
