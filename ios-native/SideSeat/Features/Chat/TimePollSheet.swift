@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 import UIKit
 
@@ -197,6 +198,7 @@ struct TimePollDetailView: View {
     @State private var choosingAgain = false
     @State private var completed = false
     @State private var finishWhenSaved = false
+    @State private var now = Date()
     @FocusState private var nameFocused: Bool
 
     init(token: String) { _store = State(initialValue: TimePollStore(token: token)) }
@@ -204,7 +206,9 @@ struct TimePollDetailView: View {
     var body: some View {
         VStack(spacing: SideSeatTheme.spaceMD) {
             if let poll = store.poll {
-                if poll.planningPhase == "COLLECTING" || choosingAgain {
+                if poll.planningPhase(at: now) == "EXPIRED" {
+                    ExpiredTimePollView(poll: poll) { dismiss() }
+                } else if poll.planningPhase == "COLLECTING" || choosingAgain {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Text("Collecting availability")
                         .font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.statusSuccessText)
@@ -278,7 +282,7 @@ struct TimePollDetailView: View {
                     Menu {
                         ShareLink(item: poll.shareUrl) { Label("Share poll", systemImage: "square.and.arrow.up") }
                         Button { UIPasteboard.general.url = poll.shareUrl } label: { Label("Copy link", systemImage: "doc.on.doc") }
-                        if poll.isOwner && ["COLLECTING", "CANCELLED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
+                        if poll.isOwner && ["COLLECTING", "CANCELLED", "EXPIRED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
                     } label: { Image(systemName: "ellipsis") }.accessibilityIdentifier("time-poll-menu")
                 }
             }
@@ -304,6 +308,9 @@ struct TimePollDetailView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.load(session: session) } } }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
+            if let expiry = store.poll?.expirationDate, now < expiry, expiry <= date { now = date }
+        }
     }
 
     private func selectionFooter(_ poll: NativeTimePoll) -> some View {

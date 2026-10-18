@@ -54,6 +54,7 @@ struct InboxNotification: Codable, Identifiable, Equatable, Sendable {
     let detail: String
     let date: Date
     let destination: Destination
+    var expiresAt: Date? = nil
     var isRead = false
 }
 
@@ -64,6 +65,7 @@ final class InboxNotificationsStore {
     private struct Snapshot: Codable {
         var items: [InboxNotification] = []
         var fingerprints: [String: String] = [:]
+        var sharedInvitationStatusVersion: Int? = 1
     }
 
     private(set) var items: [InboxNotification] = []
@@ -76,6 +78,13 @@ final class InboxNotificationsStore {
     private let defaults: UserDefaults
     private var key: String { "sideseat.notifications.v1.\(accountID ?? "")" }
     var unreadCount: Int { items.filter { !$0.isRead }.count }
+    var nextInvitationExpiry: Date? { items.compactMap(\.expiresAt).min() }
+
+    func expireInvitations(now: Date = Date()) {
+        let count = items.count
+        items.removeAll { $0.expiresAt.map { $0 <= now } == true }
+        if items.count != count { persist() }
+    }
 
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 
@@ -87,6 +96,13 @@ final class InboxNotificationsStore {
               let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) else { return }
         items = snapshot.items
         fingerprints = snapshot.fingerprints
+        if snapshot.sharedInvitationStatusVersion == nil {
+            // Preview 112 observed INVITED without creating a notification.
+            // Retry only those missed invitations, preserving existing read history.
+            fingerprints = fingerprints.filter { key, value in
+                !(key.hasPrefix("shared:") && value.hasSuffix("|INVITING|INVITED"))
+            }
+        }
     }
 
     func reset() {
@@ -174,8 +190,9 @@ final class InboxNotificationsStore {
     }
 
     func reconcile(plans: [NativePlanRequest], userID: String, now: Date = Date()) {
-        prune(source: "chat", visibleIDs: Set(plans.map(\.id)))
-        for plan in plans {
+        let visible = plans.filter { $0.status != "EXPIRED" && !($0.status == "PENDING" && ($0.startDate ?? .distantPast) <= now) }
+        prune(source: "chat", visibleIDs: Set(visible.map(\.id)))
+        for plan in visible {
             let sourceID = plan.id
             let fingerprint = "\(plan.status)|\(plan.startTime)|\(plan.endTime)|\(plan.cancellation?.canceledAt ?? "")"
             let previous = fingerprints["chat:\(sourceID)"]
@@ -192,13 +209,14 @@ final class InboxNotificationsStore {
             guard previous != fingerprint, let kind else { continue }
             insert(.init(id: "chat:\(sourceID):\(fingerprint):\(plan.updatedAt)", source: "chat", sourceID: sourceID,
                 kind: kind, detail: plan.title, date: Date.sideSeatChatISO8601(plan.cancellation?.canceledAt ?? plan.updatedAt) ?? now,
-                destination: .chatPlan(connectionID: plan.connectionId, commitmentID: plan.commitmentId ?? plan.id, revisionID: plan.id)))
+                destination: .chatPlan(connectionID: plan.connectionId, commitmentID: plan.commitmentId ?? plan.id, revisionID: plan.id),
+                expiresAt: [.invitation, .changed].contains(kind) ? plan.startDate : nil))
         }
         persist()
     }
 
     func reconcile(polls: [NativeTimePollList.Item], now: Date = Date()) {
-        let visible = polls.filter { $0.isIncluded == true }
+        let visible = polls.filter { $0.isIncluded == true && $0.planningPhase(at: now) != "EXPIRED" }
         prune(source: "shared", visibleIDs: Set(visible.map(\.token)))
         for poll in visible {
             let sourceID = poll.token
@@ -206,8 +224,8 @@ final class InboxNotificationsStore {
             let fingerprint = "\(timing)|\(poll.phase ?? "COLLECTING")|\(poll.myInvitationStatus ?? "")"
             let previous = fingerprints["shared:\(sourceID)"]
             let kind: InboxNotification.Kind?
-            if poll.phase == "INVITING", poll.myInvitationStatus == "PENDING",
-               (poll.chosenEnd ?? .distantPast) > now {
+            if poll.planningPhase(at: now) == "INVITING", poll.myInvitationStatus == "INVITED",
+               (poll.chosenStart ?? .distantPast) > now {
                 kind = previous.map { !$0.hasPrefix(timing + "|") } == true ? .changed : .invitation
             } else if poll.phase == "CONFIRMED", (poll.chosenEnd ?? .distantPast) > now {
                 kind = .confirmed
@@ -217,7 +235,8 @@ final class InboxNotificationsStore {
             fingerprints["shared:\(sourceID)"] = fingerprint
             guard previous != fingerprint, let kind else { continue }
             insert(.init(id: "shared:\(sourceID):\(fingerprint):\(poll.updatedAt.timeIntervalSince1970)", source: "shared", sourceID: sourceID,
-                kind: kind, detail: poll.title, date: poll.updatedAt, destination: .sharedPlan(token: poll.token)))
+                kind: kind, detail: poll.title, date: poll.updatedAt, destination: .sharedPlan(token: poll.token),
+                expiresAt: [.invitation, .changed].contains(kind) ? poll.chosenStart : nil))
         }
         persist()
     }

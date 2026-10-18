@@ -6,7 +6,7 @@ export type SharedTimePoll = {
   invitations: { id: string; displayName: string; status: string; selected: boolean; isMe: boolean; isGuest: boolean }[];
   mySlotIds: number[]; myDisplayName: string; didRespond: boolean; viewerId: string | null;
   location: string | null; durationMinutes: number | null; expectedCount: number | null;
-  planningMode: string; phase: string; invitationVersion: number; chosenStart: string | null; chosenEnd: string | null;
+  expiresAt?: string | null; planningMode: string; phase: string; invitationVersion: number; chosenStart: string | null; chosenEnd: string | null;
   summary: { counts: number[]; participantCount: number; maximum: number; common: boolean; windows: PollWindow[] };
 };
 export type AvailabilityCell = PollSlot & { slotIds: number[] };

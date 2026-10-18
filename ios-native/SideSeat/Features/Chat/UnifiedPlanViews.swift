@@ -1,5 +1,30 @@
 import SwiftUI
 
+struct ExpiredTimePollView: View {
+    let poll: NativeTimePoll
+    let backToPlans: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+                Text(poll.title).font(.title2.weight(.semibold)).accessibilityIdentifier("time-poll-detail-title")
+                Label("Expired", systemImage: "clock.badge.exclamationmark")
+                    .font(.headline).accessibilityIdentifier("unified-plan-phase")
+                if let start = poll.chosenStart, let end = poll.chosenEnd {
+                    Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
+                }
+                Text("This plan expired before it was confirmed. No calendar entries were added.")
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Text("Create a new plan to arrange another time.")
+                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Button("Back to plans", action: backToPlans)
+                    .buttonStyle(.bordered).tint(SideSeatTheme.utilityAction)
+                    .frame(minHeight: 44).accessibilityIdentifier("unified-plan-expired-back")
+            }.padding(SideSeatTheme.spaceLG).frame(maxWidth: .infinity, alignment: .leading)
+        }.accessibilityIdentifier("unified-plan-expired")
+    }
+}
+
 func unifiedPlanTimeLabel(start: Date, end: Date, timeZone: String) -> String {
     let formatter = DateFormatter()
     formatter.locale = AppLocalization.selectedLanguage.locale

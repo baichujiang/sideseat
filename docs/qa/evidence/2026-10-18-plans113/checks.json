@@ -1,0 +1,29 @@
+{
+  "localBrowserAndAPI": {
+    "passed": 15,
+    "failed": 0,
+    "scope": "Time poll API, unified participants, guests, persisted names, availability saves, timetable, expired collection/invitation and chat expiry"
+  },
+  "chatAPI": {
+    "passed": 2,
+    "failed": 0
+  },
+  "domain": {
+    "passed": 9,
+    "failed": 0
+  },
+  "openAPI": {
+    "passed": 13,
+    "failed": 0,
+    "implementedOperations": 191
+  },
+  "nativeUniqueCases": 53,
+  "nativeScope": "46 model/store/navigation/conversation units, 3 creation presentation UI, 4 real-API plan journeys",
+  "staticChecks": [
+    "TypeScript",
+    "targeted ESLint",
+    "3 locale plutil",
+    "git diff --check"
+  ],
+  "physicalDevice": "Pending delivery; see final release record"
+}

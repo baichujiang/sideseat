@@ -22,11 +22,19 @@ struct NativeTimePoll: Decodable, Sendable {
     let expectedCount: Int?
     let planningMode: String?
     let phase: String?
+    let expiresAt: Date?
     let invitationVersion: Int?
     let chosenStart: Date?
     let chosenEnd: Date?
     let invitations: [Invitation]?
-    var planningPhase: String { phase ?? "COLLECTING" }
+    var expirationDate: Date? {
+        expiresAt ?? (phase == "INVITING" ? chosenStart : (phase == nil || phase == "COLLECTING") ? slots.last?.end : nil)
+    }
+    func planningPhase(at now: Date) -> String {
+        let phase = phase ?? "COLLECTING"
+        return ["COLLECTING", "INVITING"].contains(phase) && expirationDate.map { $0 <= now } == true ? "EXPIRED" : phase
+    }
+    var planningPhase: String { planningPhase(at: Date()) }
     var allInvitations: [Invitation] { invitations ?? [] }
     var targetCount: Int { planningMode == "FIXED" ? expectedCount ?? 2 : allInvitations.filter(\.selected).count }
     struct Invitation: Decodable, Sendable, Identifiable {
@@ -99,6 +107,7 @@ struct NativeTimePollList: Decodable, Sendable {
         let updatedAt: Date
         let shareUrl: URL
         let phase: String?
+        let expiresAt: Date?
         let chosenStart: Date?
         let chosenEnd: Date?
         let expectedCount: Int?
@@ -107,11 +116,18 @@ struct NativeTimePollList: Decodable, Sendable {
         let invitedCount: Int?
         let myInvitationStatus: String?
         let isIncluded: Bool?
-        var statusLabel: String {
-            switch phase ?? "COLLECTING" {
+        func planningPhase(at now: Date) -> String {
+            let phase = phase ?? "COLLECTING"
+            let deadline = expiresAt ?? (phase == "INVITING" ? chosenStart : nil)
+            return ["COLLECTING", "INVITING"].contains(phase) && deadline.map { $0 <= now } == true ? "EXPIRED" : phase
+        }
+        var statusLabel: String { statusLabel(at: Date()) }
+        func statusLabel(at now: Date) -> String {
+            switch planningPhase(at: now) {
             case "INVITING": AppLocalization.string("Awaiting confirmations")
             case "CONFIRMED": AppLocalization.string("Confirmed")
             case "CANCELLED": AppLocalization.string("Cancelled")
+            case "EXPIRED": AppLocalization.string("Expired")
             default: AppLocalization.string("Finding a time")
             }
         }

@@ -2638,3 +2638,9 @@
 "Unread" = "Ungelesen";
 "Open related details" = "Zugehörige Details öffnen";
 "Mark all as read" = "Alle als gelesen markieren";
+
+"This plan expired before it was confirmed. No calendar entries were added." = "Dieser Plan ist vor der Bestätigung abgelaufen. Es wurden keine Kalendereinträge erstellt.";
+
+"Create a new plan to arrange another time." = "Erstelle einen neuen Plan, um einen anderen Termin zu vereinbaren.";
+
+"Back to plans" = "Zurück zu den Plänen";

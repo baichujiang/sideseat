@@ -15,7 +15,15 @@ struct PlanCardView: View {
     let onOpenCalendar: () -> Void
     var onRepeat: (() -> Void)? = nil
 
+    private var status: String {
+        plan.status == "PENDING" && (plan.startDate ?? .distantFuture) <= Date() ? "EXPIRED" : plan.status
+    }
+
     var body: some View {
+        TimelineView(.explicit([Date()] + (plan.startDate.map { [$0] } ?? []))) { _ in card }
+    }
+
+    private var card: some View {
         SSFlowCard(contentPadding: 12, contentSpacing: SideSeatTheme.spaceSM) {
             HStack(alignment: .top) {
                 let titleLayout = dynamicTypeSize.isAccessibilitySize
@@ -36,7 +44,7 @@ struct PlanCardView: View {
                 if canCancel {
                     Menu {
                         Button(role: .destructive, action: onWithdraw) {
-                            Label(plan.status == "ACCEPTED" ? "Cancel plan" : "Withdraw proposal", systemImage: "xmark.circle")
+                            Label(status == "ACCEPTED" ? "Cancel plan" : "Withdraw proposal", systemImage: "xmark.circle")
                         }.accessibilityIdentifier("plan-cancel-menu-action")
                     } label: {
                         Image(systemName: "ellipsis").frame(width: 44, height: 44)
@@ -88,7 +96,7 @@ struct PlanCardView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            if plan.status != "PENDING" || canRespond { Divider() }
+            if status != "PENDING" || canRespond { Divider() }
 
             if canRespond {
                 Text(
@@ -112,7 +120,7 @@ struct PlanCardView: View {
                 )
                 PlanContinuationActions(plan: plan, currentUserID: currentUserID,
                                         isDisabled: isActing, onRepeat: onRepeat)
-            } else if plan.status == "ACCEPTED" {
+            } else if status == "ACCEPTED" {
                 HStack(spacing: 8) {
                     Label("Confirmed in both calendars", systemImage: "calendar.badge.checkmark")
                         .font(.caption.weight(.semibold))
@@ -127,7 +135,7 @@ struct PlanCardView: View {
                     .accessibilityLabel("View calendar")
                     .accessibilityIdentifier("plan-card-calendar-\(plan.id)")
                 }
-            } else if plan.status != "PENDING" {
+            } else if status != "PENDING" {
                 Text(statusDetail)
                     .font(.caption)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -141,7 +149,7 @@ struct PlanCardView: View {
                     }
                     if let note = cancellation.note, !note.isEmpty { Text(note).font(.footnote) }
                 }
-                if plan.status == "CANCELED" {
+                if status == "CANCELED" {
                     Button {
                         PlanRebookingLaunch.shared.plan = plan
                         deepLinkRouter.handleAppPath("/together")
@@ -159,7 +167,7 @@ struct PlanCardView: View {
 
     private var canCancel: Bool {
         (plan.endDate ?? .distantPast) > Date() &&
-        (plan.status == "ACCEPTED" || (plan.status == "PENDING" && plan.proposer.id == currentUserID))
+        (status == "ACCEPTED" || (status == "PENDING" && plan.proposer.id == currentUserID))
     }
 
     private var planResponseActions: some View {
@@ -207,7 +215,7 @@ struct PlanCardView: View {
         } else {
             dates = "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))"
         }
-        let relative = PlanRelativeTime.value(status: plan.status, start: start, end: end, now: now)
+        let relative = PlanRelativeTime.value(status: status, start: start, end: end, now: now)
         return Label {
             (Text(relative.map { "\($0.title) · " } ?? "").fontWeight(.semibold) + Text(dates))
                 .fixedSize(horizontal: false, vertical: true)
@@ -218,16 +226,16 @@ struct PlanCardView: View {
     }
 
     private var canRespond: Bool {
-        plan.isPending && plan.receiver.id == currentUserID
+        status == "PENDING" && plan.receiver.id == currentUserID
     }
 
     private var isRescheduleProposal: Bool {
-        plan.status == "PENDING" && plan.counterOfId != nil && plan.commitmentId != nil
+        status == "PENDING" && plan.counterOfId != nil && plan.commitmentId != nil
     }
 
     private var statusLabel: String {
         if isRescheduleProposal { return AppLocalization.string("Reschedule proposed") }
-        switch plan.status {
+        switch status {
         case "PENDING": return AppLocalization.string("Proposed")
         case "ACCEPTED": return AppLocalization.string("Confirmed")
         case "DECLINED": return AppLocalization.string("Declined")
@@ -240,7 +248,7 @@ struct PlanCardView: View {
     }
 
     private var statusDetail: String {
-        switch plan.status {
+        switch status {
         case "DECLINED": return AppLocalization.string("This proposal was declined.")
         case "COUNTER_PROPOSED": return AppLocalization.string("A newer proposal is now in the conversation.")
         case "CANCELED": return AppLocalization.string("This proposal was withdrawn or canceled.")
@@ -251,7 +259,7 @@ struct PlanCardView: View {
     }
 
     private var statusIcon: String {
-        switch plan.status {
+        switch status {
         case "ACCEPTED": "checkmark.circle.fill"
         case "DECLINED": "xmark.circle.fill"
         case "COUNTER_PROPOSED": "arrow.triangle.2.circlepath"
@@ -262,7 +270,7 @@ struct PlanCardView: View {
     }
 
     private var statusForeground: Color {
-        switch plan.status {
+        switch status {
         case "ACCEPTED": SideSeatTheme.statusSuccessText
         case "DECLINED", "CANCELED": SideSeatTheme.statusDangerText
         case "COUNTER_PROPOSED", "EXPIRED", "PENDING": SideSeatTheme.statusWarningText

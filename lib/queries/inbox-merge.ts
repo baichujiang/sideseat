@@ -184,7 +184,7 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         },
         _count: { select: { messages: true } },
         planRequests: {
-          where: { status: "PENDING" },
+          where: { status: "PENDING", startTime: { gt: now }, cancellationNotice: { is: null } },
           take: 4,
           orderBy: { updatedAt: "desc" },
           select: { id: true, title: true, receiverUserId: true, proposerUserId: true },
@@ -220,6 +220,8 @@ export async function getInboxMergeBundle(userId: string): Promise<InboxMergeBun
         },
         receiverUserId: userId,
         status: PlanRequestStatus.PENDING,
+        startTime: { gt: now },
+        cancellationNotice: { is: null },
       },
     }),
     prisma.planRequest.count({

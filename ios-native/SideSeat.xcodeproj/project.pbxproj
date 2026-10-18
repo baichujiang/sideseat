@@ -168,6 +168,7 @@
 		B60DC1B70CCCB2115A605C52 /* CalendarSmartAddStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F9B1D8217108C54A294505 /* CalendarSmartAddStore.swift */; };
 		B73F9F8CF6B3B4332D3FC798 /* CrashReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53153421E0B86C234BBA457A /* CrashReporting.swift */; };
 		B747F2B0B8E6E5FB8D74C5D5 /* ProductTutorialOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40578AADCCC97E917D8B4FFA /* ProductTutorialOverlay.swift */; };
+		B8F9C4290A08A7ED01FF5784 /* PlanReliabilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C6B284045DA49A2C3BA9C3 /* PlanReliabilityUITests.swift */; };
 		BA9E27FA8C2D8464D1593F19 /* CalendarCategoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E105066676F44745C8A89430 /* CalendarCategoryStore.swift */; };
 		BBF030F792632741DFF06B8C /* CalendarSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33917ED8E5DA8CB40FC038D6 /* CalendarSearchView.swift */; };
 		BCFFEF26B903AA84938F4044 /* SessionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B11CE999B48C0D30C39E10 /* SessionStoreTests.swift */; };
@@ -318,6 +319,7 @@
 		6432CCCAF6CC10DF7090C564 /* AuthenticationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationUITests.swift; sourceTree = "<group>"; };
 		64B4F7AFF1F2EEF950896417 /* CalendarLiveUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarLiveUITests.swift; sourceTree = "<group>"; };
 		685349FEAE957E5EE3B3045A /* HomeRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRootView.swift; sourceTree = "<group>"; };
+		68C6B284045DA49A2C3BA9C3 /* PlanReliabilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanReliabilityUITests.swift; sourceTree = "<group>"; };
 		6A0AAA03F585C445C1D387FF /* ScheduleShareComposeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleShareComposeSheet.swift; sourceTree = "<group>"; };
 		6BD41CABAEE2DE875752743A /* HomeDateStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeDateStripView.swift; sourceTree = "<group>"; };
 		6C191A45032E16A760B9C346 /* PlansStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansStore.swift; sourceTree = "<group>"; };
@@ -626,6 +628,7 @@
 				6D3D43D06D8F59ED1468DB84 /* MembershipBadgeUITests.swift */,
 				50815624BB3031A64ACBCAC5 /* PlanCancellationUITests.swift */,
 				CE5ED6A12BCFE19FCCC15803 /* PlanCreationPresentationUITests.swift */,
+				68C6B284045DA49A2C3BA9C3 /* PlanReliabilityUITests.swift */,
 				E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */,
 				0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */,
 				E44BC1E89288E0B8796F7921 /* TimePollLiveUITests.swift */,
@@ -1340,6 +1343,7 @@
 				0837487E783800A799143F1D /* MembershipBadgeUITests.swift in Sources */,
 				4F5F7BC65A341DF5A2679E75 /* PlanCancellationUITests.swift in Sources */,
 				5CDB8905DCC9731CE4806DFA /* PlanCreationPresentationUITests.swift in Sources */,
+				B8F9C4290A08A7ED01FF5784 /* PlanReliabilityUITests.swift in Sources */,
 				9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */,
 				80F89555CBB966F96DB9BBDF /* SmartTimeSchedulingUITests.swift in Sources */,
 				CC138832AECB7E02E9FE6DAF /* TimePollLiveUITests.swift in Sources */,

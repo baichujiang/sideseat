@@ -88,6 +88,13 @@ approved unified planning flow can explicitly convert results to invitations;
 Calendar projections require all selected people to accept. See
 [Unified plans](./UNIFIED_PLANS.md).
 
+Preview 113 binds each native refresh to its request and the current local edit
+revision. A refresh started before a selection, nickname edit or plan mutation
+cannot later overwrite the acknowledged change or display an obsolete error.
+Refresh does not start during a queued save or mutation; serial/coalesced writes
+and explicit retry remain unchanged. Expired plans are read-only and appear in
+Ended, as defined in Unified plans.
+
 Verification is recorded in the dated QA/release records. Historic When2meet
 phone runners and receipts are evidence for Preview 98 only and must not be run
 against the native replacement.

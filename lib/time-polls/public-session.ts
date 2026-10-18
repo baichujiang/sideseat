@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getTimePoll, TimePollError, type TimePollActor } from "@/lib/api/v1/time-poll-service";
 import { consumeV1RateLimit, getV1ClientIp, rateLimitSubject } from "@/lib/api/v1/rate-limit";
 import { lockPollPlan } from "@/lib/time-polls/planning";
+import { timePollPhase } from "@/lib/time-polls/lifecycle";
 
 export const pollGuestCookie = "sideseat_poll_guest";
 export const pollGuestCookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/api/public/time-polls", maxAge: 180 * 86400 };
@@ -50,7 +51,7 @@ export async function joinPublicPoll(token: string, displayName: string, appOrig
   const { guest, resumed } = await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, null);
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
-    if (!["COLLECTING", "INVITING"].includes(poll.phase)) throw new TimePollError(409, "This plan is no longer open to new participants.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll))) throw new TimePollError(409, "This plan is no longer open to new participants.");
     const existing = await tx.timePollGuest.findFirst({
       where: { pollId: poll.id, displayName: { equals: displayName, mode: "insensitive" } },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],

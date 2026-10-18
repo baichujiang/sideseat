@@ -85,7 +85,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -151,7 +151,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The shared recommendation opportunity after saving this participant\u2019s private interest.",
+            "description": "The shared recommendation opportunity after saving this participant’s private interest.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7925,7 +7925,7 @@
               "type": "integer",
               "default": 3
             },
-            "description": "Requested count, clamped to 1\u20135."
+            "description": "Requested count, clamped to 1–5."
           }
         ],
         "responses": {
@@ -13515,7 +13515,7 @@
         ]
       },
       "IntentTimePreference": {
-        "description": "EXACT requires 1\u20137 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
+        "description": "EXACT requires 1–7 timeWindows. FLEXIBLE uses inclusive local dates and an optional day-part (ANY means no day-part preference); UNDECIDED is not declared all-day availability. Both non-exact modes require empty timeWindows. New intentions do not expire; dates describe timing preferences only.",
         "oneOf": [
           {
             "type": "object",
@@ -22735,7 +22735,8 @@
               "COLLECTING",
               "INVITING",
               "CONFIRMED",
-              "CANCELLED"
+              "CANCELLED",
+              "EXPIRED"
             ]
           },
           "invitationVersion": {
@@ -22760,6 +22761,13 @@
             "items": {
               "$ref": "#/components/schemas/TimePollInvitation"
             }
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -22824,7 +22832,8 @@
               "COLLECTING",
               "INVITING",
               "CONFIRMED",
-              "CANCELLED"
+              "CANCELLED",
+              "EXPIRED"
             ]
           },
           "chosenStart": {
@@ -22864,6 +22873,13 @@
           },
           "isIncluded": {
             "type": "boolean"
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           }
         }
       },

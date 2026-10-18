@@ -22,7 +22,7 @@ test("five authenticated accounts create, paint, erase, reopen and find the best
     tokens.push((await login.json()).data.tokens.accessToken);
   }
   const headers = (index: number) => ({ Authorization: `Bearer ${tokens[index]}` });
-  const input = { title: "Five-person native poll QA", timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 1020 };
+  const input = { title: "Five-person native poll QA", timeZone: "Europe/Berlin", dates: [new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)], startMinute: 540, endMinute: 1020 };
   const key = randomUUID();
   const created = await request.post("/api/v1/time-polls", { headers: { ...headers(0), "Idempotency-Key": key }, data: input });
   expect(created.status()).toBe(201);

@@ -547,6 +547,9 @@ export async function acceptPlanRequest(options: {
   if (planRequest.status !== "PENDING") {
     throw new PlansServiceError("CONFLICT", "This request is no longer pending.");
   }
+  if (planRequest.startTime <= new Date()) {
+    throw new PlansServiceError("CONFLICT", "This invitation expired before it was confirmed. Propose a new time.");
+  }
 
   if (planRequest.scheduleShareLinkId && planRequest.scheduleShareLink) {
     const link = planRequest.scheduleShareLink;
@@ -608,6 +611,9 @@ export async function acceptPlanRequest(options: {
         },
       });
       if (!gate) throw new LegacyPlanTransitionConflictError();
+      if (transition.revision.startTime <= new Date()) {
+        throw new PlansServiceError("CONFLICT", "This invitation expired before it was confirmed. Propose a new time.");
+      }
       const updated = await tx.planRequest.findUniqueOrThrow({
         where: { id: transition.revision.id },
         include: planRequestV1Include,

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { v1Error } from "@/lib/api/v1/http";
 import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
+import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
 
 export class TimePollError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
@@ -56,7 +57,7 @@ export async function getTimePoll(token: string, actor: TimePollActor | null, ap
     updatedAt: poll.updatedAt.toISOString(), shareUrl: `${appOrigin}/time-polls/${poll.token}`,
     summary: summarizePoll(slots, participants, poll.durationMinutes, poll.expectedCount),
     location: poll.location, durationMinutes: poll.durationMinutes, expectedCount: poll.expectedCount,
-    planningMode: poll.planningMode, phase: poll.phase, invitationVersion: poll.invitationVersion,
+    planningMode: poll.planningMode, phase: timePollPhase(poll), expiresAt: timePollExpiresAt(poll)?.toISOString() ?? null, invitationVersion: poll.invitationVersion,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
     invitations: poll.invitations.map((i) => ({ id: i.id, displayName: i.displayName, status: i.status, selected: i.selected, isMe: isActor(i, actor), isGuest: i.guestId !== null })),
   };
@@ -67,10 +68,11 @@ export async function listTimePolls(userId: string, appOrigin: string) {
   const polls = await prisma.timePoll.findMany({
     where: { creatorId: { notIn: hidden }, OR: [{ creatorId: userId }, { responses: { some: { userId } } }, { invitations: { some: { userId } } }] },
     orderBy: { updatedAt: "desc" }, take: 50,
-    select: { creatorId: true, token: true, title: true, timeZone: true, dates: true, updatedAt: true, phase: true, chosenStart: true, chosenEnd: true, expectedCount: true,
+    select: { creatorId: true, token: true, title: true, timeZone: true, dates: true, endMinute: true, updatedAt: true, phase: true, chosenStart: true, chosenEnd: true, expectedCount: true,
       _count: { select: { responses: true } }, invitations: { select: { userId: true, selected: true, status: true } } },
   });
-  return { polls: polls.map(({ _count, invitations, creatorId, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+  return { polls: polls.map(({ _count, invitations, creatorId, endMinute, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+    phase: timePollPhase({ ...poll, endMinute }), expiresAt: timePollExpiresAt({ ...poll, endMinute })?.toISOString() ?? null,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
     respondedCount: _count.responses, acceptedCount: invitations.filter((i) => i.selected && i.status === "ACCEPTED").length,
     invitedCount: invitations.filter((i) => i.selected).length,
@@ -101,6 +103,7 @@ export async function saveTimePollResponse(token: string, actor: TimePollActor, 
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
+    if (timePollPhase(poll) === "EXPIRED") throw new TimePollError(409, "This plan expired before it was confirmed. Create a new plan to arrange another time.");
     if (poll.phase !== "COLLECTING") throw new TimePollError(409, "An invitation has been sent. Respond to the proposed time.");
     if (await hasPlanningBlock(tx, [accountId(actor), poll.creatorId].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
     if (poll.expectedCount && accountId(actor) !== poll.creatorId && !poll.responses.some((r) => isActor(r, actor))
@@ -121,7 +124,7 @@ export async function sendPollInvitations(token: string, userId: string, input: 
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
-    if (!["COLLECTING", "INVITING"].includes(poll.phase) || poll.invitationVersion !== input.version || poll.planningMode === "FIXED") throw new TimePollError(409, "This plan changed. Reopen it before sending an invitation.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) || poll.invitationVersion !== input.version || poll.planningMode === "FIXED") throw new TimePollError(409, "This plan changed or expired. Reopen it before sending an invitation.");
     const start = new Date(input.start), end = input.end ? new Date(input.end) : new Date(start.getTime() + (poll.durationMinutes ?? 60) * 60_000);
     if (start <= new Date()) throw new TimePollError(422, "Choose a future start time.");
     const range = (poll.slots as unknown as PollSlot[]).filter((s) => s.start >= start.toISOString() && s.end <= end.toISOString());
@@ -188,7 +191,7 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
-    if (!["COLLECTING", "INVITING"].includes(poll.phase)) throw new TimePollError(409, "This plan is closed for nickname changes.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll))) throw new TimePollError(409, "This plan is closed for nickname changes.");
     if (typeof actor !== "string" && await tx.timePollGuest.findFirst({ where: {
       pollId: poll.id, id: { not: actor.guestId }, displayName: { equals: displayName, mode: "insensitive" },
     } })) throw new TimePollError(409, "This name already has a response. Switch participant to continue it, or choose a different name.");
@@ -218,7 +221,7 @@ export async function deleteTimePoll(token: string, userId: string) {
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
-    if (["INVITING", "CONFIRMED"].includes(poll.phase)) throw new TimePollError(409, "Cancel the plan before deleting it.");
+    if (["INVITING", "CONFIRMED"].includes(timePollPhase(poll))) throw new TimePollError(409, "Cancel the plan before deleting it.");
     await tx.timePoll.delete({ where: { id: poll.id } });
   });
   return { deleted: true };

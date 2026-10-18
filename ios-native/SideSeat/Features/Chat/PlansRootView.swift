@@ -40,7 +40,7 @@ enum MVPPlanSection: String, CaseIterable, Equatable, Sendable, Identifiable {
         currentUserID: String,
         now: Date
     ) -> MVPPlanSection {
-        if plan.status == "PENDING" {
+        if plan.status == "PENDING", (plan.startDate ?? .distantPast) > now {
             return .waitingResponse
         }
         if plan.status == "ACCEPTED", (plan.endDate ?? .distantFuture) > now {
@@ -135,7 +135,13 @@ struct PlansRootView: View {
         .background(PlanListReturnObserver(positions: scrollPositions))
         .task { if !store.hasLoaded { await store.load(using: session) } }
         .onAppear { now = Date(); Task { await loadCoordinatedPlans() } }
-        .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { now = $0 }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
+            if date.timeIntervalSince(now) >= 60 || coordinatedPlans.contains(where: {
+                ($0.expiresAt ?? $0.chosenStart).map { now < $0 && $0 <= date } == true
+            }) || store.plans.contains(where: { $0.status == "PENDING" && $0.startDate.map { now < $0 && $0 <= date } == true }) {
+                now = date
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             now = Date()
             Task { await loadCoordinatedPlans() }
@@ -235,8 +241,8 @@ struct PlansRootView: View {
         if !coordinationLoaded && coordinatedPlans.isEmpty {
             ProgressView("Loading plans").frame(maxWidth: .infinity, minHeight: 70)
         } else if section == .waitingResponse {
-            coordinatedSection("Awaiting confirmations", plans: coordinated(in: .waitingResponse).filter { $0.phase == "INVITING" }, identifier: "plans-shared-invitations")
-            coordinatedSection("Finding a time together", plans: coordinated(in: .waitingResponse).filter { ($0.phase ?? "COLLECTING") == "COLLECTING" }, identifier: "plans-shared-availability")
+            coordinatedSection("Awaiting confirmations", plans: coordinated(in: .waitingResponse).filter { $0.planningPhase(at: now) == "INVITING" }, identifier: "plans-shared-invitations")
+            coordinatedSection("Finding a time together", plans: coordinated(in: .waitingResponse).filter { $0.planningPhase(at: now) == "COLLECTING" }, identifier: "plans-shared-availability")
             if let next = coordinated(in: .upcoming).first {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     HStack {
@@ -341,13 +347,14 @@ struct PlansRootView: View {
     }
 
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
-        let collecting = (plan.phase ?? "COLLECTING") == "COLLECTING"
-        let needsReply = plan.phase == "INVITING" && plan.isIncluded != false && plan.myInvitationStatus != "ACCEPTED"
-        let tone = collecting ? SideSeatTheme.Availability.selectedFill : plan.phase == "INVITING" ? SideSeatTheme.statusWarningText : plan.phase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong
-        let action: String.LocalizationValue = collecting ? "Open availability timetable" : needsReply ? "View and confirm" : plan.phase == "INVITING" ? "View confirmation progress" : "View plan"
+        let phase = plan.planningPhase(at: now)
+        let collecting = phase == "COLLECTING"
+        let needsReply = phase == "INVITING" && plan.isIncluded != false && plan.myInvitationStatus != "ACCEPTED"
+        let tone = collecting ? SideSeatTheme.Availability.selectedFill : phase == "INVITING" ? SideSeatTheme.statusWarningText : phase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong
+        let action: String.LocalizationValue = collecting ? "Open availability timetable" : needsReply ? "View and confirm" : phase == "INVITING" ? "View confirmation progress" : "View plan"
         return Button { scrollPositions.capture(selectedSection); router.openPlan(token: plan.token) } label: {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Label(plan.statusLabel, systemImage: collecting ? "calendar.badge.clock" : plan.phase == "INVITING" ? "clock" : plan.phase == "CANCELLED" ? "xmark.circle" : "checkmark.circle")
+                Label(plan.statusLabel(at: now), systemImage: collecting ? "calendar.badge.clock" : phase == "INVITING" ? "clock" : phase == "EXPIRED" ? "clock.badge.exclamationmark" : phase == "CANCELLED" ? "xmark.circle" : "checkmark.circle")
                     .font(.caption.weight(.semibold)).foregroundStyle(tone)
                     .padding(.horizontal, 8).padding(.vertical, 5)
                     .background(tone.opacity(0.10), in: Capsule())
@@ -367,7 +374,7 @@ struct PlansRootView: View {
                         ProgressView(value: Double(min(plan.respondedCount ?? 0, count)), total: Double(count))
                             .tint(SideSeatTheme.Availability.selectedFill).accessibilityHidden(true)
                     }
-                } else if plan.phase != "CANCELLED" {
+                } else if !["CANCELLED", "EXPIRED"].contains(phase) {
                     Text(String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.invitedCount ?? plan.expectedCount ?? 0))
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
@@ -385,15 +392,16 @@ struct PlansRootView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-coordinated-\(plan.token)")
-        .accessibilityValue(plan.statusLabel)
+        .accessibilityValue(plan.statusLabel(at: now))
     }
 
     private func coordinated(in section: MVPPlanSection) -> [NativeTimePollList.Item] {
         coordinatedPlans.filter { plan in
-            switch section {
-            case .waitingResponse: ["COLLECTING", "INVITING"].contains(plan.phase ?? "COLLECTING")
-            case .upcoming: plan.phase == "CONFIRMED" && plan.isIncluded != false && (plan.chosenEnd ?? .distantPast) > now
-            case .ended: plan.phase == "CANCELLED" || (plan.phase == "CONFIRMED" && (plan.isIncluded == false || (plan.chosenEnd ?? .distantFuture) <= now))
+            let phase = plan.planningPhase(at: now)
+            return switch section {
+            case .waitingResponse: ["COLLECTING", "INVITING"].contains(phase)
+            case .upcoming: phase == "CONFIRMED" && plan.isIncluded != false && (plan.chosenEnd ?? .distantPast) > now
+            case .ended: ["CANCELLED", "EXPIRED"].contains(phase) || (phase == "CONFIRMED" && (plan.isIncluded == false || (plan.chosenEnd ?? .distantFuture) <= now))
             }
         }
     }
@@ -639,7 +647,7 @@ struct PlansRootView: View {
                                 .background(statusForeground(for: plan, section: section).opacity(0.08), in: Capsule())
                         }
                     }
-                    if plan.status == "PENDING", plan.receiver.id == currentUserID {
+                    if section != .ended, plan.status == "PENDING", plan.receiver.id == currentUserID {
                         HStack {
                             Text("View and respond")
                                 .font(.subheadline.weight(.semibold))
@@ -752,6 +760,7 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
+        if plan.status == "PENDING", (plan.startDate ?? .distantPast) <= now { return AppLocalization.string("Expired") }
         if section == .ended, plan.status == "ACCEPTED" {
             return AppLocalization.string("Ended")
         }
@@ -777,6 +786,7 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
+        if plan.status == "PENDING", (plan.startDate ?? .distantPast) <= now { return "clock.badge.exclamationmark" }
         if section == .ended, plan.status == "ACCEPTED" {
             return "clock.arrow.circlepath"
         }
@@ -798,7 +808,7 @@ struct PlansRootView: View {
     ) -> Color {
         if section == .ended { return SideSeatTheme.textSecondaryStrong }
         if plan.status == "ACCEPTED" { return SideSeatTheme.statusSuccessText }
-        if plan.status == "PENDING", plan.receiver.id == currentUserID {
+        if section != .ended, plan.status == "PENDING", plan.receiver.id == currentUserID {
             return SideSeatTheme.statusWarningText
         }
         if plan.status == "DECLINED" || plan.status == "CANCELED" {

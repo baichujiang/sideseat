@@ -35,12 +35,25 @@ current Plans or Messages navigation. Root cards refresh after saved responses.
   Calendar projections. Unblock does not restore them. Collecting/cancelled roots
   may be deleted by their creator. Confirmed plans do not support in-place
   rescheduling in this release; create a fresh plan after cancellation.
+- EXPIRED: an unconfirmed invitation reaches its chosen start, or every candidate
+  collection window has ended. GET detail/list derive this state and optional
+  `expiresAt` from existing dates and the plan's IANA time zone; no migration or
+  rewriting of confirmed facts is required. Native Plans moves it to Ended;
+  native/web details explain that no Calendar entries were added and close
+  response, nickname and new-participant actions. The creator may delete it.
+  Already-confirmed plans retain their existing Calendar and elapsed-time rules.
 
 Before confirmation, COLLECT creators may resend another time/roster. Version
 increments, other participants reset to INVITED, and stale responses return 409.
 Availability is frozen after the first invitation. The creator manually selects
 start/end and reviews the roster; half-day and full-day ranges are supported.
 Heatmap availability alone is never acceptance.
+
+Native notifications consume the API's `INVITED` status. Preview 113 recovers
+missed Preview 112 invitation fingerprints once while retaining existing read
+history. Invitation/change notices carry their deadline and expire locally,
+including while the app remains open. Elapsed pending conversation invitations
+also report EXPIRED and no longer contribute to the inbox action count.
 
 ## API and data ownership
 

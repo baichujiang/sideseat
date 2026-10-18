@@ -2639,3 +2639,9 @@
 "Unread" = "未读";
 "Open related details" = "打开相关详情";
 "Mark all as read" = "全部已读";
+
+"This plan expired before it was confirmed. No calendar entries were added." = "该计划在确认前已过期，未添加到任何日历。";
+
+"Create a new plan to arrange another time." = "请发起新计划，重新安排时间。";
+
+"Back to plans" = "返回计划";

@@ -46,7 +46,9 @@ export function planRequestV1(plan: PlanRequestV1Row, viewerId?: string) {
       plan.originAction?.coordinationPolicy ??
       plan.actionInterest?.classmatePost.coordinationPolicy ??
       null,
-    status: plan.cancellationNotice ? "CANCELED" as PlanRequestStatus : plan.status as PlanRequestStatus,
+    status: plan.cancellationNotice ? "CANCELED" as PlanRequestStatus
+      : plan.status === "PENDING" && plan.startTime <= new Date() ? "EXPIRED" as PlanRequestStatus
+      : plan.status as PlanRequestStatus,
     cancellation: plan.cancellationNotice ? {
       actorId: plan.cancellationNotice.actorId,
       reasonCode: plan.cancellationNotice.reasonCode,

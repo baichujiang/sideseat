@@ -77,12 +77,99 @@ struct TimePollTests {
         #expect(await transport.refreshCount == 0)
         }
     }
+
+    @Test("A delayed refresh cannot undo an acknowledged save or report an old refresh error")
+    @MainActor
+    func refreshAfterSave() async throws {
+        for status in [200, 503] {
+            let transport = PollRefreshRaceTransport(refreshStatus: status)
+            let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+            session.installUITestingSession()
+            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            let refresh = Task { await store.load(session: session) }
+            await transport.waitForRefresh()
+            store.selected = [2, 3]; store.save(session: session)
+            while store.saving { await Task.yield() }
+            await transport.releaseRefresh(); await refresh.value
+            #expect(store.selected == [2, 3] && store.poll?.mySlotIds == [2, 3])
+            #expect(store.saved && store.error == nil)
+            store.selected.insert(4); store.save(session: session)
+            while store.saving { await Task.yield() }
+            #expect(await transport.writes == [[2, 3], [2, 3, 4]])
+        }
+    }
+
+    @Test("A refresh started before cancellation cannot restore the confirmed state")
+    @MainActor
+    func refreshAfterMutation() async throws {
+        let transport = PollRefreshRaceTransport(initialPhase: "CONFIRMED")
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll")
+        let refresh = Task { await store.load(session: session) }
+        await transport.waitForRefresh()
+        await store.mutate("cancel", body: CancelPollPlanRequest(version: 1), session: session)
+        await transport.releaseRefresh(); await refresh.value
+        #expect(store.poll?.planningPhase == "CANCELLED" && store.error == nil)
+    }
+
+    @Test("A refresh already in flight cannot replace a nickname being edited")
+    @MainActor
+    func refreshDuringNameEdit() async throws {
+        let transport = PollRefreshRaceTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let refresh = Task { await store.load(session: session) }
+        await transport.waitForRefresh()
+        store.displayName = "New nickname"
+        await transport.releaseRefresh(); await refresh.value
+        #expect(store.displayName == "New nickname")
+    }
+}
+
+private actor PollRefreshRaceTransport: APITransport {
+    private var gate: CheckedContinuation<Void, Never>?
+    private var started: CheckedContinuation<Void, Never>?
+    private var refreshing = false
+    private let refreshStatus: Int
+    private let initialPhase: String
+    private(set) var writes: [[Int]] = []
+    init(refreshStatus: Int = 200, initialPhase: String = "COLLECTING") {
+        self.refreshStatus = refreshStatus; self.initialPhase = initialPhase
+    }
+    func waitForRefresh() async {
+        if !refreshing { await withCheckedContinuation { started = $0 } }
+    }
+    func releaseRefresh() { gate?.resume(); gate = nil }
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        var slots = [Int](), phase = initialPhase, status = 200
+        if request.httpMethod == "GET" {
+            refreshing = true
+            await withCheckedContinuation { gate = $0; started?.resume(); started = nil }
+            status = refreshStatus
+        } else if request.url!.path.hasSuffix("/cancel") { phase = "CANCELLED" }
+        else {
+            let body = try JSONDecoder().decode(SaveTimePollRequest.self, from: request.httpBody!)
+            slots = body.slotIds; writes.append(slots)
+        }
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["mySlotIds"] = slots; object["didRespond"] = true; object["phase"] = phase
+        // Use APIClient's wire date representation, not JSONEncoder's default numeric dates.
+        object["updatedAt"] = "2030-10-16T07:00:00Z"
+        let data = status == 200 ? try JSONSerialization.data(withJSONObject: ["data": object])
+            : Data(#"{"error":{"code":"UNAVAILABLE","message":"Old refresh failed","retryable":true}}"#.utf8)
+        return (data, HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!)
+    }
+}
+
+private func collectingPollData() -> Data {
+    Data(#"{"token":"poll","title":"Dinner","timeZone":"Europe/Berlin","dates":["2026-10-16"],"startMinute":540,"endMinute":600,"slots":[],"participants":[],"mySlotIds":[],"myDisplayName":"Ming","didRespond":false,"isOwner":true,"updatedAt":"2026-10-16T07:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/poll","summary":{"counts":[],"participantCount":0,"maximum":0,"common":false,"windows":[]}}"#.utf8)
 }
 
 private func collectingPoll() throws -> NativeTimePoll {
-    let data = Data(#"{"token":"poll","title":"Dinner","timeZone":"Europe/Berlin","dates":["2026-10-16"],"startMinute":540,"endMinute":600,"slots":[],"participants":[],"mySlotIds":[],"myDisplayName":"Ming","didRespond":false,"isOwner":true,"updatedAt":"2026-10-16T07:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/poll","summary":{"counts":[],"participantCount":0,"maximum":0,"common":false,"windows":[]}}"#.utf8)
     let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode(NativeTimePoll.self, from: data)
+    return try decoder.decode(NativeTimePoll.self, from: collectingPollData())
 }
 
 private actor PollSaveTransport: APITransport {

@@ -2639,3 +2639,9 @@
 "Unread" = "Unread";
 "Open related details" = "Open related details";
 "Mark all as read" = "Mark all as read";
+
+"This plan expired before it was confirmed. No calendar entries were added." = "This plan expired before it was confirmed. No calendar entries were added.";
+
+"Create a new plan to arrange another time." = "Create a new plan to arrange another time.";
+
+"Back to plans" = "Back to plans";

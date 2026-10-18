@@ -108,6 +108,12 @@ struct AppShellView: View {
     private var notificationAwareSurface: some View {
         cancellationAwareSurface
         .environment(notifications)
+        .task(id: notifications.nextInvitationExpiry) {
+            guard let deadline = notifications.nextInvitationExpiry else { return }
+            do { try await Task.sleep(for: .seconds(max(0, deadline.timeIntervalSinceNow))) }
+            catch { return }
+            notifications.expireInvitations()
+        }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
             Task { await notifications.refresh(using: session) }
         }

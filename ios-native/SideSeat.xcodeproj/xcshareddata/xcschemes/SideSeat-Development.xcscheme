@@ -140,6 +140,11 @@
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
+            key = "SIDESEAT_PLAN_RELIABILITY_QA_JSON"
+            value = "$(SIDESEAT_PLAN_RELIABILITY_QA_JSON)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "SIDESEAT_RUN_REAL_PHOTO_TEST"
             value = "$(SIDESEAT_RUN_REAL_PHOTO_TEST)"
             isEnabled = "YES">

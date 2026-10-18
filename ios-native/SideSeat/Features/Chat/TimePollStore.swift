@@ -5,14 +5,16 @@ import Observation
 final class TimePollStore {
     let token: String
     private(set) var poll: NativeTimePoll?
-    var selected = Set<Int>()
-    var displayName = ""
+    var selected = Set<Int>() { didSet { if selected != oldValue { revision += 1 } } }
+    var displayName = "" { didSet { if displayName != oldValue { revision += 1 } } }
     private(set) var saving = false
     private(set) var saved = false
     private(set) var error: String?
     private(set) var acting = false
     var canMutate: Bool { !acting && !saving && pending == nil }
     private var pending: SaveTimePollRequest?
+    private var revision = 0
+    private var refreshID = UUID()
 
     func showError(_ error: Error) { self.error = error.localizedDescription }
 
@@ -22,13 +24,21 @@ final class TimePollStore {
     }
 
     func load(session: SessionStore) async {
+        guard !saving && !acting && pending == nil else { return }
         let generation = session.authorizationGeneration
+        let currentRevision = revision
+        let request = UUID()
+        refreshID = request
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized("/api/v1/time-polls/\(token)")
-            guard generation == session.authorizationGeneration else { return }
+            guard generation == session.authorizationGeneration,
+                  currentRevision == revision, request == refreshID else { return }
             // A refresh must never replace selections that are awaiting acknowledgement.
-            if !saving && pending == nil { accept(response.data); error = nil }
-        } catch { if !saving { self.error = error.localizedDescription } }
+            if !saving && !acting && pending == nil { accept(response.data); error = nil }
+        } catch {
+            if generation == session.authorizationGeneration, currentRevision == revision,
+               request == refreshID, !saving, !acting { self.error = error.localizedDescription }
+        }
     }
 
     func accept(_ value: NativeTimePoll) {
@@ -40,6 +50,7 @@ final class TimePollStore {
 
     func mutate<Body: Encodable & Sendable>(_ action: String, method: HTTPMethod = .post, body: Body, session: SessionStore) async {
         guard canMutate else { return }
+        revision += 1
         acting = true; defer { acting = false }
         let generation = session.authorizationGeneration
         let userID = session.currentUser?.id
@@ -56,6 +67,7 @@ final class TimePollStore {
         guard poll?.planningPhase == "COLLECTING" else { return }
         let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { error = AppLocalization.string("Enter your name."); return }
+        revision += 1
         pending = SaveTimePollRequest(displayName: name, slotIds: selected.sorted())
         saved = false
         error = nil

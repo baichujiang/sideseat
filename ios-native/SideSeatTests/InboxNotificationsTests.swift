@@ -61,6 +61,40 @@ struct InboxNotificationsTests {
         #expect(store.items.isEmpty)
     }
 
+    @Test("Preview 112's missed INVITED snapshot is recovered once without losing read history")
+    func recoverMissedInvitations() throws {
+        let defaults = storage()
+        let current = try poll()
+        let old: [String: Any] = ["items": [], "fingerprints": [
+            "shared:" + current.token: "\(current.chosenStart!.timeIntervalSince1970)|\(current.chosenEnd!.timeIntervalSince1970)|INVITING|INVITED"
+        ]]
+        defaults.set(try JSONSerialization.data(withJSONObject: old), forKey: "sideseat.notifications.v1.alice")
+        let store = InboxNotificationsStore(defaults: defaults)
+        store.activate(accountID: "alice")
+        store.reconcile(polls: [try poll()])
+        #expect(store.items.count == 1 && store.unreadCount == 1)
+        store.markAllRead()
+        let reopened = InboxNotificationsStore(defaults: defaults)
+        reopened.activate(accountID: "alice")
+        reopened.reconcile(polls: [try poll()])
+        #expect(reopened.items.count == 1 && reopened.unreadCount == 0)
+    }
+
+    @Test("An elapsed invitation leaves no unread invitation or confirmation action")
+    func expiredInvitation() throws {
+        let store = InboxNotificationsStore(defaults: storage())
+        store.activate(accountID: "alice")
+        let item = try poll()
+        store.reconcile(polls: [item], now: item.chosenStart!.addingTimeInterval(-1))
+        #expect(store.unreadCount == 1)
+        #expect(store.nextInvitationExpiry == item.chosenStart)
+        store.expireInvitations(now: item.chosenStart!)
+        #expect(store.items.isEmpty && store.unreadCount == 0)
+        store.reconcile(polls: [item], now: item.chosenStart!)
+        #expect(store.items.isEmpty && store.unreadCount == 0)
+        #expect(item.planningPhase(at: item.chosenStart!) == "EXPIRED")
+    }
+
     @Test("Cancelled accepted revisions are presented as cancellation, not confirmation")
     func acceptedCancellation() {
         let store = InboxNotificationsStore(defaults: storage())
@@ -136,7 +170,7 @@ struct InboxNotificationsTests {
             "timeZone": "Europe/Berlin", "dates": ["2030-10-20"], "updatedAt": updated,
             "shareUrl": "https://www.sideseat.de/time-polls/" + String(repeating: "a", count: 32),
             "phase": "INVITING", "chosenStart": start, "chosenEnd": end,
-            "myInvitationStatus": "PENDING", "isIncluded": included]
+            "myInvitationStatus": "INVITED", "isIncluded": included]
         let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(NativeTimePollList.Item.self, from: JSONSerialization.data(withJSONObject: object))
     }
@@ -163,7 +197,7 @@ private actor NotificationsTransport: APITransport {
         switch path {
         case "/api/v1/plans": body = #"{"data":{"plans":[]}}"#
         case "/api/v1/time-polls":
-            body = #"{"data":{"polls":[{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","title":"API plan","timeZone":"Europe/Berlin","dates":["2030-10-20"],"updatedAt":"2030-10-18T09:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","phase":"INVITING","chosenStart":"2030-10-20T10:00:00Z","chosenEnd":"2030-10-20T12:00:00Z","myInvitationStatus":"PENDING","isIncluded":true}]}}"#
+            body = #"{"data":{"polls":[{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","title":"API plan","timeZone":"Europe/Berlin","dates":["2030-10-20"],"updatedAt":"2030-10-18T09:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","phase":"INVITING","chosenStart":"2030-10-20T10:00:00Z","chosenEnd":"2030-10-20T12:00:00Z","myInvitationStatus":"INVITED","isIncluded":true}]}}"#
         case "/api/v1/me":
             body = #"{"data":{"id":"ui-test-user","username":"test_001","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en","displayName":"Test User","schoolSummary":{"schoolShort":"TUM","degreeLabel":"Bachelor","major":"Informatics","semester":3},"contacts":{},"privacy":{"discoverByCourse":true,"discoverByMajor":true,"discoverBySemester":true,"allowInvitationNotes":true,"contactInfoOptIn":false,"hideFromCourseMembers":false,"hideFromDiscovery":false},"counts":{"blocked":0}}}"#
         default: throw URLError(.badURL)
