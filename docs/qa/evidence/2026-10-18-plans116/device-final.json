@@ -1,0 +1,32 @@
+{
+  "verifiedAt": "2026-10-18T05:00:39.613696+00:00",
+  "device": {
+    "model": "iPhone 14 Plus",
+    "name": "iPhone (4)",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "osVersion": "26.6.1"
+  },
+  "sourceCommit": "40604fa57926f7a2f4ea56137623a079cd0d93ce",
+  "nativeUICommit": "7e83f856c9042453f9f5ed20b34574285d3c7b7e",
+  "preview": {
+    "bundle": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "116",
+    "installed": true,
+    "strictCodeSignVerified": true,
+    "normalLaunch": true,
+    "arguments": [],
+    "qaEnvironmentVariables": false,
+    "payloadURL": "sideseat://plans",
+    "pid": 942,
+    "processVerified": true
+  },
+  "ordinarySideSeat": {
+    "bundle": "app.sideseat.mobile",
+    "build": "97",
+    "retained": true
+  },
+  "qaRunnerInstalled": false,
+  "backendDeploymentId": "dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB"
+}
