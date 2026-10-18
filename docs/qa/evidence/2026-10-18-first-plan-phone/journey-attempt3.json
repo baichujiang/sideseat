@@ -1,0 +1,10 @@
+{
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "testsExecuted": 1,
+  "failures": 1,
+  "reached": "system-share-and-native-copy-passed",
+  "failure": "Paste consent was queried in Safari instead of SpringBoard; URL was read before pasting completed, so the harness reused an earlier deleted link. Explicitly handle system consent before reading copied URL, assert new plan title.",
+  "productDefectObserved": false,
+  "resultBundle": "/tmp/sideseat-plan115-first-journey-attempt3.xcresult"
+}

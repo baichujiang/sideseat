@@ -1,0 +1,10 @@
+{
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "testsExecuted": 1,
+  "failures": 1,
+  "reached": "system-share-open",
+  "failure": "Broad label query matched the underlying Copy image before the system share Copy cell. Tightened to cell/button and wait for share dismissal.",
+  "productDefectObserved": false,
+  "resultBundle": "/tmp/sideseat-plan115-first-journey-attempt2.xcresult"
+}

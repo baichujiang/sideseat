@@ -53,10 +53,13 @@ import XCTest
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 10))
         let share = app.buttons["plan-share-primary"]
         XCTAssertTrue(share.isHittable); share.tap()
-        let copy = app.buttons.matching(NSPredicate(format: "label IN %@", ["Copy", "拷贝", "复制"])).firstMatch
+        // iOS 26 exposes share actions as cells; earlier releases use buttons.
+        let copyLabels = NSPredicate(format: "label IN %@", ["Copy", "拷贝", "复制"])
+        let copyCell = app.cells.matching(copyLabels).firstMatch
+        let copy = copyCell.waitForExistence(timeout: 3) ? copyCell : app.buttons.matching(copyLabels).firstMatch
         XCTAssertTrue(copy.waitForExistence(timeout: 10), "The system share sheet must offer copying the plan link")
         capture(app, "05-system-share"); copy.tap()
-        XCTAssertTrue(app.buttons["plan-copy-link"].waitForExistence(timeout: 10))
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: app.buttons["plan-copy-link"])], timeout: 10), .completed)
         app.buttons["plan-copy-link"].tap()
         XCTAssertEqual(app.buttons["plan-copy-link"].label, "Link copied")
 
@@ -69,14 +72,16 @@ import XCTest
         let input = safari.textFields.firstMatch
         input.typeKey("a", modifierFlags: .command)
         input.typeKey("v", modifierFlags: .command)
-        let allowPaste = safari.buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
-        if allowPaste.waitForExistence(timeout: 2) { allowPaste.tap() }
+        // Cross-app paste consent belongs to SpringBoard, not Safari's hierarchy.
+        let allowPaste = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
+        if allowPaste.waitForExistence(timeout: 3) { allowPaste.tap() }
         let copiedURL = try XCTUnwrap(input.value as? String)
         XCTAssertTrue(copiedURL.contains("sideseat.de/"), "Use the actual link copied from the newly created plan")
         let webURL = copiedURL.replacingOccurrences(of: "https://sideseat.de/", with: "https://www.sideseat.de/")
         replace(input, with: webURL + "\n")
         let name = safari.webViews.textFields.firstMatch
         XCTAssertTrue(name.waitForExistence(timeout: 30))
+        XCTAssertTrue(safari.staticTexts[fixture.title].exists, "The copied link must open the newly created plan")
         name.tap(); name.typeText("Guest Lin")
         webButton("Start or continue", "开始 / 继续填写").tap()
         let first = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
@@ -84,7 +89,7 @@ import XCTest
         XCTAssertTrue(first.waitForExistence(timeout: 20))
         for _ in 0..<3 where !second.isHittable { safari.swipeUp() }
         first.tap(); second.tap()
-        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved", "已保存"])).firstMatch.waitForExistence(timeout: 20))
+        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved automatically", "已自动保存"])).firstMatch.waitForExistence(timeout: 20))
         capture(safari, "06-guest-saved"); phase("guest-saved")
         let finish = webButton("Done selecting", "完成填写")
         for _ in 0..<3 where !finish.isHittable { safari.swipeUp() }

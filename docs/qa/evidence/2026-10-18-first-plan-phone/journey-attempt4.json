@@ -1,0 +1,10 @@
+{
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "testsExecuted": 1,
+  "failures": 1,
+  "reached": "guest-entered-and-two-selected-cells",
+  "failure": "Harness expected Saved/\u5df2\u4fdd\u5b58, but current webpage correctly shows Saved automatically/\u5df2\u81ea\u52a8\u4fdd\u5b58. Guest Lin had two selected half-hour cells and one-hour summary. Updated assertion to actual published copy.",
+  "productDefectObserved": false,
+  "resultBundle": "/tmp/sideseat-plan115-first-journey-attempt4.xcresult"
+}

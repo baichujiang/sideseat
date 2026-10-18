@@ -1,0 +1,27 @@
+{
+  "result": "Passed",
+  "totalTestCount": 1,
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "productSourceCommit": "51c98e9b16676e85047d427b70f1d91e9e68e2e1",
+  "durationSeconds": 108.654,
+  "resultBundle": "/tmp/sideseat-plan115-first-journey-attempt5.xcresult",
+  "backendDeployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g",
+  "phases": [
+    "created-and-saved",
+    "guest-saved",
+    "awaiting-confirmation",
+    "confirmed",
+    "calendar-verified"
+  ],
+  "usesRealLoginAndAPIs": true,
+  "usesAuthenticatedFixtures": false,
+  "runnerMakesHTTPRequests": false,
+  "systemShareAndCopy": true,
+  "safariUsesActuallyCopiedLink": true,
+  "calendarSearchAndReturnToPlan": true,
+  "productDefectObserved": false
+}

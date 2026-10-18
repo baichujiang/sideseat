@@ -1,0 +1,11 @@
+{
+  "result": "Passed",
+  "totalTestCount": 1,
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "testedFlow": "Open Plans, present creation and cancel directly back to Plans three times",
+  "resultBundle": "/tmp/sideseat-plan115-authorized-retry-smoke.xcresult"
+}

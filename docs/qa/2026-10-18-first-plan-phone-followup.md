@@ -1,5 +1,8 @@
 # 首次计划完整真机流程：连接恢复跟进
 
+**最新结果：2026-10-18 05:59，默认 iPhone 14 Plus 的完整连续流程通过，0 失败、0 跳过。**
+前述连接失败及等待授权为历史过程；最终结果和清理回执见本文末尾。
+
 2026-10-18，Europe/Berlin。活跃分支 `codex/ios-uxui-20260922`，基线 `f5f5b25`。
 当前手机仍为 Preview **114**，产品源码 `51c98e9`；本阶段尚无产品修复或后端部署。
 
@@ -60,3 +63,71 @@ CoreDevice 同时报告 `localNetwork`，不能单凭此字段断言没有连接
 [Xcode 界面启动](./evidence/2026-10-18-first-plan-phone/gui-smoke.json)、
 [配对恢复后等待授权](./evidence/2026-10-18-first-plan-phone/after-pairing-renewal.json)、
 [准备账号清理](./evidence/2026-10-18-first-plan-phone/prepared-account-cleanup.json)。
+
+## 最终继续：首次计划连续真机验收通过
+
+机主再次要求重试后，Mac 已解锁，默认手机仍为 wired；XCTest 成功进入测试，
+创建/取消呈现探针 **1 项通过**，连续三次创建后取消均直接回到一级计划页。
+随后使用全新一次性账号、真实登录和正式 API，在 Preview **114** 完成一条连续流程，
+**1 项通过，0 失败、0 跳过，108.654 秒**。最终完成时间 05:59，Europe/Berlin。
+
+| 实际界面操作 | 真实数据核对 |
+| --- | --- |
+| 首次打开空白计划页 → 发起新计划 → 时间还没定 → 创建 | 初始计划数 0；App 创建成功，发起人身份正确 |
+| 发起人填写 Host Ming，选择 09:00–10:00，保存并完成 | 精确保存槽位 `[0,1,2,3]`，1 人，阶段 COLLECTING，日历 0 条 |
+| 打开系统分享并点拷贝，再用界面「复制链接」 | iOS 系统面板和原生复制反馈均通过；Safari 使用实际剪贴板链接，网页标题核对本次新计划 |
+| 同一手机 Safari 输入 Guest Lin → 选两个半小时 → 已自动保存 → 完成填写 | 游客身份及姓名正确，精确槽位 `[0,1,2,3]`，共 2 人，日历 0 条 |
+| 回到 App 看到游客 → 选择 09:00–10:00 → 发送邀请 | INVITING，1/2 已确认，日历仍 0 条 |
+| 同一 Safari 游客确认参加 → 回到 App | CONFIRMED，2/2 已确认，唯一一条日历记录，标题一致、实际时长 1 小时 |
+| 查看日历 → 按标题搜索 → 打开详情 → 管理计划 | 实际搜索结果可见，开始/结束 09:00–10:00，1h，Guest Lin；能返回同一已确认计划 |
+
+五个阶段均由 Mac 观察测试阶段标记并实时调用真实 API 断言；UI runner 不发送 HTTP。
+此用例没有认证、计划或日历数据夹具，只跳过 App 通用教程，并使用内存凭据保护手机原登录。
+覆盖范围为原生英文浅色界面、中文 Safari 分享网页和 SideSeat 日历；不是 Apple 系统日历授权测试，
+也不替代 113/114 已有的通知、慢保存和过期规则回归。
+
+[最终测试结果](./evidence/2026-10-18-first-plan-phone/journey-final.json)、
+[五阶段 API 核对](./evidence/2026-10-18-first-plan-phone/journey-final-api.json)、
+[创建取消探针](./evidence/2026-10-18-first-plan-phone/authorized-smoke.json)。
+
+### 测试脚本修正及首次失败
+
+连接恢复后的四次未完成运行都因测试脚本与真实 iOS/网页的差异失败，没有发现产品阻塞缺陷：
+
+1. iOS 26 的系统分享「拷贝」是 Cell，旧脚本只查 Button。
+2. 放宽为任意元素后误匹配底层的 Copy 图片；改为明确查 Cell/Button，并等分享面板关闭后原生复制可点。
+3. 首次跨 App 粘贴提示属于 SpringBoard；旧脚本从 Safari 查找并过早读取旧地址。改为在系统层等待允许粘贴，再读实际地址，同时核对新计划标题。
+4. 分享网页保存成功文案是「已自动保存 / Saved automatically」，脚本错误期待「已保存 / Saved」。按现行界面修正断言；未改产品文案。
+
+每次均清理旧账号/计划并重新创建空白账号；第五次完整连续运行通过。
+[第 1 次](./evidence/2026-10-18-first-plan-phone/journey-attempt1.json)、
+[第 2 次](./evidence/2026-10-18-first-plan-phone/journey-attempt2.json)、
+[第 3 次](./evidence/2026-10-18-first-plan-phone/journey-attempt3.json)、
+[第 4 次](./evidence/2026-10-18-first-plan-phone/journey-attempt4.json)。
+
+### 截图和最终收尾
+
+保留完整 16 张合成测试数据截图，依次为
+[首次首页](./evidence/2026-10-18-first-plan-phone/phone-first-plan-01-first-visit.png)、
+[系统分享](./evidence/2026-10-18-first-plan-phone/phone-first-plan-05-system-share.png)、
+[游客保存](./evidence/2026-10-18-first-plan-phone/phone-first-plan-06-guest-saved.png)、
+[邀请检查](./evidence/2026-10-18-first-plan-phone/phone-first-plan-09-review-invitation.png)、
+[全员确认](./evidence/2026-10-18-first-plan-phone/phone-first-plan-13-native-confirmed.png)、
+[日历详情](./evidence/2026-10-18-first-plan-phone/phone-first-plan-15-calendar-entry.png)。
+其余连续截图位于同一 evidence 目录。
+
+最终一次账号和计划已删除，删除前剩余计划 0，旧账号令牌 401，分享链接 404；
+前四次也各有独立清理回执。本轮共回收 5 个测试账号及 5 个测试计划。
+私有账号文件及含密码的 xctestrun 已删除，原始 xcresult/附件只保留在权限受限的本机临时目录，
+没有提交账号凭据、录屏或原始诊断包。
+[最终清理](./evidence/2026-10-18-first-plan-phone/journey-final-cleanup.json)。
+
+测试 runner 已卸载。严格签名核验后重新安装同一 Preview **114**，携带 `sideseat://plans`
+恢复无测试参数/QA 环境变量的普通启动，PID **841** 已在进程表核对。
+普通 SideSeat **97** 继续保留。Xcode 当前工程为活跃 checkout，Scheme 为 SideSeat-Preview，
+运行目的地恢复为默认 iPhone (4)，UDID 匹配 iPhone 14 Plus。
+[最终设备回执](./evidence/2026-10-18-first-plan-phone/device-accepted-final.json)。
+
+本轮只修正测试脚本及补齐真机证据，没有产品代码、后端、Schema 或迁移变化；
+没有新编造 Preview 115，也没有 TestFlight/App Store 上传。
+产品源码仍为 `51c98e9`，正式后端仍为 `dpl_BerFn2d4wg2VPbtCxFN5WUQA217g`。

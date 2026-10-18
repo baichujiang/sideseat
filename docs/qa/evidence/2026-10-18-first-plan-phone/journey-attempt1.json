@@ -1,0 +1,10 @@
+{
+  "device": "00008110-001A69110CC1401E",
+  "previewBuild": 114,
+  "testsExecuted": 1,
+  "failures": 1,
+  "reached": "created-and-saved",
+  "failure": "Harness queried share Copy as a button; iOS 26 exposes it as a Cell. Share sheet opened successfully.",
+  "productDefectObserved": false,
+  "resultBundle": "/tmp/sideseat-plan115-first-journey-attempt1.xcresult"
+}
