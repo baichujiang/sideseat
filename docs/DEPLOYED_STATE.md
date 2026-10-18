@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对；117 展示统一 `062ccb9`、最终语言补齐 `05f79b3` 均已提交推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (117)` | 计划页、聊天卡片/顶部安排共用状态及下一步展示，保留双人/手动多人合同。27 项单元、2 项模拟器界面、7 项真机呈现、最终连续 App→网页→确认→日历及五阶段 API 通过；严格签名、安装、普通启动 PID 1206 核验；[117 交付](./releases/2026-10-18-preview117-plan-presentation.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；XCTest 明确 arm64 目的地；117 中文连续完整流程、创建/返回/双人确认/大字号通过，测试 runner 已移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对；118 立即显示时间表 `a2946b5` 已提交推送；117 展示统一保留 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (118)` | 征集计划创建后显示 0 人空表，保存自己的空闲/重开仍保留时间表；独立整行填写入口，始终可分享。10 项单元、5 项真机创建、修复后完整流程及六阶段 API 通过；严格签名、安装、普通启动 PID 1245 核验；[118 交付](./releases/2026-10-18-preview118-immediate-timetable.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；XCTest 明确 arm64 目的地；118 空表/保存/重开及连续流程、创建/返回/大字号检查通过，测试 runner 已移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB`，Ready | 修复后候选/正式网页各六组真实 Chromium/WebKit 流程、手机 Safari 连续流程通过；两个域名配置 HTTP 200；[116 交付](./releases/2026-10-18-preview116-purpose-and-share.md) |
 | 生产源码 | 最终 production 基线 1,348 项校验重建；保留 1,346 项，仅更新共享组件及来源记录；1,348 项上传 SHA-1 全匹配 | 来源 `40604fa`；116 整体仅两个分享组件及来源记录，服务端/API 保留；Schema 不变、迁移显式跳过；[发布清单](./qa/evidence/2026-10-18-plans116/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans116/upload-verification.json) |
+
+118 按用户要求让发起人创建后立即看到时间表：0 人填写、保存自己的空闲和重开时都保留表格；分享入口始终可用。真机发现标题旁的填写入口被系统悬浮按钮挡住，已改为独立整行按钮。10 项单元、5 项创建专项通过，修复后完整 App→空表→填写→分享→确认→日历 113.682 秒及六阶段 API 通过。两次测试账号/计划均清理，QA runner 移除，118 已普通启动 PID 1245；[完整 QA](./qa/2026-10-18-plans118.md)。本轮仅原生更新。
 
 117 先统一原生用户看到的状态、下一步和组件：手动计划与聊天计划采用同一展示词汇，按当前用户角色明确填写、分享、确认、等待或查看历史；数据、确认/改期、通知及日历合同保留。27 项单元、2 项模拟器界面、7 项真机呈现通过。截图复查补齐「另选时间」语言资源后，最终包连续真机流程 107.245 秒通过，五阶段 API 证实确认前 0 条、全员确认后唯一一条一小时日历。两次一次性账号/计划均回收，QA runner 移除，117 已普通启动 PID 1206；[完整 QA](./qa/2026-10-18-plans117.md)。本轮无后端/网页部署。
 

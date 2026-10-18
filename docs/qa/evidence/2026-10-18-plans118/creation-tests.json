@@ -1,0 +1,56 @@
+{
+  "source": "Initial physical xcresult test tree; the separate continuous case failure is retained in initial-flow/result.json",
+  "suite": {
+    "children": [
+      {
+        "duration": "20秒",
+        "durationInSeconds": 20.750633001327515,
+        "name": "testChineseDarkLargeTextCanAdvanceAndReturn()",
+        "nodeIdentifier": "PlanCreationPresentationUITests/testChineseDarkLargeTextCanAdvanceAndReturn()",
+        "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testChineseDarkLargeTextCanAdvanceAndReturn",
+        "nodeType": "Test Case",
+        "result": "Passed"
+      },
+      {
+        "duration": "17秒",
+        "durationInSeconds": 17.07377791404724,
+        "name": "testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+        "nodeIdentifier": "PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+        "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack",
+        "nodeType": "Test Case",
+        "result": "Passed"
+      },
+      {
+        "duration": "17秒",
+        "durationInSeconds": 17.25132989883423,
+        "name": "testMessagesEntryUsesFirstLevelPlans()",
+        "nodeIdentifier": "PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans()",
+        "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans",
+        "nodeType": "Test Case",
+        "result": "Passed"
+      },
+      {
+        "duration": "25秒",
+        "durationInSeconds": 25.62822997570038,
+        "name": "testPlansCreateCancelReturnsToPlansInOneStep()",
+        "nodeIdentifier": "PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep()",
+        "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep",
+        "nodeType": "Test Case",
+        "result": "Passed"
+      },
+      {
+        "duration": "26秒",
+        "durationInSeconds": 26.292975068092346,
+        "name": "testTimingModesAndSwipeDismissReturnToPlans()",
+        "nodeIdentifier": "PlanCreationPresentationUITests/testTimingModesAndSwipeDismissReturnToPlans()",
+        "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testTimingModesAndSwipeDismissReturnToPlans",
+        "nodeType": "Test Case",
+        "result": "Passed"
+      }
+    ],
+    "name": "PlanCreationPresentationUITests",
+    "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests",
+    "nodeType": "Test Suite",
+    "result": "Passed"
+  }
+}
