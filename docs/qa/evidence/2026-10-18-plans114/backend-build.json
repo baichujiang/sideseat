@@ -1,0 +1,13 @@
+{
+  "deployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g",
+  "url": "sideseat-iac9xstty-baichus-projects.vercel.app",
+  "target": "production",
+  "readyState": "READY",
+  "databaseMigrations": "explicitly skipped; verified in build log",
+  "sourceCommit": "51c98e9b16676e85047d427b70f1d91e9e68e2e1",
+  "productionHealth": {
+    "apiClientConfig": 200,
+    "wwwClientConfig": 200
+  },
+  "healthCheckedAt": "2026-10-18T01:07:07.827091+00:00"
+}

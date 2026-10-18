@@ -1,0 +1,14 @@
+{
+  "base": "https://sideseat-iac9xstty-baichus-projects.vercel.app",
+  "stage": "candidate",
+  "checkedAt": "2026-10-18T01:03:10.187Z",
+  "checks": [
+    "chromium: guest autosave/done/reopen -> INVITED -> individual confirmations -> two calendars/search -> cancel clears calendars",
+    "chromium: expired collection list/detail/write closure and readonly shared page",
+    "webkit: guest autosave/done/reopen -> INVITED -> individual confirmations -> two calendars/search -> cancel clears calendars",
+    "webkit: expired collection list/detail/write closure and readonly shared page",
+    "fixed invitation crosses actual start -> EXPIRED -> late confirmation 409 -> no calendar"
+  ],
+  "passed": 5,
+  "failed": 0
+}

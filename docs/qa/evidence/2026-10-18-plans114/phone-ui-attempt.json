@@ -1,0 +1,48 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanGuidancePhone114 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792285608.303,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792285586.081,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Early unexpected exit, operation never finished bootstrapping - no restart will be attempted. (Underlying Error: The test runner exited with code 74 before establishing connection.)",
+      "targetName" : "PlanGuidancePhone114UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanGuidancePhone114UITests-Runner (2150) encountered an error",
+      "testName" : "PlanGuidancePhone114UITests-Runner (2150) encountered an error"
+    }
+  ],
+  "title" : "Test - PlanGuidancePhone114",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

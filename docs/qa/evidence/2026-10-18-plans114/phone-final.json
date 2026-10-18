@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-18T01:07:40.412734+00:00",
+  "model": "iPhone 14 Plus",
+  "os": "26.6.1",
+  "udid": "00008110-001A69110CC1401E",
+  "preview": {
+    "bundle": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "114",
+    "installed": true,
+    "ordinaryLaunch": true,
+    "payloadURL": "sideseat://plans",
+    "arguments": [],
+    "qaEnvironmentKeys": [],
+    "pid": 2151,
+    "pidObservedRunning": true
+  },
+  "ordinarySideSeat": {
+    "bundle": "app.sideseat.mobile",
+    "build": "97",
+    "preserved": true
+  },
+  "qaRunnerRemoved": true,
+  "physicalUI": {
+    "xcodebuildExitCode": 65,
+    "runnerExitCode": 74,
+    "interactionCasesExecuted": 0,
+    "reason": "Runner exited before establishing XCTest connection; no physical interaction acceptance claimed"
+  }
+}

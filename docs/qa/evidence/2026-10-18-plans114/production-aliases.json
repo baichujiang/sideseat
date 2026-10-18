@@ -1,0 +1,10 @@
+{
+  "api.sideseat.de": {
+    "deployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g",
+    "deploymentURL": "sideseat-iac9xstty-baichus-projects.vercel.app"
+  },
+  "www.sideseat.de": {
+    "deployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g",
+    "deploymentURL": "sideseat-iac9xstty-baichus-projects.vercel.app"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-18T01:07:40.413198+00:00",
+  "deployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g",
+  "environment": "production",
+  "since": "15m",
+  "level": [
+    "error",
+    "fatal"
+  ],
+  "groupBy": "level",
+  "returnedGroups": [],
+  "limitation": "Vercel grouped runtime log query returned an empty table; this is a bounded log check."
+}

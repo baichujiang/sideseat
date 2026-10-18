@@ -1,0 +1,11 @@
+{
+  "cleanedAt": "2026-10-18T01:07:14.939Z",
+  "temporaryAccountsDeleted": 2,
+  "remainingQAPlansBeforeDeletion": 0,
+  "additionalPlanCleanup": 0,
+  "oldTokensRejected401": 2,
+  "knownShareLinksRejected404": 10,
+  "temporaryCandidateAccessRevoked": true,
+  "privateCredentialFixturesRemoved": true,
+  "embeddedCredentialRunnerBuildRemoved": true
+}

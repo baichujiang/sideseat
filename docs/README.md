@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-16
+**Last updated:** 2026-10-18
 
 ## Read this first
 
@@ -54,6 +54,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 114 / plan guidance](./releases/2026-10-18-preview114-plan-guidance.md) | Next actions by role, two-step creation, visible sharing/confirmation, deployed list fields and installed phone build |
+| [Plan guidance acceptance](./qa/2026-10-18-plans114.md) | 60 native regressions, small-screen journey, candidate/live browser flows, production cleanup and physical XCTest connection limit |
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |
 | [Storage lifecycle and cost audit](./qa/2026-09-30-storage-lifecycle-and-cost.md) | Sequential fixes, local verification, production follow-up and Vercel Pro cost scenarios |
 | [Storage production release](./releases/2026-10-01-storage-production.md) | Published backend, database recovery point, 18 migrated chat images and authenticated production verification |

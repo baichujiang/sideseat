@@ -1,0 +1,20 @@
+{
+  "baseDeployment": "dpl_BNevHf7yCYLW8MyrFPRnEtgjqcy1",
+  "verifiedBaseFiles": 1346,
+  "preservedFiles": 1344,
+  "sourceCommit": "51c98e9b16676e85047d427b70f1d91e9e68e2e1",
+  "overlays": [
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "beforeSha1": "408ab3cb48579db0039f520b433bbbc0efa9bd9c",
+      "afterSha1": "b186d70dc478c1340ee8280465581b8b91190bc7"
+    },
+    {
+      "path": "openapi/v1.json",
+      "beforeSha1": "47d11b5e0da9e8ba4f6cf6c8a927bbe863911217",
+      "afterSha1": "6c287f6125bb29ef2ef541e51034ab62b024e4ba"
+    }
+  ],
+  "schemaChanged": false,
+  "migrationRequired": false
+}
