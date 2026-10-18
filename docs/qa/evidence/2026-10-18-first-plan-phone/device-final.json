@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-18T01:19:59.623509+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "model": "iPhone 14 Plus",
+  "os": "26.6.1",
+  "previewBuild": 114,
+  "ordinaryBuildPreserved": 97,
+  "qaRunnerRemoved": true,
+  "ordinaryLaunch": {
+    "pid": 2158,
+    "arguments": [],
+    "qaEnvironmentKeys": [],
+    "payloadURL": "sideseat://plans",
+    "pidObservedRunning": true
+  },
+  "interactionCasesExecuted": 0,
+  "onlineQAFixturesCreated": 0,
+  "status": "Waiting for owner restart/unlock and possible XCTest authorization"
+}

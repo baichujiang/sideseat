@@ -58,6 +58,7 @@
 		3019843A92C48CAF427773F2 /* ClientConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 552B30C2604314E5CB4F7EB5 /* ClientConfigurationTests.swift */; };
 		30E5C930381A6DDE1C4AEAC8 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1DDE44E260D324CBA2E141 /* ContactsView.swift */; };
 		3773083EA509D53F3112DBA5 /* TabRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDFC29920481D7B2982AD5C5 /* TabRouter.swift */; };
+		380D79AFE0F10D75282FA25F /* PlanFirstUsePhoneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA67DC1151C5EAB4163C2C68 /* PlanFirstUsePhoneUITests.swift */; };
 		3817959905E02C849C413328 /* ContactsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F214C2F712C9A6079E5D9B9 /* ContactsStore.swift */; };
 		3AAE24E8F188B390FAF48C7A /* SSViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B047DABCEDBE71A957EE08A /* SSViewModifiers.swift */; };
 		3B65315EA91520FEF8663688 /* OpenConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F65DB3EA5FF74F95C95FAD /* OpenConversationStore.swift */; };
@@ -393,6 +394,7 @@
 		B56511EF60D953582EB93A5E /* DirectChatPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectChatPlaceholderView.swift; sourceTree = "<group>"; };
 		B9E3EBDD9BC84D23382AA843 /* SideSeatTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideSeatTheme.swift; sourceTree = "<group>"; };
 		BA09D44976186BF2D2D187CE /* SSSectionPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSSectionPager.swift; sourceTree = "<group>"; };
+		BA67DC1151C5EAB4163C2C68 /* PlanFirstUsePhoneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanFirstUsePhoneUITests.swift; sourceTree = "<group>"; };
 		BC1AA25C8E1519C34F995F44 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		BD03F633A5C67F0135C4C02C /* CalendarDayTimelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayTimelineTests.swift; sourceTree = "<group>"; };
 		BD784401C3E398DA91867FFB /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
@@ -633,6 +635,7 @@
 				6D3D43D06D8F59ED1468DB84 /* MembershipBadgeUITests.swift */,
 				50815624BB3031A64ACBCAC5 /* PlanCancellationUITests.swift */,
 				CE5ED6A12BCFE19FCCC15803 /* PlanCreationPresentationUITests.swift */,
+				BA67DC1151C5EAB4163C2C68 /* PlanFirstUsePhoneUITests.swift */,
 				68C6B284045DA49A2C3BA9C3 /* PlanReliabilityUITests.swift */,
 				E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */,
 				0E800CCAD079FFD96FA40E83 /* SmartTimeSchedulingUITests.swift */,
@@ -1351,6 +1354,7 @@
 				0837487E783800A799143F1D /* MembershipBadgeUITests.swift in Sources */,
 				4F5F7BC65A341DF5A2679E75 /* PlanCancellationUITests.swift in Sources */,
 				5CDB8905DCC9731CE4806DFA /* PlanCreationPresentationUITests.swift in Sources */,
+				380D79AFE0F10D75282FA25F /* PlanFirstUsePhoneUITests.swift in Sources */,
 				B8F9C4290A08A7ED01FF5784 /* PlanReliabilityUITests.swift in Sources */,
 				9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */,
 				80F89555CBB966F96DB9BBDF /* SmartTimeSchedulingUITests.swift in Sources */,
