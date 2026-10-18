@@ -2919,3 +2919,5 @@
 "No time selected yet" = "Zeit noch offen";
 
 "%d dates · %@" = "%d Tage · %@";
+
+"Waiting for %@ to confirm" = "Wartet auf die Zusage von %@";

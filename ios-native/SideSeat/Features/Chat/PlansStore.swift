@@ -145,7 +145,7 @@ final class PlansStore {
                 }
                 var incoming = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(plans[0])) as! [String: Any]
                 incoming["id"] = "ui-plan-incoming-extra"
-                incoming["title"] = "研讨课后一起整理复习笔记"
+                incoming["title"] = "研讨课后一起整理复习笔记，准备下周的小组展示"
                 plans.append(try! JSONDecoder().decode(NativePlanRequest.self,
                     from: JSONSerialization.data(withJSONObject: incoming)))
             }

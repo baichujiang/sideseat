@@ -32,16 +32,21 @@ Local overview dates omit the current year and technical timezone identifier. Cr
 dates, other years and foreign-zone context remain explicit, including DST offset changes.
 The detail timetable keeps the complete original date/time/zone information.
 
-The visual refinement keeps one adaptive card surface and a restrained hairline, instead
-of giving waiting cards a disabled-looking solid gray fill. Task actions are compact text
-and arrow affordances within the single card button. Titles follow headline/callout scales;
-metadata is quieter, section counts are unboxed, and Upcoming merges location/peer into one
-secondary line. The decorative date column aligns with the text at the top and remains
-flexible at accessibility sizes. Horizontal peeking and View all remain visible; the swipe
-hint is available to accessibility without adding a permanent helper row.
-Standard Chinese, one-line-title fixture budgets are 164pt for task, 148pt for waiting and
-124pt for upcoming. These are UI regression limits, not fixed production heights: long or
-cross-day/foreign-zone content and accessibility sizes can grow naturally without cropping.
+The compact layout uses three content groups. Task cards put a small viewer-status badge
+beside the activity, followed by the schedule and a single metadata/action footer. Waiting
+cards put activity and schedule above a combined status/progress footer, while keeping the
+explicit open-action text. Bilateral outgoing invitations say Waiting for [name] to confirm,
+instead of repeating the global waiting state and You invited [name]. Waiting cards keep
+location in detail; Task/Upcoming retain it as condensed metadata. Their narrower rail cards reveal more of the next item. Upcoming
+uses a small warm-neutral date block with activity/status, weekday/time and one metadata row.
+The complete date stays available to VoiceOver. All three use the same adaptive surface and
+restrained hairline; Task/Waiting still differ by priority, typography, arrangement and action.
+Normal metadata is condensed, while detail retains its complete data. Accessibility sizes
+stack the title/status and footer, allow complete wrapping and keep the date block flexible.
+Horizontal peeking and View all remain visible; the swipe hint is available to accessibility.
+Standard Chinese daytime fixture budgets are 128pt for task, 148pt for a two-line task title,
+112pt for waiting and 112pt for upcoming. These are UI regression limits, not fixed production
+heights: cross-day/foreign-zone content and accessibility sizes can grow without cropping.
 
 The horizontal rail previews the next card,
 snaps to card boundaries and provides View all / Show fewer plans. One item fills

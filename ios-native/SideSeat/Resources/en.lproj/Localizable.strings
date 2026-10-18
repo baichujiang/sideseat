@@ -2920,3 +2920,5 @@
 "No time selected yet" = "No time selected yet";
 
 "%d dates · %@" = "%d dates · %@";
+
+"Waiting for %@ to confirm" = "Waiting for %@ to confirm";

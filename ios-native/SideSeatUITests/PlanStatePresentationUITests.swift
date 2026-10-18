@@ -69,8 +69,8 @@ import XCTest
                                    "Actionable plans need independent boundaries and space")
         XCTAssertEqual(firstTask.value as? String, "待你确认")
         XCTAssertTrue(firstTask.label.contains("查看邀请"))
-        XCTAssertLessThanOrEqual(firstTask.frame.height, 164, "Keep the standard task card compact")
-        XCTAssertLessThanOrEqual(secondTask.frame.height, 184, "Allow one extra title line without a large card")
+        XCTAssertLessThanOrEqual(firstTask.frame.height, 128, "Keep the standard task card compact")
+        XCTAssertLessThanOrEqual(secondTask.frame.height, 148, "Allow one extra title line without a large card")
         print("PLAN_CARD_METRIC task \(firstTask.frame.height)")
         print("PLAN_CARD_METRIC taskLongTitle \(secondTask.frame.height)")
         capture("horizontal-needs-you")
@@ -91,9 +91,12 @@ import XCTest
         XCTAssertLessThanOrEqual(last.frame.maxX, rail.frame.maxX + 2)
         XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected,
                       "Horizontal plan browsing must not switch the main section")
-        XCTAssertLessThanOrEqual(last.frame.height, 148, "Waiting cards should remain compact summaries")
+        XCTAssertLessThanOrEqual(last.frame.height, 112, "Waiting cards should remain compact summaries")
         print("PLAN_CARD_METRIC waiting \(last.frame.height)")
+        XCTAssertTrue(last.label.contains("等 Mina 确认"))
         capture("horizontal-waiting-last")
+        app.swipeUp(velocity: .slow)
+        capture("compact-overview")
         let toggle = app.buttons["plans-toggle-outgoing"]
         reveal(toggle); toggle.tap()
         XCTAssertFalse(rail.exists)
@@ -133,7 +136,7 @@ import XCTest
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         XCTAssertTrue(row.label.contains("Dinner in town"))
         XCTAssertFalse(row.label.contains("Europe/Berlin"))
-        XCTAssertLessThanOrEqual(row.frame.height, 124, "The date summary should stay compact")
+        XCTAssertLessThanOrEqual(row.frame.height, 112, "The date summary should stay compact")
         print("PLAN_CARD_METRIC upcoming \(row.frame.height)")
         capture("upcoming-date-summary")
         row.tap()
@@ -141,6 +144,24 @@ import XCTest
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).isSelected)
         XCTAssertTrue(row.waitForExistence(timeout: 10))
+    }
+
+    func testUpcomingSummaryReflowsWithMaximumText() {
+        continueAfterFailure = false
+        launch(accessibility: true, layout: true)
+        app.buttons["plans-section-menu"].tap()
+        let upcoming = app.buttons["plans-tab-upcoming"]
+        XCTAssertTrue(upcoming.waitForExistence(timeout: 10)); upcoming.tap()
+        let row = app.buttons["plans-row-ui-plan-accepted"]
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        let scroll = app.scrollViews["plans-scroll-upcoming"]
+        for _ in 0..<10 where !row.isHittable { scroll.swipeUp() }
+        XCTAssertTrue(row.isHittable)
+        XCTAssertTrue(row.label.contains("Dinner in town"))
+        XCTAssertEqual(row.value as? String, "已确认")
+        capture("upcoming-large-text")
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
     }
 
     private func reveal(_ element: XCUIElement) {

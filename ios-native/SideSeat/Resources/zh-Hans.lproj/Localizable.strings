@@ -2920,3 +2920,5 @@
 "No time selected yet" = "时间待定";
 
 "%d dates · %@" = "%d 天可选 · %@";
+
+"Waiting for %@ to confirm" = "等 %@ 确认";

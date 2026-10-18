@@ -393,14 +393,14 @@ struct PlansRootView: View {
                                 ForEach(waiting) { plan in
                                     coordinatedOverview(plan, style: .waiting)
                                     .containerRelativeFrame(.horizontal) { width, _ in
-                                        waiting.count + outgoing.count == 1 ? width : min(330, width * 0.82)
+                                        waiting.count + outgoing.count == 1 ? width : min(300, width * 0.78)
                                     }
                                     .id("shared-" + plan.token)
                                 }
                                 ForEach(outgoing) { plan in
                                     conversationOverview(plan, style: .waiting)
                                     .containerRelativeFrame(.horizontal) { width, _ in
-                                        waiting.count + outgoing.count == 1 ? width : min(330, width * 0.82)
+                                        waiting.count + outgoing.count == 1 ? width : min(300, width * 0.78)
                                     }
                                     .id("chat-" + plan.id)
                                 }
@@ -475,7 +475,8 @@ struct PlansRootView: View {
         } label: {
             PlanOverviewLabel(title: plan.title,
                 presentation: PlanPresentation.conversation(plan, viewerID: currentUserID, now: now), style: style,
-                start: plan.startDate, end: plan.endDate, now: now, location: plan.location, context: context)
+                start: plan.startDate, end: plan.endDate, now: now, location: plan.location, context: context,
+                waitingFor: plan.status == "PENDING" && plan.proposer.id == currentUserID ? participant.displayName : nil)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-row-\(plan.id)")
@@ -742,6 +743,7 @@ private struct PlanOverviewLabel: View {
     var location: String? = nil
     let context: String
     var progress: String? = nil
+    var waitingFor: String? = nil
 
     private var timing: PlanOverviewTiming {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
@@ -771,64 +773,64 @@ private struct PlanOverviewLabel: View {
 
     private var task: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Label(presentation.cardStatusTitle, systemImage: presentation.nextStep.symbol)
-                .font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.statusWarningText)
-            activityTitle(.headline)
+            heading(status: presentation.cardStatusTitle, color: SideSeatTheme.statusWarningText, font: .headline)
             schedule
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
             footer {
-                Text(progress ?? context).font(.caption).foregroundStyle(secondary)
+                Text(taskMetadata).font(.caption).foregroundStyle(secondary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                     .fixedSize(horizontal: false, vertical: true)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 action.font(.footnote.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.utilityAction)
                     .frame(minHeight: 24, alignment: .leading)
-            }.padding(.top, SideSeatTheme.spaceXS)
+            }
         }
     }
 
     private var waiting: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Label(presentation.cardStatusTitle, systemImage: "clock")
-                .font(.caption).foregroundStyle(secondary)
             activityTitle(.callout)
             schedule
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
             footer {
-                Text(progress ?? context).font(.caption).foregroundStyle(secondary)
+                Text(waitingSummary)
+                    .font(.caption).foregroundStyle(secondary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
                     .fixedSize(horizontal: false, vertical: true)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                action.font(.caption.weight(.semibold))
-            }.padding(.top, SideSeatTheme.spaceXS)
+                action.font(.caption.weight(.semibold)).fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
+            }
         }
     }
 
     private var meetup: some View {
         let layout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
         return layout {
             if let start {
                 VStack(spacing: 2) {
                     Text(timing.datePart(start, template: "MMM")).font(.caption.weight(.medium))
-                    Text(timing.dayNumber(start)).font(.title.weight(.semibold)).monospacedDigit()
+                    Text(timing.dayNumber(start)).font(.title2.weight(.semibold)).monospacedDigit()
                         .foregroundStyle(SideSeatTheme.textPrimary)
-                    Text(timing.datePart(start, template: "EEE")).font(.caption2)
                 }
                 .frame(minWidth: 44).foregroundStyle(secondary)
+                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, SideSeatTheme.spaceSM)
+                .background(SideSeatTheme.activityInset,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 .accessibilityHidden(true)
             }
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(presentation.status.title).font(.caption.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.statusSuccessText)
-                activityTitle(.headline)
-                Text(timing.clockText ?? timing.dateText).font(.subheadline.weight(.medium)).monospacedDigit()
+                heading(status: presentation.status.title, color: SideSeatTheme.statusSuccessText, font: .headline)
+                Text((start.map { timing.datePart($0, template: "EEE") + " · " } ?? "")
+                     + (timing.clockText ?? timing.dateText))
+                    .font(.subheadline.weight(.medium)).monospacedDigit()
                     .fixedSize(horizontal: false, vertical: true)
-                // The complete date stays available to VoiceOver; the visible date column is decorative.
                     .accessibilityLabel(timing.dateText + ", " + (timing.clockText ?? ""))
                 if let start, timing.datePart(start, template: "y") != timing.datePart(now, template: "y") {
                     Text(timing.datePart(start, template: "y")).font(.caption).foregroundStyle(secondary)
@@ -842,10 +844,34 @@ private struct PlanOverviewLabel: View {
             }.frame(maxWidth: .infinity, alignment: .leading)
             if !typeSize.isAccessibilitySize {
                 Image(systemName: "chevron.right").font(.caption2.weight(.semibold)).foregroundStyle(secondary)
-                    .padding(.top, SideSeatTheme.spaceMD).accessibilityHidden(true)
+                    .accessibilityHidden(true)
             }
         }
         .accessibilityHint(presentation.cardActionTitle)
+    }
+
+    private var waitingSummary: String {
+        if let waitingFor {
+            return String(format: AppLocalization.string("Waiting for %@ to confirm"), waitingFor)
+        }
+        return [presentation.cardStatusTitle, progress].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    private var taskMetadata: String {
+        [progress ?? context, location].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    private func heading(status: String, color: Color, font: Font) -> some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
+        return layout {
+            activityTitle(font)
+            Text(status).font(.caption.weight(.medium)).foregroundStyle(color)
+                .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
+                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, 2)
+                .background(color.opacity(0.08), in: Capsule())
+        }
     }
 
     private func activityTitle(_ font: Font) -> some View {
@@ -863,10 +889,6 @@ private struct PlanOverviewLabel: View {
                 .foregroundStyle(style == .task ? SideSeatTheme.textPrimary : secondary)
                 .fixedSize(horizontal: false, vertical: true)
             zone
-            if let location, !location.isEmpty {
-                Text(location).font(.caption).foregroundStyle(secondary)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
-            }
         }
     }
     @ViewBuilder private var zone: some View {
