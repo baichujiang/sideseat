@@ -25,5 +25,19 @@
     "3 locale plutil",
     "git diff --check"
   ],
-  "physicalDevice": "Pending delivery; see final release record"
+  "physicalDevice": "Preview 113 installed and ordinarily launched; XCTest runner exit 74 before executing cases",
+  "expiryFinalAfterInboxPreviewFilter": {
+    "passed": 2,
+    "failed": 0
+  },
+  "nativeDarkFinal": {
+    "passed": 1,
+    "failed": 0,
+    "buttonContrast": "visually verified"
+  },
+  "online": {
+    "finalCandidateFlowGroupsPassed": 5,
+    "productionAPIFlowGroupsPassed": 5,
+    "wwwBrowserChecksPassed": 2
+  }
 }

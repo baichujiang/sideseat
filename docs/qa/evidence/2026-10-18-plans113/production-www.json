@@ -1,0 +1,10 @@
+{
+  "domain": "www.sideseat.de",
+  "engines": [
+    "chromium",
+    "webkit"
+  ],
+  "result": "expired plan readonly; closed empty-state verified",
+  "passed": 2,
+  "failed": 0
+}

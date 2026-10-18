@@ -1,0 +1,12 @@
+{
+  "deployment": "dpl_BNevHf7yCYLW8MyrFPRnEtgjqcy1",
+  "environment": "production",
+  "lookback": "15m",
+  "levels": [
+    "error",
+    "fatal"
+  ],
+  "groupBy": "level",
+  "errorGroupsReturned": 0,
+  "checkedAt": "2026-10-18T00:30:28.071317+00:00"
+}

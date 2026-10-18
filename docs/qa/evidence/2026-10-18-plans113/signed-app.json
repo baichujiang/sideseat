@@ -1,0 +1,10 @@
+{
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "113",
+  "defaultUDIDInProfile": true,
+  "signature": "strict and deep verification passed",
+  "team": [
+    "V4238R5R53"
+  ]
+}

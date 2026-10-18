@@ -1,0 +1,9 @@
+{
+  "deployment": "dpl_BNevHf7yCYLW8MyrFPRnEtgjqcy1",
+  "url": "sideseat-26ikkmafp-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "sourceCommit": "caa3e7d1a9f855b161ce7422732b12196790f973",
+  "databaseMigrations": "explicitly skipped; verified in build logs",
+  "build": "production compile, types and static generation passed"
+}

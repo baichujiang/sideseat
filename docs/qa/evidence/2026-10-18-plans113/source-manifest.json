@@ -1,0 +1,55 @@
+{
+  "baseDeployment": "dpl_EAJLd9xMRuyCx6fnoVeFphGtUmE1",
+  "verifiedBaseFiles": 1344,
+  "preservedFiles": 1336,
+  "overlays": [
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "beforeSha1": "8ff46e45e5ba7e70fc6f843758e9bfcf6b6a4516",
+      "afterSha1": "7ea806fefc5ef8e7896c7122c1d3667f8ae42eee"
+    },
+    {
+      "path": "lib/time-polls/browser-types.ts",
+      "beforeSha1": "e4a52941d43c0cee61574e724e259abcd25225e5",
+      "afterSha1": "098b3d4321877d240becdc6afb9462a03995e832"
+    },
+    {
+      "path": "lib/time-polls/lifecycle.ts",
+      "beforeSha1": null,
+      "afterSha1": "253c2fe6d20b309014569aee49d245c70556848d"
+    },
+    {
+      "path": "lib/time-polls/public-session.ts",
+      "beforeSha1": "a51c239f4ed157a24161aae5d965f20fdd81bac0",
+      "afterSha1": "6d922b7827fa7a0c4bb4dfc9d3ff536578dfc861"
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "beforeSha1": "1f6305f289e9cc3f17edaf8cbf934d73bf00f972",
+      "afterSha1": "408ab3cb48579db0039f520b433bbbc0efa9bd9c"
+    },
+    {
+      "path": "lib/api/v1/plans-dto.ts",
+      "beforeSha1": "b04d22db87745de6e6e6788095846b9173efcd5e",
+      "afterSha1": "51fa06699964186aa79dd17227b77ca43310ec36"
+    },
+    {
+      "path": "lib/api/v1/plans-service.ts",
+      "beforeSha1": "d6bcbd73649a4d40a1dd722b6e0c750b45db6642",
+      "afterSha1": "e10138cccf75823edc753f30d12183d9ad7f1edd"
+    },
+    {
+      "path": "lib/queries/inbox-merge.ts",
+      "beforeSha1": "934852928668c225c4185510fdd14e2b3a711c8e",
+      "afterSha1": "f29d4dbd920ca7cdc68490b3175ff531e2a9cc2f"
+    },
+    {
+      "path": "openapi/v1.json",
+      "beforeSha1": "c4b43afb6ac3b4b04fe2a48b4f3dbdbba81d0035",
+      "afterSha1": "47d11b5e0da9e8ba4f6cf6c8a927bbe863911217"
+    }
+  ],
+  "schemaChanged": false,
+  "migrationRequired": false,
+  "sourceCommit": "caa3e7d1a9f855b161ce7422732b12196790f973"
+}
