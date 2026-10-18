@@ -1,0 +1,12 @@
+{
+  "checks": [
+    {
+      "phase": "created-and-saved",
+      "checkedAt": "2026-10-18T04:48:14.001Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    }
+  ]
+}

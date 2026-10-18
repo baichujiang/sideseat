@@ -1,0 +1,9 @@
+{
+  "deploymentId": "dpl_5wtT2SkCCLMiKjoqvTyESgNUxf7q",
+  "expected": 1348,
+  "uploaded": 1348,
+  "allSourceSha1Match": true,
+  "preservedProductionFiles": 1345,
+  "overlaidComponents": 2,
+  "addedReleaseReceipt": 1
+}

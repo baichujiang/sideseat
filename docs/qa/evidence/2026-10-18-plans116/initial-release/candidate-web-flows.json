@@ -1,0 +1,16 @@
+{
+  "base": "https://sideseat-4fr7008lx-baichus-projects.vercel.app",
+  "stage": "candidate",
+  "realNetwork": true,
+  "checkedAt": "2026-10-18T04:45:39.874Z",
+  "checks": [
+    "chromium: real name/save/wait keeps COLLECTING and calendar empty",
+    "chromium: same-name resume → exact invitation → explicit acceptance → one Calendar entry",
+    "chromium: FIXED name does not accept; English explicit confirmation writes Calendar",
+    "webkit: real name/save/wait keeps COLLECTING and calendar empty",
+    "webkit: same-name resume → exact invitation → explicit acceptance → one Calendar entry",
+    "webkit: FIXED name does not accept; English explicit confirmation writes Calendar"
+  ],
+  "passed": 6,
+  "failed": 0
+}

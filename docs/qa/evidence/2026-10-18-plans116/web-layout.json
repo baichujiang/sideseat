@@ -1,7 +1,7 @@
 {
   "base": "http://127.0.0.1:3099",
   "syntheticNetwork": true,
-  "checkedAt": "2026-10-18T04:36:49.275Z",
+  "checkedAt": "2026-10-18T04:50:52.814Z",
   "checks": [
     "chromium/320: name → availability → wait → final invitation → explicit confirmation; mobile and desktop layout",
     "chromium/320: fixed time skips availability; English explicit confirmation",

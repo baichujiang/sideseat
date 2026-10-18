@@ -47,6 +47,7 @@ for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]])
       await page.getByLabel('你的名字', { exact: true }).fill('小林'); await next.click();
       const done = page.getByRole('button', { name: '保存并继续', exact: true });
       await expect(done).toBeDisabled();
+      await expect.poll(async () => (await page.getByTestId('time-poll-cell-2').boundingBox()).y + 44).toBeLessThan((await done.boundingBox()).y);
       await page.getByTestId('time-poll-cell-0').click(); await page.getByTestId('time-poll-cell-2').click();
       await expect(page.getByRole('status')).toHaveText('已自动保存');
       assert.deepEqual(poll.mySlotIds, [0, 1, 2, 3]);

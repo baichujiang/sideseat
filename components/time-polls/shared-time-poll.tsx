@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, CalendarDays, Check, CheckCircle2, Circle, Clock3, Loader2, MapPin, Pencil, Users, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
@@ -26,6 +26,10 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations.filter((person) => person.selected);
   const disabled = busy || saving || !saved;
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
+  const viewerId = poll?.viewerId;
+  useEffect(() => {
+    if (collecting && viewerId && !choosingName) table.current?.scrollIntoView({ block: "start" });
+  }, [collecting, viewerId, choosingName]);
   const errorText = zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
   const waiting = collecting && !choosingName && finished && !!poll?.didRespond && saved;

@@ -15,7 +15,8 @@ const out = path.resolve('docs/qa/evidence/2026-10-18-plans116'); fs.mkdirSync(o
 const access = await request.newContext();
 if (stage === 'candidate') {
   const privateAccess = JSON.parse(fs.readFileSync('/tmp/sideseat-plans116-candidate-access.json'));
-  await access.get(privateAccess.url);
+  const granted = await access.get(privateAccess.url);
+  assert.equal(new URL(granted.url()).origin, new URL(base).origin, 'Candidate access must stay on the deployment, not the Vercel login page.');
 }
 const storageState = await access.storageState();
 const cookies = storageState.cookies.map(c => `${c.name}=${c.value}`).join('; ');
@@ -43,6 +44,11 @@ try {
       p = await api(endpoint(p) + '/response', 'PUT', { displayName: 'Host Ming', slotIds: [0, 1, 2, 3] });
       let page = await context.newPage(); await page.goto(`/time-polls/${p.token}`);
       await expect(page.getByTestId('time-poll-grid')).toHaveCount(0);
+      await page.getByLabel('你的名字', { exact: true }).waitFor({ timeout: 15000 }).catch(async error => {
+        await page.screenshot({ path: `/tmp/sideseat-plans116-${stage}-initial-failure.png`, fullPage: true });
+        console.error('Initial page:', new URL(page.url()).origin + new URL(page.url()).pathname, (await page.locator('body').innerText()).slice(0, 1800));
+        throw error;
+      });
       await page.getByLabel('你的名字', { exact: true }).fill(`Guest ${engineName}`);
       await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
       await expect(page.getByRole('button', { name: '保存并继续', exact: true })).toBeDisabled();
@@ -92,6 +98,8 @@ try {
     await api(`/api/v1/time-polls/${token}`, 'DELETE');
     const r = await fetch(base + `/api/public/time-polls/${token}`, { headers: cookies ? { Cookie: cookies } : {} }); assert.equal(r.status, 404);
   }
-  fs.writeFileSync(`${out}/${stage}-web-cleanup.json`, JSON.stringify({ cleanedAt: new Date().toISOString(), plansDeleted: created.length, shareLinks404: created.length }, null, 2) + '\n');
+  const remainingPlans = (await api('/api/v1/time-polls')).polls.length;
+  assert.equal(remainingPlans, 0, 'The disposable account returns to an empty Plans page.');
+  fs.writeFileSync(`${out}/${stage}-web-cleanup.json`, JSON.stringify({ cleanedAt: new Date().toISOString(), plansDeleted: created.length, shareLinks404: created.length, remainingPlans }, null, 2) + '\n');
   await access.dispose();
 }

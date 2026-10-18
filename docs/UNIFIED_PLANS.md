@@ -54,7 +54,11 @@ Plans remain supported. Shared APIs and lifecycle semantics remain unchanged.
 
 The public link follows separate tasks. Before joining, the visitor sees the
 activity, candidate dates, the purpose of collecting availability, and a name
-form. **Next: choose my free time** opens the editable timetable. Green selection,
+form. **Next: choose my free time** opens the editable timetable.
+The name-to-editor transition scrolls the active task into view, so mobile Safari's
+app banner and the persistent save bar do not hide the first time cells. This runs
+on entering/resuming the participant, not on each autosave or refresh.
+Green selection,
 30-minute cells, automatic save feedback and the saved-only **Save and continue**
 action explain how to finish. Explicitly choosing no available times also counts
 as a saved response. Range/day gestures remain available in a short disclosure.

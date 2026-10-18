@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-10-18T04:48:36.942Z",
+  "checks": [
+    {
+      "host": "https://api.sideseat.de",
+      "status": 200,
+      "deploymentId": "dpl_5wtT2SkCCLMiKjoqvTyESgNUxf7q"
+    },
+    {
+      "host": "https://www.sideseat.de",
+      "status": 200,
+      "deploymentId": "dpl_5wtT2SkCCLMiKjoqvTyESgNUxf7q"
+    }
+  ],
+  "sourceCommit": "7e83f856c9042453f9f5ed20b34574285d3c7b7e",
+  "productionBuild": true,
+  "migrationsExplicitlySkipped": true,
+  "temporaryCandidateAccessRevoked": true,
+  "rollbackDeployment": "dpl_BerFn2d4wg2VPbtCxFN5WUQA217g"
+}
