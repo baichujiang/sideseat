@@ -1,0 +1,12 @@
+{
+  "sourceResult": "/tmp/sideseat121-phone.xcresult",
+  "test": {
+    "duration": "2\u5206\u949f14\u79d2",
+    "durationInSeconds": 134.51691210269928,
+    "name": "testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+    "nodeIdentifier": "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+    "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+    "nodeType": "Test Case",
+    "result": "Passed"
+  }
+}

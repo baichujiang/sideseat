@@ -1,0 +1,16 @@
+{
+  "receipts": [
+    "initial-fixture-cleanup.json",
+    "initial-flow/native-cleanup.json",
+    "initial-flow/web-cleanup.json",
+    "second-flow/cleanup.json",
+    "third-flow/cleanup.json",
+    "fourth-flow/cleanup.json",
+    "fifth-flow/cleanup.json",
+    "cleanup.json"
+  ],
+  "temporaryAccountsDeleted": 14,
+  "shareLinksRejected404": 7,
+  "remainingPlans": 0,
+  "allDeletedTokensRejected401": true
+}

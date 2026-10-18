@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-10-18T14:49:11.194292+00:00",
+  "sourceCommit": "9e668ca3aa88bfbafbc6d7a052d46066e758d05c",
+  "initialFeatureCommit": "dbf6ed44ebf1150d596786624a0855d531287a96",
+  "branch": "codex/ios-uxui-20260922",
+  "sourcePushed": true,
+  "backendDeployment": "dpl_APapk63YMWww6wjmBxVxHUKbDNrj",
+  "backendChanged": false,
+  "device": {
+    "name": "iPhone (4)",
+    "model": "iPhone 14 Plus",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "osVersion": "26.6.1"
+  },
+  "apps": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "bundleVersion": "97",
+      "version": "1.0.0",
+      "name": "SideSeat"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "bundleVersion": "121",
+      "version": "1.0.0",
+      "name": "SideSeat Preview"
+    }
+  ],
+  "buildAndStrictSignatureVerified": true,
+  "installVerified": true,
+  "normalLaunch": {
+    "pid": 1366,
+    "arguments": [],
+    "qaEnvironmentVariables": [],
+    "pidVerified": true,
+    "payloadURL": "sideseat://plans"
+  },
+  "qaRunnerRemoved": true,
+  "privateFixtureRemoved": true,
+  "privateXctestrunRemoved": true,
+  "testFlightOrAppStoreUpload": false,
+  "productSourceSHA256": "d4e25907c88d2f7caf8ba6970d5156dee2c77fea34e9a0b137020717f7b5b45f"
+}
