@@ -55,8 +55,11 @@ struct PlanPresentation: Sendable {
         let detail: String.LocalizationValue
         switch status {
         case .findingTime:
-            step = !didRespond ? .fillAvailability : isOwner
-                ? (respondedCount > 1 ? .chooseTime : .shareAvailability) : .waitForOrganizer
+            if isOwner {
+                step = respondedCount > (didRespond ? 1 : 0) ? .chooseTime : .shareAvailability
+            } else {
+                step = didRespond ? .waitForOrganizer : .fillAvailability
+            }
             detail = "Filling in free time doesn't confirm attendance."
         case .awaitingConfirmation:
             if myStatus == "DECLINED" {

@@ -159,10 +159,10 @@ struct TimePollCreateView: View {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if hasChosenTiming {
                     if !typeSize.isAccessibilitySize {
-                        Text(planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: mark your free time, then send the link to friends.")
+                        Text(planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: view and share the timetable. You can add your own free time anytime.")
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
-                    SSPrimaryButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : typeSize.isAccessibilitySize ? "Choose my free time" : "Create and choose my free time"),
+                    SSPrimaryButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
                                     isLoading: creating, fill: .product, accessibilityID: "time-poll-create-confirm") {
                         titleFocused = false; Task { await create() }
                     }.disabled(!canCreate)
@@ -386,7 +386,7 @@ struct TimePollDetailView: View {
         }
         .task {
             await store.load(session: session)
-            if store.poll?.didRespond == true { results = true }
+            if store.poll?.isOwner == true || store.poll?.didRespond == true { results = true }
             while !Task.isCancelled {
                 do { try await Task.sleep(for: .seconds(10)) } catch { return }
                 if scenePhase == .active && !nameFocused { await store.load(session: session) }
@@ -399,7 +399,7 @@ struct TimePollDetailView: View {
     }
 
     private func usesHandoff(_ poll: NativeTimePoll) -> Bool {
-        results && poll.didRespond && store.saved && !choosingAgain && !showsTimetable && (!poll.isOwner || !poll.participants.contains(where: { !$0.isMe }))
+        !poll.isOwner && results && poll.didRespond && store.saved && !choosingAgain && !showsTimetable
     }
 
     @ViewBuilder private func collectionSurface(_ poll: NativeTimePoll) -> some View {
@@ -459,7 +459,7 @@ struct TimePollDetailView: View {
                 Text(poll.title).font(.headline)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-detail-title")
                 Spacer(minLength: 4)
-                if results || poll.didRespond || poll.participants.contains(where: { !$0.isMe }) {
+                if (!results || !poll.isOwner) && (poll.isOwner || results || poll.didRespond || poll.participants.contains(where: { !$0.isMe })) {
                     Button { results.toggle() } label: {
                         Text(results ? "My availability" : "Group results").font(.caption.weight(.medium))
                             .frame(minHeight: 44)
@@ -469,8 +469,20 @@ struct TimePollDetailView: View {
             }
             if results {
                 summary(poll)
-                Text("Look for times with the most people, then choose a time below.")
+                Text(LocalizedStringKey(poll.isOwner && !poll.participants.contains(where: { !$0.isMe })
+                    ? (poll.participants.isEmpty ? "No one has filled in yet. Share the timetable or add your own free time." : "Your free time is shown. Share the timetable so friends can add theirs.")
+                    : "Look for times with the most people, then choose a time below."))
                     .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                if poll.isOwner {
+                    Button { results = false } label: {
+                        Label(poll.didRespond ? "Edit my free time" : "Fill in my availability", systemImage: "pencil")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    }
+                    .buttonStyle(.bordered).tint(SideSeatTheme.utilityAction)
+                    .disabled(choosingAgain || store.saving)
+                    .accessibilityIdentifier("plan-edit-availability")
+                }
             } else {
                 Text("Tap the times you're free").font(.title3.weight(.bold))
                 Text("Green means you're free. You can choose more than one time.")
@@ -504,9 +516,8 @@ struct TimePollDetailView: View {
                     SSPrimaryButton(title: AppLocalization.string("Set time and send invitations"), fill: .product,
                                     accessibilityID: "unified-plan-invite-window") { showsInvite = true }
                         .disabled(!store.canMutate || poll.slots.isEmpty)
-                } else {
-                    PlanShareActions(poll: poll, prominent: true)
                 }
+                PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }))
             } else {
                 SSPrimaryButton(title: AppLocalization.string("Back to plans"), fill: .product,
                                 accessibilityID: "plan-done-back") { dismiss() }
@@ -577,7 +588,6 @@ struct TimePollDetailView: View {
                 Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
                     .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            if poll.isOwner && poll.participants.contains(where: { !$0.isMe }) { PlanShareActions(poll: poll) }
             Text(poll.participants.map { $0.displayName + ($0.isGuest == true ? " (" + AppLocalization.string("Guest") + ")" : "") }.joined(separator: " · "))
                 .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong).lineLimit(2)
                 .accessibilityIdentifier("time-poll-participants")

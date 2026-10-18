@@ -19,6 +19,16 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Organizer timetable on creation — Preview 118
+
+The organizer opens directly on the complete timetable, including zero responses.
+Sharing/copying and an optional own-availability action are available immediately.
+Saving own availability and reopening retain the timetable; the organizer no
+longer goes to the saved-only sharing handoff. With friend responses, the invitation
+action appears alongside sharing. Participant waiting screens and all API/data,
+consent and Calendar rules remain unchanged. This amendment supersedes the
+organizer handoff described in the dated Preview 116 section below.
+
 ## Shared native presentation — Preview 117
 
 Plans, manual detail and conversation-based Plan summaries/cards share display status and

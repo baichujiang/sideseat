@@ -2830,3 +2830,11 @@
 "Viewing" = "正在查看";
 
 "Choose another time" = "另选时间";
+
+"Create timetable" = "创建时间表";
+
+"Next: view and share the timetable. You can add your own free time anytime." = "创建后即可查看、分享时间表，也能随时填写自己的空闲。";
+
+"No one has filled in yet. Share the timetable or add your own free time." = "还没有人填写。可以先分享时间表，也可以填写自己的空闲。";
+
+"Your free time is shown. Share the timetable so friends can add theirs." = "表中已显示你的空闲。分享给朋友，让他们也填写。";

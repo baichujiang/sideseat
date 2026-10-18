@@ -47,7 +47,22 @@ import XCTest
         let submit = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(submit.isHittable); XCTAssertTrue(submit.isEnabled)
         capture(app, "03-create"); submit.tap()
-        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 25))
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 25))
+        let emptyCell = app.descendants(matching: .any)["time-poll-cell-0"].firstMatch
+        XCTAssertTrue(emptyCell.exists, "An empty timetable must be visible immediately after creation")
+        XCTAssertTrue(emptyCell.label.hasSuffix(", 0"))
+        XCTAssertTrue(app.buttons["plan-share-primary"].isHittable, "Sharing must not require anyone to fill in first")
+        XCTAssertFalse(app.textFields["time-poll-name"].exists)
+        capture(app, "03a-empty-timetable"); phase("created-empty")
+        // Reopening a plan with no responses must still show the timetable.
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 15)); card.tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-cell-0"].firstMatch.label.hasSuffix(", 0"))
+        app.buttons["plan-edit-availability"].tap()
+        XCTAssertTrue(app.textFields["time-poll-name"].waitForExistence(timeout: 10))
+        capture(app, "03b-owner-editor")
         replace(app.textFields["time-poll-name"], with: "Host Ming\n")
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
@@ -57,6 +72,10 @@ import XCTest
         let share = app.buttons["plan-share-primary"]
         XCTAssertTrue(share.isHittable)
         XCTAssertTrue(app.buttons["plan-edit-availability"].exists)
+        let ownCell = app.descendants(matching: .any)["time-poll-cell-0"].firstMatch
+        XCTAssertTrue(ownCell.exists, "Saving must keep the timetable visible even with no friend responses")
+        XCTAssertTrue(ownCell.label.hasSuffix(", 1"))
+        XCTAssertLessThan(ownCell.frame.maxY, share.frame.minY)
         capture(app, "05-next-share"); share.tap()
         // iOS 26 exposes share actions as cells; earlier releases use buttons.
         let copyLabels = NSPredicate(format: "label IN %@", ["Copy", "拷贝", "复制"])

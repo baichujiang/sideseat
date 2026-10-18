@@ -56,15 +56,18 @@ read-only heatmap and response count, without recommendation cards or a required
 activity duration. Each number counts people covering that full 30-minute cell.
 Friends use the table to decide the date and hours, including half a day or a full day.
 
+**Owner amendment — 2026-10-18 / Preview 118:** creation opens the organizer's
+**Group timetable** immediately, including a real empty grid with zero responses.
+Sharing and copying are already available. **Fill in my availability** switches to
+editing; **Save and continue** returns to the same timetable, even when only the
+organizer has filled in. Reopening also shows the timetable. No friend response
+or organizer response is required to see or share it. Once friends respond,
+**Set time and send invitations** is added while sharing remains available.
+
 Availability editing focuses on one task: **Tap the times you're free**.
-Sharing appears after **Save and continue**. If no friend has responded, the
-organizer sees a dedicated **Now send it to your friends** screen with a prominent
-share action, full copy-link label, saved status, and an edit-availability action.
-Once friends respond, the organizer sees the complete group timetable and
-**Set time and send invitations**. Other participants see a dedicated saved/waiting
-screen explaining that a separate invitation still needs confirmation, with an
-optional group-timetable view. A filled collection reopens at the corresponding
-handoff or results screen. Unsaved selections never show a saved handoff.
+Other participants retain a dedicated saved/waiting screen explaining that a
+separate invitation still needs confirmation, with an optional group-timetable
+view. Unsaved selections never show a saved handoff.
 
 The creator selects **Set time and send invitations**, chooses a date and start/end from
 the configured hours, reviews the explicit participant list and sends. The initial
