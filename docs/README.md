@@ -37,6 +37,7 @@ Historical build evidence never certifies a newer build.
 | [Unified plans](./UNIFIED_PLANS.md) | Manual availability/direct-time creation, explicit invitations, individual confirmation and owned Calendar projections |
 | [Product](./PRODUCT.md) | Positioning, product objects, navigation, invariants and non-goals |
 | [User Flow](./USER_FLOW.md) | Current user-visible Intent → Opportunity → Plan flow and repeat boundary |
+| [Plan flow baseline version 1](./PLAN_FLOW_BASELINE_2026-10-18.md) | Owner-saved organizer, App participant and shared-web participant flow before the card-layout update; Preview 123 rules retained |
 | [Calendar smart input](./CALENDAR_SMART_INPUT.md) | Event extraction, missing-information completion, duration defaults, uniform preview and acceptance examples; implemented policy, shared defaults and verification boundaries |
 | [Roadmap](./ROADMAP.md) | Current implementation order and decision gates |
 | [Together Contract](./TOGETHER_CONTRACT.md) | Weekly Intent, matching session and Mutual Opportunity engineering rules |
