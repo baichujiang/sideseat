@@ -1,0 +1,25 @@
+{
+  "unitTestsPassed": 10,
+  "acceptedPhysicalPresentationCases": 5,
+  "acceptedCompletePhysicalFlows": 2,
+  "nativeFlowDurationSeconds": 254.052,
+  "safariFlowDurationSeconds": 150.256,
+  "realAPICheckpoints": 20,
+  "finalPhysicalExecutions": {
+    "nativeAndPresentation": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "safari": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "initialFailures": "Expanded waiting container inherited its accessibility identifier onto child buttons; fixed with explicit children containment. Initial test search helper also assumed one scroll direction; it now reaches items above or below the viewport. Original card/status/flow assertions remain.",
+  "initialSafariExecution": "Interrupted after repeated animation-completion waits; a fresh Safari process retained tabs/data and the follow-up passed.",
+  "temporaryAccountsDeleted": 4,
+  "plansAndShareLinksDeleted": 3,
+  "remainingPlans": 0
+}

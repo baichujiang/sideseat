@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 1,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanPresentationPhone117 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792357761.457,
+  "passedTests" : 1,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792357431.38,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Testing was canceled",
+      "targetName" : "PlanPresentationPhone117UITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+      "testName" : "testFirstVisitCreateShareFillInviteConfirmAndCalendar()"
+    }
+  ],
+  "title" : "Test - PlanPresentationPhone117",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 2
+}

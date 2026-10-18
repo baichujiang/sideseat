@@ -1,0 +1,9 @@
+{
+  "result": "interrupted",
+  "reason": "Safari XCTest repeatedly waited 60 seconds for animation-completion after URL field interactions. The actual shared page responded HTTP 200. Stopped this execution before calling it passed; restarted Safari for the follow-up test.",
+  "observedAPICheckpoints": [
+    "created-empty",
+    "created-and-saved"
+  ],
+  "runnerRestartClearsWebsiteData": false
+}

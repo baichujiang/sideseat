@@ -1,0 +1,11 @@
+{
+  "suites": [
+    "PlanGuidanceTests",
+    "PlanPresentationTests"
+  ],
+  "passed": 10,
+  "failed": 0,
+  "skipped": 0,
+  "resultBundle": "/tmp/sideseat125-layout-sim.xcresult",
+  "note": "The same execution includes two earlier UI presentation failures; this verdict covers only the two Swift Testing suites."
+}
