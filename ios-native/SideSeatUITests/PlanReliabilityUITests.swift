@@ -63,6 +63,7 @@ import XCTest
         XCTAssertTrue(manage.waitForExistence(timeout: 10)); capture("readonly-calendar"); manage.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-phase"].waitForExistence(timeout: 15))
         launch(auth: fixture.owner, path: "/time-polls/\(token)")
+        app.buttons["time-poll-menu"].tap()
         let cancel = app.buttons["unified-plan-cancel"]
         XCTAssertTrue(cancel.waitForExistence(timeout: 15)); cancel.tap()
         let confirm = app.buttons.matching(NSPredicate(format: "label == 'Cancel plan' AND identifier != 'unified-plan-cancel'")).firstMatch
@@ -78,14 +79,15 @@ import XCTest
         let token = try XCTUnwrap(poll["token"] as? String)
         _ = try call("/api/v1/time-polls/\(token)/invitation-response", auth: fixture.peer, method: "PUT", body: ["version": 1, "status": "ACCEPTED"])
         launch(auth: fixture.peer, path: "/time-polls/\(token)")
-        XCTAssertTrue(app.buttons["unified-plan-accept"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["plan-done-back"].waitForExistence(timeout: 15))
+        XCTAssertEqual(try get(token)["phase"] as? String, "INVITING")
         XCTAssertTrue(app.buttons["unified-plan-expired-back"].waitForExistence(timeout: 45))
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
         XCTAssertFalse(app.buttons["time-poll-finish"].exists)
         capture("deadline-closes-open-invitation")
         app.buttons["unified-plan-expired-back"].tap()
         XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
-        app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+        app.segmentedControls["plans-segmented-control"].buttons["Past"].tap()
         XCTAssertTrue(app.buttons["plans-coordinated-\(token)"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["phase"] as? String, "EXPIRED")
         XCTAssertEqual(try calendarRows(token, auth: fixture.peer).count, 0)
@@ -124,9 +126,95 @@ import XCTest
         app.navigationBars.buttons.element(boundBy: 0).tap()
         let card = app.buttons["plans-coordinated-\(token)"]
         XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
-        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
+        app.segmentedControls["time-poll-mode"].buttons["My availability"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])
         capture("saved-availability-reopened")
+    }
+
+    func testGuidedCreationExplainsSharingAndPersistsMyTime() throws {
+        let title = "Guided plan \(UUID().uuidString.prefix(6))"
+        launch(auth: fixture.owner, path: "/plans")
+        let newPlan = app.buttons["plans-create-primary"]
+        XCTAssertTrue(newPlan.waitForExistence(timeout: 20)); capture("hub-first-use"); newPlan.tap()
+        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists); capture("creation-choice"); app.buttons["plan-mode-collect"].tap()
+        let titleField = app.textFields["time-poll-title"]
+        XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText(title + "\n")
+        let createButton = app.buttons["time-poll-create-confirm"]
+        XCTAssertTrue(createButton.isEnabled); capture("creation-details"); createButton.tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+        let list = try call("/api/v1/time-polls", auth: fixture.owner)
+        let record = try XCTUnwrap((list["polls"] as? [[String: Any]])?.first { $0["title"] as? String == title })
+        let token = try XCTUnwrap(record["token"] as? String); tokens.append(token)
+        XCTAssertTrue(app.buttons["plan-share-primary"].exists)
+        app.buttons["time-poll-cell-0"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
+        capture("choose-my-time")
+        app.buttons["time-poll-finish"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-share-primary"].isHittable)
+        app.buttons["plan-copy-link"].tap()
+        XCTAssertEqual(app.buttons["plan-copy-link"].label, "Link copied")
+        XCTAssertEqual(try get(token)["phase"] as? String, "COLLECTING")
+        capture("saved-next-share")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        let card = app.buttons["plans-coordinated-\(token)"]
+        for _ in 0..<3 where !card.isHittable { app.swipeUp() }
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        XCTAssertTrue(card.label.contains("Share with friends"))
+        capture("hub-next-action-share")
+    }
+
+    func testRoleGuidanceFromTimetableToInvitationAndCalendar() throws {
+        var poll = try create(title: "Clear next step \(UUID().uuidString.prefix(6))")
+        let token = try XCTUnwrap(poll["token"] as? String)
+        for (auth, name) in [(fixture.owner, "Ming"), (fixture.peer, "Lin")] {
+            poll = try call("/api/v1/time-polls/\(token)/response", auth: auth, method: "PUT", body: ["displayName": name, "slotIds": [0, 1, 2, 3]])
+        }
+        launch(auth: fixture.owner, path: "/plans")
+        let card = app.buttons["plans-coordinated-\(token)"]
+        XCTAssertTrue(card.waitForExistence(timeout: 20)); XCTAssertTrue(card.label.contains("View timetable and choose")); capture("hub-owner-choose")
+        card.tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 10))
+        let invite = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(invite.isHittable); capture("owner-next-invite"); invite.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isHittable); capture("review-invitation"); send.tap()
+        XCTAssertTrue(app.buttons["plan-share-primary"].waitForExistence(timeout: 15)); capture("owner-share-invitation")
+        launch(auth: fixture.peer, path: "/plans")
+        let invited = app.buttons["plans-coordinated-\(token)"]
+        XCTAssertTrue(invited.waitForExistence(timeout: 15)); XCTAssertTrue(invited.label.contains("View and confirm")); capture("hub-invitee-confirm"); invited.tap()
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 10)); XCTAssertTrue(accept.isHittable); capture("invitee-confirm"); accept.tap()
+        let calendar = app.buttons["plan-view-calendar"]
+        XCTAssertTrue(calendar.waitForExistence(timeout: 15)); capture("confirmed-calendar-next")
+        XCTAssertEqual(try calendarRows(token, auth: fixture.owner).count, 1)
+        XCTAssertEqual(try calendarRows(token, auth: fixture.peer).count, 1)
+        calendar.tap()
+        XCTAssertTrue(app.tabBars.buttons["Calendar"].isSelected)
+    }
+
+    func testChineseDarkGuidanceAndAccessibleCreation() throws {
+        launch(auth: fixture.owner, path: "/plans", chinese: true)
+        XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 15)); capture("hub-chinese-dark")
+        app.buttons["plans-create-primary"].tap()
+        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10)); capture("choice-chinese-dark")
+        app.terminate()
+        app.launchArguments.append("--ui-testing-dynamic-type-accessibility")
+        app.launch()
+        app.buttons["plans-create-unified"].tap()
+        let choice = app.buttons["plan-mode-collect"]
+        XCTAssertTrue(choice.waitForExistence(timeout: 10)); XCTAssertGreaterThan(choice.frame.height, 240); capture("choice-accessibility5"); choice.tap()
+        let titleField = app.textFields["time-poll-title"]
+        for _ in 0..<4 where !titleField.isHittable { app.swipeUp() }
+        XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText("Large text plan\n")
+        let createButton = app.buttons["time-poll-create-confirm"]
+        XCTAssertTrue(createButton.isHittable)
+        XCTAssertLessThanOrEqual(createButton.frame.maxX, app.frame.maxX + 1)
+        XCTAssertGreaterThan(createButton.frame.height, 43)
+        capture("creation-accessibility5")
     }
 
     private func launch(auth: String, path: String, chinese: Bool = false, realPeerLogin: Bool = false) {
@@ -179,7 +267,7 @@ import XCTest
         return (try JSONSerialization.jsonObject(with: XCTUnwrap(box.data)) as? [String: Any])?["data"] as? [String: Any] ?? [:]
     }
     private func capture(_ name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot()); attachment.name = "plans113-" + name; attachment.lifetime = .keepAlways; add(attachment)
+        let attachment = XCTAttachment(screenshot: app.screenshot()); attachment.name = "plans114-" + name; attachment.lifetime = .keepAlways; add(attachment)
     }
 }
 private final class PlanReliabilityHTTPResult: @unchecked Sendable { var data: Data?; var status: Int?; var error: Error? }

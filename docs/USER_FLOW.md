@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-18
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -10,15 +10,23 @@
 
 ## Unified manual plans — owner-approved 2026-10-15
 
-**Plans → + → Create a plan** starts one shared plan. Enter title, optional place,
-and participant count (default five). Choose **Collect availability** or **Set a time**; only the direct-time route asks for a duration. The existing Messages coordination
-entry and shared links open these same plans in the Plans tab.
+**2026-10-18 owner-requested usability update:** Plans starts with a clear next action.
+With no active plans, it explains sharing a link, agreeing on a time and finding
+that confirmed plan in Calendar. With active plans, this introduction becomes a
+compact header. **Your next steps** groups filling, sharing, choosing and invitations
+that need the viewer; **Waiting for others** contains saved responses and accepted
+invitations awaiting other people. Cards show what to do, rather than only a phase.
+**Upcoming** and **Past** remain separate; conversation plans retain their existing
+consent and feedback rules. The next meet-up uses the earliest actual start.
 
-The first-level Plans overview provides **Create a plan** and **Open a shared
-link**, followed by awaiting confirmations, availability collections and the next
-confirmed activity. Cards show dates, response/confirmation counts and a concrete
-next action. Upcoming and Ended retain their separate sections; conversation plans
-remain available with their existing consent and feedback rules.
+**Plans → Start a new plan** (or **+**) first asks whether **We haven't picked a
+time** or **We already have a time**. Each choice explains the next steps before
+showing title, optional place, count (default five) and the appropriate time fields.
+Collection asks for candidate days and daily hours; direct invitation asks for the
+actual start and duration. The bottom action explains what happens after creation;
+validation applies to the chosen method. Native candidate selection excludes past
+days and explains an invalid range instead of silently disabling creation.
+Messages and shared links continue to open the same plans in the Plans tab.
 
 The Plans **+** or primary creation action opens one creation sheet. One Cancel or
 downward dismissal returns to Plans. Successful creation closes that sheet and
@@ -38,6 +46,12 @@ including an explicit empty response. Results show **Group timetable**, the full
 read-only heatmap and response count, without recommendation cards or a required
 activity duration. Each number counts people covering that full 30-minute cell.
 Friends use the table to decide the date and hours, including half a day or a full day.
+
+Sharing and copying the link are visible in the detail. After saving and finishing,
+the organizer is guided to share if no friend has responded, or sees a persistent
+**Choose time and invite** action. Other participants are told that their free time
+is saved and a separate invitation will need confirmation. Reopening a filled
+collection starts at results, with My availability available for editing.
 
 The creator selects **Choose time and invite**, chooses a date and start/end from
 the configured hours, reviews the explicit participant list and sends. The initial
@@ -61,14 +75,15 @@ response or confirm/decline the latest invitation; no download or registration i
 required. A different browser is a separate guest identity. An optional Open in
 app link remains. Web and native participant lists mark guests explicitly.
 
-**Overview** includes collection and pending invitations. **Upcoming** includes
+**Planning** includes collection and pending invitations. **Upcoming** includes
 confirmed plans for the selected viewer. Each selected account holder's Calendar receives
 one projection only after everyone selected, including guests, has accepted. Guests
 return to the shared web page for plan details, and appear as named companions in
 registered participants' calendars. Reopening Plans or
 Calendar loads persisted server data. Shared calendar details are read-only and
-**Manage Plan** opens the original plan; cancellation removes all its projections.
-**Ended** retains cancelled, past or excluded records. Creator deletion is allowed
+**Manage Plan** opens the original plan. Confirmed members can also use **View in Calendar**
+from the plan detail. Cancellation lives in the plan menu and removes all projections.
+**Past** retains cancelled, past or excluded records. Creator deletion is allowed
 for collecting/cancelled plans, with active plans requiring cancellation first.
 
 Sharing a link does not send a message or disclose anyone's personal Calendar.

@@ -35,11 +35,16 @@ import XCTest
     func testTimingModesAndSwipeDismissReturnToPlans() {
         app.tabBars.buttons["计划"].tap()
         openCreation()
-        let methods = app.segmentedControls["unified-plan-timing-method"]
-        methods.buttons["直接选时间"].tap()
-        XCTAssertTrue(app.datePickers["unified-plan-fixed-start"].waitForExistence(timeout: 5))
-        methods.buttons["一起定时间"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["time-poll-dates"].firstMatch.waitForExistence(timeout: 5))
+        app.buttons["plan-mode-fixed"].tap()
+        let fixed = app.datePickers["unified-plan-fixed-start"]
+        for _ in 0..<3 where !fixed.exists { app.swipeUp() }
+        XCTAssertTrue(fixed.waitForExistence(timeout: 5))
+        for _ in 0..<4 where !app.buttons["plan-change-method"].isHittable { app.swipeDown() }
+        app.buttons["plan-change-method"].tap()
+        app.buttons["plan-mode-collect"].tap()
+        let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
+        for _ in 0..<3 where !dates.exists { app.swipeUp() }
+        XCTAssertTrue(dates.waitForExistence(timeout: 5))
         let bar = app.navigationBars.firstMatch
         bar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
             .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
@@ -64,7 +69,7 @@ import XCTest
         let create = app.buttons["plans-create-unified"]
         assertHittable(create, "Plans creation entry must be available")
         create.tap()
-        XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10))
     }
 
     private func cancel() -> XCUIElement {

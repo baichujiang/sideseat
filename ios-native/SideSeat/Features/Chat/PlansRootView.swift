@@ -13,9 +13,9 @@ enum MVPPlanSection: String, CaseIterable, Equatable, Sendable, Identifiable {
 
     var title: String {
         switch self {
-        case .waitingResponse: AppLocalization.string("Overview")
+        case .waitingResponse: AppLocalization.string("Planning")
         case .upcoming: AppLocalization.string("Upcoming")
-        case .ended: AppLocalization.string("Ended")
+        case .ended: AppLocalization.string("Past")
         }
     }
 
@@ -113,15 +113,15 @@ struct PlansRootView: View {
             }
         }
         .sheet(isPresented: $showsPlanCreation, onDismiss: {
-            if let token = createdPlanToken { createdPlanToken = nil; router.openPlan(token: token) }
+            if let token = createdPlanToken { createdPlanToken = nil; selectedSection = .waitingResponse; router.openPlan(token: token) }
             Task { await loadCoordinatedPlans() }
         }) {
             NavigationStack {
                 TimePollCreateView { poll in createdPlanToken = poll.token; showsPlanCreation = false }
-            }.tint(SideSeatTheme.utilityAction)
+            }.tint(SideSeatTheme.utilityAction).dynamicTypeSize(dynamicTypeSize)
         }
-        .alert("Open a poll link", isPresented: $showsOpenPlanLink) {
-            TextField("Sideseat poll link", text: $planLink).textInputAutocapitalization(.never).autocorrectionDisabled()
+        .alert("Open a plan link", isPresented: $showsOpenPlanLink) {
+            TextField("Paste the plan link", text: $planLink).textInputAutocapitalization(.never).autocorrectionDisabled()
             Button("Open") {
                 if let token = TimePollLink.token(from: planLink) { coordinationError = nil; router.openPlan(token: token) }
                 else { coordinationError = AppLocalization.string("Enter a Sideseat time poll link.") }
@@ -144,7 +144,7 @@ struct PlansRootView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             now = Date()
-            Task { await loadCoordinatedPlans() }
+            Task { await store.load(using: session); await loadCoordinatedPlans() }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
             Task { await store.load(using: session); await loadCoordinatedPlans() }
@@ -240,21 +240,7 @@ struct PlansRootView: View {
         if section == .waitingResponse { planActions }
         if !coordinationLoaded && coordinatedPlans.isEmpty {
             ProgressView("Loading plans").frame(maxWidth: .infinity, minHeight: 70)
-        } else if section == .waitingResponse {
-            coordinatedSection("Awaiting confirmations", plans: coordinated(in: .waitingResponse).filter { $0.planningPhase(at: now) == "INVITING" }, identifier: "plans-shared-invitations")
-            coordinatedSection("Finding a time together", plans: coordinated(in: .waitingResponse).filter { $0.planningPhase(at: now) == "COLLECTING" }, identifier: "plans-shared-availability")
-            if let next = coordinated(in: .upcoming).first {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    HStack {
-                        Text("Next meet-up").font(.headline)
-                        Spacer()
-                        Button("View all") { selectedSection = .upcoming }.frame(minHeight: 44)
-                            .accessibilityIdentifier("plans-view-shared-upcoming")
-                    }
-                    coordinatedCard(next)
-                }
-            }
-        } else {
+        } else if section != .waitingResponse {
             ForEach(coordinated(in: section)) { plan in coordinatedCard(plan) }
         }
         if let coordinationError {
@@ -287,12 +273,7 @@ struct PlansRootView: View {
             }
             let visiblePlans = plans(in: section)
             if section == .waitingResponse {
-                if !plans(in: .waitingResponse).isEmpty || !plans(in: .upcoming).isEmpty {
-                    Text("From conversations").font(.headline).padding(.top, SideSeatTheme.spaceSM)
-                    overview
-                } else if coordinated(in: .waitingResponse).isEmpty && coordinated(in: .upcoming).isEmpty && coordinationLoaded && coordinationError == nil {
-                    emptyState(for: .waitingResponse)
-                }
+                actionOverview
             } else if visiblePlans.isEmpty { if coordinated(in: section).isEmpty { emptyState(for: section) } }
             else {
                 LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
@@ -308,30 +289,97 @@ struct PlansRootView: View {
         }
     }
 
-    private var planActions: some View {
+    @ViewBuilder private var planActions: some View {
+        if !coordinated(in: .waitingResponse).isEmpty || !plans(in: .waitingResponse).isEmpty {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 12))
+                layout {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Continue your plans").font(.title3.weight(.bold))
+                        Text("Start with the plans that need you.").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    Button { showsPlanCreation = true } label: { Label("Create a plan", systemImage: "plus") }
+                        .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+                        .buttonStyle(.bordered).tint(SideSeatTheme.utilityAction).accessibilityIdentifier("plans-create-primary")
+                }
+                Button { planLink = ""; showsOpenPlanLink = true } label: { Label("I received a plan link", systemImage: "link") }
+                    .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plans-open-link")
+            }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
+        } else {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Text("Make plans, all in one place").font(.title3.weight(.semibold))
-            Text("Share availability, confirm a time, and keep track of what's next.")
-                .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-            let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
-            layout {
-                Button { showsPlanCreation = true } label: {
-                    Label("Create a plan", systemImage: "plus.circle.fill")
-                        .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 50)
-                        .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-                        .background(SideSeatTheme.ProductAction.fill, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                }.buttonStyle(.plain).accessibilityIdentifier("plans-create-primary")
-                Button { planLink = ""; showsOpenPlanLink = true } label: {
-                    Label("Open a poll link", systemImage: "link")
-                        .font(.subheadline.weight(.semibold)).frame(maxWidth: .infinity, minHeight: 50)
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                }.buttonStyle(.plain).accessibilityIdentifier("plans-open-link")
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: "calendar.badge.plus")
+                    .font(.title2).frame(width: 48, height: 48)
+                    .background(SideSeatTheme.bgGrouped, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Make a plan with friends").font(.title3.weight(.bold))
+                    Text("Share a link. Agree on a time. Find it in Calendar.")
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-        }.padding(.bottom, SideSeatTheme.spaceSM)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("plans-actions")
+            SSPrimaryButton(title: AppLocalization.string("Start a new plan"), fill: .product,
+                            accessibilityID: "plans-create-primary") { showsPlanCreation = true }
+            Button { planLink = ""; showsOpenPlanLink = true } label: {
+                Label("I received a plan link", systemImage: "link")
+                    .font(.subheadline.weight(.medium)).frame(maxWidth: .infinity, minHeight: 44)
+            }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                .accessibilityIdentifier("plans-open-link")
+        }
+        .padding(SideSeatTheme.spaceLG)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+        .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
+        }
+    }
+
+    private var actionOverview: some View {
+        let manual = coordinated(in: .waitingResponse)
+        let needs = manual.filter { $0.nextStep(at: now).needsYou }.sorted {
+            ($0.nextStep(at: now) == .confirm ? 0 : 1) < ($1.nextStep(at: now) == .confirm ? 0 : 1)
+        }
+        let waiting = manual.filter { !$0.nextStep(at: now).needsYou }
+        let incoming = plans(in: .waitingResponse).filter { $0.receiver.id == currentUserID }
+        let outgoing = plans(in: .waitingResponse).filter { $0.proposer.id == currentUserID }
+        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+            if !needs.isEmpty || !incoming.isEmpty {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    overviewHeading("Your next steps", count: needs.count + incoming.count,
+                        identifier: "plans-waiting-incoming-heading", needsAttention: true)
+                    ForEach(needs) { coordinatedCard($0) }
+                    ForEach(incoming) { planRow($0, section: .waitingResponse) }
+                }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-needs-you")
+            }
+            if !waiting.isEmpty || !outgoing.isEmpty {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    overviewHeading("Waiting for others", count: waiting.count + outgoing.count,
+                        identifier: "plans-waiting-outgoing-heading")
+                    ForEach(waiting) { coordinatedCard($0) }
+                    ForEach(outgoing) { planRow($0, section: .waitingResponse) }
+                }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-waiting-others")
+            }
+            let shared = coordinated(in: .upcoming).first
+            let chat = plans(in: .upcoming).first
+            if shared != nil || chat != nil {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    HStack {
+                        Text("Next meet-up").font(.headline)
+                        Spacer()
+                        Button("View all") { selectedSection = .upcoming }.frame(minHeight: 44)
+                            .accessibilityIdentifier("plans-view-shared-upcoming")
+                    }
+                    if let shared, (shared.chosenStart ?? .distantFuture) <= (chat?.startDate ?? .distantFuture) {
+                        coordinatedCard(shared)
+                    } else if let chat { planRow(chat, section: .upcoming, showsFullDate: true) }
+                }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-next-meetup")
+            } else if manual.isEmpty && incoming.isEmpty && outgoing.isEmpty && coordinationLoaded && coordinationError == nil {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    Label("Your first plan starts here", systemImage: "sparkles").font(.headline)
+                    Text("Not sure when? Collect free time first. Already decided? Send an invitation directly.")
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }.padding(.vertical, SideSeatTheme.spaceMD).accessibilityIdentifier("plans-empty-waitingResponse")
+            }
+        }
     }
 
     @ViewBuilder private func coordinatedSection(_ title: LocalizedStringKey, plans: [NativeTimePollList.Item], identifier: String) -> some View {
@@ -348,46 +396,47 @@ struct PlansRootView: View {
 
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
         let phase = plan.planningPhase(at: now)
-        let collecting = phase == "COLLECTING"
-        let needsReply = phase == "INVITING" && plan.isIncluded != false && plan.myInvitationStatus != "ACCEPTED"
-        let tone = collecting ? SideSeatTheme.Availability.selectedFill : phase == "INVITING" ? SideSeatTheme.statusWarningText : phase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong
-        let action: String.LocalizationValue = collecting ? "Open availability timetable" : needsReply ? "View and confirm" : phase == "INVITING" ? "View confirmation progress" : "View plan"
+        let step = plan.nextStep(at: now)
+        let active = ["COLLECTING", "INVITING"].contains(phase)
+        let tone = phase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : step == .confirm ? SideSeatTheme.statusWarningText : SideSeatTheme.textSecondaryStrong
         return Button { scrollPositions.capture(selectedSection); router.openPlan(token: plan.token) } label: {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Label(plan.statusLabel(at: now), systemImage: collecting ? "calendar.badge.clock" : phase == "INVITING" ? "clock" : phase == "EXPIRED" ? "clock.badge.exclamationmark" : phase == "CANCELLED" ? "xmark.circle" : "checkmark.circle")
-                    .font(.caption.weight(.semibold)).foregroundStyle(tone)
-                    .padding(.horizontal, 8).padding(.vertical, 5)
-                    .background(tone.opacity(0.10), in: Capsule())
-                Text(plan.title).font(.headline).foregroundStyle(SideSeatTheme.textPrimary)
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                HStack {
+                    Label(plan.statusLabel(at: now), systemImage: phase == "CONFIRMED" ? "checkmark.circle.fill" : step.symbol)
+                        .font(.caption.weight(.semibold)).foregroundStyle(tone)
+                    Spacer(minLength: 8)
+                    Text(plan.isOwner == true ? "Organized by you" : "Shared plan")
+                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }
+                Text(plan.title).font(.title3.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
                 if let start = plan.chosenStart, let end = plan.chosenEnd {
                     Label(unifiedPlanTimeLabel(start: start, end: end, timeZone: plan.timeZone), systemImage: "calendar")
-                        .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 } else if let first = plan.dates.first, let last = plan.dates.last {
                     Label(timePollDateLabel(first).replacingOccurrences(of: "\n", with: " ") + (first == last ? "" : " – " + timePollDateLabel(last).replacingOccurrences(of: "\n", with: " ")), systemImage: "calendar")
-                        .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
-                if collecting {
-                    Text(plan.expectedCount.map { String(format: AppLocalization.string("%d of %d people filled in their availability"), plan.respondedCount ?? 0, $0) } ?? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0))
-                        .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    if let count = plan.expectedCount, count > 0 {
-                        ProgressView(value: Double(min(plan.respondedCount ?? 0, count)), total: Double(count))
-                            .tint(SideSeatTheme.Availability.selectedFill).accessibilityHidden(true)
-                    }
-                } else if !["CANCELLED", "EXPIRED"].contains(phase) {
-                    Text(String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.invitedCount ?? plan.expectedCount ?? 0))
-                        .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                if active {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(step.title).font(.subheadline.weight(.medium))
+                        Text(phase == "COLLECTING"
+                             ? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
+                             : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget))
+                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }.foregroundStyle(SideSeatTheme.textPrimary)
                 }
                 HStack {
-                    Text(AppLocalization.string(action)).font(.subheadline.weight(.semibold))
+                    Text(step.action).font(.subheadline.weight(.semibold))
                     Spacer(minLength: 8)
-                    Image(systemName: "arrow.right").font(.subheadline.weight(.semibold))
+                    Image(systemName: "arrow.right").accessibilityHidden(true)
                 }
-                .foregroundStyle(needsReply ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
-                .padding(.horizontal, needsReply ? 12 : 0).frame(minHeight: 44)
-                .background(needsReply ? SideSeatTheme.ProductAction.fill : Color.clear, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .foregroundStyle(step.needsYou ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
+                .padding(.horizontal, step.needsYou ? 12 : 0).frame(minHeight: 46)
+                .background(step.needsYou ? SideSeatTheme.ProductAction.fill : Color.clear,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceMD)
+            .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
             .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
             .contentShape(Rectangle())
         }
@@ -403,6 +452,10 @@ struct PlansRootView: View {
             case .upcoming: phase == "CONFIRMED" && plan.isIncluded != false && (plan.chosenEnd ?? .distantPast) > now
             case .ended: ["CANCELLED", "EXPIRED"].contains(phase) || (phase == "CONFIRMED" && (plan.isIncluded == false || (plan.chosenEnd ?? .distantFuture) <= now))
             }
+        }.sorted {
+            section == .upcoming
+                ? ($0.chosenStart ?? .distantFuture) < ($1.chosenStart ?? .distantFuture)
+                : $0.updatedAt > $1.updatedAt
         }
     }
     private func loadCoordinatedPlans() async {
@@ -415,99 +468,6 @@ struct PlansRootView: View {
             guard generation == session.authorizationGeneration else { return }
             coordinatedPlans = result.data.polls; coordinationError = nil
         } catch { coordinationError = error.localizedDescription }
-    }
-
-    private var overview: some View {
-        let waiting = plans(in: .waitingResponse)
-        let incoming = waiting.filter { $0.receiver.id == currentUserID }
-        let outgoing = waiting.filter { $0.proposer.id == currentUserID }
-        let upcoming = plans(in: .upcoming)
-        return VStack(alignment: .leading, spacing: 24) {
-            if !incoming.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    overviewHeading("Awaiting my response", count: incoming.count,
-                        identifier: "plans-waiting-incoming-heading", needsAttention: true)
-                    ForEach(showsAllIncoming ? incoming : Array(incoming.prefix(2))) { plan in
-                        planRow(plan, section: .waitingResponse)
-                    }
-                    if incoming.count > 2 {
-                        Button(showsAllIncoming ? "Show less" : "View all invitations") {
-                            showsAllIncoming.toggle()
-                        }
-                        .font(.subheadline.weight(.medium))
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .accessibilityIdentifier("plans-show-all-incoming")
-                    }
-                }
-            }
-
-            if let next = upcoming.first {
-                VStack(alignment: .leading, spacing: 10) {
-                    let headerLayout = dynamicTypeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                        : AnyLayout(HStackLayout(spacing: 8))
-                    headerLayout {
-                        Text(next.startDate.map { $0 <= now } == true ? "In progress" : "Next meet-up")
-                            .font(.headline)
-                            .accessibilityAddTraits(.isHeader)
-                        if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
-                        Button {
-                            selectedSection = .upcoming
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text("View all")
-                                Text(upcoming.count.formatted())
-                                Image(systemName: "chevron.right").font(.caption.weight(.semibold))
-                            }
-                            .font(.subheadline)
-                            .frame(minHeight: 44)
-                        }
-                        .accessibilityIdentifier("plans-view-upcoming")
-                    }
-                    planRow(next, section: .upcoming, showsFullDate: true)
-                }
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("plans-next-meetup")
-            } else if !waiting.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("No confirmed meet-ups yet").font(.headline)
-                    Text("Once an invitation is accepted, your next meet-up appears here.")
-                        .font(.footnote)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 8)
-            } else if coordinatedPlans.isEmpty {
-                emptyState(for: .waitingResponse)
-            }
-
-            if !outgoing.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Button {
-                        showsOutgoing.toggle()
-                    } label: {
-                        HStack {
-                            overviewHeading("Awaiting their response", count: outgoing.count,
-                                identifier: "plans-waiting-outgoing-heading")
-                            Spacer(minLength: 8)
-                            Image(systemName: showsOutgoing ? "chevron.up" : "chevron.down")
-                                .font(.caption.weight(.semibold))
-                        }
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityValue(AppLocalization.string(showsOutgoing ? "Expanded" : "Collapsed"))
-                    .accessibilityIdentifier("plans-toggle-outgoing")
-                    if showsOutgoing {
-                        ForEach(outgoing) { plan in planRow(plan, section: .waitingResponse) }
-                    }
-                }
-            }
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(MVPPlanSection.waitingResponse.accessibilityIdentifier)
     }
 
     private func overviewHeading(_ title: LocalizedStringKey, count: Int, identifier: String,

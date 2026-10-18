@@ -2645,3 +2645,85 @@
 "Create a new plan to arrange another time." = "请发起新计划，重新安排时间。";
 
 "Back to plans" = "返回计划";
+
+/* Plan guidance and task-oriented planning, Preview 114 */
+"Planning" = "待安排";
+"Fill in your free time" = "先填写你的空闲时间";
+"Invite friends to fill in" = "邀请朋友填写时间";
+"Choose a time for everyone" = "看看大家的时间，再发邀请";
+"Does this time work for you?" = "这个时间，你方便吗？";
+"Waiting for the organizer" = "时间已保存，等待发起人安排";
+"Waiting for confirmations" = "等待大家确认参加";
+"Fill in my availability" = "填写我的空闲时间";
+"Share with friends" = "发链接给朋友";
+"View timetable and choose" = "看时间表，选时间";
+"View saved availability" = "查看已保存的时间";
+"Find a time" = "收集空闲";
+"Confirm together" = "确认参加";
+"In your calendars" = "加入日历";
+"Share invitation" = "分享邀请链接";
+"Make a plan with friends" = "约朋友，一起做点什么";
+"Share a link. Agree on a time. Find it in Calendar." = "发链接约朋友，定好时间，确认后加入日历。";
+"Start a new plan" = "发起新计划";
+"I received a plan link" = "我收到一个计划链接";
+"Your next steps" = "需要你处理";
+"Waiting for others" = "等待其他人";
+"Your first plan starts here" = "第一个计划，从这里开始";
+"Not sure when? Collect free time first. Already decided? Send an invitation directly." = "时间没定，就先收集大家的空闲；时间已定，就直接发邀请。";
+"Organized by you" = "我发起的";
+"Shared plan" = "共同计划";
+"Open a plan link" = "打开计划链接";
+"Paste the plan link" = "粘贴计划链接";
+"How would you like to plan?" = "你们的时间定了吗？";
+"Choose what you know now. We'll guide you through the next step." = "选一种情况，我们带你一步步把计划定下来。";
+"We haven't picked a time" = "时间还没定";
+"Friends fill in their free time. You choose a time and send an invitation." = "大家先填空闲时间，你再看时间表，选一个时间发邀请。";
+"We already have a time" = "已经有时间了";
+"Set the date and send a link. Everyone confirms before it goes into Calendar." = "选好时间，发链接请朋友确认；大家都确认后加入日历。";
+"Friends can join from the link. No app download needed." = "朋友打开链接就能参与，无需下载 App。";
+"Next: share the invitation link with friends." = "下一步：把邀请链接发给朋友，等待大家确认。";
+"Next: fill in your free time and share the link." = "下一步：填写自己的空闲时间，再把链接发给朋友。";
+"Create invitation link" = "生成邀请链接";
+"Create and fill in my time" = "创建并填写空闲时间";
+"Change planning method" = "更换安排方式";
+"What's the plan?" = "打算做什么？";
+"How many people?" = "预计一共几个人？";
+"Include yourself. The plan is confirmed when this many people have accepted." = "包含你自己。达到这个人数且全部确认后，计划才会确定。";
+"Include yourself. This is an estimate; you choose the final invitation list later." = "包含你自己。这是预计人数，之后还可以选择实际邀请谁。";
+"When are we meeting?" = "什么时候见面？";
+"Which days could work?" = "哪几天可以考虑？";
+"Hours to choose from" = "每天在哪些时段选空闲？";
+"These are the hours people can mark as free, not the final activity time." = "这只是大家填写空闲的范围，活动的具体起止时间之后再定。";
+"Choose at least one date." = "请至少选择一天。";
+"End time must be after start time." = "结束时间需要晚于开始时间。";
+"These hours have already passed. Choose a later time or date." = "这些时段已经结束，请选择更晚的时间或日期。";
+"No free time" = "没有空闲时间";
+"Choose the final time and invite people. Everyone still needs to confirm." = "选定具体时间和邀请名单后，每个人还需要确认参加。";
+"Share this link so at least one friend can fill in their free time." = "先把链接发给朋友，至少有一位朋友填写后，就能选时间发邀请。";
+"Your free time is saved. The organizer will choose a time for you to confirm." = "你的空闲已保存。等发起人选好时间后，你再确认是否参加。";
+"Tap your free time. Each cell is 30 minutes. Tap a date to select the day." = "点选你有空的时段，每格 30 分钟；点日期可全选当天。";
+"Inviting %d people, including you" = "将邀请 %d 人（含你）";
+"Sending confirms your participation. Everyone else confirms from the link." = "发送即代表你确认参加，其他人通过链接逐一确认。";
+"Who's joining?" = "谁会参加？";
+"%d places still open" = "还有 %d 个位置等待朋友加入";
+"Choosing another time asks everyone to confirm again." = "更换时间后，所有人都需要重新确认。";
+"Send the link to friends so they can confirm this time." = "把链接发给朋友，请他们确认这个时间。";
+"View in Calendar" = "去日历查看";
+"This plan has been cancelled" = "这次计划已取消";
+"You're all set!" = "都确认啦，准备见面吧";
+"This time is confirmed" = "这个时间已确定";
+"Invite friends to confirm" = "邀请已准备好，发给朋友确认";
+"You've confirmed. Now wait for the others." = "你已确认，等其他人回复";
+"You've replied that you can't attend" = "你已回复无法参加";
+"You're viewing the invitation" = "查看这次邀请";
+"Only invited participants have this plan in their calendars." = "只有本次受邀参与者的日历会显示这项计划。";
+
+"Give your plan a title to continue." = "先给计划起个名字，就能继续。";
+
+"Keep the plan title within 120 characters." = "计划名称请控制在 120 个字符以内。";
+
+"Keep the location within 200 characters." = "地点请控制在 200 个字符以内。";
+
+"Continue your plans" = "继续安排计划";
+
+"Start with the plans that need you." = "先完成下方需要你处理的事。";

@@ -1,0 +1,73 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "A181C802-7A80-4150-98BD-D945DB87E72D",
+        "deviceName" : "SideSeat Plans114 QA",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23F77",
+        "osVersion" : "26.5",
+        "platform" : "iOS Simulator"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 4,
+      "passedTests" : 10,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "SideSeat-Development · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 4,
+  "finishTime" : 1792284476.502,
+  "passedTests" : 10,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792284132.333,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 8,
+      "testIdentifierString" : "PlanReliabilityUITests/testAvailabilityAutosaveUndoDoneAndReopen()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanReliabilityUITests/testAvailabilityAutosaveUndoDoneAndReopen",
+      "testName" : "testAvailabilityAutosaveUndoDoneAndReopen()"
+    },
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 11,
+      "testIdentifierString" : "PlanReliabilityUITests/testGuidedCreationExplainsSharingAndPersistsMyTime()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanReliabilityUITests/testGuidedCreationExplainsSharingAndPersistsMyTime",
+      "testName" : "testGuidedCreationExplainsSharingAndPersistsMyTime()"
+    },
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 12,
+      "testIdentifierString" : "PlanReliabilityUITests/testOpenInvitationExpiresAndReturnsToEndedPlans()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanReliabilityUITests/testOpenInvitationExpiresAndReturnsToEndedPlans",
+      "testName" : "testOpenInvitationExpiresAndReturnsToEndedPlans()"
+    },
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "SideSeatUITests",
+      "testIdentifier" : 14,
+      "testIdentifierString" : "PlanReliabilityUITests/testRoleGuidanceFromTimetableToInvitationAndCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatUITests/PlanReliabilityUITests/testRoleGuidanceFromTimetableToInvitationAndCalendar",
+      "testName" : "testRoleGuidanceFromTimetableToInvitationAndCalendar()"
+    }
+  ],
+  "title" : "Test - SideSeat-Development",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 14
+}

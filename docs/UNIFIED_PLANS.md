@@ -19,6 +19,39 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Guided native planning — Preview 114
+
+Plans is organized around the viewer's next action. Planning separates **Your
+next steps** from **Waiting for others**; Upcoming and Past retain their own tabs.
+A first-time user sees the link → agreement → Calendar explanation and a prominent
+creation entry. With active plans, that introduction becomes a compact header so
+their next task appears first. Shared and conversation plans keep their existing
+canonical destinations. The next meet-up is the earliest actual start across
+the two sources, rather than the most recently edited shared plan.
+
+Creation first asks whether a time is already decided. The two scenario cards
+explain their consequences before opening details. COLLECT asks for candidate
+days and hours; FIXED asks for an actual start and duration. Validation follows
+the chosen method, earlier days are unavailable in the native date picker, and
+the persistent creation action states what happens next. The estimated collection
+count is distinguished from the required size of a direct invitation.
+
+`GET /api/v1/time-polls` adds optional `isOwner`, `didRespond` and `planningMode`
+fields. They identify whether to fill in, share, choose a time, confirm, or wait;
+the internal response rows are not returned. FIXED progress uses expectedCount;
+COLLECT invitation progress uses its actual roster. These are additive read-model
+fields, with no Schema or migration change.
+
+Details use the same short collection → individual confirmation → Calendar
+journey. Sharing and copying the link are visible actions. Returning to a filled
+collection opens its results; an organizer sees a fixed bottom action to choose
+and invite, or sharing guidance if no friend has responded. A participant sees
+that their time is saved and that a separate invitation will follow. Filling in
+still does not accept an invitation. Confirmation shows the actual time, roster,
+remaining direct-invitation places and Calendar rule. Confirmed members can open
+Calendar directly; cancellation remains in the plan menu. Large text is passed
+into creation/invitation sheets and the availability page can scroll as a whole.
+
 - COLLECTING: immutable candidate slots, one autosaved response/account or browser guest.
   The complete heatmap and response count are primary. No duration is required,
   and no common-time/maximum-attendance cards are shown. The older summary/window

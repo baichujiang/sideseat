@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-18
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -28,12 +28,28 @@
 | Surface  | Primary task                   | Visual rule                                                                         |
 | -------- | ------------------------------ | ----------------------------------------------------------------------------------- |
 | Together | Intent, countdown, Opportunity | Action-first cards; status through text/structure, not color alone                  |
+| Plans | Understand and complete the next planning step | Role-specific next actions, a short shared lifecycle, visible link sharing and persistent contextual actions |
 | Calendar | Understand and edit time       | Neutral grid and date selections; solid blue for today, separate current-time marker       |
 | Messages | Coordinate and manage Plans    | Reading comfort over brand saturation; source and Plan cards have distinct surfaces |
 | Me       | Identity and settings          | Native grouped hierarchy; light brand wash only where useful                        |
 
 Root pages may use one compact brand/navigation signature. Secondary pages use
 standard iOS titles and back behavior.
+
+### Planning clarity
+
+For first use, explain the link → agreement → Calendar path and present the two
+creation scenarios in plain language. With active plans, collapse that introduction
+and prioritize what needs the viewer's input. “Waiting for others” must distinguish
+saved availability from confirmed participation. Status colors support explicit
+labels and the next action; they do not replace those explanations.
+
+Each detail has one contextual primary action: save availability, share with
+friends, choose and invite, confirm participation, or open Calendar. Link sharing
+cannot depend on finding an overflow menu. Destructive cancellation stays in that
+menu. Keep the current paired ProductAction colors, availability colors and design
+tokens. Pass Dynamic Type into presented sheets; let the availability page scroll
+in accessibility sizes instead of compressing the timetable out of view.
 
 ### Public invitation visual continuity — 2026-10-04
 

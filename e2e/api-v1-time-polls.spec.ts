@@ -60,7 +60,7 @@ test("five authenticated accounts create, paint, erase, reopen and find the best
     expect(reopen.myDisplayName).toBe(`Person ${index + 1}`);
     expect(reopen.summary.maximum).toBe(4);
     const list = (await (await request.get("/api/v1/time-polls", { headers: headers(index) })).json()).data;
-    expect(list.polls.some((item: { token: string }) => item.token === pollToken)).toBe(true);
+    expect(list.polls.find((item: { token: string }) => item.token === pollToken)).toMatchObject({ isOwner: index === 0, didRespond: true, planningMode: "COLLECT" });
   }
   expect((await request.put(`/api/v1/time-polls/${pollToken}/response`, { headers: headers(0), data: { displayName: "Person 1", slotIds: [999] } })).status()).toBe(422);
   expect((await request.get(`/api/v1/time-polls/${pollToken}`)).status()).toBe(401);

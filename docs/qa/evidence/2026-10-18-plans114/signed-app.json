@@ -1,0 +1,8 @@
+{
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "114",
+  "api": "https://api.sideseat.de",
+  "signature": "strict and deep verified",
+  "defaultUDIDInProfile": true
+}

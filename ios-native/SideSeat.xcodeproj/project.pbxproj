@@ -139,12 +139,14 @@
 		99B4A2584377C5122ED1A82B /* SideSeatTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9E3EBDD9BC84D23382AA843 /* SideSeatTheme.swift */; };
 		9BC714AFF1549D31D7976ED6 /* ProfileAppearanceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B42C9C3CA89ADE66162B0F /* ProfileAppearanceUITests.swift */; };
 		9C0743FAAE96FC13EC0CD377 /* CalendarAgendaListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7DB4CDB43D47ECF6D2D4BAE /* CalendarAgendaListView.swift */; };
+		9CBFCC8F6AF6BA59FEF3B51E /* PlanFlowViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C442B57FCEDC94450F983926 /* PlanFlowViews.swift */; };
 		9E06662FD7AEA350951900D7 /* ScheduleShareComposeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A0AAA03F585C445C1D387FF /* ScheduleShareComposeSheet.swift */; };
 		9E1DBB83A9FD9F8C49084E5E /* ChatsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FF7C9B9BB1A16712C88565 /* ChatsRootView.swift */; };
 		9E7F0D08521DA58CF6077EBD /* CalendarSmartAddStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3208D76590787780948C57C0 /* CalendarSmartAddStoreTests.swift */; };
 		9EEC881673C6D2A08D3B97AA /* CalendarEventShareViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2181B2E4D53B989291A9632 /* CalendarEventShareViews.swift */; };
 		9FD902631981BD1AA8666944 /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C8CE032ACEB321C2797799 /* ChatModels.swift */; };
 		A020209BB1D70B69EB954C86 /* DirectChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D553AA379EE2BE32D3D719 /* DirectChatStore.swift */; };
+		A373F3BC4801DAD43BEE881B /* PlanGuidanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF8E9B9BD32482D539F23E07 /* PlanGuidanceTests.swift */; };
 		A41120119EB90BAEAD38BA33 /* DiscoverModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E4C6F2C3D61764D6514D45F /* DiscoverModels.swift */; };
 		A4429AAA28FA0E7AC2F497BD /* ProfileEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519EB859556A4DAF07E9A170 /* ProfileEditSheet.swift */; };
 		A4A2C426276F93D607709158 /* DiscoverStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DE982D5D5C77FDAB46E733F /* DiscoverStoreTests.swift */; };
@@ -398,6 +400,7 @@
 		C1EC7B6461F3CFDB8B3510A1 /* ScheduleShareRecipientView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleShareRecipientView.swift; sourceTree = "<group>"; };
 		C2181B2E4D53B989291A9632 /* CalendarEventShareViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventShareViews.swift; sourceTree = "<group>"; };
 		C25FEA39CE720EBB74D7B997 /* ConversationPlansTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationPlansTests.swift; sourceTree = "<group>"; };
+		C442B57FCEDC94450F983926 /* PlanFlowViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanFlowViews.swift; sourceTree = "<group>"; };
 		C475CBBA5DBD9CB51770FD13 /* ExploreIntentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreIntentListView.swift; sourceTree = "<group>"; };
 		C4F88078731B89C2C0298D66 /* CreateChooserSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateChooserSheet.swift; sourceTree = "<group>"; };
 		C5C94D3EB90356BB435A3B8F /* SideSeatUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = SideSeatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -453,6 +456,7 @@
 		FDFC29920481D7B2982AD5C5 /* TabRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRouter.swift; sourceTree = "<group>"; };
 		FF620B25C8B323A0AFCED41F /* TimePollSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollSheet.swift; sourceTree = "<group>"; };
 		FF8842FFFA21FD89D3D41EF2 /* CalendarEventPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventPresentation.swift; sourceTree = "<group>"; };
+		FF8E9B9BD32482D539F23E07 /* PlanGuidanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanGuidanceTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -491,6 +495,7 @@
 				5F6F0514D8378C0483FC78BE /* InboxNotificationsTests.swift */,
 				CF57114581BA83F81840755B /* NavigationTests.swift */,
 				7B751761CBC12061ED1B5694 /* OpenConversationStoreTests.swift */,
+				FF8E9B9BD32482D539F23E07 /* PlanGuidanceTests.swift */,
 				74F9ECCBA3A3C27943291510 /* ProfileAppearanceTests.swift */,
 				34C26C5FA985B4C6A201CAE9 /* ProfileStoreTests.swift */,
 				C75F2229901EF85748CE39B1 /* ScheduleSharePhotoLibraryTests.swift */,
@@ -861,6 +866,7 @@
 				00F2DD0C7E13C0AE7ECEEB12 /* PlanCancellationSheet.swift */,
 				496182E114CE1ADDF9CBD1B2 /* PlanCardView.swift */,
 				27150D95DF55323B911FAF17 /* PlanCreateSheet.swift */,
+				C442B57FCEDC94450F983926 /* PlanFlowViews.swift */,
 				CA6EAEC43670BED2E9DC894C /* PlansRootView.swift */,
 				6C191A45032E16A760B9C346 /* PlansStore.swift */,
 				DD7104F613D511F0D719BA9D /* ScheduleShareCardView.swift */,
@@ -1238,6 +1244,7 @@
 				79EC6D4BC19B474B33DB432F /* PlanCancellationSheet.swift in Sources */,
 				504A1CFABEDCD77FCD4B366E /* PlanCardView.swift in Sources */,
 				92F1E96FF60238FF1CF57F60 /* PlanCreateSheet.swift in Sources */,
+				9CBFCC8F6AF6BA59FEF3B51E /* PlanFlowViews.swift in Sources */,
 				04972E19F7E6C5E3D96AD230 /* PlansRootView.swift in Sources */,
 				4E2D07BF1D5EC43C407546E3 /* PlansStore.swift in Sources */,
 				0DBF6E74E40C120EF3942418 /* ProductTutorialController.swift in Sources */,
@@ -1318,6 +1325,7 @@
 				F7023DF7D44EA574E377F53E /* InboxNotificationsTests.swift in Sources */,
 				1BB0B635D9F9584EDFA5E1CE /* NavigationTests.swift in Sources */,
 				0A9050448DB9334726FC94A4 /* OpenConversationStoreTests.swift in Sources */,
+				A373F3BC4801DAD43BEE881B /* PlanGuidanceTests.swift in Sources */,
 				EAF190C983026C87BE311BB2 /* ProfileAppearanceTests.swift in Sources */,
 				2DDCA00097CA22D4AFBA4316 /* ProfileStoreTests.swift in Sources */,
 				B17C4DAD1BF034C18A80FD76 /* ScheduleSharePhotoLibraryTests.swift in Sources */,

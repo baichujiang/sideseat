@@ -2644,3 +2644,85 @@
 "Create a new plan to arrange another time." = "Erstelle einen neuen Plan, um einen anderen Termin zu vereinbaren.";
 
 "Back to plans" = "Zurück zu den Plänen";
+
+/* Plan guidance and task-oriented planning, Preview 114 */
+"Planning" = "In Planung";
+"Fill in your free time" = "Trage deine freien Zeiten ein";
+"Invite friends to fill in" = "Freunde zum Ausfüllen einladen";
+"Choose a time for everyone" = "Wähle einen gemeinsamen Termin";
+"Does this time work for you?" = "Passt dir dieser Termin?";
+"Waiting for the organizer" = "Warten auf die organisierende Person";
+"Waiting for confirmations" = "Warten auf Zusagen";
+"Fill in my availability" = "Meine freien Zeiten eintragen";
+"Share with friends" = "Link mit Freunden teilen";
+"View timetable and choose" = "Zeiten ansehen und Termin wählen";
+"View saved availability" = "Gespeicherte Zeiten ansehen";
+"Find a time" = "Zeit finden";
+"Confirm together" = "Zusagen";
+"In your calendars" = "Im Kalender";
+"Share invitation" = "Einladungslink teilen";
+"Make a plan with friends" = "Plane etwas mit Freunden";
+"Share a link. Agree on a time. Find it in Calendar." = "Link teilen, Termin vereinbaren und im Kalender wiederfinden.";
+"Start a new plan" = "Neuen Plan starten";
+"I received a plan link" = "Ich habe einen Planlink erhalten";
+"Your next steps" = "Deine nächsten Schritte";
+"Waiting for others" = "Warten auf andere";
+"Your first plan starts here" = "Dein erster Plan beginnt hier";
+"Not sure when? Collect free time first. Already decided? Send an invitation directly." = "Noch kein Termin? Sammelt freie Zeiten. Termin steht fest? Lade direkt ein.";
+"Organized by you" = "Von dir organisiert";
+"Shared plan" = "Gemeinsamer Plan";
+"Open a plan link" = "Planlink öffnen";
+"Paste the plan link" = "Planlink einfügen";
+"How would you like to plan?" = "Steht euer Termin schon fest?";
+"Choose what you know now. We'll guide you through the next step." = "Wähle eure Situation. Wir führen dich durch die nächsten Schritte.";
+"We haven't picked a time" = "Der Termin steht noch nicht fest";
+"Friends fill in their free time. You choose a time and send an invitation." = "Freunde tragen freie Zeiten ein. Du wählst einen Termin und lädst ein.";
+"We already have a time" = "Der Termin steht bereits fest";
+"Set the date and send a link. Everyone confirms before it goes into Calendar." = "Datum festlegen und Link senden. Nach allen Zusagen erscheint der Plan im Kalender.";
+"Friends can join from the link. No app download needed." = "Freunde können über den Link teilnehmen, ohne die App herunterzuladen.";
+"Next: share the invitation link with friends." = "Danach: Teile den Einladungslink mit deinen Freunden.";
+"Next: fill in your free time and share the link." = "Danach: Trage deine freien Zeiten ein und teile den Link.";
+"Create invitation link" = "Einladungslink erstellen";
+"Create and fill in my time" = "Erstellen und freie Zeiten eintragen";
+"Change planning method" = "Planungsart ändern";
+"What's the plan?" = "Was habt ihr vor?";
+"How many people?" = "Wie viele Personen?";
+"Include yourself. The plan is confirmed when this many people have accepted." = "Dich selbst mitzählen. Der Plan steht, sobald so viele Personen zugesagt haben.";
+"Include yourself. This is an estimate; you choose the final invitation list later." = "Dich selbst mitzählen. Dies ist eine Schätzung; die endgültige Einladungsliste wählst du später.";
+"When are we meeting?" = "Wann trefft ihr euch?";
+"Which days could work?" = "Welche Tage kommen infrage?";
+"Hours to choose from" = "In welchen Stunden sucht ihr?";
+"These are the hours people can mark as free, not the final activity time." = "In diesem Bereich tragen alle freie Zeiten ein. Die genaue Aktivitätszeit legt ihr später fest.";
+"Choose at least one date." = "Wähle mindestens einen Tag.";
+"End time must be after start time." = "Die Endzeit muss nach der Startzeit liegen.";
+"These hours have already passed. Choose a later time or date." = "Diese Zeiten sind bereits vorbei. Wähle eine spätere Zeit oder ein anderes Datum.";
+"No free time" = "Keine freie Zeit";
+"Choose the final time and invite people. Everyone still needs to confirm." = "Wähle den Termin und die Personen. Danach müssen noch alle zusagen.";
+"Share this link so at least one friend can fill in their free time." = "Teile den Link. Sobald mindestens ein Freund freie Zeiten eingetragen hat, kannst du einen Termin auswählen.";
+"Your free time is saved. The organizer will choose a time for you to confirm." = "Deine freien Zeiten sind gespeichert. Sobald ein Termin gewählt wurde, kannst du zusagen.";
+"Tap your free time. Each cell is 30 minutes. Tap a date to select the day." = "Tippe auf freie Zeiten. Ein Feld sind 30 Minuten. Tippe auf ein Datum, um den Tag auszuwählen.";
+"Inviting %d people, including you" = "Einladung für %d Personen, dich eingeschlossen";
+"Sending confirms your participation. Everyone else confirms from the link." = "Mit dem Senden sagst du zu. Alle anderen bestätigen über den Link.";
+"Who's joining?" = "Wer nimmt teil?";
+"%d places still open" = "Noch %d Plätze frei";
+"Choosing another time asks everyone to confirm again." = "Nach einer Terminänderung müssen alle erneut zusagen.";
+"Send the link to friends so they can confirm this time." = "Teile den Link, damit deine Freunde diesen Termin bestätigen können.";
+"View in Calendar" = "Im Kalender ansehen";
+"This plan has been cancelled" = "Dieser Plan wurde abgesagt";
+"You're all set!" = "Alles bestätigt!";
+"This time is confirmed" = "Dieser Termin ist bestätigt";
+"Invite friends to confirm" = "Lade deine Freunde zur Bestätigung ein";
+"You've confirmed. Now wait for the others." = "Du hast zugesagt. Jetzt fehlen noch die anderen.";
+"You've replied that you can't attend" = "Du hast abgesagt";
+"You're viewing the invitation" = "Du siehst dir diese Einladung an";
+"Only invited participants have this plan in their calendars." = "Nur eingeladene Personen sehen diesen Plan in ihrem Kalender.";
+
+"Give your plan a title to continue." = "Gib deinem Plan einen Titel, um fortzufahren.";
+
+"Keep the plan title within 120 characters." = "Der Titel darf höchstens 120 Zeichen lang sein.";
+
+"Keep the location within 200 characters." = "Der Ort darf höchstens 200 Zeichen lang sein.";
+
+"Continue your plans" = "Plane weiter";
+
+"Start with the plans that need you." = "Beginne mit den Plänen, die dich brauchen.";

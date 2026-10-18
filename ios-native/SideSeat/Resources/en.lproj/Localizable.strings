@@ -2645,3 +2645,85 @@
 "Create a new plan to arrange another time." = "Create a new plan to arrange another time.";
 
 "Back to plans" = "Back to plans";
+
+/* Plan guidance and task-oriented planning, Preview 114 */
+"Planning" = "Planning";
+"Fill in your free time" = "Fill in your free time";
+"Invite friends to fill in" = "Invite friends to fill in";
+"Choose a time for everyone" = "Choose a time for everyone";
+"Does this time work for you?" = "Does this time work for you?";
+"Waiting for the organizer" = "Waiting for the organizer";
+"Waiting for confirmations" = "Waiting for confirmations";
+"Fill in my availability" = "Fill in my availability";
+"Share with friends" = "Share with friends";
+"View timetable and choose" = "View timetable and choose";
+"View saved availability" = "View saved availability";
+"Find a time" = "Find a time";
+"Confirm together" = "Confirm together";
+"In your calendars" = "In your calendars";
+"Share invitation" = "Share invitation";
+"Make a plan with friends" = "Make a plan with friends";
+"Share a link. Agree on a time. Find it in Calendar." = "Share a link. Agree on a time. Find it in Calendar.";
+"Start a new plan" = "Start a new plan";
+"I received a plan link" = "I received a plan link";
+"Your next steps" = "Your next steps";
+"Waiting for others" = "Waiting for others";
+"Your first plan starts here" = "Your first plan starts here";
+"Not sure when? Collect free time first. Already decided? Send an invitation directly." = "Not sure when? Collect free time first. Already decided? Send an invitation directly.";
+"Organized by you" = "Organized by you";
+"Shared plan" = "Shared plan";
+"Open a plan link" = "Open a plan link";
+"Paste the plan link" = "Paste the plan link";
+"How would you like to plan?" = "How would you like to plan?";
+"Choose what you know now. We'll guide you through the next step." = "Choose what you know now. We'll guide you through the next step.";
+"We haven't picked a time" = "We haven't picked a time";
+"Friends fill in their free time. You choose a time and send an invitation." = "Friends fill in their free time. You choose a time and send an invitation.";
+"We already have a time" = "We already have a time";
+"Set the date and send a link. Everyone confirms before it goes into Calendar." = "Set the date and send a link. Everyone confirms before it goes into Calendar.";
+"Friends can join from the link. No app download needed." = "Friends can join from the link. No app download needed.";
+"Next: share the invitation link with friends." = "Next: share the invitation link with friends.";
+"Next: fill in your free time and share the link." = "Next: fill in your free time and share the link.";
+"Create invitation link" = "Create invitation link";
+"Create and fill in my time" = "Create and fill in my time";
+"Change planning method" = "Change planning method";
+"What's the plan?" = "What's the plan?";
+"How many people?" = "How many people?";
+"Include yourself. The plan is confirmed when this many people have accepted." = "Include yourself. The plan is confirmed when this many people have accepted.";
+"Include yourself. This is an estimate; you choose the final invitation list later." = "Include yourself. This is an estimate; you choose the final invitation list later.";
+"When are we meeting?" = "When are we meeting?";
+"Which days could work?" = "Which days could work?";
+"Hours to choose from" = "Hours to choose from";
+"These are the hours people can mark as free, not the final activity time." = "These are the hours people can mark as free, not the final activity time.";
+"Choose at least one date." = "Choose at least one date.";
+"End time must be after start time." = "End time must be after start time.";
+"These hours have already passed. Choose a later time or date." = "These hours have already passed. Choose a later time or date.";
+"No free time" = "No free time";
+"Choose the final time and invite people. Everyone still needs to confirm." = "Choose the final time and invite people. Everyone still needs to confirm.";
+"Share this link so at least one friend can fill in their free time." = "Share this link so at least one friend can fill in their free time.";
+"Your free time is saved. The organizer will choose a time for you to confirm." = "Your free time is saved. The organizer will choose a time for you to confirm.";
+"Tap your free time. Each cell is 30 minutes. Tap a date to select the day." = "Tap your free time. Each cell is 30 minutes. Tap a date to select the day.";
+"Inviting %d people, including you" = "Inviting %d people, including you";
+"Sending confirms your participation. Everyone else confirms from the link." = "Sending confirms your participation. Everyone else confirms from the link.";
+"Who's joining?" = "Who's joining?";
+"%d places still open" = "%d places still open";
+"Choosing another time asks everyone to confirm again." = "Choosing another time asks everyone to confirm again.";
+"Send the link to friends so they can confirm this time." = "Send the link to friends so they can confirm this time.";
+"View in Calendar" = "View in Calendar";
+"This plan has been cancelled" = "This plan has been cancelled";
+"You're all set!" = "You're all set!";
+"This time is confirmed" = "This time is confirmed";
+"Invite friends to confirm" = "Invite friends to confirm";
+"You've confirmed. Now wait for the others." = "You've confirmed. Now wait for the others.";
+"You've replied that you can't attend" = "You've replied that you can't attend";
+"You're viewing the invitation" = "You're viewing the invitation";
+"Only invited participants have this plan in their calendars." = "Only invited participants have this plan in their calendars.";
+
+"Give your plan a title to continue." = "Give your plan a title to continue.";
+
+"Keep the plan title within 120 characters." = "Keep the plan title within 120 characters.";
+
+"Keep the location within 200 characters." = "Keep the location within 200 characters.";
+
+"Continue your plans" = "Continue your plans";
+
+"Start with the plans that need you." = "Start with the plans that need you.";

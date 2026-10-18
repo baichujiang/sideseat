@@ -116,6 +116,23 @@ struct NativeTimePollList: Decodable, Sendable {
         let invitedCount: Int?
         let myInvitationStatus: String?
         let isIncluded: Bool?
+        let isOwner: Bool?
+        let didRespond: Bool?
+        let planningMode: String?
+        var confirmationTarget: Int { planningMode == "FIXED" ? expectedCount ?? 2 : invitedCount ?? 0 }
+
+        func nextStep(at now: Date) -> PlanNextStep {
+            switch planningPhase(at: now) {
+            case "COLLECTING":
+                if didRespond != true { return .fillAvailability }
+                if isOwner == true { return (respondedCount ?? 0) > 1 ? .chooseTime : .shareAvailability }
+                return .waitForOrganizer
+            case "INVITING":
+                if isIncluded != false && myInvitationStatus == "INVITED" { return .confirm }
+                return .waitForReplies
+            default: return .viewPlan
+            }
+        }
         func planningPhase(at now: Date) -> String {
             let phase = phase ?? "COLLECTING"
             let deadline = expiresAt ?? (phase == "INVITING" ? chosenStart : nil)

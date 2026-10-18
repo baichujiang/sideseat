@@ -22880,6 +22880,19 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "isOwner": {
+            "type": "boolean"
+          },
+          "didRespond": {
+            "type": "boolean"
+          },
+          "planningMode": {
+            "type": "string",
+            "enum": [
+              "COLLECT",
+              "FIXED"
+            ]
           }
         }
       },

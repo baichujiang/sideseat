@@ -68,10 +68,12 @@ export async function listTimePolls(userId: string, appOrigin: string) {
   const polls = await prisma.timePoll.findMany({
     where: { creatorId: { notIn: hidden }, OR: [{ creatorId: userId }, { responses: { some: { userId } } }, { invitations: { some: { userId } } }] },
     orderBy: { updatedAt: "desc" }, take: 50,
-    select: { creatorId: true, token: true, title: true, timeZone: true, dates: true, endMinute: true, updatedAt: true, phase: true, chosenStart: true, chosenEnd: true, expectedCount: true,
+    select: { creatorId: true, token: true, title: true, timeZone: true, dates: true, endMinute: true, updatedAt: true, phase: true, planningMode: true, chosenStart: true, chosenEnd: true, expectedCount: true,
+      responses: { where: { userId }, select: { id: true } },
       _count: { select: { responses: true } }, invitations: { select: { userId: true, selected: true, status: true } } },
   });
-  return { polls: polls.map(({ _count, invitations, creatorId, endMinute, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+  return { polls: polls.map(({ _count, invitations, responses, creatorId, endMinute, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+    isOwner: creatorId === userId, didRespond: responses.length > 0,
     phase: timePollPhase({ ...poll, endMinute }), expiresAt: timePollExpiresAt({ ...poll, endMinute })?.toISOString() ?? null,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
     respondedCount: _count.responses, acceptedCount: invitations.filter((i) => i.selected && i.status === "ACCEPTED").length,
