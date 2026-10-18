@@ -82,7 +82,6 @@ struct PlansRootView: View {
     @State private var coordinationLoaded = false
     @State private var coordinationError: String?
     @State private var repeatPlan: NativePlanRequest?
-    @ScaledMetric(relativeTo: .subheadline) private var detailIconWidth: CGFloat = 18
 
     var body: some View {
         VStack(spacing: 0) {
@@ -130,6 +129,9 @@ struct PlansRootView: View {
                 else { coordinationError = AppLocalization.string("Enter a Sideseat time poll link.") }
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .onChange(of: coordinatedPlans.isEmpty && store.plans.isEmpty) { _, isEmpty in
+            if !isEmpty { showsPurposeExample = false }
         }
         .onChange(of: router.path) { old, new in
             if !old.isEmpty && new.isEmpty { Task { await loadCoordinatedPlans() } }
@@ -293,24 +295,39 @@ struct PlansRootView: View {
     }
 
     private var planActions: some View {
-        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Text("Find a time your friends can all make").font(.title2.weight(.bold))
-                Text("For meals, study sessions and sports with friends.")
-                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
+        let hasPlans = !coordinatedPlans.isEmpty || !store.plans.isEmpty
+        return VStack(alignment: .leading, spacing: hasPlans ? SideSeatTheme.spaceMD : SideSeatTheme.spaceLG) {
+            if !hasPlans {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    Text("Find a time your friends can all make").font(.title2.weight(.bold))
+                    Text("For meals, study sessions and sports with friends.")
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-            SSPrimaryButton(title: AppLocalization.string("Find a time with friends"), fill: .product,
-                            accessibilityID: "plans-create-primary") { showsPlanCreation = true }
-            Button { planLink = ""; showsOpenPlanLink = true } label: {
-                HStack {
-                    Image(systemName: "link")
-                    Text("Got a friend's link? Fill it in here")
-                    Spacer(minLength: 4)
-                    Image(systemName: "chevron.right").font(.caption.weight(.semibold))
-                }.font(.subheadline.weight(.medium)).frame(minHeight: 44)
-            }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                .accessibilityIdentifier("plans-open-link")
+            let layout = hasPlans && !dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+            layout {
+                SSPrimaryButton(title: AppLocalization.string("Find a time with friends"), fill: .product,
+                                accessibilityID: "plans-create-primary") { showsPlanCreation = true }
+                Button { planLink = ""; showsOpenPlanLink = true } label: {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: "link")
+                        Text(LocalizedStringKey(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here"))
+                            .fixedSize(horizontal: false, vertical: true)
+                        if !hasPlans {
+                            Spacer(minLength: 4)
+                            Image(systemName: "chevron.right").font(.caption.weight(.semibold))
+                        }
+                    }.font(.subheadline.weight(.medium))
+                        .frame(maxWidth: .infinity, minHeight: 48, alignment: hasPlans ? .center : .leading)
+                        .padding(.horizontal, hasPlans ? SideSeatTheme.spaceSM : 0)
+                        .background(hasPlans ? SideSeatTheme.bgGrouped : Color.clear,
+                                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                    .accessibilityIdentifier("plans-open-link")
+            }
             Divider()
             DisclosureGroup(isExpanded: $showsPurposeExample) {
                 PlanPurposeExample().padding(.top, SideSeatTheme.spaceMD)
@@ -321,7 +338,7 @@ struct PlansRootView: View {
                 .accessibilityIdentifier("plans-purpose-example")
 
         }
-        .padding(SideSeatTheme.spaceLG)
+        .padding(hasPlans ? SideSeatTheme.spaceMD : SideSeatTheme.spaceLG)
         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
         .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
     }
@@ -387,35 +404,31 @@ struct PlansRootView: View {
         let presentation = plan.presentation(at: now)
         let step = presentation.nextStep
         return Button { scrollPositions.capture(selectedSection); router.openPlan(token: plan.token) } label: {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                HStack {
-                    PlanStatusBadge(status: presentation.status, needsYou: step.needsYou)
-                    Spacer(minLength: 8)
-                    Text(plan.isOwner == true ? "Organized by you" : "Shared plan")
-                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-                Text(plan.title).font(.title3.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
+            SSFlowCard {
+                PlanCardHeading(title: plan.title, presentation: presentation,
+                    context: AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"))
                 if let start = plan.chosenStart, let end = plan.chosenEnd {
-                    Label(unifiedPlanTimeLabel(start: start, end: end, timeZone: plan.timeZone), systemImage: "calendar")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    PlanCardSchedule(start: start, end: end, timeZone: plan.timeZone)
                 } else if let first = plan.dates.first, let last = plan.dates.last {
-                    Label(timePollDateLabel(first).replacingOccurrences(of: "\n", with: " ") + (first == last ? "" : " – " + timePollDateLabel(last).replacingOccurrences(of: "\n", with: " ")), systemImage: "calendar")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-                PlanNextStepSummary(presentation: presentation)
-                if ["COLLECTING", "INVITING"].contains(phase) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(phase == "COLLECTING"
-                             ? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
-                             : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget))
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        Text("Candidate dates").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Label(timePollDateLabel(first).replacingOccurrences(of: "\n", with: " ")
+                              + (first == last ? "" : " – " + timePollDateLabel(last).replacingOccurrences(of: "\n", with: " ")),
+                              systemImage: "calendar")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                        Text(plan.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }.foregroundStyle(SideSeatTheme.textPrimary)
                 }
-                PlanOpenActionLabel(step: step == .viewCalendar ? .viewPlan : step)
+                if ["COLLECTING", "INVITING"].contains(phase) {
+                    Divider()
+                    PlanCardProgress(title: phase == "COLLECTING"
+                        ? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
+                        : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget),
+                        confirmed: phase == "INVITING" ? plan.acceptedCount ?? 0 : nil,
+                        target: phase == "INVITING" ? plan.confirmationTarget : nil)
+                }
+                PlanCardActionFooter(presentation: presentation)
             }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-coordinated-\(plan.token)")
@@ -550,36 +563,27 @@ struct PlansRootView: View {
         let participant = otherParticipant(for: plan)
         let showsOutcome = plan.isOutcomeEligible()
         let presentation = PlanPresentation.conversation(plan, viewerID: currentUserID, now: now)
-        return SSFlowCard(contentPadding: 14, contentSpacing: SideSeatTheme.spaceSM) {
+        return SSFlowCard(contentSpacing: SideSeatTheme.spaceMD) {
             Button {
                 scrollPositions.capture(selectedSection)
                 router.navigate(to: MVPPlanRoute.route(for: plan))
             } label: {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    planTitleHeader(plan, section: section)
-
-                    planDetails(plan, section: section, showsFullDate: showsFullDate)
-
-                    let participantLayout = dynamicTypeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
-                        : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-                    participantLayout {
-                        HStack(spacing: 6) {
-                            InitialAvatar(name: participant.displayName, url: participant.avatarUrl, size: 18)
-                                .accessibilityHidden(true)
-                            Text(plan.status == "PENDING"
-                                ? String(format: AppLocalization.string(plan.receiver.id == currentUserID
-                                    ? "%@ invited you" : "You invited %@"), participant.displayName)
-                                : participant.displayName)
-                                .font(.footnote)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 4) }
-                        PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou)
+                    PlanCardHeading(title: plan.title, presentation: presentation)
+                    if let start = plan.startDate, let end = plan.endDate {
+                        PlanCardSchedule(start: start, end: end, location: plan.location,
+                            relative: section == .ended ? nil : PlanRelativeTime.value(status: plan.status, start: start, end: end, now: now)?.title)
                     }
-                    PlanNextStepSummary(presentation: presentation)
-                    PlanOpenActionLabel(step: presentation.nextStep == .viewCalendar ? .viewPlan : presentation.nextStep)
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        InitialAvatar(name: participant.displayName, url: participant.avatarUrl, size: 24).accessibilityHidden(true)
+                        Text(plan.status == "PENDING"
+                            ? String(format: AppLocalization.string(plan.receiver.id == currentUserID
+                                ? "%@ invited you" : "You invited %@"), participant.displayName)
+                            : participant.displayName)
+                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    PlanCardActionFooter(presentation: presentation)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
@@ -607,48 +611,6 @@ struct PlansRootView: View {
         }
     }
 
-    private func planTitleHeader(_ plan: NativePlanRequest, section: MVPPlanSection) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
-            Text(plan.title)
-                .font(.headline)
-                .foregroundStyle(section == .ended ? SideSeatTheme.textSecondaryStrong : SideSeatTheme.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(SideSeatTheme.textSecondary)
-                .accessibilityHidden(true)
-        }
-    }
-
-    @ViewBuilder
-    private func planDetails(_ plan: NativePlanRequest, section: MVPPlanSection, showsFullDate: Bool) -> some View {
-        let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        VStack(alignment: .leading, spacing: 5) {
-            if let start = plan.startDate, let end = plan.endDate {
-                let time = planTimeSummary(start: start, end: end, includesDay: section != .upcoming || showsFullDate)
-                let relative = section == .ended ? nil
-                    : PlanRelativeTime.value(status: plan.status, start: start, end: end, now: now)?.title
-                Label {
-                    (Text(relative.map { "\($0) · " } ?? "").fontWeight(.semibold) + Text(time))
-                        .fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: "clock").frame(width: detailIconWidth)
-                }
-                .foregroundStyle(section == .ended ? SideSeatTheme.textSecondaryStrong : SideSeatTheme.textPrimary)
-            }
-            if !location.isEmpty {
-                Label {
-                    Text(location).fixedSize(horizontal: false, vertical: true)
-                } icon: {
-                    Image(systemName: "mappin.and.ellipse").frame(width: detailIconWidth)
-                }
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            }
-        }
-        .font(.subheadline)
-    }
-
     private func planDaySummary(_ date: Date) -> String {
         let calendar = Calendar.autoupdatingCurrent
         let locale = AppLocalization.selectedLanguage.locale
@@ -656,18 +618,6 @@ struct PlansRootView: View {
             return date.formatted(.dateTime.month(.abbreviated).day().weekday(.abbreviated).locale(locale))
         }
         return date.formatted(.dateTime.year().month(.abbreviated).day().locale(locale))
-    }
-
-    private func planTimeSummary(start: Date, end: Date, includesDay: Bool) -> String {
-        let calendar = Calendar.autoupdatingCurrent
-        let locale = AppLocalization.selectedLanguage.locale
-        let startTime = start.formatted(.dateTime.hour().minute().locale(locale))
-        let endTime = end.formatted(.dateTime.hour().minute().locale(locale))
-        if calendar.isDate(start, inSameDayAs: end) {
-            let prefix = includesDay ? "\(planDaySummary(start)) · " : ""
-            return "\(prefix)\(startTime)–\(endTime)"
-        }
-        return "\(planDaySummary(start)) \(startTime) – \(planDaySummary(end)) \(endTime)"
     }
 
     private func statusLabel(

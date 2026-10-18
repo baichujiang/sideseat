@@ -11,7 +11,7 @@ import XCTest
             app = XCUIApplication()
         }
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
-            "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-local-api"]
+            "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-local-api", "--ui-testing-plans-empty"]
         // Presentation needs no server or changes to the owner's account.
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()

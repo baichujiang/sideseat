@@ -229,6 +229,9 @@ struct PlanStatusBadge: View {
         Label(status.title, systemImage: status.symbol)
             .font(.caption.weight(.semibold)).foregroundStyle(foreground)
             .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .padding(.vertical, SideSeatTheme.spaceXS)
+            .background(foreground.opacity(0.08), in: Capsule())
             .accessibilityIdentifier(identifier)
     }
 }
@@ -261,6 +264,130 @@ struct PlanOpenActionLabel: View {
         .foregroundStyle(step.needsYou ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
         .padding(.horizontal, step.needsYou ? 12 : 0).frame(minHeight: 46)
         .background(step.needsYou ? SideSeatTheme.ProductAction.fill : Color.clear,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+    }
+}
+
+/// Shared card anatomy only; callers own navigation and all plan mutations.
+struct PlanCardHeading: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let title: String
+    let presentation: PlanPresentation
+    var context: String? = nil
+    var titleIdentifier: String? = nil
+    var statusIdentifier = "plan-display-status"
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
+            layout {
+                PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou,
+                                identifier: statusIdentifier)
+                if let context {
+                    if !typeSize.isAccessibilitySize { Spacer(minLength: 4) }
+                    Text(context).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            if let titleIdentifier {
+                titleText.accessibilityIdentifier(titleIdentifier)
+            } else { titleText }
+        }
+    }
+
+    private var titleText: some View {
+        Text(title).font(.title3.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+            .fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct PlanCardSchedule: View {
+    let start: Date
+    let end: Date
+    var timeZone: String = TimeZone.current.identifier
+    var location: String? = nil
+    var relative: String? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: "calendar").font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong).padding(.top, 2).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    Text(dateText).font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                    Text(clockText).font(.title3.weight(.semibold).monospacedDigit())
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let relative {
+                        Text(relative).font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
+                    Text(timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if let location = location?.trimmingCharacters(in: .whitespacesAndNewlines), !location.isEmpty {
+                Label(location, systemImage: "mappin.and.ellipse").font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+            }
+        }.foregroundStyle(SideSeatTheme.textPrimary)
+    }
+
+    private func formatter(_ template: String) -> DateFormatter {
+        let format = DateFormatter()
+        format.locale = AppLocalization.selectedLanguage.locale
+        format.timeZone = TimeZone(identifier: timeZone) ?? .current
+        format.setLocalizedDateFormatFromTemplate(template)
+        return format
+    }
+    private var dateText: String {
+        let format = formatter("yMMMdEEE")
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = format.timeZone
+        let first = format.string(from: start)
+        return calendar.isDate(start, inSameDayAs: end) ? first : first + " – " + format.string(from: end)
+    }
+    private var clockText: String {
+        let format = formatter("jmm")
+        return format.string(from: start) + " – " + format.string(from: end)
+    }
+}
+
+struct PlanCardProgress: View {
+    let title: String
+    var confirmed: Int? = nil
+    var target: Int? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Label(title, systemImage: "person.2")
+                .font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+            if let confirmed, let target, target > 0 {
+                ProgressView(value: Double(min(confirmed, target)), total: Double(target))
+                    .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
+            }
+        }
+    }
+}
+
+struct PlanCardActionFooter: View {
+    let presentation: PlanPresentation
+
+    private var step: PlanNextStep { presentation.nextStep == .viewCalendar ? .viewPlan : presentation.nextStep }
+    var body: some View {
+        HStack(alignment: .center, spacing: SideSeatTheme.spaceMD) {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                if presentation.nextStep.title != step.action {
+                    Text(presentation.nextStep.title).font(.caption)
+                        .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("plan-next-step")
+                }
+                Text(step.action).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "arrow.right").font(.subheadline.weight(.semibold)).accessibilityHidden(true)
+        }
+        .foregroundStyle(step.needsYou ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
+        .padding(SideSeatTheme.spaceMD).frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+        .background(step.needsYou ? SideSeatTheme.ProductAction.fill : SideSeatTheme.bgGrouped,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 }

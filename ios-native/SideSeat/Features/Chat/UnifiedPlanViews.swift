@@ -133,34 +133,31 @@ struct UnifiedPlanConfirmationView: View {
         ScrollViewReader { reader in
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                    if ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
-                        PlanJourneyProgress(phase: poll.planningPhase, fixed: poll.planningMode == "FIXED")
-                    }
-                    PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou,
-                                    identifier: "unified-plan-phase")
-                    PlanNextStepSummary(presentation: presentation)
-                    Text(poll.title).font(.headline).accessibilityIdentifier("time-poll-detail-title")
-                    if let start = poll.chosenStart, let end = poll.chosenEnd {
-                        Label(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone), systemImage: "calendar")
-                            .font(.body.weight(.medium)).fixedSize(horizontal: false, vertical: true)
-                    }
-                    if let location = poll.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.subheadline) }
-                    Text(String(format: AppLocalization.string("All times in %@"), poll.timeZone))
-                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                if ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
+                    PlanJourneyProgress(phase: poll.planningPhase, fixed: poll.planningMode == "FIXED")
                 }
-                .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                SSFlowCard {
+                    PlanCardHeading(title: poll.title, presentation: presentation,
+                        context: AppLocalization.string(poll.isOwner ? "Organized by you" : "Shared plan"),
+                        titleIdentifier: "time-poll-detail-title", statusIdentifier: "unified-plan-phase")
+                    if let start = poll.chosenStart, let end = poll.chosenEnd {
+                        PlanCardSchedule(start: start, end: end, timeZone: poll.timeZone, location: poll.location)
+                    }
+                    Divider()
+                    PlanNextStepSummary(presentation: presentation)
+                }
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
                     InvitationTimetableView(title: poll.title, location: poll.location, start: start, end: end, timeZone: poll.timeZone, needsConfirmation: canReply && mine?.status != "ACCEPTED")
                 }
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                SSFlowCard {
                     HStack {
                         Text("Who's joining?").font(.headline)
                         Spacer()
                         Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
                             .font(.subheadline.weight(.medium)).accessibilityIdentifier("unified-plan-confirmation-count")
                     }
+                    ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
+                        .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
                     ForEach(poll.allInvitations.filter(\.selected)) { person in
                         HStack(spacing: SideSeatTheme.spaceMD) {
                             Image(systemName: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock")
@@ -187,8 +184,7 @@ struct UnifiedPlanConfirmationView: View {
                         Button { draftName = poll.myDisplayName; showsName = true } label: { Label("Edit nickname", systemImage: "pencil") }
                             .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("time-poll-edit-name")
                     }
-                }.padding(SideSeatTheme.spaceLG)
-                    .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                }
                 if !poll.isOwner && mine == nil && poll.planningMode != "FIXED" {
                     Text("You are not included in this invitation. Your availability is saved.")
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("unified-plan-not-included")

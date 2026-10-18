@@ -478,7 +478,9 @@ import XCTest
         let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 20))
         for _ in 0..<8 where !card.isHittable { app.swipeUp() }
-        XCTAssertTrue(card.isHittable); card.tap()
+        XCTAssertTrue(card.isHittable)
+        capture(app, "native-list-" + String(UUID().uuidString.prefix(8)))
+        card.tap()
     }
     private func nativeAssertInline() {
         XCTAssertFalse(app.buttons["time-poll-switch-view"].exists)

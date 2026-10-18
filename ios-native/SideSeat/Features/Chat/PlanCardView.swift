@@ -29,20 +29,10 @@ struct PlanCardView: View {
     }
 
     private var card: some View {
-        SSFlowCard(contentPadding: 12, contentSpacing: SideSeatTheme.spaceSM) {
+        SSFlowCard(contentSpacing: SideSeatTheme.spaceMD) {
             HStack(alignment: .top) {
-                let titleLayout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
-                    : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
-                titleLayout {
-                    Text(plan.title)
-                        .font(.headline)
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou)
-                }
-                .accessibilityIdentifier("plan-card-\(plan.id)")
+                PlanCardHeading(title: plan.title, presentation: presentation,
+                                titleIdentifier: "plan-card-\(plan.id)")
                 if canCancel {
                     Menu {
                         Button(role: .destructive, action: onWithdraw) {
@@ -57,19 +47,17 @@ struct PlanCardView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                if let start = plan.startDate, let end = plan.endDate {
-                    TimelineView(.periodic(from: .now, by: 60)) { context in
-                        planDateDetails(start: start, end: end, now: context.date)
-                    }
+            if let start = plan.startDate, let end = plan.endDate {
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    PlanCardSchedule(start: start, end: end, location: plan.location,
+                        relative: PlanRelativeTime.value(status: status, start: start, end: end, now: context.date)?.title)
                 }
-                if let location = plan.location?.trimmingCharacters(in: .whitespacesAndNewlines), !location.isEmpty {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("plan-card-time-\(plan.id)")
+            } else if let location = plan.location, !location.isEmpty {
+                Label(location, systemImage: "mappin.and.ellipse").font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            .font(.footnote)
-            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
 
             PlanNextStepSummary(presentation: presentation, showsDetail: status == "PENDING" && !canRespond && !isRescheduleProposal)
 
@@ -163,10 +151,7 @@ struct PlanCardView: View {
                 }
             }
         }
-        .frame(
-            maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 340,
-            alignment: .leading
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var canCancel: Bool {
@@ -208,25 +193,6 @@ struct PlanCardView: View {
             .buttonStyle(SSPressButtonStyle())
         }
         .disabled(isActing)
-    }
-
-    private func planDateDetails(start: Date, end: Date, now: Date) -> some View {
-        let calendar = Calendar.autoupdatingCurrent
-        let locale = AppLocalization.selectedLanguage.locale
-        let dates: String
-        if calendar.isDate(start, inSameDayAs: end) {
-            dates = "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))–\(end.formatted(.dateTime.hour().minute().locale(locale)))"
-        } else {
-            dates = "\(start.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale))) – \(end.formatted(.dateTime.year().month(.abbreviated).day().hour().minute().locale(locale)))"
-        }
-        let relative = PlanRelativeTime.value(status: status, start: start, end: end, now: now)
-        return Label {
-            (Text(relative.map { "\($0.title) · " } ?? "").fontWeight(.semibold) + Text(dates))
-                .fixedSize(horizontal: false, vertical: true)
-        } icon: {
-            Image(systemName: "calendar")
-        }
-        .accessibilityIdentifier("plan-card-time-\(plan.id)")
     }
 
     private var canRespond: Bool {

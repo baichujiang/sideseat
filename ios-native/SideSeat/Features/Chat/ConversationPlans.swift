@@ -196,9 +196,9 @@ struct ConversationPlanBar: View {
                     Image(systemName: "calendar").font(.body).dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .foregroundStyle(SideSeatTheme.utilityAction)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(fullTitle).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         Text(plan.title).font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
                         Text(ConversationPlanSelection.time(plan)).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        Text(fullTitle).font(.caption.weight(.medium)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -263,15 +263,16 @@ struct ConversationPlansSheet: View {
                                             onSelect(plan)
                                         } label: {
                                             VStack(alignment: .leading, spacing: 4) {
-                                                Text(plan.title).font(.headline)
+                                                PlanCardHeading(title: plan.title,
+                                                    presentation: .conversation(plan, viewerID: viewerID, now: now))
                                                 if group.plans.count > 1 {
                                                     Text(plan.status == "ACCEPTED" ? "Confirmed time" : "Proposed new time")
                                                         .font(.caption.weight(.semibold))
                                                 }
-                                                PlanStatusBadge(status: PlanPresentation.conversation(plan, viewerID: viewerID, now: now).status)
-                                                Text(ConversationPlanSelection.time(plan)).font(.subheadline)
-                                                PlanNextStepSummary(presentation: .conversation(plan, viewerID: viewerID, now: now), showsDetail: false)
-                                                if let location = plan.location, !location.isEmpty { Text(location).font(.footnote) }
+                                                if let start = plan.startDate, let end = plan.endDate {
+                                                    PlanCardSchedule(start: start, end: end, location: plan.location)
+                                                }
+                                                PlanCardActionFooter(presentation: .conversation(plan, viewerID: viewerID, now: now))
                                             }
                                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                                             .contentShape(Rectangle())
