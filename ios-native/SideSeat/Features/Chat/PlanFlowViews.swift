@@ -309,10 +309,15 @@ struct PlanCardSchedule: View {
     var timeZone: String = TimeZone.current.identifier
     var location: String? = nil
     var relative: String? = nil
+    var compact = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+            if compact {
+                Text(dateText + " · " + clockText).font(.footnote)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            } else { HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
                 Image(systemName: "calendar").font(.subheadline)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong).padding(.top, 2).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
@@ -324,7 +329,7 @@ struct PlanCardSchedule: View {
                     }
                     Text(timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }.frame(maxWidth: .infinity, alignment: .leading)
-            }
+            } }
             if let location = location?.trimmingCharacters(in: .whitespacesAndNewlines), !location.isEmpty {
                 Label(location, systemImage: "mappin.and.ellipse").font(.subheadline)
                     .foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)

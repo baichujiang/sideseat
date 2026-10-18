@@ -18,8 +18,21 @@ shared backend capabilities separately, only after validating their contracts.
 The native list, manual detail, conversation summary/list and chat plan card use
 one read-only presentation vocabulary. `PlanPresentation` adapts the existing
 `NativeTimePoll` / list DTO and `NativePlanRequest`; it never writes or converts
-persisted records. `PlanStatusBadge`, `PlanNextStepSummary` and
-`PlanOpenActionLabel` share the view implementation.
+persisted records. `PlanStatusBadge`, `PlanNextStepSummary`, `PlanCardSchedule`
+and the card heading/action components share the view implementation.
+
+The Plans overview uses a vertical task group for the viewer's next steps and a
+horizontal rail for plans waiting on others. The rail previews the next card,
+snaps to card boundaries and provides View all / Show fewer plans. One item fills
+the available width. Accessibility text sizes use a wrapping vertical group so
+large text remains readable. These are layout choices over the same classification,
+records and detail routes; browsing or expanding never sends a reply. The rail
+owns horizontal gestures without switching the surrounding Plans section pager.
+
+Existing-plan creation/link controls sit directly on the page, with the purpose
+example still available. Empty accounts keep the full introduction. The next
+meet-up uses a compact date summary; complete Upcoming and Past views retain
+their existing cards and actions.
 
 | Display status | Viewer's next step |
 | --- | --- |
@@ -52,9 +65,7 @@ Dark mode and accessibility text sizes use the same wrapping components.
 - No public discovery, Pod, group chat, old Action acquisition entry or archived
   feature is enabled.
 
-The larger flow proposals discussed before this stage (collection capacity,
-explicit initial time/roster selection and expanded rescheduling) are separate
-follow-up work. This stage does not claim they have shipped.
-
-Validation and actual installation are recorded in the dated Preview 117 QA and
-release documents, rather than inferred from this design contract.
+The owner requested a saved flow baseline before the card refresh:
+[baseline version 1](./PLAN_FLOW_BASELINE_2026-10-18.md). Current validation and
+installation are recorded in the dated QA/release documents and
+[deployment state](./DEPLOYED_STATE.md), rather than inferred from this contract.

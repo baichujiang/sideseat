@@ -104,7 +104,9 @@ import XCTest
         app.buttons["plan-copy-link"].tap()
         XCTAssertEqual(app.buttons["plan-copy-link"].label, "链接已复制")
 
-        safari.activate()
+        // Start a fresh Safari automation session while retaining its tabs and website data.
+        safari.terminate()
+        safari.launch()
         let done = safari.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成"])).firstMatch
         if done.exists { done.tap() }
         let address = safari.textFields["TabBarItemTitle"]

@@ -3,13 +3,14 @@ import XCTest
 @MainActor final class PlanStatePresentationUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private func launch(accessibility: Bool = false) {
+    private func launch(accessibility: Bool = false, layout: Bool = false) {
         if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
             app = XCUIApplication(bundleIdentifier: bundle)
         } else { app = XCUIApplication() }
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
             "--ui-testing-skip-tutorial", "--ui-testing-chats", "--ui-testing-language=zh-Hans", "--ui-testing-local-api"]
         if accessibility { app.launchArguments += ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] }
+        if layout { app.launchArguments += ["--ui-testing-plans-mixed-waiting", "--ui-testing-plans-waiting-rail"] }
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
@@ -56,9 +57,66 @@ import XCTest
         capture("large-text-confirmed")
     }
 
+    func testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan() {
+        continueAfterFailure = false
+        launch(layout: true)
+        let firstTask = app.buttons["plans-row-ui-plan-1"]
+        let secondTask = app.buttons["plans-row-ui-plan-incoming-extra"]
+        reveal(firstTask); reveal(secondTask)
+        XCTAssertEqual(firstTask.frame.minX, secondTask.frame.minX, accuracy: 2)
+        XCTAssertGreaterThan(secondTask.frame.minY, firstTask.frame.minY)
+        capture("horizontal-needs-you")
+        let rail = app.scrollViews["plans-waiting-rail"]
+        reveal(rail)
+        let last = app.buttons["plans-row-ui-plan-outgoing-3"]
+        let first = app.buttons["plans-row-ui-plan-outgoing"]
+        XCTAssertGreaterThan(last.frame.minX, first.frame.minX)
+        for _ in 0..<4 where !last.isHittable || last.frame.maxX > rail.frame.maxX + 2 {
+            rail.swipeLeft(velocity: .slow)
+        }
+        XCTAssertTrue(last.isHittable)
+        XCTAssertLessThanOrEqual(last.frame.maxX, rail.frame.maxX + 2)
+        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected,
+                      "Horizontal plan browsing must not switch the main section")
+        capture("horizontal-waiting-last")
+        let toggle = app.buttons["plans-toggle-outgoing"]
+        reveal(toggle); toggle.tap()
+        XCTAssertFalse(rail.exists)
+        reveal(last)
+        XCTAssertEqual(last.frame.minX, first.frame.minX, accuracy: 2)
+        XCTAssertGreaterThan(last.frame.minY, first.frame.minY)
+        capture("horizontal-view-all")
+        reveal(toggle); toggle.tap()
+        XCTAssertTrue(rail.waitForExistence(timeout: 5))
+        reveal(rail)
+        for _ in 0..<4 where !first.isHittable { rail.swipeRight(velocity: .slow) }
+        XCTAssertTrue(first.isHittable); first.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(rail.waitForExistence(timeout: 10))
+    }
+
+    func testWaitingPlansReflowWithMaximumTextAndStayOpenable() {
+        continueAfterFailure = false
+        launch(accessibility: true, layout: true)
+        XCTAssertFalse(app.scrollViews["plans-waiting-rail"].exists)
+        let first = app.buttons["plans-row-ui-plan-outgoing"]
+        let last = app.buttons["plans-row-ui-plan-outgoing-3"]
+        reveal(first); reveal(last)
+        XCTAssertEqual(first.frame.minX, last.frame.minX, accuracy: 2)
+        XCTAssertGreaterThan(last.frame.minY, first.frame.minY)
+        capture("horizontal-large-text-waiting")
+        first.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+    }
+
     private func reveal(_ element: XCUIElement) {
         XCTAssertTrue(element.waitForExistence(timeout: 10))
-        for _ in 0..<8 where !element.isHittable { app.swipeUp() }
+        let scroll = app.scrollViews["plans-scroll-waitingResponse"].firstMatch
+        for _ in 0..<16 where !element.isHittable {
+            if element.frame.midY < scroll.frame.minY { app.swipeDown() }
+            else { app.swipeUp() }
+        }
         XCTAssertTrue(element.isHittable)
     }
 

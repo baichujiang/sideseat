@@ -125,6 +125,21 @@ final class PlansStore {
                         from: JSONSerialization.data(withJSONObject: item)))
                 }
             }
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-waiting-rail"),
+               let outgoing = plans.first(where: { $0.id == "ui-plan-outgoing" }) {
+                for index in 1...3 {
+                    var item = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(outgoing)) as! [String: Any]
+                    item["id"] = "ui-plan-outgoing-\(index)"
+                    item["title"] = ["期中复习小组", "周末一起去徒步", "周五一起吃饭"][index - 1]
+                    plans.append(try! JSONDecoder().decode(NativePlanRequest.self,
+                        from: JSONSerialization.data(withJSONObject: item)))
+                }
+                var incoming = try! JSONSerialization.jsonObject(with: JSONEncoder().encode(plans[0])) as! [String: Any]
+                incoming["id"] = "ui-plan-incoming-extra"
+                incoming["title"] = "研讨课后一起整理复习笔记"
+                plans.append(try! JSONDecoder().decode(NativePlanRequest.self,
+                    from: JSONSerialization.data(withJSONObject: incoming)))
+            }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-long-list") {
                 plans = plans.flatMap { plan in
                     (0..<8).map { index in
