@@ -69,6 +69,10 @@ import XCTest
                                    "Actionable plans need independent boundaries and space")
         XCTAssertEqual(firstTask.value as? String, "待你确认")
         XCTAssertTrue(firstTask.label.contains("查看邀请"))
+        XCTAssertLessThanOrEqual(firstTask.frame.height, 164, "Keep the standard task card compact")
+        XCTAssertLessThanOrEqual(secondTask.frame.height, 184, "Allow one extra title line without a large card")
+        print("PLAN_CARD_METRIC task \(firstTask.frame.height)")
+        print("PLAN_CARD_METRIC taskLongTitle \(secondTask.frame.height)")
         capture("horizontal-needs-you")
         let rail = app.scrollViews["plans-waiting-rail"]
         reveal(rail)
@@ -87,6 +91,8 @@ import XCTest
         XCTAssertLessThanOrEqual(last.frame.maxX, rail.frame.maxX + 2)
         XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected,
                       "Horizontal plan browsing must not switch the main section")
+        XCTAssertLessThanOrEqual(last.frame.height, 148, "Waiting cards should remain compact summaries")
+        print("PLAN_CARD_METRIC waiting \(last.frame.height)")
         capture("horizontal-waiting-last")
         let toggle = app.buttons["plans-toggle-outgoing"]
         reveal(toggle); toggle.tap()
@@ -127,6 +133,8 @@ import XCTest
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         XCTAssertTrue(row.label.contains("Dinner in town"))
         XCTAssertFalse(row.label.contains("Europe/Berlin"))
+        XCTAssertLessThanOrEqual(row.frame.height, 124, "The date summary should stay compact")
+        print("PLAN_CARD_METRIC upcoming \(row.frame.height)")
         capture("upcoming-date-summary")
         row.tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))

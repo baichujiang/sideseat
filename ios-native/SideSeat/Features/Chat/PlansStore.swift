@@ -36,8 +36,17 @@ final class PlansStore {
                 plans = []; return
             }
             let formatter = ISO8601DateFormatter()
-            let pendingStart = Date().addingTimeInterval(24 * 60 * 60)
-            let acceptedStart = Date().addingTimeInterval(48 * 60 * 60)
+            let usesCardLayoutFixture = ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-waiting-rail")
+            let calendar = Calendar.autoupdatingCurrent
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: Date()))!
+            // Stable daytime examples make height budgets and screenshots independent of test-run time.
+            let pendingStart = usesCardLayoutFixture
+                ? calendar.date(byAdding: .hour, value: 14, to: tomorrow)!
+                : Date().addingTimeInterval(24 * 60 * 60)
+            let acceptedStart = usesCardLayoutFixture
+                ? calendar.date(byAdding: .hour, value: 18,
+                                to: calendar.date(byAdding: .day, value: 1, to: tomorrow)!)!
+                : Date().addingTimeInterval(48 * 60 * 60)
             let completedStart = Date().addingTimeInterval(-2 * 60 * 60)
             plans = [
                 NativePlanRequest(

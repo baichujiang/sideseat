@@ -376,7 +376,7 @@ struct PlansRootView: View {
                         Spacer(minLength: SideSeatTheme.spaceSM)
                         if !dynamicTypeSize.isAccessibilitySize {
                             Button(showsAllWaiting ? "Show fewer plans" : "View all") { showsAllWaiting.toggle() }
-                                .font(.subheadline).frame(minHeight: 44)
+                                .font(.footnote.weight(.medium)).frame(minHeight: 44)
                                 .accessibilityIdentifier("plans-toggle-outgoing")
                                 .accessibilityValue(AppLocalization.string(showsAllWaiting ? "Expanded" : "Collapsed"))
                         }
@@ -415,10 +415,7 @@ struct PlansRootView: View {
                             }
                         }
                         .accessibilityIdentifier("plans-waiting-rail")
-                        if waiting.count + outgoing.count > 1 {
-                            Label("Swipe to see more plans", systemImage: "arrow.left.and.right")
-                                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        }
+                        .accessibilityHint("Swipe to see more plans")
                     }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-waiting-others")
             }
@@ -429,7 +426,8 @@ struct PlansRootView: View {
                     HStack {
                         Text("Next meet-up").font(.headline)
                         Spacer()
-                        Button("View all") { selectedSection = .upcoming }.frame(minHeight: 44)
+                        Button("View all") { selectedSection = .upcoming }
+                            .font(.footnote.weight(.medium)).frame(minHeight: 44)
                             .accessibilityIdentifier("plans-view-shared-upcoming")
                     }
                     if let shared, (shared.chosenStart ?? .distantFuture) <= (chat?.startDate ?? .distantFuture) {
@@ -456,7 +454,7 @@ struct PlansRootView: View {
             PlanOverviewLabel(title: plan.title, presentation: plan.presentation(at: now), style: style,
                 start: plan.chosenStart, end: plan.chosenEnd, timeZone: plan.timeZone,
                 candidateDates: plan.dates, now: now,
-                context: AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"),
+                context: style == .meetup ? "" : AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"),
                 progress: progress)
         }
         .buttonStyle(SSPressButtonStyle())
@@ -568,10 +566,7 @@ struct PlansRootView: View {
             Text(count.formatted())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .padding(.horizontal, 7)
-                .padding(.vertical, 3)
-                .background(needsAttention ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillTertiary,
-                    in: Capsule())
+
         }
         .accessibilityElement(children: .combine)
         .accessibilityValue(count.formatted())
@@ -752,7 +747,7 @@ private struct PlanOverviewLabel: View {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
               now: now, locale: AppLocalization.selectedLanguage.locale)
     }
-    private var secondary: Color { SideSeatTheme.textSecondaryStrong }
+    private var secondary: Color { SideSeatTheme.textSecondaryStrong.opacity(0.82) }
 
     var body: some View {
         Group {
@@ -765,11 +760,11 @@ private struct PlanOverviewLabel: View {
         .foregroundStyle(SideSeatTheme.textPrimary)
         .padding(SideSeatTheme.spaceLG)
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-        .background(style == .waiting ? SideSeatTheme.fillTertiary : SideSeatTheme.surface,
+        .background(SideSeatTheme.surface,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
         .overlay {
             RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
-                .strokeBorder(SideSeatTheme.separator, lineWidth: style == .waiting ? 0 : 0.5)
+                .strokeBorder(SideSeatTheme.separator.opacity(0.45), lineWidth: 0.5)
         }
         .contentShape(Rectangle())
     }
@@ -778,7 +773,7 @@ private struct PlanOverviewLabel: View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             Label(presentation.cardStatusTitle, systemImage: presentation.nextStep.symbol)
                 .font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.statusWarningText)
-            activityTitle(.title3)
+            activityTitle(.headline)
             schedule
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
@@ -787,7 +782,9 @@ private struct PlanOverviewLabel: View {
                 Text(progress ?? context).font(.caption).foregroundStyle(secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                action.prominentAction()
+                action.font(.footnote.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .frame(minHeight: 24, alignment: .leading)
             }.padding(.top, SideSeatTheme.spaceXS)
         }
     }
@@ -796,7 +793,7 @@ private struct PlanOverviewLabel: View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             Label(presentation.cardStatusTitle, systemImage: "clock")
                 .font(.caption).foregroundStyle(secondary)
-            activityTitle(.headline)
+            activityTitle(.callout)
             schedule
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
@@ -813,39 +810,39 @@ private struct PlanOverviewLabel: View {
     private var meetup: some View {
         let layout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
         return layout {
             if let start {
                 VStack(spacing: 2) {
                     Text(timing.datePart(start, template: "MMM")).font(.caption.weight(.medium))
-                    Text(timing.dayNumber(start)).font(.largeTitle.weight(.semibold)).monospacedDigit()
-                    Text(timing.datePart(start, template: "EEE")).font(.caption)
+                    Text(timing.dayNumber(start)).font(.title.weight(.semibold)).monospacedDigit()
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                    Text(timing.datePart(start, template: "EEE")).font(.caption2)
                 }
-                .frame(minWidth: 52).foregroundStyle(SideSeatTheme.textPrimary)
+                .frame(minWidth: 44).foregroundStyle(secondary)
                 .accessibilityHidden(true)
             }
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                 Text(presentation.status.title).font(.caption.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.statusSuccessText)
                 activityTitle(.headline)
-                Text(timing.clockText ?? timing.dateText).font(.subheadline.weight(.semibold)).monospacedDigit()
+                Text(timing.clockText ?? timing.dateText).font(.subheadline.weight(.medium)).monospacedDigit()
                     .fixedSize(horizontal: false, vertical: true)
                 // The complete date stays available to VoiceOver; the visible date column is decorative.
                     .accessibilityLabel(timing.dateText + ", " + (timing.clockText ?? ""))
                 if let start, timing.datePart(start, template: "y") != timing.datePart(now, template: "y") {
                     Text(timing.datePart(start, template: "y")).font(.caption).foregroundStyle(secondary)
                 }
-                if let location, !location.isEmpty {
-                    Text(location).font(.caption).foregroundStyle(secondary)
+                let metadata = [location, context].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+                if !metadata.isEmpty {
+                    Text(metadata).font(.caption).foregroundStyle(secondary)
                         .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 }
                 zone
-                Text(context).font(.caption).foregroundStyle(secondary)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
             }.frame(maxWidth: .infinity, alignment: .leading)
             if !typeSize.isAccessibilitySize {
-                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(secondary)
-                    .accessibilityHidden(true)
+                Image(systemName: "chevron.right").font(.caption2.weight(.semibold)).foregroundStyle(secondary)
+                    .padding(.top, SideSeatTheme.spaceMD).accessibilityHidden(true)
             }
         }
         .accessibilityHint(presentation.cardActionTitle)
@@ -883,16 +880,6 @@ private struct PlanOverviewLabel: View {
             Text(presentation.cardActionTitle).fixedSize(horizontal: false, vertical: true)
             Image(systemName: "arrow.right").accessibilityHidden(true)
         }
-    }
-}
-
-private extension View {
-    func prominentAction() -> some View {
-        self.font(.subheadline.weight(.semibold))
-            .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceSM)
-            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-            .background(SideSeatTheme.ProductAction.fill,
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 }
 

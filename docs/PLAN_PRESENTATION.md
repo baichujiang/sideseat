@@ -32,6 +32,17 @@ Local overview dates omit the current year and technical timezone identifier. Cr
 dates, other years and foreign-zone context remain explicit, including DST offset changes.
 The detail timetable keeps the complete original date/time/zone information.
 
+The visual refinement keeps one adaptive card surface and a restrained hairline, instead
+of giving waiting cards a disabled-looking solid gray fill. Task actions are compact text
+and arrow affordances within the single card button. Titles follow headline/callout scales;
+metadata is quieter, section counts are unboxed, and Upcoming merges location/peer into one
+secondary line. The decorative date column aligns with the text at the top and remains
+flexible at accessibility sizes. Horizontal peeking and View all remain visible; the swipe
+hint is available to accessibility without adding a permanent helper row.
+Standard Chinese, one-line-title fixture budgets are 164pt for task, 148pt for waiting and
+124pt for upcoming. These are UI regression limits, not fixed production heights: long or
+cross-day/foreign-zone content and accessibility sizes can grow naturally without cropping.
+
 The horizontal rail previews the next card,
 snaps to card boundaries and provides View all / Show fewer plans. One item fills
 the available width. Accessibility text sizes use a wrapping vertical group so
