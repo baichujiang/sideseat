@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-18T19:48:21.224479+00:00",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceId": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "nativeUITestsExecuted": 0,
+  "webPhoneUITestsExecuted": 0,
+  "reason": "Xcode device preparation stopped before tests: Unlock iPhone (4) to Continue; passcodeRequired=true.",
+  "previewInstalled": "123",
+  "normalLaunchVerified": false,
+  "previousFullPhoneVerification": "Preview 122; not evidence for 123",
+  "userUnlockRequested": true,
+  "scope": "Initial locked preflight only; not the final test verdict",
+  "resolved": true,
+  "subsequentActualDeviceVerification": "phone-flow.json",
+  "finalNormalLaunch": "device-final.json"
+}

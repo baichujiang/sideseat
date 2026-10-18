@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "b438a8581c8ddaf8a9b96f98edcfa725b414be64",
+  "previewBuild": "123",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "strictSignaturePassed": true,
+  "nativeBuildSucceeded": true,
+  "installationSucceeded": true,
+  "sourceSHA256": {
+    "ios-native/SideSeat/Features/Chat/TimePoll.swift": "46dcf782740e826405e80d0f4be7f7550ccefc92f8d78c57ea068a773da41134",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "568313ccfab9b9750c312406231e8926e49f21344cf8df8f66a15603bc28df7e",
+    "components/time-polls/invitation-timetable.tsx": "7f19479c043ebc85eb1f053c0d5b57a6b4beaa71cfb816456d1718232630a92a",
+    "components/time-polls/shared-time-poll.tsx": "c8e66b03300b442971ffb9fe578b39a8f9cb415a91258de2a0c1f2d0cb8b228c",
+    "components/time-polls/shared-time-poll.module.css": "43765dc71caf8c115d237dc16ba7e6cb3cbb816f5853db9b8e7e58cd387f4344",
+    "lib/time-polls/browser-types.ts": "c9bb750bcd94b8bc12ffddf79d7b8a1259e67e725f3c664d781d14dccd9e4bd6"
+  },
+  "webSourceCommit": "e484b77431e57ed3a9290b4880f2a55eb6cbf908"
+}

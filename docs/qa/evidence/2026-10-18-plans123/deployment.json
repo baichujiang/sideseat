@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-18T19:52:29.892Z",
+  "sourceCommit": "e484b77431e57ed3a9290b4880f2a55eb6cbf908",
+  "deploymentId": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "url": "https://sideseat-p02igf8pp-baichus-projects.vercel.app",
+  "productionURL": "https://www.sideseat.de",
+  "target": "production",
+  "status": "READY",
+  "framework": "Next.js 15.5.23",
+  "durationSeconds": 125.033,
+  "queueAndBuildSeconds": 201.322,
+  "promotedWithoutRebuild": true,
+  "aliases": [
+    {
+      "host": "api.sideseat.de",
+      "deploymentId": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn"
+    },
+    {
+      "host": "www.sideseat.de",
+      "deploymentId": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn"
+    },
+    {
+      "host": "sideseat.de",
+      "deploymentId": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn"
+    }
+  ],
+  "migrationsExplicitlySkipped": true,
+  "schemaChanged": false,
+  "sourceFiles": 1351,
+  "preservedSourceFiles": 1346,
+  "unusedStagedDeployments": [
+    "dpl_8keG6fka3z5vXSsDuUTaKLZAY6Bi",
+    "dpl_Bh3gmZPzDEPVGLWoQLhJx5mtsMbV"
+  ],
+  "unusedStagedDeploymentsPromoted": false
+}

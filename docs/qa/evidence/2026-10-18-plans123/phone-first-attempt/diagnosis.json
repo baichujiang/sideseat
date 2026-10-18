@@ -1,0 +1,9 @@
+{
+  "nativeFailure": "Timed out locating plan-invitation-cell-1 at PlanFirstUsePhoneUITests.swift:335.",
+  "diagnosis": "The outer SwiftUI accessibility identifier propagated to all timetable descendants, overriding per-row identifiers. The captured accessibility tree still showed the correct highlighted rows with Invited time values and Selected traits.",
+  "productFix": "Remove the unused parent accessibility identifier; retain each row identifier, label, read-only value and Selected trait.",
+  "nativeAPIPartialChecks": 6,
+  "apiObserverFailure": "The roster-reviewed checkpoint was read after the subsequent send action changed COLLECTING to INVITING.",
+  "qaFix": "Hold native checkpoint state for three seconds while the strict Mac API checks run; all data assertions remain.",
+  "retry": "Fresh disposable accounts and a rebuilt/reinstalled native Preview 123; browser product unchanged."
+}

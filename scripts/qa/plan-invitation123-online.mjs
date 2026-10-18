@@ -88,6 +88,18 @@ try {
       await page.reload(); await expect(page.getByRole('heading', { name: '最后一步：确认最终时间', exact: true })).toBeVisible();
       const invited = page.getByTestId('plan-invitation-timetable');
       await expect(invited).toBeVisible(); await expect(invited.locator('[data-highlighted="true"]')).toHaveCount(3);
+      async function checkFirstView(label) {
+        const confirm = page.getByRole('button', { name: '确认参加', exact: true });
+        const highlighted = invited.locator('[data-highlighted="true"]');
+        await expect.poll(async () => {
+          const first = await highlighted.first().boundingBox(), last = await highlighted.last().boundingBox(), action = await confirm.boundingBox();
+          return !!first && !!last && !!action && first.y >= 0 && last.y + last.height < action.y;
+        }).toBe(true);
+        const heading = await invited.getByRole('heading', { name: '受邀时间表', exact: true }).boundingBox();
+        assert(heading && heading.y >= 0, 'Invitation context stays visible before any table interaction.');
+        await page.screenshot({ path: `${out}/${stage}-${engineName}-${label}-viewport.png` });
+      }
+      await checkFirstView('invitation');
       assert.equal(await page.getByTestId('plan-invitation-cell-1').locator('td > div').evaluate(el => el.style.top), '50%');
       await expect(invited.locator('button,input')).toHaveCount(0);
       await page.getByTestId('plan-invitation-cell-1').click();
@@ -115,6 +127,7 @@ try {
       await expect(page.getByTestId('time-poll-grid')).toHaveCount(0);
       await expect(page.getByTestId('plan-invitation-timetable').locator('[data-highlighted="true"]')).toHaveCount(3);
       await expect(page.getByTestId('plan-invitation-cell-1')).toContainText('22:00');
+      await checkFirstView('fixed');
       await page.screenshot({ path: `${out}/${stage}-${engineName}-fixed-invitation.png`, fullPage: true });
       await page.getByRole('button', { name: 'Switch to English', exact: true }).click();
       await page.getByRole('button', { name: 'Confirm participation', exact: true }).click();

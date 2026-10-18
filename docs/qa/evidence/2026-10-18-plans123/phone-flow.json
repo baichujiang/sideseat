@@ -1,0 +1,26 @@
+{
+  "acceptedFlows": [
+    {
+      "flow": "App \u2192 Safari \u2192 invitation \u2192 explicit acceptance \u2192 Calendar",
+      "sourceCommit": "e484b77431e57ed3a9290b4880f2a55eb6cbf908",
+      "durationSeconds": 147.349,
+      "result": "Passed",
+      "evidence": "phone-first-attempt/phone-flow.json",
+      "apiCheckpoints": 8
+    },
+    {
+      "flow": "Native two-account timetable \u2192 invitation \u2192 dark accessibility text \u2192 explicit acceptance \u2192 Calendar",
+      "sourceCommit": "b438a8581c8ddaf8a9b96f98edcfa725b414be64",
+      "durationSeconds": 253.634,
+      "result": "Passed",
+      "evidence": "phone-native-flow.json",
+      "apiCheckpoints": 12
+    }
+  ],
+  "acceptedFlowsPassed": 2,
+  "physicalDevice": "iPhone 14 Plus / 00008110-001A69110CC1401E",
+  "historicalFailedNativeExecutions": 1,
+  "firstFailureAndFix": "phone-first-attempt/diagnosis.json",
+  "initialLockedPreflightExecutedTests": 0,
+  "unrelatedHistoricalTestsRerun": false
+}

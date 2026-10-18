@@ -1,0 +1,6 @@
+{
+  "command": "npx tsx --test tests/time-polls/invitation-timetable.test.ts",
+  "passed": 3,
+  "failed": 0,
+  "checkedAt": "2026-10-18T19:38:38.113963+00:00"
+}

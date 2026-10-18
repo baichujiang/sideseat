@@ -1,0 +1,17 @@
+{
+  "candidateDeployment": "dpl_8keG6fka3z5vXSsDuUTaKLZAY6Bi",
+  "sourceCommit": "ff5539db6a23604cffb1ce38e4c068570a6cf662",
+  "baseDeployment": "dpl_APapk63YMWww6wjmBxVxHUKbDNrj",
+  "expectedFiles": 1351,
+  "uploadedFiles": 1351,
+  "sha1AllMatched": true,
+  "preservedSourceFiles": 1346,
+  "overlays": [
+    "components/time-polls/shared-time-poll.tsx",
+    "components/time-polls/shared-time-poll.module.css",
+    "lib/time-polls/browser-types.ts",
+    "components/time-polls/invitation-timetable.tsx"
+  ],
+  "schemaChanged": false,
+  "migrationsExplicitlySkipped": true
+}

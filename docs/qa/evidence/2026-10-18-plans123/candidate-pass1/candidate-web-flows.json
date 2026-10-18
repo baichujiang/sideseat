@@ -1,0 +1,18 @@
+{
+  "base": "https://sideseat-p02igf8pp-baichus-projects.vercel.app",
+  "stage": "candidate",
+  "realNetwork": true,
+  "checkedAt": "2026-10-18T19:50:18.507Z",
+  "checks": [
+    "chromium: real name/save/wait keeps COLLECTING and calendar empty",
+    "chromium: read-only partial invitation and reschedule highlight preserve replies and require new explicit acceptance",
+    "chromium: same-name resume → exact invitation → explicit acceptance → one Calendar entry",
+    "chromium: FIXED name does not accept; English explicit confirmation writes Calendar",
+    "webkit: real name/save/wait keeps COLLECTING and calendar empty",
+    "webkit: read-only partial invitation and reschedule highlight preserve replies and require new explicit acceptance",
+    "webkit: same-name resume → exact invitation → explicit acceptance → one Calendar entry",
+    "webkit: FIXED name does not accept; English explicit confirmation writes Calendar"
+  ],
+  "passed": 8,
+  "failed": 0
+}

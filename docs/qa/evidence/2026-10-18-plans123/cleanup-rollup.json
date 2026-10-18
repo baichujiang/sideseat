@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-18T20:06:18.350253+00:00",
+  "temporaryAccountsDeleted": 5,
+  "plansDeleted": 15,
+  "shareLinksRejected404": 15,
+  "oldTokensRejected401": 5,
+  "remainingPlans": 0,
+  "privateFixturesAndCandidateCookiesRemoved": true,
+  "qaRunnerRemoved": true,
+  "local3099ServerStopped": true
+}

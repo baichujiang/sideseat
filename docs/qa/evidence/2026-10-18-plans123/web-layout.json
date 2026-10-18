@@ -1,0 +1,21 @@
+{
+  "base": "http://127.0.0.1:3099",
+  "syntheticNetwork": true,
+  "checkedAt": "2026-10-18T19:42:41.204Z",
+  "checks": [
+    "chromium/320: name → availability → wait → final invitation → explicit confirmation; mobile and desktop layout",
+    "chromium/320: fixed time skips availability; English explicit confirmation",
+    "chromium/320: cross-midnight date headers and exact partial boundaries",
+    "chromium/390: name → availability → wait → final invitation → explicit confirmation; mobile and desktop layout",
+    "chromium/390: fixed time skips availability; English explicit confirmation",
+    "chromium/390: cross-midnight date headers and exact partial boundaries",
+    "webkit/320: name → availability → wait → final invitation → explicit confirmation; mobile and desktop layout",
+    "webkit/320: fixed time skips availability; English explicit confirmation",
+    "webkit/320: cross-midnight date headers and exact partial boundaries",
+    "webkit/390: name → availability → wait → final invitation → explicit confirmation; mobile and desktop layout",
+    "webkit/390: fixed time skips availability; English explicit confirmation",
+    "webkit/390: cross-midnight date headers and exact partial boundaries"
+  ],
+  "passed": 12,
+  "failed": 0
+}
