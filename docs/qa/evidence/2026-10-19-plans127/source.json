@@ -1,0 +1,63 @@
+{
+  "commit": "f0dc53e1e9434a582e30565990ad32c055b3ed1a",
+  "pushed": true,
+  "previewBuild": "127",
+  "builtSourceVerifiedUnchanged": {
+    "ios-native/Configuration/Preview.xcconfig": "5d6ddac9cdda7ae4434b9cae8afe2830263b6a8de9e16e8001f5c4a2eae61c3e",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "53ca12063b8a4a0e4a955cf7cd704609dedb9eca6913b46e8a33b2031a5d0ad3",
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "6912f33537ada4a93febbc29d3e4f921b2659bc8ab1028890a4ee0d54a51978a",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "159bb73dfca33cfa97811c822d944b7028f10e0d2e2a94632b7baf00f27437f6",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "575e4148123d6c226d4f94dc44d9c1c3beb1182f63cd32b7dceae949eb6fb5bb",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "2e7a3b148194b9a9929f4519ced0fe699ac80d8a68dbe0094b9e390545f533cf"
+  },
+  "files": [
+    {
+      "path": "docs/PLAN_PRESENTATION.md",
+      "sha256": "282fa05e9b7638b78af6f2cbaad22f6451147220d44e1dd1a194c522982b2c83"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "5d6ddac9cdda7ae4434b9cae8afe2830263b6a8de9e16e8001f5c4a2eae61c3e"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/PlanPresentation.swift",
+      "sha256": "6912f33537ada4a93febbc29d3e4f921b2659bc8ab1028890a4ee0d54a51978a"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/PlansRootView.swift",
+      "sha256": "53ca12063b8a4a0e4a955cf7cd704609dedb9eca6913b46e8a33b2031a5d0ad3"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/de.lproj/Localizable.strings",
+      "sha256": "575e4148123d6c226d4f94dc44d9c1c3beb1182f63cd32b7dceae949eb6fb5bb"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
+      "sha256": "159bb73dfca33cfa97811c822d944b7028f10e0d2e2a94632b7baf00f27437f6"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings",
+      "sha256": "2e7a3b148194b9a9929f4519ced0fe699ac80d8a68dbe0094b9e390545f533cf"
+    },
+    {
+      "path": "ios-native/SideSeatTests/PlanPresentationTests.swift",
+      "sha256": "9e951fa5d14ed5f91a61d7ce45114af347ae6de3047e44d48879052f4767197a"
+    },
+    {
+      "path": "ios-native/SideSeatUITests/PlanFirstUsePhoneUITests.swift",
+      "sha256": "5df09aaea641900c1fa123696ef74c94db5613ace661b546b1af26f956496d72"
+    },
+    {
+      "path": "ios-native/SideSeatUITests/PlanStatePresentationUITests.swift",
+      "sha256": "2e2d86e95e8d76229f0acfc6f3365bf3d70c074c8ebc0c82d7fe6c190dffe7f5"
+    },
+    {
+      "path": "scripts/qa/plan-first-use-phone.mjs",
+      "sha256": "4f62a96834980b567b63136bc91648ab623dad221f03a7214d5ae4482c1d6a0c"
+    },
+    {
+      "path": "scripts/qa/plan-participant-phone.mjs",
+      "sha256": "eea69d158b8e23062052685c2d32f9db8419093cecb8518cc247ba402b28ee7c"
+    }
+  ]
+}

@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 126 详情来源 `3e4e70f9`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (126)` | 时间表为核心、名单按需展开、底部操作分层；25 项单元、263.027 秒原生与 150.573 秒 Safari 完整真机、47.175 秒首页回归及 12+8 个 API 阶段通过；严格签名/安装/普通启动 PID 1741 已核验；[126 交付](./releases/2026-10-19-preview126-timetable-detail.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；126 两条完整链路、时间表主次/名单展开/高亮位置/深色最大字号与首页横滑通过；首轮 Safari 测试路径失败保留；QA runner 移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 127 卡片来源 `f0dc53e1`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (127)` | 独立待处理任务卡、较轻横向等待摘要、日期优先的即将开始，状态与入口按用户任务表达；28 项单元、8 项真机（259.921 秒原生 / 154.251 秒 Safari 完整链路）、12+8 个 API 阶段通过；严格签名/安装/普通启动 PID 1826 已核验；[127 交付](./releases/2026-10-19-preview127-plan-card-hierarchy.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；127 两条完整链路、三类卡片及实际已确认摘要、深色最大字号、横滑/展开/返回通过；初始失败和中止执行独立保留；QA runner 移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn`，Ready | 受邀时段表格与明确确认统一；候选两轮各 8 组、正式 8 组真实浏览器流程、手机 Safari 147.349 秒及八阶段 API 通过，7 项健康 HTTP 200；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
 | 生产源码 | 原生产 1,349 项校验重建，保留 1,346 项；三个网页文件更新，新增组件及来源记录；1,351 项上传 SHA-1 全匹配 | 网页来源 `e484b774`；API/Schema 保留，迁移显式跳过；同一生产候选验证后原样提升；[清单](./qa/evidence/2026-10-18-plans123/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans123/upload-verification.json) |
+
+127 重做三类计划卡片：待处理独立边界和明确入口；等待其他人保留较轻的横向摘要与进度；即将开始使用日期柱。状态按当前用户表达，紧凑日期保留跨日/跨年/异地时区，详情和 userflow 基准不变。28 项单元、8 项最终真机、259.921 秒原生与 154.251 秒 Safari 完整链路、12+8 个 API 阶段通过。5 个临时账号和 3 个计划/链接回收；127 普通启动 PID 1826 核验。本轮无后端/网页发布。[完整 QA](./qa/2026-10-19-plans127.md)。
 
 126 重排详情：平面活动与状态、核心时间表、表下确认进度和展开名单、底部当前阶段动作，复制链接为次要图标；原 flow 和数据合同保留。25 项单元、263.027 秒原生与 150.573 秒 Safari 两条完整真机、47.175 秒首页回归及 12+8 个 API 阶段通过。首轮测试漏同步名单入口，修正测试路径后用新账号完整复验，原失败记录保留。4 个临时账号、3 个计划/链接回收，QA runner 移除，126 普通启动 PID 1741 已核验；本轮无后端/网页发布。[完整 QA](./qa/2026-10-19-plans126.md)。
 

@@ -1,0 +1,312 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "AEBD816E-53A7-4012-B76A-FEF82CF02A6B",
+      "deviceName" : "SideSeat UX QA",
+      "modelName" : "iPhone 17 Pro",
+      "osBuildNumber" : "23F77",
+      "osVersion" : "26.5",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "0,0027s",
+                  "durationInSeconds" : 0.0027039051055908203,
+                  "name" : "Organizer can share before filling and choose a time after a friend responds",
+                  "nodeIdentifier" : "PlanGuidanceTests/organizerJourney()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanGuidanceTests/organizerJourney()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0011s",
+                  "durationInSeconds" : 0.0010831356048583984,
+                  "name" : "A participant who filled in waits for an invitation rather than being asked to repeat",
+                  "nodeIdentifier" : "PlanGuidanceTests/participantJourney()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanGuidanceTests/participantJourney()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00023s",
+                  "durationInSeconds" : 0.000225067138671875,
+                  "name" : "Open fixed invitations use expected count, collected invitations use the actual roster",
+                  "nodeIdentifier" : "PlanGuidanceTests/actualConfirmationTarget()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanGuidanceTests/actualConfirmationTarget()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00061s",
+                  "durationInSeconds" : 0.0006058216094970703,
+                  "name" : "Terminal and elapsed plans do not ask for input",
+                  "nodeIdentifier" : "PlanGuidanceTests/closedPlans()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanGuidanceTests/closedPlans()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanGuidanceTests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanGuidanceTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0,00075s",
+                  "durationInSeconds" : 0.0007510185241699219,
+                  "name" : "The same pending invitation has the same status and next step across plan types",
+                  "nodeIdentifier" : "PlanPresentationTests/pendingEquivalence()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/pendingEquivalence()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00037s",
+                  "durationInSeconds" : 0.0003719329833984375,
+                  "name" : "The sender, accepting participant, declined participant and excluded participant see different tasks",
+                  "nodeIdentifier" : "PlanPresentationTests/roles()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/roles()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0053s",
+                  "durationInSeconds" : 0.005304098129272461,
+                  "name" : "An open invitation offers explicit confirmation, while unselected collection respondents cannot join",
+                  "nodeIdentifier" : "PlanPresentationTests/fixedAndRosterRemainDistinct()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/fixedAndRosterRemainDistinct()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00039s",
+                  "durationInSeconds" : 0.00038504600524902344,
+                  "name" : "Only confirmed participants get Calendar guidance; elapsed time never creates attendance feedback for manual plans",
+                  "nodeIdentifier" : "PlanPresentationTests/calendarAndFeedbackBoundary()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/calendarAndFeedbackBoundary()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00014s",
+                  "durationInSeconds" : 0.00014281272888183594,
+                  "name" : "Rescheduling retains the existing confirmed-time rule and never changes the persisted invitation",
+                  "nodeIdentifier" : "PlanPresentationTests/rescheduleKeepsContract()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/rescheduleKeepsContract()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00035s",
+                  "durationInSeconds" : 0.00034809112548828125,
+                  "name" : "Expired, cancelled and superseded plans never request confirmation",
+                  "nodeIdentifier" : "PlanPresentationTests/terminalStates()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/terminalStates()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00038s",
+                  "durationInSeconds" : 0.0003750324249267578,
+                  "name" : "Overview status names the viewer's task without changing the invitation lifecycle",
+                  "nodeIdentifier" : "PlanPresentationTests/overviewPerspective()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/overviewPerspective()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0019s",
+                  "durationInSeconds" : 0.0019118785858154297,
+                  "name" : "Compact dates retain cross-midnight and cross-year meaning",
+                  "nodeIdentifier" : "PlanPresentationTests/overviewDates()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/overviewDates()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0057s",
+                  "durationInSeconds" : 0.005651950836181641,
+                  "name" : "Only a different viewer zone needs an explicit overview zone; DST offsets remain visible",
+                  "nodeIdentifier" : "PlanPresentationTests/overviewZones()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests/overviewZones()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Shared plan presentation preserves separate contracts",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/PlanPresentationTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "0,00035s",
+                  "durationInSeconds" : 0.00034618377685546875,
+                  "name" : "Paint and erase a rectangle without toggling revisited cells",
+                  "nodeIdentifier" : "TimePollTests/rectangles()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/rectangles()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00016s",
+                  "durationInSeconds" : 0.00015783309936523438,
+                  "name" : "Partial legacy cells fill explicitly and heatmap counts only whole-cell attendees",
+                  "nodeIdentifier" : "TimePollTests/legacyHalfHours()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/legacyHalfHours()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0009s",
+                  "durationInSeconds" : 0.0009019374847412109,
+                  "name" : "Invitation timetable focuses the actual time without depending on candidate slots",
+                  "nodeIdentifier" : "TimePollTests/invitationTimetable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/invitationTimetable()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0036s",
+                  "durationInSeconds" : 0.003595113754272461,
+                  "name" : "Invitation timetable keeps legacy quarter-hour edges exact",
+                  "nodeIdentifier" : "TimePollTests/invitationTimetablePartial()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/invitationTimetablePartial()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0014s",
+                  "durationInSeconds" : 0.0013659000396728516,
+                  "name" : "Invitation timetable separates midnight and repeated DST times",
+                  "nodeIdentifier" : "TimePollTests/invitationTimetableDates()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/invitationTimetableDates()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00022s",
+                  "durationInSeconds" : 0.00021910667419433594,
+                  "name" : "Final time spans continuous half-hour cells in either direction without changing replies",
+                  "nodeIdentifier" : "TimePollTests/finalTimeRange()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/finalTimeRange()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,000096s",
+                  "durationInSeconds" : 9.608268737792969e-05,
+                  "name" : "Final time cannot span different dates or gaps",
+                  "nodeIdentifier" : "TimePollTests/finalTimeBoundaries()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/finalTimeBoundaries()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00032s",
+                  "durationInSeconds" : 0.0003180503845214844,
+                  "name" : "Whole-day final time preserves midnight and an odd legacy boundary",
+                  "nodeIdentifier" : "TimePollTests/finalTimeWholeDay()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/finalTimeWholeDay()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0007s",
+                  "durationInSeconds" : 0.0006999969482421875,
+                  "name" : "Invite links use the Sideseat domain and route into the native feature",
+                  "nodeIdentifier" : "TimePollTests/links()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/links()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0064s",
+                  "durationInSeconds" : 0.0063629150390625,
+                  "name" : "Inline timetable counts the current draft once and preserves other replies",
+                  "nodeIdentifier" : "TimePollTests/inlineTimetableCounts()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/inlineTimetableCounts()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,015s",
+                  "durationInSeconds" : 0.014991998672485352,
+                  "name" : "Quick consecutive drags save in order and leave the latest draft acknowledged",
+                  "nodeIdentifier" : "TimePollTests/autosaveOrder()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/autosaveOrder()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,029s",
+                  "durationInSeconds" : 0.028862953186035156,
+                  "name" : "Switching accounts drops queued availability from the previous account",
+                  "nodeIdentifier" : "TimePollTests/autosaveAccountScope()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/autosaveAccountScope()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,0021s",
+                  "durationInSeconds" : 0.002087116241455078,
+                  "name" : "A delayed refresh cannot undo an acknowledged save or report an old refresh error",
+                  "nodeIdentifier" : "TimePollTests/refreshAfterSave()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/refreshAfterSave()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,002s",
+                  "durationInSeconds" : 0.0020241737365722656,
+                  "name" : "A refresh started before cancellation cannot restore the confirmed state",
+                  "nodeIdentifier" : "TimePollTests/refreshAfterMutation()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/refreshAfterMutation()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00046s",
+                  "durationInSeconds" : 0.0004608631134033203,
+                  "name" : "A refresh already in flight cannot replace a nickname being edited",
+                  "nodeIdentifier" : "TimePollTests/refreshDuringNameEdit()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests/refreshDuringNameEdit()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "Native time polls",
+              "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests/TimePollTests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "SideSeatTests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/SideSeat/SideSeatTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "SideSeat-Development",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

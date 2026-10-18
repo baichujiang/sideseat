@@ -1,0 +1,63 @@
+{
+  "unitTests": {
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      "PlanPresentationTests",
+      "PlanGuidanceTests",
+      "TimePollTests"
+    ]
+  },
+  "finalPhysicalBatches": [
+    {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "includes": "Real native full journey and five card presentation tests"
+    },
+    {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "includes": "Real Safari full journey and real confirmed manual Upcoming summary"
+    }
+  ],
+  "fullNativeFlowSeconds": 259.921,
+  "fullSafariFlowSeconds": 154.251,
+  "realUpcomingSummarySeconds": 15.878,
+  "railRegressionSeconds": 47.965,
+  "realAPICheckpoints": [
+    12,
+    8
+  ],
+  "visualReview": [
+    "Separate task boundaries, viewer task wording, single review affordance",
+    "Quieter horizontal waiting cards fully visible above tab bar",
+    "Date-first upcoming in next meet-up and full section",
+    "Real manual upcoming summary opens same confirmed plan",
+    "Maximum accessibility text uses vertical waiting footer"
+  ],
+  "initialAttempts": {
+    "presentationPreflight": "Moved xctestrun needed absolute TESTROOT paths; no tests ran before path correction",
+    "presentationFirstBatch": {
+      "passed": 4,
+      "failed": 1,
+      "reason": "List fixture includes accepted record but chat fixture has only ui-plan-1; assertion incorrectly expected an absent accepted-record Calendar control. Final list test checks navigation/return, and a separate real manual confirmed-plan test verifies exact title/time/status and existing Calendar action."
+    },
+    "nativeInitialRun": "Stopped during visual review to reflow large-text waiting footer. Not accepted as final flow evidence; two disposable accounts and one plan/link cleaned before fresh final run."
+  },
+  "fixtureCleanupTotals": {
+    "temporaryAccountsDeleted": 5,
+    "shareLinksRejected404": 3,
+    "remainingPlans": 0
+  },
+  "unchangedContracts": [
+    "Saved flow baseline version 1",
+    "Existing records, rules, invitation version and roster",
+    "Availability is separate from explicit attendance consent",
+    "No Calendar entries until everyone included confirms",
+    "Bilateral and manual backend contracts remain separate"
+  ],
+  "backendOrWebDeployments": false
+}

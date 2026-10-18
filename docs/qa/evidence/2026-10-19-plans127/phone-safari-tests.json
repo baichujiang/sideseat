@@ -1,0 +1,62 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "00008110-001A69110CC1401E",
+      "deviceName" : "iPhone (4)",
+      "modelName" : "iPhone 14 Plus",
+      "osBuildNumber" : "23G83",
+      "osVersion" : "26.6.1",
+      "platform" : "iOS"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "2分钟34秒",
+                  "durationInSeconds" : 154.25104403495789,
+                  "name" : "testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+                  "nodeIdentifier" : "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "15秒",
+                  "durationInSeconds" : 15.87816298007965,
+                  "name" : "testNativeConfirmedPlanUsesUpcomingSummary()",
+                  "nodeIdentifier" : "PlanFirstUsePhoneUITests/testNativeConfirmedPlanUsesUpcomingSummary()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testNativeConfirmedPlanUsesUpcomingSummary",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanFirstUsePhoneUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "PlanPresentationPhone117UITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "PlanPresentationPhone117",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}
