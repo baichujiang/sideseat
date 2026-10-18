@@ -427,7 +427,8 @@ struct TimePollDetailView: View {
                 Image(systemName: poll.isOwner ? "paperplane.circle.fill" : "checkmark.circle.fill")
                     .font(.system(size: 44)).foregroundStyle(poll.isOwner ? SideSeatTheme.utilityAction : SideSeatTheme.statusSuccessText)
                     .accessibilityHidden(true)
-                PlanTaskHeader(step: "Your free time is saved", title: poll.isOwner ? "Now send it to your friends" : "You're done for now",
+                PlanStatusBadge(status: poll.presentation(at: now).status, needsYou: poll.presentation(at: now).nextStep.needsYou)
+                PlanTaskHeader(step: "Your free time is saved", title: poll.presentation(at: now).nextStep.title,
                                detail: poll.isOwner ? "Share the link in your group chat. Friends can fill in without downloading the app." : "The organizer will pick a time. You'll receive an invitation to confirm next.")
                     .accessibilityIdentifier("plan-handoff-guidance")
                 Text(poll.title).font(.headline).accessibilityIdentifier("time-poll-result-heading")
@@ -453,6 +454,7 @@ struct TimePollDetailView: View {
 
     private func collectionHeader(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            PlanStatusBadge(status: poll.presentation(at: now).status, needsYou: !results || poll.presentation(at: now).nextStep.needsYou)
             HStack(alignment: .firstTextBaseline) {
                 Text(poll.title).font(.headline)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-detail-title")

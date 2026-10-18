@@ -34,22 +34,14 @@ enum ConversationPlanSelection {
     }
 
     static func title(_ plan: NativePlanRequest, viewerID: String, now: Date) -> String {
-        if plan.cancellation != nil || plan.status == "CANCELED" { return AppLocalization.string("Viewing · Canceled") }
-        if !isCurrent(plan, at: now) { return AppLocalization.string("Viewing · Ended") }
-        if plan.status == "ACCEPTED" {
-            return AppLocalization.string((plan.startDate ?? .distantFuture) <= now ? "In progress" : "Next meet-up · Confirmed")
-        }
-        if plan.receiver.id == viewerID { return AppLocalization.string("Waiting for your reply") }
-        return String(format: AppLocalization.string("Waiting for %@"), plan.receiver.displayName)
+        let presentation = PlanPresentation.conversation(plan, viewerID: viewerID, now: now)
+        if !isCurrent(plan, at: now) { return AppLocalization.string("Viewing") + " · " + presentation.status.title }
+        return [presentation.status.title, presentation.nextStep.title].joined(separator: " · ")
     }
 
     static func compactTitle(_ plan: NativePlanRequest, viewerID: String, now: Date) -> String {
-        if plan.cancellation != nil || plan.status == "CANCELED" { return AppLocalization.string("Canceled") }
-        if !isCurrent(plan, at: now) { return AppLocalization.string("Ended") }
-        if plan.status == "ACCEPTED" {
-            return AppLocalization.string((plan.startDate ?? .distantFuture) <= now ? "In progress" : "Confirmed")
-        }
-        return AppLocalization.string(plan.receiver.id == viewerID ? "Reply needed (compact)" : "Awaiting reply (compact)")
+        let presentation = PlanPresentation.conversation(plan, viewerID: viewerID, now: now)
+        return presentation.status == .awaitingConfirmation ? presentation.nextStep.title : presentation.status.title
     }
 
     static func time(_ plan: NativePlanRequest) -> String {
@@ -133,9 +125,7 @@ struct ConversationPlanBar: View {
 
     private var usesCompactLayout: Bool { dynamicTypeSize.isAccessibilitySize || expandedHeight > maximumHeight }
     private var fullTitle: String {
-        isFocused && plan.status == "ACCEPTED" && ConversationPlanSelection.isCurrent(plan, at: now)
-            ? AppLocalization.string("Viewing · Confirmed")
-            : ConversationPlanSelection.title(plan, viewerID: viewerID, now: now)
+        ConversationPlanSelection.title(plan, viewerID: viewerID, now: now)
     }
     private var participant: String { (plan.proposer.id == viewerID ? plan.receiver : plan.proposer).displayName }
 
@@ -278,7 +268,9 @@ struct ConversationPlansSheet: View {
                                                     Text(plan.status == "ACCEPTED" ? "Confirmed time" : "Proposed new time")
                                                         .font(.caption.weight(.semibold))
                                                 }
+                                                PlanStatusBadge(status: PlanPresentation.conversation(plan, viewerID: viewerID, now: now).status)
                                                 Text(ConversationPlanSelection.time(plan)).font(.subheadline)
+                                                PlanNextStepSummary(presentation: .conversation(plan, viewerID: viewerID, now: now), showsDetail: false)
                                                 if let location = plan.location, !location.isEmpty { Text(location).font(.footnote) }
                                             }
                                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)

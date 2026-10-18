@@ -15,12 +15,17 @@ struct PlanCardView: View {
     let onOpenCalendar: () -> Void
     var onRepeat: (() -> Void)? = nil
 
+    private var presentation: PlanPresentation {
+        .conversation(plan, viewerID: currentUserID, now: Date())
+    }
+
     private var status: String {
-        plan.status == "PENDING" && (plan.startDate ?? .distantFuture) <= Date() ? "EXPIRED" : plan.status
+        plan.cancellation != nil ? "CANCELED"
+            : plan.status == "PENDING" && (plan.startDate ?? .distantFuture) <= Date() ? "EXPIRED" : plan.status
     }
 
     var body: some View {
-        TimelineView(.explicit([Date()] + (plan.startDate.map { [$0] } ?? []))) { _ in card }
+        TimelineView(.explicit([Date()] + (plan.startDate.map { [$0] } ?? []) + (plan.endDate.map { [$0] } ?? []))) { _ in card }
     }
 
     private var card: some View {
@@ -35,10 +40,7 @@ struct PlanCardView: View {
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Label(statusLabel, systemImage: statusIcon)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(statusForeground)
-                        .fixedSize(horizontal: false, vertical: true)
+                    PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou)
                 }
                 .accessibilityIdentifier("plan-card-\(plan.id)")
                 if canCancel {
@@ -68,6 +70,8 @@ struct PlanCardView: View {
             }
             .font(.footnote)
             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+
+            PlanNextStepSummary(presentation: presentation, showsDetail: status == "PENDING" && !canRespond && !isRescheduleProposal)
 
             if isRescheduleProposal {
                 Label(
@@ -173,7 +177,7 @@ struct PlanCardView: View {
     private var planResponseActions: some View {
         VStack(spacing: SideSeatTheme.spaceSM) {
             SSPrimaryButton(
-                title: AppLocalization.string("Accept"),
+                title: AppLocalization.string("Confirm participation"),
                 isLoading: isActing,
                 fill: .product,
                 height: 46,
@@ -194,7 +198,7 @@ struct PlanCardView: View {
                 }
                 .accessibilityIdentifier("plan-card-counter-\(plan.id)")
                 Button(role: .destructive, action: onDecline) {
-                    Text("Decline")
+                    Text("I can't attend")
                         .font(.subheadline.weight(.medium))
                         .frame(maxWidth: .infinity, minHeight: 44)
                         .contentShape(Rectangle())
@@ -233,50 +237,8 @@ struct PlanCardView: View {
         status == "PENDING" && plan.counterOfId != nil && plan.commitmentId != nil
     }
 
-    private var statusLabel: String {
-        if isRescheduleProposal { return AppLocalization.string("Reschedule proposed") }
-        switch status {
-        case "PENDING": return AppLocalization.string("Proposed")
-        case "ACCEPTED": return AppLocalization.string("Confirmed")
-        case "DECLINED": return AppLocalization.string("Declined")
-        case "COUNTER_PROPOSED": return AppLocalization.string("Superseded")
-        case "CANCELED": return AppLocalization.string("Canceled")
-        case "EXPIRED": return AppLocalization.string("Expired")
-        case "INVALIDATED": return AppLocalization.string("Ended")
-        default: return AppLocalization.string("Plan")
-        }
-    }
+    private var statusDetail: String { presentation.detail }
 
-    private var statusDetail: String {
-        switch status {
-        case "DECLINED": return AppLocalization.string("This proposal was declined.")
-        case "COUNTER_PROPOSED": return AppLocalization.string("A newer proposal is now in the conversation.")
-        case "CANCELED": return AppLocalization.string("This proposal was withdrawn or canceled.")
-        case "EXPIRED": return AppLocalization.string("This proposal expired before it was confirmed.")
-        case "INVALIDATED": return AppLocalization.string("This Plan is no longer available.")
-        default: return AppLocalization.string("This Plan is no longer active.")
-        }
-    }
-
-    private var statusIcon: String {
-        switch status {
-        case "ACCEPTED": "checkmark.circle.fill"
-        case "DECLINED": "xmark.circle.fill"
-        case "COUNTER_PROPOSED": "arrow.triangle.2.circlepath"
-        case "CANCELED": "calendar.badge.minus"
-        case "EXPIRED": "clock.badge.exclamationmark"
-        default: "calendar.badge.clock"
-        }
-    }
-
-    private var statusForeground: Color {
-        switch status {
-        case "ACCEPTED": SideSeatTheme.statusSuccessText
-        case "DECLINED", "CANCELED": SideSeatTheme.statusDangerText
-        case "COUNTER_PROPOSED", "EXPIRED", "PENDING": SideSeatTheme.statusWarningText
-        default: SideSeatTheme.textSecondaryStrong
-        }
-    }
 }
 
 struct PlanContinuationActions: View {

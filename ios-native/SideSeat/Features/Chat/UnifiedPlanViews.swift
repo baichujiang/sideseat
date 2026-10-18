@@ -151,7 +151,11 @@ struct UnifiedPlanConfirmationView: View {
     @State private var draftName = ""
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
-    private var canReply: Bool { poll.planningPhase == "INVITING" && !poll.isOwner && (mine != nil || poll.planningMode == "FIXED") }
+    private var presentation: PlanPresentation { poll.presentation(at: Date()) }
+    private var canReply: Bool {
+        poll.planningPhase == "INVITING" && !poll.isOwner && (mine?.selected == true
+            || poll.planningMode == "FIXED" && accepted < poll.targetCount && (mine == nil || mine?.status == "DECLINED"))
+    }
 
     var body: some View {
         ScrollView {
@@ -160,11 +164,9 @@ struct UnifiedPlanConfirmationView: View {
                     if ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
                         PlanJourneyProgress(phase: poll.planningPhase, fixed: poll.planningMode == "FIXED")
                     }
-                    Label(statusTitle, systemImage: poll.planningPhase == "CONFIRMED" ? "checkmark.circle.fill" : poll.planningPhase == "CANCELLED" ? "xmark.circle" : "clock")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(poll.planningPhase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
-                        .accessibilityIdentifier("unified-plan-phase")
-                    Text(nextStepTitle).font(.title2.weight(.bold)).fixedSize(horizontal: false, vertical: true)
+                    PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou,
+                                    identifier: "unified-plan-phase")
+                    PlanNextStepSummary(presentation: presentation)
                     Text(poll.title).font(.headline).accessibilityIdentifier("time-poll-detail-title")
                     if let start = poll.chosenStart, let end = poll.chosenEnd {
                         Label(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone), systemImage: "calendar")
@@ -216,6 +218,11 @@ struct UnifiedPlanConfirmationView: View {
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("unified-plan-not-included")
                 }
                 if poll.isOwner && poll.planningPhase == "INVITING" && poll.planningMode != "FIXED" {
+                    if poll.allInvitations.contains(where: { $0.selected && $0.status == "DECLINED" }) {
+                        Text("Someone can’t attend. Review the time or invitation list before sending a new invitation.")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("plan-declined-guidance")
+                    }
                     Button("Choose another time", action: chooseAnotherTime).frame(minHeight: 44)
                         .accessibilityIdentifier("unified-plan-choose-again")
                     Text("Choosing another time asks everyone to confirm again.")
@@ -272,21 +279,10 @@ struct UnifiedPlanConfirmationView: View {
         }
     }
     private var included: Bool { poll.isOwner || mine?.selected == true }
-    private var nextStepTitle: String {
-        AppLocalization.string(poll.planningPhase == "CANCELLED" ? "This plan has been cancelled"
-            : poll.planningPhase == "CONFIRMED" ? (included ? "You're all set!" : "This time is confirmed")
-            : poll.isOwner ? "Invite friends to confirm"
-            : mine?.status == "ACCEPTED" ? "You've confirmed. Now wait for the others."
-            : mine?.status == "DECLINED" ? "You've replied that you can't attend"
-            : canReply ? "Does this time work for you?" : "You're viewing the invitation")
-    }
     private var calendarExplanation: String {
         AppLocalization.string(poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed."
             : poll.planningPhase == "CONFIRMED" ? (included ? "Synced to Sideseat calendars" : "Only invited participants have this plan in their calendars.")
             : "The plan is added to calendars after everyone included confirms.")
-    }
-    private var statusTitle: String {
-        AppLocalization.string(poll.planningPhase == "CONFIRMED" ? "Confirmed" : poll.planningPhase == "CANCELLED" ? "Cancelled" : "Awaiting confirmations")
     }
     private func reply(_ status: String) {
         Task { await store.mutate("invitation-response", method: .put, body: RespondPollInvitationRequest(status: status, version: poll.invitationVersion ?? 0), session: session) }

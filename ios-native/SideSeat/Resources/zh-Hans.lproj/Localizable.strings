@@ -2802,3 +2802,29 @@
 "You, Lin and Chen are all free on Saturday at 15:00." = "你、小林和小陈在周六 15:00 都有空。";
 "Saturday at 15:00 works for all three" = "周六 15:00，3 人都有空";
 "You pick the final time. Everyone confirms, then it appears in Calendar." = "你选最终时间，大家确认后，这次自习就会进入日历。";
+
+"Review replies and arrange the next step" = "查看回复，安排下一步";
+
+"View my response" = "查看我的回复";
+
+"You’ve replied that you can’t attend" = "你已回复无法参加";
+
+"You’re not joining this plan" = "你未参加本次计划";
+
+"You’re all set" = "安排已确认";
+
+"How did the activity go?" = "这次活动怎么样？";
+
+"View activity feedback" = "查看活动反馈";
+
+"Your reply is saved. You have not confirmed attendance." = "你的回复已保存，你尚未确认参加。";
+
+"You've confirmed. The plan is added to calendars after everyone included confirms." = "你已确认。其余受邀者全部确认后，计划才会加入日历。";
+
+"This activity has ended." = "本次活动已结束。";
+
+"Your invitation is sent. The other person needs to confirm this time." = "邀请已发出，等待对方确认这个时间。";
+
+"Someone can’t attend. Review the time or invitation list before sending a new invitation." = "有人无法参加。请检查时间或受邀名单，再发出新版邀请。";
+
+"Viewing" = "正在查看";

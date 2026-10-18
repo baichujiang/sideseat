@@ -384,14 +384,12 @@ struct PlansRootView: View {
 
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
         let phase = plan.planningPhase(at: now)
-        let step = plan.nextStep(at: now)
-        let active = ["COLLECTING", "INVITING"].contains(phase)
-        let tone = phase == "CONFIRMED" ? SideSeatTheme.statusSuccessText : step == .confirm ? SideSeatTheme.statusWarningText : SideSeatTheme.textSecondaryStrong
+        let presentation = plan.presentation(at: now)
+        let step = presentation.nextStep
         return Button { scrollPositions.capture(selectedSection); router.openPlan(token: plan.token) } label: {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 HStack {
-                    Label(plan.statusLabel(at: now), systemImage: phase == "CONFIRMED" ? "checkmark.circle.fill" : step.symbol)
-                        .font(.caption.weight(.semibold)).foregroundStyle(tone)
+                    PlanStatusBadge(status: presentation.status, needsYou: step.needsYou)
                     Spacer(minLength: 8)
                     Text(plan.isOwner == true ? "Organized by you" : "Shared plan")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -405,24 +403,16 @@ struct PlansRootView: View {
                     Label(timePollDateLabel(first).replacingOccurrences(of: "\n", with: " ") + (first == last ? "" : " – " + timePollDateLabel(last).replacingOccurrences(of: "\n", with: " ")), systemImage: "calendar")
                         .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
-                if active {
+                PlanNextStepSummary(presentation: presentation)
+                if ["COLLECTING", "INVITING"].contains(phase) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(step.title).font(.subheadline.weight(.medium))
                         Text(phase == "COLLECTING"
                              ? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
                              : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget))
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }.foregroundStyle(SideSeatTheme.textPrimary)
                 }
-                HStack {
-                    Text(step.action).font(.subheadline.weight(.semibold))
-                    Spacer(minLength: 8)
-                    Image(systemName: "arrow.right").accessibilityHidden(true)
-                }
-                .foregroundStyle(step.needsYou ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
-                .padding(.horizontal, step.needsYou ? 12 : 0).frame(minHeight: 46)
-                .background(step.needsYou ? SideSeatTheme.ProductAction.fill : Color.clear,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                PlanOpenActionLabel(step: step == .viewCalendar ? .viewPlan : step)
             }
             .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
             .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
@@ -559,6 +549,7 @@ struct PlansRootView: View {
     ) -> some View {
         let participant = otherParticipant(for: plan)
         let showsOutcome = plan.isOutcomeEligible()
+        let presentation = PlanPresentation.conversation(plan, viewerID: currentUserID, now: now)
         return SSFlowCard(contentPadding: 14, contentSpacing: SideSeatTheme.spaceSM) {
             Button {
                 scrollPositions.capture(selectedSection)
@@ -584,32 +575,11 @@ struct PlansRootView: View {
                                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        if showsStatusBadge(plan, section: section) {
-                            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 4) }
-                            Label(statusLabel(for: plan, section: section), systemImage: statusIcon(for: plan, section: section))
-                                .font(.caption)
-                                .foregroundStyle(statusForeground(for: plan, section: section))
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(statusForeground(for: plan, section: section).opacity(0.08), in: Capsule())
-                        }
+                        if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 4) }
+                        PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou)
                     }
-                    if section != .ended, plan.status == "PENDING", plan.receiver.id == currentUserID {
-                        HStack {
-                            Text("View and respond")
-                                .font(.subheadline.weight(.semibold))
-                            Spacer(minLength: 8)
-                            Image(systemName: "arrow.right")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-                        .padding(.horizontal, 14)
-                        .frame(minHeight: 44)
-                        .background(SideSeatTheme.ProductAction.fill,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                        .padding(.top, 4)
-                    }
+                    PlanNextStepSummary(presentation: presentation)
+                    PlanOpenActionLabel(step: presentation.nextStep == .viewCalendar ? .viewPlan : presentation.nextStep)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
@@ -649,10 +619,6 @@ struct PlansRootView: View {
                 .foregroundStyle(SideSeatTheme.textSecondary)
                 .accessibilityHidden(true)
         }
-    }
-
-    private func showsStatusBadge(_ plan: NativePlanRequest, section: MVPPlanSection) -> Bool {
-        section == .ended || plan.status == "ACCEPTED" || (plan.status == "PENDING" && plan.counterOfId != nil && plan.commitmentId != nil)
     }
 
     @ViewBuilder
@@ -708,61 +674,7 @@ struct PlansRootView: View {
         for plan: NativePlanRequest,
         section: MVPPlanSection
     ) -> String {
-        if plan.status == "PENDING", (plan.startDate ?? .distantPast) <= now { return AppLocalization.string("Expired") }
-        if section == .ended, plan.status == "ACCEPTED" {
-            return AppLocalization.string("Ended")
-        }
-        if plan.status == "PENDING", plan.counterOfId != nil, plan.commitmentId != nil {
-            return AppLocalization.string("Reschedule proposed")
-        }
-        switch plan.status {
-        case "PENDING":
-            return plan.receiver.id == currentUserID
-                ? AppLocalization.string("Your confirmation needed")
-                : AppLocalization.string("Waiting for response")
-        case "ACCEPTED": return AppLocalization.string("Confirmed")
-        case "DECLINED": return AppLocalization.string("Declined")
-        case "COUNTER_PROPOSED": return AppLocalization.string("Superseded")
-        case "CANCELED": return AppLocalization.string("Canceled")
-        case "EXPIRED": return AppLocalization.string("Expired")
-        case "INVALIDATED": return AppLocalization.string("Ended")
-        default: return AppLocalization.string("Ended")
-        }
-    }
-
-    private func statusIcon(
-        for plan: NativePlanRequest,
-        section: MVPPlanSection
-    ) -> String {
-        if plan.status == "PENDING", (plan.startDate ?? .distantPast) <= now { return "clock.badge.exclamationmark" }
-        if section == .ended, plan.status == "ACCEPTED" {
-            return "clock.arrow.circlepath"
-        }
-        if plan.status == "ACCEPTED" { return "checkmark.circle.fill" }
-        if plan.status == "PENDING" {
-            return plan.receiver.id == currentUserID ? "envelope.badge" : "hourglass"
-        }
-        switch plan.status {
-        case "DECLINED": return "xmark.circle"
-        case "CANCELED": return "calendar.badge.minus"
-        case "EXPIRED": return "clock.badge.exclamationmark"
-        default: return "clock.arrow.circlepath"
-        }
-    }
-
-    private func statusForeground(
-        for plan: NativePlanRequest,
-        section: MVPPlanSection
-    ) -> Color {
-        if section == .ended { return SideSeatTheme.textSecondaryStrong }
-        if plan.status == "ACCEPTED" { return SideSeatTheme.statusSuccessText }
-        if section != .ended, plan.status == "PENDING", plan.receiver.id == currentUserID {
-            return SideSeatTheme.statusWarningText
-        }
-        if plan.status == "DECLINED" || plan.status == "CANCELED" {
-            return SideSeatTheme.statusDangerText
-        }
-        return SideSeatTheme.textSecondaryStrong
+        PlanPresentation.conversation(plan, viewerID: currentUserID, now: now).status.title
     }
 
     private func otherParticipant(for plan: NativePlanRequest) -> NativePlanAuthor {

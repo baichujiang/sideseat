@@ -94,8 +94,9 @@ struct PlanPurposeExample: View {
 
 enum PlanNextStep: String, Sendable {
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan
+    case shareInvitation, reviewReplies, declined, notIncluded, viewCalendar, recordOutcome
 
-    var needsYou: Bool { [.fillAvailability, .shareAvailability, .chooseTime, .confirm].contains(self) }
+    var needsYou: Bool { [.fillAvailability, .shareAvailability, .chooseTime, .confirm, .shareInvitation].contains(self) }
     var title: String {
         let key: String.LocalizationValue = switch self {
         case .fillAvailability: "Fill in your free time"
@@ -105,6 +106,12 @@ enum PlanNextStep: String, Sendable {
         case .waitForOrganizer: "Waiting for the organizer"
         case .waitForReplies: "Waiting for confirmations"
         case .viewPlan: "View plan"
+        case .shareInvitation: "Invite friends to confirm"
+        case .reviewReplies: "Review replies and arrange the next step"
+        case .declined: "You’ve replied that you can’t attend"
+        case .notIncluded: "You’re not joining this plan"
+        case .viewCalendar: "You’re all set"
+        case .recordOutcome: "How did the activity go?"
         }
         return AppLocalization.string(key)
     }
@@ -117,6 +124,12 @@ enum PlanNextStep: String, Sendable {
         case .waitForOrganizer: "View saved availability"
         case .waitForReplies: "View confirmation progress"
         case .viewPlan: "View plan"
+        case .shareInvitation: "Share invitation"
+        case .reviewReplies: "View confirmation progress"
+        case .declined: "View my response"
+        case .notIncluded: "View plan"
+        case .viewCalendar: "View in Calendar"
+        case .recordOutcome: "View activity feedback"
         }
         return AppLocalization.string(key)
     }
@@ -127,7 +140,11 @@ enum PlanNextStep: String, Sendable {
         case .chooseTime: "calendar.badge.clock"
         case .confirm: "envelope.badge"
         case .waitForOrganizer, .waitForReplies: "hourglass"
-        case .viewPlan: "calendar"
+        case .viewPlan, .viewCalendar: "calendar"
+        case .shareInvitation: "square.and.arrow.up"
+        case .reviewReplies: "person.2.badge.gearshape"
+        case .declined, .notIncluded: "person.crop.circle.badge.xmark"
+        case .recordOutcome: "checkmark.bubble"
         }
     }
 }
@@ -192,5 +209,58 @@ struct PlanShareActions: View {
             .accessibilityLabel(copied ? "Link copied" : "Copy link")
             .accessibilityIdentifier("plan-copy-link")
         }
+    }
+}
+
+
+/// Shared display only: each caller retains its existing navigation and mutation actions.
+struct PlanStatusBadge: View {
+    let status: PlanDisplayStatus
+    var needsYou = false
+    var identifier: String = "plan-display-status"
+
+    private var foreground: Color {
+        if status == .confirmed || status == .inProgress { return SideSeatTheme.statusSuccessText }
+        if needsYou { return SideSeatTheme.statusWarningText }
+        return SideSeatTheme.textSecondaryStrong
+    }
+
+    var body: some View {
+        Label(status.title, systemImage: status.symbol)
+            .font(.caption.weight(.semibold)).foregroundStyle(foreground)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier(identifier)
+    }
+}
+
+struct PlanNextStepSummary: View {
+    let presentation: PlanPresentation
+    var showsDetail = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(presentation.nextStep.title).font(.subheadline.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("plan-next-step")
+            if showsDetail {
+                Text(presentation.detail).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct PlanOpenActionLabel: View {
+    let step: PlanNextStep
+    var body: some View {
+        HStack {
+            Text(step.action).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Image(systemName: "arrow.right").accessibilityHidden(true)
+        }
+        .foregroundStyle(step.needsYou ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
+        .padding(.horizontal, step.needsYou ? 12 : 0).frame(minHeight: 46)
+        .background(step.needsYou ? SideSeatTheme.ProductAction.fill : Color.clear,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 }

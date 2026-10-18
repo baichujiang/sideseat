@@ -26,9 +26,10 @@ struct PlanGuidanceTests {
         let pending = try item(["phase": "INVITING", "isOwner": false, "isIncluded": true, "myInvitationStatus": "INVITED"])
         #expect(pending.nextStep(at: now) == .confirm)
         #expect(pending.nextStep(at: now).needsYou)
-        for status in ["ACCEPTED", "DECLINED"] {
+        for status in ["ACCEPTED"] {
             #expect(try item(["phase": "INVITING", "isOwner": false, "myInvitationStatus": status]).nextStep(at: now) == .waitForReplies)
         }
+        #expect(try item(["phase": "INVITING", "isOwner": false, "myInvitationStatus": "DECLINED"]).nextStep(at: now) == .declined)
     }
     @Test("Open fixed invitations use expected count, collected invitations use the actual roster")
     func actualConfirmationTarget() throws {
@@ -37,7 +38,7 @@ struct PlanGuidanceTests {
     }
     @Test("Terminal and elapsed plans do not ask for input")
     func closedPlans() throws {
-        for phase in ["CONFIRMED", "CANCELLED", "EXPIRED"] {
+        for phase in ["CANCELLED", "EXPIRED"] {
             #expect(try item(["phase": phase]).nextStep(at: now) == .viewPlan)
         }
         #expect(try item(["phase": "INVITING", "myInvitationStatus": "INVITED", "expiresAt": "1970-01-01T00:01:00Z"]).nextStep(at: now) == .viewPlan)

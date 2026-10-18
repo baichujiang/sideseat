@@ -122,16 +122,7 @@ struct NativeTimePollList: Decodable, Sendable {
         var confirmationTarget: Int { planningMode == "FIXED" ? expectedCount ?? 2 : invitedCount ?? 0 }
 
         func nextStep(at now: Date) -> PlanNextStep {
-            switch planningPhase(at: now) {
-            case "COLLECTING":
-                if didRespond != true { return .fillAvailability }
-                if isOwner == true { return (respondedCount ?? 0) > 1 ? .chooseTime : .shareAvailability }
-                return .waitForOrganizer
-            case "INVITING":
-                if isIncluded != false && myInvitationStatus == "INVITED" { return .confirm }
-                return .waitForReplies
-            default: return .viewPlan
-            }
+            presentation(at: now).nextStep
         }
         func planningPhase(at now: Date) -> String {
             let phase = phase ?? "COLLECTING"
@@ -140,13 +131,7 @@ struct NativeTimePollList: Decodable, Sendable {
         }
         var statusLabel: String { statusLabel(at: Date()) }
         func statusLabel(at now: Date) -> String {
-            switch planningPhase(at: now) {
-            case "INVITING": AppLocalization.string("Awaiting confirmations")
-            case "CONFIRMED": AppLocalization.string("Confirmed")
-            case "CANCELLED": AppLocalization.string("Cancelled")
-            case "EXPIRED": AppLocalization.string("Expired")
-            default: AppLocalization.string("Finding a time")
-            }
+            presentation(at: now).status.title
         }
     }
 }
