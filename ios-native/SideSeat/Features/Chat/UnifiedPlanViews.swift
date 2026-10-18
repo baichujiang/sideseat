@@ -335,6 +335,6 @@ private struct InvitationTimetableView: View {
                 }.background(SideSeatTheme.surface).clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
                     .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }
             }
-        }.accessibilityIdentifier("plan-invitation-timetable")
+        }
     }
 }

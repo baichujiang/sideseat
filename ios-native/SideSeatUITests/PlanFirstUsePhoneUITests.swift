@@ -487,7 +487,11 @@ import XCTest
         XCTAssertFalse(app.staticTexts["plan-handoff-guidance"].exists)
     }
     private func nativeWaitSaved() { XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20)) }
-    private func nativePhase(_ value: String) { print("NATIVE_PARTICIPANT_PHASE \(value)") }
+    private func nativePhase(_ value: String) {
+        print("NATIVE_PARTICIPANT_PHASE \(value)")
+        // Keep each UI state stable while the Mac checks its real API boundary.
+        Thread.sleep(forTimeInterval: 3)
+    }
 
     private func webButton(_ en: String, _ zh: String) -> XCUIElement {
         safari.buttons.matching(NSPredicate(format: "label IN %@", [en, zh])).firstMatch
