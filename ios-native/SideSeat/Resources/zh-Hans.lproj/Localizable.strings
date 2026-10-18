@@ -2894,3 +2894,29 @@
 "Show fewer plans" = "收起";
 
 "Swipe to see more plans" = "左右滑动查看更多计划";
+
+"Your availability needed" = "待你选空闲";
+
+"Ready to share" = "待你分享";
+
+"Ready for you to choose" = "待你定时间";
+
+"Waiting for a final time" = "等发起人定时间";
+
+"Waiting for friends" = "等朋友确认";
+
+"You've confirmed" = "你已确认";
+
+"Review invitation" = "查看邀请";
+
+"Open timetable" = "打开时间表";
+
+"Open and share" = "查看并分享";
+
+"View progress" = "查看进度";
+
+"View arrangement" = "查看安排";
+
+"No time selected yet" = "时间待定";
+
+"%d dates · %@" = "%d 天可选 · %@";

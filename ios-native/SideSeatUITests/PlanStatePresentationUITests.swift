@@ -24,8 +24,9 @@ import XCTest
         launch()
         let row = app.buttons["plans-row-ui-plan-1"]
         reveal(row)
-        XCTAssertEqual(row.value as? String, "等待大家确认")
-        XCTAssertTrue(row.label.contains("这个时间，你方便吗？"))
+        XCTAssertEqual(row.value as? String, "待你确认")
+        XCTAssertTrue(row.label.contains("查看邀请"))
+        XCTAssertFalse(row.label.contains("Europe/Berlin"), "The local technical timezone should not occupy its own card row")
         capture("list-awaiting-confirmation")
         row.tap()
         let accept = app.buttons["plan-card-accept-ui-plan-1"]
@@ -46,7 +47,7 @@ import XCTest
         launch(accessibility: true)
         let row = app.buttons["plans-row-ui-plan-1"]
         reveal(row)
-        XCTAssertEqual(row.value as? String, "等待大家确认")
+        XCTAssertEqual(row.value as? String, "待你确认")
         capture("large-text-list")
         row.tap()
         let accept = app.buttons["plan-card-accept-ui-plan-1"]
@@ -64,10 +65,18 @@ import XCTest
         let secondTask = app.buttons["plans-row-ui-plan-incoming-extra"]
         reveal(firstTask); reveal(secondTask)
         XCTAssertEqual(firstTask.frame.minX, secondTask.frame.minX, accuracy: 2)
-        XCTAssertGreaterThan(secondTask.frame.minY, firstTask.frame.minY)
+        XCTAssertGreaterThanOrEqual(secondTask.frame.minY - firstTask.frame.maxY, 8,
+                                   "Actionable plans need independent boundaries and space")
+        XCTAssertEqual(firstTask.value as? String, "待你确认")
+        XCTAssertTrue(firstTask.label.contains("查看邀请"))
         capture("horizontal-needs-you")
         let rail = app.scrollViews["plans-waiting-rail"]
         reveal(rail)
+        for _ in 0..<3 where rail.frame.maxY > app.tabBars.firstMatch.frame.minY - 8 {
+            app.swipeUp(velocity: .slow)
+        }
+        XCTAssertLessThan(rail.frame.maxY, app.tabBars.firstMatch.frame.minY,
+                          "The complete waiting card should be visible for the visual review")
         let last = app.buttons["plans-row-ui-plan-outgoing-3"]
         let first = app.buttons["plans-row-ui-plan-outgoing"]
         XCTAssertGreaterThan(last.frame.minX, first.frame.minX)
@@ -108,6 +117,22 @@ import XCTest
         capture("horizontal-large-text-waiting")
         first.tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+    }
+
+    func testUpcomingDateSummaryOpensTheExistingConfirmedPlan() {
+        continueAfterFailure = false
+        launch(layout: true)
+        app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).tap()
+        let row = app.buttons["plans-row-ui-plan-accepted"]
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        XCTAssertTrue(row.label.contains("Dinner in town"))
+        XCTAssertFalse(row.label.contains("Europe/Berlin"))
+        capture("upcoming-date-summary")
+        row.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).isSelected)
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
     }
 
     private func reveal(_ element: XCUIElement) {

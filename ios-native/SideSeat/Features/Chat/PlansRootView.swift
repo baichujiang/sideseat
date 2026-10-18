@@ -248,7 +248,10 @@ struct PlansRootView: View {
         if !coordinationLoaded && coordinatedPlans.isEmpty {
             ProgressView("Loading plans").frame(maxWidth: .infinity, minHeight: 70)
         } else if section != .waitingResponse {
-            ForEach(coordinated(in: section)) { plan in coordinatedCard(plan) }
+            ForEach(coordinated(in: section)) { plan in
+                if section == .upcoming { coordinatedOverview(plan, style: .meetup) }
+                else { coordinatedCard(plan) }
+            }
         }
         if let coordinationError {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
@@ -359,15 +362,9 @@ struct PlansRootView: View {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     overviewHeading("Your next steps", count: needs.count + incoming.count,
                         identifier: "plans-waiting-incoming-heading", needsAttention: true)
-                    SSFlowCard(contentPadding: SideSeatTheme.spaceMD, contentSpacing: 0) {
-                        ForEach(needs) { plan in
-                            coordinatedOverview(plan)
-                            if plan.id != needs.last?.id || !incoming.isEmpty { Divider() }
-                        }
-                        ForEach(incoming) { plan in
-                            conversationOverview(plan)
-                            if plan.id != incoming.last?.id { Divider() }
-                        }
+                    VStack(spacing: SideSeatTheme.spaceSM) {
+                        ForEach(needs) { plan in coordinatedOverview(plan) }
+                        ForEach(incoming) { plan in conversationOverview(plan) }
                     }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-needs-you")
             }
@@ -385,33 +382,23 @@ struct PlansRootView: View {
                         }
                     }
                     if showsAllWaiting || dynamicTypeSize.isAccessibilitySize {
-                        SSFlowCard(contentPadding: SideSeatTheme.spaceMD, contentSpacing: 0) {
-                            ForEach(waiting) { plan in
-                                coordinatedOverview(plan)
-                                if plan.id != waiting.last?.id || !outgoing.isEmpty { Divider() }
-                            }
-                            ForEach(outgoing) { plan in
-                                conversationOverview(plan)
-                                if plan.id != outgoing.last?.id { Divider() }
-                            }
+                        VStack(spacing: SideSeatTheme.spaceSM) {
+                            ForEach(waiting) { plan in coordinatedOverview(plan, style: .waiting) }
+                            ForEach(outgoing) { plan in conversationOverview(plan, style: .waiting) }
                         }.accessibilityElement(children: .contain)
                             .accessibilityIdentifier("plans-waiting-expanded")
                     } else {
                         ScrollView(.horizontal) {
                             HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
                                 ForEach(waiting) { plan in
-                                    SSFlowCard(contentPadding: SideSeatTheme.spaceMD) {
-                                        coordinatedOverview(plan, style: .waiting)
-                                    }
+                                    coordinatedOverview(plan, style: .waiting)
                                     .containerRelativeFrame(.horizontal) { width, _ in
                                         waiting.count + outgoing.count == 1 ? width : min(330, width * 0.82)
                                     }
                                     .id("shared-" + plan.token)
                                 }
                                 ForEach(outgoing) { plan in
-                                    SSFlowCard(contentPadding: SideSeatTheme.spaceMD) {
-                                        conversationOverview(plan, style: .waiting)
-                                    }
+                                    conversationOverview(plan, style: .waiting)
                                     .containerRelativeFrame(.horizontal) { width, _ in
                                         waiting.count + outgoing.count == 1 ? width : min(330, width * 0.82)
                                     }
@@ -462,23 +449,19 @@ struct PlansRootView: View {
         case "INVITING": String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget)
         default: nil
         }
-        let candidateDates = plan.dates.first.map { first in
-            timePollDateLabel(first).replacingOccurrences(of: "\n", with: " ")
-                + (first == plan.dates.last ? "" : " – " + timePollDateLabel(plan.dates.last!).replacingOccurrences(of: "\n", with: " "))
-        }
         return Button {
             scrollPositions.capture(selectedSection)
             router.openPlan(token: plan.token)
         } label: {
             PlanOverviewLabel(title: plan.title, presentation: plan.presentation(at: now), style: style,
                 start: plan.chosenStart, end: plan.chosenEnd, timeZone: plan.timeZone,
-                candidateDates: candidateDates,
+                candidateDates: plan.dates, now: now,
                 context: AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"),
                 progress: progress)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-coordinated-\(plan.token)")
-        .accessibilityValue(plan.statusLabel(at: now))
+        .accessibilityValue(plan.presentation(at: now).cardStatusTitle)
     }
 
     private func conversationOverview(_ plan: NativePlanRequest,
@@ -494,11 +477,11 @@ struct PlansRootView: View {
         } label: {
             PlanOverviewLabel(title: plan.title,
                 presentation: PlanPresentation.conversation(plan, viewerID: currentUserID, now: now), style: style,
-                start: plan.startDate, end: plan.endDate, location: plan.location, context: context)
+                start: plan.startDate, end: plan.endDate, now: now, location: plan.location, context: context)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-row-\(plan.id)")
-        .accessibilityValue(statusLabel(for: plan, section: .waitingResponse))
+        .accessibilityValue(PlanPresentation.conversation(plan, viewerID: currentUserID, now: now).cardStatusTitle)
         .accessibilityHint("Open Plan in conversation")
     }
 
@@ -675,10 +658,11 @@ struct PlansRootView: View {
         section: MVPPlanSection,
         showsFullDate: Bool = false
     ) -> some View {
+        if section == .upcoming { return AnyView(conversationOverview(plan, style: .meetup)) }
         let participant = otherParticipant(for: plan)
         let showsOutcome = plan.isOutcomeEligible()
         let presentation = PlanPresentation.conversation(plan, viewerID: currentUserID, now: now)
-        return SSFlowCard(contentSpacing: SideSeatTheme.spaceMD) {
+        return AnyView(SSFlowCard(contentSpacing: SideSeatTheme.spaceMD) {
             Button {
                 scrollPositions.capture(selectedSection)
                 router.navigate(to: MVPPlanRoute.route(for: plan))
@@ -723,7 +707,7 @@ struct PlansRootView: View {
                     repeatPlan = plan
                 }
             }
-        }
+        })
     }
 
     private func planDaySummary(_ date: Date) -> String {
@@ -758,78 +742,157 @@ private struct PlanOverviewLabel: View {
     let start: Date?
     let end: Date?
     var timeZone = TimeZone.current.identifier
-    var candidateDates: String? = nil
+    var candidateDates: [String] = []
+    var now = Date()
     var location: String? = nil
     let context: String
     var progress: String? = nil
 
-    private var step: PlanNextStep { presentation.nextStep == .viewCalendar ? .viewPlan : presentation.nextStep }
+    private var timing: PlanOverviewTiming {
+        .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
+              now: now, locale: AppLocalization.selectedLanguage.locale)
+    }
+    private var secondary: Color { SideSeatTheme.textSecondaryStrong }
 
     var body: some View {
-        let layout = style == .meetup && !typeSize.isAccessibilitySize
-            ? AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
-            : AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-        layout {
-            if style == .meetup, let start {
-                VStack(spacing: SideSeatTheme.spaceXS) {
-                    Text(datePart(start, template: "MMM")).font(.caption)
-                    Text(datePart(start, template: "d")).font(.title2.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                    Text(datePart(start, template: "EEE")).font(.caption)
-                }.foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .accessibilityHidden(true)
+        Group {
+            switch style {
+            case .task: task
+            case .waiting: waiting
+            case .meetup: meetup
             }
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                let heading = style == .waiting || typeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                    : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
-                heading {
-                    Text(title).font(.headline).fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    PlanStatusBadge(status: presentation.status, needsYou: presentation.nextStep.needsYou)
-                }
-                if let start, let end {
-                    PlanCardSchedule(start: start, end: end, timeZone: timeZone, location: location, compact: true)
-                } else if let candidateDates {
-                    Text(AppLocalization.string("Candidate dates") + ": " + candidateDates)
-                        .font(.footnote).fixedSize(horizontal: false, vertical: true)
-                    Text(timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }
-                if let progress {
-                    Label(progress, systemImage: "person.2").font(.caption)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Text(context).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-                if style != .meetup {
-                    let footer = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                        : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-                    footer {
-                        Text(presentation.nextStep.title).font(.caption)
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Label(step.action, systemImage: "arrow.right").labelStyle(.titleAndIcon)
-                            .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.utilityAction)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }.padding(.top, SideSeatTheme.spaceXS)
-                }
-            }.frame(maxWidth: .infinity, alignment: .leading)
         }
         .foregroundStyle(SideSeatTheme.textPrimary)
-        .padding(.vertical, style == .waiting ? 0 : SideSeatTheme.spaceMD)
+        .padding(SideSeatTheme.spaceLG)
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+        .background(style == .waiting ? SideSeatTheme.fillTertiary : SideSeatTheme.surface,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
+                .strokeBorder(SideSeatTheme.separator, lineWidth: style == .waiting ? 0 : 0.5)
+        }
         .contentShape(Rectangle())
     }
 
-    private func datePart(_ date: Date, template: String) -> String {
-        let format = DateFormatter()
-        format.locale = AppLocalization.selectedLanguage.locale
-        format.timeZone = TimeZone(identifier: timeZone) ?? .current
-        format.setLocalizedDateFormatFromTemplate(template)
-        return format.string(from: date)
+    private var task: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Label(presentation.cardStatusTitle, systemImage: presentation.nextStep.symbol)
+                .font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.statusWarningText)
+            activityTitle(.title3)
+            schedule
+            let footer = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+            footer {
+                Text(progress ?? context).font(.caption).foregroundStyle(secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                action.prominentAction()
+            }.padding(.top, SideSeatTheme.spaceXS)
+        }
+    }
+
+    private var waiting: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Label(presentation.cardStatusTitle, systemImage: "clock")
+                .font(.caption).foregroundStyle(secondary)
+            activityTitle(.headline)
+            schedule
+            let footer = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
+            footer {
+                Text(progress ?? context).font(.caption).foregroundStyle(secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                action.font(.caption.weight(.semibold))
+            }.padding(.top, SideSeatTheme.spaceXS)
+        }
+    }
+
+    private var meetup: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+        return layout {
+            if let start {
+                VStack(spacing: 2) {
+                    Text(timing.datePart(start, template: "MMM")).font(.caption.weight(.medium))
+                    Text(timing.dayNumber(start)).font(.largeTitle.weight(.semibold)).monospacedDigit()
+                    Text(timing.datePart(start, template: "EEE")).font(.caption)
+                }
+                .frame(minWidth: 52).foregroundStyle(SideSeatTheme.textPrimary)
+                .accessibilityHidden(true)
+            }
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                Text(presentation.status.title).font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.statusSuccessText)
+                activityTitle(.headline)
+                Text(timing.clockText ?? timing.dateText).font(.subheadline.weight(.semibold)).monospacedDigit()
+                    .fixedSize(horizontal: false, vertical: true)
+                // The complete date stays available to VoiceOver; the visible date column is decorative.
+                    .accessibilityLabel(timing.dateText + ", " + (timing.clockText ?? ""))
+                if let start, timing.datePart(start, template: "y") != timing.datePart(now, template: "y") {
+                    Text(timing.datePart(start, template: "y")).font(.caption).foregroundStyle(secondary)
+                }
+                if let location, !location.isEmpty {
+                    Text(location).font(.caption).foregroundStyle(secondary)
+                        .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                }
+                zone
+                Text(context).font(.caption).foregroundStyle(secondary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+            }.frame(maxWidth: .infinity, alignment: .leading)
+            if !typeSize.isAccessibilitySize {
+                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(secondary)
+                    .accessibilityHidden(true)
+            }
+        }
+        .accessibilityHint(presentation.cardActionTitle)
+    }
+
+    private func activityTitle(_ font: Font) -> some View {
+        Text(title).font(font.weight(.semibold))
+            .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityLabel(title)
+    }
+
+    private var schedule: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            Text(timing.dateText + (timing.clockText.map { " · " + $0 } ?? ""))
+                .font(style == .task ? .subheadline : .footnote)
+                .foregroundStyle(style == .task ? SideSeatTheme.textPrimary : secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            zone
+            if let location, !location.isEmpty {
+                Text(location).font(.caption).foregroundStyle(secondary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+            }
+        }
+    }
+    @ViewBuilder private var zone: some View {
+        if let name = timing.zoneText {
+            Text(name).font(.caption).foregroundStyle(secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    private var action: some View {
+        HStack(spacing: SideSeatTheme.spaceXS) {
+            Text(presentation.cardActionTitle).fixedSize(horizontal: false, vertical: true)
+            Image(systemName: "arrow.right").accessibilityHidden(true)
+        }
+    }
+}
+
+private extension View {
+    func prominentAction() -> some View {
+        self.font(.subheadline.weight(.semibold))
+            .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceSM)
+            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
+            .background(SideSeatTheme.ProductAction.fill,
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 }
 

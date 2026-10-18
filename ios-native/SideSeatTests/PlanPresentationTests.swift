@@ -80,4 +80,43 @@ struct PlanPresentationTests {
         }
         #expect(PlanPresentation.conversation(chat(hours: -1), viewerID: "me", now: now).status == .expired)
     }
+    @Test("Overview status names the viewer's task without changing the invitation lifecycle")
+    func overviewPerspective() {
+        let invited = manual()
+        let accepted = manual(reply: "ACCEPTED")
+        let owner = manual(owner: true)
+        #expect(invited.cardStatusTitle == AppLocalization.string("Your confirmation needed"))
+        #expect(invited.cardActionTitle == AppLocalization.string("Review invitation"))
+        #expect(accepted.cardStatusTitle == AppLocalization.string("You've confirmed"))
+        #expect(owner.cardStatusTitle == AppLocalization.string("Waiting for friends"))
+        #expect(invited.status == accepted.status && accepted.status == owner.status)
+        #expect(invited.nextStep == .confirm && !accepted.nextStep.needsYou && !owner.nextStep.needsYou)
+    }
+
+    @Test("Compact dates retain cross-midnight and cross-year meaning")
+    func overviewDates() throws {
+        let start = try #require(ISO8601DateFormatter().date(from: "2026-12-31T22:30:00Z"))
+        let end = start.addingTimeInterval(7200)
+        let display = PlanOverviewTiming(start: start, end: end, timeZone: "Europe/Berlin", now: start,
+                                         locale: Locale(identifier: "en_GB"))
+        #expect(display.crossesDay)
+        #expect(!display.dateText.contains("2026"))
+        #expect(display.clockText?.contains("2027") == true)
+        #expect(display.clockText?.contains("23:30") == true)
+        #expect(display.clockText?.contains("01:30") == true)
+    }
+
+    @Test("Only a different viewer zone needs an explicit overview zone; DST offsets remain visible")
+    func overviewZones() throws {
+        let start = try #require(ISO8601DateFormatter().date(from: "2026-10-24T23:30:00Z"))
+        var display = PlanOverviewTiming(start: start, end: start.addingTimeInterval(10800),
+            timeZone: "Europe/Berlin", now: start, locale: Locale(identifier: "en_GB"),
+            viewerTimeZone: try #require(TimeZone(identifier: "Europe/Berlin")))
+        #expect(display.zoneText == nil)
+        display.viewerTimeZone = try #require(TimeZone(identifier: "UTC"))
+        #expect(display.zoneText != nil)
+        #expect(display.zoneText?.contains(" / ") == true)
+        #expect(display.zoneText?.contains("Europe/Berlin") == false)
+    }
+
 }

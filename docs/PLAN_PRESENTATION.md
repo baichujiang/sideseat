@@ -21,8 +21,18 @@ one read-only presentation vocabulary. `PlanPresentation` adapts the existing
 persisted records. `PlanStatusBadge`, `PlanNextStepSummary`, `PlanCardSchedule`
 and the card heading/action components share the view implementation.
 
-The Plans overview uses a vertical task group for the viewer's next steps and a
-horizontal rail for plans waiting on others. The rail previews the next card,
+The Plans overview uses independent vertical task cards for the viewer's next steps and a
+horizontal rail for plans waiting on others. Task cards lead with a viewer-specific status
+(e.g. Your confirmation needed), activity and concise schedule, ending in one review/open
+affordance. Opening never confirms participation or sends an invitation. Waiting cards use
+quieter fills, a short viewer status and response/confirmation progress without repeating the
+next-step paragraph. Upcoming cards use a date-first summary in both Next meet-up and the
+full Upcoming section. Full lifecycle status stays in detail; no persisted phase is changed.
+Local overview dates omit the current year and technical timezone identifier. Cross-day end
+dates, other years and foreign-zone context remain explicit, including DST offset changes.
+The detail timetable keeps the complete original date/time/zone information.
+
+The horizontal rail previews the next card,
 snaps to card boundaries and provides View all / Show fewer plans. One item fills
 the available width. Accessibility text sizes use a wrapping vertical group so
 large text remains readable. These are layout choices over the same classification,
@@ -31,8 +41,8 @@ owns horizontal gestures without switching the surrounding Plans section pager.
 
 Existing-plan creation/link controls sit directly on the page, with the purpose
 example still available. Empty accounts keep the full introduction. The next
-meet-up uses a compact date summary; complete Upcoming and Past views retain
-their existing cards and actions.
+meet-up and Upcoming use the same compact date summary; Past retains its existing
+history, feedback and continuation actions.
 
 Manual plan detail is organized around the timetable. A flat `PlanDetailHeading`
 contains the activity, current status, role and optional location. Collection
@@ -56,8 +66,8 @@ in the existing menu. No duplicate summary/attendee cards precede the timetable.
 | Ended | View history; bilateral feedback remains available only under its existing eligibility rule |
 | Cancelled / Expired / Superseded / Unavailable | View the existing result/history; no new acceptance prompt |
 
-Cards that navigate to detail say View plan before a Calendar action is available
-inside. Pending invitations use the same explicit Confirm participation wording in
+Overview cards name the review/open action (for example Review invitation or View arrangement);
+the Calendar action remains inside the existing confirmed detail. Pending invitations use the same explicit Confirm participation wording in
 chat and manual details. The existing stable accessibility IDs remain in place.
 Dark mode and accessibility text sizes use the same wrapping components.
 

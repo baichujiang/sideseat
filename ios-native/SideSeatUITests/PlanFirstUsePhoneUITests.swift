@@ -274,13 +274,13 @@ import XCTest
         capture(app, "detail-people-responses")
         app.buttons["plan-people-done"].tap()
         XCTAssertTrue(first.waitForExistence(timeout: 10)); XCTAssertTrue(first.isSelected)
-        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
+        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard(expectedStatus: "等发起人定时间")
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected)
         wait(first, labelContains: ", 2")
         first.tap(); nativeWaitSaved(); XCTAssertFalse(first.isSelected); wait(first, labelContains: ", 1")
         nativePhase("participant-edited"); capture(app, "native-04-organizer-time-preserved")
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        nativeOpenCard()
+        nativeOpenCard(expectedStatus: "等发起人定时间")
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertFalse(first.isSelected)
         wait(first, labelContains: ", 1"); first.tap(); nativeWaitSaved()
         wait(first, labelContains: ", 2")
@@ -297,7 +297,7 @@ import XCTest
         swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeStartY)).press(forDuration: 0.05,
             thenDragTo: swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeEndY)))
         XCTAssertFalse(first.isHittable, "An ordinary swipe must scroll rather than change free time")
-        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
+        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard(expectedStatus: "等发起人定时间")
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         wait(first, labelContains: ", 2"); nativeAssertInline()
         nativePhase("participant-reopened"); capture(app, "native-05-participant-reopened")
@@ -329,7 +329,7 @@ import XCTest
 
         nativeFinalTimeLargeText(owner: owner, route: route, bundle: fixture.bundle)
         nativeSignIn(owner, bundle: fixture.bundle)
-        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你定时间")
         reviewFinalHour(mark: nativePhase)
         app.buttons["unified-plan-send-invitations"].tap()
         wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "1/2 人已确认")
@@ -343,7 +343,7 @@ import XCTest
         nativePhase("reschedule-cancelled")
 
         nativeSignIn(participant, bundle: fixture.bundle)
-        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你确认")
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 20))
         XCTAssertFalse(app.buttons["time-poll-cell-0"].exists, "An invitation is a separate explicit confirmation")
@@ -366,7 +366,7 @@ import XCTest
         nativePhase("invitation-reviewed"); capture(app, "native-08-participant-invitation")
         nativeInvitedTimetableLarge(participant: participant, route: route, bundle: fixture.bundle)
         nativeSignIn(participant, bundle: fixture.bundle)
-        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你确认")
         let finalAccept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(finalAccept.waitForExistence(timeout: 15)); finalAccept.tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
@@ -384,6 +384,28 @@ import XCTest
         XCTAssertTrue(manage.waitForExistence(timeout: 10)); capture(app, "native-10-participant-calendar")
         manage.tap(); wait(count, labelContains: "2/2 人已确认")
         nativePhase("calendar-verified"); capture(app, "native-11-calendar-to-plan")
+    }
+
+    func testNativeConfirmedPlanUsesUpcomingSummary() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires the confirmed disposable native plan.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let participant = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).tap()
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20))
+        XCTAssertEqual(card.value as? String, "已确认")
+        XCTAssertTrue(card.label.contains(fixture.title))
+        XCTAssertTrue(card.label.contains("09:00") && card.label.contains("10:00"))
+        XCTAssertFalse(card.label.contains("Europe/Berlin"))
+        capture(app, "native-upcoming-date-summary")
+        card.tap()
+        wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "2/2 人已确认")
+        XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        XCTAssertTrue(app.buttons["plan-view-calendar"].isEnabled)
     }
 
     private func reviewFinalHour(mark: (String) -> Void = { _ in }) {
@@ -501,11 +523,12 @@ import XCTest
         app.buttons["login-submit"].tap()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
     }
-    private func nativeOpenCard() {
+    private func nativeOpenCard(expectedStatus: String? = nil) {
         let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 20))
         for _ in 0..<8 where !card.isHittable { app.swipeUp() }
         XCTAssertTrue(card.isHittable)
+        if let expectedStatus { XCTAssertEqual(card.value as? String, expectedStatus) }
         capture(app, "native-list-" + String(UUID().uuidString.prefix(8)))
         card.tap()
     }

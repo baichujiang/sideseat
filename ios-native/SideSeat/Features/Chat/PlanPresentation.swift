@@ -38,6 +38,38 @@ struct PlanPresentation: Sendable {
     let status: PlanDisplayStatus
     let nextStep: PlanNextStep
     let detail: String
+    var viewerHasConfirmed = false
+
+    /// Overview speaks about this viewer's task; detail keeps the shared lifecycle.
+    var cardStatusTitle: String {
+        let key: String.LocalizationValue? = switch nextStep {
+        case .fillAvailability: "Your availability needed"
+        case .shareAvailability, .shareInvitation: "Ready to share"
+        case .chooseTime: "Ready for you to choose"
+        case .confirm: "Your confirmation needed"
+        case .waitForOrganizer: "Waiting for a final time"
+        case .waitForReplies: viewerHasConfirmed ? "You've confirmed" : "Waiting for friends"
+        case .reviewReplies: "Waiting for friends"
+        case .declined: "You’ve replied that you can’t attend"
+        case .notIncluded: "You’re not joining this plan"
+        default: nil
+        }
+        return key.map { AppLocalization.string($0) } ?? status.title
+    }
+
+    var cardActionTitle: String {
+        let key: String.LocalizationValue = switch nextStep {
+        case .confirm: "Review invitation"
+        case .fillAvailability, .waitForOrganizer: "Open timetable"
+        case .chooseTime: "Choose final time"
+        case .shareAvailability, .shareInvitation: "Open and share"
+        case .waitForReplies, .reviewReplies: "View progress"
+        case .viewCalendar, .viewPlan, .notIncluded: "View arrangement"
+        case .declined: "View my response"
+        case .recordOutcome: "View activity feedback"
+        }
+        return AppLocalization.string(key)
+    }
 
     static func manual(phase: String, isOwner: Bool, didRespond: Bool, respondedCount: Int,
                        myStatus: String?, isIncluded: Bool, fixed: Bool, accepted: Int, target: Int,
@@ -94,7 +126,8 @@ struct PlanPresentation: Sendable {
             step = .viewPlan
             detail = "This Plan is no longer available."
         }
-        return Self(status: status, nextStep: step, detail: AppLocalization.string(detail))
+        return Self(status: status, nextStep: step, detail: AppLocalization.string(detail),
+                    viewerHasConfirmed: !isOwner && isIncluded && myStatus == "ACCEPTED")
     }
 
     static func conversation(_ plan: NativePlanRequest, viewerID: String, now: Date) -> Self {
@@ -161,5 +194,61 @@ extension NativeTimePollList.Item {
                 respondedCount: respondedCount ?? 0, myStatus: myInvitationStatus,
                 isIncluded: isOwner == true || isIncluded != false, fixed: planningMode == "FIXED",
                 accepted: acceptedCount ?? 0, target: confirmationTarget, start: chosenStart, end: chosenEnd, now: now)
+    }
+}
+
+/// Concise overview dates, retaining exact cross-day / cross-year and foreign-zone context.
+struct PlanOverviewTiming {
+    let start: Date?
+    let end: Date?
+    var candidateDates: [String] = []
+    let timeZone: String
+    let now: Date
+    let locale: Locale
+    var viewerTimeZone: TimeZone = .current
+
+    private var zone: TimeZone { TimeZone(identifier: timeZone) ?? .current }
+    private var calendar: Calendar {
+        var value = Calendar(identifier: .gregorian); value.timeZone = zone; return value
+    }
+    var crossesDay: Bool {
+        guard let start, let end else { return false }
+        return !calendar.isDate(start, inSameDayAs: end)
+    }
+    func datePart(_ date: Date, template: String) -> String {
+        let format = DateFormatter()
+        format.locale = locale; format.timeZone = zone
+        format.setLocalizedDateFormatFromTemplate(template)
+        return format.string(from: date)
+    }
+    func dayNumber(_ date: Date) -> String {
+        calendar.component(.day, from: date).formatted(.number.locale(locale))
+    }
+    private func dateLabel(_ date: Date, weekday: Bool = true) -> String {
+        let year = calendar.component(.year, from: date) != calendar.component(.year, from: now)
+        return datePart(date, template: (year ? "y" : "") + "MMMd" + (weekday ? "EEE" : ""))
+    }
+    var dateText: String {
+        if let start { return dateLabel(start) }
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = zone; parser.dateFormat = "yyyy-MM-dd"
+        let dates = candidateDates.compactMap { parser.date(from: $0) }.sorted()
+        guard let first = dates.first, let last = dates.last else { return AppLocalization.string("No time selected yet") }
+        if first == last { return dateLabel(first) }
+        return String(format: AppLocalization.string("%d dates · %@"), dates.count,
+                      dateLabel(first, weekday: false) + " – " + dateLabel(last, weekday: false))
+    }
+    var clockText: String? {
+        guard let start, let end else { return nil }
+        return datePart(start, template: "jmm") + " – "
+            + (crossesDay ? dateLabel(end, weekday: false) + " " : "") + datePart(end, template: "jmm")
+    }
+    var zoneText: String? {
+        guard zone.identifier != viewerTimeZone.identifier else { return nil }
+        let date = start ?? now
+        let name = zone.localizedName(for: .generic, locale: locale) ?? zone.identifier
+        let offset = zone.abbreviation(for: date) ?? ""
+        let endOffset = end.map { zone.abbreviation(for: $0) ?? "" }
+        return name + " · " + offset + (endOffset != nil && endOffset != offset ? " / " + endOffset! : "")
     }
 }
