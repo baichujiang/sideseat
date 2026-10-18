@@ -1,0 +1,45 @@
+{
+  "commit": "3e4e70f9cbc2edde4002a8452f533b061550255b",
+  "pushed": true,
+  "previewBuild": "126",
+  "builtSourceVerifiedUnchanged": {
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "22607ab75c58f3b49d0f8585fbf6ddcc1a4fc680484bf5324695caf2ccb93082",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "1e63e8df44be36dbc8969b52e5ae7ab8b5b8231a150fd046fc07d95fbf2ad00e",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "34bc96142a983614f77dfb59a916be09026342ae2a89d7f1e86aff6437050ee8",
+    "ios-native/Configuration/Preview.xcconfig": "6fe089c4dbbde82e5b6561d292233169352a31624eb8a1be67f4a554e5a4dc8d"
+  },
+  "files": [
+    {
+      "path": "docs/PLAN_PRESENTATION.md",
+      "sha256": "3b9971e6e9ad526d853ff2a0dbdb980b7c31de3fb9e885b91de937745cf651ef"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "6fe089c4dbbde82e5b6561d292233169352a31624eb8a1be67f4a554e5a4dc8d"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift",
+      "sha256": "34bc96142a983614f77dfb59a916be09026342ae2a89d7f1e86aff6437050ee8"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+      "sha256": "22607ab75c58f3b49d0f8585fbf6ddcc1a4fc680484bf5324695caf2ccb93082"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+      "sha256": "1e63e8df44be36dbc8969b52e5ae7ab8b5b8231a150fd046fc07d95fbf2ad00e"
+    },
+    {
+      "path": "ios-native/SideSeatUITests/PlanFirstUsePhoneUITests.swift",
+      "sha256": "06e38b2e677dd172cc5a51f485346febb06257ef6405995d13223fdbb2bfe915"
+    },
+    {
+      "path": "scripts/qa/plan-first-use-phone.mjs",
+      "sha256": "58354bc0e5ffcc062505febd26e4e46a5280f7cb209133337773a398fdc75636"
+    },
+    {
+      "path": "scripts/qa/plan-participant-phone.mjs",
+      "sha256": "a059d8a723c5b65f6eb1d1f34ce59f037b134b06145797bcc022ec98c6437e99"
+    }
+  ]
+}

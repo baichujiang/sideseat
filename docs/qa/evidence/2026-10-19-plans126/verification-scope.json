@@ -1,0 +1,32 @@
+{
+  "unitTestsPassed": 25,
+  "acceptedPhysicalRegressionCases": 1,
+  "acceptedCompletePhysicalFlows": 2,
+  "nativeFlowDurationSeconds": 263.027,
+  "listRegressionDurationSeconds": 47.175,
+  "safariFlowDurationSeconds": 150.573,
+  "realAPICheckpoints": 20,
+  "finalPhysicalExecutions": {
+    "nativeAndList": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "safari": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "detailAssertions": [
+    "The initial timetable occupies more than 35 percent of the phone app height.",
+    "The activity heading stays above the timetable.",
+    "The final highlighted range is fully above the confirm action.",
+    "Response and invitation people sheets show the same participants and preserve availability and invitation status.",
+    "Maximum-text dark-mode cells and actions remain reachable."
+  ],
+  "initialSafariFailure": "The test still looked for participant names on the main page after they moved into the people sheet. Updated the test to open and close the actual people control, retaining the name/data assertions; repeated the complete flow with fresh fixtures.",
+  "temporaryAccountsDeleted": 4,
+  "plansAndShareLinksDeleted": 3,
+  "remainingPlans": 0
+}

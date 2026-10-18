@@ -1,6 +1,6 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；原生、生产部署、公开配置最后核验 2026-10-18，Europe/Berlin。
+**状态：** 当前运行清单；原生安装与计划完整链路核验 2026-10-19；生产部署与公开配置按下方记录日期，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 125 横向分区来源 `6338897b`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (125)` | 待处理纵向、等待他人横向；10 项单元、5 个呈现用例、原生 254.052 秒和 Safari 150.256 秒两条完整真机、12+8 阶段 API 通过；严格签名/安装/普通启动 PID 1671 已核验；[125 交付](./releases/2026-10-18-preview125-horizontal-plan-sections.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有命令明确指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；125 两条完整流程、横滑/展开及深色最大字号通过。初始失败与 Safari 中止记录保留；QA runner 已移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 126 详情来源 `3e4e70f9`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (126)` | 时间表为核心、名单按需展开、底部操作分层；25 项单元、263.027 秒原生与 150.573 秒 Safari 完整真机、47.175 秒首页回归及 12+8 个 API 阶段通过；严格签名/安装/普通启动 PID 1741 已核验；[126 交付](./releases/2026-10-19-preview126-timetable-detail.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；126 两条完整链路、时间表主次/名单展开/高亮位置/深色最大字号与首页横滑通过；首轮 Safari 测试路径失败保留；QA runner 移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn`，Ready | 受邀时段表格与明确确认统一；候选两轮各 8 组、正式 8 组真实浏览器流程、手机 Safari 147.349 秒及八阶段 API 通过，7 项健康 HTTP 200；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
 | 生产源码 | 原生产 1,349 项校验重建，保留 1,346 项；三个网页文件更新，新增组件及来源记录；1,351 项上传 SHA-1 全匹配 | 网页来源 `e484b774`；API/Schema 保留，迁移显式跳过；同一生产候选验证后原样提升；[清单](./qa/evidence/2026-10-18-plans123/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans123/upload-verification.json) |
+
+126 重排详情：平面活动与状态、核心时间表、表下确认进度和展开名单、底部当前阶段动作，复制链接为次要图标；原 flow 和数据合同保留。25 项单元、263.027 秒原生与 150.573 秒 Safari 两条完整真机、47.175 秒首页回归及 12+8 个 API 阶段通过。首轮测试漏同步名单入口，修正测试路径后用新账号完整复验，原失败记录保留。4 个临时账号、3 个计划/链接回收，QA runner 移除，126 普通启动 PID 1741 已核验；本轮无后端/网页发布。[完整 QA](./qa/2026-10-19-plans126.md)。
 
 125 采用选定横向分区：待处理纵向任务组、等待他人横向轨道及查看全部、单卡铺满、大字号纵向换行；创建入口与下一次见面减轻外框。10 项单元、5 个呈现用例及两条完整真机流程通过，原生 254.052 秒、Safari 150.256 秒，12+8 个正式 API 阶段通过。初始辅助功能容器与 Safari 自动化等待分别修正复验，原记录保留。4 个临时账号、3 个计划/链接回收，QA runner 移除，125 普通启动 PID 1671 核验。后端/网页无发布。[完整 QA](./qa/2026-10-18-plans125.md)。
 
