@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "f541685fc9081b11f9e88f3baa9ff3dbb6f14f71",
+  "pushed": true,
+  "preview": "128",
+  "builtSourceVerifiedUnchanged": {
+    "ios-native/Configuration/Preview.xcconfig": "cd677771ba18f232c2151736b95190b7f9701ce1556b83f5c6db98c5ff8346a7",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "2ddea76ae44ec0cd119c204c35de3abd71ef7dec5233beb37e47b237285497d6",
+    "ios-native/SideSeat/Features/Chat/PlansStore.swift": "94db1ebc97f7bb21eb0c4a4aae116a79a908a2f152402304098e4eec70d7ebf9"
+  }
+}

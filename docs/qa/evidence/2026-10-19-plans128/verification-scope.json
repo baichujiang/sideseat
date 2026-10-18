@@ -1,0 +1,28 @@
+{
+  "preview": "128",
+  "physicalPresentationTests": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0
+  },
+  "physicalDevice": "iPhone 14 Plus 00008110-001A69110CC1401E",
+  "scope": [
+    "Compact task, waiting and upcoming layout",
+    "Default-size card height budgets",
+    "Horizontal rail stays on the same section, expands, collapses and returns from detail",
+    "Invitation open, explicit confirmation and Calendar route with offline fixtures",
+    "Dark mode and maximum accessibility text reachability"
+  ],
+  "fixtures": "Existing offline UI fixtures at 127.0.0.1:9; rail examples use stable daytime hours only during UI testing",
+  "newLiveAccounts": 0,
+  "unitAndRealAPIJourneysRerun": false,
+  "priorFullJourneyEvidence": "../2026-10-19-plans127/verification-scope.json",
+  "reason": "Display-only changes in typography, fill, spacing and metadata; no status, persistence, API or mutation rule changes",
+  "manualVisualReview": [
+    "Tasks have compact text/arrow action without dark inner pill",
+    "Waiting cards use adaptive surface instead of disabled-looking gray fill",
+    "Date column aligns at top, quieter metadata is combined",
+    "All three standard-size cards and maximum-size waiting layout inspected"
+  ],
+  "productionUsesFixedCardHeight": false
+}
