@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 128 精修来源 `f541685f`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (128)` | 三类卡片视觉精修、紧凑文字入口/轻底色/日期对齐；5 项真机界面回归通过；标准样例 156/142/111pt；严格签名/安装/普通启动 PID 1840 已核验；完整真实链路最近验收仍为 127；[128 交付](./releases/2026-10-19-preview128-plan-card-polish.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；128 三类卡片界面回归、深色最大字号、横滑/展开/返回与高度检查通过；127 两条真实完整链路保留；QA runner 移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 129 紧凑卡片来源 `32848bf3`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (129)` | 三组信息的紧凑任务/等待/日程卡片，标准样例约 111/97/94pt，双行标题约 132pt；6 项真机界面回归通过；严格签名/安装/普通启动 PID 1862 核验；真实完整链路最近验收仍为 127；[129 交付](./releases/2026-10-19-preview129-compact-plan-cards.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；129 三类紧凑卡片、双行标题、最大字号、横滑/展开/返回和高度检查通过；127 真实完整链路保留；QA runner 移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn`，Ready | 受邀时段表格与明确确认统一；候选两轮各 8 组、正式 8 组真实浏览器流程、手机 Safari 147.349 秒及八阶段 API 通过，7 项健康 HTTP 200；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
 | 生产源码 | 原生产 1,349 项校验重建，保留 1,346 项；三个网页文件更新，新增组件及来源记录；1,351 项上传 SHA-1 全匹配 | 网页来源 `e484b774`；API/Schema 保留，迁移显式跳过；同一生产候选验证后原样提升；[清单](./qa/evidence/2026-10-18-plans123/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans123/upload-verification.json) |
+
+129 收为三个信息组：活动/个人状态同排，等待直接显示正在等谁，即将开始使用小型日期块。标准样例约 111/97/94pt，双行长标题约 132pt，6 项最终真机界面回归通过。没有创建真实账号，本轮未重跑 127 的真实 API 链路。默认手机 Preview 129 普通启动 PID 1862 核验；无后端/网页发布。[完整 QA](./qa/2026-10-19-plans129.md)。
 
 128 继续精修卡片：减轻按钮、底色和分区数量标签，统一字体与次要信息，日期柱顶部对齐，普通样例高度为 156/142/111pt。5 项真机界面回归通过；无真实账号创建，本轮未重跑 127 的真实 API 完整链路。默认手机 Preview 128 普通启动 PID 1840 核验，QA runner 已移除；本轮无后端/网页发布。[完整 QA](./qa/2026-10-19-plans128.md)。
 

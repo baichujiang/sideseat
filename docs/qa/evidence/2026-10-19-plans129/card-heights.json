@@ -1,0 +1,20 @@
+{
+  "units": "pt",
+  "device": "iPhone 14 Plus",
+  "locale": "zh-Hans",
+  "typeSize": "standard",
+  "fixture": "daytime layout, including a two-line task title",
+  "actual": {
+    "upcoming": 93.67,
+    "task": 111.33,
+    "taskLongTitle": 132.33,
+    "waiting": 97.33
+  },
+  "budgets": {
+    "task": 128,
+    "taskLongTitle": 148,
+    "waiting": 112,
+    "upcoming": 112
+  },
+  "fixedProductionHeight": false
+}

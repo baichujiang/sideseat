@@ -1,0 +1,35 @@
+{
+  "preview": "129",
+  "finalPhysicalUIBatch": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "initialVisualIteration": {
+    "passed": 6,
+    "acceptedAsFinalEvidence": false,
+    "reason": "Screenshots showed duplicate waiting wording and location occupying a separate line. Condensed it, then reran all six on the final source."
+  },
+  "scope": [
+    "Task title plus viewer badge, full schedule and one metadata/action row",
+    "Two-line task title retained in full",
+    "Narrower waiting rail, named-person waiting summary and explicit progress action",
+    "Upcoming neutral date block, visible status and correct full date for VoiceOver",
+    "Horizontal browsing stays in the same section, expands, collapses and returns from detail",
+    "Invitation opens existing explicit confirmation and Calendar route with offline fixtures",
+    "Dark maximum accessibility task, waiting and upcoming reachability"
+  ],
+  "fixtures": "Offline UI data at 127.0.0.1:9; Chinese daytime layout examples",
+  "newLiveAccounts": 0,
+  "unitAndRealAPIJourneysRerun": false,
+  "priorFullJourneyEvidence": "../2026-10-19-plans127/verification-scope.json",
+  "localization": "Named waiting summary added to en/zh-Hans/de resources; all three plist validations passed, physical UI tested in Chinese",
+  "productionUsesFixedCardHeight": false,
+  "visualReview": [
+    "Compact overview with all three card types",
+    "Two-line task title",
+    "Named waiting summary",
+    "Upcoming date block in standard and maximum text"
+  ],
+  "backendDeploymentRetainedFromRecord": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn"
+}
