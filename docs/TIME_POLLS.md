@@ -8,6 +8,21 @@ When2meet source code or save service is used. Sideseat account authentication
 replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
+
+## Invitation timetable — Preview 123
+
+App and public-share invitation details now show a read-only timetable focused on
+the exact invited day/time, with one context cell before and after where possible.
+A distinct outline, fill, calendar icon and text mark the final interval; quarter-hour
+edges use proportional highlights, and cross-midnight dates and repeated DST times
+retain actual instants. Fixed-time invitations use the same display even outside
+collection hours. The invited time is separate from personal availability.
+Opening or tapping the timetable never edits a response or accepts an invitation.
+The viewer still explicitly confirms or declines the current invitation version;
+Calendar projections still wait for every selected person. The highlight remains
+on confirmed details; only pending replies show the instruction to confirm.
+
+
 ## Mobile selection
 
 Ordinary vertical and horizontal swipes over the cells scroll without editing.

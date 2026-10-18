@@ -2879,3 +2879,13 @@
 "Confirm invitation list" = "Einladungsliste prüfen";
 
 "Back to timetable" = "Zurück zum Zeitplan";
+
+"Invited timetable" = "Zeitplan der Einladung";
+
+"The highlighted time is the invitation. Review it, then confirm participation below." = "Die markierte Zeit gehört zur Einladung. Prüfe sie und bestätige dann unten deine Teilnahme.";
+
+"Invited time" = "Eingeladene Zeit";
+
+"Outside the invited time" = "Außerhalb der eingeladenen Zeit";
+
+"Highlighted cells show the final activity time." = "Die markierten Zellen zeigen die endgültige Aktivitätszeit.";

@@ -2880,3 +2880,13 @@
 "Confirm invitation list" = "Confirm invitation list";
 
 "Back to timetable" = "Back to timetable";
+
+"Invited timetable" = "Invited timetable";
+
+"The highlighted time is the invitation. Review it, then confirm participation below." = "The highlighted time is the invitation. Review it, then confirm participation below.";
+
+"Invited time" = "Invited time";
+
+"Outside the invited time" = "Outside the invited time";
+
+"Highlighted cells show the final activity time." = "Highlighted cells show the final activity time.";

@@ -35,3 +35,29 @@ export function selectedRanges(poll: SharedTimePoll, selected: number[]) {
 }
 export function pollClock(instant: string, zone: string) { return new Intl.DateTimeFormat("en-GB", { timeZone: zone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(instant)); }
 export function pollDate(date: string, zh: boolean) { return new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", month: "short", day: "numeric", weekday: "short" }).format(new Date(date + "T12:00:00Z")); }
+
+
+export type InvitationTimetableRow = { start: string; end: string; date: string; label: string; from: number; through: number };
+// Display-only half-hour context. It never rewrites saved availability or invitation instants.
+export function invitationTimetableRows(start: string, end: string, timeZone: string): InvitationTimetableRow[] {
+  const first = Date.parse(start), last = Date.parse(end);
+  if (!(last > first)) return [];
+  const clock = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
+  const offset = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "longOffset" });
+  const floorHalfHour = (instant: number) => {
+    const parts = clock.formatToParts(instant);
+    return instant - (Number(parts.find(p => p.type === "minute")!.value) % 30 * 60 + Number(parts.find(p => p.type === "second")!.value)) * 1000 - instant % 1000;
+  };
+  const endFloor = floorHalfHour(last), limit = (endFloor < last ? endFloor + 1800000 : endFloor) + 1800000;
+  const rows: InvitationTimetableRow[] = [], occurrences = new Map<string, number>();
+  for (let cursor = floorHalfHour(first) - 1800000; cursor < limit; cursor += 1800000) {
+    const day = date.format(cursor), label = pollClock(new Date(cursor).toISOString(), timeZone), key = day + label;
+    const repeated = occurrences.get(key) ?? 0; occurrences.set(key, repeated + 1);
+    const zone = repeated ? " " + offset.formatToParts(cursor).find(p => p.type === "timeZoneName")!.value.replace("GMT", "") : "";
+    rows.push({ start: new Date(cursor).toISOString(), end: new Date(cursor + 1800000).toISOString(), date: day, label: label + zone,
+      from: Math.max(0, Math.min(1, (first - cursor) / 1800000)), through: Math.max(0, Math.min(1, (last - cursor) / 1800000)) });
+  }
+  const days = new Set(rows.filter(row => row.through > row.from).map(row => row.date));
+  return rows.filter(row => days.has(row.date));
+}

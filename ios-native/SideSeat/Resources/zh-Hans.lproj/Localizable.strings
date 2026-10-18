@@ -2880,3 +2880,13 @@
 "Confirm invitation list" = "确认邀请名单";
 
 "Back to timetable" = "返回时间表";
+
+"Invited timetable" = "受邀时间表";
+
+"The highlighted time is the invitation. Review it, then confirm participation below." = "高亮部分是受邀时段。看清时间后，再点击下方「确认参加」。";
+
+"Invited time" = "受邀时段";
+
+"Outside the invited time" = "邀请时段之外";
+
+"Highlighted cells show the final activity time." = "高亮部分表示最终活动时段。";

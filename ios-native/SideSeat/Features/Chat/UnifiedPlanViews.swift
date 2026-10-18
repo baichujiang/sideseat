@@ -130,6 +130,7 @@ struct UnifiedPlanConfirmationView: View {
     }
 
     var body: some View {
+        ScrollViewReader { reader in
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
@@ -150,6 +151,9 @@ struct UnifiedPlanConfirmationView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceLG)
                 .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                if let start = poll.chosenStart, let end = poll.chosenEnd {
+                    InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, needsConfirmation: canReply && mine?.status != "ACCEPTED")
+                }
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                     HStack {
                         Text("Who's joining?").font(.headline)
@@ -203,6 +207,10 @@ struct UnifiedPlanConfirmationView: View {
             }.padding(SideSeatTheme.spaceMD)
         }
         .background(SideSeatTheme.bgGrouped)
+        .task(id: poll.invitationVersion) {
+            if poll.planningPhase == "INVITING" { reader.scrollTo("invitation-timetable-focus", anchor: .top) }
+        }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
@@ -258,5 +266,69 @@ struct UnifiedPlanConfirmationView: View {
     }
     private func reply(_ status: String) {
         Task { await store.mutate("invitation-response", method: .put, body: RespondPollInvitationRequest(status: status, version: poll.invitationVersion ?? 0), session: session) }
+    }
+}
+
+
+private struct InvitationTimetableView: View {
+    let start: Date
+    let end: Date
+    let timeZone: String
+    let needsConfirmation: Bool
+    @ScaledMetric(relativeTo: .caption) private var rowHeight: CGFloat = 44
+    @ScaledMetric(relativeTo: .caption2) private var labelWidth: CGFloat = 64
+
+    var body: some View {
+        let rows = TimePollInvitationRow.rows(start: start, end: end, timeZone: timeZone)
+        let dates = rows.map(\.date).reduce(into: [String]()) { if $0.last != $1 { $0.append($1) } }
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Text("Invited timetable").font(.headline)
+            Text(LocalizedStringKey(needsConfirmation ? "The highlighted time is the invitation. Review it, then confirm participation below." : "Highlighted cells show the final activity time."))
+                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            ForEach(dates, id: \.self) { date in
+                let dayRows = rows.filter { $0.date == date }
+                let dayStart = max(start, dayRows.first?.start ?? start)
+                let dayEnd = min(end, dayRows.last?.end ?? end)
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(timePollDateLabel(date).replacingOccurrences(of: "\n", with: " ")).font(.subheadline.weight(.semibold))
+                        Text(timePollClockFormatter(timeZone).string(from: dayStart) + " – " + (dayEnd == dayRows.last?.end && dayEnd > dayStart && timePollClockFormatter(timeZone).string(from: dayEnd) == "00:00" ? "24:00" : timePollClockFormatter(timeZone).string(from: dayEnd)))
+                            .font(.caption.monospacedDigit())
+                        Text(timeZone).font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }.frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceSM)
+                        .id(date == dates.first ? "invitation-timetable-focus" : date)
+                    ForEach(dayRows) { row in
+                        HStack(spacing: 0) {
+                            Text(row.label).font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
+                                .frame(width: labelWidth, height: rowHeight)
+                            GeometryReader { geometry in
+                                ZStack(alignment: .top) {
+                                    Rectangle().fill(SideSeatTheme.success.opacity(0.04))
+                                    if row.highlighted {
+                                        Rectangle().fill(SideSeatTheme.success.opacity(0.26))
+                                            .overlay { Rectangle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2) }
+                                            .overlay {
+                                                if row.through - row.from >= 0.5 {
+                                                    Label("Invited time", systemImage: "calendar")
+                                                        .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                                                }
+                                            }
+                                            .frame(height: geometry.size.height * (row.through - row.from))
+                                            .offset(y: geometry.size.height * row.from)
+                                    }
+                                }
+                            }.frame(height: rowHeight)
+                        }
+                        .overlay(alignment: .bottom) { Divider() }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(timePollDateLabel(row.date).replacingOccurrences(of: "\n", with: ", ") + ", " + row.label)
+                        .accessibilityValue(AppLocalization.string(row.highlighted ? "Invited time" : "Outside the invited time"))
+                        .accessibilityAddTraits(row.highlighted ? .isSelected : [])
+                        .accessibilityIdentifier("plan-invitation-cell-\(rows.firstIndex(where: { $0.id == row.id }) ?? 0)")
+                    }
+                }.background(SideSeatTheme.surface).clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                    .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }
+            }
+        }.accessibilityIdentifier("plan-invitation-timetable")
     }
 }

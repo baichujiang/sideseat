@@ -3,6 +3,21 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+
+## Invitation timetable — Preview 123
+
+App and public-share invitation details now show a read-only timetable focused on
+the exact invited day/time, with one context cell before and after where possible.
+A distinct outline, fill, calendar icon and text mark the final interval; quarter-hour
+edges use proportional highlights, and cross-midnight dates and repeated DST times
+retain actual instants. Fixed-time invitations use the same display even outside
+collection hours. The invited time is separate from personal availability.
+Opening or tapping the timetable never edits a response or accepts an invitation.
+The viewer still explicitly confirms or declines the current invitation version;
+Calendar projections still wait for every selected person. The highlight remains
+on confirmed details; only pending replies show the instruction to confirm.
+
+
 ## One shared lifecycle
 
 `TimePoll` is the persisted root of manual plans. `COLLECT` starts in COLLECTING;

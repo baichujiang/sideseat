@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, CalendarDays, Check, CheckCircle2, Circle, Clock3, Loader2, MapPin, Pencil, Users, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InvitationTimetable } from "@/components/time-polls/invitation-timetable";
 import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
 import { useSharedTimePoll } from "@/components/time-polls/use-shared-time-poll";
 import styles from "./shared-time-poll.module.css";
@@ -26,8 +27,8 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
   const viewerId = poll?.viewerId;
   useEffect(() => {
-    if (collecting && viewerId && !choosingName) table.current?.scrollIntoView({ block: "start" });
-  }, [collecting, viewerId, choosingName]);
+    if ((collecting || poll?.phase === "INVITING") && viewerId && !choosingName) table.current?.scrollIntoView({ block: "start" });
+  }, [collecting, viewerId, choosingName, poll?.phase, poll?.invitationVersion]);
   const errorText = zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
   const editing = collecting && !!poll?.viewerId && !choosingName;
@@ -107,6 +108,9 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
             {!collecting ? <section className="space-y-4 rounded-2xl border bg-background p-5 sm:p-6" data-testid="plan-invitation">
               <h2 className="text-2xl font-semibold">{poll.phase === "CONFIRMED" ? (zh ? "计划已确定" : "Plan confirmed") : poll.phase === "CANCELLED" ? (zh ? "计划已取消" : "Plan cancelled") : poll.phase === "EXPIRED" ? (zh ? "计划已过期" : "Plan expired") : mine?.status === "ACCEPTED" ? (zh ? "你已确认，等待其他人" : "You've confirmed. Waiting for others.") : (zh ? "最后一步：确认最终时间" : "Last step: confirm the final time")}</h2>
               {poll.chosenStart && poll.chosenEnd ? <p className="text-lg font-semibold leading-7">{formatWindow(poll.chosenStart, poll.chosenEnd)}</p> : null}
+              {poll.chosenStart && poll.chosenEnd ? <section ref={table} className="scroll-mt-4">
+                <InvitationTimetable start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} needsConfirmation={!!replying && mine?.status !== "ACCEPTED"} />
+              </section> : null}
               {poll.phase === "EXPIRED" ? <p role="status" className="text-sm leading-6 text-muted-foreground">{zh ? "这次安排在确认前已过期，没有加入任何人的日历。请联系发起人重新约时间。" : "This plan expired before confirmation. No calendar entries were added. Ask the organizer to arrange another time."}</p> : poll.phase === "CANCELLED" ? <p className="text-sm text-muted-foreground">{zh ? "发起人已取消这次安排，请联系对方重新约时间。" : "This activity was cancelled. Contact the organizer to arrange another time."}</p> : <>
                 <p className={"inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium " + styles.phase}><Users className="h-4 w-4" aria-hidden />{accepted}/{target ?? 0} {zh ? "人已确认" : "confirmed"}</p>
                 {poll.phase === "CONFIRMED" ? <><p className="text-sm leading-6">{zh ? "大家已同意这个时间，按上面的时间地点参加即可。" : "Everyone agreed to this time. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>

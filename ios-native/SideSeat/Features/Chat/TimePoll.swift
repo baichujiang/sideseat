@@ -189,6 +189,45 @@ enum TimePollLink {
     }
 }
 
+/// Read-only invitation context, independent of saved availability and fixed-plan candidate hours.
+struct TimePollInvitationRow: Identifiable, Sendable {
+    var id: Date { start }
+    let start: Date
+    let end: Date
+    let date: String
+    let label: String
+    let from: Double
+    let through: Double
+    var highlighted: Bool { through > from }
+
+    static func rows(start: Date, end: Date, timeZone: String) -> [Self] {
+        guard end > start else { return [] }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZone) ?? .gmt
+        let day = DateFormatter(); day.locale = Locale(identifier: "en_US_POSIX"); day.timeZone = calendar.timeZone; day.dateFormat = "yyyy-MM-dd"
+        let clock = DateFormatter(); clock.locale = day.locale; clock.timeZone = calendar.timeZone; clock.dateFormat = "HH:mm"
+        let offset = DateFormatter(); offset.locale = day.locale; offset.timeZone = calendar.timeZone; offset.dateFormat = "XXX"
+        func floorHalfHour(_ date: Date) -> Date {
+            date.addingTimeInterval(-Double(calendar.component(.minute, from: date) % 30 * 60 + calendar.component(.second, from: date)) - Double(calendar.component(.nanosecond, from: date)) / 1_000_000_000)
+        }
+        var cursor = floorHalfHour(start).addingTimeInterval(-1800)
+        let last = floorHalfHour(end)
+        let limit = (last < end ? last.addingTimeInterval(1800) : last).addingTimeInterval(1800)
+        var rows: [Self] = [], occurrences: [String: Int] = [:]
+        while cursor < limit {
+            let next = cursor.addingTimeInterval(1800), date = day.string(from: cursor), time = clock.string(from: cursor)
+            let key = date + time, occurrence = occurrences[key, default: 0]
+            occurrences[key] = occurrence + 1
+            rows.append(.init(start: cursor, end: next, date: date, label: time + (occurrence > 0 ? " " + offset.string(from: cursor) : ""),
+                              from: max(0, min(1, start.timeIntervalSince(cursor) / 1800)),
+                              through: max(0, min(1, end.timeIntervalSince(cursor) / 1800))))
+            cursor = next
+        }
+        let dates = Set(rows.filter(\.highlighted).map(\.date))
+        return rows.filter { dates.contains($0.date) }
+    }
+}
+
 /// One continuous, candidate-backed invitation window; never an availability response.
 struct TimePollFinalRange: Equatable, Sendable {
     let date: String

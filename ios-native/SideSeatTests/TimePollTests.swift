@@ -29,6 +29,39 @@ struct TimePollTests {
         #expect(cells[0].availableCount(in: [[0], [1]]) == 0)
     }
 
+    @Test("Invitation timetable focuses the actual time without depending on candidate slots")
+    func invitationTimetable() {
+        let start = ISO8601DateFormatter().date(from: "2030-10-20T20:00:00Z")!
+        let rows = TimePollInvitationRow.rows(start: start, end: start.addingTimeInterval(3600), timeZone: "Europe/Berlin")
+        #expect(rows.map(\.label) == ["21:30", "22:00", "22:30", "23:00"])
+        #expect(rows.map(\.highlighted) == [false, true, true, false])
+        #expect(rows.filter(\.highlighted).allSatisfy { $0.from == 0 && $0.through == 1 })
+    }
+
+    @Test("Invitation timetable keeps legacy quarter-hour edges exact")
+    func invitationTimetablePartial() {
+        let start = ISO8601DateFormatter().date(from: "2030-10-20T07:15:00Z")!
+        let rows = TimePollInvitationRow.rows(start: start, end: start.addingTimeInterval(3600), timeZone: "Europe/Berlin")
+        let selected = rows.filter(\.highlighted)
+        #expect(selected.count == 3)
+        #expect(selected.first?.label == "09:00")
+        #expect(selected.first?.from == 0.5 && selected.first?.through == 1)
+        #expect(selected.last?.label == "10:00")
+        #expect(selected.last?.from == 0 && selected.last?.through == 0.5)
+    }
+
+    @Test("Invitation timetable separates midnight and repeated DST times")
+    func invitationTimetableDates() {
+        let formatter = ISO8601DateFormatter()
+        let start = formatter.date(from: "2030-10-20T21:45:00Z")!
+        let cross = TimePollInvitationRow.rows(start: start, end: start.addingTimeInterval(1800), timeZone: "Europe/Berlin")
+        #expect(Set(cross.filter(\.highlighted).map(\.date)) == ["2030-10-20", "2030-10-21"])
+        let fall = formatter.date(from: "2026-10-25T00:30:00Z")!
+        let repeated = TimePollInvitationRow.rows(start: fall, end: fall.addingTimeInterval(7200), timeZone: "Europe/Berlin")
+        #expect(repeated.filter(\.highlighted).count == 4)
+        #expect(repeated.contains { $0.label == "02:30 +01:00" })
+    }
+
     @Test("Final time spans continuous half-hour cells in either direction without changing replies")
     func finalTimeRange() {
         let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }

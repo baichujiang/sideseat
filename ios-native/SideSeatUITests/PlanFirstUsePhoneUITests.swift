@@ -171,7 +171,12 @@ import XCTest
 
         safari.activate()
         let accept = webButton("Confirm participation", "确认参加")
-        XCTAssertTrue(accept.waitForExistence(timeout: 35)); capture(safari, "11-guest-invitation"); accept.tap()
+        XCTAssertTrue(accept.waitForExistence(timeout: 35))
+        XCTAssertTrue(safari.staticTexts["受邀时间表"].waitForExistence(timeout: 15))
+        let invited = safari.staticTexts.matching(NSPredicate(format: "label == %@", "受邀时段")).firstMatch
+        XCTAssertTrue(invited.isHittable); invited.tap()
+        XCTAssertTrue(accept.isEnabled)
+        capture(safari, "11-guest-invitation"); accept.tap()
         XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Plan confirmed", "计划已确定"])).firstMatch.waitForExistence(timeout: 25))
         capture(safari, "12-guest-confirmed")
         app.activate(); wait(count, labelContains: "2/2 人已确认")
@@ -326,7 +331,17 @@ import XCTest
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 20))
         XCTAssertFalse(app.buttons["time-poll-cell-0"].exists, "An invitation is a separate explicit confirmation")
-        capture(app, "native-08-participant-invitation"); accept.tap()
+        let invited = app.descendants(matching: .any)["plan-invitation-cell-1"].firstMatch
+        XCTAssertTrue(invited.waitForExistence(timeout: 10)); XCTAssertTrue(invited.isSelected)
+        XCTAssertFalse(app.buttons["plan-invitation-cell-1"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["plan-invitation-cell-0"].firstMatch.isSelected)
+        invited.tap(); XCTAssertTrue(accept.isEnabled)
+        nativePhase("invitation-reviewed"); capture(app, "native-08-participant-invitation")
+        nativeInvitedTimetableLarge(participant: participant, route: route, bundle: fixture.bundle)
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        let finalAccept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(finalAccept.waitForExistence(timeout: 15)); finalAccept.tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "2/2 人已确认")
         nativePhase("confirmed"); capture(app, "native-09-participant-confirmed")
@@ -412,6 +427,37 @@ import XCTest
         let send = app.buttons["unified-plan-send-invitations"]
         XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isHittable)
         capture(app, "final-05-dark-large-roster")
+    }
+
+    private func nativeInvitedTimetableLarge(participant: NativeAccount, route: String, bundle: String) {
+        app.terminate(); app = XCUIApplication(bundleIdentifier: bundle)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-time-poll-live", "--ui-testing-deep-link=\(route)", "--ui-testing-language=zh-Hans",
+            "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": participant.accessToken]; app.launch()
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 20))
+        let invited = app.descendants(matching: .any)["plan-invitation-cell-1"].firstMatch
+        XCTAssertTrue(invited.waitForExistence(timeout: 10))
+        for _ in 0..<12 where !invited.isHittable || invited.frame.maxY >= accept.frame.minY - 20 || invited.frame.minY <= app.navigationBars.firstMatch.frame.maxY {
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            let nav = app.navigationBars.firstMatch.frame.maxY
+            if invited.frame.minY <= nav {
+                let amount = min(180, nav + 20 - invited.frame.minY)
+                origin.withOffset(CGVector(dx: 40, dy: nav + 40)).press(forDuration: 0.05,
+                    thenDragTo: origin.withOffset(CGVector(dx: 40, dy: nav + 40 + amount)))
+            } else {
+                let start = min(app.frame.height * 0.65, accept.frame.minY - 24)
+                let amount = max(60, min(180, invited.frame.maxY - accept.frame.minY + 28))
+                origin.withOffset(CGVector(dx: 40, dy: start)).press(forDuration: 0.05,
+                    thenDragTo: origin.withOffset(CGVector(dx: 40, dy: start - amount)))
+            }
+        }
+        XCTAssertTrue(invited.isHittable); XCTAssertTrue(invited.isSelected)
+        XCTAssertLessThan(invited.frame.maxY, accept.frame.minY - 20)
+        XCTAssertGreaterThan(invited.frame.minY, app.navigationBars.firstMatch.frame.maxY)
+        XCTAssertTrue(accept.isHittable); invited.tap(); XCTAssertTrue(accept.isEnabled)
+        capture(app, "invitation-01-dark-large")
     }
 
     private func nativeSignIn(_ account: NativeAccount, bundle: String) {
