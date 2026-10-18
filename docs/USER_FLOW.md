@@ -69,9 +69,13 @@ invitations** is added. The inviter can only send after pending saves complete.
 Choosing another invitation time remains a read-only review of collected replies.
 
 Availability editing focuses on one task: **Tap the times you're free**.
-Other participants retain a dedicated saved/waiting screen explaining that a
+Native participants retain a dedicated saved/waiting screen explaining that a
 separate invitation still needs confirmation, with an optional group-timetable
-view. Unsaved selections never show a saved handoff.
+view. On the public share page, entering a name opens one editable group timetable:
+checkmarks indicate the viewer's selections, counts include everyone, and edits
+autosave in place. Saving and reopening keep the table visible, with no personal/
+group switch or completion action. A persistent next-step notice explains that
+availability is not attendance and the final invitation requires explicit confirmation.
 
 The creator selects **Set time and send invitations**, chooses a date and start/end from
 the configured hours, reviews the explicit participant list and sends. The initial
@@ -88,11 +92,12 @@ For a direct-time plan, creation confirms the creator's time. Share the private
 Sideseat link; account holders or browser guests explicitly join/accept until the requested count
 is filled. This uses the same per-person confirmation view and final calendar rule.
 The browser share page shows the shared names, availability and results. Guests
-enter a recognizable nickname, add ranges using a date and From/Until selectors,
-and save automatically. The pencil edits **Your name in this plan** without
+enter a recognizable nickname and select their free time directly in the group
+timetable, with tap/hold, date selection, undo and automatic saving. The pencil edits **Your name in this plan** without
 changing a global profile. In the same browser they can return to edit their own
 response or confirm/decline the latest invitation; no download or registration is
-required. A different browser is a separate guest identity. An optional Open in
+required. Entering the same guest name in another browser resumes the same
+response, while a new name starts a distinct participant. An optional Open in
 app link remains. Web and native participant lists mark guests explicitly.
 
 **Planning** includes collection and pending invitations. **Upcoming** includes

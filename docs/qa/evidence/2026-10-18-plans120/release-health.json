@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-10-18T13:53:23.021Z",
+  "deploymentId": "dpl_APapk63YMWww6wjmBxVxHUKbDNrj",
+  "previousDeployment": "dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB",
+  "checks": [
+    {
+      "route": "api-config",
+      "status": 200
+    },
+    {
+      "route": "www-config",
+      "status": 200
+    },
+    {
+      "route": "ios",
+      "status": 200
+    },
+    {
+      "route": "privacy",
+      "status": 200
+    },
+    {
+      "route": "support",
+      "status": 200
+    },
+    {
+      "route": "aasa",
+      "status": 200
+    },
+    {
+      "route": "active-shared-plan",
+      "status": 200
+    },
+    {
+      "route": "apex-config-to-www",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    }
+  ],
+  "sourceCommit": "9f3d9f1d",
+  "productionBuild": true,
+  "promotedWithoutRebuild": true,
+  "migrationsExplicitlySkipped": true
+}

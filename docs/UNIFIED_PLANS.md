@@ -19,6 +19,18 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Shared web timetable — 2026-10-18
+
+After entering or resuming a guest name, the public share page keeps one editable
+group timetable on screen. The guest can tap/drag their own availability while
+seeing everyone's counts; own checkmarks and partial states remain distinct.
+Autosave, date selection, undo and name/participant switching retain the existing
+identities and slot IDs. Saving and reloading do not require a separate completion
+or view switch. A persistent notice explains to wait for the organizer's exact
+invitation, then explicitly confirm here. Availability never accepts an invitation.
+This supersedes the dated Preview 116 web saved-only handoff below; fixed-time,
+versioned confirmation and Calendar rules remain unchanged.
+
 ## Direct timetable editing — Preview 119
 
 The organizer now edits their free time directly in the shared timetable during

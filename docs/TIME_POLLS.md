@@ -50,9 +50,11 @@ separate from availability controls. While editing, a persistent bottom bar show
 the actual save state: choose times, saving, saved automatically, or failed with
 Retry. The saved summary includes selected days and total hours. Success appears
 only after the existing serialized queue is acknowledged; failures retain the draft.
-Done selecting becomes available after a response is saved and opens Group results
-with a completion notice. Users can return to My availability and keep editing.
-This completion action does not confirm participation or create a Calendar entry.
+The native organizer (119) and public share page edit directly in the group
+timetable, keeping total counts and own checkmarks visible without a completion
+or personal/group switch. Native non-organizer saved/waiting screens retain their
+existing completion action. Availability does not confirm participation or create
+a Calendar entry.
 
 API: `GET/POST /api/v1/time-polls`, `GET/DELETE /api/v1/time-polls/{token}`,
 `PUT /api/v1/time-polls/{token}/response`. Contract: `openapi/v1.json`.
@@ -67,7 +69,7 @@ Dates, time range and IANA zone determine immutable UTC intervals. Selection is
 an array of slot IDs validated against those intervals. Repeated DST wall times
 have separate row IDs and offset labels. Responses with zero selected slots still
 count in the denominator. Collection does not require an activity duration. The
-full read-only heatmap and response count let friends decide when and how long to
+full heatmap and response count let friends decide when and how long to
 spend together. Common-time and maximum-attendance cards are removed from both
 current clients. Existing API summary/window fields remain for older clients;
 their original complete-duration and attendance intersection semantics are retained.
@@ -108,8 +110,12 @@ selection rules above: normal swipes scroll, taps toggle one cell, a 400 ms hold
 previews a rectangular paint/erase range, release commits, cancellation discards,
 and the last change can be undone. Date headers select/clear their configured day
 without changing other dates. Teal/amber states use the native color values;
-the public page follows the browser's Light/Dark appearance. Group results shows
-the same full timetable and a read-only per-slot attendance heatmap, with no recommendation cards.
+the public page follows the browser's Light/Dark appearance. The same editable
+timetable shows per-slot attendance counts together with the viewer's checkmarks,
+with no recommendation cards. Counts replace the viewer's saved response with
+the current draft once; other people's replies remain intact. Saving/reopening
+keeps this timetable visible. The bottom bar explains that the guest should return
+to explicitly confirm the final invitation after the organizer chooses a time.
 
 At desktop viewport widths of 1024 CSS pixels and above, the shared page expands
 to a maximum of 1440 pixels and gives the timetable the remaining width beside a

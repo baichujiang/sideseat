@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-18T13:55:11.591029+00:00",
+  "deploymentId": "dpl_APapk63YMWww6wjmBxVxHUKbDNrj",
+  "level": "error",
+  "since": "20m",
+  "errorCount": 0,
+  "scope": "Current deployment, including browser and physical flow verification"
+}

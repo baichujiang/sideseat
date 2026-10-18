@@ -1,0 +1,16 @@
+{
+  "candidateDeployment": "dpl_APapk63YMWww6wjmBxVxHUKbDNrj",
+  "sourceCommit": "9f3d9f1d5c594ed9ef71a8c206cdff8b3c2c8def",
+  "baseDeployment": "dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB",
+  "expectedFiles": 1349,
+  "uploadedFiles": 1349,
+  "sha1AllMatched": true,
+  "preservedSourceFiles": 1345,
+  "overlays": [
+    "components/time-polls/shared-time-poll.tsx",
+    "components/time-polls/availability-editor.tsx",
+    "components/time-polls/shared-time-poll.module.css"
+  ],
+  "schemaChanged": false,
+  "migrationsExplicitlySkipped": true
+}

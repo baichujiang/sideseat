@@ -12,12 +12,10 @@ assert(base?.startsWith('https://')); assert(['candidate', 'production'].include
 const fixture = JSON.parse(fs.readFileSync(path.join(os.tmpdir(), 'sideseat-first-plan-phone-private.json')));
 assert(fixture.identifier.startsWith('planqa_phone120_'));
 const out = path.resolve('docs/qa/evidence/2026-10-18-plans120'); fs.mkdirSync(out, { recursive: true });
-const access = await request.newContext();
-if (stage === 'candidate') {
-  const privateAccess = JSON.parse(fs.readFileSync('/tmp/sideseat-plans120-candidate-access.json'));
-  const granted = await access.get(privateAccess.url);
-  assert.equal(new URL(granted.url()).origin, new URL(base).origin, 'Candidate access must stay on the deployment, not the Vercel login page.');
-}
+const access = await request.newContext(stage === 'candidate' ? { storageState: JSON.parse(fs.readFileSync('/tmp/sideseat-share120-candidate-storage.json')) } : {});
+const granted = await access.get(base + '/api/v1/client-config');
+assert.equal(granted.status(), 200, 'Test the intended deployment with existing Vercel authentication.');
+assert.equal(new URL(granted.url()).origin, new URL(base).origin);
 const storageState = await access.storageState();
 const cookies = storageState.cookies.map(c => `${c.name}=${c.value}`).join('; ');
 async function api(route, method = 'GET', body, expected = 200) {
@@ -38,7 +36,13 @@ try {
   for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     const browser = await engine.launch();
     const options = { baseURL: base, storageState, viewport: { width: 390, height: 844 }, colorScheme: engineName === 'webkit' ? 'dark' : 'light' };
-    let context = await browser.newContext(options);
+    const pageErrors = [];
+    const openContext = async () => {
+      const context = await browser.newContext(options);
+      context.on('page', page => page.on('pageerror', error => pageErrors.push(error.message)));
+      return context;
+    };
+    let context = await openContext();
     try {
       let p = await create();
       p = await api(endpoint(p) + '/response', 'PUT', { displayName: 'Host Ming', slotIds: [0, 1, 2, 3] });
@@ -62,7 +66,7 @@ try {
       await cell.click(); await expect(cell).toHaveAttribute('aria-pressed', 'false');
       await expect(page.getByRole('status')).toHaveText('已自动保存');
       await expect(cell).toContainText('1');
-      let edited = await api(endpoint(p));
+      const edited = await api(endpoint(p));
       assert.deepEqual(edited.participants.find(x => x.isGuest).slotIds, [2, 3]);
       assert.deepEqual(edited.participants.find(x => !x.isGuest).slotIds, [0, 1, 2, 3]);
       await page.getByTestId('time-poll-undo').click();
@@ -74,7 +78,7 @@ try {
       assert.deepEqual(p.participants.find(x => x.isGuest).slotIds, [0, 1, 2, 3]);
       await page.screenshot({ path: `${out}/${stage}-${engineName}-wait.png`, fullPage: true });
       checks.push(`${engineName}: real name/save/wait keeps COLLECTING and calendar empty`);
-      await context.close(); context = await browser.newContext(options); page = await context.newPage(); await page.goto(`/time-polls/${p.token}`);
+      await context.close(); context = await openContext(); page = await context.newPage(); await page.goto(`/time-polls/${p.token}`);
       await page.getByLabel('你的名字', { exact: true }).fill(`Guest ${engineName}`);
       await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
       await expect(page.getByTestId('time-poll-cell-0')).toHaveAttribute('aria-pressed', 'true');
@@ -100,6 +104,7 @@ try {
       await page.getByRole('button', { name: 'Confirm participation', exact: true }).click();
       await expect(page.getByRole('heading', { name: 'Plan confirmed', exact: true })).toBeVisible(); assert.equal((await calendar(fixed)).length, 1);
       checks.push(`${engineName}: FIXED name does not accept; English explicit confirmation writes Calendar`);
+      assert.deepEqual(pageErrors, [], 'No browser runtime errors across the complete flow');
     } finally { await context.close(); await browser.close(); }
   }
   fs.writeFileSync(`${out}/${stage}-web-flows.json`, JSON.stringify({ base, stage, realNetwork: true, checkedAt: new Date().toISOString(), checks, passed: checks.length, failed: 0 }, null, 2) + '\n');

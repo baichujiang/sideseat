@@ -1,0 +1,68 @@
+{
+  "checks": [
+    {
+      "phase": "created-empty",
+      "checkedAt": "2026-10-18T13:52:28.811Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 0,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "created-and-saved",
+      "checkedAt": "2026-10-18T13:52:41.393Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "guest-saved",
+      "checkedAt": "2026-10-18T13:53:16.894Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "owner-edited",
+      "checkedAt": "2026-10-18T13:53:22.770Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "owner-restored",
+      "checkedAt": "2026-10-18T13:53:31.326Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "acceptedCount": 0,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "awaiting-confirmation",
+      "checkedAt": "2026-10-18T13:53:41.777Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "acceptedCount": 1,
+      "calendarEntries": 0
+    },
+    {
+      "phase": "confirmed",
+      "checkedAt": "2026-10-18T13:54:02.791Z",
+      "actualPhase": "CONFIRMED",
+      "participantCount": 2,
+      "acceptedCount": 2,
+      "calendarEntries": 1
+    },
+    {
+      "phase": "calendar-verified",
+      "checkedAt": "2026-10-18T13:54:18.420Z",
+      "actualPhase": "CONFIRMED",
+      "participantCount": 2,
+      "acceptedCount": 2,
+      "calendarEntries": 1
+    }
+  ]
+}
