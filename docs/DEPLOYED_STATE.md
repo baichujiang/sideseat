@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对；116 初版 `7e83f85`、最终 Safari 修复 `40604fa` 均已提交推送 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (116)` | 首屏用具体自习示例解释用途；分享网页按填名/选时/等待/明确确认引导。修复 Safari 选时被底栏遮挡后连续真机完整流程、五阶段 API 及五项呈现通过。严格签名、重新安装及普通启动 PID 942 核验；[116 交付](./releases/2026-10-18-preview116-purpose-and-share.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；已恢复 XCTest；116 中文连续完整流程、创建/返回/大字号通过，测试 runner 已移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 2026-10-18 工作区/Git 根目录/fetch 核对；117 展示统一 `062ccb9`、最终语言补齐 `05f79b3` 均已提交推送 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (117)` | 计划页、聊天卡片/顶部安排共用状态及下一步展示，保留双人/手动多人合同。27 项单元、2 项模拟器界面、7 项真机呈现、最终连续 App→网页→确认→日历及五阶段 API 通过；严格签名、安装、普通启动 PID 1206 核验；[117 交付](./releases/2026-10-18-preview117-plan-presentation.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 全部真机命令明确指定该 UDID，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；XCTest 明确 arm64 目的地；117 中文连续完整流程、创建/返回/双人确认/大字号通过，测试 runner 已移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de` → `dpl_7DwPLdanvVjFSiAK96AQQxH4x7ZB`，Ready | 修复后候选/正式网页各六组真实 Chromium/WebKit 流程、手机 Safari 连续流程通过；两个域名配置 HTTP 200；[116 交付](./releases/2026-10-18-preview116-purpose-and-share.md) |
 | 生产源码 | 最终 production 基线 1,348 项校验重建；保留 1,346 项，仅更新共享组件及来源记录；1,348 项上传 SHA-1 全匹配 | 来源 `40604fa`；116 整体仅两个分享组件及来源记录，服务端/API 保留；Schema 不变、迁移显式跳过；[发布清单](./qa/evidence/2026-10-18-plans116/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans116/upload-verification.json) |
+
+117 先统一原生用户看到的状态、下一步和组件：手动计划与聊天计划采用同一展示词汇，按当前用户角色明确填写、分享、确认、等待或查看历史；数据、确认/改期、通知及日历合同保留。27 项单元、2 项模拟器界面、7 项真机呈现通过。截图复查补齐「另选时间」语言资源后，最终包连续真机流程 107.245 秒通过，五阶段 API 证实确认前 0 条、全员确认后唯一一条一小时日历。两次一次性账号/计划均回收，QA runner 移除，117 已普通启动 PID 1206；[完整 QA](./qa/2026-10-18-plans117.md)。本轮无后端/网页部署。
 
 116 针对「看得到按钮，但不知道功能帮我做什么」，在首屏用具体的共同空闲示例解释用途；朋友网页按当前阶段引导填名、选时、等待和最终确认。连续真机发现 Safari 填名后时间格被底栏遮挡，已修复并新增位置断言。最终候选/正式网页各六组真实流程、五项真机呈现及修复后完整 App→Safari→邀请确认→日历流程通过，五阶段 API 证实确认前 0 条、全员确认后唯一一条一小时日历。两个测试账号及临时计划已回收，116 已普通启动；[完整 QA](./qa/2026-10-18-plans116.md)。
 

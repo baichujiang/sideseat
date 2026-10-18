@@ -33,6 +33,7 @@ Historical build evidence never certifies a newer build.
 | Document | Purpose |
 | --- | --- |
 | [Deployed state](./DEPLOYED_STATE.md) | Current phone/backend versions, actual feature entries, live flags, retained compatibility and frozen archive boundaries |
+| [Shared plan presentation](./PLAN_PRESENTATION.md) | Read-only native state/next-step adapters and shared views, preserving manual and bilateral records and rules |
 | [Unified plans](./UNIFIED_PLANS.md) | Manual availability/direct-time creation, explicit invitations, individual confirmation and owned Calendar projections |
 | [Product](./PRODUCT.md) | Positioning, product objects, navigation, invariants and non-goals |
 | [User Flow](./USER_FLOW.md) | Current user-visible Intent → Opportunity → Plan flow and repeat boundary |

@@ -8,6 +8,14 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+## Shared native presentation — owner-approved 2026-10-18
+
+The first convergence stage shares visible status, next action and view components across
+manual Plans and conversation-bound Plans. Entry consent, stored records and each
+confirmation/rescheduling/Outcome contract stay intact. Together retains greeting →
+written reply → conversation → explicit proposal; manual Plans work independently of chat.
+See [Shared native plan presentation](./PLAN_PRESENTATION.md).
+
 ## Unified manual plans — owner-approved 2026-10-15
 
 **Preview 115 — a clear starting point:** Plans leads with **Start an activity**

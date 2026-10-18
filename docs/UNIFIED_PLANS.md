@@ -19,6 +19,13 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
+## Shared native presentation — Preview 117
+
+Plans, manual detail and conversation-based Plan summaries/cards share display status and
+viewer-specific next-step components. Existing TimePoll and bilateral records and lifecycle
+contracts remain separate. See [Shared native plan presentation](./PLAN_PRESENTATION.md)
+and [Preview 117 acceptance](./qa/2026-10-18-plans117.md).
+
 ## Guided native planning — Preview 116
 
 Plans leads with **Find a time your friends can all make**, a **Find a time with
