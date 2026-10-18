@@ -15,8 +15,6 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const { poll, error, busy, saving, saved, selected, editingName, switchingParticipant, resumed } = state;
   const [name, setName] = useState("");
   const table = useRef<HTMLElement>(null);
-  const [finished, setFinished] = useState(false);
-  const [view, setView] = useState<"mine" | "group">("mine");
   const collecting = poll?.phase === "COLLECTING";
   const closed = poll?.phase === "CONFIRMED" || poll?.phase === "CANCELLED" || poll?.phase === "EXPIRED";
   const mine = poll?.invitations.find((person) => person.isMe);
@@ -32,24 +30,21 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   }, [collecting, viewerId, choosingName]);
   const errorText = zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
-  const waiting = collecting && !choosingName && finished && !!poll?.didRespond && saved;
-  const editing = collecting && !!poll?.viewerId && !choosingName && !waiting && view === "mine";
+  const editing = collecting && !!poll?.viewerId && !choosingName;
   const replying = poll?.phase === "INVITING" && !!poll.viewerId && included && !choosingName;
   const selectedSlots = poll?.slots.filter((slot) => selected.includes(slot.id)) ?? [];
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
   const selectedHours = new Intl.NumberFormat(zh ? "zh-CN" : "en", { maximumFractionDigits: 2 }).format(selectedSlots.reduce((sum, slot) => sum + (Date.parse(slot.end) - Date.parse(slot.start)) / 3600000, 0));
   const failed = !saved && !saving && !!error;
   const saveTitle = saving ? (zh ? "正在保存…" : "Saving…") : failed ? (zh ? "保存失败" : "Couldn't save") : poll?.didRespond && saved ? (zh ? "已自动保存" : "Saved automatically") : (zh ? "还没有选择空闲" : "No free time selected yet");
-  const showResults = () => { setFinished(true); table.current?.scrollIntoView({ block: "start" }); };
-  const editAvailability = () => { setFinished(false); setView("mine"); };
   const formatWindow = (start: string, end: string) => {
     const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
     const first = formatter.format(new Date(start)), last = formatter.format(new Date(end));
     return pollDate(first, zh) + " · " + pollClock(start, poll!.timeZone) + "–" + (first === last ? "" : pollDate(last, zh) + " · ") + pollClock(end, poll!.timeZone);
   };
   const fixed = poll?.planningMode === "FIXED";
-  const step = fixed ? choosingName ? 0 : 1 : collecting ? waiting ? 1 : 0 : 2;
-  const steps = fixed ? [zh ? "填写名字" : "Your name", zh ? "确认参加" : "Confirm participation"] : [zh ? "填写空闲" : "Share free time", zh ? "定最终时间" : "Pick a final time", zh ? "确认参加" : "Confirm participation"];
+  const step = fixed ? choosingName ? 0 : 1 : collecting ? poll?.didRespond && saved ? 1 : 0 : 2;
+  const steps = fixed ? [zh ? "填写名字" : "Your name", zh ? "确认参加" : "Confirm participation"] : [zh ? "填写空闲" : "Share free time", zh ? "等发起人定时间" : "Organizer picks a time", zh ? "确认参加" : "Confirm participation"];
 
   return <main lang={zh ? "zh-CN" : "en"} className={styles.page + " min-h-dvh px-4 pt-4 sm:px-6 " + (editing || replying ? "pb-44" : "pb-12")}>
     <div className="mx-auto max-w-4xl lg:max-w-[1440px]">
@@ -94,25 +89,19 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
               </form>
             </section> : <section className="flex flex-wrap items-center justify-between gap-x-4 rounded-xl border bg-background px-4 py-2">
               <p className="break-words text-sm"><span className="text-muted-foreground">{zh ? "当前填写人：" : "Filling in as: "}</span><strong>{poll.myDisplayName}</strong></p>
-              <div className="flex gap-3"><button type="button" disabled={disabled} aria-label={zh ? "编辑昵称" : "Edit nickname"} onClick={() => { setName(poll.myDisplayName); state.setEditingName(true); }} className="inline-flex min-h-11 items-center gap-1 text-xs"><Pencil className="h-3.5 w-3.5" aria-hidden />{zh ? "改名字" : "Edit name"}</button><button type="button" disabled={disabled} className="min-h-11 text-xs text-muted-foreground underline underline-offset-4" onClick={() => { setName(""); setFinished(false); setView("mine"); state.setSwitchingParticipant(true); }}>{zh ? "切换填写人" : "Switch participant"}</button></div>
+              <div className="flex gap-3"><button type="button" disabled={disabled} aria-label={zh ? "编辑昵称" : "Edit nickname"} onClick={() => { setName(poll.myDisplayName); state.setEditingName(true); }} className="inline-flex min-h-11 items-center gap-1 text-xs"><Pencil className="h-3.5 w-3.5" aria-hidden />{zh ? "改名字" : "Edit name"}</button><button type="button" disabled={disabled} className="min-h-11 text-xs text-muted-foreground underline underline-offset-4" onClick={() => { setName(""); state.setSwitchingParticipant(true); }}>{zh ? "切换填写人" : "Switch participant"}</button></div>
               {resumed ? <p className={"w-full pb-1 text-xs " + styles.savedText}>{zh ? "已找到这个名字的记录，可以继续修改。" : "Found your previous response. Continue editing here."}</p> : null}
             </section> : null}
 
             {collecting && !choosingName ? <section ref={table} className="scroll-mt-4 rounded-2xl border bg-background p-4 sm:p-6">
-              {waiting ? <div data-testid="availability-next-step" className="space-y-5">
-                <CheckCircle2 className={"h-10 w-10 " + styles.savedText} aria-hidden />
-                <div><h2 className="text-2xl font-semibold">{zh ? "空闲已提交，接下来等发起人定时间" : "Free time sent. Wait for the organizer to pick a time."}</h2>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{zh ? "发起人选好后，这个页面会出现最终邀请。到时请回来点「确认参加」。" : "The final invitation will appear here once the organizer chooses. Come back to confirm participation."}</p></div>
-                <div className={"rounded-xl p-4 text-sm leading-6 " + styles.savedNotice}>{zh ? "你现在只提交了空闲时间。收到最终邀请并确认后，才算确定参加。" : "You've shared your availability. Confirm the final invitation later to commit to attending."}</div>
-                <p className="text-sm">{zh ? "保留这个链接，之后还可以改空闲、查看邀请和活动详情。" : "Keep this link to edit free time, confirm the invitation, and view activity details."}</p>
-                <div className="flex flex-wrap gap-3"><Button variant="outline" className="min-h-12 rounded-xl" onClick={editAvailability}>{zh ? "修改我的空闲" : "Edit my free time"}</Button><Button variant="ghost" className="min-h-12 rounded-xl" onClick={() => { setFinished(false); setView("group"); }}>{zh ? "查看大家填写" : "View everyone's availability"}</Button></div>
-              </div> : <>
-                <div className="mb-3 flex items-start justify-between gap-3"><div>
-                  <h2 className="text-xl font-semibold">{view === "group" ? (zh ? "大家的时间表" : "Group timetable") : (zh ? "点选你有空的时间" : "Tap the times you're free")}</h2>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{view === "group" ? (zh ? poll.summary.participantCount + " 人已填写，等发起人选择最终时间。" : poll.summary.participantCount + " people have responded. The organizer picks the final time.") : (zh ? "选中会变绿，可以多选。之后再确认最终活动时间。" : "Selected times turn green. Choose as many as you like. Confirm the final time later.")}</p>
-                </div>{poll.didRespond || view === "group" ? <button type="button" className="min-h-11 shrink-0 text-xs underline underline-offset-4" disabled={disabled} onClick={() => view === "group" ? editAvailability() : setView("group")}>{view === "group" ? (zh ? "改我的空闲" : "Edit my times") : (zh ? "看大家填写" : "View responses")}</button> : null}</div>
-                <AvailabilityEditor poll={poll} selected={selected} onChange={state.saveSelection} onEditingChange={state.setEditingAvailability} disabled={busy || editingName || switchingParticipant} zh={zh} results={view === "group"} />
-              </>}
+              <div className="mb-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="text-xl font-semibold">{zh ? "大家的时间表" : "Group timetable"}</h2>
+                  <p className="text-xs text-muted-foreground">{poll.summary.participantCount} {zh ? "人已填写" : "people responded"}</p>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{zh ? "直接点选你有空的时间，再点一次取消。你也能同时看到朋友的空闲。" : "Tap when you're free; tap again to clear. See your friends' availability in the same timetable."}</p>
+              </div>
+              <AvailabilityEditor poll={poll} selected={selected} onChange={state.saveSelection} onEditingChange={state.setEditingAvailability} disabled={busy || editingName || switchingParticipant} zh={zh} />
             </section> : null}
 
             {!collecting ? <section className="space-y-4 rounded-2xl border bg-background p-5 sm:p-6" data-testid="plan-invitation">
@@ -141,9 +130,10 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
               {saving ? <Loader2 className="h-5 w-5 shrink-0 motion-safe:animate-spin" aria-hidden /> : failed ? <AlertCircle className="h-5 w-5 shrink-0 text-amber-700" aria-hidden /> : poll.didRespond && saved ? <CheckCircle2 className={"h-5 w-5 shrink-0 " + styles.savedText} aria-hidden /> : <Circle className="h-5 w-5 shrink-0" aria-hidden />}
-              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : saving ? (zh ? "保存后即可继续" : "Continue once saving completes") : poll.didRespond ? (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected") : (zh ? "点亮时间表中的空闲时段" : "Tap free times in the timetable")}</p></div>
+              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : saving ? (zh ? "改动会自动保存" : "Changes save automatically") : poll.didRespond ? (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected") : (zh ? "点亮时间表中的空闲时段" : "Tap free times in the timetable")}</p></div>
             </div>
-            {failed ? <Button onClick={() => void state.retry()} className={"min-h-12 shrink-0 rounded-xl " + styles.finishButton}>{zh ? "重试保存" : "Retry save"}</Button> : <Button disabled={disabled || !poll.didRespond} onClick={showResults} className={"min-h-12 shrink-0 rounded-xl " + styles.finishButton}>{zh ? "保存并继续" : "Save and continue"}</Button>}
+            {failed ? <Button onClick={() => void state.retry()} className={"min-h-12 shrink-0 rounded-xl " + styles.finishButton}>{zh ? "重试保存" : "Retry save"}</Button> : null}
+            <p data-testid="availability-next-step" className="w-full text-xs leading-5 text-muted-foreground">{zh ? "填写空闲不代表确认参加。等发起人选定最终时间后，请回到这里点「确认参加」。保留此链接，可随时查看和修改。" : "Sharing free time doesn't confirm attendance. Return here to confirm participation after the organizer picks the final time. Keep this link to view and edit."}</p>
           </div>
         </div> : null}
         {replying ? <div className={styles.saveBar + " fixed inset-x-0 bottom-0 z-40 border-t bg-background px-4 pt-3 shadow-[0_-4px_24px_rgb(0_0_0_/_0.05)] sm:px-6"}>

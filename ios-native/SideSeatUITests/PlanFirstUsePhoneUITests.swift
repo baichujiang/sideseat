@@ -129,14 +129,17 @@ import XCTest
         let second = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
         XCTAssertTrue(first.waitForExistence(timeout: 20))
         for _ in 0..<3 where !second.isHittable { safari.swipeUp() }
-        let finish = webButton("Save and continue", "保存并继续")
-        XCTAssertLessThan(second.frame.maxY, finish.frame.minY, "Name submission must reveal the time cells above the fixed save bar")
+        let nextStep = safari.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "填写空闲不代表确认参加")).firstMatch
+        XCTAssertTrue(nextStep.waitForExistence(timeout: 10))
+        XCTAssertFalse(webButton("Save and continue", "保存并继续").exists)
+        XCTAssertLessThan(second.frame.maxY, nextStep.frame.minY, "Name submission must reveal the time cells above the fixed save bar")
         capture(safari, "06a-guest-editor")
         first.tap(); second.tap()
         XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved automatically", "已自动保存"])).firstMatch.waitForExistence(timeout: 20))
         capture(safari, "06-guest-saved"); phase("guest-saved")
-        for _ in 0..<3 where !finish.isHittable { safari.swipeUp() }
-        XCTAssertTrue(finish.isHittable); finish.tap()
+        XCTAssertTrue(first.exists, "Autosave must keep the same editable timetable visible")
+        XCTAssertTrue(nextStep.exists)
+        XCTAssertFalse(webButton("View responses", "看大家填写").exists)
         capture(safari, "07-guest-results")
 
         app.activate()
