@@ -73,6 +73,7 @@ struct PlansRootView: View {
     @State private var showsOutgoing = false
     @State private var showsSectionPicker = false
     @State private var coordinatedPlans: [NativeTimePollList.Item] = []
+    @State private var showsPurposeExample = true
     @State private var showsPlanCreation = false
     @State private var createdPlanToken: String?
     @State private var showsOpenPlanLink = false
@@ -292,33 +293,33 @@ struct PlansRootView: View {
     }
 
     private var planActions: some View {
-        let isFirstPlan = coordinatedPlans.isEmpty && store.plans.isEmpty
         return VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Text("Make time for friends").font(.title2.weight(.bold))
-                Text("You start the activity. Friends join from your link.")
+                Text("Find a time your friends can all make").font(.title2.weight(.bold))
+                Text("For meals, study sessions and sports with friends.")
                     .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            SSPrimaryButton(title: AppLocalization.string("Start an activity"), fill: .product,
+            SSPrimaryButton(title: AppLocalization.string("Find a time with friends"), fill: .product,
                             accessibilityID: "plans-create-primary") { showsPlanCreation = true }
             Button { planLink = ""; showsOpenPlanLink = true } label: {
                 HStack {
                     Image(systemName: "link")
-                    Text("Open a friend's invitation")
+                    Text("Got a friend's link? Fill it in here")
                     Spacer(minLength: 4)
                     Image(systemName: "chevron.right").font(.caption.weight(.semibold))
                 }.font(.subheadline.weight(.medium)).frame(minHeight: 44)
             }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
                 .accessibilityIdentifier("plans-open-link")
-            if isFirstPlan {
-                Divider()
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                    PlanGuideRow(number: 1, title: "Write an activity", detail: "For example, a meal or a study session.")
-                    PlanGuideRow(number: 2, title: "Send the link to friends", detail: "They choose when they're free. No app needed.")
-                    PlanGuideRow(number: 3, title: "Pick a time and confirm", detail: "Everyone confirms, then it appears in Calendar.")
-                }.accessibilityIdentifier("plans-first-use-guide")
-            }
+            Divider()
+            DisclosureGroup(isExpanded: $showsPurposeExample) {
+                PlanPurposeExample().padding(.top, SideSeatTheme.spaceMD)
+            } label: {
+                Text("See an example: a weekend study session")
+                    .font(.subheadline.weight(.medium)).frame(minHeight: 44)
+            }.tint(SideSeatTheme.utilityAction)
+                .accessibilityIdentifier("plans-purpose-example")
+
         }
         .padding(SideSeatTheme.spaceLG)
         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))

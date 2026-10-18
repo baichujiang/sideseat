@@ -36,6 +36,62 @@ struct PlanGuideRow: View {
     }
 }
 
+/// An explicitly labelled illustration explains what a plan helps friends do.
+struct PlanPurposeExample: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    private let names = ["You", "Friend Lin", "Friend Chen"]
+    private let choices = [[true, true, false], [true, true, true], [false, true, false]]
+    private let times = ["Sat\n14:00", "Sat\n15:00", "Sun\n10:00"]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            HStack {
+                Text("Example").font(.caption.weight(.semibold))
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(SideSeatTheme.bgGrouped, in: Capsule())
+                Text("Three friends want to study together").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
+            Text("One link collects everyone's free time.")
+                .font(.subheadline).fixedSize(horizontal: false, vertical: true)
+            if typeSize.isAccessibilitySize {
+                Text("You, Lin and Chen are all free on Saturday at 15:00.")
+                    .font(.body).fixedSize(horizontal: false, vertical: true)
+            } else {
+                Grid(horizontalSpacing: 5, verticalSpacing: 5) {
+                    GridRow {
+                        Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                        ForEach(0..<3) { column in
+                            Text(LocalizedStringKey(times[column])).font(.caption2).multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity, minHeight: 34)
+                        }
+                    }
+                    ForEach(0..<3) { row in
+                        GridRow {
+                            Text(LocalizedStringKey(names[row])).font(.caption).frame(minWidth: 38, alignment: .leading)
+                            ForEach(0..<3) { column in
+                                Image(systemName: choices[row][column] ? "checkmark" : "minus")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(choices[row][column] ? column == 1 ? SideSeatTheme.Availability.onSelected : SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
+                                    .frame(maxWidth: .infinity, minHeight: 30)
+                                    .background(column == 1 ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.bgGrouped,
+                                                in: RoundedRectangle(cornerRadius: 6))
+                            }
+                        }
+                    }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(AppLocalization.string("You, Lin and Chen are all free on Saturday at 15:00."))
+            }
+            Label("Saturday at 15:00 works for all three", systemImage: "checkmark.circle.fill")
+                .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.statusSuccessText)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("You pick the final time. Everyone confirms, then it appears in Calendar.")
+                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+        }.accessibilityIdentifier("plans-purpose-illustration")
+    }
+}
+
 enum PlanNextStep: String, Sendable {
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan
 

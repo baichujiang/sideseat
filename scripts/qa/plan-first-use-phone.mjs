@@ -20,7 +20,7 @@ async function call(route, token, method = 'GET', body, expected = 200) {
 if (mode === 'prepare') {
   await assert.rejects(fs.access(privatePath), 'Clean up the previous disposable fixture before creating another.');
   const suffix = randomBytes(4).toString('hex');
-  const identifier = `planqa_phone115_${suffix}`, password = randomBytes(22).toString('base64url');
+  const identifier = `planqa_phone116_${suffix}`, password = randomBytes(22).toString('base64url');
   const signup = await fetch(base + '/api/auth/signup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios' }, body: JSON.stringify({ username: identifier, password, displayName: 'Host Ming', school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }) });
   assert.equal(signup.status, 201);
   // Save recovery credentials immediately, even if a subsequent login fails.
@@ -33,7 +33,7 @@ if (mode === 'prepare') {
   console.log('One fresh disposable account ready; initial plans list is empty.');
 } else {
   const fixture = JSON.parse(await fs.readFile(privatePath, 'utf8'));
-  assert(fixture.identifier.startsWith('planqa_phone115_'));
+  assert(fixture.identifier.startsWith('planqa_phone116_'));
   if (!fixture.accessToken) {
     const login = await call('/api/v1/auth/login', null, 'POST', { identifier: fixture.identifier, password: fixture.password, device: { id: randomUUID(), name: 'First plan cleanup', appVersion: '1.0.0', platformVersion: '26.6.1' } });
     fixture.accessToken = login.tokens.accessToken;

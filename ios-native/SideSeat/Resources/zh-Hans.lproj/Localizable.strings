@@ -2784,3 +2784,21 @@
 "Create activity" = "发起活动";
 "Type an activity name or choose an example above." = "写下想做什么，也可以点上面的示例。";
 "Choose my free time" = "填写空闲";
+
+// Preview 116: show what planning helps friends do.
+"Find a time your friends can all make" = "找个大家都能来的时间";
+"For meals, study sessions and sports with friends." = "约吃饭、自习、运动，都可以用。";
+"Find a time with friends" = "和朋友约时间";
+"Got a friend's link? Fill it in here" = "收到朋友链接？点这里填写";
+"See an example: a weekend study session" = "看个例子：周末一起自习";
+"Example" = "示例";
+"Three friends want to study together" = "三位朋友想一起自习";
+"One link collects everyone's free time." = "发一个链接，就能把大家的空闲放到同一张表里。";
+"Friend Lin" = "小林";
+"Friend Chen" = "小陈";
+"Sat\n14:00" = "周六\n14:00";
+"Sat\n15:00" = "周六\n15:00";
+"Sun\n10:00" = "周日\n10:00";
+"You, Lin and Chen are all free on Saturday at 15:00." = "你、小林和小陈在周六 15:00 都有空。";
+"Saturday at 15:00 works for all three" = "周六 15:00，3 人都有空";
+"You pick the final time. Everyone confirms, then it appears in Calendar." = "你选最终时间，大家确认后，这次自习就会进入日历。";

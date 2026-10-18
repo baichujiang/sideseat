@@ -88,7 +88,7 @@ import XCTest
         XCTAssertTrue(name.waitForExistence(timeout: 30))
         XCTAssertTrue(safari.staticTexts[fixture.title].exists, "The copied link must open the newly created plan")
         name.tap(); name.typeText("Guest Lin")
-        webButton("Start or continue", "开始 / 继续填写").tap()
+        webButton("Next: choose my free time", "下一步：选择我的空闲").tap()
         let first = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
         let second = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
         XCTAssertTrue(first.waitForExistence(timeout: 20))
@@ -96,7 +96,7 @@ import XCTest
         first.tap(); second.tap()
         XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved automatically", "已自动保存"])).firstMatch.waitForExistence(timeout: 20))
         capture(safari, "06-guest-saved"); phase("guest-saved")
-        let finish = webButton("Done selecting", "完成填写")
+        let finish = webButton("Save and continue", "保存并继续")
         for _ in 0..<3 where !finish.isHittable { safari.swipeUp() }
         XCTAssertTrue(finish.isHittable); finish.tap()
         capture(safari, "07-guest-results")

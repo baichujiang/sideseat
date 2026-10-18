@@ -2783,3 +2783,21 @@
 "Create activity" = "Aktivität erstellen";
 "Type an activity name or choose an example above." = "Gib eine Aktivität ein oder wähle oben ein Beispiel.";
 "Choose my free time" = "Freie Zeiten wählen";
+
+// Preview 116: show what planning helps friends do.
+"Find a time your friends can all make" = "Eine Zeit finden, die allen passt";
+"For meals, study sessions and sports with friends." = "Für Essen, Lernen und Sport mit Freunden.";
+"Find a time with friends" = "Zeit mit Freunden finden";
+"Got a friend's link? Fill it in here" = "Link von Freunden erhalten? Hier antworten";
+"See an example: a weekend study session" = "Beispiel: am Wochenende zusammen lernen";
+"Example" = "Beispiel";
+"Three friends want to study together" = "Drei Freunde möchten zusammen lernen";
+"One link collects everyone's free time." = "Ein Link sammelt die freien Zeiten aller.";
+"Friend Lin" = "Lin";
+"Friend Chen" = "Chen";
+"Sat\n14:00" = "Sa\n14:00";
+"Sat\n15:00" = "Sa\n15:00";
+"Sun\n10:00" = "So\n10:00";
+"You, Lin and Chen are all free on Saturday at 15:00." = "Du, Lin und Chen habt am Samstag um 15:00 Zeit.";
+"Saturday at 15:00 works for all three" = "Samstag 15:00 passt allen drei";
+"You pick the final time. Everyone confirms, then it appears in Calendar." = "Du wählst die Zeit. Nach allen Zusagen erscheint das Treffen im Kalender.";

@@ -61,6 +61,8 @@ import XCTest
         app.tabBars.buttons["计划"].tap()
         XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["plans-create-primary"].isHittable)
+        XCTAssertTrue(app.staticTexts["找个大家都能来的时间"].exists)
+        XCTAssertTrue(app.staticTexts["周六 15:00，3 人都有空"].exists)
         capture("clear-start")
         app.buttons["plans-create-primary"].tap()
         let next = app.buttons["plan-create-next"]
@@ -82,6 +84,7 @@ import XCTest
         app.launchArguments.append(contentsOf: ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
         app.launch()
         app.tabBars.buttons["计划"].tap()
+        capture("dark-large-purpose")
         openCreation()
         let title = app.textFields["time-poll-title"]
         for _ in 0..<4 where !title.isHittable { app.swipeDown() }

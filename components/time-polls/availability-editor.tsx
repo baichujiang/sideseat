@@ -55,7 +55,7 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={results ? (zh ? "大家的时间热图" : "Group availability heatmap") : (zh ? "我的可用时间" : "My availability")}>
     {!results ? <>
-      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格 30 分钟 · 点日期选全天，点按或长按拖选。滑动可滚动。" : "30 minutes per cell. Tap a day for all its times, or tap/hold cells to edit. Swipe to scroll."}</p>
+      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格 30 分钟。点一下选中，再点一次取消。" : "Each cell is 30 minutes. Tap to select; tap again to clear."}</p>
         <button type="button" aria-label={zh ? "撤销上次修改" : "Undo last change"} data-testid="time-poll-undo" disabled={!undo || disabled || gesture.preview !== null} onClick={() => { if (undo) { onChange(undo); setUndo(null); } }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border disabled:opacity-35"><Undo2 className="h-4 w-4" aria-hidden /></button>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
@@ -64,6 +64,10 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
         <span className="flex items-center gap-1"><Circle className="h-3.5 w-3.5" aria-hidden />{zh ? "未选时段" : "Unselected slots"}</span>
       </div>
     </> : <p className="text-xs text-muted-foreground">{zh ? "颜色越深，方便的人越多。数字为每个时段的可用人数。" : "Darker cells mean more people are available. Numbers show attendance per slot."}</p>}
+    {!results ? <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+      <details><summary className="cursor-pointer py-2">{zh ? "连续选时和全天选择" : "Select a range or a whole day"}</summary><p className="max-w-sm pb-2 leading-5">{zh ? "长按时间格后拖动，可连续选择。点日期可选当天全部时段。滑动时间表可查看更多。" : "Hold a cell, then drag to select a range. Tap a date to select its whole day. Swipe the timetable to see more."}</p></details>
+      <button type="button" disabled={disabled || gesture.preview !== null} onClick={() => { if (selected.length) apply([]); else onChange([]); }} className="min-h-11 text-sm underline underline-offset-4">{zh ? "这些时间我都没空" : "None of these times work"}</button>
+    </div> : null}
     <div ref={scroll} data-testid="time-poll-grid" className="max-h-[60dvh] overflow-auto rounded-xl border bg-background" tabIndex={0} aria-label={zh ? "可滚动时间表" : "Scrollable timetable"}>
       <div style={{ minWidth: 56 + dates.length * 88 }}>
         <div className="sticky top-0 z-20 grid bg-background" style={columns}>
@@ -95,6 +99,6 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
         </div>
       </div>
     </div>
-    {!results ? <button type="button" disabled={disabled || gesture.preview !== null} onClick={() => { if (selected.length) apply([]); else onChange([]); }} className="min-h-11 text-sm underline underline-offset-4">{zh ? "我没有可用时间" : "I have no available time"}</button> : null}
+
   </section>;
 }

@@ -2784,3 +2784,21 @@
 "Create activity" = "Create activity";
 "Type an activity name or choose an example above." = "Type an activity name or choose an example above.";
 "Choose my free time" = "Choose my free time";
+
+// Preview 116: show what planning helps friends do.
+"Find a time your friends can all make" = "Find a time your friends can all make";
+"For meals, study sessions and sports with friends." = "For meals, study sessions and sports with friends.";
+"Find a time with friends" = "Find a time with friends";
+"Got a friend's link? Fill it in here" = "Got a friend's link? Fill it in here";
+"See an example: a weekend study session" = "See an example: a weekend study session";
+"Example" = "Example";
+"Three friends want to study together" = "Three friends want to study together";
+"One link collects everyone's free time." = "One link collects everyone's free time.";
+"Friend Lin" = "Friend Lin";
+"Friend Chen" = "Friend Chen";
+"Sat\n14:00" = "Sat\n14:00";
+"Sat\n15:00" = "Sat\n15:00";
+"Sun\n10:00" = "Sun\n10:00";
+"You, Lin and Chen are all free on Saturday at 15:00." = "You, Lin and Chen are all free on Saturday at 15:00.";
+"Saturday at 15:00 works for all three" = "Saturday at 15:00 works for all three";
+"You pick the final time. Everyone confirms, then it appears in Calendar." = "You pick the final time. Everyone confirms, then it appears in Calendar.";

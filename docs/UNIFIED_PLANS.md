@@ -19,11 +19,14 @@ Back returns directly to Plans, including after Done selecting. Creation alone
 uses a dismissible form sheet; the secondary TimePollSheet list is not part of
 current Plans or Messages navigation. Root cards refresh after saved responses.
 
-## Guided native planning — Preview 115
+## Guided native planning — Preview 116
 
-Plans leads with **Start an activity** and **Open a friend's invitation**. The
-creation action is prominent for first-time and returning organizers. Empty accounts
-see three concrete steps instead of empty section filters. Existing **Your next
+Plans leads with **Find a time your friends can all make**, a **Find a time with
+friends** action and the entry for an existing invitation. An expanded, explicitly
+labelled study-session example shows three friends' availability, their shared
+Saturday 15:00, and the organizer-choice → confirmation → Calendar result.
+Accessibility text sizes use an equivalent sentence instead of a cramped grid.
+Empty accounts omit empty section filters. Existing **Your next
 steps**, **Waiting for others**, Upcoming and Past classification stays intact.
 
 Creation has two parts: activity name/optional place/timing method, followed by
@@ -47,8 +50,19 @@ Once others respond, the organizer sees the complete timetable and a persistent
 **Set time and send invitations** action. Unsaved work never shows the saved handoff.
 Confirmation retains the exact time, roster, count, and Calendar rule; only complete
 acceptance enables the Calendar action. Large text, dark mode and direct return to
-Plans remain supported. These changes are native only; shared APIs, the published
-web page and lifecycle semantics remain unchanged.
+Plans remain supported. Shared APIs and lifecycle semantics remain unchanged.
+
+The public link follows separate tasks. Before joining, the visitor sees the
+activity, candidate dates, the purpose of collecting availability, and a name
+form. **Next: choose my free time** opens the editable timetable. Green selection,
+30-minute cells, automatic save feedback and the saved-only **Save and continue**
+action explain how to finish. Explicitly choosing no available times also counts
+as a saved response. Range/day gestures remain available in a short disclosure.
+After continuing, a dedicated waiting page explains that the organizer must pick
+the final time, and the visitor returns to this same link to confirm participation.
+Editing and group results remain available. The final invitation shows the actual
+time/place and a persistent **Confirm participation** action. FIXED links skip
+availability and still require explicit confirmation after entering a name.
 
 - COLLECTING: immutable candidate slots, one autosaved response/account or browser guest.
   The complete heatmap and response count are primary. No duration is required,
