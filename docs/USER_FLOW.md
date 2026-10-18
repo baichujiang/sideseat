@@ -10,23 +10,24 @@
 
 ## Unified manual plans — owner-approved 2026-10-15
 
-**2026-10-18 owner-requested usability update:** Plans starts with a clear next action.
-With no active plans, it explains sharing a link, agreeing on a time and finding
-that confirmed plan in Calendar. With active plans, this introduction becomes a
-compact header. **Your next steps** groups filling, sharing, choosing and invitations
-that need the viewer; **Waiting for others** contains saved responses and accepted
-invitations awaiting other people. Cards show what to do, rather than only a phase.
-**Upcoming** and **Past** remain separate; conversation plans retain their existing
-consent and feedback rules. The next meet-up uses the earliest actual start.
+**Preview 115 — a clear starting point:** Plans leads with **Start an activity**
+and **Open a friend's invitation**. The same prominent creation action remains
+visible above active plans. A first-plan account sees three concrete steps:
+write an activity, send the link, pick a time and confirm. Section filters stay
+out of the empty first-use screen and appear when there are plans to organize.
+**Your next steps** and **Waiting for others** still group active plans by role;
+**Upcoming** and **Past** retain their existing classifications and calendar rules.
 
-**Plans → Start a new plan** (or **+**) first asks whether **We haven't picked a
-time** or **We already have a time**. Each choice explains the next steps before
-showing title, optional place, count (default five) and the appropriate time fields.
-Collection asks for candidate days and daily hours; direct invitation asks for the
-actual start and duration. The bottom action explains what happens after creation;
-validation applies to the chosen method. Native candidate selection excludes past
-days and explains an invalid range instead of silently disabling creation.
-Messages and shared links continue to open the same plans in the Plans tab.
+**Plans → Start an activity** opens a two-part creation sheet. First, describe
+what to do, optionally choose a suggested activity and location, and choose
+whether the time is still open or already set. The persistent **Next: choose dates**
+action advances only after an activity name exists. Second, choose candidate days
+or the actual meeting time. Collection hours and the estimated count sit under
+optional time settings; direct invitations retain the required group size.
+**Edit activity** returns to the first part without losing inputs. Candidate dates
+exclude past days. The final action tells the viewer that filling their availability
+or sharing the fixed invitation comes next.
+Messages and shared links continue to open the same canonical plan detail.
 
 The Plans **+** or primary creation action opens one creation sheet. One Cancel or
 downward dismissal returns to Plans. Successful creation closes that sheet and
@@ -47,13 +48,17 @@ read-only heatmap and response count, without recommendation cards or a required
 activity duration. Each number counts people covering that full 30-minute cell.
 Friends use the table to decide the date and hours, including half a day or a full day.
 
-Sharing and copying the link are visible in the detail. After saving and finishing,
-the organizer is guided to share if no friend has responded, or sees a persistent
-**Choose time and invite** action. Other participants are told that their free time
-is saved and a separate invitation will need confirmation. Reopening a filled
-collection starts at results, with My availability available for editing.
+Availability editing focuses on one task: **Tap the times you're free**.
+Sharing appears after **Save and continue**. If no friend has responded, the
+organizer sees a dedicated **Now send it to your friends** screen with a prominent
+share action, full copy-link label, saved status, and an edit-availability action.
+Once friends respond, the organizer sees the complete group timetable and
+**Set time and send invitations**. Other participants see a dedicated saved/waiting
+screen explaining that a separate invitation still needs confirmation, with an
+optional group-timetable view. A filled collection reopens at the corresponding
+handoff or results screen. Unsaved selections never show a saved handoff.
 
-The creator selects **Choose time and invite**, chooses a date and start/end from
+The creator selects **Set time and send invitations**, chooses a date and start/end from
 the configured hours, reviews the explicit participant list and sends. The initial
 range covers the configured day, with no one-hour limit. Availability labels update
 for the chosen range; they do not automatically remove people from the reviewed roster.

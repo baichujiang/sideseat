@@ -21,7 +21,7 @@ import XCTest
         app = XCUIApplication(bundleIdentifier: fixture.bundle)
         addTeardownBlock { [self] in MainActor.assumeIsolated { app.terminate() } }
         app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials",
-            "--ui-testing-skip-tutorial", "--ui-testing-language=en", "--ui-testing-appearance=light"]
+            "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
         app.launch()
         let identifier = app.textFields["login-identifier"]
         XCTAssertTrue(identifier.waitForExistence(timeout: 20))
@@ -30,7 +30,7 @@ import XCTest
         password.tap(); password.typeText(fixture.password)
         app.buttons["login-submit"].tap()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
-        app.tabBars.buttons["Plans"].tap()
+        app.tabBars.buttons["计划"].tap()
         let create = app.buttons["plans-create-primary"]
         XCTAssertTrue(create.waitForExistence(timeout: 25)); XCTAssertTrue(create.isHittable)
         capture(app, "01-first-visit")
@@ -41,6 +41,9 @@ import XCTest
         capture(app, "02-choice"); collect.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        let next = app.buttons["plan-create-next"]
+        XCTAssertTrue(next.isHittable); next.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-dates"].firstMatch.waitForExistence(timeout: 10))
         let submit = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(submit.isHittable); XCTAssertTrue(submit.isEnabled)
         capture(app, "03-create"); submit.tap()
@@ -52,7 +55,9 @@ import XCTest
         app.buttons["time-poll-finish"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 10))
         let share = app.buttons["plan-share-primary"]
-        XCTAssertTrue(share.isHittable); share.tap()
+        XCTAssertTrue(share.isHittable)
+        XCTAssertTrue(app.buttons["plan-edit-availability"].exists)
+        capture(app, "05-next-share"); share.tap()
         // iOS 26 exposes share actions as cells; earlier releases use buttons.
         let copyLabels = NSPredicate(format: "label IN %@", ["Copy", "拷贝", "复制"])
         let copyCell = app.cells.matching(copyLabels).firstMatch
@@ -61,7 +66,7 @@ import XCTest
         capture(app, "05-system-share"); copy.tap()
         XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: app.buttons["plan-copy-link"])], timeout: 10), .completed)
         app.buttons["plan-copy-link"].tap()
-        XCTAssertEqual(app.buttons["plan-copy-link"].label, "Link copied")
+        XCTAssertEqual(app.buttons["plan-copy-link"].label, "链接已复制")
 
         safari.activate()
         let done = safari.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成"])).firstMatch
@@ -108,7 +113,7 @@ import XCTest
         XCTAssertTrue(ten.waitForExistence(timeout: 5)); ten.tap()
         capture(app, "09-review-invitation"); send.tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
-        wait(count, labelContains: "1 of 2 confirmed")
+        wait(count, labelContains: "1/2 人已确认")
         capture(app, "10-awaiting-confirmation"); phase("awaiting-confirmation")
 
         safari.activate()
@@ -116,11 +121,11 @@ import XCTest
         XCTAssertTrue(accept.waitForExistence(timeout: 35)); capture(safari, "11-guest-invitation"); accept.tap()
         XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Plan confirmed", "计划已确定"])).firstMatch.waitForExistence(timeout: 25))
         capture(safari, "12-guest-confirmed")
-        app.activate(); wait(count, labelContains: "2 of 2 confirmed")
+        app.activate(); wait(count, labelContains: "2/2 人已确认")
         let calendar = app.buttons["plan-view-calendar"]
         XCTAssertTrue(calendar.waitForExistence(timeout: 15)); capture(app, "13-native-confirmed"); phase("confirmed")
         calendar.tap()
-        XCTAssertTrue(app.tabBars.buttons["Calendar"].isSelected)
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
         app.buttons["calendar-search"].tap()
         let search = app.searchFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.title)
@@ -129,7 +134,7 @@ import XCTest
         let manage = app.buttons["calendar-manage-plan"]
         for _ in 0..<4 where !manage.isHittable { app.swipeUp() }
         XCTAssertTrue(manage.waitForExistence(timeout: 10)); capture(app, "15-calendar-entry")
-        manage.tap(); wait(count, labelContains: "2 of 2 confirmed")
+        manage.tap(); wait(count, labelContains: "2/2 人已确认")
         capture(app, "16-calendar-to-plan"); phase("calendar-verified")
     }
 

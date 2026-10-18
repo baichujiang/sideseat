@@ -119,7 +119,7 @@ import XCTest
         XCTAssertTrue(undo.waitForExistence(timeout: 10)); undo.tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
         app.buttons["time-poll-finish"].tap()
-        XCTAssertTrue(app.staticTexts["time-poll-completed"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-edit-availability"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["phase"] as? String, "COLLECTING")
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])
         capture("availability-done-after-undo")
@@ -127,7 +127,7 @@ import XCTest
         let card = app.buttons["plans-coordinated-\(token)"]
         XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
-        app.segmentedControls["time-poll-mode"].buttons["My availability"].tap()
+        app.buttons["plan-edit-availability"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])
         capture("saved-availability-reopened")
@@ -142,13 +142,14 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-mode-fixed"].exists); capture("creation-choice"); app.buttons["plan-mode-collect"].tap()
         let titleField = app.textFields["time-poll-title"]
         XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText(title + "\n")
+        app.buttons["plan-create-next"].tap()
         let createButton = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(createButton.isEnabled); capture("creation-details"); createButton.tap()
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
         let list = try call("/api/v1/time-polls", auth: fixture.owner)
         let record = try XCTUnwrap((list["polls"] as? [[String: Any]])?.first { $0["title"] as? String == title })
         let token = try XCTUnwrap(record["token"] as? String); tokens.append(token)
-        XCTAssertTrue(app.buttons["plan-share-primary"].exists)
+        XCTAssertFalse(app.buttons["plan-share-primary"].exists)
         app.buttons["time-poll-cell-0"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
         capture("choose-my-time")
@@ -206,10 +207,11 @@ import XCTest
         app.launch()
         app.buttons["plans-create-unified"].tap()
         let choice = app.buttons["plan-mode-collect"]
-        XCTAssertTrue(choice.waitForExistence(timeout: 10)); XCTAssertGreaterThan(choice.frame.height, 240); capture("choice-accessibility5"); choice.tap()
+        XCTAssertTrue(choice.waitForExistence(timeout: 10)); XCTAssertGreaterThanOrEqual(choice.frame.height, 44); capture("choice-accessibility5"); choice.tap()
         let titleField = app.textFields["time-poll-title"]
-        for _ in 0..<4 where !titleField.isHittable { app.swipeUp() }
+        for _ in 0..<4 where !titleField.isHittable { app.swipeDown() }
         XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText("Large text plan\n")
+        app.buttons["plan-create-next"].tap()
         let createButton = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(createButton.isHittable)
         XCTAssertLessThanOrEqual(createButton.frame.maxX, app.frame.maxX + 1)

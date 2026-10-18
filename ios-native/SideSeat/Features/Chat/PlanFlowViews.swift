@@ -1,5 +1,41 @@
 import SwiftUI
 
+/// A screen tells the viewer the one task to finish before moving on.
+struct PlanTaskHeader: View {
+    let step: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            Text(LocalizedStringKey(step)).font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            Text(LocalizedStringKey(title)).font(.title2.weight(.bold)).fixedSize(horizontal: false, vertical: true)
+            Text(LocalizedStringKey(detail)).font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct PlanGuideRow: View {
+    let number: Int
+    let title: String
+    let detail: String
+    var complete = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+            Image(systemName: complete ? "checkmark.circle.fill" : "\(number).circle.fill")
+                .font(.title3).foregroundStyle(complete ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
+                .frame(width: 28).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }.accessibilityElement(children: .combine)
+    }
+}
+
 enum PlanNextStep: String, Sendable {
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan
 
@@ -74,9 +110,10 @@ struct PlanShareActions: View {
     @State private var copied = false
 
     var body: some View {
-        HStack(spacing: SideSeatTheme.spaceSM) {
+        let layout = prominent ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        layout {
             ShareLink(item: poll.shareUrl) {
-                Label(poll.planningPhase == "COLLECTING" ? "Invite friends to fill in" : "Share invitation", systemImage: "square.and.arrow.up")
+                Label(poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation", systemImage: "square.and.arrow.up")
                     .font(.subheadline.weight(.semibold))
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, minHeight: 48)
@@ -89,11 +126,10 @@ struct PlanShareActions: View {
                 UIPasteboard.general.url = poll.shareUrl
                 copied = true
             } label: {
-                VStack(spacing: 3) {
-                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                    Text(copied ? "Copied" : "Copy").font(.caption2)
-                }
-                    .frame(minWidth: 48, minHeight: 48)
+                Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: prominent ? .infinity : nil, minHeight: 48)
+                    .padding(.horizontal, SideSeatTheme.spaceMD)
                     .background(SideSeatTheme.bgGrouped, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             }
             .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)

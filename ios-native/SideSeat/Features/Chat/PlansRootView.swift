@@ -85,10 +85,12 @@ struct PlansRootView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            sectionPicker
-                .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                .padding(.vertical, SideSeatTheme.spaceMD)
-                .background(SideSeatTheme.bgGrouped)
+            if !coordinatedPlans.isEmpty || !store.plans.isEmpty || selectedSection != .waitingResponse {
+                sectionPicker
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                    .padding(.vertical, SideSeatTheme.spaceMD)
+                    .background(SideSeatTheme.bgGrouped)
+            }
 
             SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
                 ScrollView {
@@ -289,47 +291,38 @@ struct PlansRootView: View {
         }
     }
 
-    @ViewBuilder private var planActions: some View {
-        if !coordinated(in: .waitingResponse).isEmpty || !plans(in: .waitingResponse).isEmpty {
+    private var planActions: some View {
+        let isFirstPlan = coordinatedPlans.isEmpty && store.plans.isEmpty
+        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                let layout = dynamicTypeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 12))
-                layout {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Continue your plans").font(.title3.weight(.bold))
-                        Text("Start with the plans that need you.").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                    Button { showsPlanCreation = true } label: { Label("Create a plan", systemImage: "plus") }
-                        .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
-                        .buttonStyle(.bordered).tint(SideSeatTheme.utilityAction).accessibilityIdentifier("plans-create-primary")
-                }
-                Button { planLink = ""; showsOpenPlanLink = true } label: { Label("I received a plan link", systemImage: "link") }
-                    .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plans-open-link")
-            }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
-        } else {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-                Image(systemName: "calendar.badge.plus")
-                    .font(.title2).frame(width: 48, height: 48)
-                    .background(SideSeatTheme.bgGrouped, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Make a plan with friends").font(.title3.weight(.bold))
-                    Text("Share a link. Agree on a time. Find it in Calendar.")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                Text("Make time for friends").font(.title2.weight(.bold))
+                Text("You start the activity. Friends join from your link.")
+                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            SSPrimaryButton(title: AppLocalization.string("Start a new plan"), fill: .product,
+            SSPrimaryButton(title: AppLocalization.string("Start an activity"), fill: .product,
                             accessibilityID: "plans-create-primary") { showsPlanCreation = true }
             Button { planLink = ""; showsOpenPlanLink = true } label: {
-                Label("I received a plan link", systemImage: "link")
-                    .font(.subheadline.weight(.medium)).frame(maxWidth: .infinity, minHeight: 44)
+                HStack {
+                    Image(systemName: "link")
+                    Text("Open a friend's invitation")
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right").font(.caption.weight(.semibold))
+                }.font(.subheadline.weight(.medium)).frame(minHeight: 44)
             }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
                 .accessibilityIdentifier("plans-open-link")
+            if isFirstPlan {
+                Divider()
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                    PlanGuideRow(number: 1, title: "Write an activity", detail: "For example, a meal or a study session.")
+                    PlanGuideRow(number: 2, title: "Send the link to friends", detail: "They choose when they're free. No app needed.")
+                    PlanGuideRow(number: 3, title: "Pick a time and confirm", detail: "Everyone confirms, then it appears in Calendar.")
+                }.accessibilityIdentifier("plans-first-use-guide")
+            }
         }
         .padding(SideSeatTheme.spaceLG)
         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
         .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
-        }
     }
 
     private var actionOverview: some View {
@@ -371,13 +364,7 @@ struct PlansRootView: View {
                         coordinatedCard(shared)
                     } else if let chat { planRow(chat, section: .upcoming, showsFullDate: true) }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-next-meetup")
-            } else if manual.isEmpty && incoming.isEmpty && outgoing.isEmpty && coordinationLoaded && coordinationError == nil {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Label("Your first plan starts here", systemImage: "sparkles").font(.headline)
-                    Text("Not sure when? Collect free time first. Already decided? Send an invitation directly.")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }.padding(.vertical, SideSeatTheme.spaceMD).accessibilityIdentifier("plans-empty-waitingResponse")
+
             }
         }
     }
