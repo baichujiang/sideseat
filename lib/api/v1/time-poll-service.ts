@@ -87,12 +87,14 @@ export async function listTimePolls(userId: string, appOrigin: string) {
         select: { userId: true, guestId: true, displayName: true, user: { select: { avatarUrl: true } } } },
       activityTopic: true, activityChosenAt: true, activitySelectedId: true,
       activityIdeas: { where: { OR: [{ userId: null }, { userId: { notIn: hidden } }] }, select: { userId: true, guestId: true, interests: { where: { OR: [{ userId: null }, { userId: { notIn: hidden } }] }, select: { userId: true, guestId: true } } } },
-      _count: { select: { responses: true } }, invitations: { select: { userId: true, guestId: true, selected: true, status: true } } },
+      _count: { select: { responses: true } }, invitations: { select: { userId: true, guestId: true, selected: true, status: true,
+        displayName: true, user: { select: { avatarUrl: true } } } } },
   });
   return { polls: polls.map(({ _count, invitations, responses, creator, creatorId, endMinute, activityIdeas, activityTopic, activityChosenAt, activitySelectedId, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
-    organizer: { displayName: creator.nickname?.trim() || creator.username, avatarUrl: creator.avatarUrl },
-    peoplePreview: responses.filter(person => person.userId !== userId && person.userId !== creatorId)
-      .filter(person => !["INVITING", "CONFIRMED"].includes(poll.phase) || invitations.some(invite => invite.selected && identity(invite) === identity(person)))
+    organizer: { displayName: responses.find(person => person.userId === creatorId)?.displayName
+      ?? invitations.find(person => person.userId === creatorId)?.displayName ?? (creator.nickname?.trim() || creator.username), avatarUrl: creator.avatarUrl },
+    peoplePreview: (["INVITING", "CONFIRMED"].includes(poll.phase) ? invitations.filter(person => person.selected) : responses)
+      .filter(person => person.userId !== userId && person.userId !== creatorId && (!person.userId || !hidden.includes(person.userId)))
       .slice(0, 3).map(person => ({ displayName: person.displayName, avatarUrl: person.user?.avatarUrl ?? null })),
     activitySelection: activitySummary({ activityIdeas, activityTopic, activityChosenAt, activitySelectedId }, userId),
     isOwner: creatorId === userId, didRespond: responses.some(person => person.userId === userId),

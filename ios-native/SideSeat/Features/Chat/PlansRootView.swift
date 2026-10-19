@@ -341,12 +341,20 @@ struct PlansRootView: View {
                         .background(SideSeatTheme.PlanHome.ink, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-create-primary")
                 openLink
-                DisclosureGroup(isExpanded: $showsPurposeExample) {
-                    PlanPurposeExample().padding(.top, SideSeatTheme.spaceMD)
-                } label: {
+                Button { showsPurposeExample = true } label: {
                     Label("See an example: a weekend study session", systemImage: "book")
                         .font(.subheadline).frame(minHeight: 44)
-                }.tint(SideSeatTheme.PlanHome.ink).accessibilityIdentifier("plans-purpose-example")
+                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
+                    .accessibilityIdentifier("plans-purpose-example")
+                    .sheet(isPresented: $showsPurposeExample) {
+                        NavigationStack {
+                            ScrollView { PlanPurposeExample().padding(SideSeatTheme.spaceLG) }
+                                .navigationTitle("Example").navigationBarTitleDisplayMode(.inline)
+                                .toolbar { ToolbarItem(placement: .confirmationAction) {
+                                    Button("Done") { showsPurposeExample = false }
+                                } }
+                        }.tint(SideSeatTheme.PlanHome.ink).dynamicTypeSize(dynamicTypeSize)
+                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

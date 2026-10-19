@@ -127,6 +127,14 @@ try {
       let old = await call('/api/v1/time-polls', owner, 'POST', { title: 'Already decided activity', timeZone: 'Europe/Berlin', dates: [date], startMinute: 540, endMinute: 660 }, 201);
       fixture.tokens.push(old.token); savePrivate();assert.equal(old.activitySelection, null);
       checks.push(`${engineName}: existing creation skips the optional activity stage`);
+      const fixed = await call('/api/v1/time-polls', owner, 'POST', { title: 'Coffee fixed invitation', timeZone: 'Europe/Berlin', dates: [date], startMinute: 540, endMinute: 660, planningMode: 'FIXED', fixedStart: p.slots[0].start, durationMinutes: 60, expectedCount: 2 }, 201);
+      fixture.tokens.push(fixed.token); savePrivate();
+      await call(route(fixed) + '/invitation-response', peer, 'PUT', { status: 'ACCEPTED', version: fixed.invitationVersion });
+      const fixedRow = (await call('/api/v1/time-polls', owner)).polls.find(row => row.token === fixed.token);
+      assert.equal(fixedRow.phase, 'CONFIRMED'); assert.equal(fixedRow.respondedCount, 0);
+      assert.deepEqual(fixedRow.peoplePreview.map(x => x.displayName), ['Peer Lin']);
+      checks.push(`${engineName}: fixed invitation previews real companions without requiring an availability response`);
+
     } finally { await context.close(); await browser.close(); }
   }
   fs.writeFileSync(`${out}/${stage}-web-flows.json`, JSON.stringify({ base, stage, checkedAt: new Date().toISOString(), checks, passed: checks.length, failed: 0 }, null, 2));
