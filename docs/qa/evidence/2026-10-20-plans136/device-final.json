@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-19T22:43:10.938093+00:00",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "136",
+  "pid": 2890,
+  "normalLaunchArguments": [],
+  "qaEnvironment": false,
+  "runnerRemoved": true,
+  "ordinarySideSeatBuild": "97",
+  "sourceHashesMatch": true
+}

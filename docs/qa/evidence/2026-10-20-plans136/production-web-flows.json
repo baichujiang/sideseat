@@ -1,0 +1,31 @@
+{
+  "base": "https://www.sideseat.de",
+  "stage": "production",
+  "checkedAt": "2026-10-19T22:39:26.981Z",
+  "checks": [
+    "chromium: shared plan opens directly into the timetable with inline activity ideas",
+    "chromium: App and guest suggestions, multiple interests, owner-only choice, no implicit attendance",
+    "chromium: real organizer/guest previews without changing own response or attendance",
+    "chromium: free time can be filled before choice; same plan/link/guest and selections retained after choice",
+    "chromium: selected guest and account previews survive explicit confirmation",
+    "chromium: exact invitation, separate explicit confirmations and unique calendars with the chosen activity",
+    "chromium: existing creation skips the optional activity stage",
+    "chromium: zero availability → same-link direct guest/account invitation → explicit confirmations → unique Calendar",
+    "chromium: only organizer availability → same-link direct guest/account invitation → explicit confirmations → unique Calendar",
+    "chromium: selected respondent plus a new link guest both explicitly confirm before Calendar",
+    "chromium: fixed invitation previews real companions without requiring an availability response",
+    "webkit: shared plan opens directly into the timetable with inline activity ideas",
+    "webkit: App and guest suggestions, multiple interests, owner-only choice, no implicit attendance",
+    "webkit: real organizer/guest previews without changing own response or attendance",
+    "webkit: free time can be filled before choice; same plan/link/guest and selections retained after choice",
+    "webkit: selected guest and account previews survive explicit confirmation",
+    "webkit: exact invitation, separate explicit confirmations and unique calendars with the chosen activity",
+    "webkit: existing creation skips the optional activity stage",
+    "webkit: zero availability → same-link direct guest/account invitation → explicit confirmations → unique Calendar",
+    "webkit: only organizer availability → same-link direct guest/account invitation → explicit confirmations → unique Calendar",
+    "webkit: selected respondent plus a new link guest both explicitly confirm before Calendar",
+    "webkit: fixed invitation previews real companions without requiring an availability response"
+  ],
+  "passed": 22,
+  "failed": 0
+}

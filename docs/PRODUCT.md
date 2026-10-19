@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-20
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -37,6 +37,13 @@ choose a concrete time directly. Both routes use one shared plan and the same
 invitation, confirmation and cancellation lifecycle. Native SwiftUI and Sideseat's
 API/database retain 30-minute paint/erase over existing quarter-hour storage, autosave and attendance
 heatmap mechanism; provider pages, advertisements and storage are excluded.
+
+**2026-10-20 availability autosave amendment:** App and shared-web selections
+highlight immediately. A burst of edits saves its newest complete selection after
+700 ms of quiet, with one write in flight per viewer and acknowledgement-based
+save feedback. Leaving/backgrounding requests an early flush; failures retain the
+current choices for retry. This introduces no save button or extra planning step.
+Explicit attendance confirmation and existing quarter-hour records remain intact.
 
 **2026-10-16 timetable amendment:** Availability is input, never acceptance.
 Collection shows the complete availability heatmap and response progress, without

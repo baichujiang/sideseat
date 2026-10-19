@@ -1,0 +1,47 @@
+{
+  "attempt": "initial baseline",
+  "result": "failed: intended selections were not all activated",
+  "actualSlotIds": [
+    0,
+    1,
+    2,
+    3,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "expectedSlotIds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "correction": "Replace forced clicks in the short viewport with ordinary hit-tested clicks in a viewport that shows ten cells; assert every local activation. Fresh accounts and both engines then pass.",
+  "cleanup": {
+    "accountsDeleted": 1,
+    "plansAndLinksDeleted": 1,
+    "oldTokens401": 1,
+    "links404": 1
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "temporaryAccountsDeleted": 11,
+  "plansAndLinksDeleted": 29,
+  "oldTokensRejected401": 11,
+  "linksRejected404": 29,
+  "privateFixturesRemoved": true,
+  "candidateCookieRemoved": true,
+  "phoneRunnerRemoved": true
+}

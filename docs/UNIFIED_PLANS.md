@@ -98,6 +98,24 @@ Only Send invitations mutates the existing invitation API/version. Cancelling a
 draft changes nothing; rescheduling uses the same selection with the old range
 prefilled. Existing identity, consent and Calendar rules remain unchanged.
 
+## Coalesced availability autosave — Preview 136
+
+App and public web debounce committed selections for 700 ms. Local checkmarks and
+counts update immediately; pending and in-flight selections both remain unsaved
+until the final snapshot is acknowledged. A new edit during a request has its own
+quiet period and cannot start a concurrent write. Leaving/backgrounding and Retry
+flush the pending snapshot. Failures preserve the latest draft and cancel automatic
+continuation; a new edit or explicit retry can save again. Native drafts capture
+account generation before debounce. Refresh cannot overwrite pending choices;
+mutation controls retain the save acknowledgement boundary.
+
+The public response endpoint returns the already computed authenticated save result
+with its existing viewerId. Identical saved slot/name snapshots skip response,
+guest and updatedAt writes inside the existing validation and lock boundary. API
+shape, records, invitations and Calendar rules are unchanged. Existing read polling
+is unchanged. Browser unload delivery remains best effort, with the existing
+unsaved-changes warning; no offline or force-quit delivery guarantee is added.
+
 ## Native participant timetable — Preview 121
 
 Native participants now use the same editable group timetable from their first

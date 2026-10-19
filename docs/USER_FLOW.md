@@ -9,6 +9,15 @@
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
 
+## Availability autosave — Preview 136
+
+Tap/drag → immediate local checkmark and count → 700 ms without another committed
+edit → save the newest complete selection → server acknowledgement → Saved.
+Further edits remain available while saving and follow serially. Leaving the detail
+or backgrounding requests an early flush. A failed save keeps the newest choices,
+shows Retry, and cannot be mistaken for saved. Final-time/invitation actions wait
+for acknowledgement. No additional save or completion step is introduced.
+
 ## Formal invitation before availability — owner correction / Preview 135
 
 Plans → activity/place → timetable → choose final time → review invitation →

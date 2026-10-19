@@ -7,7 +7,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { chromium, webkit, expect } from '@playwright/test';
 
 const base = process.argv[2], stage = process.argv[3];
-assert(base && ['candidate', 'production'].includes(stage));
+assert(base && ['baseline', 'candidate', 'production'].includes(stage));
 const out = path.resolve('docs/qa/evidence/2026-10-20-plans136'); fs.mkdirSync(out, { recursive: true });
 const privatePath = path.join(os.tmpdir(), `sideseat136-autosave-${stage}-private.json`);
 assert(!fs.existsSync(privatePath), 'Clean the previous fixture first.');
@@ -32,7 +32,7 @@ try {
   owner.accessToken = (await call('/api/v1/auth/login', null, 'POST', { identifier: owner.identifier, password: owner.password, device: { id: randomUUID(), name: 'Autosave verification', appVersion: '1.0.0', platformVersion: '26.6.1' } })).tokens.accessToken; persist();
   for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     const browser = await engine.launch();
-    const context = await browser.newContext({ storageState: { cookies, origins: [] }, viewport: { width: 390, height: 844 }, locale: 'zh-CN' });
+    const context = await browser.newContext({ storageState: { cookies, origins: [] }, viewport: { width: 1280, height: 1200 }, locale: 'zh-CN' });
     const page = await context.newPage(), requests = [], errors = [];
     try {
       const date = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
@@ -41,14 +41,21 @@ try {
       const api = `/api/v1/time-polls/${p.token}`, responseURL = `**/api/public/time-polls/${p.token}/response`;
       page.on('request', r => { if (r.method() === 'PUT' && r.url().endsWith(`/time-polls/${p.token}/response`)) requests.push({ at: Date.now(), slotIds: r.postDataJSON().slotIds }); });
       page.on('pageerror', e => errors.push(e.message));
+      page.on('dialog', dialog => { void dialog.accept(); });
       await page.goto(`${base}/time-polls/${p.token}`);
       await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
       await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
       const cell = n => page.getByTestId(`time-poll-cell-${n}`);
       const saved = () => expect(page.getByText('已自动保存', { exact: true })).toBeVisible();
-      for (let n = 0; n < 20; n += 2) await cell(n).click({ force: true });
+      for (let n = 0; n < 20; n += 2) { await cell(n).click(); await expect(cell(n)).toHaveAttribute('aria-pressed', 'true'); }
       await expect(cell(18)).toHaveAttribute('aria-pressed', 'true');
       await saved();
+      if (stage === 'baseline') {
+        assert.deepEqual((await call(api, owner)).participants.find(x => x.isGuest).slotIds, Array.from({ length: 20 }, (_, i) => i));
+        measurements.push({ engineName, rapidTaps: 10, saves: requests.length });
+        checks.push(`${engineName}: baseline request count and durable final selection recorded`);
+        continue;
+      }
       assert.equal(requests.length, 1); assert.deepEqual(requests[0].slotIds, Array.from({ length: 20 }, (_, i) => i));
       assert.deepEqual((await call(api, owner)).participants.find(x => x.isGuest).slotIds, requests[0].slotIds);
       measurements.push({ engineName, rapidTaps: 10, saves: requests.length });
@@ -57,8 +64,8 @@ try {
       let release, intercepted;
       const held = new Promise(r => { release = r; }), started = new Promise(r => { intercepted = r; });
       await page.route(responseURL, async route => { const result = await route.fetch(); intercepted(); await held; await route.fulfill({ response: result }); }, { times: 1 });
-      await cell(0).click({ force: true }); await started;
-      await cell(2).click({ force: true }); await cell(4).click({ force: true });
+      await cell(0).click(); await started;
+      await cell(2).click(); await cell(4).click();
       const lastEdit = Date.now(); release();
       await expect(cell(4)).toHaveAttribute('aria-pressed', 'false');
       await saved();
@@ -70,8 +77,8 @@ try {
       let fail, failStarted;
       const failGate = new Promise(r => { fail = r; }), failReady = new Promise(r => { failStarted = r; });
       await page.route(responseURL, async route => { failStarted(); await failGate; await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: { message: 'Autosave verification failure' } }) }); }, { times: 1 });
-      await cell(6).click({ force: true }); await failReady;
-      await cell(8).click({ force: true }); fail();
+      await cell(6).click(); await failReady;
+      await cell(8).click(); fail();
       await expect(page.getByText('保存失败', { exact: true })).toBeVisible();
       await expect(cell(6)).toHaveAttribute('aria-pressed', 'false'); await expect(cell(8)).toHaveAttribute('aria-pressed', 'false');
       assert.equal(requests.length, 4);
@@ -80,7 +87,7 @@ try {
       assert.deepEqual(requests[4].slotIds, Array.from({ length: 10 }, (_, i) => i + 10));
       checks.push(`${engineName}: failure preserves the newest local choices and one explicit retry saves them`);
 
-      await cell(10).click({ force: true });
+      await cell(10).click();
       await page.goto('about:blank');
       await expect.poll(async () => (await call(api, owner)).participants.find(x => x.isGuest).slotIds).toEqual(Array.from({ length: 8 }, (_, i) => i + 12));
       await page.goto(`${base}/time-polls/${p.token}`);

@@ -1,0 +1,22 @@
+{
+  "base": "https://www.sideseat.de",
+  "checkedAt": "2026-10-19T22:33:56.669Z",
+  "checks": [
+    "chromium: baseline request count and durable final selection recorded",
+    "webkit: baseline request count and durable final selection recorded"
+  ],
+  "measurements": [
+    {
+      "engineName": "chromium",
+      "rapidTaps": 10,
+      "saves": 2
+    },
+    {
+      "engineName": "webkit",
+      "rapidTaps": 10,
+      "saves": 3
+    }
+  ],
+  "passed": 2,
+  "failed": 0
+}

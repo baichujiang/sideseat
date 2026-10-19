@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 135 原生来源 `ebef28c9`、API/OpenAPI 来源 `d00c7668` 已推送；[邀请合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (135)` | 无需填写前置的正式邀请、同一链接直接确认；103.879 秒直接邀请/7 API、297.853 秒原征集/12 API 通过；普通启动 PID 2839；[135 交付](./releases/2026-10-20-preview135-direct-invitation.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 136 保存相关原生/网页/API 来源 `ab5ba6f7` 已推送；[邀请合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (136)` | 连续选时合并保存，真实确认后显示已保存；300.021 秒 App 双账号/12 API、168.116 秒 App/Safari/8 API 通过；普通启动 PID 2890；[136 交付](./releases/2026-10-20-preview136-coalesced-autosave.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终包两条完整流程、最大字号/深色与普通启动通过，QA runner 与临时账号/计划已清理 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_CSkVAD8Ue2QMkZ7cSDa3AGR82KkJ`，Ready | 同一计划可在无人填写时生成正式邀请，复用直接确认网页；候选/正式各 22 项浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-19-plans135/release-health.json) |
-| 生产源码 | 1,362 项当前线上源码逐项验证重建；保留 1,359 项，仅覆盖服务、领域 schema 和 OpenAPI，并添加来源记录；1,363 项上传 SHA-1 全匹配 | API 来源 `d00c7668`；同一 Production 候选测试后原样提升，无 Schema/迁移变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-19-plans135/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-19-plans135/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_4ky937DveSrBpgzRVY6baFwfYBZ2`，Ready | 700 毫秒合并保存，去除重复读取、重复写入；候选/正式各 32 项浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-20-plans136/release-health.json) |
+| 生产源码 | 1,363 项当前线上源码逐项验证重建；保留 1,360 项，仅覆盖网页 hook、public response route 和保存服务，并添加来源记录；1,364 项上传 SHA-1 全匹配 | 来源 `ab5ba6f7`；同一 Production 候选测试后原样提升，无 Schema/迁移变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-20-plans136/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-20-plans136/upload-verification.json) |
+
+136 将连续点选改成即时显示、700 毫秒安静期后合并保存，同一填写者串行提交并保留最新草稿；离开/后台提前提交，失败保留并可重试。网页去除保存后的重复全量读取，同一快照不再重复更新答复/昵称/计划。实测旧网页连续 10 次点选产生 2/3 次请求，新候选与正式两浏览器均为 1 次；18 项原生、13 项领域、候选/正式各 32 项检查通过。App 双账号 300.021 秒/12 API，最终正式环境 App/Safari 168.116 秒/8 API；完整覆盖创建、分享、填写、邀请、明确确认和唯一日历。11 个临时账号、29 个计划/链接清理，QA runner 移除，136 普通启动 PID 2890；[完整 QA 与范围](./qa/2026-10-20-plans136.md)。
 
 135 取消发邀请前必须有朋友填写的限制。无人填写或只有自己时，可直接选最终时间、核对总人数并生成正式邀请；朋友打开同一链接或 App 后直接确认。已填写名单保持原规则，添加链接参与者需显式开启；取消最后一位不会自动切换。最终包直接邀请 103.879 秒/7 API、原征集 297.853 秒/12 API，候选/正式各 22 项与 13 项领域测试通过。早期搜索脚本错误和自动切换回归均修正后以新账号完整复验，初始记录保留。14 个临时账号、25 个计划/链接清理，QA runner 移除，135 普通启动 PID 2839；[完整 QA](./qa/2026-10-19-plans135.md)。分享页复用既有最终时段高亮和确认界面，无视觉重做。
 

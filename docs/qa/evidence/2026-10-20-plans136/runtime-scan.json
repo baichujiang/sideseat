@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-19T22:41:20.943Z",
+  "deployment": "dpl_4ky937DveSrBpgzRVY6baFwfYBZ2",
+  "project": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "window": "1h (subject to retained logs)",
+  "levels": [
+    "error",
+    "fatal"
+  ],
+  "groupBy": "requestPath",
+  "returnedText": [
+    "## Runtime Log Counts\n\n**Project:** prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N\n**Grouped by:** requestPath\n**Showing:** Top 25 groups by log count; this may omit other groups.\n\n| requestPath | count |\n|---|---|"
+  ]
+}

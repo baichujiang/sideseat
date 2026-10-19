@@ -1,0 +1,13 @@
+{
+  "baseDeployment": "dpl_CSkVAD8Ue2QMkZ7cSDa3AGR82KkJ",
+  "sourceCommit": "ab5ba6f797b267b5081128686c62ce7994cf5018",
+  "sourceFiles": 1363,
+  "preservedFiles": 1360,
+  "overlay": {
+    "components/time-polls/use-shared-time-poll.ts": "874d9e942bb45ae0af44537dc91b62da6b4fe3e3",
+    "app/api/public/time-polls/[token]/response/route.ts": "aa43bbc2e59334fd799e341fdd291487f3785811",
+    "lib/api/v1/time-poll-service.ts": "2f11e922351c55f37cc7894d807ed166075712fc"
+  },
+  "databaseMigration": "none",
+  "buildMigrationPolicy": "SKIP_DATABASE_MIGRATIONS=1"
+}

@@ -1,0 +1,30 @@
+{
+  "base": "https://www.sideseat.de",
+  "checkedAt": "2026-10-19T22:38:58.153Z",
+  "checks": [
+    "chromium: ten rapid taps highlight immediately and produce one complete durable save",
+    "chromium: edits during a slow save remain visible and follow serially after their quiet period",
+    "chromium: failure preserves the newest local choices and one explicit retry saves them",
+    "chromium: leaving before the debounce deadline flushes and reopening restores the saved selection",
+    "chromium: an identical acknowledged snapshot returns current data without another plan update",
+    "webkit: ten rapid taps highlight immediately and produce one complete durable save",
+    "webkit: edits during a slow save remain visible and follow serially after their quiet period",
+    "webkit: failure preserves the newest local choices and one explicit retry saves them",
+    "webkit: leaving before the debounce deadline flushes and reopening restores the saved selection",
+    "webkit: an identical acknowledged snapshot returns current data without another plan update"
+  ],
+  "measurements": [
+    {
+      "engineName": "chromium",
+      "rapidTaps": 10,
+      "saves": 1
+    },
+    {
+      "engineName": "webkit",
+      "rapidTaps": 10,
+      "saves": 1
+    }
+  ],
+  "passed": 10,
+  "failed": 0
+}
