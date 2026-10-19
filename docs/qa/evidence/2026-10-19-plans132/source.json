@@ -1,0 +1,14 @@
+{
+  "preview": 132,
+  "sha256": {
+    "ios-native/Configuration/Preview.xcconfig": "753cfd2a958a9171b9f8c0aaaacb910b3f71521d43f2891fc062188e6da6e02c",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "5dbc9084c0ec67896bbe1985976fde9803caf3a9402b236fd996fb0ae0ab31dd",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "88ea394e4505586414171500b2568e4b005c114588c27fc7e96f1a44a99070f5",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "c677d2b315521fc27d08281e0fe61a9837b228776a1a8e936a8907ad7872a60e",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "305fe4087f96353e1649288344ee6dd65c0b946fb995d19d9852b69d2a1e3177",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "5c66c9d71d2740798d50567b98a9228113733dbf38bcf6b0fa7b1ce964ff49a1"
+  },
+  "sourceCommit": "4a18c8fdbce30a5c3d898a5d13c0bdda025b2d11",
+  "testHostSelectionCommit": "b1927967",
+  "creationUITestRuntimeCondition": "Explicit SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE, unchanged by restoring the original scheme-target fallback."
+}

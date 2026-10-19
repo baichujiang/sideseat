@@ -1,0 +1,33 @@
+{
+  "preview": 132,
+  "changes": "Single default creation form, inline time editing, secondary shortcuts; default seven candidate days.",
+  "backendOrWebChanged": false,
+  "backendDeploymentRetained": "dpl_678enJmimu7x5DSTraSn59s342X4",
+  "newSchemaOrMigration": false,
+  "fullFlowsToVerify": [
+    "default native account flow",
+    "optional activity idea flow with App participant and Safari guest"
+  ],
+  "unitTestsRerun": false,
+  "unitScope": "No domain or API changes; validate the changed creation UI and real request outcomes on the phone.",
+  "creationUI": {
+    "passed": 6,
+    "failed": 0,
+    "initialFailures": 2,
+    "secondBatchFailures": 1
+  },
+  "nativeDefaultFlow": {
+    "passed": true,
+    "seconds": 320.25,
+    "apiBoundaries": 12
+  },
+  "activityShortcutFlow": {
+    "passed": true,
+    "seconds": 240.896,
+    "apiBoundaries": 14
+  },
+  "nativeSourceCommit": "4a18c8fdbce30a5c3d898a5d13c0bdda025b2d11",
+  "normalLaunchPid": 2433,
+  "temporaryAccountsDeleted": 4,
+  "temporaryPlansAndLinksDeleted": 2
+}

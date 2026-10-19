@@ -1,0 +1,98 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "00008110-001A69110CC1401E",
+      "deviceName" : "iPhone (4)",
+      "modelName" : "iPhone 14 Plus",
+      "osBuildNumber" : "23G83",
+      "osVersion" : "26.6.1",
+      "platform" : "iOS"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "25秒",
+                  "durationInSeconds" : 25.139339089393616,
+                  "name" : "testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26秒",
+                  "durationInSeconds" : 26.024456024169922,
+                  "name" : "testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "12秒",
+                  "durationInSeconds" : 12.714886903762817,
+                  "name" : "testDefaultFormNeedsOnlyActivityAndOneCreateAction()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testDefaultFormNeedsOnlyActivityAndOneCreateAction()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testDefaultFormNeedsOnlyActivityAndOneCreateAction",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "22秒",
+                  "durationInSeconds" : 22.603121995925903,
+                  "name" : "testFixedTimeShortcutEditsInPlaceAndKeepsInputs()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "15秒",
+                  "durationInSeconds" : 15.67303192615509,
+                  "name" : "testMessagesEntryUsesFirstLevelPlans()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "24秒",
+                  "durationInSeconds" : 24.92445993423462,
+                  "name" : "testPlansCreateCancelReturnsToPlansInOneStep()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanCreationPresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "PlanPresentationPhone117UITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "PlanPresentationPhone117",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

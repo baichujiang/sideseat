@@ -1,0 +1,57 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 2,
+      "passedTests" : 4,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanPresentationPhone117 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 2,
+  "finishTime" : 1792414122.729,
+  "passedTests" : 4,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792413993.004,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "PlanPresentationPhone117UITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable",
+      "testName" : "testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()"
+    },
+    {
+      "failureText" : "XCTAssertEqual failed: (\"生成邀请链接\") is not equal to (\"创建邀请链接\")",
+      "targetName" : "PlanPresentationPhone117UITests",
+      "testIdentifier" : 4,
+      "testIdentifierString" : "PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs",
+      "testName" : "testFixedTimeShortcutEditsInPlaceAndKeepsInputs()"
+    }
+  ],
+  "title" : "Test - PlanPresentationPhone117",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 6
+}

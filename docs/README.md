@@ -57,6 +57,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 132 / default flow](./releases/2026-10-19-preview132-default-plan-flow.md) | Single default creation form, contextual shortcuts, inline time inputs and physical end-to-end acceptance |
+| [Preview 132 acceptance](./qa/2026-10-19-plans132.md) | Six creation checks, default and activity App/Safari flows, cleanup and install evidence |
 | [Preview 131 / activity ideas](./releases/2026-10-19-preview131-activity-ideas.md) | Optional theme start, shared App/web suggestions, explicit organizer choice, retained timetable and installed phone delivery |
 | [Preview 131 acceptance](./qa/2026-10-19-plans131.md) | API/browser, native/web phone flow, original-flow regression and release evidence |
 | [Preview 114 / plan guidance](./releases/2026-10-18-preview114-plan-guidance.md) | Next actions by role, two-step creation, visible sharing/confirmation, deployed list fields and installed phone build |
