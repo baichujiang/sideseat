@@ -172,7 +172,6 @@ struct UnifiedPlanInviteView: View {
             }
             .navigationTitle(hasFriends ? "Confirm invitation list" : "Review invitation").navigationBarTitleDisplayMode(.inline)
             .onChange(of: selected) { _, _ in
-                if selectedFriends == 0 && linkParticipantCount == nil { linkParticipantCount = 2 }
                 if let count = linkParticipantCount { linkParticipantCount = max(count, minimumLinkCount) }
             }
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(sending || store.acting) } }

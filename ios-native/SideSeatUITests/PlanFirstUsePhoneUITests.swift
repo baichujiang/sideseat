@@ -630,7 +630,7 @@ import XCTest
         app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
         app.buttons["calendar-search"].tap()
-        let search = app.textFields["calendar-search-field"]
+        let search = app.searchFields.firstMatch
         XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.title)
         let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.title)).firstMatch
         XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()

@@ -154,6 +154,19 @@ try {
         assert.equal((await calendar(direct, owner)).length, 1);
         checks.push(`${engineName}: ${ownerResponded ? 'only organizer availability' : 'zero availability'} → same-link direct guest/account invitation → explicit confirmations → unique Calendar`);
       }
+      old = await call(route(old) + '/response', peer, 'PUT', { displayName: 'Peer Lin', slotIds: [0, 1, 2, 3] });
+      old = await call(route(old) + '/invitations', owner, 'POST', { start: old.slots[0].start, end: old.slots[3].end, version: 0, attendeeIds: old.participants.map(person => person.id), linkParticipantCount: 3 });
+      assert.equal(old.invitations.length, 2); assert.equal(old.invitations.find(person => person.displayName === 'Peer Lin').status, 'INVITED');
+      await page.goto(`${base}/time-polls/${old.token}`);
+      await page.getByLabel('你的名字', { exact: true }).fill('Guest Added');
+      await page.getByRole('button', { name: '继续查看邀请', exact: true }).click();
+      await page.getByRole('button', { name: '确认参加', exact: true }).click();
+      await expect.poll(async () => (await call(route(old), owner)).invitations.filter(person => person.status === 'ACCEPTED').length).toBe(2);
+      assert.equal((await calendar(old, owner)).length, 0);
+      old = await call(route(old) + '/invitation-response', peer, 'PUT', { status: 'ACCEPTED', version: old.invitationVersion });
+      assert.equal(old.phase, 'CONFIRMED'); assert.equal(old.participants.length, 1);
+      assert.equal((await calendar(old, owner)).length, 1); assert.equal((await calendar(old, peer)).length, 1);
+      checks.push(`${engineName}: selected respondent plus a new link guest both explicitly confirm before Calendar`);
       const fixed = await call('/api/v1/time-polls', owner, 'POST', { title: 'Coffee fixed invitation', timeZone: 'Europe/Berlin', dates: [date], startMinute: 540, endMinute: 660, planningMode: 'FIXED', fixedStart: p.slots[0].start, durationMinutes: 60, expectedCount: 2 }, 201);
       fixture.tokens.push(fixed.token); savePrivate();
       await call(route(fixed) + '/invitation-response', peer, 'PUT', { status: 'ACCEPTED', version: fixed.invitationVersion });
