@@ -387,6 +387,7 @@ struct TimePollDetailView: View {
                     }
                     timetableHeader(poll)
                     TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) { store.save(session: session) }
+                        .disabled(store.acting).allowsHitTesting(!store.acting)
                         .id("plan-timetable")
                 }
             }.scrollDismissesKeyboard(.interactively)
@@ -412,6 +413,7 @@ struct TimePollDetailView: View {
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     Text("Your name").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     TextField("Your name", text: $store.displayName)
+                        .disabled(store.acting)
                         .font(.subheadline.weight(.medium)).focused($nameFocused).submitLabel(.done)
                         .onSubmit { store.save(session: session); nameFocused = false }
                         .accessibilityLabel("Your name in this plan").accessibilityIdentifier("time-poll-name")
@@ -971,7 +973,7 @@ struct PlanActivityIdeasView: View {
                 }
             }.disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120 || draftLocation.count > 200)
             Button("Cancel") { showsSuggestion = false }.font(.caption).frame(minHeight: 44).disabled(store.acting)
-        }
+        }.disabled(store.acting)
     }
 
     private func ideaRow(_ idea: NativePlanActivity.Idea) -> some View {
