@@ -93,6 +93,7 @@ function migrateDeployWithRetries() {
 }
 
 assertNoConcurrentNextDev();
+if (buildEnv.SIDESEAT_ACTIVITY_RELEASE === "preview131") run("node", ["scripts/release-plan-activities131.mjs"]);
 const migrationPolicy = buildMigrationPolicy(buildEnv);
 
 if (migrationPolicy.run && process.env.VERCEL) {

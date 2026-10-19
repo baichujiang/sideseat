@@ -1,10 +1,11 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { v1Error } from "@/lib/api/v1/http";
-import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, type PollSlot } from "@/lib/time-polls/domain";
+import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
 import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
 
@@ -25,13 +26,20 @@ function isActor(person: { userId: string | null; guestId: string | null }, acto
 }
 function identity(person: { userId: string | null; guestId: string | null }) { return person.userId ? `user:${person.userId}` : `guest:${person.guestId}`; }
 
+function activitySummary(poll: { activityTopic: string | null; activityChosenAt: Date | null; activitySelectedId: string | null;
+  activityIdeas: { userId: string | null; guestId: string | null; interests: { userId: string | null; guestId: string | null }[] }[] }, actor: TimePollActor | null) {
+  return poll.activityTopic ? { topic: poll.activityTopic, isOpen: !poll.activityChosenAt, selectedIdeaId: poll.activitySelectedId,
+    ideaCount: poll.activityIdeas.length, hasParticipated: poll.activityIdeas.some(idea => isActor(idea, actor) || idea.interests.some(person => isActor(person, actor))) } : null;
+}
+
 async function accessiblePoll(token: string, actor: TimePollActor | null) {
   const userId = accountId(actor);
   const hidden = userId ? await blockedUserIds(userId) : [];
   const visible = { OR: [{ userId: null }, { userId: { notIn: hidden } }] };
   const poll = await prisma.timePoll.findFirst({
     where: { token, creatorId: { notIn: hidden } },
-    include: { responses: { where: visible, orderBy: { id: "asc" } }, invitations: { where: visible, orderBy: { id: "asc" } } },
+    include: { responses: { where: visible, orderBy: { id: "asc" } }, invitations: { where: visible, orderBy: { id: "asc" } },
+      activityIdeas: { where: visible, orderBy: [{ createdAt: "asc" }, { id: "asc" }], include: { interests: { where: visible, orderBy: { id: "asc" } } } } },
   });
   if (!poll) throw new TimePollError(404, "Plan unavailable.");
   if (actor && typeof actor !== "string" && !await prisma.timePollGuest.findFirst({ where: { id: actor.guestId, pollId: poll.id } })) {
@@ -60,19 +68,26 @@ export async function getTimePoll(token: string, actor: TimePollActor | null, ap
     planningMode: poll.planningMode, phase: timePollPhase(poll), expiresAt: timePollExpiresAt(poll)?.toISOString() ?? null, invitationVersion: poll.invitationVersion,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
     invitations: poll.invitations.map((i) => ({ id: i.id, displayName: i.displayName, status: i.status, selected: i.selected, isMe: isActor(i, actor), isGuest: i.guestId !== null })),
+    activitySelection: poll.activityTopic ? { ...activitySummary(poll, actor), ideas: poll.activityIdeas.map(idea => ({
+      id: idea.id, title: idea.title, location: idea.location, authorName: idea.displayName, isMine: isActor(idea, actor),
+      interestedBy: idea.interests.map(person => ({ displayName: person.displayName, isMe: isActor(person, actor) })),
+    })) } : null,
   };
 }
 
 export async function listTimePolls(userId: string, appOrigin: string) {
   const hidden = await blockedUserIds(userId);
   const polls = await prisma.timePoll.findMany({
-    where: { creatorId: { notIn: hidden }, OR: [{ creatorId: userId }, { responses: { some: { userId } } }, { invitations: { some: { userId } } }] },
+    where: { creatorId: { notIn: hidden }, OR: [{ creatorId: userId }, { responses: { some: { userId } } }, { invitations: { some: { userId } } },
+      { activityIdeas: { some: { OR: [{ userId }, { interests: { some: { userId } } }] } } }] },
     orderBy: { updatedAt: "desc" }, take: 50,
     select: { creatorId: true, token: true, title: true, timeZone: true, dates: true, endMinute: true, updatedAt: true, phase: true, planningMode: true, chosenStart: true, chosenEnd: true, expectedCount: true,
-      responses: { where: { userId }, select: { id: true } },
+      responses: { where: { userId }, select: { id: true } }, activityTopic: true, activityChosenAt: true, activitySelectedId: true,
+      activityIdeas: { where: { OR: [{ userId: null }, { userId: { notIn: hidden } }] }, select: { userId: true, guestId: true, interests: { where: { OR: [{ userId: null }, { userId: { notIn: hidden } }] }, select: { userId: true, guestId: true } } } },
       _count: { select: { responses: true } }, invitations: { select: { userId: true, selected: true, status: true } } },
   });
-  return { polls: polls.map(({ _count, invitations, responses, creatorId, endMinute, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+  return { polls: polls.map(({ _count, invitations, responses, creatorId, endMinute, activityIdeas, activityTopic, activityChosenAt, activitySelectedId, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
+    activitySelection: activitySummary({ activityIdeas, activityTopic, activityChosenAt, activitySelectedId }, userId),
     isOwner: creatorId === userId, didRespond: responses.length > 0,
     phase: timePollPhase({ ...poll, endMinute }), expiresAt: timePollExpiresAt({ ...poll, endMinute })?.toISOString() ?? null,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
@@ -84,16 +99,18 @@ export async function listTimePolls(userId: string, appOrigin: string) {
 }
 
 export async function createTimePoll(userId: string, input: z.infer<typeof createTimePollSchema>, appOrigin: string) {
-  const { fixedStart, ...values } = input;
+  const { fixedStart, chooseActivityTogether, ...values } = input;
   const slots = buildPollSlots(input);
   if (!slots.length) throw new TimePollError(422, "Choose a time range with available time slots.");
   const fixed = input.planningMode === "FIXED";
+  if (fixed && chooseActivityTogether) throw new TimePollError(422, "Choose an activity before creating a fixed invitation.");
   const start = fixedStart ? new Date(fixedStart) : null;
   if (fixed && (!start || start <= new Date() || !input.durationMinutes || !input.expectedCount)) throw new TimePollError(422, "Choose a future time, duration and participant count.");
   const viewer = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { username: true, nickname: true } });
   const poll = await prisma.timePoll.create({ data: {
     ...values, dates: [...new Set(input.dates)].sort(), slots, token: randomBytes(24).toString("base64url"), creatorId: userId,
     phase: fixed ? "INVITING" : "COLLECTING", invitationVersion: fixed ? 1 : 0,
+    activityTopic: chooseActivityTogether ? input.title : null,
     chosenStart: fixed ? start : null, chosenEnd: fixed ? new Date(start!.getTime() + input.durationMinutes! * 60_000) : null,
     ...(fixed ? { invitations: { create: { userId, displayName: viewer.nickname?.trim() || viewer.username, status: "ACCEPTED", version: 1 } } } : {}),
   } });
@@ -126,6 +143,7 @@ export async function sendPollInvitations(token: string, userId: string, input: 
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
+    if (poll.activityTopic && !poll.activityChosenAt) throw new TimePollError(409, "Choose the activity before sending invitations.");
     if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) || poll.invitationVersion !== input.version || poll.planningMode === "FIXED") throw new TimePollError(409, "This plan changed or expired. Reopen it before sending an invitation.");
     const start = new Date(input.start), end = input.end ? new Date(input.end) : new Date(start.getTime() + (poll.durationMinutes ?? 60) * 60_000);
     if (start <= new Date()) throw new TimePollError(422, "Choose a future start time.");
@@ -200,6 +218,8 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
     const own = typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId };
     await tx.timePollResponse.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
     await tx.timePollInvitation.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
+    await tx.timePollActivityIdea.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
+    await tx.timePollActivityInterest.updateMany({ where: { idea: { pollId: poll.id }, ...own }, data: { displayName } });
     if (typeof actor !== "string") await tx.timePollGuest.update({ where: { id: actor.guestId }, data: { displayName } });
     await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } });
   });
@@ -227,6 +247,65 @@ export async function deleteTimePoll(token: string, userId: string) {
     await tx.timePoll.delete({ where: { id: poll.id } });
   });
   return { deleted: true };
+}
+
+async function activityActorName(tx: Prisma.TransactionClient, pollId: string, actor: TimePollActor) {
+  const response = await tx.timePollResponse.findFirst({ where: { pollId, ...(typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId }) } });
+  if (response) return response.displayName;
+  if (typeof actor !== "string") return (await tx.timePollGuest.findFirstOrThrow({ where: { id: actor.guestId, pollId } })).displayName;
+  const user = await tx.user.findUniqueOrThrow({ where: { id: actor }, select: { nickname: true, username: true } });
+  return (user.nickname?.trim() || user.username).slice(0, 60);
+}
+
+export async function suggestPollActivity(token: string, actor: TimePollActor, input: z.infer<typeof suggestPollActivitySchema>, appOrigin: string) {
+  await accessiblePoll(token, actor);
+  await prisma.$transaction(async tx => {
+    const poll = await lockPollPlan(tx, token, accountId(actor));
+    if (!poll?.activityTopic || timePollPhase(poll) !== "COLLECTING" || poll.activityChosenAt) throw new TimePollError(409, "Activity suggestions are closed. Reopen the plan to see the chosen activity.");
+    if (await hasPlanningBlock(tx, [poll.creatorId, accountId(actor)].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
+    const count = await tx.timePollActivityIdea.count({ where: { pollId: poll.id } });
+    if (count >= 20) throw new TimePollError(422, "Choose from the existing twenty suggestions.");
+    if (await tx.timePollActivityIdea.findFirst({ where: { pollId: poll.id, title: { equals: input.title, mode: "insensitive" } } })) throw new TimePollError(409, "This activity is already suggested. Mark your interest on that option.");
+    await tx.timePollActivityIdea.create({ data: { pollId: poll.id, ...(typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId }),
+      displayName: await activityActorName(tx, poll.id, actor), title: input.title, location: input.location || null } });
+    await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } });
+  });
+  return getTimePoll(token, actor, appOrigin);
+}
+
+export async function setPollActivityInterest(token: string, actor: TimePollActor, input: z.infer<typeof pollActivityInterestSchema>, appOrigin: string) {
+  await accessiblePoll(token, actor);
+  await prisma.$transaction(async tx => {
+    const poll = await lockPollPlan(tx, token, accountId(actor));
+    if (!poll?.activityTopic || timePollPhase(poll) !== "COLLECTING" || poll.activityChosenAt) throw new TimePollError(409, "Activity suggestions are closed. Reopen the plan to see the chosen activity.");
+    const idea = await tx.timePollActivityIdea.findFirst({ where: { id: input.ideaId, pollId: poll.id } });
+    if (!idea) throw new TimePollError(404, "Activity suggestion unavailable.");
+    if (await hasPlanningBlock(tx, [poll.creatorId, idea.userId, accountId(actor)].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
+    const own = typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId };
+    if (input.interested) {
+      await tx.timePollActivityInterest.upsert({
+        where: typeof actor === "string" ? { ideaId_userId: { ideaId: idea.id, userId: actor } } : { ideaId_guestId: { ideaId: idea.id, guestId: actor.guestId } },
+        create: { ideaId: idea.id, ...own, displayName: await activityActorName(tx, poll.id, actor) }, update: {},
+      });
+    } else await tx.timePollActivityInterest.deleteMany({ where: { ideaId: idea.id, ...own } });
+    await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } });
+  });
+  return getTimePoll(token, actor, appOrigin);
+}
+
+export async function choosePollActivity(token: string, userId: string, ideaId: string, appOrigin: string) {
+  await accessiblePoll(token, userId);
+  await prisma.$transaction(async tx => {
+    const poll = await lockPollPlan(tx, token, userId);
+    if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
+    if (!poll.activityTopic || timePollPhase(poll) !== "COLLECTING") throw new TimePollError(409, "The activity cannot be changed after invitations are sent.");
+    const idea = await tx.timePollActivityIdea.findFirst({ where: { id: ideaId, pollId: poll.id } });
+    if (!idea) throw new TimePollError(404, "Activity suggestion unavailable.");
+    if (await hasPlanningBlock(tx, [userId, idea.userId].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
+    await tx.timePoll.update({ where: { id: poll.id }, data: { title: idea.title, location: idea.location, activitySelectedId: idea.id, activityChosenAt: new Date() } });
+    // Availability, participant identities and invitation version are deliberately retained.
+  });
+  return getTimePoll(token, userId, appOrigin);
 }
 
 export function timePollFailure(request: Request, cause: unknown) {

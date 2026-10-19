@@ -1,5 +1,10 @@
 import type { PollSlot, PollWindow } from "@/lib/time-polls/domain";
 export const POLL_LOCALE_COOKIE = "SIDESEAT_POLL_LOCALE";
+export type PollActivitySelection = {
+  topic: string; isOpen: boolean; selectedIdeaId: string | null; ideaCount: number; hasParticipated: boolean;
+  ideas: { id: string; title: string; location: string | null; authorName: string; isMine: boolean;
+    interestedBy: { displayName: string; isMe: boolean }[] }[];
+};
 export type SharedTimePoll = {
   token: string; title: string; timeZone: string; dates: string[]; slots: PollSlot[];
   participants: { id: string; displayName: string; slotIds: number[]; isMe: boolean; isGuest: boolean }[];
@@ -8,6 +13,7 @@ export type SharedTimePoll = {
   location: string | null; durationMinutes: number | null; expectedCount: number | null;
   expiresAt?: string | null; planningMode: string; phase: string; invitationVersion: number; chosenStart: string | null; chosenEnd: string | null;
   summary: { counts: number[]; participantCount: number; maximum: number; common: boolean; windows: PollWindow[] };
+  activitySelection?: PollActivitySelection | null;
 };
 export type AvailabilityCell = PollSlot & { slotIds: number[] };
 // Keep persisted 15-minute IDs intact, including a legacy trailing quarter-hour.

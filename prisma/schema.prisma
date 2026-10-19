@@ -668,6 +668,8 @@ model User {
   timePollsCreated                    TimePoll[]                          @relation("TimePollCreator")
   timePollResponses                  TimePollResponse[]
   timePollInvitations                TimePollInvitation[]
+  timePollActivityIdeas              TimePollActivityIdea[]
+  timePollActivityInterests          TimePollActivityInterest[]
   planRequestsProposed               PlanRequest[]                       @relation("PlanRequestProposer")
   planRequestsReceived               PlanRequest[]                       @relation("PlanRequestReceiver")
   planRequestsResolved               PlanRequest[]                       @relation("PlanRequestResolvedBy")
@@ -2783,6 +2785,10 @@ model TimePoll {
   invitations TimePollInvitation[]
   calendarEntries CalendarEntry[]
   guests TimePollGuest[]
+  activityTopic String?
+  activitySelectedId String?
+  activityChosenAt DateTime?
+  activityIdeas TimePollActivityIdea[]
 
   @@index([creatorId, updatedAt])
 }
@@ -2835,5 +2841,43 @@ model TimePollGuest {
   responses TimePollResponse[]
   invitations TimePollInvitation[]
 
+  activityIdeas TimePollActivityIdea[]
+  activityInterests TimePollActivityInterest[]
+
   @@unique([pollId, credentialHash])
+}
+
+model TimePollActivityIdea {
+  id String @id @default(cuid())
+  pollId String
+  userId String?
+  guestId String?
+  displayName String @db.VarChar(60)
+  title String @db.VarChar(120)
+  location String? @db.VarChar(200)
+  createdAt DateTime @default(now())
+  poll TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guest TimePollGuest? @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  interests TimePollActivityInterest[]
+
+  @@index([pollId, createdAt])
+  @@index([userId])
+  @@index([guestId])
+}
+
+model TimePollActivityInterest {
+  id String @id @default(cuid())
+  ideaId String
+  userId String?
+  guestId String?
+  displayName String @db.VarChar(60)
+  idea TimePollActivityIdea @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guest TimePollGuest? @relation(fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@unique([ideaId, userId])
+  @@unique([ideaId, guestId])
+  @@index([userId])
+  @@index([guestId])
 }

@@ -77,19 +77,22 @@ export function useSharedTimePoll(token: string) {
     void flush();
   };
   const act = async (suffix: string, method: string, body: unknown) => {
-    if (running.current || pending.current) return;
+    if (running.current || pending.current) return false;
     revision.current += 1; setBusy(true); setError("");
     try {
       const data = await call(suffix, method, body);
       setPoll(data); setSelected(data.mySlotIds); setEditingName(false); setSwitchingParticipant(false);
       if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);
+      return true;
     }
-    catch (cause) { setError((cause as Error).message); }
+    catch (cause) { setError((cause as Error).message); return false; }
     finally { setBusy(false); }
   };
   return { poll, selected, error, busy, saving, saved, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, retry: flush,
     cancelNameEditing: () => { setEditingName(false); setSwitchingParticipant(false); setError(""); },
     join: (displayName: string) => act("/participant", "POST", { displayName }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),
+    suggestActivity: (title: string, location: string) => act("/activities", "POST", { participantId: poll?.viewerId, title, location }),
+    setActivityInterest: (ideaId: string, interested: boolean) => act("/activities/interest", "PUT", { participantId: poll?.viewerId, ideaId, interested }),
     reply: (status: string) => act("/invitation-response", "PUT", { participantId: poll?.viewerId, status, version: poll?.invitationVersion }) };
 }

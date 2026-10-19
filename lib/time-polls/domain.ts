@@ -18,7 +18,17 @@ export const createTimePollSchema = z.object({
   expectedCount: z.number().int().min(2).max(20).optional(),
   planningMode: z.enum(["COLLECT", "FIXED"]).optional(),
   fixedStart: z.string().datetime().optional(),
+  chooseActivityTogether: z.boolean().optional(),
 }).strict().refine((value) => value.endMinute > value.startMinute, { path: ["endMinute"], message: "End time must follow start time." });
+
+export const suggestPollActivitySchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  location: z.string().trim().max(200).optional(),
+}).strict();
+export const pollActivityInterestSchema = z.object({
+  ideaId: z.string().cuid(), interested: z.boolean(),
+}).strict();
+export const choosePollActivitySchema = z.object({ ideaId: z.string().cuid() }).strict();
 export const saveTimePollResponseSchema = z.object({
   displayName: z.string().trim().min(1).max(60),
   slotIds: z.array(z.number().int().min(0)).max(3100),
