@@ -67,8 +67,22 @@ full names behind the response-count control. Invitation/confirmed detail shows
 the activity once, then the read-only highlighted timetable, confirmation count
 and Calendar explanation. Selected attendees and their individual replies open
 from Who's joining. Neither participant sheet changes selections or attendance.
-The bottom action area emphasizes the current share, choose-time, explicit
-confirmation or Calendar action; copying is a secondary labeled icon control.
+The bottom action area distinguishes a local choice from a committed response or navigation.
+`PlanActionButton` / `PlanActionLabel` share these roles in manual and chat plan controls:
+
+| Purpose | Appearance and label |
+| --- | --- |
+| Create, send invitations, confirm participation | Filled ink/chalk button with plus, paper plane or checkmark; only the existing explicit handler commits the action |
+| Choose/adjust time, review invitation list | Outline with timetable/pencil/people icon; choosing and reviewing remain local drafts |
+| Share and copy | Outlined share-sheet action, separate plain Copy link with visible text and copied feedback; both wrap vertically at accessibility sizes |
+| Open a link, view Calendar, return | Light navigation row with destination icon and trailing arrow |
+| Decline | Red text with an x-circle and explicit I can't attend wording; destructive management remains in its menu |
+
+Compact overview task actions use a small outline, action-specific symbol and chevron;
+waiting cards use a lighter text link. The entire card still opens the original detail,
+without nested buttons or implicit confirmation. Icon, wording and structure communicate
+the role together; purpose is not encoded solely by color. Existing accessibility IDs,
+loading/disabled state, 44pt-or-larger actual button targets and dynamic wrapping remain.
 Rescheduling and nickname editing stay secondary, with destructive management
 in the existing menu. No duplicate summary/attendee cards precede the timetable.
 

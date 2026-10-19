@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -44,8 +44,14 @@ and prioritize what needs the viewer's input. “Waiting for others” must dist
 saved availability from confirmed participation. Status colors support explicit
 labels and the next action; they do not replace those explanations.
 
-Each detail has one contextual primary action: save availability, share with
-friends, choose and invite, confirm participation, or open Calendar. Link sharing
+Each detail has a contextual action area. Plans reserve the solid ProductAction
+control for creating, sending invitations or explicitly confirming participation.
+Choosing time and reviewing a roster use outlined controls; sharing uses an outlined
+share icon and text, with a separately labelled Copy link utility. Viewing Calendar
+or opening another destination uses a light row with a destination icon and arrow.
+Declining uses red text and an x-circle. Icons, explicit labels and fill/border/arrow
+structure distinguish effects without relying on color alone. Inline availability
+edits retain their automatic-save feedback. Link sharing
 cannot depend on finding an overflow menu. Destructive cancellation stays in that
 menu. Keep the current paired ProductAction colors, availability colors and design
 tokens. Pass Dynamic Type into presented sheets; let the availability page scroll

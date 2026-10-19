@@ -88,6 +88,13 @@ import XCTest
         XCTAssertTrue(app.buttons["time-poll-cell-2"].isSelected)
         let share = app.buttons["plan-share-primary"]
         XCTAssertTrue(share.isHittable)
+        XCTAssertEqual(share.label, "发给朋友填写")
+        let copyLink = app.buttons["plan-copy-link"]
+        XCTAssertEqual(copyLink.label, "复制链接")
+        XCTAssertTrue(copyLink.isHittable)
+        XCTAssertGreaterThanOrEqual(copyLink.frame.height, 44)
+        copyLink.tap()
+        XCTAssertEqual(copyLink.label, "链接已复制")
         XCTAssertFalse(app.buttons["plan-edit-availability"].exists)
         let ownCell = app.descendants(matching: .any)["time-poll-cell-0"].firstMatch
         XCTAssertTrue(ownCell.exists, "Saving must keep the timetable visible even with no friend responses")
@@ -410,7 +417,12 @@ import XCTest
 
     private func reviewFinalHour(mark: (String) -> Void = { _ in }) {
         let choose = app.buttons["unified-plan-invite-window"]
-        XCTAssertTrue(choose.waitForExistence(timeout: 15)); choose.tap()
+        XCTAssertTrue(choose.waitForExistence(timeout: 15))
+        XCTAssertEqual(choose.label, "选择最终时间")
+        XCTAssertTrue(app.buttons["plan-share-primary"].isHittable)
+        XCTAssertTrue(app.buttons["plan-copy-link"].isHittable)
+        capture(app, "action-choose-share-copy")
+        choose.tap()
         let review = app.buttons["unified-plan-review-roster"]
         XCTAssertTrue(review.waitForExistence(timeout: 10)); XCTAssertFalse(review.isEnabled)
         let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]

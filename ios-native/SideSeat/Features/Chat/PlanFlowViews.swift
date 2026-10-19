@@ -147,6 +147,19 @@ enum PlanNextStep: String, Sendable {
         case .recordOutcome: "checkmark.bubble"
         }
     }
+    /// Overview controls open a review surface; they do not execute the next step.
+    var cardActionSymbol: String {
+        switch self {
+        case .fillAvailability, .waitForOrganizer: "calendar"
+        case .shareAvailability, .shareInvitation: "square.and.arrow.up"
+        case .chooseTime: "calendar.badge.clock"
+        case .confirm: "envelope.open"
+        case .waitForReplies, .reviewReplies: "person.2"
+        case .viewPlan, .viewCalendar, .notIncluded: "calendar"
+        case .declined: "text.bubble"
+        case .recordOutcome: "checkmark.bubble"
+        }
+    }
 }
 
 /// The same short lifecycle appears in creation, availability and confirmation.
@@ -177,44 +190,88 @@ struct PlanJourneyProgress: View {
     }
 }
 
+/// Filled controls commit a choice; outlined controls edit or share; arrows only open a destination.
+enum PlanActionKind: Equatable { case commit, edit, utility, navigate, decline }
+
+struct PlanActionLabel: View {
+    @Environment(\.isEnabled) private var isEnabled
+    let title: String
+    let symbol: String
+    var kind: PlanActionKind = .edit
+    var isLoading = false
+
+    private var foreground: Color {
+        if !isEnabled { return SideSeatTheme.textSecondaryStrong }
+        return kind == .commit ? SideSeatTheme.ProductAction.foreground
+            : kind == .decline ? SideSeatTheme.danger : SideSeatTheme.textPrimary
+    }
+
+    var body: some View {
+        HStack(spacing: SideSeatTheme.spaceSM) {
+            if isLoading {
+                ProgressView().tint(foreground)
+            } else {
+                Image(systemName: symbol).accessibilityHidden(true)
+                Text(title).fixedSize(horizontal: false, vertical: true)
+                if kind == .navigate {
+                    Spacer(minLength: 0)
+                    Image(systemName: "arrow.right").accessibilityHidden(true)
+                }
+            }
+        }
+        .font(.subheadline.weight(kind == .commit ? .semibold : .medium))
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceSM)
+        .frame(maxWidth: .infinity, minHeight: 48)
+        .foregroundStyle(foreground)
+        .background(kind == .commit ? (isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.Interaction.disabledFill) : Color.clear,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+        .overlay {
+            if kind == .edit {
+                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                    .strokeBorder(SideSeatTheme.separator, lineWidth: 1)
+            }
+        }
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore).accessibilityLabel(title)
+    }
+}
+
+struct PlanActionButton: View {
+    let title: String
+    let symbol: String
+    var kind: PlanActionKind = .edit
+    var isLoading = false
+    var accessibilityID: String? = nil
+    let action: () -> Void
+
+    var body: some View {
+        Button(role: kind == .decline ? .destructive : nil, action: action) {
+            PlanActionLabel(title: title, symbol: symbol, kind: kind, isLoading: isLoading)
+        }
+        .buttonStyle(SSPressButtonStyle()).disabled(isLoading)
+        .ssAccessibilityIdentifier(accessibilityID)
+    }
+}
+
 struct PlanShareActions: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
-    var prominent = false
-    var compact = false
     @State private var copied = false
 
     var body: some View {
-        let layout = prominent && !compact ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
         layout {
             ShareLink(item: poll.shareUrl) {
-                Label(poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation", systemImage: "square.and.arrow.up")
-                    .font(.subheadline.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, minHeight: 48)
-                    .padding(.horizontal, SideSeatTheme.spaceSM)
-                    .foregroundStyle(prominent ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
-                    .background(prominent ? SideSeatTheme.ProductAction.fill : SideSeatTheme.bgGrouped,
-                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                PlanActionLabel(title: AppLocalization.string(poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation"),
+                                symbol: "square.and.arrow.up")
             }.buttonStyle(.plain).accessibilityIdentifier("plan-share-primary")
-            Button {
+            PlanActionButton(title: AppLocalization.string(copied ? "Link copied" : "Copy link"),
+                             symbol: copied ? "checkmark" : "doc.on.doc", kind: .utility,
+                             accessibilityID: "plan-copy-link") {
                 UIPasteboard.general.url = poll.shareUrl
                 copied = true
-            } label: {
-                Group {
-                    if compact {
-                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                    } else {
-                        Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
-                    }
-                }
-                    .font(.subheadline.weight(.medium))
-                    .frame(maxWidth: prominent && !compact ? .infinity : nil, minHeight: 48)
-                    .padding(.horizontal, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.bgGrouped, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             }
-            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-            .accessibilityLabel(copied ? "Link copied" : "Copy link")
-            .accessibilityIdentifier("plan-copy-link")
         }
     }
 }

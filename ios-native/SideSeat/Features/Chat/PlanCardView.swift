@@ -161,11 +161,11 @@ struct PlanCardView: View {
 
     private var planResponseActions: some View {
         VStack(spacing: SideSeatTheme.spaceSM) {
-            SSPrimaryButton(
+            PlanActionButton(
                 title: AppLocalization.string("Confirm participation"),
+                symbol: "checkmark.circle",
+                kind: .commit,
                 isLoading: isActing,
-                fill: .product,
-                height: 46,
                 accessibilityID: "plan-card-accept-\(plan.id)",
                 action: onAccept
             )
@@ -174,21 +174,10 @@ struct PlanCardView: View {
                 ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS))
                 : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
             layout {
-                Button(action: onCounter) {
-                    Text("Propose new time")
-                        .font(.subheadline.weight(.medium))
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityIdentifier("plan-card-counter-\(plan.id)")
-                Button(role: .destructive, action: onDecline) {
-                    Text("I can't attend")
-                        .font(.subheadline.weight(.medium))
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .contentShape(Rectangle())
-                }
-                .accessibilityIdentifier("plan-card-decline-\(plan.id)")
+                PlanActionButton(title: AppLocalization.string("Propose new time"), symbol: "calendar.badge.clock",
+                                 accessibilityID: "plan-card-counter-\(plan.id)", action: onCounter)
+                PlanActionButton(title: AppLocalization.string("I can't attend"), symbol: "xmark.circle", kind: .decline,
+                                 accessibilityID: "plan-card-decline-\(plan.id)", action: onDecline)
             }
             .buttonStyle(SSPressButtonStyle())
         }

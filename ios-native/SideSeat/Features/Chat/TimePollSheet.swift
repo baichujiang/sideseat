@@ -162,8 +162,8 @@ struct TimePollCreateView: View {
                         Text(planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: view and share the timetable. You can add your own free time anytime.")
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
-                    SSPrimaryButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
-                                    isLoading: creating, fill: .product, accessibilityID: "time-poll-create-confirm") {
+                    PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
+                                     symbol: "plus", kind: .commit, isLoading: creating, accessibilityID: "time-poll-create-confirm") {
                         titleFocused = false; Task { await create() }
                     }.disabled(!canCreate)
                 } else {
@@ -171,7 +171,7 @@ struct TimePollCreateView: View {
                         Text("Type an activity name or choose an example above.")
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
-                    SSPrimaryButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Choose dates" : "Next: choose dates"), fill: .product,
+                    PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Choose dates" : "Next: choose dates"), symbol: "calendar",
                                     accessibilityID: "plan-create-next") { titleFocused = false; hasChosenTiming = true }
                         .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 120 || location.count > 200)
                 }
@@ -465,23 +465,23 @@ struct TimePollDetailView: View {
                     Text("Tap the first and last time cells, or hold and drag.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
-                SSPrimaryButton(title: AppLocalization.string("Next: review invitation list"), fill: .product,
+                PlanActionButton(title: AppLocalization.string("Next: review invitation list"), symbol: "person.2",
                                 accessibilityID: "unified-plan-review-roster") { showsInvite = true }
                     .disabled(finalRange == nil || !store.canMutate)
-                Button("Cancel time selection") {
+                PlanActionButton(title: AppLocalization.string("Cancel time selection"), symbol: "xmark", kind: .utility,
+                                 accessibilityID: "time-poll-cancel-final") {
                     pickingFinalTime = false; finalRange = nil
                     if choosingAgain { choosingAgain = false }
-                }.font(.caption).frame(maxWidth: .infinity, minHeight: 44)
-                    .accessibilityIdentifier("time-poll-cancel-final")
+                }
             } else {
                 if editsTimetable(poll) { saveStatus(poll) }
                 if poll.isOwner {
                     if poll.participants.contains(where: { !$0.isMe }) {
-                        SSPrimaryButton(title: AppLocalization.string("Choose final time"), fill: .product,
+                        PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
                                         accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
                             .disabled(!store.canMutate || poll.slots.isEmpty)
                     }
-                    PlanShareActions(poll: poll, prominent: !poll.participants.contains(where: { !$0.isMe }), compact: true)
+                    PlanShareActions(poll: poll)
                 } else {
                     Text("Wait for the organizer's invitation")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)

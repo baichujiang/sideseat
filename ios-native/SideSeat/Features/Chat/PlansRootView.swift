@@ -314,24 +314,12 @@ struct PlansRootView: View {
                 ? AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
             layout {
-                SSPrimaryButton(title: AppLocalization.string("Find a time with friends"), fill: .product,
+                PlanActionButton(title: AppLocalization.string("Find a time with friends"), symbol: "plus", kind: .commit,
                                 accessibilityID: "plans-create-primary") { showsPlanCreation = true }
-                Button { planLink = ""; showsOpenPlanLink = true } label: {
-                    HStack(spacing: SideSeatTheme.spaceSM) {
-                        Image(systemName: "link")
-                        Text(LocalizedStringKey(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here"))
-                            .fixedSize(horizontal: false, vertical: true)
-                        if !hasPlans {
-                            Spacer(minLength: 4)
-                            Image(systemName: "chevron.right").font(.caption.weight(.semibold))
-                        }
-                    }.font(.subheadline.weight(.medium))
-                        .frame(maxWidth: .infinity, minHeight: 48, alignment: hasPlans ? .center : .leading)
-                        .padding(.horizontal, hasPlans ? SideSeatTheme.spaceSM : 0)
-                        .background(hasPlans ? SideSeatTheme.bgGrouped : Color.clear,
-                                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                    .accessibilityIdentifier("plans-open-link")
+                PlanActionButton(title: AppLocalization.string(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here"),
+                                 symbol: "link", kind: .navigate, accessibilityID: "plans-open-link") {
+                    planLink = ""; showsOpenPlanLink = true
+                }
             }
             if !hasPlans { Divider() }
             DisclosureGroup(isExpanded: $showsPurposeExample) {
@@ -785,7 +773,12 @@ private struct PlanOverviewLabel: View {
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 action.font(.footnote.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.utilityAction)
-                    .frame(minHeight: 24, alignment: .leading)
+                    .padding(.horizontal, SideSeatTheme.spaceSM)
+                    .frame(minHeight: 28, alignment: .leading)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                            .strokeBorder(SideSeatTheme.separator, lineWidth: 1)
+                    }
             }
         }
     }
@@ -899,8 +892,9 @@ private struct PlanOverviewLabel: View {
     }
     private var action: some View {
         HStack(spacing: SideSeatTheme.spaceXS) {
+            Image(systemName: presentation.nextStep.cardActionSymbol).accessibilityHidden(true)
             Text(presentation.cardActionTitle).fixedSize(horizontal: false, vertical: true)
-            Image(systemName: "arrow.right").accessibilityHidden(true)
+            Image(systemName: "chevron.right").font(.caption2).accessibilityHidden(true)
         }
     }
 }

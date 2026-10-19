@@ -63,7 +63,7 @@ struct UnifiedPlanInviteView: View {
                 }
                 Section("Final time") {
                     LabeledContent("Time zone", value: poll.timeZone)
-                    Button("Adjust time") { dismiss() }
+                    Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil") }
                         .accessibilityIdentifier("unified-plan-adjust-time")
                 }
                 Section("Choose who to invite") {
@@ -96,7 +96,7 @@ struct UnifiedPlanInviteView: View {
                         .font(.subheadline.weight(.semibold))
                     Text("Sending confirms your participation. Everyone else confirms from the link.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    SSPrimaryButton(title: AppLocalization.string("Send invitations"), isLoading: store.acting, fill: .product,
+                    PlanActionButton(title: AppLocalization.string("Send invitations"), symbol: "paperplane.fill", kind: .commit, isLoading: store.acting,
                                     accessibilityID: "unified-plan-send-invitations") {
                         Task {
                             await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
@@ -178,7 +178,7 @@ struct UnifiedPlanConfirmationView: View {
                             .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                             .accessibilityIdentifier("plan-declined-guidance")
                     }
-                    Button("Choose another time", action: chooseAnotherTime).frame(minHeight: 44)
+                    Button(action: chooseAnotherTime) { Label("Choose another time", systemImage: "calendar.badge.clock") }.frame(minHeight: 44)
                         .accessibilityIdentifier("unified-plan-choose-again")
                     Text("Choosing another time asks everyone to confirm again.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -196,20 +196,20 @@ struct UnifiedPlanConfirmationView: View {
                 if canReply && mine?.status != "ACCEPTED" {
                     Text(presentation.nextStep.title).font(.caption)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("plan-next-step")
-                    SSPrimaryButton(title: AppLocalization.string("Confirm participation"), isLoading: store.acting, fill: .product,
+                    PlanActionButton(title: AppLocalization.string("Confirm participation"), symbol: "checkmark.circle", kind: .commit, isLoading: store.acting,
                                     accessibilityID: "unified-plan-accept") { reply("ACCEPTED") }
-                    Button("I can't attend") { reply("DECLINED") }
-                        .font(.subheadline).frame(maxWidth: .infinity, minHeight: 44)
-                        .disabled(mine?.status == "DECLINED").accessibilityIdentifier("unified-plan-decline")
+                    PlanActionButton(title: AppLocalization.string("I can't attend"), symbol: "xmark.circle", kind: .decline,
+                                     accessibilityID: "unified-plan-decline") { reply("DECLINED") }
+                        .disabled(mine?.status == "DECLINED")
                 } else if poll.planningPhase == "INVITING" && poll.isOwner {
                     Text("Send the link to friends so they can confirm this time.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    PlanShareActions(poll: poll, prominent: true, compact: true)
+                    PlanShareActions(poll: poll)
                 } else if poll.planningPhase == "CONFIRMED" && included {
-                    SSPrimaryButton(title: AppLocalization.string("View in Calendar"), fill: .product,
+                    PlanActionButton(title: AppLocalization.string("View in Calendar"), symbol: "calendar", kind: .navigate,
                                     accessibilityID: "plan-view-calendar") { deepLinkRouter.handleAppPath("/home") }
                 } else {
-                    SSPrimaryButton(title: AppLocalization.string("Back to plans"), fill: .product,
+                    PlanActionButton(title: AppLocalization.string("Back to plans"), symbol: "list.bullet", kind: .navigate,
                                     accessibilityID: "plan-done-back") { dismiss() }
                 }
             }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)

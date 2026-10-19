@@ -32,6 +32,8 @@ import XCTest
         let accept = app.buttons["plan-card-accept-ui-plan-1"]
         XCTAssertTrue(accept.waitForExistence(timeout: 10))
         XCTAssertEqual(accept.label, "确认参加")
+        XCTAssertEqual(app.buttons["plan-card-counter-ui-plan-1"].label, "提议新时间")
+        XCTAssertEqual(app.buttons["plan-card-decline-ui-plan-1"].label, "我无法参加")
         capture("chat-explicit-confirmation")
         accept.tap()
         let calendar = app.buttons["plan-card-calendar-ui-plan-1"]
