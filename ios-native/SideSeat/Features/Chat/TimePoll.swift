@@ -1,5 +1,27 @@
 import Foundation
 
+struct NativePlanActivity: Decodable, Sendable {
+    let topic: String
+    let isOpen: Bool
+    let selectedIdeaId: String?
+    let ideaCount: Int
+    let hasParticipated: Bool
+    var ideas: [Idea]? = nil
+    struct Idea: Decodable, Sendable, Identifiable {
+        let id: String
+        let title: String
+        let location: String?
+        let authorName: String
+        let isMine: Bool
+        let interestedBy: [Interest]
+        var isInterested: Bool { interestedBy.contains(where: \.isMe) }
+    }
+    struct Interest: Decodable, Sendable {
+        let displayName: String
+        let isMe: Bool
+    }
+}
+
 struct NativeTimePoll: Decodable, Sendable {
     let token: String
     let title: String
@@ -27,6 +49,7 @@ struct NativeTimePoll: Decodable, Sendable {
     let chosenStart: Date?
     let chosenEnd: Date?
     let invitations: [Invitation]?
+    var activitySelection: NativePlanActivity? = nil
     var expirationDate: Date? {
         expiresAt ?? (phase == "INVITING" ? chosenStart : (phase == nil || phase == "COLLECTING") ? slots.last?.end : nil)
     }
@@ -124,6 +147,7 @@ struct NativeTimePollList: Decodable, Sendable {
         let isOwner: Bool?
         let didRespond: Bool?
         let planningMode: String?
+        var activitySelection: NativePlanActivity? = nil
         var confirmationTarget: Int { planningMode == "FIXED" ? expectedCount ?? 2 : invitedCount ?? 0 }
 
         func nextStep(at now: Date) -> PlanNextStep {
@@ -152,7 +176,12 @@ struct CreateTimePollRequest: Encodable, Sendable {
     var expectedCount: Int? = nil
     var planningMode: String? = nil
     var fixedStart: String? = nil
+    var chooseActivityTogether: Bool? = nil
 }
+
+struct SuggestPlanActivityRequest: Encodable, Sendable { let title: String; let location: String }
+struct PlanActivityInterestRequest: Encodable, Sendable { let ideaId: String; let interested: Bool }
+struct ChoosePlanActivityRequest: Encodable, Sendable { let ideaId: String }
 
 struct SendPollInvitationsRequest: Encodable, Sendable {
     let start: String

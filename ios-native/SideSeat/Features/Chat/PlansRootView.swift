@@ -304,8 +304,8 @@ struct PlansRootView: View {
         return VStack(alignment: .leading, spacing: hasPlans ? SideSeatTheme.spaceMD : SideSeatTheme.spaceLG) {
             if !hasPlans {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text("Find a time your friends can all make").font(.title2.weight(.bold))
-                    Text("For meals, study sessions and sports with friends.")
+                    Text("What could you do together?").font(.title2.weight(.bold))
+                    Text("Choose an activity, find a time and confirm together.")
                         .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -314,7 +314,7 @@ struct PlansRootView: View {
                 ? AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
             layout {
-                PlanActionButton(title: AppLocalization.string("Find a time with friends"), symbol: "plus", kind: .commit,
+                PlanActionButton(title: AppLocalization.string("Start a plan"), symbol: "plus", kind: .commit,
                                 accessibilityID: "plans-create-primary") { showsPlanCreation = true }
                 PlanActionButton(title: AppLocalization.string(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here"),
                                  symbol: "link", kind: .navigate, accessibilityID: "plans-open-link") {
@@ -431,7 +431,9 @@ struct PlansRootView: View {
                                      style: PlanOverviewStyle = .task) -> some View {
         let phase = plan.planningPhase(at: now)
         let progress: String? = switch phase {
-        case "COLLECTING": String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
+        case "COLLECTING": plan.activitySelection?.isOpen == true
+            ? String(format: AppLocalization.string("%d activity ideas"), plan.activitySelection?.ideaCount ?? 0)
+            : String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
         case "INVITING": String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget)
         default: nil
         }

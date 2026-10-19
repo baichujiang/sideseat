@@ -8,6 +8,28 @@ struct InboxNotificationsTests {
         UserDefaults(suiteName: "notifications-tests.\(UUID())")!
     }
 
+    @Test("Activity selection creates one actionable notice without treating interest as an invitation")
+    func activityChosenNotice() throws {
+        let store = InboxNotificationsStore(defaults: storage())
+        store.activate(accountID: "alice")
+        var value = try poll(included: false, phase: "COLLECTING")
+        value.activitySelection = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 2, hasParticipated: true)
+        store.reconcile(polls: [value])
+        #expect(store.items.isEmpty)
+        value.activitySelection = NativePlanActivity(topic: "Weekend", isOpen: false, selectedIdeaId: "idea", ideaCount: 2, hasParticipated: true)
+        store.reconcile(polls: [value])
+        #expect(store.items.count == 1 && store.items.first?.kind == .activityChosen)
+        store.markAllRead()
+        store.reconcile(polls: [value])
+        #expect(store.items.count == 1 && store.unreadCount == 0)
+        var invited = try poll()
+        invited.activitySelection = value.activitySelection
+        store.reconcile(polls: [invited])
+        #expect(store.items.filter { $0.kind == .invitation }.count == 1)
+        #expect(!store.items.contains { $0.kind == .changed })
+        #expect(store.items.first { $0.kind == .invitation }?.destination.route == .timePoll(token: invited.token))
+    }
+
     @Test("Read markers survive refresh and relaunch, and stay scoped to an account")
     func readPersistenceAndAccountIsolation() throws {
         let defaults = storage()
@@ -165,11 +187,11 @@ struct InboxNotificationsTests {
     }
 
     private func poll(start: String = "2030-10-20T10:00:00Z", end: String = "2030-10-20T12:00:00Z",
-                      updated: String = "2030-10-18T09:00:00Z", included: Bool = true) throws -> NativeTimePollList.Item {
+                      updated: String = "2030-10-18T09:00:00Z", included: Bool = true, phase: String = "INVITING") throws -> NativeTimePollList.Item {
         let object: [String: Any] = ["token": String(repeating: "a", count: 32), "title": "Coffee",
             "timeZone": "Europe/Berlin", "dates": ["2030-10-20"], "updatedAt": updated,
             "shareUrl": "https://www.sideseat.de/time-polls/" + String(repeating: "a", count: 32),
-            "phase": "INVITING", "chosenStart": start, "chosenEnd": end,
+            "phase": phase, "chosenStart": start, "chosenEnd": end,
             "myInvitationStatus": "INVITED", "isIncluded": included]
         let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(NativeTimePollList.Item.self, from: JSONSerialization.data(withJSONObject: object))

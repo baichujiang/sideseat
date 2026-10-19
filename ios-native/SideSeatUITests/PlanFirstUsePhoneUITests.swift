@@ -209,6 +209,150 @@ import XCTest
         capture(app, "16-calendar-to-plan"); phase("calendar-verified")
     }
 
+    func testActivityIdeasNativeAndWebContinueIntoPlan() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_ACTIVITY_PLAN_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires fresh activity-plan accounts.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-create-primary"].tap()
+        XCTAssertTrue(app.buttons["plan-start-together"].waitForExistence(timeout: 10))
+        app.buttons["plan-start-together"].tap()
+        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText(fixture.title + "\n")
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
+        capture(app, "activity-01-create"); app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 25))
+        XCTAssertFalse(app.buttons["unified-plan-invite-window"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        activityPhase("created")
+        activitySuggest("Badminton", location: "Campus court")
+        activityPhase("owner-suggested"); capture(app, "activity-02-owner-idea")
+        app.buttons["plan-copy-link"].tap()
+
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-open-link"].tap()
+        let link = app.alerts.textFields.firstMatch
+        XCTAssertTrue(link.waitForExistence(timeout: 10)); link.tap(); link.typeKey("v", modifierFlags: .command)
+        let allow = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
+        if allow.waitForExistence(timeout: 2) { allow.tap() }
+        let copiedLink = try XCTUnwrap(link.value as? String)
+        app.alerts.buttons["打开"].tap()
+        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 20))
+        activitySuggest("Hotpot", location: "Town centre")
+        let interests = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-'"))
+        XCTAssertEqual(interests.count, 2)
+        interests.element(boundBy: 0).tap()
+        activityWaitEnabled(interests.element(boundBy: 1)); interests.element(boundBy: 1).tap()
+        activityPhase("peer-interested"); capture(app, "activity-03-peer-interests")
+        app.buttons["plan-activity-show-timetable"].tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); first.tap(); second.tap(); nativeWaitSaved()
+        activityPhase("peer-filled")
+        // The same live record must stay usable at maximum text size.
+        app.terminate()
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-deep-link=\(try XCTUnwrap(URL(string: copiedLink)?.path))", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": peer.accessToken]
+        app.launch()
+        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 20))
+        let largeInterest = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-' ")).firstMatch
+        for _ in 0..<8 where !largeInterest.isHittable { app.scrollViews["plan-activity-ideas"].swipeUp() }
+        XCTAssertTrue(largeInterest.isHittable); capture(app, "activity-04-dark-large-ideas")
+
+        activityOpenSafari(copiedLink)
+        let guestName = safari.webViews.textFields.firstMatch
+        XCTAssertTrue(guestName.waitForExistence(timeout: 25)); guestName.tap(); guestName.typeText("Guest Lin")
+        webButton("Join the activity ideas", "加入一起选活动").tap()
+        let guestTitle = safari.webViews.textFields.firstMatch
+        XCTAssertTrue(guestTitle.waitForExistence(timeout: 20))
+        activityRevealWeb(guestTitle); guestTitle.tap(); guestTitle.typeText("Exhibition")
+        let add = webButton("Add suggestion", "添加提议"); activityRevealWeb(add); add.tap()
+        XCTAssertTrue(safari.staticTexts["Exhibition"].waitForExistence(timeout: 15))
+        let webLikes = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", "感兴趣"))
+        XCTAssertEqual(webLikes.count, 3)
+        let likeFirst = webLikes.element(boundBy: 0), likeSecond = webLikes.element(boundBy: 1)
+        activityRevealWeb(likeFirst); likeFirst.tap(); activityWaitEnabled(likeSecond); activityRevealWeb(likeSecond); likeSecond.tap()
+        activityPhase("guest-interested"); capture(safari, "activity-05-guest-ideas")
+        let free = webButton("You can fill in free time too", "也可以先填写空闲")
+        activityRevealWeb(free); free.tap()
+        let webFirst = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
+        let webSecond = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
+        XCTAssertTrue(webFirst.waitForExistence(timeout: 20)); activityRevealWeb(webSecond)
+        webFirst.tap(); webSecond.tap()
+        XCTAssertTrue(safari.staticTexts["已自动保存"].waitForExistence(timeout: 20))
+        activityPhase("guest-filled"); capture(safari, "activity-06-guest-free-time")
+
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你定活动")
+        let hotpot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-select-' AND label CONTAINS 'Hotpot'")).firstMatch
+        XCTAssertTrue(hotpot.waitForExistence(timeout: 15)); hotpot.tap()
+        capture(app, "activity-07-choice-draft"); activityPhase("choice-draft")
+        app.buttons["plan-activity-choose"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, "Hotpot")
+        activityPhase("activity-chosen")
+        first.tap(); second.tap(); nativeWaitSaved(); activityPhase("owner-ready")
+        app.buttons["unified-plan-invite-window"].tap(); first.tap(); second.tap()
+        app.buttons["unified-plan-review-roster"].tap()
+        capture(app, "activity-08-review-roster"); app.buttons["unified-plan-send-invitations"].tap()
+        let count = app.staticTexts["unified-plan-confirmation-count"]
+        wait(count, labelContains: "1/3 人已确认"); activityPhase("inviting")
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你确认")
+        XCTAssertTrue(app.buttons["unified-plan-accept"].waitForExistence(timeout: 20))
+        capture(app, "activity-09-explicit-invitation"); activityPhase("peer-review")
+        app.buttons["unified-plan-accept"].tap(); wait(count, labelContains: "2/3 人已确认"); activityPhase("peer-confirmed")
+        activityOpenSafari(copiedLink)
+        let confirm = webButton("Confirm participation", "确认参加")
+        XCTAssertTrue(confirm.waitForExistence(timeout: 25)); confirm.tap()
+        XCTAssertTrue(safari.staticTexts["计划已确定"].waitForExistence(timeout: 25))
+        activityPhase("all-confirmed"); capture(safari, "activity-10-guest-confirmed")
+        app.activate(); wait(count, labelContains: "3/3 人已确认")
+        app.buttons["plan-view-calendar"].tap(); app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText("Hotpot")
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS 'Hotpot'")).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()
+        let manage = app.buttons["calendar-manage-plan"]
+        for _ in 0..<4 where !manage.isHittable { app.swipeUp() }
+        XCTAssertTrue(manage.waitForExistence(timeout: 10)); manage.tap(); wait(count, labelContains: "3/3 人已确认")
+        activityPhase("calendar-verified"); capture(app, "activity-11-calendar-return")
+    }
+
+    private func activitySuggest(_ title: String, location: String) {
+        app.buttons["plan-activity-suggest"].tap()
+        let field = app.textFields["plan-activity-title"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(title)
+        let place = app.textFields["plan-activity-location"]; place.tap(); place.typeText(location)
+        app.buttons["plan-activity-add"].tap()
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 15))
+    }
+    private func activityPhase(_ value: String) { print("ACTIVITY_PLAN_PHASE \(value)"); Thread.sleep(forTimeInterval: 3) }
+    private func activityWaitEnabled(_ element: XCUIElement) {
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"), object: element)], timeout: 20), .completed)
+    }
+    private func activityRevealWeb(_ element: XCUIElement) {
+        XCTAssertTrue(element.waitForExistence(timeout: 15))
+        for _ in 0..<14 where !element.isHittable {
+            if element.frame.midY < safari.frame.midY { safari.swipeDown() } else { safari.swipeUp() }
+        }
+        XCTAssertTrue(element.isHittable)
+    }
+    private func activityOpenSafari(_ raw: String) {
+        safari.terminate(); safari.launch()
+        let done = safari.buttons.matching(NSPredicate(format: "label IN %@", ["Done", "完成"])).firstMatch
+        if done.exists { done.tap() }
+        let address = safari.textFields["TabBarItemTitle"]
+        if !address.exists { safari.swipeDown() }
+        XCTAssertTrue(address.waitForExistence(timeout: 10)); address.tap()
+        let url = raw.replacingOccurrences(of: "https://sideseat.de/", with: "https://www.sideseat.de/")
+        replace(safari.textFields.firstMatch, with: url + "\n")
+    }
+
     private struct NativeAccount: Decodable {
         let role: String
         let identifier: String

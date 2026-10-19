@@ -104,6 +104,7 @@ struct TimePollCreateView: View {
     @State private var startMinute = 9 * 60
     @State private var endMinute = 17 * 60
     @State private var planningMode = "COLLECT"
+    @State private var chooseActivityTogether = false
     @State private var hasChosenTiming = false
     @FocusState private var titleFocused: Bool
     @State private var location = ""
@@ -120,9 +121,14 @@ struct TimePollCreateView: View {
             if !hasChosenTiming {
                 ScrollView {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                        PlanTaskHeader(step: "Step 1 of 2", title: "What would you like to do together?", detail: "Start with the activity. You can decide the time together.")
+                        PlanTaskHeader(step: chooseActivityTogether ? "Choose together" : "Step 1 of 2", title: "What would you like to do together?", detail: chooseActivityTogether ? "Start with a theme. Friends can suggest activities and mark interest." : "Start with the activity. You can decide the time together.")
+                        let startLayout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+                        startLayout {
+                            activityStartingPoint(together: false, title: "Activity already decided", symbol: "checkmark.circle")
+                            activityStartingPoint(together: true, title: "Choose an activity together", symbol: "lightbulb")
+                        }
                         VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                            TextField("For example: Friday dinner", text: $title)
+                            TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
                                 .font(.title3.weight(.medium)).focused($titleFocused)
                                 .submitLabel(.done).onSubmit { titleFocused = false }
                                 .accessibilityIdentifier("time-poll-title")
@@ -132,15 +138,23 @@ struct TimePollCreateView: View {
                         }
                         .padding(SideSeatTheme.spaceLG)
                         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-                        ViewThatFits(in: .horizontal) {
+                        if !chooseActivityTogether { ViewThatFits(in: .horizontal) {
                             HStack { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
                             VStack(alignment: .leading) { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
-                        }
-                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        } }
+                        if chooseActivityTogether {
+                            Label("Everyone can suggest activities. Interest does not confirm attendance.", systemImage: "person.2")
+                                .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                            Button { titleFocused = false; hasChosenTiming = true } label: {
+                                Label("Review dates and hours", systemImage: "calendar").font(.subheadline).frame(minHeight: 44)
+                            }.accessibilityIdentifier("plan-activity-date-options")
+                            Text(String(format: AppLocalization.string("%d candidate days — you can start without changing them"), dates.count))
+                                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                        } else { VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                             Text("Have you picked a time?").font(.headline)
                             timingChoice("COLLECT", title: "Time not set: find it together", detail: "Let friends mark when they're free.", symbol: "calendar.badge.clock")
                             timingChoice("FIXED", title: "The time is already set", detail: "Ask friends to confirm a specific time.", symbol: "calendar.badge.checkmark")
-                        }
+                        } }
                         if let message = validationMessage, title.count > 120 || location.count > 200 {
                             Text(message).font(.footnote).foregroundStyle(SideSeatTheme.danger)
                         }
@@ -151,24 +165,24 @@ struct TimePollCreateView: View {
             }
         }
         .navigationTitle("Create activity").navigationBarTitleDisplayMode(.inline)
-        .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
+        .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(chooseActivityTogether)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                if hasChosenTiming {
+                if hasChosenTiming || chooseActivityTogether {
                     if !typeSize.isAccessibilitySize {
-                        Text(planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: view and share the timetable. You can add your own free time anytime.")
+                        Text(chooseActivityTogether ? "Next: share the plan so friends can suggest activities." : planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: view and share the timetable. You can add your own free time anytime.")
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
-                    PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
-                                     symbol: "plus", kind: .commit, isLoading: creating, accessibilityID: "time-poll-create-confirm") {
+                    PlanActionButton(title: AppLocalization.string(chooseActivityTogether ? "Start choosing an activity" : planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
+                                     symbol: chooseActivityTogether ? "lightbulb" : "plus", kind: .commit, isLoading: creating, accessibilityID: "time-poll-create-confirm") {
                         titleFocused = false; Task { await create() }
                     }.disabled(!canCreate)
                 } else {
                     if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !typeSize.isAccessibilitySize {
-                        Text("Type an activity name or choose an example above.")
+                        Text(chooseActivityTogether ? "Give this plan a theme, such as a weekend together." : "Type an activity name or choose an example above.")
                             .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Choose dates" : "Next: choose dates"), symbol: "calendar",
@@ -179,6 +193,32 @@ struct TimePollCreateView: View {
             .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
             .overlay(alignment: .top) { Divider() }
         }
+    }
+
+    private func activityStartingPoint(together: Bool, title: String, symbol: String) -> some View {
+        let selected = chooseActivityTogether == together
+        return Button {
+            chooseActivityTogether = together
+            if together {
+                planningMode = "COLLECT"
+                dates = Set((1...7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: Date()) }
+                    .map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
+            }
+            titleFocused = false
+        } label: {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: symbol).accessibilityHidden(true)
+                Text(LocalizedStringKey(title)).fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle").accessibilityHidden(true)
+            }.font(.subheadline.weight(selected ? .semibold : .regular))
+                .padding(SideSeatTheme.spaceMD).frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+                .background(selected ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.surface,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius).strokeBorder(selected ? SideSeatTheme.ControlSelection.border : SideSeatTheme.separator, lineWidth: 1) }
+        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.textPrimary)
+            .accessibilityValue(selected ? "Selected" : "Not selected")
+            .accessibilityIdentifier(together ? "plan-start-together" : "plan-start-known-activity")
     }
 
     private func activityExample(_ value: String) -> some View {
@@ -243,9 +283,9 @@ struct TimePollCreateView: View {
                             .accessibilityIdentifier("time-poll-from")
                         Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) } }
                             .accessibilityIdentifier("time-poll-until")
-                        Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
+                        if !chooseActivityTogether { Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
                             .accessibilityIdentifier("unified-plan-participant-count")
-                        Text("This is an estimate; you choose who to invite later.").font(.caption).foregroundStyle(.secondary)
+                        Text("This is an estimate; you choose who to invite later.").font(.caption).foregroundStyle(.secondary) }
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Hours people can choose from").font(.subheadline.weight(.medium))
@@ -290,7 +330,7 @@ struct TimePollCreateView: View {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                 "/api/v1/time-polls", method: .post,
-                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: planningMode == "FIXED" ? durationMinutes : nil, expectedCount: expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil),
+                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: planningMode == "FIXED" ? durationMinutes : nil, expectedCount: chooseActivityTogether ? nil : expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil, chooseActivityTogether: chooseActivityTogether ? true : nil),
                 idempotencyKey: createKey
             )
             onCreate(response.data)
@@ -313,6 +353,8 @@ struct TimePollDetailView: View {
     @State private var finalRange: TimePollFinalRange?
     @State private var invitationRoster = Set<String>()
     @State private var choosingAgain = false
+    @State private var showsActivityTimetable = false
+    @State private var showsActivityHistory = false
     @State private var now = Date()
     @FocusState private var nameFocused: Bool
 
@@ -324,7 +366,11 @@ struct TimePollDetailView: View {
                 if poll.planningPhase(at: now) == "EXPIRED" {
                     ExpiredTimePollView(poll: poll) { dismiss() }
                 } else if poll.planningPhase == "COLLECTING" || choosingAgain {
-                collectionSurface(poll)
+                if activityBoardVisible(poll) {
+                    PlanActivityIdeasView(poll: poll, store: store) {
+                        showsActivityTimetable = true; showsActivityHistory = false
+                    }
+                } else { collectionSurface(poll) }
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
@@ -347,7 +393,7 @@ struct TimePollDetailView: View {
         .background(SideSeatTheme.bg)
         .navigationTitle("Plan together").navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let poll = store.poll, poll.planningPhase == "COLLECTING" || choosingAgain {
+            if let poll = store.poll, (poll.planningPhase == "COLLECTING" || choosingAgain) && !activityBoardVisible(poll) {
                 collectionFooter(poll)
             }
         }
@@ -412,6 +458,11 @@ struct TimePollDetailView: View {
         poll.planningPhase == "COLLECTING" && !choosingAgain && !pickingFinalTime
     }
 
+    private func activityBoardVisible(_ poll: NativeTimePoll) -> Bool {
+        poll.planningPhase == "COLLECTING" && poll.activitySelection != nil
+            && (showsActivityHistory || (poll.activitySelection?.isOpen == true && !showsActivityTimetable))
+    }
+
     @ViewBuilder private func collectionSurface(_ poll: NativeTimePoll) -> some View {
         if typeSize.isAccessibilitySize {
             ScrollView {
@@ -429,6 +480,18 @@ struct TimePollDetailView: View {
     private func collectionHeader(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             PlanDetailHeading(poll: poll)
+            if let activity = poll.activitySelection {
+                Button {
+                    showsActivityTimetable = false; showsActivityHistory = true
+                } label: {
+                    Label(activity.isOpen ? "Back to activity ideas" : "View activity ideas", systemImage: "lightbulb")
+                        .font(.subheadline).frame(minHeight: 44)
+                }.accessibilityIdentifier("plan-activity-open-ideas")
+                if !activity.isOpen {
+                    Text("Activity chosen. Your saved free time is kept.").font(.caption)
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                }
+            }
             Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
             summary(poll)
@@ -477,7 +540,10 @@ struct TimePollDetailView: View {
             } else {
                 if editsTimetable(poll) { saveStatus(poll) }
                 if poll.isOwner {
-                    if poll.participants.contains(where: { !$0.isMe }) {
+                    if poll.activitySelection?.isOpen == true {
+                        PlanActionButton(title: AppLocalization.string("Choose an activity first"), symbol: "lightbulb", kind: .navigate,
+                                         accessibilityID: "plan-activity-back-to-ideas") { showsActivityTimetable = false; showsActivityHistory = true }
+                    } else if poll.participants.contains(where: { !$0.isMe }) {
                         PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
                                         accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
                             .disabled(!store.canMutate || poll.slots.isEmpty)
@@ -901,4 +967,145 @@ func timePollDateLabel(_ key: String) -> String {
     let parser = DateFormatter(); parser.locale = Locale(identifier: "en_US_POSIX"); parser.dateFormat = "yyyy-MM-dd"
     guard let date = parser.date(from: key) else { return key }
     let output = DateFormatter(); output.locale = AppLocalization.selectedLanguage.locale; output.dateFormat = "EEE\nMMM d"; return output.string(from: date)
+}
+
+/// An optional starting stage, sharing the plan identity and keeping attendance explicit.
+struct PlanActivityIdeasView: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let poll: NativeTimePoll
+    @Bindable var store: TimePollStore
+    let onTimetable: () -> Void
+    @State private var showsSuggestion = false
+    @State private var draftTitle = ""
+    @State private var draftLocation = ""
+    @State private var selectedIdeaId: String?
+    private var activity: NativePlanActivity { poll.activitySelection! }
+    private var ideas: [NativePlanActivity.Idea] { activity.ideas ?? [] }
+    private var canChoose: Bool { poll.isOwner && poll.planningPhase == "COLLECTING" }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                PlanDetailHeading(poll: poll)
+                Text("Choose an activity → Find a time → Confirm participation")
+                    .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                Text(activity.isOpen ? "Everyone can suggest activities and mark interest in several options. The organizer makes the final choice." : "The activity is chosen. Your ideas and saved free time are kept.")
+                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                Text("Interest does not confirm attendance. You will confirm the final arrangement later.")
+                    .font(.caption.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("plan-activity-consent-note")
+                HStack {
+                    Text("Activity ideas").font(.headline)
+                    Text(ideas.count.formatted()).font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    if activity.isOpen {
+                        Button { showsSuggestion = true } label: { Label("Suggest an activity", systemImage: "plus").font(.subheadline).frame(minHeight: 44) }
+                            .disabled(!store.canMutate).accessibilityIdentifier("plan-activity-suggest")
+                    }
+                }
+                if ideas.isEmpty {
+                    Text("No ideas yet. Suggest something you'd enjoy doing together.")
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, SideSeatTheme.spaceLG)
+                }
+                ForEach(ideas) { idea in ideaRow(idea) }
+                if !activity.isOpen && !canChoose {
+                    Text("The activity cannot be changed after invitations are sent.")
+                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                }
+            }.padding(SideSeatTheme.spaceMD)
+        }.accessibilityIdentifier("plan-activity-ideas")
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: SideSeatTheme.spaceSM) {
+                if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger).fixedSize(horizontal: false, vertical: true) }
+                if canChoose && !ideas.isEmpty {
+                    PlanActionButton(title: AppLocalization.string("Set activity and continue"), symbol: "checkmark.circle", kind: .commit,
+                                     isLoading: store.acting, accessibilityID: "plan-activity-choose") {
+                        guard let selectedIdeaId else { return }
+                        Task {
+                            await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: selectedIdeaId), session: session)
+                            if store.error == nil { onTimetable() }
+                        }
+                    }.disabled(selectedIdeaId == nil || !store.canMutate)
+                }
+                PlanActionButton(title: AppLocalization.string(activity.isOpen ? "Fill in free time too" : "Back to timetable"), symbol: "calendar", kind: .navigate,
+                                 accessibilityID: "plan-activity-show-timetable", action: onTimetable)
+                PlanShareActions(poll: poll)
+            }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
+        }
+        .onAppear { selectedIdeaId = activity.selectedIdeaId }
+        .sheet(isPresented: $showsSuggestion) {
+            NavigationStack {
+                Form {
+                    Section {
+                        TextField("For example: an exhibition, dinner or badminton", text: $draftTitle)
+                            .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
+                        TextField("Location (optional)", text: $draftLocation).accessibilityIdentifier("plan-activity-location")
+                    } header: { Text("What would you like to suggest?") }
+                    if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
+                }
+                .navigationTitle("Suggest an activity").navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsSuggestion = false }.disabled(store.acting) } }
+                .safeAreaInset(edge: .bottom) {
+                    PlanActionButton(title: AppLocalization.string("Add suggestion"), symbol: "plus", kind: .commit, isLoading: store.acting,
+                                     accessibilityID: "plan-activity-add") {
+                        Task {
+                            await store.mutate("activities", body: SuggestPlanActivityRequest(title: draftTitle.trimmingCharacters(in: .whitespacesAndNewlines), location: draftLocation.trimmingCharacters(in: .whitespacesAndNewlines)), session: session)
+                            if store.error == nil { draftTitle = ""; draftLocation = ""; showsSuggestion = false }
+                        }
+                    }.disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120 || draftLocation.count > 200)
+                        .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
+                }
+            }.dynamicTypeSize(typeSize).interactiveDismissDisabled(store.acting)
+        }
+    }
+
+    private func ideaRow(_ idea: NativePlanActivity.Idea) -> some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            if canChoose {
+                Button { selectedIdeaId = idea.id } label: {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                        ideaIdentity(idea)
+                        Image(systemName: selectedIdeaId == idea.id ? "checkmark.circle.fill" : "circle").font(.title3).accessibilityHidden(true)
+                    }.frame(minHeight: 44).contentShape(Rectangle())
+                }.buttonStyle(.plain).disabled(!store.canMutate)
+                    .accessibilityIdentifier("plan-activity-select-\(idea.id)")
+                    .accessibilityValue(selectedIdeaId == idea.id ? "Selected" : "Not selected")
+            } else { ideaIdentity(idea) }
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                if activity.isOpen {
+                    Button {
+                        Task { await store.mutate("activities/interest", method: .put, body: PlanActivityInterestRequest(ideaId: idea.id, interested: !idea.isInterested), session: session) }
+                    } label: {
+                        Label(idea.isInterested ? "Interest marked" : "I'm interested", systemImage: idea.isInterested ? "checkmark" : "heart")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, SideSeatTheme.spaceMD).frame(minHeight: 44)
+                            .background(idea.isInterested ? SideSeatTheme.ControlSelection.fill : Color.clear, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                            .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius).strokeBorder(SideSeatTheme.separator, lineWidth: 1) }
+                    }.buttonStyle(.plain).disabled(!store.canMutate)
+                        .accessibilityIdentifier("plan-activity-interest-\(idea.id)")
+                        .accessibilityValue(idea.isInterested ? "Interest marked" : "Interest not marked")
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count)).font(.caption.weight(.medium))
+                    if !idea.interestedBy.isEmpty {
+                        Text(idea.interestedBy.map(\.displayName).joined(separator: ", ")).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+        .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius).strokeBorder(selectedIdeaId == idea.id ? SideSeatTheme.ControlSelection.border : SideSeatTheme.separator, lineWidth: 1) }
+        .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-idea-\(idea.id)")
+    }
+
+    private func ideaIdentity(_ idea: NativePlanActivity.Idea) -> some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            Text(idea.title).font(.headline).fixedSize(horizontal: false, vertical: true)
+            if let location = idea.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
+            Text(String(format: AppLocalization.string("%@ suggested this"), idea.authorName)).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
 }

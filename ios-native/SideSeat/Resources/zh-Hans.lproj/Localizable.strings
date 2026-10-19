@@ -2924,3 +2924,93 @@
 "Waiting for %@ to confirm" = "等 %@ 确认";
 
 "Review invitees" = "核对名单";
+
+"Choosing an activity" = "一起选活动";
+
+"Your activity ideas needed" = "待你提议活动";
+
+"Ready to choose an activity" = "待你定活动";
+
+"Waiting for the activity choice" = "等发起人定活动";
+
+"View activity ideas" = "查看活动提议";
+
+"Suggest an activity" = "提议活动";
+
+"Choose an activity for everyone" = "为大家选定活动";
+
+"Waiting for the organizer to choose an activity" = "等待发起人选定活动";
+
+"Interest does not confirm attendance. You will confirm the final arrangement later." = "感兴趣不代表确认参加，最终安排确定后还需确认。";
+
+"Start with a theme. Friends can suggest activities and mark interest." = "先写一个主题，朋友可以提议活动、标记兴趣。";
+
+"Activity already decided" = "已想好活动";
+
+"Choose an activity together" = "一起选活动";
+
+"For example: what shall we do this weekend?" = "例如：这周末一起做点什么？";
+
+"Everyone can suggest activities. Interest does not confirm attendance." = "每个人都能提议活动；感兴趣不代表确认参加。";
+
+"Next: share the plan so friends can suggest activities." = "接下来：分享计划，邀请朋友提议活动。";
+
+"Give this plan a theme, such as a weekend together." = "给计划写个主题，例如“这周末一起玩”。";
+
+"Start choosing an activity" = "发起一起选活动";
+
+"Back to activity ideas" = "返回活动提议";
+
+"Activity chosen. Your saved free time is kept." = "活动已选定，之前填写的空闲会保留。";
+
+"Choose an activity first" = "先选定活动";
+
+"Choose an activity → Find a time → Confirm participation" = "选活动 → 约时间 → 确认参加";
+
+"Everyone can suggest activities and mark interest in several options. The organizer makes the final choice." = "大家都能提议，也能对多个活动标记兴趣；最后由发起人定案。";
+
+"The activity is chosen. Your ideas and saved free time are kept." = "活动已选定，大家的提议和已填空闲仍会保留。";
+
+"Activity ideas" = "活动提议";
+
+"No ideas yet. Suggest something you'd enjoy doing together." = "还没有提议，先分享一个你想一起做的活动吧。";
+
+"The activity cannot be changed after invitations are sent." = "邀请发出后，不能再修改活动。";
+
+"Set activity and continue" = "确定活动，继续约时间";
+
+"Fill in free time too" = "也可以先填写空闲";
+
+"For example: an exhibition, dinner or badminton" = "例如：逛展、火锅、羽毛球";
+
+"Activity idea" = "活动提议";
+
+"What would you like to suggest?" = "你想提议做什么？";
+
+"Add suggestion" = "添加提议";
+
+"%d interested" = "%d 人感兴趣";
+
+"%@ suggested this" = "%@ 提议";
+
+"What could you do together?" = "想和朋友一起做点什么？";
+
+"Choose an activity, find a time and confirm together." = "一起挑活动、约时间，确认后加入日历。";
+
+"Start a plan" = "发起计划";
+
+"%d activity ideas" = "%d 个活动提议";
+
+"Invite activity ideas" = "邀请朋友选活动";
+
+"Activity chosen — share your free time" = "活动已选定，来填空闲吧";
+
+"Interest marked" = "已感兴趣";
+
+"Interest not marked" = "未标记兴趣";
+
+"Choose together" = "一起决定做什么";
+
+"Review dates and hours" = "查看日期范围和时段";
+
+"%d candidate days — you can start without changing them" = "已选 %d 个候选日期，可直接发起";

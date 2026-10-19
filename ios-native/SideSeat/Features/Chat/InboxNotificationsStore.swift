@@ -3,7 +3,7 @@ import Observation
 
 struct InboxNotification: Codable, Identifiable, Equatable, Sendable {
     enum Kind: String, Codable, Sendable {
-        case invitation, changed, confirmed, cancelled, verificationApproved, verificationRejected, accountUpdated
+        case invitation, changed, confirmed, cancelled, activityChosen, verificationApproved, verificationRejected, accountUpdated
 
         var title: String {
             switch self {
@@ -11,6 +11,7 @@ struct InboxNotification: Codable, Identifiable, Equatable, Sendable {
             case .changed: AppLocalization.string("Plan time updated")
             case .confirmed: AppLocalization.string("Plan confirmed")
             case .cancelled: AppLocalization.string("Plan cancelled")
+            case .activityChosen: AppLocalization.string("Activity chosen — share your free time")
             case .verificationApproved: AppLocalization.string("Student verification approved")
             case .verificationRejected: AppLocalization.string("Student verification needs attention")
             case .accountUpdated: AppLocalization.string("Account updated")
@@ -23,6 +24,7 @@ struct InboxNotification: Codable, Identifiable, Equatable, Sendable {
             case .changed: "clock.arrow.circlepath"
             case .confirmed: "calendar.badge.checkmark"
             case .cancelled: "calendar.badge.minus"
+            case .activityChosen: "lightbulb"
             case .verificationApproved: "checkmark.shield"
             case .verificationRejected: "exclamationmark.shield"
             case .accountUpdated: "person.crop.circle"
@@ -216,17 +218,21 @@ final class InboxNotificationsStore {
     }
 
     func reconcile(polls: [NativeTimePollList.Item], now: Date = Date()) {
-        let visible = polls.filter { $0.isIncluded == true && $0.planningPhase(at: now) != "EXPIRED" }
+        let visible = polls.filter { ($0.isIncluded == true || $0.activitySelection?.hasParticipated == true) && $0.planningPhase(at: now) != "EXPIRED" }
         prune(source: "shared", visibleIDs: Set(visible.map(\.token)))
         for poll in visible {
             let sourceID = poll.token
             let timing = "\(poll.chosenStart?.timeIntervalSince1970 ?? 0)|\(poll.chosenEnd?.timeIntervalSince1970 ?? 0)"
             let fingerprint = "\(timing)|\(poll.phase ?? "COLLECTING")|\(poll.myInvitationStatus ?? "")"
+                + (poll.activitySelection.map { "|activity:\($0.selectedIdeaId ?? "open")" } ?? "")
             let previous = fingerprints["shared:\(sourceID)"]
             let kind: InboxNotification.Kind?
             if poll.planningPhase(at: now) == "INVITING", poll.myInvitationStatus == "INVITED",
                (poll.chosenStart ?? .distantPast) > now {
-                kind = previous.map { !$0.hasPrefix(timing + "|") } == true ? .changed : .invitation
+                kind = previous.map { $0.contains("|INVITING|") && !$0.hasPrefix(timing + "|") } == true ? .changed : .invitation
+            } else if poll.phase == "COLLECTING", poll.isOwner != true,
+                      let activity = poll.activitySelection, !activity.isOpen, activity.hasParticipated {
+                kind = .activityChosen
             } else if poll.phase == "CONFIRMED", (poll.chosenEnd ?? .distantPast) > now {
                 kind = .confirmed
             } else if poll.phase == "CANCELLED", now.timeIntervalSince(poll.updatedAt) < 30 * 86400 {
@@ -236,7 +242,7 @@ final class InboxNotificationsStore {
             guard previous != fingerprint, let kind else { continue }
             insert(.init(id: "shared:\(sourceID):\(fingerprint):\(poll.updatedAt.timeIntervalSince1970)", source: "shared", sourceID: sourceID,
                 kind: kind, detail: poll.title, date: poll.updatedAt, destination: .sharedPlan(token: poll.token),
-                expiresAt: [.invitation, .changed].contains(kind) ? poll.chosenStart : nil))
+                expiresAt: kind == .activityChosen ? poll.expiresAt : [.invitation, .changed].contains(kind) ? poll.chosenStart : nil))
         }
         persist()
     }

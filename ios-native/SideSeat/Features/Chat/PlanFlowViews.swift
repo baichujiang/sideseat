@@ -93,12 +93,16 @@ struct PlanPurposeExample: View {
 }
 
 enum PlanNextStep: String, Sendable {
+    case suggestActivity, chooseActivity, waitForActivity
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan
     case shareInvitation, reviewReplies, declined, notIncluded, viewCalendar, recordOutcome
 
-    var needsYou: Bool { [.fillAvailability, .shareAvailability, .chooseTime, .confirm, .shareInvitation].contains(self) }
+    var needsYou: Bool { [.suggestActivity, .chooseActivity, .fillAvailability, .shareAvailability, .chooseTime, .confirm, .shareInvitation].contains(self) }
     var title: String {
         let key: String.LocalizationValue = switch self {
+        case .suggestActivity: "Suggest an activity"
+        case .chooseActivity: "Choose an activity for everyone"
+        case .waitForActivity: "Waiting for the organizer to choose an activity"
         case .fillAvailability: "Fill in your free time"
         case .shareAvailability: "Invite friends to fill in"
         case .chooseTime: "Choose a time for everyone"
@@ -117,6 +121,7 @@ enum PlanNextStep: String, Sendable {
     }
     var action: String {
         let key: String.LocalizationValue = switch self {
+        case .suggestActivity, .chooseActivity, .waitForActivity: "View activity ideas"
         case .fillAvailability: "Fill in my availability"
         case .shareAvailability: "Share with friends"
         case .chooseTime: "View timetable and choose"
@@ -135,6 +140,7 @@ enum PlanNextStep: String, Sendable {
     }
     var symbol: String {
         switch self {
+        case .suggestActivity, .chooseActivity, .waitForActivity: "lightbulb"
         case .fillAvailability: "hand.tap"
         case .shareAvailability: "square.and.arrow.up"
         case .chooseTime: "calendar.badge.clock"
@@ -150,6 +156,7 @@ enum PlanNextStep: String, Sendable {
     /// Overview controls open a review surface; they do not execute the next step.
     var cardActionSymbol: String {
         switch self {
+        case .suggestActivity, .chooseActivity, .waitForActivity: "lightbulb"
         case .fillAvailability, .waitForOrganizer: "calendar"
         case .shareAvailability, .shareInvitation: "square.and.arrow.up"
         case .chooseTime: "calendar.badge.clock"
@@ -263,7 +270,7 @@ struct PlanShareActions: View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
         layout {
             ShareLink(item: poll.shareUrl) {
-                PlanActionLabel(title: AppLocalization.string(poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation"),
+                PlanActionLabel(title: AppLocalization.string(poll.activitySelection?.isOpen == true ? "Invite activity ideas" : poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation"),
                                 symbol: "square.and.arrow.up")
             }.buttonStyle(.plain).accessibilityIdentifier("plan-share-primary")
             PlanActionButton(title: AppLocalization.string(copied ? "Link copied" : "Copy link"),

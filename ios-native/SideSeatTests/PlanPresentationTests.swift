@@ -119,4 +119,32 @@ struct PlanPresentationTests {
         #expect(display.zoneText?.contains("Europe/Berlin") == false)
     }
 
+    @Test("Activity ideas are separate from availability and attendance")
+    func activityStageRoles() {
+        let open = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 2, hasParticipated: true)
+        func present(owner: Bool, activity: NativePlanActivity, phase: String = "COLLECTING") -> PlanPresentation {
+            .manual(phase: phase, isOwner: owner, didRespond: false, respondedCount: 0, myStatus: nil,
+                    isIncluded: owner, fixed: false, accepted: 0, target: 0, start: nil, end: nil, now: now, activity: activity)
+        }
+        #expect(present(owner: true, activity: open).nextStep == .chooseActivity)
+        #expect(present(owner: true, activity: open).status == .choosingActivity)
+        #expect(present(owner: false, activity: open).nextStep == .waitForActivity)
+        #expect(!present(owner: false, activity: open).nextStep.needsYou)
+        let chosen = NativePlanActivity(topic: "Weekend", isOpen: false, selectedIdeaId: "idea", ideaCount: 2, hasParticipated: true)
+        #expect(present(owner: false, activity: chosen).nextStep == .fillAvailability)
+        #expect(present(owner: false, activity: open, phase: "EXPIRED").status == .expired)
+    }
+
+    @Test("An untouched participant and empty organizer get a clear first activity action")
+    func activityStageFirstAction() {
+        let empty = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 0, hasParticipated: false)
+        for owner in [true, false] {
+            let value = PlanPresentation.manual(phase: "COLLECTING", isOwner: owner, didRespond: false,
+                respondedCount: 0, myStatus: nil, isIncluded: owner, fixed: false, accepted: 0, target: 0,
+                start: nil, end: nil, now: now, activity: empty)
+            #expect(value.nextStep == .suggestActivity)
+            #expect(value.nextStep.needsYou)
+        }
+    }
+
 }

@@ -2923,3 +2923,93 @@
 "Waiting for %@ to confirm" = "Wartet auf die Zusage von %@";
 
 "Review invitees" = "Personen prüfen";
+
+"Choosing an activity" = "Aktivität auswählen";
+
+"Your activity ideas needed" = "Deine Ideen sind gefragt";
+
+"Ready to choose an activity" = "Aktivität festlegen";
+
+"Waiting for the activity choice" = "Wartet auf die Aktivitätswahl";
+
+"View activity ideas" = "Aktivitätsideen ansehen";
+
+"Suggest an activity" = "Aktivität vorschlagen";
+
+"Choose an activity for everyone" = "Eine Aktivität festlegen";
+
+"Waiting for the organizer to choose an activity" = "Wartet auf die Aktivitätswahl der organisierenden Person";
+
+"Interest does not confirm attendance. You will confirm the final arrangement later." = "Interesse ist noch keine Zusage. Die endgültige Planung bestätigst du später.";
+
+"Start with a theme. Friends can suggest activities and mark interest." = "Beginne mit einem Thema. Freunde können Aktivitäten vorschlagen und Interesse zeigen.";
+
+"Activity already decided" = "Aktivität steht fest";
+
+"Choose an activity together" = "Gemeinsam auswählen";
+
+"For example: what shall we do this weekend?" = "Zum Beispiel: Was machen wir am Wochenende?";
+
+"Everyone can suggest activities. Interest does not confirm attendance." = "Alle können Aktivitäten vorschlagen. Interesse ist noch keine Zusage.";
+
+"Next: share the plan so friends can suggest activities." = "Danach: Teile den Plan, damit Freunde Aktivitäten vorschlagen können.";
+
+"Give this plan a theme, such as a weekend together." = "Gib dem Plan ein Thema, etwa ein gemeinsames Wochenende.";
+
+"Start choosing an activity" = "Aktivitätswahl starten";
+
+"Back to activity ideas" = "Zurück zu den Ideen";
+
+"Activity chosen. Your saved free time is kept." = "Aktivität gewählt. Deine gespeicherten freien Zeiten bleiben erhalten.";
+
+"Choose an activity first" = "Zuerst Aktivität wählen";
+
+"Choose an activity → Find a time → Confirm participation" = "Aktivität → Termin → Zusage";
+
+"Everyone can suggest activities and mark interest in several options. The organizer makes the final choice." = "Alle können Ideen vorschlagen und mehrere interessant finden. Die organisierende Person entscheidet.";
+
+"The activity is chosen. Your ideas and saved free time are kept." = "Die Aktivität steht fest. Ideen und gespeicherte freie Zeiten bleiben erhalten.";
+
+"Activity ideas" = "Aktivitätsideen";
+
+"No ideas yet. Suggest something you'd enjoy doing together." = "Noch keine Ideen. Schlage etwas vor, das ihr gerne gemeinsam machen würdet.";
+
+"The activity cannot be changed after invitations are sent." = "Nach dem Versand der Einladungen lässt sich die Aktivität nicht mehr ändern.";
+
+"Set activity and continue" = "Aktivität festlegen und weiter";
+
+"Fill in free time too" = "Auch freie Zeiten eintragen";
+
+"For example: an exhibition, dinner or badminton" = "Zum Beispiel: Ausstellung, Abendessen oder Badminton";
+
+"Activity idea" = "Aktivitätsidee";
+
+"What would you like to suggest?" = "Was möchtest du vorschlagen?";
+
+"Add suggestion" = "Vorschlag hinzufügen";
+
+"%d interested" = "%d interessiert";
+
+"%@ suggested this" = "Vorschlag von %@";
+
+"What could you do together?" = "Was könntet ihr gemeinsam machen?";
+
+"Choose an activity, find a time and confirm together." = "Aktivität wählen, Termin finden und gemeinsam zusagen.";
+
+"Start a plan" = "Plan starten";
+
+"%d activity ideas" = "%d Aktivitätsideen";
+
+"Invite activity ideas" = "Freunde um Ideen bitten";
+
+"Activity chosen — share your free time" = "Aktivität gewählt – freie Zeiten eintragen";
+
+"Interest marked" = "Interesse markiert";
+
+"Interest not marked" = "Kein Interesse markiert";
+
+"Choose together" = "Gemeinsam entscheiden";
+
+"Review dates and hours" = "Tage und Zeiten ansehen";
+
+"%d candidate days — you can start without changing them" = "%d mögliche Tage – du kannst direkt starten";

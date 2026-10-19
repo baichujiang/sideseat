@@ -2,10 +2,11 @@ import Foundation
 
 /// Read-only presentation of the two existing plan contracts. No persisted state is translated.
 enum PlanDisplayStatus: String, Sendable {
-    case findingTime, awaitingConfirmation, confirmed, inProgress, ended, cancelled, expired, declined, superseded, unavailable
+    case choosingActivity, findingTime, awaitingConfirmation, confirmed, inProgress, ended, cancelled, expired, declined, superseded, unavailable
 
     var title: String {
         let key: String.LocalizationValue = switch self {
+        case .choosingActivity: "Choosing an activity"
         case .findingTime: "Finding a time"
         case .awaitingConfirmation: "Awaiting confirmations"
         case .confirmed: "Confirmed"
@@ -22,6 +23,7 @@ enum PlanDisplayStatus: String, Sendable {
 
     var symbol: String {
         switch self {
+        case .choosingActivity: "lightbulb"
         case .findingTime: "calendar.badge.clock"
         case .awaitingConfirmation: "envelope.badge"
         case .confirmed, .inProgress: "checkmark.circle.fill"
@@ -43,6 +45,9 @@ struct PlanPresentation: Sendable {
     /// Overview speaks about this viewer's task; detail keeps the shared lifecycle.
     var cardStatusTitle: String {
         let key: String.LocalizationValue? = switch nextStep {
+        case .suggestActivity: "Your activity ideas needed"
+        case .chooseActivity: "Ready to choose an activity"
+        case .waitForActivity: "Waiting for the activity choice"
         case .fillAvailability: "Your availability needed"
         case .shareAvailability, .shareInvitation: "Ready to share"
         case .chooseTime: "Ready for you to choose"
@@ -59,6 +64,7 @@ struct PlanPresentation: Sendable {
 
     var cardActionTitle: String {
         let key: String.LocalizationValue = switch nextStep {
+        case .suggestActivity, .chooseActivity, .waitForActivity: "View activity ideas"
         case .confirm: "Review invitation"
         case .fillAvailability, .waitForOrganizer: "Open timetable"
         case .chooseTime: "Choose final time"
@@ -73,7 +79,13 @@ struct PlanPresentation: Sendable {
 
     static func manual(phase: String, isOwner: Bool, didRespond: Bool, respondedCount: Int,
                        myStatus: String?, isIncluded: Bool, fixed: Bool, accepted: Int, target: Int,
-                       start: Date?, end: Date?, now: Date) -> Self {
+                       start: Date?, end: Date?, now: Date, activity: NativePlanActivity? = nil) -> Self {
+        if phase == "COLLECTING", let activity, activity.isOpen {
+            return Self(status: .choosingActivity,
+                        nextStep: isOwner ? (activity.ideaCount == 0 ? .suggestActivity : .chooseActivity)
+                            : activity.hasParticipated ? .waitForActivity : .suggestActivity,
+                        detail: AppLocalization.string("Interest does not confirm attendance. You will confirm the final arrangement later."))
+        }
         let status: PlanDisplayStatus = switch phase {
         case "COLLECTING": .findingTime
         case "INVITING": .awaitingConfirmation
@@ -184,7 +196,7 @@ extension NativeTimePoll {
                        respondedCount: participants.count, myStatus: mine?.status,
                        isIncluded: isOwner || mine?.selected == true, fixed: planningMode == "FIXED",
                        accepted: allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count,
-                       target: targetCount, start: chosenStart, end: chosenEnd, now: now)
+                       target: targetCount, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }
 
@@ -193,7 +205,7 @@ extension NativeTimePollList.Item {
         .manual(phase: planningPhase(at: now), isOwner: isOwner == true, didRespond: didRespond == true,
                 respondedCount: respondedCount ?? 0, myStatus: myInvitationStatus,
                 isIncluded: isOwner == true || isIncluded != false, fixed: planningMode == "FIXED",
-                accepted: acceptedCount ?? 0, target: confirmationTarget, start: chosenStart, end: chosenEnd, now: now)
+                accepted: acceptedCount ?? 0, target: confirmationTarget, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }
 

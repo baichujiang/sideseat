@@ -20,6 +20,25 @@ import XCTest
 
     override func tearDownWithError() throws { app?.terminate() }
 
+    func testActivityIdeasIsAnOptionalStartingPoint() {
+        app.tabBars.buttons["计划"].tap(); openCreation()
+        let together = app.buttons["plan-start-together"]
+        XCTAssertTrue(together.waitForExistence(timeout: 10)); together.tap()
+        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText("Weekend together\n")
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        XCTAssertTrue(app.buttons["time-poll-create-confirm"].isEnabled)
+        app.buttons["plan-activity-date-options"].tap()
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
+        capture("activity-ideas-start")
+        app.buttons["plan-change-method"].tap()
+        XCTAssertEqual(title.value as? String, "Weekend together")
+        app.buttons["plan-start-known-activity"].tap()
+        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists)
+        cancel().tap(); assertHittable(app.buttons["plans-create-primary"], "Both starts return to the same Plans page")
+    }
+
     func testPlansCreateCancelReturnsToPlansInOneStep() {
         app.tabBars.buttons["计划"].tap()
         for attempt in 1...3 {
@@ -61,7 +80,7 @@ import XCTest
         app.tabBars.buttons["计划"].tap()
         XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["plans-create-primary"].isHittable)
-        XCTAssertTrue(app.staticTexts["找个大家都能来的时间"].exists)
+        XCTAssertTrue(app.staticTexts["想和朋友一起做点什么？"].exists)
         XCTAssertTrue(app.staticTexts["周六 15:00，3 人都有空"].exists)
         capture("clear-start")
         app.buttons["plans-create-primary"].tap()
