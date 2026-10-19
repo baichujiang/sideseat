@@ -57,6 +57,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 134 / social Plans home](./releases/2026-10-19-preview134-social-plan-home.md) | Approved first-version home, original activity artwork, real friend context, retained horizontal sections and phone delivery |
+| [Preview 134 acceptance](./qa/2026-10-19-plans134.md) | 13 physical UI cases, complete native flow, 32 browser checks, release provenance and cleanup |
 | [Preview 133 / integrated planning](./releases/2026-10-19-preview133-integrated-planning.md) | One plan surface for activity ideas and availability; final activity/roster review and phone delivery |
 | [Preview 133 acceptance](./qa/2026-10-19-plans133.md) | Two complete phone flows, 25 API boundaries, 20 browser checks, initial failures and cleanup |
 | [Preview 132 / default flow](./releases/2026-10-19-preview132-default-plan-flow.md) | Single default creation form, contextual shortcuts, inline time inputs and physical end-to-end acceptance |

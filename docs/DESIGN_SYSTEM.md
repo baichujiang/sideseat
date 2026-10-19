@@ -636,3 +636,8 @@ A source card says Met through this intention, never implies the old snapshot is
 the newest Plan. The multi-Plan sheet groups a reschedule and its confirmed time.
 Chinese, English and German strings use the existing semantic colors and Dynamic
 Type. Verification evidence is tracked in the same-person remediation QA report.
+
+
+## Plans home — owner-approved 2026-10-19
+
+The first photographic concept is approved for implementation. Plans home uses the centrally owned `SideSeatTheme.PlanHome` warm ivory, forest, sage and restrained terracotta tokens, with adaptive dark counterparts. Other product surfaces and Brand Rose retain their existing tokens. First-use illustration is decorative; actual cards use real inviter/organizer context and existing avatars. Title-derived default artwork never sets or changes the activity. Needs-you stays vertical; waiting stays a compact horizontal rail, reflowing vertically for accessibility sizes. Opening an overview card never commits a response. See [design and assets](./designs/2026-10-19-plans-home/README.md).

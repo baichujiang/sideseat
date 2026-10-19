@@ -35,20 +35,27 @@ Local overview dates omit the current year and technical timezone identifier. Cr
 dates, other years and foreign-zone context remain explicit, including DST offset changes.
 The detail timetable keeps the complete original date/time/zone information.
 
-The compact layout uses three content groups. Task cards put a small viewer-status badge
-beside the activity, followed by the schedule and a single metadata/action footer. Waiting
-cards put activity and schedule above a combined status/progress footer, while keeping the
-explicit open-action text. Bilateral outgoing invitations say Waiting for [name] to confirm,
-instead of repeating the global waiting state and You invited [name]. Waiting cards keep
-location in detail; Task/Upcoming retain it as condensed metadata. Their narrower rail cards reveal more of the next item. Upcoming
-uses a small warm-neutral date block with activity/status, weekday/time and one metadata row.
-The complete date stays available to VoiceOver. All three use the same adaptive surface and
-restrained hairline; Task/Waiting still differ by priority, typography, arrangement and action.
-Normal metadata is condensed, while detail retains its complete data. Accessibility sizes
-stack the title/status and footer, allow complete wrapping and keep the date block flexible.
-Horizontal peeking and View all remain visible; the swipe hint is available to accessibility.
-Standard Chinese daytime fixture budgets are 128pt for task, 148pt for a two-line task title,
-112pt for waiting and 112pt for upcoming. These are UI regression limits, not fixed production
+Preview 134 implements the owner-approved first-version home: a scoped warm ivory/forest/sage
+palette, original photographic introduction and compact activity artwork. Default title-matched
+covers require no extra creation step and do not change the activity. Undecided plans retain a
+neutral suggestion theme. The introduction explains the purpose, provides one primary create
+action, a link entry and an immediately visible optional read-only example sheet. Existing-plan
+creation is one labeled toolbar action. The illustrative hero never represents actual attendees.
+
+The compact layout uses three content groups. Task cards put the viewer-specific status above
+the activity and schedule, with a small activity thumbnail beside them and a real-people/action
+footer. Confirmation review is filled forest; availability uses pale sage. Waiting cards use a
+sage surface with activity/schedule, real-people status/progress and a quiet open link. Bilateral
+outgoing invitations say Waiting for [name] to confirm. Real organizer/inviter and existing
+avatars come from the current record; no fictional friend roster is inserted. Manual-list
+peoplePreview excludes the viewer/organizer and blocked accounts; invitation phases use selected
+invitees, including fixed-time invitees without availability responses. Older DTOs remain valid.
+Task/Waiting keep location and complete progress in detail to control height. Upcoming retains
+its small date block, activity/status, weekday/time and condensed metadata. Full dates remain
+available to VoiceOver. Accessibility sizes omit decorative thumbnails, stack the footer and
+allow complete wrapping. Horizontal peeking, View all and accessibility swipe hints remain.
+Final standard Chinese fixture measurements are 128.67pt for task, 150.67pt for a two-line task,
+120.33pt for waiting and 85.67pt for Upcoming. These are measurements, not fixed production
 heights: cross-day/foreign-zone content and accessibility sizes can grow without cropping.
 
 The horizontal rail previews the next card,
@@ -88,8 +95,9 @@ The bottom action area distinguishes a local choice from a committed response or
 | Open a link, view Calendar, return | Light navigation row with destination icon and trailing arrow |
 | Decline | Red text with an x-circle and explicit I can't attend wording; destructive management remains in its menu |
 
-Compact overview task actions use a small outline, action-specific symbol and chevron;
-waiting cards use a lighter text link. The entire card still opens the original detail,
+Compact overview task actions use the confirmation/availability treatments described above,
+with an action-specific symbol and chevron; waiting cards use a lighter text link.
+The entire card still opens the original detail,
 without nested buttons or implicit confirmation. Icon, wording and structure communicate
 the role together; purpose is not encoded solely by color. Existing accessibility IDs,
 loading/disabled state, 44pt-or-larger actual button targets and dynamic wrapping remain.

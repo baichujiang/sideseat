@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 133 原生来源 `08f8741d`，网页来源 `b5e1e374` 已推送；[融合合同](./PLAN_ACTIVITY_START.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (133)` | 活动建议/时间表同页、复核活动与名单；41 单元、7 创建/布局真机、303.126 秒普通/12 API、344.053 秒活动/13 API 通过；普通启动 PID 2560；[133 交付](./releases/2026-10-19-preview133-integrated-planning.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；两条完整流程、最大字号/深色与普通启动通过，QA runner 与临时账号/计划已清理 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 134 原生来源 `021ea76d`、只读 API/OpenAPI 来源 `9eec0d95` 已推送；[呈现合同](./PLAN_PRESENTATION.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (134)` | 首次使用说明、活动主题图、真实朋友信息与横向分区；41 单元、13 界面真机、301.862 秒完整流程/12 API 通过；普通启动 PID 2754；[134 交付](./releases/2026-10-19-preview134-social-plan-home.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；完整原生流程、最大字号/深色与普通启动通过，QA runner 与临时账号/计划已清理 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_92P95djZabN4SkdFU6DGJxjqQQJL`，Ready | 网页活动建议原位展开，时间表始终可用；候选/正式各 10 项真实浏览器流程、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-19-plans133/release-health.json) |
-| 生产源码 | 1,360 项当前线上源码逐项校验重建；保留 1,358 项，覆盖两个界面组件及新增来源记录；上传 1,361 项 SHA-1 全匹配 | 网页来源 `b5e1e374`；测试同一 Production 候选后原样提升，无 API/Schema/迁移变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-19-plans133/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-19-plans133/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_9P8hKpuSHdscF2qXcbNiXgUMRWAL`，Ready | 列表新增只读真实人物信息；分享页保留 133 外观和时间表流程；候选/正式各 16 项真实浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-19-plans134/release-health.json) |
+| 生产源码 | 1,361 项线上源码逐项校验重建；保留 1,359 项，仅覆盖列表服务和 OpenAPI，并新增来源记录；上传 1,362 项 SHA-1 全匹配 | API 来源 `9eec0d95`；同一 Production 候选测试后原样提升，无 Schema/迁移变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-19-plans134/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-19-plans134/upload-verification.json) |
+
+134 落地已确认的照片版计划首页：用具体用途、单一主要创建入口和可立即查看的示例解释首次使用；已有计划增加活动辨识度、真实发起人和参与者头像，保留待处理纵向和等待他人横向。卡片打开原详情，不代替发送或确认；活动、空闲、名单、邀请、日历与到期规则保留。41 项单元、13 项真机界面、301.862 秒完整原生流程及 12 个 API 阶段、候选/正式各 16 项浏览器检查通过。6 个临时账号与 13 个计划/链接清理，QA runner 移除，134 普通启动 PID 2754；[完整 QA](./qa/2026-10-19-plans134.md)。本轮分享网页保留 133 外观；真实流程已复验。
 
 133 将可选活动建议与时间表融合为同一页，参与者无需切换，添加建议原位输入。发起人可先选最终时间，在同一复核页明确选择活动和名单；返回调整保留草稿，发送前不提交。活动兴趣不再提前隐藏填写空闲任务。41 项原生单元、7 项创建/布局真机、303.126 秒普通流程及 344.053 秒 App/Safari 活动流程、12+13 个 API 阶段通过；网页候选/正式各 10 项通过，原样提升同一构建。初始脚本滚动/入口/中文断言失败保留并修正复验。临时账号/计划清理，runner 移除，133 普通启动 PID 2560；[完整 QA](./qa/2026-10-19-plans133.md)。
 

@@ -1,0 +1,21 @@
+{
+  "tool": "built-in imagegen",
+  "assets": {
+    "PlanHomeHero": {
+      "transparent_background": true,
+      "prompt": "Create a production-ready transparent PNG illustration asset for the first-use screen of SideSeat, a warm premium social planning iPhone app. This is ONLY an editorial photo collage, no UI, no phone, no typography, no text. Wide composition about 2:1: one large softly rounded photo of three ethnically diverse university-age friends smiling naturally at an outdoor café in warm daylight on the left, and one smaller overlapping slightly rotated softly rounded photo of a badminton racket and shuttlecock on a green outdoor court at right. Subtle pale sage paper shape behind the photos and two tiny dark-forest hand-drawn strokes. Realistic candid editorial photography, restrained, clean carefully cropped photos, inviting not advertising. Crop the composition close with very little transparent padding. Genuine transparent background outside photo cutouts; no checkerboard rendered. Must remain clear at 340x170 logical pixels. No people names or fake avatars."
+    },
+    "PlanCoverHotpot": {
+      "transparent_background": false,
+      "prompt": "A beautiful tight square editorial food photograph of a simmering Chinese hotpot on a casual dinner table with vegetables, natural appetizing red broth, warm daylight, premium restrained photographic composition for a 64x64 pixel activity thumbnail in a friendly university social app. Whole composition readable at tiny size. Top-down three-quarter close crop, realistic, warm terracotta and cream palette. No people, lettering, UI, collage, border or logos. Full bleed image."
+    },
+    "PlanCoverBadminton": {
+      "transparent_background": false,
+      "prompt": "A beautiful tight square editorial lifestyle photograph of a single badminton racket and two white shuttlecocks lying diagonally on a softly sunlit sage-green outdoor badminton court. Premium quiet photographic composition for a 64x64 pixel social activity thumbnail. Whole subject readable at tiny size. Natural soft shadows, warm daylight, green and ivory, full bleed. No people, lettering, UI, collage, border or logos."
+    },
+    "PlanCoverCoffee": {
+      "transparent_background": false,
+      "prompt": "A beautiful tight square editorial photograph of two small ceramic coffee cups on a warm café table, one creamy cappuccino with simple latte art, hint of a notebook edge, friendly afternoon sunlight. Premium restrained social lifestyle composition, useful as a tiny 64x64 pixel activity thumbnail, large simple subjects. Cream, warm brown, gentle sage detail. Full bleed. No people, text, lettering, UI, collage, border or logos."
+    }
+  }
+}

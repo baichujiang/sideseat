@@ -1,0 +1,11 @@
+{
+  "nativeCommit": "021ea76dcb375164ac87e49f3b5528e671ac6723",
+  "apiCommit": "9eec0d95fe50b6d36d22f7adf37b5c018d844372",
+  "files": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "064846c7d55ad20ad9cbd454721e3a772c32fed4ea475bc7792cb826efbd463a",
+    "ios-native/SideSeat/Features/Chat/PlanHomeArtwork.swift": "72728487bdba1525f25db1b0adf744a3a4a8a80d5ecc528cb9098b10f986d223",
+    "ios-native/SideSeat/Features/Chat/TimePoll.swift": "8e60e665feefa0e2b39b4ddf2082f35205398f3a364dd4eee8aa500c6edf38fb",
+    "ios-native/SideSeat/Core/Design/SideSeatTheme.swift": "5050dc233b1b99ff33c10f9df08a1592ed5618291af8e0c89fecad276c9bb055",
+    "ios-native/Configuration/Preview.xcconfig": "4660ef013b879e6512a764da4848c674da8bd5445f6a5ebff3152260616a0e17"
+  }
+}

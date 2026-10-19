@@ -398,7 +398,9 @@ import XCTest
         nativeSignIn(owner, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
         let create = app.buttons["plans-create-primary"]
-        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        XCTAssertTrue(create.waitForExistence(timeout: 20))
+        capture(app, "native-home-first-use")
+        create.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
         XCTAssertFalse(app.buttons["plan-create-next"].exists)

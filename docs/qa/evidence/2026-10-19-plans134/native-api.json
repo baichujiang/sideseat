@@ -1,0 +1,244 @@
+{
+  "checks": [
+    {
+      "phase": "owner-ready",
+      "checkedAt": "2026-10-19T20:29:44.809Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-opened",
+      "checkedAt": "2026-10-19T20:30:11.903Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-saved",
+      "checkedAt": "2026-10-19T20:30:22.337Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-edited",
+      "checkedAt": "2026-10-19T20:30:43.091Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-reopened",
+      "checkedAt": "2026-10-19T20:31:12.684Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "owner-final-picked",
+      "checkedAt": "2026-10-19T20:32:30.110Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "roster-reviewed",
+      "checkedAt": "2026-10-19T20:32:53.118Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "awaiting-confirmation",
+      "checkedAt": "2026-10-19T20:32:58.581Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "reschedule-cancelled",
+      "checkedAt": "2026-10-19T20:33:10.876Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "invitation-reviewed",
+      "checkedAt": "2026-10-19T20:33:29.179Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "confirmed",
+      "checkedAt": "2026-10-19T20:34:02.005Z",
+      "actualPhase": "CONFIRMED",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    },
+    {
+      "phase": "calendar-verified",
+      "checkedAt": "2026-10-19T20:34:20.550Z",
+      "actualPhase": "CONFIRMED",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    }
+  ]
+}

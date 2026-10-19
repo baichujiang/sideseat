@@ -1,0 +1,12 @@
+{
+  "baseDeployment": "dpl_92P95djZabN4SkdFU6DGJxjqQQJL",
+  "sourceCommit": "9eec0d95fe50b6d36d22f7adf37b5c018d844372",
+  "sourceFiles": 1361,
+  "preservedFiles": 1359,
+  "overlay": {
+    "lib/api/v1/time-poll-service.ts": "ae8f46521320c9272a4af0c3dc5b9fa30e8d32ac",
+    "openapi/v1.json": "e0651d9f12e2e76c365fd0c05d960b4cb3f41491"
+  },
+  "databaseMigration": "none",
+  "buildMigrationPolicy": "SKIP_DATABASE_MIGRATIONS=1"
+}
