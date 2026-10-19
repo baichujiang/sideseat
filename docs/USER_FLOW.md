@@ -31,19 +31,18 @@ timetable directly; **Ask friends for ideas** enables the optional theme stage
 in place, with the same dates and existing inputs. The former two-choice header
 and two-part known-activity creation have been removed.
 
-Theme → share the same plan → App participants and web guests suggest activities
-and mark multiple interests → organizer selects a candidate locally → explicitly
-sets the activity → same timetable → choose final time → review invitees → send
-invitations → each selected person explicitly confirms → Calendar.
+Preview 133 integrates the optional activity ideas into the same timetable page.
+Everyone can suggest/mark interest and fill availability in parallel. Ideas expand
+inline; no separate activity/timetable page or switch is required. The organizer
+can select final time first, then explicitly select the activity and invitees in
+one invitation review before sending. Returning to adjust time preserves the
+local activity/roster draft; navigating or cancelling never commits it.
 
-During activity choice, ideas lead and **Fill free time first** opens the existing
-editable timetable. After selection, that timetable leads again. The token/link,
-names, participant identities, slots and saved availability are retained. Interest
-is neither an availability response nor attendance; counts never choose a winner.
-The organizer can choose without waiting for everyone. Existing plans skip this
-optional stage. Chat-bound bilateral plans keep their existing creation/consent;
-sharing a manual-plan link in chat opens this same manual flow. See
-[Activity-choice contract](./PLAN_ACTIVITY_START.md).
+The token/link, identities, slots and saved availability remain unchanged. Interest
+alone never hides an outstanding availability task, confirms attendance or chooses
+a winner. Existing plans skip activity ideas. Chat-bound bilateral plans retain
+their creation and consent; manual links in chat open the same manual plan.
+See [Activity-choice and product-integration contract](./PLAN_ACTIVITY_START.md).
 
 ## Invitation timetable — Preview 123
 

@@ -3023,3 +3023,11 @@
 "Everyone can fill free time on the same timetable." = "创建后，大家直接在同一张时间表填写空闲。";
 "%@ · %d candidate days" = "%@ · %d 个候选日期";
 "Write an activity, share free time and confirm together." = "写下活动，一起约时间，再确认参加。";
+
+"Choosing activity and time" = "一起定活动和时间";
+"Suggest activities and fill free time here. Neither is a commitment to attend." = "在这里提议活动、填写空闲，最终安排之后再确认参加。";
+"Use this activity" = "使用这个活动";
+"Collapse activity ideas" = "收起活动建议";
+"Choose the activity to invite people to" = "确认这次邀请的活动";
+"Your activity choice is saved when you send invitations." = "发送邀请时才会保存这里选择的活动。";
+"Add an activity idea in the plan before sending invitations." = "先返回计划添加一个活动建议，再发送邀请。";

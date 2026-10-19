@@ -40,10 +40,21 @@ struct UnifiedPlanInviteView: View {
     @Bindable var store: TimePollStore
     let range: TimePollFinalRange
     @Binding var selected: Set<String>
+    @Binding var activityID: String?
+    @State private var sending = false
 
-    init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>) {
+    init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>, activityID: Binding<String?>) {
         self.poll = poll; self.store = store; self.range = range
         _selected = selected
+        _activityID = activityID
+    }
+
+    private var needsActivityChoice: Bool { poll.activitySelection?.isOpen == true }
+    private var activityIdeas: [NativePlanActivity.Idea] { poll.activitySelection?.ideas ?? [] }
+    private var chosenActivity: NativePlanActivity.Idea? { activityIdeas.first { $0.id == activityID } }
+    private var reviewLocation: String? {
+        if let chosenActivity { return chosenActivity.location }
+        return poll.location
     }
 
     private var rangeIds: Set<Int> {
@@ -56,10 +67,34 @@ struct UnifiedPlanInviteView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(poll.title) {
+                Section(chosenActivity?.title ?? poll.title) {
                     Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
                         .accessibilityIdentifier("unified-plan-chosen-range")
-                    if let location = poll.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
+                    if let location = reviewLocation, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
+                }
+                if needsActivityChoice {
+                    Section {
+                        ForEach(activityIdeas) { idea in
+                            Button { activityID = idea.id } label: {
+                                HStack {
+                                    Image(systemName: activityID == idea.id ? "checkmark.circle.fill" : "circle")
+                                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                        Text(idea.title).foregroundStyle(SideSeatTheme.textPrimary)
+                                        if let location = idea.location, !location.isEmpty {
+                                            Text(location).font(.caption).foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }.frame(minHeight: 44)
+                            }.disabled(sending || store.acting)
+                                .accessibilityIdentifier("unified-plan-activity-\(idea.id)")
+                                .accessibilityValue(activityID == idea.id ? "Selected" : "Not selected")
+                        }
+                        if activityIdeas.isEmpty {
+                            Text("Add an activity idea in the plan before sending invitations.")
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                    } header: { Text("Choose the activity to invite people to") }
+                    footer: { Text("Your activity choice is saved when you send invitations.") }
                 }
                 Section("Final time") {
                     LabeledContent("Time zone", value: poll.timeZone)
@@ -96,19 +131,27 @@ struct UnifiedPlanInviteView: View {
                         .font(.subheadline.weight(.semibold))
                     Text("Sending confirms your participation. Everyone else confirms from the link.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    PlanActionButton(title: AppLocalization.string("Send invitations"), symbol: "paperplane.fill", kind: .commit, isLoading: store.acting,
+                    PlanActionButton(title: AppLocalization.string("Send invitations"), symbol: "paperplane.fill", kind: .commit, isLoading: sending || store.acting,
                                     accessibilityID: "unified-plan-send-invitations") {
                         Task {
+                            sending = true
+                            defer { sending = false }
+                            if needsActivityChoice {
+                                guard let activityID else { return }
+                                await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: activityID), session: session)
+                                guard store.error == nil else { return }
+                            }
                             await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
                             if store.error == nil && store.poll?.planningPhase == "INVITING" { dismiss() }
                         }
                     }
-                    .disabled(!store.canMutate || !poll.participants.contains { !$0.isMe && selected.contains($0.id) })
+                    .disabled(sending || !store.canMutate || (needsActivityChoice && chosenActivity == nil)
+                              || !poll.participants.contains { !$0.isMe && selected.contains($0.id) })
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
             }
             .navigationTitle("Confirm invitation list").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(store.acting) } }
-        }.tint(SideSeatTheme.utilityAction)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(sending || store.acting) } }
+        }.tint(SideSeatTheme.utilityAction).interactiveDismissDisabled(sending || store.acting)
     }
 }
 

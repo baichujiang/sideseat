@@ -3023,3 +3023,11 @@
 "Everyone can fill free time on the same timetable." = "Everyone can fill free time on the same timetable.";
 "%@ · %d candidate days" = "%@ · %d candidate days";
 "Write an activity, share free time and confirm together." = "Write an activity, share free time and confirm together.";
+
+"Choosing activity and time" = "Choosing activity and time";
+"Suggest activities and fill free time here. Neither is a commitment to attend." = "Suggest activities and fill free time here. Neither is a commitment to attend.";
+"Use this activity" = "Use this activity";
+"Collapse activity ideas" = "Collapse activity ideas";
+"Choose the activity to invite people to" = "Choose the activity to invite people to";
+"Your activity choice is saved when you send invitations." = "Your activity choice is saved when you send invitations.";
+"Add an activity idea in the plan before sending invitations." = "Add an activity idea in the plan before sending invitations.";

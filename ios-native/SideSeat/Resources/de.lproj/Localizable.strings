@@ -3022,3 +3022,11 @@
 "Everyone can fill free time on the same timetable." = "Nach dem Erstellen tragen alle ihre freie Zeit im selben Zeitplan ein.";
 "%@ · %d candidate days" = "%@ · %d mögliche Tage";
 "Write an activity, share free time and confirm together." = "Aktivität eintragen, freie Zeiten teilen und gemeinsam bestätigen.";
+
+"Choosing activity and time" = "Aktivität und Zeit finden";
+"Suggest activities and fill free time here. Neither is a commitment to attend." = "Hier Aktivitäten vorschlagen und freie Zeiten angeben. Die Teilnahme bestätigst du später.";
+"Use this activity" = "Diese Aktivität auswählen";
+"Collapse activity ideas" = "Aktivitätsideen einklappen";
+"Choose the activity to invite people to" = "Aktivität für die Einladung auswählen";
+"Your activity choice is saved when you send invitations." = "Deine Aktivitätsauswahl wird beim Senden der Einladungen gespeichert.";
+"Add an activity idea in the plan before sending invitations." = "Füge im Plan eine Aktivitätsidee hinzu, bevor du Einladungen sendest.";

@@ -6,7 +6,7 @@ enum PlanDisplayStatus: String, Sendable {
 
     var title: String {
         let key: String.LocalizationValue = switch self {
-        case .choosingActivity: "Choosing an activity"
+        case .choosingActivity: "Choosing activity and time"
         case .findingTime: "Finding a time"
         case .awaitingConfirmation: "Awaiting confirmations"
         case .confirmed: "Confirmed"
@@ -82,9 +82,9 @@ struct PlanPresentation: Sendable {
                        start: Date?, end: Date?, now: Date, activity: NativePlanActivity? = nil) -> Self {
         if phase == "COLLECTING", let activity, activity.isOpen {
             return Self(status: .choosingActivity,
-                        nextStep: isOwner ? (activity.ideaCount == 0 ? .suggestActivity : .chooseActivity)
-                            : activity.hasParticipated ? .waitForActivity : .suggestActivity,
-                        detail: AppLocalization.string("Interest does not confirm attendance. You will confirm the final arrangement later."))
+                        nextStep: isOwner ? (respondedCount > (didRespond ? 1 : 0) ? .chooseTime : .shareAvailability)
+                            : didRespond ? .waitForOrganizer : .fillAvailability,
+                        detail: AppLocalization.string("Suggest activities and fill free time here. Neither is a commitment to attend."))
         }
         let status: PlanDisplayStatus = switch phase {
         case "COLLECTING": .findingTime

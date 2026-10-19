@@ -223,7 +223,9 @@ import XCTest
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
         XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
         capture(app, "activity-01-create"); app.buttons["time-poll-create-confirm"].tap()
-        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 25))
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 25))
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].exists)
+        XCTAssertFalse(app.buttons["plan-activity-show-timetable"].exists)
         XCTAssertFalse(app.buttons["unified-plan-invite-window"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
         activityPhase("created")
@@ -239,37 +241,42 @@ import XCTest
         if allow.waitForExistence(timeout: 2) { allow.tap() }
         let copiedLink = try XCTUnwrap(link.value as? String)
         app.alerts.buttons["打开"].tap()
-        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
         activitySuggest("Hotpot", location: "Town centre")
         let interests = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-'"))
         XCTAssertEqual(interests.count, 2)
-        interests.element(boundBy: 0).tap()
-        activityWaitEnabled(interests.element(boundBy: 1)); interests.element(boundBy: 1).tap()
+        activityRevealNative(interests.element(boundBy: 0)); interests.element(boundBy: 0).tap()
+        activityWaitEnabled(interests.element(boundBy: 1)); activityRevealNative(interests.element(boundBy: 1)); interests.element(boundBy: 1).tap()
         activityPhase("peer-interested"); capture(app, "activity-03-peer-interests")
-        app.buttons["plan-activity-show-timetable"].tap()
+        activityRevealNative(app.buttons["plan-activity-collapse"]); app.buttons["plan-activity-collapse"].tap()
         let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
-        XCTAssertTrue(first.waitForExistence(timeout: 15)); first.tap(); second.tap(); nativeWaitSaved()
+        XCTAssertTrue(first.waitForExistence(timeout: 15)); activityRevealNative(second); first.tap(); second.tap(); nativeWaitSaved()
         activityPhase("peer-filled")
         // The same live record must stay usable at maximum text size.
         app.terminate()
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-deep-link=\(try XCTUnwrap(URL(string: copiedLink)?.path))", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
         app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": peer.accessToken]
         app.launch()
-        XCTAssertTrue(app.scrollViews["plan-activity-ideas"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
+        app.buttons["plan-activity-open-ideas"].tap()
         let largeInterest = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-' ")).firstMatch
-        for _ in 0..<8 where !largeInterest.isHittable { app.scrollViews["plan-activity-ideas"].swipeUp() }
+        activityRevealNative(largeInterest)
         XCTAssertTrue(largeInterest.isHittable); capture(app, "activity-04-dark-large-ideas")
-        let largeTimetable = app.buttons["plan-activity-show-timetable"]
-        for _ in 0..<8 where !largeTimetable.isHittable { app.scrollViews["plan-activity-ideas"].swipeUp() }
-        XCTAssertTrue(largeTimetable.isHittable)
+        let collapse = app.buttons["plan-activity-collapse"]
+        activityRevealNative(collapse); collapse.tap()
+        let largeFirst = app.buttons["time-poll-cell-0"]
+        activityRevealNative(largeFirst)
+        XCTAssertTrue(largeFirst.isHittable)
         XCTAssertTrue(app.buttons["plan-copy-link"].exists)
-        capture(app, "activity-04b-dark-large-actions"); largeTimetable.tap()
-        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
+        capture(app, "activity-04b-dark-large-timetable")
 
         activityOpenSafari(copiedLink)
         let guestName = safari.webViews.textFields.firstMatch
         XCTAssertTrue(guestName.waitForExistence(timeout: 25)); guestName.tap(); guestName.typeText("Guest Lin")
         webButton("Join the activity ideas", "加入一起选活动").tap()
+        XCTAssertTrue(safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch.waitForExistence(timeout: 20))
+        let ideasPanel = safari.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "活动建议", "Activity ideas")).firstMatch
+        activityRevealWeb(ideasPanel); ideasPanel.tap()
         let guestTitle = safari.webViews.textFields.firstMatch
         XCTAssertTrue(guestTitle.waitForExistence(timeout: 20))
         activityRevealWeb(guestTitle); guestTitle.tap(); guestTitle.typeText("Exhibition")
@@ -280,8 +287,7 @@ import XCTest
         let likeFirst = webLikes.element(boundBy: 0), likeSecond = webLikes.element(boundBy: 1)
         activityRevealWeb(likeFirst); likeFirst.tap(); activityWaitEnabled(likeSecond); activityRevealWeb(likeSecond); likeSecond.tap()
         activityPhase("guest-interested"); capture(safari, "activity-05-guest-ideas")
-        let free = webButton("You can fill in free time too", "也可以先填写空闲")
-        activityRevealWeb(free); free.tap()
+        activityRevealWeb(ideasPanel); ideasPanel.tap()
         let webFirst = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:00")).firstMatch
         let webSecond = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
         XCTAssertTrue(webFirst.waitForExistence(timeout: 20)); activityRevealWeb(webSecond)
@@ -290,18 +296,19 @@ import XCTest
         activityPhase("guest-filled"); capture(safari, "activity-06-guest-free-time")
 
         nativeSignIn(owner, bundle: fixture.bundle)
-        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你定活动")
-        let hotpot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-select-' AND label CONTAINS 'Hotpot'")).firstMatch
-        XCTAssertTrue(hotpot.waitForExistence(timeout: 15)); hotpot.tap()
-        capture(app, "activity-07-choice-draft"); activityPhase("choice-draft")
-        app.buttons["plan-activity-choose"].tap()
-        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
-        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, "Hotpot")
-        activityPhase("activity-chosen")
-        first.tap(); second.tap(); nativeWaitSaved(); activityPhase("owner-ready")
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard(expectedStatus: "待你定时间")
+        activityRevealNative(second); first.tap(); second.tap(); nativeWaitSaved(); activityPhase("owner-ready")
         app.buttons["unified-plan-invite-window"].tap(); first.tap(); second.tap()
         app.buttons["unified-plan-review-roster"].tap()
-        capture(app, "activity-08-review-roster"); app.buttons["unified-plan-send-invitations"].tap()
+        XCTAssertFalse(app.buttons["unified-plan-send-invitations"].isEnabled)
+        let hotpot = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-' AND label CONTAINS 'Hotpot'")).firstMatch
+        XCTAssertTrue(hotpot.waitForExistence(timeout: 15)); hotpot.tap()
+        capture(app, "activity-07-choice-draft"); activityPhase("choice-draft")
+        app.buttons["unified-plan-adjust-time"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        app.buttons["unified-plan-review-roster"].tap()
+        XCTAssertEqual(hotpot.value as? String, "Selected", "Activity draft survives returning to the timetable")
+        capture(app, "activity-08-review-arrangement"); app.buttons["unified-plan-send-invitations"].tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "1/3 人已确认"); activityPhase("inviting")
         nativeSignIn(peer, bundle: fixture.bundle)
@@ -329,12 +336,21 @@ import XCTest
     }
 
     private func activitySuggest(_ title: String, location: String) {
-        app.buttons["plan-activity-suggest"].tap()
+        activityRevealNative(app.buttons["plan-activity-suggest"]); app.buttons["plan-activity-suggest"].tap()
         let field = app.textFields["plan-activity-title"]
-        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText(title)
-        let place = app.textFields["plan-activity-location"]; place.tap(); place.typeText(location)
-        app.buttons["plan-activity-add"].tap()
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); activityRevealNative(field); field.tap(); field.typeText(title)
+        let place = app.textFields["plan-activity-location"]; activityRevealNative(place); place.tap(); place.typeText(location + "\n")
+        activityRevealNative(app.buttons["plan-activity-add"]); app.buttons["plan-activity-add"].tap()
         XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 15))
+    }
+    private func activityRevealNative(_ element: XCUIElement) {
+        XCTAssertTrue(element.waitForExistence(timeout: 15))
+        let scroll = app.scrollViews["time-poll-detail-scroll"]
+        for _ in 0..<14 where !element.isHittable {
+            if element.frame.midY < app.frame.midY { scroll.swipeDown(velocity: .slow) }
+            else { scroll.swipeUp(velocity: .slow) }
+        }
+        XCTAssertTrue(element.isHittable)
     }
     private func activityPhase(_ value: String) { print("ACTIVITY_PLAN_PHASE \(value)"); Thread.sleep(forTimeInterval: 3) }
     private func activityWaitEnabled(_ element: XCUIElement) {
@@ -388,9 +404,9 @@ import XCTest
         capture(app, "native-00-single-form")
         app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
-        XCTAssertGreaterThan(app.scrollViews["time-poll-grid"].frame.height, app.frame.height * 0.35,
+        XCTAssertGreaterThan(app.descendants(matching: .any)["time-poll-grid"].frame.height, app.frame.height * 0.35,
                              "The timetable should be the main working area on first entry")
-        XCTAssertLessThan(app.staticTexts["time-poll-detail-title"].frame.minY, app.scrollViews["time-poll-grid"].frame.minY)
+        XCTAssertLessThan(app.staticTexts["time-poll-detail-title"].frame.minY, app.descendants(matching: .any)["time-poll-grid"].frame.minY)
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         nativeWaitSaved(); nativePhase("owner-ready"); capture(app, "native-01-owner-table")
         app.buttons["plan-copy-link"].tap()
@@ -446,7 +462,7 @@ import XCTest
         app.buttons["time-poll-undo"].tap(); nativeWaitSaved()
         XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
         XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
-        let grid = app.scrollViews["time-poll-grid"].firstMatch
+        let grid = app.descendants(matching: .any)["time-poll-grid"].firstMatch
         let swipeOrigin = app.coordinate(withNormalizedOffset: .zero)
         let swipeX = first.frame.midX
         let swipeStartY = app.staticTexts["time-poll-saved"].frame.minY - 24

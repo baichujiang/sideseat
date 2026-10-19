@@ -12,28 +12,49 @@ form. Time already set? Send an invitation switches to exact time/duration/targe
 count inline. Returning to the default preserves name, place and candidate dates.
 The optional theme path still joins the same planning lifecycle below.
 
-Theme → everyone suggests activities and marks interest → organizer explicitly
-chooses an activity → existing timetable → review roster → send invitations →
-individual explicit confirmations → Calendar.
+## Integrated planning surface — Preview 133
+
+The same plan contains optional activity ideas and an always-editable timetable.
+There is no activity/timetable mode switch in the App or share page. An inline,
+collapsible ideas section keeps suggestions, interest and supporters beside the
+existing timetable. Native suggestion input expands in place. Interest never
+completes the separate availability task; participant cards still ask for free time
+until a response is saved. The existing vertical-action/horizontal-waiting layout stays.
+
+Theme → share the same plan → suggest/mark interest and fill free time in parallel
+→ organizer selects final time in the timetable → review activity and invitees
+→ send invitations → individual explicit confirmations → Calendar.
+
+An organizer may explicitly choose an activity from the inline section, or select
+it in the final invitation review. In review, activity/time/roster are local drafts;
+returning to adjust time retains the activity and roster draft. Merely selecting,
+opening or cancelling review writes nothing. Sending saves the selected activity
+through the existing owner-only endpoint, then sends invitations through the
+existing invitation endpoint. If the first request fails, no invitation is sent;
+if invitation sending fails, the already-saved activity remains visible for retry.
+The send action stays disabled for an undecided activity or an empty invitee list.
 
 The same plan token, link, account/guest identity and availability are retained.
-People can fill free time before the activity is selected. Suggestions and
-multiple interests never create an availability response, invitation, acceptance
-or Calendar entry. The organizer can choose without waiting for every voter;
-interest counts do not select a winner automatically.
+Suggestions and multiple interests never create an availability response,
+invitation, acceptance or Calendar entry. The organizer need not wait for every
+voter; interest counts never select a winner automatically.
 
-## Presentation
+## Product references and module boundaries
 
-Activity ideas lead while choosing; the timetable remains directly reachable.
-After choice, the timetable leads again and prior suggestions remain available.
-The organizer first selects a candidate locally, then commits Set activity and
-continue. App participants and web guests can suggest, mark/unmark interest and
-see supporters. Web visitors enter/resume their existing poll-scoped name.
+Owner request 2026-10-19: combine the useful capabilities of mature products in
+SideSeat's existing modules, keeping one default flow.
 
-Plans cards distinguish Your activity ideas needed, Ready to choose an activity
-and Waiting for the activity choice, while keeping the vertical-task/horizontal-
-waiting layout. Interested participants receive one local activity-chosen notice
-on the next authenticated refresh; this is separate from the final invitation.
+| Reference | Adopted in SideSeat | Boundary |
+| --- | --- | --- |
+| [Howbout](https://howbout.app/blog/group-planning/how-to-find-a-date-that-works-for-everyone-/) | One plan reached from Plans, existing conversation links and Calendar | Existing campus discovery and bilateral consent remain separate |
+| [Timeful](https://github.com/schej-it/timeful.app) | Direct availability input and simultaneous group overlap in the timetable | No automatic duration, roster, calendar disclosure or time winner |
+| [Tricider](https://www.tricider.com/features), [PollUnit](https://pollunit.com/en/questions/13/how-can-participants-add-their-own-options-in-a-poll) | Everyone can add suggestions and mark multiple interests inline | Activity preference is separate from availability and attendance |
+| [Rallly](https://github.com/lukevella/rallly) | Organizer reviews the final arrangement and recipients before sending | Every selected person explicitly confirms the same invitation version |
+
+This integrates product interactions using SideSeat's own SwiftUI, React and API
+implementation; it imports no third-party product code or new dependencies.
+Optional personal-calendar overlays, subset filtering and copying plans are future
+enhancements, not part of this delivered core integration or its acceptance claim.
 
 ## Data and authorization
 

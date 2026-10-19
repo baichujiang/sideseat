@@ -63,16 +63,13 @@ example still available. Empty accounts keep the full introduction. The next
 meet-up and Upcoming use the same compact date summary; Past retains its existing
 history, feedback and continuation actions.
 
-Manual plan detail is organized around the timetable after an activity is decided.
-During optional activity choice, compact suggestion rows lead; the timetable is
-directly reachable and can already save availability. Choosing an activity restores
-the timetable as the main surface, with ideas available as history.
-Creation now places title/place fields first in one native form at every text size;
-optional activity/exact-time shortcuts follow the relevant fields. Date editing
-expands in place. A single Create action replaces the mode pairs and Next page.
-At accessibility sizes, activity-choice actions join the same scroll as the ideas,
-so pinned controls do not cover interest buttons. Standard text keeps the compact
-fixed action area.
+Manual collection always shows the timetable, including plans with undecided
+activities. A compact ideas section expands inline for suggestions, interest and
+optional explicit activity selection; native suggestion input stays in that page.
+One vertical detail scroll owns the header, expanded ideas and full-height grid at
+all text sizes; date columns still scroll horizontally. The bottom action area
+remains reachable. An organizer can select time and review activity/roster together.
+Creation keeps the Preview 132 single form and contextual shortcuts.
 Manual scheduling detail is organized around the timetable. A flat `PlanDetailHeading`
 contains the activity, current status, role and optional location. Collection
 keeps the editable name, date range and response count close to the grid, with the
@@ -104,7 +101,7 @@ in the existing menu. No duplicate summary/attendee cards precede the timetable.
 
 | Display status | Viewer's next step |
 | --- | --- |
-| Choosing an activity | New participants suggest/mark interest; the organizer explicitly sets an activity; contributors wait for that choice. Interest counts and suggestions replace availability counts on these cards |
+| Choosing activity and time | Ideas are optional inline input. Participants without a saved availability response still need to fill it; those who responded wait for the organizer. The organizer can share or choose final time, then review activity and invitees together |
 | Finding a time | Organizer can view/share immediately and edit own availability directly in the timetable, then choose a time after friends respond; other participants fill availability and wait for the organizer |
 | Awaiting confirmations | Invited viewer explicitly confirms; an accepting participant waits; manual organizer reviews replies/shares; bilateral sender waits for the recipient |
 | Awaiting confirmations, viewer declined | Own reply is saved; no claim that this viewer is waiting to attend |

@@ -126,10 +126,10 @@ struct PlanPresentationTests {
             .manual(phase: phase, isOwner: owner, didRespond: false, respondedCount: 0, myStatus: nil,
                     isIncluded: owner, fixed: false, accepted: 0, target: 0, start: nil, end: nil, now: now, activity: activity)
         }
-        #expect(present(owner: true, activity: open).nextStep == .chooseActivity)
+        #expect(present(owner: true, activity: open).nextStep == .shareAvailability)
         #expect(present(owner: true, activity: open).status == .choosingActivity)
-        #expect(present(owner: false, activity: open).nextStep == .waitForActivity)
-        #expect(!present(owner: false, activity: open).nextStep.needsYou)
+        #expect(present(owner: false, activity: open).nextStep == .fillAvailability)
+        #expect(present(owner: false, activity: open).nextStep.needsYou)
         let chosen = NativePlanActivity(topic: "Weekend", isOpen: false, selectedIdeaId: "idea", ideaCount: 2, hasParticipated: true)
         #expect(present(owner: false, activity: chosen).nextStep == .fillAvailability)
         #expect(present(owner: false, activity: open, phase: "EXPIRED").status == .expired)
@@ -142,9 +142,23 @@ struct PlanPresentationTests {
             let value = PlanPresentation.manual(phase: "COLLECTING", isOwner: owner, didRespond: false,
                 respondedCount: 0, myStatus: nil, isIncluded: owner, fixed: false, accepted: 0, target: 0,
                 start: nil, end: nil, now: now, activity: empty)
-            #expect(value.nextStep == .suggestActivity)
+            #expect(value.nextStep == (owner ? .shareAvailability : .fillAvailability))
             #expect(value.nextStep.needsYou)
         }
+    }
+
+    @Test("Activity interest never hides an outstanding availability task")
+    func parallelActivityAndAvailability() {
+        let activity = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 2, hasParticipated: true)
+        func present(owner: Bool, responded: Bool, count: Int) -> PlanPresentation {
+            .manual(phase: "COLLECTING", isOwner: owner, didRespond: responded, respondedCount: count,
+                    myStatus: nil, isIncluded: owner, fixed: false, accepted: 0, target: 0,
+                    start: nil, end: nil, now: now, activity: activity)
+        }
+        #expect(present(owner: false, responded: false, count: 1).nextStep == .fillAvailability)
+        #expect(present(owner: false, responded: true, count: 1).nextStep == .waitForOrganizer)
+        #expect(present(owner: true, responded: false, count: 1).nextStep == .chooseTime)
+        #expect(present(owner: true, responded: true, count: 1).nextStep == .shareAvailability)
     }
 
 }

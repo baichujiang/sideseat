@@ -24,6 +24,16 @@ The one-form theme start defaults to the next seven days; date/hour review is
 optional, and no estimated response cap is set. See
 [Activity-choice contract](./PLAN_ACTIVITY_START.md).
 
+## Activity and time on one page — Preview 133
+
+Activity suggestions and free-time input run in parallel in one collection page.
+The organizer can choose final time directly, then select the activity and invitees
+in the same review. Activity/roster drafts survive adjusting time, and are committed
+only by sending (activity first through the existing endpoint, then invitation).
+A suggestion or interest does not satisfy the availability task. The existing
+records, consent versions, cancellation, expiry and Calendar rules are unchanged.
+This supersedes separate activity-board/timetable presentation below.
+
 ## Invitation timetable — Preview 123
 
 App and public-share invitation details now show a read-only timetable focused on
