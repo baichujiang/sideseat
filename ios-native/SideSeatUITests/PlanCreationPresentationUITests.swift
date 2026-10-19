@@ -17,6 +17,21 @@ import XCTest
 
     override func tearDownWithError() throws { app?.terminate() }
 
+    func testFirstHomeShowsPurposeAndOnePrimaryEntry() {
+        app.tabBars.buttons["计划"].tap()
+        XCTAssertTrue(app.staticTexts["把「改天约」\n变成「周末见」"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plans-create-primary"].isHittable)
+        XCTAssertFalse(app.buttons["plans-create-unified"].exists)
+        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        capture("home-first-use")
+        app.buttons["plans-purpose-example"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["plans-purpose-illustration"].exists)
+        app.buttons["plans-purpose-example"].tap()
+        openCreation()
+        cancel().tap()
+        XCTAssertTrue(homeCreate.isHittable)
+    }
+
     func testDefaultFormNeedsOnlyActivityAndOneCreateAction() {
         app.tabBars.buttons["计划"].tap(); openCreation()
         XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
@@ -75,7 +90,7 @@ import XCTest
         let bar = app.navigationBars.firstMatch
         bar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
             .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
-        assertHittable(app.buttons["plans-create-unified"])
+        assertHittable(homeCreate)
     }
 
     func testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable() {
@@ -93,14 +108,14 @@ import XCTest
         let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
         reveal(dates); capture("inline-dates-dark-large")
         XCTAssertTrue(create.isHittable)
-        cancel().tap(); assertHittable(app.buttons["plans-create-unified"])
+        cancel().tap(); assertHittable(homeCreate)
     }
 
     func testPlansCreateCancelReturnsToPlansInOneStep() {
         app.tabBars.buttons["计划"].tap()
         for attempt in 1...3 {
             openCreation(); capture("creation-\(attempt)"); cancel().tap()
-            assertHittable(app.buttons["plans-create-unified"])
+            assertHittable(homeCreate)
             XCTAssertFalse(app.buttons["time-poll-create"].exists)
         }
         capture("returned-to-plans")
@@ -110,13 +125,18 @@ import XCTest
         app.tabBars.buttons["消息"].tap()
         let entry = app.buttons["inbox-time-poll"]
         XCTAssertTrue(entry.waitForExistence(timeout: 10)); entry.tap()
-        assertHittable(app.buttons["plans-create-unified"])
+        assertHittable(homeCreate)
         XCTAssertTrue(app.tabBars.buttons["计划"].isSelected)
-        openCreation(); cancel().tap(); assertHittable(app.buttons["plans-create-unified"])
+        openCreation(); cancel().tap(); assertHittable(homeCreate)
     }
 
+    private var homeCreate: XCUIElement {
+        let primary = app.buttons["plans-create-primary"]
+        return primary.exists ? primary : app.buttons["plans-create-unified"]
+    }
     private func openCreation() {
-        let create = app.buttons["plans-create-unified"]
+        let create = homeCreate
+        for _ in 0..<5 where !create.isHittable { app.swipeUp() }
         assertHittable(create); create.tap()
         XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["time-poll-create-confirm"].exists)

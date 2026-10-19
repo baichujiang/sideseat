@@ -23082,6 +23082,49 @@
           },
           "activitySelection": {
             "$ref": "#/components/schemas/TimePollActivitySummary"
+          },
+          "organizer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "displayName",
+              "avatarUrl"
+            ],
+            "properties": {
+              "displayName": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "peoplePreview": {
+            "type": "array",
+            "maxItems": 3,
+            "description": "Existing visible participants, excluding the viewer and organizer; previews do not imply acceptance.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "displayName",
+                "avatarUrl"
+              ],
+              "properties": {
+                "displayName": {
+                  "type": "string"
+                },
+                "avatarUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
           }
         }
       },

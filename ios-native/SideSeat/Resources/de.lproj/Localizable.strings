@@ -3030,3 +3030,10 @@
 "Choose the activity to invite people to" = "Aktivität für die Einladung auswählen";
 "Your activity choice is saved when you send invitations." = "Deine Aktivitätsauswahl wird beim Senden der Einladungen gespeichert.";
 "Add an activity idea in the plan before sending invitations." = "Füge im Plan eine Aktivitätsidee hinzu, bevor du Einladungen sendest.";
+
+// Plans home: activity identity and friends
+"Turn things to do into time together." = "Aus Ideen wird gemeinsame Zeit.";
+"Turn ‘sometime’ into ‘see you soon’." = "Aus „irgendwann“ wird „bis bald“.";
+"Start a plan. Choose an activity and find a time together." = "Starte einen Plan. Findet gemeinsam eine Aktivität und einen Termin.";
+"Start your first plan" = "Ersten Plan starten";
+"%@ is organizing" = "%@ organisiert";

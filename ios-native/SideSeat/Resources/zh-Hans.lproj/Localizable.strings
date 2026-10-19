@@ -3031,3 +3031,10 @@
 "Choose the activity to invite people to" = "确认这次邀请的活动";
 "Your activity choice is saved when you send invitations." = "发送邀请时才会保存这里选择的活动。";
 "Add an activity idea in the plan before sending invitations." = "先返回计划添加一个活动建议，再发送邀请。";
+
+// Plans home: activity identity and friends
+"Turn things to do into time together." = "把想做的事，约成见面";
+"Turn ‘sometime’ into ‘see you soon’." = "把「改天约」\n变成「周末见」";
+"Start a plan. Choose an activity and find a time together." = "发个计划，一起选活动、找时间。";
+"Start your first plan" = "发起第一个计划";
+"%@ is organizing" = "%@ 发起";

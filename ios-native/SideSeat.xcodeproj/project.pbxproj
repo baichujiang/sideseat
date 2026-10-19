@@ -169,6 +169,7 @@
 		B2B5A3549718D7E8FB9F587B /* InboxNotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE53BA7801E4894A9A11FA7 /* InboxNotificationsView.swift */; };
 		B36F943E120850600DA9057B /* GroupChatManageModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DCA9EDEBD8EB96EB222260F /* GroupChatManageModels.swift */; };
 		B38EC3DB03C3967CF65B829E /* CalendarVoiceInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF7F0B0BE6539441B903817 /* CalendarVoiceInput.swift */; };
+		B44B3BB6A5D79326BEA03BEC /* PlanHomeArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED1DFB6065BC33C0292BA2A /* PlanHomeArtwork.swift */; };
 		B4C1147D9A51907BCDB60A4C /* ProfileAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2456ED392E82C96DFD3955E8 /* ProfileAppearance.swift */; };
 		B60DC1B70CCCB2115A605C52 /* CalendarSmartAddStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F9B1D8217108C54A294505 /* CalendarSmartAddStore.swift */; };
 		B73F9F8CF6B3B4332D3FC798 /* CrashReporting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53153421E0B86C234BBA457A /* CrashReporting.swift */; };
@@ -374,6 +375,7 @@
 		9C468BD9DED03DE05528A642 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		9DFF1B221A5ED72A5959924E /* DiscoverPlanShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverPlanShare.swift; sourceTree = "<group>"; };
 		9E8949EDFC00E4F92635CFCA /* TimePollStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePollStore.swift; sourceTree = "<group>"; };
+		9ED1DFB6065BC33C0292BA2A /* PlanHomeArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanHomeArtwork.swift; sourceTree = "<group>"; };
 		9EEC67F6581568857A4D683F /* ScheduleSharePhotoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSharePhotoLibrary.swift; sourceTree = "<group>"; };
 		9F8B24F33D337C2525B5E7D7 /* ProfileAvatarPreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarPreprocessor.swift; sourceTree = "<group>"; };
 		9FEBE4F2ACF6A60EF3E8737A /* DirectChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectChatView.swift; sourceTree = "<group>"; };
@@ -878,6 +880,7 @@
 				496182E114CE1ADDF9CBD1B2 /* PlanCardView.swift */,
 				27150D95DF55323B911FAF17 /* PlanCreateSheet.swift */,
 				C442B57FCEDC94450F983926 /* PlanFlowViews.swift */,
+				9ED1DFB6065BC33C0292BA2A /* PlanHomeArtwork.swift */,
 				0F81D54C02CFCBEB4751ABA8 /* PlanPresentation.swift */,
 				CA6EAEC43670BED2E9DC894C /* PlansRootView.swift */,
 				6C191A45032E16A760B9C346 /* PlansStore.swift */,
@@ -1257,6 +1260,7 @@
 				504A1CFABEDCD77FCD4B366E /* PlanCardView.swift in Sources */,
 				92F1E96FF60238FF1CF57F60 /* PlanCreateSheet.swift in Sources */,
 				9CBFCC8F6AF6BA59FEF3B51E /* PlanFlowViews.swift in Sources */,
+				B44B3BB6A5D79326BEA03BEC /* PlanHomeArtwork.swift in Sources */,
 				4FE0DE4EE144BD5386F72EA5 /* PlanPresentation.swift in Sources */,
 				04972E19F7E6C5E3D96AD230 /* PlansRootView.swift in Sources */,
 				4E2D07BF1D5EC43C407546E3 /* PlansStore.swift in Sources */,

@@ -3031,3 +3031,10 @@
 "Choose the activity to invite people to" = "Choose the activity to invite people to";
 "Your activity choice is saved when you send invitations." = "Your activity choice is saved when you send invitations.";
 "Add an activity idea in the plan before sending invitations." = "Add an activity idea in the plan before sending invitations.";
+
+// Plans home: activity identity and friends
+"Turn things to do into time together." = "Turn things to do into time together.";
+"Turn ‘sometime’ into ‘see you soon’." = "Turn ‘sometime’ into ‘see you soon’.";
+"Start a plan. Choose an activity and find a time together." = "Start a plan. Choose an activity and find a time together.";
+"Start your first plan" = "Start your first plan";
+"%@ is organizing" = "%@ is organizing";

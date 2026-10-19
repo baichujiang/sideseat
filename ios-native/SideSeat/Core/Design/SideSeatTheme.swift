@@ -24,6 +24,24 @@ import SwiftUI
 /// Never reuse the brand accent for
 /// calendar “now”, errors, or success. See `docs/DESIGN_SYSTEM.md`.
 enum SideSeatTheme {
+    /// Owner-approved Plans home palette; other product surfaces keep their current tokens.
+    enum PlanHome {
+        static let background = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor(red: 0.07, green: 0.09, blue: 0.08, alpha: 1)
+            : UIColor(red: 0.973, green: 0.969, blue: 0.949, alpha: 1) })
+        static let ink = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor(red: 0.89, green: 0.94, blue: 0.90, alpha: 1)
+            : UIColor(red: 0.14, green: 0.24, blue: 0.21, alpha: 1) })
+        static let sage = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor(red: 0.13, green: 0.20, blue: 0.16, alpha: 1)
+            : UIColor(red: 0.90, green: 0.94, blue: 0.90, alpha: 1) })
+        static let warm = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor(red: 0.22, green: 0.16, blue: 0.12, alpha: 1)
+            : UIColor(red: 0.99, green: 0.95, blue: 0.89, alpha: 1) })
+        static let terracotta = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+            ? UIColor(red: 0.98, green: 0.65, blue: 0.46, alpha: 1)
+            : UIColor(red: 0.66, green: 0.27, blue: 0.13, alpha: 1) })
+    }
     // MARK: - Brand palette
 
     /// Top-left coral from the brand mark. Decorative / CTA gradient only.

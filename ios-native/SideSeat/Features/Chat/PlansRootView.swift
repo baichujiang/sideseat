@@ -73,7 +73,7 @@ struct PlansRootView: View {
     @State private var showsOutgoing = false
     @State private var showsSectionPicker = false
     @State private var coordinatedPlans: [NativeTimePollList.Item] = []
-    @State private var showsPurposeExample = true
+    @State private var showsPurposeExample = false
     @State private var showsAllWaiting = false
     @State private var waitingScrollID: String?
     @State private var showsPlanCreation = false
@@ -85,13 +85,15 @@ struct PlansRootView: View {
     @State private var coordinationError: String?
     @State private var repeatPlan: NativePlanRequest?
 
+    private var hasPlans: Bool { !coordinatedPlans.isEmpty || !store.plans.isEmpty }
+
     var body: some View {
         VStack(spacing: 0) {
             if !coordinatedPlans.isEmpty || !store.plans.isEmpty || selectedSection != .waitingResponse {
                 sectionPicker
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
                     .padding(.vertical, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.bgGrouped)
+                    .background(SideSeatTheme.PlanHome.background)
             }
 
             SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
@@ -108,12 +110,17 @@ struct PlansRootView: View {
                 .refreshable { await store.load(using: session); await loadCoordinatedPlans() }
             }
         }
-        .background(SideSeatTheme.bgGrouped)
-        .ssRootNavigationTitle("Plans")
+        .background(SideSeatTheme.PlanHome.background)
+        .navigationTitle("Plans")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(SideSeatTheme.PlanHome.background, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showsPlanCreation = true } label: { Image(systemName: "plus") }
-                    .accessibilityLabel("Create a plan").accessibilityIdentifier("plans-create-unified")
+            if hasPlans {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showsPlanCreation = true } label: { Label("Start a plan", systemImage: "plus").font(.subheadline.weight(.semibold)) }
+                        .tint(SideSeatTheme.PlanHome.ink)
+                        .accessibilityIdentifier("plans-create-unified")
+                }
             }
         }
         .sheet(isPresented: $showsPlanCreation, onDismiss: {
@@ -300,41 +307,59 @@ struct PlansRootView: View {
     }
 
     private var planActions: some View {
-        let hasPlans = !coordinatedPlans.isEmpty || !store.plans.isEmpty
-        return VStack(alignment: .leading, spacing: hasPlans ? SideSeatTheme.spaceMD : SideSeatTheme.spaceLG) {
-            if !hasPlans {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+            if hasPlans {
+                let layout = dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+                layout {
+                    Text("Turn things to do into time together.")
+                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                    openLink
+                }
+            } else {
+                Text("Turn things to do into time together.")
+                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                Image("PlanHomeHero").resizable().scaledToFit()
+                    .frame(maxWidth: .infinity).frame(maxHeight: dynamicTypeSize.isAccessibilitySize ? 120 : 185)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text("What could you do together?").font(.title2.weight(.bold))
-                    Text("Write an activity, share free time and confirm together.")
+                    Text("Turn ‘sometime’ into ‘see you soon’.")
+                        .font(.title.weight(.bold)).foregroundStyle(SideSeatTheme.PlanHome.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Start a plan. Choose an activity and find a time together.")
                         .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                Button { showsPlanCreation = true } label: {
+                    Label("Start your first plan", systemImage: "plus")
+                        .font(.headline).frame(maxWidth: .infinity, minHeight: 52)
+                        .foregroundStyle(SideSeatTheme.ProductAction.foreground)
+                        .background(SideSeatTheme.PlanHome.ink, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-create-primary")
+                openLink
+                DisclosureGroup(isExpanded: $showsPurposeExample) {
+                    PlanPurposeExample().padding(.top, SideSeatTheme.spaceMD)
+                } label: {
+                    Label("See an example: a weekend study session", systemImage: "book")
+                        .font(.subheadline).frame(minHeight: 44)
+                }.tint(SideSeatTheme.PlanHome.ink).accessibilityIdentifier("plans-purpose-example")
             }
-            let layout = hasPlans && !dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
-            layout {
-                PlanActionButton(title: AppLocalization.string("Start a plan"), symbol: "plus", kind: .commit,
-                                accessibilityID: "plans-create-primary") { showsPlanCreation = true }
-                PlanActionButton(title: AppLocalization.string(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here"),
-                                 symbol: "link", kind: .navigate, accessibilityID: "plans-open-link") {
-                    planLink = ""; showsOpenPlanLink = true
-                }
-            }
-            if !hasPlans { Divider() }
-            DisclosureGroup(isExpanded: $showsPurposeExample) {
-                PlanPurposeExample().padding(.top, SideSeatTheme.spaceMD)
-            } label: {
-                Text("See an example: a weekend study session")
-                    .font(.subheadline.weight(.medium)).frame(minHeight: 44)
-            }.tint(SideSeatTheme.utilityAction)
-                .accessibilityIdentifier("plans-purpose-example")
-
         }
-        .padding(hasPlans ? 0 : SideSeatTheme.spaceLG)
-        .background(hasPlans ? Color.clear : SideSeatTheme.surface,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
+    }
+
+    private var openLink: some View {
+        Button { planLink = ""; showsOpenPlanLink = true } label: {
+            Label(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here", systemImage: "link")
+                .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 44, alignment: .leading)
+        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
+            .accessibilityIdentifier("plans-open-link")
     }
 
     private var actionOverview: some View {
@@ -444,8 +469,11 @@ struct PlansRootView: View {
             PlanOverviewLabel(title: plan.title, presentation: plan.presentation(at: now), style: style,
                 start: plan.chosenStart, end: plan.chosenEnd, timeZone: plan.timeZone,
                 candidateDates: plan.dates, now: now,
-                context: style == .meetup ? "" : AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"),
-                progress: progress)
+                context: plan.isOwner == true ? AppLocalization.string("Organized by you")
+                    : plan.organizer.map { String(format: AppLocalization.string(phase == "INVITING" ? "%@ invited you" : "%@ is organizing"), $0.displayName) }
+                        ?? AppLocalization.string("Shared plan"),
+                progress: progress, people: (plan.isOwner == true ? [] : plan.organizer.map { [$0] } ?? []) + (plan.peoplePreview ?? []),
+                isChoosingActivity: plan.activitySelection?.isOpen == true)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-coordinated-\(plan.token)")
@@ -466,7 +494,8 @@ struct PlansRootView: View {
             PlanOverviewLabel(title: plan.title,
                 presentation: PlanPresentation.conversation(plan, viewerID: currentUserID, now: now), style: style,
                 start: plan.startDate, end: plan.endDate, now: now, location: plan.location, context: context,
-                waitingFor: plan.status == "PENDING" && plan.proposer.id == currentUserID ? participant.displayName : nil)
+                waitingFor: plan.status == "PENDING" && plan.proposer.id == currentUserID ? participant.displayName : nil,
+                people: [.init(displayName: participant.displayName, avatarUrl: participant.avatarUrl)])
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-row-\(plan.id)")
@@ -734,6 +763,8 @@ private struct PlanOverviewLabel: View {
     let context: String
     var progress: String? = nil
     var waitingFor: String? = nil
+    var people: [NativeTimePollList.Person] = []
+    var isChoosingActivity = false
 
     private var timing: PlanOverviewTiming {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
@@ -750,9 +781,9 @@ private struct PlanOverviewLabel: View {
             }
         }
         .foregroundStyle(SideSeatTheme.textPrimary)
-        .padding(SideSeatTheme.spaceLG)
+        .padding(SideSeatTheme.spaceMD)
         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-        .background(SideSeatTheme.surface,
+        .background(style == .waiting ? SideSeatTheme.PlanHome.sage : SideSeatTheme.surface,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
         .overlay {
             RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
@@ -763,43 +794,44 @@ private struct PlanOverviewLabel: View {
 
     private var task: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            heading(status: presentation.cardStatusTitle, color: SideSeatTheme.statusWarningText, font: .headline)
-            schedule
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    Text(presentation.cardStatusTitle).font(.caption.weight(.medium))
+                        .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.statusWarningText : SideSeatTheme.PlanHome.ink)
+                    activityTitle(.headline)
+                    schedule
+                }
+                if !typeSize.isAccessibilitySize { PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity) }
+            }
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
             footer {
-                Text(taskMetadata).font(.caption).foregroundStyle(secondary)
+                PlanHomePeople(people: people, text: context)
                     .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
-                    .fixedSize(horizontal: false, vertical: true)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 action.font(.footnote.weight(.semibold))
-                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.PlanHome.ink)
                     .padding(.horizontal, SideSeatTheme.spaceSM)
-                    .frame(minHeight: 28, alignment: .leading)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                            .strokeBorder(SideSeatTheme.separator, lineWidth: 1)
-                    }
+                    .frame(minHeight: 36, alignment: .leading)
+                    .background(presentation.nextStep == .confirm ? SideSeatTheme.PlanHome.ink : SideSeatTheme.PlanHome.sage,
+                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             }
         }
     }
 
     private var waiting: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            activityTitle(.callout)
-            schedule
-            let footer = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-            footer {
-                Text(waitingSummary)
-                    .font(.caption).foregroundStyle(secondary)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
-                    .fixedSize(horizontal: false, vertical: true)
-                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                action.font(.caption.weight(.semibold)).fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    activityTitle(.callout)
+                    schedule
+                }
+                if !typeSize.isAccessibilitySize { PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity, size: 42) }
             }
+            PlanHomePeople(people: people, text: waitingSummary)
+                .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+            action.font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.PlanHome.ink)
         }
     }
 

@@ -21845,6 +21845,92 @@ internal enum Components {
             internal var planningMode: Components.Schemas.TimePollListItem.PlanningModePayload?
             /// - Remark: Generated from `#/components/schemas/TimePollListItem/activitySelection`.
             internal var activitySelection: Components.Schemas.TimePollActivitySummary?
+            /// - Remark: Generated from `#/components/schemas/TimePollListItem/organizer`.
+            internal struct OrganizerPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/TimePollListItem/organizer/displayName`.
+                internal var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/TimePollListItem/organizer/avatarUrl`.
+                internal var avatarUrl: Swift.String?
+                /// Creates a new `OrganizerPayload`.
+                ///
+                /// - Parameters:
+                ///   - displayName:
+                ///   - avatarUrl:
+                internal init(
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case displayName
+                    case avatarUrl
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.displayName = try container.decode(
+                        Swift.String.self,
+                        forKey: .displayName
+                    )
+                    self.avatarUrl = try container.decodeIfPresent(
+                        Swift.String.self,
+                        forKey: .avatarUrl
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "displayName",
+                        "avatarUrl"
+                    ])
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/TimePollListItem/organizer`.
+            internal var organizer: Components.Schemas.TimePollListItem.OrganizerPayload?
+            /// - Remark: Generated from `#/components/schemas/TimePollListItem/PeoplePreviewPayload`.
+            internal struct PeoplePreviewPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/TimePollListItem/PeoplePreviewPayload/displayName`.
+                internal var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/TimePollListItem/PeoplePreviewPayload/avatarUrl`.
+                internal var avatarUrl: Swift.String?
+                /// Creates a new `PeoplePreviewPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - displayName:
+                ///   - avatarUrl:
+                internal init(
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                internal enum CodingKeys: String, CodingKey {
+                    case displayName
+                    case avatarUrl
+                }
+                internal init(from decoder: any Swift.Decoder) throws {
+                    let container = try decoder.container(keyedBy: CodingKeys.self)
+                    self.displayName = try container.decode(
+                        Swift.String.self,
+                        forKey: .displayName
+                    )
+                    self.avatarUrl = try container.decodeIfPresent(
+                        Swift.String.self,
+                        forKey: .avatarUrl
+                    )
+                    try decoder.ensureNoAdditionalProperties(knownKeys: [
+                        "displayName",
+                        "avatarUrl"
+                    ])
+                }
+            }
+            /// Existing visible participants, excluding the viewer and organizer; previews do not imply acceptance.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimePollListItem/peoplePreview`.
+            internal typealias PeoplePreviewPayload = [Components.Schemas.TimePollListItem.PeoplePreviewPayloadPayload]
+            /// Existing visible participants, excluding the viewer and organizer; previews do not imply acceptance.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TimePollListItem/peoplePreview`.
+            internal var peoplePreview: Components.Schemas.TimePollListItem.PeoplePreviewPayload?
             /// Creates a new `TimePollListItem`.
             ///
             /// - Parameters:
@@ -21868,6 +21954,8 @@ internal enum Components {
             ///   - didRespond:
             ///   - planningMode:
             ///   - activitySelection:
+            ///   - organizer:
+            ///   - peoplePreview: Existing visible participants, excluding the viewer and organizer; previews do not imply acceptance.
             internal init(
                 token: Swift.String,
                 title: Swift.String,
@@ -21888,7 +21976,9 @@ internal enum Components {
                 isOwner: Swift.Bool? = nil,
                 didRespond: Swift.Bool? = nil,
                 planningMode: Components.Schemas.TimePollListItem.PlanningModePayload? = nil,
-                activitySelection: Components.Schemas.TimePollActivitySummary? = nil
+                activitySelection: Components.Schemas.TimePollActivitySummary? = nil,
+                organizer: Components.Schemas.TimePollListItem.OrganizerPayload? = nil,
+                peoplePreview: Components.Schemas.TimePollListItem.PeoplePreviewPayload? = nil
             ) {
                 self.token = token
                 self.title = title
@@ -21910,6 +22000,8 @@ internal enum Components {
                 self.didRespond = didRespond
                 self.planningMode = planningMode
                 self.activitySelection = activitySelection
+                self.organizer = organizer
+                self.peoplePreview = peoplePreview
             }
             internal enum CodingKeys: String, CodingKey {
                 case token
@@ -21932,6 +22024,8 @@ internal enum Components {
                 case didRespond
                 case planningMode
                 case activitySelection
+                case organizer
+                case peoplePreview
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -22015,6 +22109,14 @@ internal enum Components {
                     Components.Schemas.TimePollActivitySummary.self,
                     forKey: .activitySelection
                 )
+                self.organizer = try container.decodeIfPresent(
+                    Components.Schemas.TimePollListItem.OrganizerPayload.self,
+                    forKey: .organizer
+                )
+                self.peoplePreview = try container.decodeIfPresent(
+                    Components.Schemas.TimePollListItem.PeoplePreviewPayload.self,
+                    forKey: .peoplePreview
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "token",
                     "title",
@@ -22035,7 +22137,9 @@ internal enum Components {
                     "isOwner",
                     "didRespond",
                     "planningMode",
-                    "activitySelection"
+                    "activitySelection",
+                    "organizer",
+                    "peoplePreview"
                 ])
             }
         }

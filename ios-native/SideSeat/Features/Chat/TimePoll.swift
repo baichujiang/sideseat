@@ -126,6 +126,10 @@ struct NativeTimePoll: Decodable, Sendable {
 
 struct NativeTimePollList: Decodable, Sendable {
     let polls: [Item]
+    struct Person: Decodable, Sendable {
+        let displayName: String
+        let avatarUrl: String?
+    }
     struct Item: Decodable, Sendable, Identifiable {
         var id: String { token }
         let token: String
@@ -148,6 +152,8 @@ struct NativeTimePollList: Decodable, Sendable {
         let didRespond: Bool?
         let planningMode: String?
         var activitySelection: NativePlanActivity? = nil
+        var organizer: Person? = nil
+        var peoplePreview: [Person]? = nil
         var confirmationTarget: Int { planningMode == "FIXED" ? expectedCount ?? 2 : invitedCount ?? 0 }
 
         func nextStep(at now: Date) -> PlanNextStep {
