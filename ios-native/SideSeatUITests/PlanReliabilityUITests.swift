@@ -138,11 +138,10 @@ import XCTest
         launch(auth: fixture.owner, path: "/plans")
         let newPlan = app.buttons["plans-create-primary"]
         XCTAssertTrue(newPlan.waitForExistence(timeout: 20)); capture("hub-first-use"); newPlan.tap()
-        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists); capture("creation-choice"); app.buttons["plan-mode-collect"].tap()
+        XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["plan-create-next"].exists); capture("creation-single-form")
         let titleField = app.textFields["time-poll-title"]
         XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText(title + "\n")
-        app.buttons["plan-create-next"].tap()
         let createButton = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(createButton.isEnabled); capture("creation-details"); createButton.tap()
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
@@ -201,17 +200,15 @@ import XCTest
         launch(auth: fixture.owner, path: "/plans", chinese: true)
         XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 15)); capture("hub-chinese-dark")
         app.buttons["plans-create-primary"].tap()
-        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10)); capture("choice-chinese-dark")
+        XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10)); capture("form-chinese-dark")
         app.terminate()
         app.launchArguments.append("--ui-testing-dynamic-type-accessibility")
         app.launch()
         app.buttons["plans-create-unified"].tap()
-        let choice = app.buttons["plan-mode-collect"]
-        XCTAssertTrue(choice.waitForExistence(timeout: 10)); XCTAssertGreaterThanOrEqual(choice.frame.height, 44); capture("choice-accessibility5"); choice.tap()
+        XCTAssertFalse(app.buttons["plan-create-next"].exists); capture("form-accessibility5")
         let titleField = app.textFields["time-poll-title"]
         for _ in 0..<4 where !titleField.isHittable { app.swipeDown() }
         XCTAssertTrue(titleField.waitForExistence(timeout: 10)); titleField.tap(); titleField.typeText("Large text plan\n")
-        app.buttons["plan-create-next"].tap()
         let createButton = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(createButton.isHittable)
         XCTAssertLessThanOrEqual(createButton.frame.maxX, app.frame.maxX + 1)

@@ -2,10 +2,15 @@
 
 Owner approval: 2026-10-19. Delivery status belongs to [Deployed state](./DEPLOYED_STATE.md).
 
-Plans supports two starts: an activity already decided, or a shared theme such as
-“What shall we do together this weekend?”. The existing decided-activity start
-retains its collection/fixed invitation paths. The theme start can be created from
-one form with the next seven days preselected; reviewing dates/hours is optional.
+Owner refinement — Preview 132: one default creation form, with optional shortcuts.
+The form opens directly on activity name, optional location and a visible date/hour
+summary. The next seven candidate days are preselected; expanding the time row edits
+dates/hours in place. Create opens the timetable with no mode decision or Next step.
+
+Not sure what to do? Ask friends for ideas is a secondary text action in that same
+form. Time already set? Send an invitation switches to exact time/duration/target
+count inline. Returning to the default preserves name, place and candidate dates.
+The optional theme path still joins the same planning lifecycle below.
 
 Theme → everyone suggests activities and marks interest → organizer explicitly
 chooses an activity → existing timetable → review roster → send invitations →

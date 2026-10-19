@@ -5,14 +5,9 @@ import XCTest
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
-            app = XCUIApplication(bundleIdentifier: bundle)
-        } else {
-            app = XCUIApplication()
-        }
+        app = XCUIApplication(bundleIdentifier: ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] ?? "app.sideseat.mobile.preview")
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
             "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-local-api", "--ui-testing-plans-empty"]
-        // Presentation needs no server or changes to the owner's account.
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
@@ -20,138 +15,129 @@ import XCTest
 
     override func tearDownWithError() throws { app?.terminate() }
 
-    func testActivityIdeasIsAnOptionalStartingPoint() {
+    func testDefaultFormNeedsOnlyActivityAndOneCreateAction() {
         app.tabBars.buttons["计划"].tap(); openCreation()
-        let together = app.buttons["plan-start-together"]
-        XCTAssertTrue(together.waitForExistence(timeout: 10)); together.tap()
-        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
-        let title = app.textFields["time-poll-title"]
-        title.tap(); title.typeText("Weekend together\n")
+        XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
+        XCTAssertFalse(app.buttons["plan-mode-collect"].exists)
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
-        XCTAssertTrue(app.buttons["time-poll-create-confirm"].isEnabled)
-        app.buttons["plan-activity-date-options"].tap()
+        XCTAssertFalse(app.buttons["plan-change-method"].exists)
+        let create = app.buttons["time-poll-create-confirm"]
+        XCTAssertEqual(create.label, "创建时间表"); XCTAssertFalse(create.isEnabled)
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText("周末聚餐\n")
+        XCTAssertTrue(create.isEnabled); XCTAssertTrue(create.isHittable)
+        XCTAssertTrue(app.buttons["plan-date-options"].exists)
+        capture("single-form-default")
+    }
+
+    func testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm() {
+        app.tabBars.buttons["计划"].tap(); openCreation()
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText("周末一起出去\n")
+        let location = app.textFields["unified-plan-location"]
+        location.tap(); location.typeText("校园\n")
+        app.swipeDown()
+        let dates = app.buttons["plan-date-options"]
+        reveal(dates); let dateSummary = dates.label
+        let shortcut = app.buttons["plan-start-together"]
+        reveal(shortcut); XCTAssertGreaterThanOrEqual(shortcut.frame.height, 44); shortcut.tap()
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
         XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
-        capture("activity-ideas-start")
-        app.buttons["plan-change-method"].tap()
-        XCTAssertEqual(title.value as? String, "Weekend together")
-        app.buttons["plan-start-known-activity"].tap()
-        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists)
-        cancel().tap(); assertHittable(app.buttons["plans-create-primary"], "Both starts return to the same Plans page")
+        capture("secondary-activity-ideas")
+        let cancelIdeas = app.buttons["plan-start-known-activity"]
+        reveal(cancelIdeas); cancelIdeas.tap()
+        XCTAssertEqual(title.value as? String, "周末一起出去")
+        XCTAssertEqual(location.value as? String, "校园")
+        XCTAssertEqual(dates.label, dateSummary)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "创建时间表")
+        cancel().tap(); assertHittable(app.buttons["plans-create-primary"])
+    }
+
+    func testFixedTimeShortcutEditsInPlaceAndKeepsInputs() {
+        app.tabBars.buttons["计划"].tap(); openCreation()
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText("已定时间的聚餐\n")
+        let fixed = app.buttons["plan-mode-fixed"]
+        reveal(fixed); fixed.tap()
+        XCTAssertTrue(app.datePickers["unified-plan-fixed-start"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.steppers["unified-plan-participant-count"].exists)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "生成邀请链接")
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        capture("secondary-fixed-time")
+        let collect = app.buttons["plan-mode-collect"]
+        reveal(collect); collect.tap()
+        XCTAssertEqual(title.value as? String, "已定时间的聚餐")
+        XCTAssertTrue(app.buttons["plan-date-options"].exists)
+        capture("return-to-default-form")
+        let bar = app.navigationBars.firstMatch
+        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
+            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
+        assertHittable(app.buttons["plans-create-unified"])
+    }
+
+    func testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable() {
+        app.terminate()
+        app.launchArguments.append(contentsOf: ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
+        app.launch(); app.tabBars.buttons["计划"].tap(); openCreation()
+        let title = app.textFields["time-poll-title"]
+        reveal(title); title.tap(); title.typeText("Accessible activity\n")
+        let create = app.buttons["time-poll-create-confirm"]
+        XCTAssertTrue(create.isEnabled); XCTAssertTrue(create.isHittable)
+        XCTAssertLessThanOrEqual(create.frame.maxX, app.frame.maxX + 1)
+        capture("single-form-dark-large")
+        let options = app.buttons["plan-date-options"]
+        reveal(options); options.tap()
+        let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
+        reveal(dates); capture("inline-dates-dark-large")
+        XCTAssertTrue(create.isHittable)
+        cancel().tap(); assertHittable(app.buttons["plans-create-unified"])
     }
 
     func testPlansCreateCancelReturnsToPlansInOneStep() {
         app.tabBars.buttons["计划"].tap()
         for attempt in 1...3 {
-            openCreation()
-            capture("creation-\(attempt)")
-            cancel().tap()
-            assertHittable(app.buttons["plans-create-unified"], "One Cancel must return directly to Plans")
-            XCTAssertFalse(app.buttons["time-poll-create"].exists, "No intermediate plan-list sheet should remain")
+            openCreation(); capture("creation-\(attempt)"); cancel().tap()
+            assertHittable(app.buttons["plans-create-unified"])
+            XCTAssertFalse(app.buttons["time-poll-create"].exists)
         }
         capture("returned-to-plans")
-    }
-
-    func testTimingModesAndSwipeDismissReturnToPlans() {
-        app.tabBars.buttons["计划"].tap()
-        openCreation()
-        app.buttons["一起吃饭"].tap()
-        app.buttons["plan-mode-fixed"].tap()
-        app.buttons["plan-create-next"].tap()
-        let fixed = app.datePickers["unified-plan-fixed-start"]
-        for _ in 0..<3 where !fixed.exists { app.swipeUp() }
-        XCTAssertTrue(fixed.waitForExistence(timeout: 5))
-        for _ in 0..<4 where !app.buttons["plan-change-method"].isHittable { app.swipeDown() }
-        app.buttons["plan-change-method"].tap()
-        app.buttons["plan-mode-collect"].tap()
-        app.buttons["plan-create-next"].tap()
-        let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
-        for _ in 0..<3 where !dates.exists { app.swipeUp() }
-        XCTAssertTrue(dates.waitForExistence(timeout: 5))
-        let bar = app.navigationBars.firstMatch
-        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
-            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
-        assertHittable(app.buttons["plans-create-unified"], "One swipe must dismiss the creation sheet")
-        openCreation()
-        cancel().tap()
-        assertHittable(app.buttons["plans-create-unified"], "Creation should reopen and close normally after a swipe")
-    }
-
-    func testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack() {
-        app.tabBars.buttons["计划"].tap()
-        XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["plans-create-primary"].isHittable)
-        XCTAssertTrue(app.staticTexts["想和朋友一起做点什么？"].exists)
-        XCTAssertTrue(app.staticTexts["周六 15:00，3 人都有空"].exists)
-        capture("clear-start")
-        app.buttons["plans-create-primary"].tap()
-        let next = app.buttons["plan-create-next"]
-        XCTAssertTrue(next.waitForExistence(timeout: 10)); XCTAssertFalse(next.isEnabled)
-        XCTAssertFalse(app.buttons["time-poll-create-confirm"].exists)
-        app.buttons["一起学习"].tap()
-        XCTAssertTrue(next.isEnabled); capture("activity-first"); next.tap()
-        XCTAssertTrue(app.buttons["time-poll-create-confirm"].waitForExistence(timeout: 10))
-        capture("dates-second")
-        app.buttons["plan-change-method"].tap()
-        XCTAssertEqual(app.textFields["time-poll-title"].value as? String, "一起学习")
-        XCTAssertTrue(next.isHittable)
-        cancel().tap()
-        assertHittable(app.buttons["plans-create-primary"], "Cancel returns to the clear starting point")
-    }
-
-    func testChineseDarkLargeTextCanAdvanceAndReturn() {
-        app.terminate()
-        app.launchArguments.append(contentsOf: ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
-        app.launch()
-        app.tabBars.buttons["计划"].tap()
-        capture("dark-large-purpose")
-        openCreation()
-        let title = app.textFields["time-poll-title"]
-        for _ in 0..<4 where !title.isHittable { app.swipeDown() }
-        title.tap(); title.typeText("Accessible activity\n")
-        let next = app.buttons["plan-create-next"]
-        XCTAssertTrue(next.isHittable); XCTAssertTrue(next.isEnabled)
-        XCTAssertLessThanOrEqual(next.frame.maxX, app.frame.maxX + 1)
-        capture("dark-large-activity"); next.tap()
-        let create = app.buttons["time-poll-create-confirm"]
-        XCTAssertTrue(create.waitForExistence(timeout: 10)); XCTAssertTrue(create.isHittable)
-        XCTAssertLessThanOrEqual(create.frame.maxX, app.frame.maxX + 1)
-        let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
-        for _ in 0..<5 where !dates.isHittable { app.swipeUp() }
-        XCTAssertTrue(dates.isHittable, "Date selection must remain reachable at maximum text size")
-        capture("dark-large-dates")
-        cancel().tap()
-        assertHittable(app.buttons["plans-create-unified"], "Large text creation returns directly to Plans")
     }
 
     func testMessagesEntryUsesFirstLevelPlans() {
         app.tabBars.buttons["消息"].tap()
         let entry = app.buttons["inbox-time-poll"]
         XCTAssertTrue(entry.waitForExistence(timeout: 10)); entry.tap()
-        assertHittable(app.buttons["plans-create-unified"], "Messages must hand off to first-level Plans")
+        assertHittable(app.buttons["plans-create-unified"])
         XCTAssertTrue(app.tabBars.buttons["计划"].isSelected)
-        XCTAssertFalse(app.buttons["time-poll-create"].exists)
-        openCreation(); cancel().tap()
-        assertHittable(app.buttons["plans-create-unified"], "Creation Cancel returns directly to Plans")
+        openCreation(); cancel().tap(); assertHittable(app.buttons["plans-create-unified"])
     }
 
     private func openCreation() {
         let create = app.buttons["plans-create-unified"]
-        assertHittable(create, "Plans creation entry must be available")
-        create.tap()
-        XCTAssertTrue(app.buttons["plan-mode-collect"].waitForExistence(timeout: 10))
+        assertHittable(create); create.tap()
+        XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["time-poll-create-confirm"].exists)
     }
-
+    private func reveal(_ element: XCUIElement) {
+        for _ in 0..<8 {
+            let top = app.navigationBars.firstMatch.frame.maxY + 8
+            let bottom = app.buttons["time-poll-create-confirm"].frame.minY - 8
+            if element.exists && element.isHittable && element.frame.midY > top && element.frame.midY < bottom { break }
+            if element.exists && element.frame.midY < top { app.swipeDown() } else { app.swipeUp() }
+        }
+        XCTAssertTrue(element.waitForExistence(timeout: 10))
+        XCTAssertTrue(element.isHittable)
+    }
     private func cancel() -> XCUIElement {
         app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["取消", "Cancel"])).firstMatch
     }
-
-    private func assertHittable(_ element: XCUIElement, _ message: String) {
-        XCTAssertTrue(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: element)], timeout: 8) == .completed, message)
+    private func assertHittable(_ element: XCUIElement) {
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "hittable == true"), object: element)], timeout: 8), .completed)
     }
-
     private func capture(_ name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "plan-presentation-" + name
+        attachment.name = "plan-creation-132-" + name
         attachment.lifetime = .keepAlways
         add(attachment)
     }

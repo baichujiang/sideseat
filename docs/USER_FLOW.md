@@ -9,12 +9,27 @@
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
 
+## One default creation form — owner refinement / Preview 132
+
+Plans → Start a plan → activity name, optional place and time → Create timetable →
+edit availability directly in the group timetable → share → select final time →
+review invitees and send → explicit individual confirmations → Calendar.
+
+Creation has one form. Candidate dates/hours are visible as a compact summary,
+preselected for the next seven days, and expand in place when editing is needed.
+There is no initial activity-mode choice, time-mode choice pair or mandatory Next
+page. A secondary Ask friends for ideas action enables collaborative suggestions;
+a secondary Time already set action shows the exact-time fields inline. Neither
+shortcut discards existing input. Essential invitee selection and explicit
+attendance consent remain real actions; opening or navigating never sends them.
+This supersedes the creation-screen descriptions in earlier dated sections below.
+
 ## Optional activity choice — Preview 131 / owner-approved 2026-10-19
 
-Plans leads with **Start a plan**. Creation offers **Activity already decided**
-and **Choose an activity together**. A shared theme can be created from one form,
-with the next seven days preselected and optional date/hour settings. The known
-activity start retains the two-part creation flow described below.
+Plans leads with **Start a plan**. Under Preview 132 the default form creates a
+timetable directly; **Ask friends for ideas** enables the optional theme stage
+in place, with the same dates and existing inputs. The former two-choice header
+and two-part known-activity creation have been removed.
 
 Theme → share the same plan → App participants and web guests suggest activities
 and mark multiple interests → organizer selects a candidate locally → explicitly

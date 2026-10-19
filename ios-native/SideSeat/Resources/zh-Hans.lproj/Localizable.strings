@@ -3014,3 +3014,12 @@
 "Review dates and hours" = "查看日期范围和时段";
 
 "%d candidate days — you can start without changing them" = "已选 %d 个候选日期，可直接发起";
+
+"Friends can suggest activities" = "朋友可以提议活动";
+"Not sure what to do? Ask friends for ideas" = "还没想好做什么？让朋友提议";
+"Find a time together instead" = "改为一起商量时间";
+"Dates to find a time" = "可约时间";
+"Time already set? Send an invitation" = "时间已定？直接发邀请";
+"Everyone can fill free time on the same timetable." = "创建后，大家直接在同一张时间表填写空闲。";
+"%@ · %d candidate days" = "%@ · %d 个候选日期";
+"Write an activity, share free time and confirm together." = "写下活动，一起约时间，再确认参加。";

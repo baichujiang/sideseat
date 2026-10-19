@@ -3013,3 +3013,12 @@
 "Review dates and hours" = "Tage und Zeiten ansehen";
 
 "%d candidate days — you can start without changing them" = "%d mögliche Tage – du kannst direkt starten";
+
+"Friends can suggest activities" = "Freunde können Aktivitäten vorschlagen";
+"Not sure what to do? Ask friends for ideas" = "Noch keine Idee? Freunde fragen";
+"Find a time together instead" = "Stattdessen gemeinsam eine Zeit finden";
+"Dates to find a time" = "Zeitraum zur Terminfindung";
+"Time already set? Send an invitation" = "Zeit steht fest? Einladung senden";
+"Everyone can fill free time on the same timetable." = "Nach dem Erstellen tragen alle ihre freie Zeit im selben Zeitplan ein.";
+"%@ · %d candidate days" = "%@ · %d mögliche Tage";
+"Write an activity, share free time and confirm together." = "Aktivität eintragen, freie Zeiten teilen und gemeinsam bestätigen.";

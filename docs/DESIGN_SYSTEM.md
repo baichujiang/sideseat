@@ -12,6 +12,11 @@
 
 - Use native SwiftUI structure and behavior first.
 - One primary task per screen.
+- Owner refinement 2026-10-19: provide one default complete flow. Start with the
+  task's inputs and result; expose exceptions as secondary contextual actions.
+  Avoid repeated two-choice gates or an extra page for fields that fit in the
+  same form. Keep meaningful sends, invitee selection and attendance consent
+  explicit; direct edits and navigation should not gain artificial confirmations.
 - Routine buttons, filters, menus, tabs and private-save controls use neutral text
   and neutral selected surfaces. Selection also uses a checkmark, icon or weight.
 - Product primary actions use adaptive ink/chalk. Rare emphasized actions such as
@@ -38,8 +43,10 @@ standard iOS titles and back behavior.
 
 ### Planning clarity
 
-For first use, explain the link → agreement → Calendar path and present the two
-creation scenarios in plain language. With active plans, collapse that introduction
+For first use, explain the link → agreement → Calendar path. Creation opens directly
+on activity/place/time in one form, then creates the timetable. Optional activity
+ideas or exact-time invitations expand from secondary text actions in context.
+With active plans, collapse that introduction
 and prioritize what needs the viewer's input. “Waiting for others” must distinguish
 saved availability from confirmed participation. Status colors support explicit
 labels and the next action; they do not replace those explanations.

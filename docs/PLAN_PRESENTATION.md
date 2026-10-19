@@ -67,8 +67,9 @@ Manual plan detail is organized around the timetable after an activity is decide
 During optional activity choice, compact suggestion rows lead; the timetable is
 directly reachable and can already save availability. Choosing an activity restores
 the timetable as the main surface, with ideas available as history.
-At accessibility sizes, creation places title/place inputs before the starting-point
-controls so the keyboard can be focused above the fixed action area.
+Creation now places title/place fields first in one native form at every text size;
+optional activity/exact-time shortcuts follow the relevant fields. Date editing
+expands in place. A single Create action replaces the mode pairs and Next page.
 At accessibility sizes, activity-choice actions join the same scroll as the ideas,
 so pinned controls do not cover interest buttons. Standard text keeps the compact
 fixed action area.

@@ -98,15 +98,18 @@ struct TimePollSheet: View {
 struct TimePollCreateView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.locale) private var locale
     @State private var title = ""
-    @State private var dates: Set<DateComponents> = [Calendar.current.dateComponents([.era, .year, .month, .day], from: Calendar.current.date(byAdding: .day, value: 1, to: Date())!)]
+    @State private var dates: Set<DateComponents> = Set((1...7).compactMap {
+        Calendar.current.date(byAdding: .day, value: $0, to: Date())
+    }.map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
     @State private var startMinute = 9 * 60
     @State private var endMinute = 17 * 60
     @State private var planningMode = "COLLECT"
     @State private var chooseActivityTogether = false
-    @State private var hasChosenTiming = false
+    @State private var showsDateOptions = false
     @FocusState private var titleFocused: Bool
+    @FocusState private var locationFocused: Bool
     @State private var location = ""
     @State private var durationMinutes = 60
     @State private var expectedCount = 5
@@ -117,193 +120,108 @@ struct TimePollCreateView: View {
     let onCreate: (NativeTimePoll) -> Void
 
     var body: some View {
-        Group {
-            if !hasChosenTiming {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                        PlanTaskHeader(step: chooseActivityTogether ? "Choose together" : "Step 1 of 2", title: "What would you like to do together?", detail: chooseActivityTogether ? "Start with a theme. Friends can suggest activities and mark interest." : "Start with the activity. You can decide the time together.")
-                        if typeSize.isAccessibilitySize { activityIdentityFields }
-                        let startLayout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-                        startLayout {
-                            activityStartingPoint(together: false, title: "Activity already decided", symbol: "checkmark.circle")
-                            activityStartingPoint(together: true, title: "Choose an activity together", symbol: "lightbulb")
-                        }
-                        if !typeSize.isAccessibilitySize { activityIdentityFields }
-                        if !chooseActivityTogether { ViewThatFits(in: .horizontal) {
-                            HStack { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
-                            VStack(alignment: .leading) { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
-                        } }
-                        if chooseActivityTogether {
-                            Label("Everyone can suggest activities. Interest does not confirm attendance.", systemImage: "person.2")
-                                .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
-                            Button { titleFocused = false; hasChosenTiming = true } label: {
-                                Label("Review dates and hours", systemImage: "calendar").font(.subheadline).frame(minHeight: 44)
-                            }.accessibilityIdentifier("plan-activity-date-options")
-                            Text(String(format: AppLocalization.string("%d candidate days — you can start without changing them"), dates.count))
-                                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
-                        } else { VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                            Text("Have you picked a time?").font(.headline)
-                            timingChoice("COLLECT", title: "Time not set: find it together", detail: "Let friends mark when they're free.", symbol: "calendar.badge.clock")
-                            timingChoice("FIXED", title: "The time is already set", detail: "Ask friends to confirm a specific time.", symbol: "calendar.badge.checkmark")
-                        } }
-                        if let message = validationMessage, title.count > 120 || location.count > 200 {
-                            Text(message).font(.footnote).foregroundStyle(SideSeatTheme.danger)
-                        }
-                    }.padding(SideSeatTheme.spaceLG)
-                }.scrollDismissesKeyboard(.interactively).background(SideSeatTheme.bgGrouped)
-            } else {
-                detailsForm
+        Form {
+            Section("Activity") {
+                TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
+                    .font(.title3.weight(.medium)).focused($titleFocused)
+                    .submitLabel(.done).onSubmit { titleFocused = false }
+                    .accessibilityIdentifier("time-poll-title")
+                TextField("Location (optional)", text: $location)
+                    .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
+                    .accessibilityIdentifier("unified-plan-location")
+                if chooseActivityTogether {
+                    HStack(alignment: .firstTextBaseline) {
+                        Label("Friends can suggest activities", systemImage: "lightbulb")
+                            .font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: SideSeatTheme.spaceSM)
+                        Button("Cancel") { chooseActivityTogether = false }
+                            .font(.subheadline).frame(minHeight: 44)
+                            .accessibilityIdentifier("plan-start-known-activity")
+                    }
+                } else if planningMode != "FIXED" {
+                    Button { chooseActivityTogether = true; titleFocused = false } label: {
+                        Text("Not sure what to do? Ask friends for ideas")
+                            .font(.subheadline).fixedSize(horizontal: false, vertical: true).frame(minHeight: 44)
+                    }.accessibilityIdentifier("plan-start-together")
+                }
             }
+            Section {
+                if planningMode == "FIXED" {
+                    DatePicker("Starts", selection: $fixedStart, in: Date()...)
+                        .accessibilityIdentifier("unified-plan-fixed-start")
+                    Picker("Activity duration", selection: $durationMinutes) {
+                        ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) {
+                            Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0)
+                        }
+                    }.accessibilityIdentifier("unified-plan-duration")
+                    Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
+                        .accessibilityIdentifier("unified-plan-participant-count")
+                    Button("Find a time together instead") { planningMode = "COLLECT"; titleFocused = false }
+                        .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-mode-collect")
+                } else {
+                    Button {
+                        titleFocused = false; locationFocused = false; showsDateOptions.toggle()
+                    } label: {
+                        HStack(spacing: SideSeatTheme.spaceMD) {
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                Label("Dates to find a time", systemImage: "calendar")
+                                Text(candidateDateSummary).font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(clock(startMinute) + "–" + clock(endMinute))
+                                    .font(.caption.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            }.frame(maxWidth: .infinity, alignment: .leading)
+                            Image(systemName: showsDateOptions ? "chevron.down" : "chevron.right").font(.caption.weight(.semibold)).accessibilityHidden(true)
+                        }.padding(.vertical, SideSeatTheme.spaceXS).contentShape(Rectangle())
+                    }.buttonStyle(.plain).accessibilityIdentifier("plan-date-options")
+                        .accessibilityValue(showsDateOptions ? "Expanded" : "Collapsed")
+                    if showsDateOptions {
+                        MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
+                            .accessibilityIdentifier("time-poll-dates")
+                        Picker("From", selection: $startMinute) {
+                            ForEach(Array(stride(from: 0, to: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
+                        }.accessibilityIdentifier("time-poll-from")
+                        Picker("Until", selection: $endMinute) {
+                            ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
+                        }.accessibilityIdentifier("time-poll-until")
+                    }
+                    if !chooseActivityTogether {
+                        Button("Time already set? Send an invitation") { planningMode = "FIXED"; titleFocused = false }
+                            .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-mode-fixed")
+                    }
+                }
+            } header: { Text("When") } footer: {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    Text(planningMode == "FIXED" ? "Include yourself. The plan is confirmed when this many people have accepted." : "Everyone can fill free time on the same timetable.")
+                    Text(String(format: AppLocalization.string("All times in %@"), TimeZone.current.identifier))
+                }
+            }
+            if let message = validationMessage { Section { Text(message).font(.footnote).foregroundStyle(SideSeatTheme.danger) } }
+            if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
         }
-        .navigationTitle("Create activity").navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
+        .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
         .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(chooseActivityTogether)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                if hasChosenTiming || chooseActivityTogether {
-                    if !typeSize.isAccessibilitySize {
-                        Text(chooseActivityTogether ? "Next: share the plan so friends can suggest activities." : planningMode == "FIXED" ? "Next: share the invitation link with friends." : "Next: view and share the timetable. You can add your own free time anytime.")
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }
-                    PlanActionButton(title: AppLocalization.string(chooseActivityTogether ? "Start choosing an activity" : planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
-                                     symbol: chooseActivityTogether ? "lightbulb" : "plus", kind: .commit, isLoading: creating, accessibilityID: "time-poll-create-confirm") {
-                        titleFocused = false; Task { await create() }
-                    }.disabled(!canCreate)
-                } else {
-                    if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !typeSize.isAccessibilitySize {
-                        Text(chooseActivityTogether ? "Give this plan a theme, such as a weekend together." : "Type an activity name or choose an example above.")
-                            .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    }
-                    PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Choose dates" : "Next: choose dates"), symbol: "calendar",
-                                    accessibilityID: "plan-create-next") { titleFocused = false; hasChosenTiming = true }
-                        .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 120 || location.count > 200)
-                }
-            }
-            .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-            .overlay(alignment: .top) { Divider() }
+            PlanActionButton(title: AppLocalization.string(chooseActivityTogether ? "Start choosing an activity" : planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
+                             symbol: chooseActivityTogether ? "lightbulb" : "plus", kind: .commit, isLoading: creating,
+                             accessibilityID: "time-poll-create-confirm") {
+                titleFocused = false; locationFocused = false; Task { await create() }
+            }.disabled(!canCreate)
+                .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
+                .overlay(alignment: .top) { Divider() }
         }
     }
 
-    private var activityIdentityFields: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
-                .font(.title3.weight(.medium)).focused($titleFocused)
-                .submitLabel(.done).onSubmit { titleFocused = false }
-                .accessibilityIdentifier("time-poll-title")
-            Divider()
-            TextField("Location (optional)", text: $location)
-                .accessibilityIdentifier("unified-plan-location")
-        }
-        .padding(SideSeatTheme.spaceLG)
-        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-    }
-
-    private func activityStartingPoint(together: Bool, title: String, symbol: String) -> some View {
-        let selected = chooseActivityTogether == together
-        return Button {
-            chooseActivityTogether = together
-            if together {
-                planningMode = "COLLECT"
-                dates = Set((1...7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: Date()) }
-                    .map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
-            }
-            titleFocused = false
-        } label: {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: symbol).accessibilityHidden(true)
-                Text(LocalizedStringKey(title)).fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-                Image(systemName: selected ? "checkmark.circle.fill" : "circle").accessibilityHidden(true)
-            }.font(.subheadline.weight(selected ? .semibold : .regular))
-                .padding(SideSeatTheme.spaceMD).frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
-                .background(selected ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.surface,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius).strokeBorder(selected ? SideSeatTheme.ControlSelection.border : SideSeatTheme.separator, lineWidth: 1) }
-        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.textPrimary)
-            .accessibilityValue(selected ? "Selected" : "Not selected")
-            .accessibilityIdentifier(together ? "plan-start-together" : "plan-start-known-activity")
-    }
-
-    private func activityExample(_ value: String) -> some View {
-        Button { title = AppLocalization.string(String.LocalizationValue(value)); titleFocused = false } label: {
-            Text(LocalizedStringKey(value)).font(.subheadline)
-                .padding(.horizontal, 14).frame(minHeight: 44)
-                .background(SideSeatTheme.surface, in: Capsule())
-        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-    }
-
-    private func timingChoice(_ mode: String, title: LocalizedStringKey, detail: LocalizedStringKey, symbol: String) -> some View {
-        Button { planningMode = mode; titleFocused = false } label: {
-            HStack(alignment: .center, spacing: SideSeatTheme.spaceMD) {
-                Image(systemName: symbol).font(.title2).frame(width: 32).accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(title).font(.subheadline.weight(.semibold))
-                    Text(detail).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }.frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: planningMode == mode ? "checkmark.circle.fill" : "circle").accessibilityHidden(true)
-            }
-            .padding(SideSeatTheme.spaceMD)
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-            .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius).strokeBorder(planningMode == mode ? SideSeatTheme.utilityAction : .clear, lineWidth: 1.5) }
-        }
-        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.textPrimary)
-        .accessibilityAddTraits(planningMode == mode ? .isSelected : [])
-        .accessibilityIdentifier(mode == "FIXED" ? "plan-mode-fixed" : "plan-mode-collect")
-    }
-
-    private var detailsForm: some View {
-        Form {
-            Section {
-                PlanTaskHeader(step: "Step 2 of 2", title: planningMode == "FIXED" ? "When are we meeting?" : "Which dates could work?",
-                               detail: planningMode == "FIXED" ? "Friends will confirm this exact time." : "Choose possible days. The final time comes after everyone fills in.")
-                HStack {
-                    Text(title).font(.subheadline.weight(.semibold))
-                    Spacer()
-                    Button("Edit activity") { titleFocused = false; hasChosenTiming = false }
-                        .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-change-method")
-                }
-            }.listRowBackground(Color.clear).listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-            if planningMode == "FIXED" {
-                Section("When are we meeting?") {
-                    DatePicker("Starts", selection: $fixedStart, in: Date()...).accessibilityIdentifier("unified-plan-fixed-start")
-                    Picker("Activity duration", selection: $durationMinutes) {
-                        ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) { Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0) }
-                    }.accessibilityIdentifier("unified-plan-duration")
-                }
-                Section {
-                    Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
-                        .accessibilityIdentifier("unified-plan-participant-count")
-                } header: { Text("How many people?") } footer: { Text("Include yourself. The plan is confirmed when this many people have accepted.") }
-            } else {
-                Section {
-                    MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
-                        .accessibilityIdentifier("time-poll-dates")
-                } footer: { Text("Tap one or more dates. Tap again to remove a date.") }
-                Section {
-                    DisclosureGroup {
-                        Picker("From", selection: $startMinute) { ForEach(Array(stride(from: 0, to: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) } }
-                            .accessibilityIdentifier("time-poll-from")
-                        Picker("Until", selection: $endMinute) { ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) } }
-                            .accessibilityIdentifier("time-poll-until")
-                        if !chooseActivityTogether { Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
-                            .accessibilityIdentifier("unified-plan-participant-count")
-                        Text("This is an estimate; you choose who to invite later.").font(.caption).foregroundStyle(.secondary) }
-                    } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Hours people can choose from").font(.subheadline.weight(.medium))
-                            Text(clock(startMinute) + "–" + clock(endMinute)).font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
-                        }
-                    }.accessibilityIdentifier("plan-time-options")
-                } footer: { Text("This is the available range, not the final meeting time.") }
-            }
-            Section { Text(String(format: AppLocalization.string("All times in %@"), TimeZone.current.identifier)).font(.caption).foregroundStyle(.secondary) }
-                .listRowBackground(Color.clear)
-            if let message = validationMessage { Section { Text(message).font(.footnote).foregroundStyle(SideSeatTheme.danger) } }
-            if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
-        }.scrollDismissesKeyboard(.interactively)
+    private var candidateDateSummary: String {
+        let days = dates.compactMap { Calendar.current.date(from: $0) }.sorted()
+        guard let first = days.first, let last = days.last else { return AppLocalization.string("Choose at least one date.") }
+        let formatter = DateIntervalFormatter()
+        formatter.locale = locale; formatter.dateStyle = .medium; formatter.timeStyle = .none
+        let range = formatter.string(from: first, to: last)
+        return String(format: AppLocalization.string("%@ · %d candidate days"), range, days.count)
     }
 
     private var validationMessage: String? {

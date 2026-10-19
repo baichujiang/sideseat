@@ -4,6 +4,15 @@ Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.m
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
 
+## Default single-form creation — Preview 132
+
+The default is activity/place/time → Create timetable. The time summary opens
+inline date/hour editing and defaults to the next seven days. No mode selection
+or Next page is required. Optional text shortcuts enable activity ideas or an
+exact-time invitation in the same form, retaining inputs. Existing API, records,
+expected-count defaults, timetable editing and explicit attendance contracts stay
+unchanged. Earlier dated creation-screen descriptions below are superseded.
+
 ## Optional activity choice — Preview 131
 
 A new manual plan may start with a theme, then collect suggestions and multiple

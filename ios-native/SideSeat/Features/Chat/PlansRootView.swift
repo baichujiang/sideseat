@@ -305,7 +305,7 @@ struct PlansRootView: View {
             if !hasPlans {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Text("What could you do together?").font(.title2.weight(.bold))
-                    Text("Choose an activity, find a time and confirm together.")
+                    Text("Write an activity, share free time and confirm together.")
                         .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }

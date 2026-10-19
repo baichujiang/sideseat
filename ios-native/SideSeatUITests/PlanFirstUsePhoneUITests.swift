@@ -35,15 +35,12 @@ import XCTest
         XCTAssertTrue(create.waitForExistence(timeout: 25)); XCTAssertTrue(create.isHittable)
         capture(app, "01-first-visit")
         create.tap()
-        let collect = app.buttons["plan-mode-collect"]
-        XCTAssertTrue(collect.waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists)
-        capture(app, "02-choice"); collect.tap()
         let title = app.textFields["time-poll-title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
-        let next = app.buttons["plan-create-next"]
-        XCTAssertTrue(next.isHittable); next.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["time-poll-dates"].firstMatch.waitForExistence(timeout: 10))
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        capture(app, "02-single-form")
+        title.tap(); title.typeText(fixture.title + "\n")
         let submit = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(submit.isHittable); XCTAssertTrue(submit.isEnabled)
         capture(app, "03-create"); submit.tap()
@@ -384,10 +381,11 @@ import XCTest
         app.tabBars.buttons["计划"].tap()
         let create = app.buttons["plans-create-primary"]
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
-        app.buttons["plan-mode-collect"].tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
-        app.buttons["plan-create-next"].tap()
+        XCTAssertFalse(app.buttons["plan-create-next"].exists)
+        XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
+        capture(app, "native-00-single-form")
         app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 20))
         XCTAssertGreaterThan(app.scrollViews["time-poll-grid"].frame.height, app.frame.height * 0.35,
