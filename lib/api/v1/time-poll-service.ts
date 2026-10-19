@@ -139,6 +139,10 @@ export async function saveTimePollResponse(token: string, actor: TimePollActor, 
     const slotIds = [...new Set(input.slotIds)].sort((a, b) => a - b);
     const validIds = new Set((poll.slots as unknown as PollSlot[]).map((slot) => slot.id));
     if (slotIds.some((id) => !validIds.has(id))) throw new TimePollError(422, "Choose time slots from this poll.");
+    const previous = poll.responses.find((response) => isActor(response, actor));
+    // A repeated snapshot is already durable; keep reads/validation but avoid writes.
+    if (previous?.displayName === input.displayName && previous.slotIds.length === slotIds.length
+      && previous.slotIds.every((id, index) => id === slotIds[index])) return;
     await tx.timePollResponse.upsert({ where: typeof actor === "string" ? { pollId_userId: { pollId: poll.id, userId: actor } } : { pollId_guestId: { pollId: poll.id, guestId: actor.guestId } },
       create: { pollId: poll.id, ...(typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId }), displayName: input.displayName, slotIds }, update: { displayName: input.displayName, slotIds } });
     if (typeof actor !== "string") await tx.timePollGuest.update({ where: { id: actor.guestId }, data: { displayName: input.displayName } });

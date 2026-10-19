@@ -15,7 +15,9 @@ export function useSharedTimePoll(token: string) {
   const [resumed, setResumed] = useState(false);
   const [editingAvailability, setEditingAvailability] = useState(false);
   const pending = useRef<Draft | null>(null);
-  const running = useRef(false);
+  const running = useRef<Promise<boolean> | null>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pendingReady = useRef(false);
   const revision = useRef(0);
   const pauseRefresh = useRef(false);
   pauseRefresh.current = busy || saving || editingName || switchingParticipant || editingAvailability;
@@ -51,35 +53,61 @@ export function useSharedTimePoll(token: string) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [saved]);
 
-  const flush = async () => {
-    if (running.current || !pending.current) return;
-    running.current = true; setSaving(true); setError("");
-    while (pending.current) {
-      const draft = pending.current; pending.current = null;
-      try {
-        const data = await call("/response", "PUT", draft);
-        setPoll(data);
-        if (!pending.current) { setSelected(data.mySlotIds); setSaved(true); }
-      } catch (cause) {
-        if (!pending.current) pending.current = draft;
-        setError((cause as Error).message); setSaved(false);
-        break;
+  const flush = useCallback((): Promise<boolean> => {
+    clearTimeout(saveTimer.current); saveTimer.current = undefined;
+    pendingReady.current = true;
+    if (running.current) return running.current;
+    if (!pending.current) return Promise.resolve(true);
+    setSaving(true); setError("");
+    running.current = (async () => {
+      let succeeded = true;
+      while (pendingReady.current && pending.current) {
+        const draft = pending.current; pending.current = null; pendingReady.current = false;
+        try {
+          const data = await call("/response", "PUT", draft);
+          setPoll(data);
+          if (!pending.current) { setSelected(data.mySlotIds); setSaved(true); }
+        } catch (cause) {
+          if (!pending.current) pending.current = draft;
+          clearTimeout(saveTimer.current); saveTimer.current = undefined;
+          pendingReady.current = false;
+          setError((cause as Error).message); setSaved(false);
+          succeeded = false;
+          break;
+        }
       }
-    }
-    running.current = false; setSaving(false);
-  };
+      running.current = null;
+      setSaving(succeeded && pending.current !== null);
+      return succeeded;
+    })();
+    return running.current;
+  }, [call]);
+
+  useEffect(() => {
+    const leave = () => { void flush(); };
+    const visibility = () => { if (document.visibilityState === "hidden") leave(); };
+    window.addEventListener("pagehide", leave);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      window.removeEventListener("pagehide", leave);
+      document.removeEventListener("visibilitychange", visibility);
+      leave();
+    };
+  }, [flush]);
   const saveSelection = (slots: number[]) => {
     if (!poll?.viewerId) return;
     revision.current += 1;
     const next = [...new Set(slots)].sort((a, b) => a - b);
-    setSelected(next); setSaved(false);
+    setSelected(next); setSaved(false); setSaving(true); setError("");
     pending.current = { participantId: poll.viewerId, displayName: poll.myDisplayName, slotIds: next };
-    void flush();
+    pendingReady.current = false;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => { void flush(); }, 700);
   };
   const act = async (suffix: string, method: string, body: unknown) => {
-    if (running.current || pending.current) return false;
     revision.current += 1; setBusy(true); setError("");
     try {
+      if (!await flush() || pending.current) return false;
       const data = await call(suffix, method, body);
       setPoll(data); setSelected(data.mySlotIds); setEditingName(false); setSwitchingParticipant(false);
       if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);

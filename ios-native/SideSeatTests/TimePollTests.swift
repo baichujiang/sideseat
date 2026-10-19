@@ -119,6 +119,60 @@ struct TimePollTests {
         #expect(try collectingPoll().timetableSelections(ownSelection: [0, 1]) == [[0, 1]])
     }
 
+    @Test("Ten rapid taps update immediately and coalesce into one durable snapshot")
+    @MainActor
+    func autosaveDebounce() async throws {
+        let transport = PollSaveTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        for id in 0..<10 { store.selected.insert(id); store.save(session: session) }
+        #expect(store.selected == Set(0..<10)); #expect(!store.saved && store.saving && !store.canMutate)
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(await transport.writes.isEmpty)
+        await transport.waitUntilFirstStarted()
+        #expect(await transport.writes == [Array(0..<10)])
+        await transport.finishFirst()
+        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(store.saved && store.canMutate)
+        store.save(session: session)
+        #expect(!store.saving); #expect(await transport.writes.count == 1)
+    }
+
+    @Test("Leaving bypasses debounce and a failed save keeps the latest choices for retry")
+    @MainActor
+    func autosaveFlushAndRetry() async throws {
+        let transport = PollSaveTransport(firstStatus: 503)
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        store.selected = [0]; store.save(session: session); store.flush(session: session)
+        await transport.waitUntilFirstStarted()
+        store.selected = [1, 2]; store.save(session: session)
+        await transport.finishFirst()
+        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(store.selected == [1, 2]); #expect(!store.saved && store.error != nil && !store.canMutate)
+        try await Task.sleep(for: .milliseconds(800))
+        #expect(await transport.writes == [[0]])
+        store.flush(session: session)
+        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(store.saved && store.error == nil && store.canMutate)
+        #expect(await transport.writes == [[0], [1, 2]])
+    }
+
+    @Test("Switching accounts during debounce never submits the previous account's choices")
+    @MainActor
+    func autosaveAccountDuringDebounce() async throws {
+        let transport = PollSaveTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        store.selected = [0]; store.save(session: session)
+        await session.login(identifier: "other", password: "test")
+        try await Task.sleep(for: .milliseconds(800))
+        #expect(await transport.writes.isEmpty); #expect(!store.saving && !store.saved)
+    }
+
     @Test("Quick consecutive drags save in order and leave the latest draft acknowledged")
     @MainActor
     func autosaveOrder() async throws {
@@ -275,9 +329,9 @@ private actor PollSaveTransport: APITransport {
             await withCheckedContinuation { continuation in
                 firstPending = continuation; firstStarted?.resume(); firstStarted = nil
             }
-            if firstStatus == 401 {
-                let body = #"{"error":{"code":"AUTH_REQUIRED","message":"Expired QA session","retryable":false}}"#
-                return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 401, httpVersion: nil, headerFields: nil)!)
+            if firstStatus != 200 {
+                let body = #"{"error":{"code":"UNAVAILABLE","message":"Save failed","retryable":false}}"#
+                return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: firstStatus, httpVersion: nil, headerFields: nil)!)
             }
         }
         let data = try JSONSerialization.data(withJSONObject: ["data": [

@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 @MainActor @Observable
 final class TimePollStore {
@@ -13,6 +14,12 @@ final class TimePollStore {
     private(set) var acting = false
     var canMutate: Bool { !acting && !saving && pending == nil }
     private var pending: SaveTimePollRequest?
+    private var debounceTask: Task<Void, Never>?
+    private var saveTask: Task<Void, Never>?
+    private var pendingReady = false
+    private var draftGeneration: UInt64?
+    private var draftUserID: String?
+    private var inFlight: SaveTimePollRequest?
     private var revision = 0
     private var refreshID = UUID()
 
@@ -67,34 +74,66 @@ final class TimePollStore {
         guard poll?.planningPhase == "COLLECTING" else { return }
         let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { error = AppLocalization.string("Enter your name."); return }
+        let draft = SaveTimePollRequest(displayName: name, slotIds: selected.sorted())
+        if error == nil && (draft == pending || (pending == nil && draft == inFlight)) { return }
+        if !saving && pending == nil && poll?.didRespond == true,
+           name == poll?.myDisplayName, draft.slotIds == poll?.mySlotIds { return }
         revision += 1
-        pending = SaveTimePollRequest(displayName: name, slotIds: selected.sorted())
-        saved = false
-        error = nil
-        guard !saving else { return }
-        saving = true
+        pending = draft
+        draftGeneration = session.authorizationGeneration; draftUserID = session.currentUser?.id
+        pendingReady = false
+        saved = false; saving = true; error = nil
+        debounceTask?.cancel()
+        // Each burst of taps (or completed drag) sends only its latest snapshot.
+        debounceTask = Task {
+            do { try await Task.sleep(for: .milliseconds(700)) } catch { return }
+            flush(session: session)
+        }
+    }
+
+    /// Bypass the quiet period when leaving the screen or retrying a failed save.
+    /// Never cancel a write already in flight: the newest snapshot follows it serially.
+    func flush(session: SessionStore) {
+        debounceTask?.cancel(); debounceTask = nil
+        guard pending != nil else { return }
+        guard draftGeneration == session.authorizationGeneration, draftUserID == session.currentUser?.id else {
+            pending = nil; saved = false; saving = false; return
+        }
+        pendingReady = true
+        guard saveTask == nil else { return }
+        saving = true; error = nil
         let generation = session.authorizationGeneration
         let userID = session.currentUser?.id
-        // Keep a serial queue alive after the sheet closes. The newest drag wins.
-        Task {
-            defer { saving = false }
-            while let request = pending {
-                guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
-                pending = nil
+        let background = UIApplication.shared.beginBackgroundTask(withName: "Save plan availability")
+        saveTask = Task {
+            defer {
+                saveTask = nil; inFlight = nil
+                saving = pending != nil && error == nil
+                if background != .invalid { UIApplication.shared.endBackgroundTask(background) }
+            }
+            while pendingReady, let request = pending {
+                guard session.authorizationGeneration == generation, session.currentUser?.id == userID else {
+                    pending = nil; saved = false; return
+                }
+                pending = nil; pendingReady = false; inFlight = request
                 do {
                     let result: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                         "/api/v1/time-polls/\(token)/response", method: .put, body: request
                     )
-                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
+                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else {
+                        pending = nil; saved = false; return
+                    }
                     poll = result.data
                     saved = pending == nil
                     if saved { NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil) }
                 } catch {
-                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else { pending = nil; return }
-                    self.error = error.localizedDescription
-                    saved = false
-                    // Preserve the latest draft for an explicit retry.
+                    guard session.authorizationGeneration == generation, session.currentUser?.id == userID else {
+                        pending = nil; saved = false; return
+                    }
+                    self.error = error.localizedDescription; saved = false
                     if pending == nil { pending = request }
+                    pendingReady = false
+                    debounceTask?.cancel(); debounceTask = nil
                     break
                 }
             }

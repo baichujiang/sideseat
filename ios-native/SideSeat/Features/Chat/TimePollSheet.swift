@@ -293,7 +293,7 @@ struct TimePollDetailView: View {
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
-                        Button("Retry") { if deleting { Task { await delete() } } else { store.save(session: session) } }
+                        Button("Retry") { if deleting { Task { await delete() } } else { store.save(session: session); store.flush(session: session) } }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
                 } else {
@@ -367,7 +367,11 @@ struct TimePollDetailView: View {
                 if scenePhase == .active && !nameFocused { await store.load(session: session) }
             }
         }
-        .onChange(of: scenePhase) { _, phase in if phase == .active { Task { await store.load(session: session) } } }
+        .onDisappear { store.flush(session: session) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await store.load(session: session) } }
+            else { store.flush(session: session) }
+        }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
             if let expiry = store.poll?.expirationDate, now < expiry, expiry <= date { now = date }
         }
