@@ -5,7 +5,9 @@ import XCTest
 
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(bundleIdentifier: ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] ?? "app.sideseat.mobile.preview")
+        if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
+            app = XCUIApplication(bundleIdentifier: bundle)
+        } else { app = XCUIApplication() }
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
             "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-local-api", "--ui-testing-plans-empty"]
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
