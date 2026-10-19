@@ -1,0 +1,9 @@
+{
+  "failureLine": 317,
+  "apiBoundariesPassed": 12,
+  "safariPrivateMode": true,
+  "scriptTerminatedSafariBeforeReturn": true,
+  "visiblePageAskedForName": true,
+  "confirmButtonAbsentUntilIdentityResumed": true,
+  "fix": "Activate the existing Safari session, as in the previously verified native/web flow. Product identity rules unchanged."
+}

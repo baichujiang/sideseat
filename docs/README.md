@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 ## Read this first
 
@@ -34,6 +34,7 @@ Historical build evidence never certifies a newer build.
 | --- | --- |
 | [Deployed state](./DEPLOYED_STATE.md) | Current phone/backend versions, actual feature entries, live flags, retained compatibility and frozen archive boundaries |
 | [Shared plan presentation](./PLAN_PRESENTATION.md) | Read-only native state/next-step adapters and shared views, preserving manual and bilateral records and rules |
+| [Optional activity choice](./PLAN_ACTIVITY_START.md) | Shared theme → activity suggestions/interests → organizer choice → same manual timetable and explicit confirmation |
 | [Unified plans](./UNIFIED_PLANS.md) | Manual availability/direct-time creation, explicit invitations, individual confirmation and owned Calendar projections |
 | [Product](./PRODUCT.md) | Positioning, product objects, navigation, invariants and non-goals |
 | [User Flow](./USER_FLOW.md) | Current user-visible Intent → Opportunity → Plan flow and repeat boundary |
@@ -56,6 +57,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 131 / activity ideas](./releases/2026-10-19-preview131-activity-ideas.md) | Optional theme start, shared App/web suggestions, explicit organizer choice, retained timetable and installed phone delivery |
+| [Preview 131 acceptance](./qa/2026-10-19-plans131.md) | API/browser, native/web phone flow, original-flow regression and release evidence |
 | [Preview 114 / plan guidance](./releases/2026-10-18-preview114-plan-guidance.md) | Next actions by role, two-step creation, visible sharing/confirmation, deployed list fields and installed phone build |
 | [Plan guidance acceptance](./qa/2026-10-18-plans114.md) | 60 native regressions, small-screen journey, candidate/live browser flows, production cleanup and physical XCTest connection limit |
 | [Legacy Action Compatibility](./LEGACY_ACTION_COMPATIBILITY.md) | Existing B-light/public Action, legacy Activity and web fallback only |

@@ -1,0 +1,7 @@
+{
+  "migration": "20261019100000_plan_activity_ideas",
+  "applied": true,
+  "additiveOnly": true,
+  "previousRecordsRewritten": false,
+  "verifiedPrivateBackupBeforeMigration": true
+}

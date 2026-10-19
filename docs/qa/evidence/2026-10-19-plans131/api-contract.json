@@ -1,0 +1,8 @@
+{
+  "implementedOperations": 194,
+  "contractValidationPassed": true,
+  "contractTestsPassed": 13,
+  "contractTestsFailed": 0,
+  "swiftGeneratorVersion": "1.13.0",
+  "generatorDiagnostics": []
+}

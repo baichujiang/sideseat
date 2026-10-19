@@ -1,0 +1,23 @@
+{
+  "preview": 131,
+  "sha256": {
+    "ios-native/Configuration/Preview.xcconfig": "46b17b13c5a67da13965181098c9600f892d30db7e46f08ebedbce62488d5bff",
+    "ios-native/SideSeat/Features/Chat/InboxNotificationsStore.swift": "54605156a64a1f8bb4ea6d0f431c68853fed948ae45aa0934dfc5f234f883002",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "1f34346a8c04d169a2796928b9dce95628b2decfd501645fb509879a5111cfe1",
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "8074fd64779203d5c646c962ecda1df19381425dbf6ed42022308d9e0f22a814",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "15b832a4c7a54d0480c9993b803d27ec69b0a7dd515b7ab19d8138062ee25257",
+    "ios-native/SideSeat/Features/Chat/TimePoll.swift": "d5dc616544bc2c54035e4b13e01865c5fb0c5cdf890106c67e96e1e142ac46a2",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "8f36ec0b5fbf9525727291a733cdc1beb5e83aeb290bd16599f56fd504cf19a2",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "e415e309fdb6e666e3601022479cd4e5978062939c022c0b402b5316ffedb0e0",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "5c8cb946538a420b017895a8344cdf2437304b15f010681f559eeea7f5e31d9a",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "42690ece644accb0ac6e765f6bb6731fa5f878a2b7afef1fe96914d1aa939b16",
+    "ios-native/SideSeat/Generated/OpenAPI/Types.swift": "03f29beadf0f36058dafdd7cef3ba89f19f183bcd8cd05a3a54d93ad898c1713",
+    "ios-native/SideSeat/Generated/OpenAPI/Client.swift": "07e6d9b9789f961f95e40f532c9cc94d4ec7a9e8857591037060dedd0a018f69",
+    "openapi/v1.json": "5ca996e09e99fb5bef1713e992b9aa2aa2e5cdd4b49baab9bdbc04aad56cd94c"
+  },
+  "sourceCommitBeforeNoticeCopyFix": "8c1f8a294dcfa8cbb7e29da81f252af3f00084b9",
+  "sourceCommit": "243590215616b99dfa0ba1e04d8accf7ef21104b",
+  "sourceCommitBeforeAccessibilityFix": "90c4306eee279f09ed13533828afde2e41206e64",
+  "sourceCommitBeforeContractGeneration": "bd16cfb12363b635c3ce98ec7396c8d190a684b1",
+  "sourceCommitBeforeBoardAccessibilityFix": "9b049974aa2c448cee17917dc60b7cd13bead98c"
+}

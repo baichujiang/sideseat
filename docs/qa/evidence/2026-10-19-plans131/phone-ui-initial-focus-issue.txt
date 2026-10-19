@@ -1,0 +1,36 @@
+Failed to synthesize event: Neither element nor any descendant has keyboard focus. Event dispatch snapshot: TextField, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+Element debug description:
+Attributes: TextField, 0x1141b2580, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+Element subtree:
+ →TextField, 0x1141b2580, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+Path to element:
+ →Application, 0x1093fad00, pid: 2219, label: 'SideSeat Preview'
+  ↳Window (Main), 0x1093faf80, {{0.0, 0.0}, {428.0, 926.0}}
+   ↳Other, 0x1141a03c0, {{0.0, 0.0}, {428.0, 926.0}}
+    ↳Other, 0x1141a0640, {{0.0, 47.0}, {428.0, 879.0}}
+     ↳Other, 0x1141a08c0, {{0.0, 47.0}, {428.0, 879.0}}
+      ↳Other, 0x1141a0a00, {{0.0, 47.0}, {428.0, 879.0}}
+       ↳Other, 0x1141a0b40, {{0.0, 47.0}, {428.0, 879.0}}
+        ↳Other, 0x1141a0f00, {{0.0, 47.0}, {428.0, 879.0}}
+         ↳Other, 0x1141a0780, {{0.0, 47.0}, {428.0, 879.0}}
+          ↳Other, 0x1141a1680, {{0.0, 47.0}, {428.0, 879.0}}
+           ↳Other, 0x1141a1400, {{0.0, 47.0}, {428.0, 879.0}}
+            ↳Other, 0x1141a1540, {{0.0, 47.0}, {428.0, 879.0}}
+             ↳Other, 0x1141a17c0, {{0.0, 47.0}, {428.0, 879.0}}
+              ↳ScrollView, 0x1141a1a40, {{0.0, 47.0}, {428.0, 879.0}}
+               ↳Other, 0x1141a2800, {{0.0, 121.0}, {428.0, 1820.7}}
+                ↳TextField, 0x1141b2580, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+Query chain:
+ →Find: Application 'app.sideseat.mobile.preview'
+  Output: {
+    Application, 0x114236580, pid: 2219, label: 'SideSeat Preview'
+  }
+  ↪︎Find: Descendants matching type TextField
+    Output: {
+      TextField, 0x1141f4000, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+      TextField, 0x1141f4140, {{32.0, 886.3}, {364.0, 64.0}}, identifier: 'unified-plan-location', placeholderValue: '地点（可选）', value: 地点（可选）
+    }
+    ↪︎Find: Elements matching predicate '"time-poll-title" IN identifiers'
+      Output: {
+        TextField, 0x114005180, {{32.0, 795.3}, {364.0, 66.0}}, identifier: 'time-poll-title', placeholderValue: '例如：周五聚餐', value: 例如：周五聚餐
+      }

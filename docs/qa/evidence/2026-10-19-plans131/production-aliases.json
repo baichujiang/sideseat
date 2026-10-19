@@ -1,0 +1,14 @@
+[
+  {
+    "host": "api.sideseat.de",
+    "deploymentId": "dpl_678enJmimu7x5DSTraSn59s342X4"
+  },
+  {
+    "host": "www.sideseat.de",
+    "deploymentId": "dpl_678enJmimu7x5DSTraSn59s342X4"
+  },
+  {
+    "host": "sideseat.de",
+    "deploymentId": "dpl_678enJmimu7x5DSTraSn59s342X4"
+  }
+]

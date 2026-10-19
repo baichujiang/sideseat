@@ -1,0 +1,186 @@
+{
+  "checks": [
+    {
+      "phase": "created",
+      "ideaCount": 0,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "owner-suggested",
+      "ideaCount": 1,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-interested",
+      "ideaCount": 2,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-filled",
+      "ideaCount": 2,
+      "activityChosen": false,
+      "participants": 1,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "guest-interested",
+      "ideaCount": 3,
+      "activityChosen": false,
+      "participants": 1,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "guest-filled",
+      "ideaCount": 3,
+      "activityChosen": false,
+      "participants": 2,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "choice-draft",
+      "ideaCount": 3,
+      "activityChosen": false,
+      "participants": 2,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "activity-chosen",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 2,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "owner-ready",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "inviting",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 1,
+      "phaseOnServer": "INVITING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-review",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 1,
+      "phaseOnServer": "INVITING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-confirmed",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 2,
+      "phaseOnServer": "INVITING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "all-confirmed",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 3,
+      "phaseOnServer": "CONFIRMED",
+      "calendarCounts": [
+        1,
+        1
+      ],
+      "passed": true
+    },
+    {
+      "phase": "calendar-verified",
+      "ideaCount": 3,
+      "activityChosen": true,
+      "participants": 3,
+      "accepted": 3,
+      "phaseOnServer": "CONFIRMED",
+      "calendarCounts": [
+        1,
+        1
+      ],
+      "passed": true
+    }
+  ]
+}

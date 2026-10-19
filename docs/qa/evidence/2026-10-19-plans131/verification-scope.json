@@ -1,0 +1,38 @@
+{
+  "unitTestsPassed": 40,
+  "apiContractTestsPassed": 13,
+  "implementedAPIOperations": 194,
+  "physicalUIBatch": {
+    "passed": 12,
+    "failed": 0,
+    "sourceCommit": "bd16cfb12363b635c3ce98ec7396c8d190a684b1",
+    "subsequentAppChange": "Regenerated API client and activity-choice accessibility scrolling; exercised by complete activity phone flow."
+  },
+  "physicalActivityFlow": {
+    "passed": true,
+    "seconds": 241.239,
+    "apiBoundaries": 14,
+    "appSourceCommit": "243590215616b99dfa0ba1e04d8accf7ef21104b"
+  },
+  "physicalKnownActivityRegression": {
+    "passed": true,
+    "seconds": 269.367,
+    "apiBoundaries": 12,
+    "appSourceCommit": "243590215616b99dfa0ba1e04d8accf7ef21104b"
+  },
+  "realBrowserChecks": {
+    "localFinal": 10,
+    "productionCandidate": 10,
+    "production": 10,
+    "engines": [
+      "Chromium light",
+      "WebKit dark"
+    ]
+  },
+  "initialPhysicalFailures": {
+    "creationUI": 1,
+    "activityFlow": 2
+  },
+  "normalLaunchPid": 2327,
+  "ordinary97Retained": true
+}

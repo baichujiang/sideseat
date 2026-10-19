@@ -1,0 +1,160 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "00008110-001A69110CC1401E",
+      "deviceName" : "iPhone (4)",
+      "modelName" : "iPhone 14 Plus",
+      "osBuildNumber" : "23G83",
+      "osVersion" : "26.6.1",
+      "platform" : "iOS"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "18秒",
+                  "durationInSeconds" : 18.724588990211487,
+                  "name" : "testActivityIdeasIsAnOptionalStartingPoint()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testActivityIdeasIsAnOptionalStartingPoint()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testActivityIdeasIsAnOptionalStartingPoint",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "21秒",
+                  "durationInSeconds" : 21.3612539768219,
+                  "name" : "testChineseDarkLargeTextCanAdvanceAndReturn()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testChineseDarkLargeTextCanAdvanceAndReturn()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testChineseDarkLargeTextCanAdvanceAndReturn",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "16秒",
+                  "durationInSeconds" : 16.761878967285156,
+                  "name" : "testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testFirstStepHasOneNextActionAndKeepsActivityWhenGoingBack",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "15秒",
+                  "durationInSeconds" : 15.83258593082428,
+                  "name" : "testMessagesEntryUsesFirstLevelPlans()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testMessagesEntryUsesFirstLevelPlans",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "23秒",
+                  "durationInSeconds" : 23.993173003196716,
+                  "name" : "testPlansCreateCancelReturnsToPlansInOneStep()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testPlansCreateCancelReturnsToPlansInOneStep",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "26秒",
+                  "durationInSeconds" : 26.069820046424866,
+                  "name" : "testTimingModesAndSwipeDismissReturnToPlans()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testTimingModesAndSwipeDismissReturnToPlans()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testTimingModesAndSwipeDismissReturnToPlans",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanCreationPresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "15秒",
+                  "durationInSeconds" : 15.800827980041504,
+                  "name" : "testLargeTextDarkModeKeepsInvitationAndReplyReachable()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testLargeTextDarkModeKeepsInvitationAndReplyReachable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testLargeTextDarkModeKeepsInvitationAndReplyReachable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "14秒",
+                  "durationInSeconds" : 14.614091992378235,
+                  "name" : "testListAndChatUseTheSameStatusAndConfirmationAction()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testListAndChatUseTheSameStatusAndConfirmationAction()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testListAndChatUseTheSameStatusAndConfirmationAction",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "13秒",
+                  "durationInSeconds" : 13.497412919998169,
+                  "name" : "testUpcomingDateSummaryOpensTheExistingConfirmedPlan()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testUpcomingDateSummaryOpensTheExistingConfirmedPlan()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testUpcomingDateSummaryOpensTheExistingConfirmedPlan",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "12秒",
+                  "durationInSeconds" : 12.761368036270142,
+                  "name" : "testUpcomingSummaryReflowsWithMaximumText()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "25秒",
+                  "durationInSeconds" : 25.108030080795288,
+                  "name" : "testWaitingPlansReflowWithMaximumTextAndStayOpenable()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testWaitingPlansReflowWithMaximumTextAndStayOpenable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testWaitingPlansReflowWithMaximumTextAndStayOpenable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "43秒",
+                  "durationInSeconds" : 43.98851704597473,
+                  "name" : "testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanStatePresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "PlanPresentationPhone117UITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "PlanPresentationPhone117",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "checkedAt": "2026-10-19T11:23:19.592711+00:00",
+  "deploymentId": "dpl_678enJmimu7x5DSTraSn59s342X4",
+  "previousDeployment": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "state": "READY",
+  "target": "production",
+  "framework": "Next.js 15.5.23",
+  "buildDurationSeconds": 166.111,
+  "sourceCommit": "ebe8b081c465487b4eba088e1ca0b384855d3fdc",
+  "productionBuild": true,
+  "promotedWithoutRebuild": true,
+  "migration": "20261019100000_plan_activity_ideas",
+  "checks": [
+    {
+      "route": "api-config",
+      "status": 200,
+      "finalOrigin": "https://api.sideseat.de"
+    },
+    {
+      "route": "www-config",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    },
+    {
+      "route": "ios",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    },
+    {
+      "route": "privacy",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    },
+    {
+      "route": "support",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    },
+    {
+      "route": "aasa",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    },
+    {
+      "route": "apex-config-to-www",
+      "status": 200,
+      "finalOrigin": "https://www.sideseat.de"
+    }
+  ],
+  "runtimeErrorScan": {
+    "since": "1h",
+    "returnedErrorLogs": 0,
+    "limit": "Vercel retained logs only",
+    "checkedAfterPhoneActivityFlow": true
+  }
+}
