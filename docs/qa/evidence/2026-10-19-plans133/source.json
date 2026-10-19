@@ -1,0 +1,14 @@
+{
+  "preview": 133,
+  "sourceCommit": "08f8741d26f9d36b68892333f8dd623ac6ba7145",
+  "sha256": {
+    "ios-native/Configuration/Preview.xcconfig": "199fd54a533820ca62bd145d5ab0fe1f4fa67d977c9b1b9cf44dac87d213c091",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "97bd9c0d7478936afb40c05e1f28c5d5df6e662d92207a275c4c63b18a669e11",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "a27a17ab22bd01e8fa8d170dde601309ac1e0a6637723b04326c83c0554253eb",
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "27c298b10506185e8aa5e711f29dbaa19d8c85160da2b33293373c270f68dce8",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "6a06bb542730e7d8998e6c37135e84d0505197c8a2ac0ca0c15d91ec5576f8ec",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "be5e9b515510969d25e725243bca180b6d0e272de6c15d46f836138203caa968",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "08eef6e2f0616e7ee7856c9ec987e9ff012a92b96872d32bd7bd8dfa13942b2b"
+  },
+  "webSourceCommit": "b5e1e374b882c684123efc75b58dcae057044dda"
+}

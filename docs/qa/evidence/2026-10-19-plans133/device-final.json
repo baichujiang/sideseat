@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-19T15:26:31.726282+00:00",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDeviceID": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "model": "iPhone 14 Plus",
+  "preview": {
+    "bundle": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": 133
+  },
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 2560,
+  "processVerified": true,
+  "normalLaunchNoTestArguments": true,
+  "normalLaunchNoQAEnvironment": true,
+  "qaRunnerRemoved": true,
+  "sourceCommit": "08f8741d"
+}

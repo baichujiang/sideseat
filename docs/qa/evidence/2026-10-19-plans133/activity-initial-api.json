@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "phase": "created",
+      "ideaCount": 0,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "owner-suggested",
+      "ideaCount": 1,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-interested",
+      "ideaCount": 2,
+      "activityChosen": false,
+      "participants": 0,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "phase": "peer-filled",
+      "ideaCount": 2,
+      "activityChosen": false,
+      "participants": 1,
+      "accepted": 0,
+      "phaseOnServer": "COLLECTING",
+      "calendarCounts": [
+        0,
+        0
+      ],
+      "passed": true
+    }
+  ]
+}

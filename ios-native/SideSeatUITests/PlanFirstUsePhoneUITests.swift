@@ -267,7 +267,9 @@ import XCTest
         let largeFirst = app.buttons["time-poll-cell-0"]
         activityRevealNative(largeFirst)
         XCTAssertTrue(largeFirst.isHittable)
-        XCTAssertTrue(app.buttons["plan-copy-link"].exists)
+        app.buttons["time-poll-menu"].tap()
+        let copy = app.buttons["复制链接"]
+        XCTAssertTrue(copy.waitForExistence(timeout: 10)); copy.tap()
         capture(app, "activity-04b-dark-large-timetable")
 
         activityOpenSafari(copiedLink)
@@ -307,7 +309,7 @@ import XCTest
         app.buttons["unified-plan-adjust-time"].tap()
         XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
         app.buttons["unified-plan-review-roster"].tap()
-        XCTAssertEqual(hotpot.value as? String, "Selected", "Activity draft survives returning to the timetable")
+        XCTAssertEqual(hotpot.value as? String, "已选择", "Activity draft survives returning to the timetable")
         capture(app, "activity-08-review-arrangement"); app.buttons["unified-plan-send-invitations"].tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "1/3 人已确认"); activityPhase("inviting")
@@ -465,11 +467,13 @@ import XCTest
         let grid = app.descendants(matching: .any)["time-poll-grid"].firstMatch
         let swipeOrigin = app.coordinate(withNormalizedOffset: .zero)
         let swipeX = first.frame.midX
+        let firstTopBeforeSwipe = first.frame.minY
         let swipeStartY = app.staticTexts["time-poll-saved"].frame.minY - 24
         let swipeEndY = max(grid.frame.minY + 24, first.frame.minY + 24)
         swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeStartY)).press(forDuration: 0.05,
             thenDragTo: swipeOrigin.withOffset(CGVector(dx: swipeX, dy: swipeEndY)))
-        XCTAssertFalse(first.isHittable, "An ordinary swipe must scroll rather than change free time")
+        XCTAssertLessThan(first.frame.minY, firstTopBeforeSwipe - 40, "An ordinary swipe must move the timetable in the full-page scroll")
+        XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard(expectedStatus: "等发起人定时间")
         XCTAssertTrue(first.waitForExistence(timeout: 15)); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         wait(first, labelContains: ", 2"); nativeAssertInline()

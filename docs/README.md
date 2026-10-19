@@ -57,6 +57,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 133 / integrated planning](./releases/2026-10-19-preview133-integrated-planning.md) | One plan surface for activity ideas and availability; final activity/roster review and phone delivery |
+| [Preview 133 acceptance](./qa/2026-10-19-plans133.md) | Two complete phone flows, 25 API boundaries, 20 browser checks, initial failures and cleanup |
 | [Preview 132 / default flow](./releases/2026-10-19-preview132-default-plan-flow.md) | Single default creation form, contextual shortcuts, inline time inputs and physical end-to-end acceptance |
 | [Preview 132 acceptance](./qa/2026-10-19-plans132.md) | Six creation checks, default and activity App/Safari flows, cleanup and install evidence |
 | [Preview 131 / activity ideas](./releases/2026-10-19-preview131-activity-ideas.md) | Optional theme start, shared App/web suggestions, explicit organizer choice, retained timetable and installed phone delivery |

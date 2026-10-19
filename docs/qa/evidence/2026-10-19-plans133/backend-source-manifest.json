@@ -1,0 +1,12 @@
+{
+  "baseDeployment": "dpl_678enJmimu7x5DSTraSn59s342X4",
+  "sourceCommit": "b5e1e374b882c684123efc75b58dcae057044dda",
+  "sourceFiles": 1360,
+  "preservedFiles": 1358,
+  "overlay": {
+    "components/time-polls/activity-ideas.tsx": "615f2dea87bef06996c4c7e8905cc0493dc07026",
+    "components/time-polls/shared-time-poll.tsx": "eeaf00435118878a87d15382051e62ea747c09a2"
+  },
+  "databaseMigration": "none",
+  "buildMigrationPolicy": "SKIP_DATABASE_MIGRATIONS=1"
+}

@@ -63,6 +63,17 @@ See [User Flow](./USER_FLOW.md), [time polls](./TIME_POLLS.md) and the
 [unified planning contract](./UNIFIED_PLANS.md). Deployment facts belong in
 [Deployed state](./DEPLOYED_STATE.md).
 
+**2026-10-19 owner-approved integrated planning amendment:**
+Howbout is the planning-module product reference; direct timetable interaction
+and collaborative activity suggestions are integrated with SideSeat's explicit
+invitation and Calendar rules. The default remains one creation form. Optional
+activity ideas and availability run in parallel in the same plan detail, without
+mode switching. Interest never satisfies an availability task. The organizer may
+choose final time first, then explicitly choose the activity and roster together
+before sending. Existing private/manual and conversation-bound records retain
+identity, provenance and consent. This adds no public group, social graph or
+calendar-sharing permission. See [Integrated planning](./PLAN_ACTIVITY_START.md).
+
 ## 1. Positioning
 
 Product vision:

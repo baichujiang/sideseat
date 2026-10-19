@@ -1,0 +1,10 @@
+{
+  "test": "PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar",
+  "result": "Passed",
+  "durationSeconds": 303.126,
+  "apiBoundaries": 12,
+  "preview": 133,
+  "appSourceCommit": "08f8741d",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "suite": "mixed-phone-summary.json; this native case passed while the activity case failed its obsolete copy-link assertion"
+}
