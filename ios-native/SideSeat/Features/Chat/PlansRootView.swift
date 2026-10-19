@@ -117,7 +117,7 @@ struct PlansRootView: View {
         .toolbar {
             if hasPlans {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showsPlanCreation = true } label: { Label("Start a plan", systemImage: "plus").font(.subheadline.weight(.semibold)) }
+                    Button { showsPlanCreation = true } label: { Label("Start a plan", systemImage: "plus").font(.subheadline.weight(.semibold)).labelStyle(.titleAndIcon) }
                         .tint(SideSeatTheme.PlanHome.ink)
                         .accessibilityIdentifier("plans-create-unified")
                 }

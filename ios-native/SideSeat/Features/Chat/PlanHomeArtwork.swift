@@ -14,10 +14,21 @@ struct PlanHomeArtwork: View {
         return nil
     }
 
+    private var topic: NativeWeeklyIntentTopic? {
+        let value = title.lowercased()
+        if ["自习", "学习", "复习", "研讨", "study", "library", "lernen"].contains(where: value.contains) { return .study }
+        if ["聚餐", "吃饭", "dinner", "lunch", "essen"].contains(where: value.contains) { return .food }
+        if ["运动", "跑步", "健身", "sport", "yoga", "run"].contains(where: value.contains) { return .sports }
+        return nil
+    }
+
     var body: some View {
         Group {
             if !isChoosingActivity, let photo {
                 Image(photo).resizable().scaledToFill()
+            } else if !isChoosingActivity, let topic {
+                SSActivityArtwork(topic: topic, size: size)
+                    .background(SideSeatTheme.PlanHome.warm)
             } else {
                 VStack(spacing: SideSeatTheme.spaceXS) {
                     Image(systemName: isChoosingActivity ? "sun.max" : "sparkles")
