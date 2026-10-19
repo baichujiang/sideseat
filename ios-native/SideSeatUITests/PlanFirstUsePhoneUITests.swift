@@ -262,6 +262,12 @@ import XCTest
         let largeInterest = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-' ")).firstMatch
         for _ in 0..<8 where !largeInterest.isHittable { app.scrollViews["plan-activity-ideas"].swipeUp() }
         XCTAssertTrue(largeInterest.isHittable); capture(app, "activity-04-dark-large-ideas")
+        let largeTimetable = app.buttons["plan-activity-show-timetable"]
+        for _ in 0..<8 where !largeTimetable.isHittable { app.scrollViews["plan-activity-ideas"].swipeUp() }
+        XCTAssertTrue(largeTimetable.isHittable)
+        XCTAssertTrue(app.buttons["plan-copy-link"].exists)
+        capture(app, "activity-04b-dark-large-actions"); largeTimetable.tap()
+        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
 
         activityOpenSafari(copiedLink)
         let guestName = safari.webViews.textFields.firstMatch

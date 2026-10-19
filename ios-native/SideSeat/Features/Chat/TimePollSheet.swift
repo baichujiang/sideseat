@@ -1019,51 +1019,58 @@ struct PlanActivityIdeasView: View {
                     Text("The activity cannot be changed after invitations are sent.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
+                if typeSize.isAccessibilitySize { activityActions }
             }.padding(SideSeatTheme.spaceMD)
         }.accessibilityIdentifier("plan-activity-ideas")
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: SideSeatTheme.spaceSM) {
-                if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger).fixedSize(horizontal: false, vertical: true) }
-                if canChoose && !ideas.isEmpty {
-                    PlanActionButton(title: AppLocalization.string("Set activity and continue"), symbol: "checkmark.circle", kind: .commit,
-                                     isLoading: store.acting, accessibilityID: "plan-activity-choose") {
-                        guard let selectedIdeaId else { return }
-                        Task {
-                            await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: selectedIdeaId), session: session)
-                            if store.error == nil { onTimetable() }
-                        }
-                    }.disabled(selectedIdeaId == nil || !store.canMutate)
-                }
-                PlanActionButton(title: AppLocalization.string(activity.isOpen ? "Fill in free time too" : "Back to timetable"), symbol: "calendar", kind: .navigate,
-                                 accessibilityID: "plan-activity-show-timetable", action: onTimetable)
-                PlanShareActions(poll: poll)
-            }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
+            if !typeSize.isAccessibilitySize { activityActions }
         }
         .onAppear { selectedIdeaId = activity.selectedIdeaId }
-        .sheet(isPresented: $showsSuggestion) {
-            NavigationStack {
-                Form {
-                    Section {
-                        TextField("For example: an exhibition, dinner or badminton", text: $draftTitle)
-                            .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
-                        TextField("Location (optional)", text: $draftLocation).accessibilityIdentifier("plan-activity-location")
-                    } header: { Text("What would you like to suggest?") }
-                    if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
-                }
-                .navigationTitle("Suggest an activity").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsSuggestion = false }.disabled(store.acting) } }
-                .safeAreaInset(edge: .bottom) {
-                    PlanActionButton(title: AppLocalization.string("Add suggestion"), symbol: "plus", kind: .commit, isLoading: store.acting,
-                                     accessibilityID: "plan-activity-add") {
-                        Task {
-                            await store.mutate("activities", body: SuggestPlanActivityRequest(title: draftTitle.trimmingCharacters(in: .whitespacesAndNewlines), location: draftLocation.trimmingCharacters(in: .whitespacesAndNewlines)), session: session)
-                            if store.error == nil { draftTitle = ""; draftLocation = ""; showsSuggestion = false }
-                        }
-                    }.disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120 || draftLocation.count > 200)
-                        .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-                }
-            }.dynamicTypeSize(typeSize).interactiveDismissDisabled(store.acting)
-        }
+        .sheet(isPresented: $showsSuggestion) { suggestionSheet }
+    }
+
+    private var activityActions: some View {
+        VStack(spacing: SideSeatTheme.spaceSM) {
+            if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger).fixedSize(horizontal: false, vertical: true) }
+            if canChoose && !ideas.isEmpty {
+                PlanActionButton(title: AppLocalization.string("Set activity and continue"), symbol: "checkmark.circle", kind: .commit,
+                                 isLoading: store.acting, accessibilityID: "plan-activity-choose") {
+                    guard let selectedIdeaId else { return }
+                    Task {
+                        await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: selectedIdeaId), session: session)
+                        if store.error == nil { onTimetable() }
+                    }
+                }.disabled(selectedIdeaId == nil || !store.canMutate)
+            }
+            PlanActionButton(title: AppLocalization.string(activity.isOpen ? "Fill in free time too" : "Back to timetable"), symbol: "calendar", kind: .navigate,
+                             accessibilityID: "plan-activity-show-timetable", action: onTimetable)
+            PlanShareActions(poll: poll)
+        }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
+    }
+
+    private var suggestionSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("For example: an exhibition, dinner or badminton", text: $draftTitle)
+                        .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
+                    TextField("Location (optional)", text: $draftLocation).accessibilityIdentifier("plan-activity-location")
+                } header: { Text("What would you like to suggest?") }
+                if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
+            }
+            .navigationTitle("Suggest an activity").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsSuggestion = false }.disabled(store.acting) } }
+            .safeAreaInset(edge: .bottom) {
+                PlanActionButton(title: AppLocalization.string("Add suggestion"), symbol: "plus", kind: .commit, isLoading: store.acting,
+                                 accessibilityID: "plan-activity-add") {
+                    Task {
+                        await store.mutate("activities", body: SuggestPlanActivityRequest(title: draftTitle.trimmingCharacters(in: .whitespacesAndNewlines), location: draftLocation.trimmingCharacters(in: .whitespacesAndNewlines)), session: session)
+                        if store.error == nil { draftTitle = ""; draftLocation = ""; showsSuggestion = false }
+                    }
+                }.disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120 || draftLocation.count > 200)
+                    .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
+            }
+        }.dynamicTypeSize(typeSize).interactiveDismissDisabled(store.acting)
     }
 
     private func ideaRow(_ idea: NativePlanActivity.Idea) -> some View {

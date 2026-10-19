@@ -69,6 +69,9 @@ directly reachable and can already save availability. Choosing an activity resto
 the timetable as the main surface, with ideas available as history.
 At accessibility sizes, creation places title/place inputs before the starting-point
 controls so the keyboard can be focused above the fixed action area.
+At accessibility sizes, activity-choice actions join the same scroll as the ideas,
+so pinned controls do not cover interest buttons. Standard text keeps the compact
+fixed action area.
 Manual scheduling detail is organized around the timetable. A flat `PlanDetailHeading`
 contains the activity, current status, role and optional location. Collection
 keeps the editable name, date range and response count close to the grid, with the
