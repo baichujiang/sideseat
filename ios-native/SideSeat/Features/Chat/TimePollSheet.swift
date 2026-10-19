@@ -461,11 +461,12 @@ struct TimePollDetailView: View {
                     Text(timePollClockFormatter(poll.timeZone).string(from: finalRange.start) + " – " + timePollClockFormatter(poll.timeZone).string(from: finalRange.end))
                         .font(.subheadline.monospacedDigit()).fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("time-poll-final-range")
-                } else {
+                } else if !typeSize.isAccessibilitySize {
                     Text("Tap the first and last time cells, or hold and drag.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                PlanActionButton(title: AppLocalization.string("Next: review invitation list"), symbol: "person.2",
+                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"), symbol: "person.2",
                                 accessibilityID: "unified-plan-review-roster") { showsInvite = true }
                     .disabled(finalRange == nil || !store.canMutate)
                 PlanActionButton(title: AppLocalization.string("Cancel time selection"), symbol: "xmark", kind: .utility,

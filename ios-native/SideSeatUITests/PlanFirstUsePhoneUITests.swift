@@ -472,10 +472,14 @@ import XCTest
         XCTAssertTrue(review.waitForExistence(timeout: 10)); XCTAssertFalse(review.isEnabled)
         let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
         let footer = app.staticTexts["time-poll-final-heading"]
-        for _ in 0..<12 where !second.isHittable || second.frame.maxY >= footer.frame.minY - 20 {
+        let top = app.navigationBars.firstMatch.frame.maxY + 20
+        for _ in 0..<12 where !first.isHittable || !second.isHittable || first.frame.minY < top || second.frame.maxY >= footer.frame.minY - 20 {
             let origin = app.coordinate(withNormalizedOffset: .zero)
-            let startY = min(app.frame.height * 0.6, footer.frame.minY - 24)
-            let endY = app.navigationBars.firstMatch.frame.maxY + 80
+            let bottom = footer.frame.minY - 20
+            let startY = (top + bottom) / 2
+            let overflow = first.frame.minY < top ? first.frame.minY - top : second.frame.maxY - bottom
+            let distance = min(120, max(24, abs(overflow)))
+            let endY = startY + (overflow < 0 ? distance : -distance)
             origin.withOffset(CGVector(dx: 80, dy: startY)).press(forDuration: 0.05,
                 thenDragTo: origin.withOffset(CGVector(dx: 80, dy: endY)))
         }

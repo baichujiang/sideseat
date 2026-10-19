@@ -83,6 +83,9 @@ waiting cards use a lighter text link. The entire card still opens the original 
 without nested buttons or implicit confirmation. Icon, wording and structure communicate
 the role together; purpose is not encoded solely by color. Existing accessibility IDs,
 loading/disabled state, 44pt-or-larger actual button targets and dynamic wrapping remain.
+At accessibility sizes the final-time footer uses the shorter Review invitees label
+and leaves the complete selection instructions beside the scrollable timetable,
+avoiding duplicate large paragraphs in the pinned controls. Text is not scaled down.
 Rescheduling and nickname editing stay secondary, with destructive management
 in the existing menu. No duplicate summary/attendee cards precede the timetable.
 

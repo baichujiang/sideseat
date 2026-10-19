@@ -2922,3 +2922,5 @@
 "%d dates · %@" = "%d 天可选 · %@";
 
 "Waiting for %@ to confirm" = "等 %@ 确认";
+
+"Review invitees" = "核对名单";
