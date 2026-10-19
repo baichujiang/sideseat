@@ -1,0 +1,70 @@
+{
+  "checks": [
+    {
+      "phase": "solo-zero-ready",
+      "checkedAt": "2026-10-19T21:58:45.612Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 0,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-owner-ready",
+      "checkedAt": "2026-10-19T21:58:59.156Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-roster-reviewed",
+      "checkedAt": "2026-10-19T21:59:14.714Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-link-ready",
+      "checkedAt": "2026-10-19T21:59:20.151Z",
+      "actualPhase": "INVITING",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-participant-opened",
+      "checkedAt": "2026-10-19T21:59:43.897Z",
+      "actualPhase": "INVITING",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-confirmed",
+      "checkedAt": "2026-10-19T21:59:48.635Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    }
+  ]
+}

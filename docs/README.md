@@ -2,7 +2,7 @@
 
 **Status:** Current index and authority map
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ## Read this first
 
@@ -57,6 +57,8 @@ Historical build evidence never certifies a newer build.
 
 | Document | Purpose |
 | --- | --- |
+| [Preview 135 / direct invitation](./releases/2026-10-20-preview135-direct-invitation.md) | Formal invitation before any friend fills availability, same-link direct confirmation and phone delivery |
+| [Preview 135 acceptance](./qa/2026-10-19-plans135.md) | Two final-source physical flows, 19 API boundaries, 44 browser checks, observed regressions and cleanup |
 | [Preview 134 / social Plans home](./releases/2026-10-19-preview134-social-plan-home.md) | Approved first-version home, original activity artwork, real friend context, retained horizontal sections and phone delivery |
 | [Preview 134 acceptance](./qa/2026-10-19-plans134.md) | 13 physical UI cases, complete native flow, 32 browser checks, release provenance and cleanup |
 | [Preview 133 / integrated planning](./releases/2026-10-19-preview133-integrated-planning.md) | One plan surface for activity ideas and availability; final activity/roster review and phone delivery |

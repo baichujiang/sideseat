@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-19T22:16:36.694366+00:00",
+  "device": {
+    "model": "iPhone 14 Plus",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "osVersion": "26.6.1"
+  },
+  "preview": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "bundleVersion": "135",
+    "version": "1.0.0",
+    "name": "SideSeat Preview"
+  },
+  "ordinary": {
+    "bundleIdentifier": "app.sideseat.mobile",
+    "bundleVersion": "97",
+    "version": "1.0.0",
+    "name": "SideSeat"
+  },
+  "normalLaunch": {
+    "pid": 2839,
+    "arguments": [],
+    "environmentKeys": [
+      "TERM"
+    ],
+    "processObserved": true
+  },
+  "qaRunnerInstalled": false,
+  "qaRunnerRemoved": [
+    {
+      "bundleID": "app.sideseat.planpresentationqa.xctrunner"
+    }
+  ],
+  "privateTestAndCookieFilesAbsent": true,
+  "sourceHashesMatch": true,
+  "cleanup": {
+    "accountsDeleted": 14,
+    "plansAndLinksDeleted": 25,
+    "tokens401": 14,
+    "links404": 25
+  }
+}

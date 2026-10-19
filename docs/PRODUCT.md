@@ -74,6 +74,16 @@ before sending. Existing private/manual and conversation-bound records retain
 identity, provenance and consent. This adds no public group, social graph or
 calendar-sharing permission. See [Integrated planning](./PLAN_ACTIVITY_START.md).
 
+**2026-10-19 owner correction — invitations do not require availability:**
+The organizer can set a final time and invite friends before anyone else responds,
+including with no availability responses at all. The same plan/link becomes a
+formal invitation with an explicit total count, using the existing direct-time
+confirmation rules. Friends can confirm the highlighted time directly in the App
+or share page. Saved responses and activity data remain; no response or attendance
+is fabricated. Known respondents can still form a closed roster. Adding link
+participants is explicit; deselecting a known invitee never silently opens a roster.
+Calendar still requires the displayed total and every selected person's acceptance.
+
 ## 1. Positioning
 
 Product vision:

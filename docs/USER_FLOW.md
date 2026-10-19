@@ -2,12 +2,28 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+
+## Formal invitation before availability — owner correction / Preview 135
+
+Plans → activity/place → timetable → choose final time → review invitation →
+create formal invitation link → share → individual confirmation → Calendar.
+
+Availability collection remains available in the same timetable, but is optional
+before inviting. Choose final time never waits for another person's response.
+With no other respondents, review directly shows the total including the organizer
+(default two). Friends open the same link, see the final-time highlight and confirm
+without filling availability. Existing respondents can instead be selected as a
+closed roster; Invite more friends by link is an explicit secondary action.
+Deselecting the last invitee keeps a closed-roster Send disabled. Adjusting time
+retains the count/roster draft, and cancelling sends nothing. Calendar waits for
+the displayed count and all selected acceptances. This supersedes any response
+prerequisite implied by the earlier dated collection-first descriptions.
 
 ## One default creation form — owner refinement / Preview 132
 

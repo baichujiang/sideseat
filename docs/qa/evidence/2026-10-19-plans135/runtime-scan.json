@@ -1,0 +1,23 @@
+{
+  "deploymentId": "dpl_CSkVAD8Ue2QMkZ7cSDa3AGR82KkJ",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "filter": {
+    "level": [
+      "error",
+      "fatal"
+    ],
+    "since": "1h",
+    "group_by": "level"
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "## Runtime Log Counts\n\n**Project:** prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N\n**Grouped by:** level\n**Showing:** Top 25 groups by log count; this may omit other groups.\n\n| level | count |\n|---|---|"
+      }
+    ],
+    "structuredContent": null,
+    "isError": false
+  },
+  "note": "No error/fatal groups returned for this deployment in the retained one-hour window; earlier periods are not certified."
+}

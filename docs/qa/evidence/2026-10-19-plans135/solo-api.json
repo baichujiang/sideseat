@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "phase": "solo-zero-ready",
+      "checkedAt": "2026-10-19T22:14:30.983Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 0,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-owner-ready",
+      "checkedAt": "2026-10-19T22:14:44.597Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-roster-reviewed",
+      "checkedAt": "2026-10-19T22:14:59.611Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-link-ready",
+      "checkedAt": "2026-10-19T22:15:05.377Z",
+      "actualPhase": "INVITING",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-participant-opened",
+      "checkedAt": "2026-10-19T22:15:29.245Z",
+      "actualPhase": "INVITING",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-confirmed",
+      "checkedAt": "2026-10-19T22:15:34.224Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    },
+    {
+      "phase": "solo-calendar-verified",
+      "checkedAt": "2026-10-19T22:15:52.058Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    }
+  ]
+}
