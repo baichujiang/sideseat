@@ -23320,7 +23320,7 @@
           },
           "attendeeIds": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "maxItems": 20,
             "items": {
               "type": "string"
@@ -23334,6 +23334,12 @@
             "type": "string",
             "format": "date-time",
             "description": "Explicit end chosen by the creator; supports half-day/full-day ranges. If omitted, older clients keep the stored duration or 60-minute fallback."
+          },
+          "linkParticipantCount": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 20,
+            "description": "Optional total including the organizer. Generates an open fixed-time invitation on the same plan/link so friends can confirm without an availability response. When omitted, attendeeIds remains a closed roster with at least one other person."
           }
         }
       },

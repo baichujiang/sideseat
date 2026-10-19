@@ -3038,3 +3038,10 @@
 "Start a plan. Choose an activity and find a time together." = "Start a plan. Choose an activity and find a time together.";
 "Start your first plan" = "Start your first plan";
 "%@ is organizing" = "%@ is organizing";
+
+"Next: review invitation" = "Next: review invitation";
+"Plan for %d people, including you" = "Plan for %d people, including you";
+"Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first." = "Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first.";
+"Only invite selected people" = "Only invite selected people";
+"Invite more friends by link" = "Invite more friends by link";
+"Invite friends" = "Invite friends";

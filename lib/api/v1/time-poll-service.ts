@@ -165,13 +165,16 @@ export async function sendPollInvitations(token: string, userId: string, input: 
     const owner = await tx.user.findUniqueOrThrow({ where: { id: userId }, select: { nickname: true, username: true } });
     roster.set(`user:${userId}`, { userId, guestId: null, displayName: poll.responses.find((r) => r.userId === userId)?.displayName ?? owner.nickname ?? owner.username });
     if (roster.size > 20) throw new TimePollError(422, "Invite at most twenty people.");
-    if (roster.size < 2) throw new TimePollError(422, "Invite at least one other person.");
+    if (input.linkParticipantCount !== undefined) {
+      if (input.linkParticipantCount < roster.size) throw new TimePollError(422, "The participant count must include everyone you selected.");
+    } else if (roster.size < 2) throw new TimePollError(422, "Invite at least one other person.");
     const userIds = [...roster.values()].flatMap((person) => person.userId ? [person.userId] : []);
     if (await hasPlanningBlock(tx, userIds)) throw new TimePollError(409, "This participant list is unavailable.");
     const version = poll.invitationVersion + 1;
     await tx.timePollInvitation.deleteMany({ where: { pollId: poll.id } });
     await tx.timePollInvitation.createMany({ data: [...roster.values()].map((person) => ({ pollId: poll.id, ...person, status: person.userId === userId ? "ACCEPTED" : "INVITED", version })) });
-    await tx.timePoll.update({ where: { id: poll.id }, data: { phase: "INVITING", chosenStart: start, chosenEnd: end, invitationVersion: version } });
+    await tx.timePoll.update({ where: { id: poll.id }, data: { phase: "INVITING", chosenStart: start, chosenEnd: end, invitationVersion: version,
+      ...(input.linkParticipantCount !== undefined ? { planningMode: "FIXED", expectedCount: input.linkParticipantCount } : {}) } });
   });
   return getTimePoll(token, userId, appOrigin);
 }

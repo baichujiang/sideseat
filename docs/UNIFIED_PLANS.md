@@ -3,6 +3,25 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Invite before availability responses — owner correction 2026-10-19
+
+The organizer can choose the final time immediately, including zero responses or
+only their own availability. A response is not a prerequisite for being invited.
+Review defaults to a shareable formal invitation when no other respondents exist:
+confirm the total participant count (including the organizer, default two), create
+the invitation, then share the same plan link. Friends see the highlighted final
+time and explicitly confirm, without filling availability first.
+
+Existing respondents can still be selected as a closed roster. A secondary Invite
+more friends by link action adds room for people who have not responded. The new
+optional linkParticipantCount on the existing invitation request explicitly opts
+into the existing FIXED link-joining/capacity/confirmation rules on this same plan;
+token, candidate slots, saved responses and activity records are preserved. There
+is no duplicate plan or automatic confirmation for a friend. The organizer accepts
+on sending, and Calendar still waits for the displayed total and every selected
+person's explicit acceptance. Cancelled drafts change nothing; old requests retain
+closed-roster behavior. Existing FIXED cancellation and version rules apply.
+
 
 ## Default single-form creation — Preview 132
 

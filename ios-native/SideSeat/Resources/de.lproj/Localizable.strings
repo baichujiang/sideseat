@@ -3037,3 +3037,10 @@
 "Start a plan. Choose an activity and find a time together." = "Starte einen Plan. Findet gemeinsam eine Aktivität und einen Termin.";
 "Start your first plan" = "Ersten Plan starten";
 "%@ is organizing" = "%@ organisiert";
+
+"Next: review invitation" = "Weiter: Einladung prüfen";
+"Plan for %d people, including you" = "Für %d Personen, einschließlich dir";
+"Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first." = "Freunde können über diesen Link direkt die Teilnahme zur gewählten Zeit bestätigen, ohne vorher freie Zeiten einzutragen.";
+"Only invite selected people" = "Nur ausgewählte Personen einladen";
+"Invite more friends by link" = "Weitere Freunde per Link einladen";
+"Invite friends" = "Freunde einladen";

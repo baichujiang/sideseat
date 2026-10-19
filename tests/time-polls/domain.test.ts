@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildPollSlots, createTimePollSchema, summarizePoll } from "../../lib/time-polls/domain";
+import { buildPollSlots, createTimePollSchema, summarizePoll, sendPollInvitationsSchema } from "../../lib/time-polls/domain";
 
 const input = createTimePollSchema.parse({ title: "Dinner", timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 1020 });
 const slots = buildPollSlots(input);
@@ -46,4 +46,14 @@ test("recommendations cover the entire activity duration and keep unfilled invit
   const waiting = summarizePoll(slots, people.slice(0, 3), 60, 5);
   assert.equal(waiting.maximum, 3);
   assert.equal(waiting.common, false);
+});
+
+
+test("an invitation link needs no availability respondents; closed rosters keep their existing contract", () => {
+  const draft = { start: slots[0].start, end: slots[3].end, version: 0, attendeeIds: [] };
+  assert.equal(sendPollInvitationsSchema.safeParse(draft).success, false);
+  assert.deepEqual(sendPollInvitationsSchema.parse({ ...draft, linkParticipantCount: 2 }).attendeeIds, []);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 1 }).success, false);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 21 }).success, false);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, attendeeIds: ["existing-response"] }).success, true);
 });

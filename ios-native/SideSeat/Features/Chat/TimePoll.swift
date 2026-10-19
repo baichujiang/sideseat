@@ -194,6 +194,7 @@ struct SendPollInvitationsRequest: Encodable, Sendable {
     var end: String? = nil
     let attendeeIds: [String]
     let version: Int
+    var linkParticipantCount: Int? = nil
 }
 struct RespondPollInvitationRequest: Encodable, Sendable { let status: String; let version: Int }
 struct CancelPollPlanRequest: Encodable, Sendable { let version: Int }

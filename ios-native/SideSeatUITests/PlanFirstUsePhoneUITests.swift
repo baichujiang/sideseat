@@ -565,6 +565,82 @@ import XCTest
         nativePhase("calendar-verified"); capture(app, "native-11-calendar-to-plan")
     }
 
+    func testOrganizerInvitesBeforeFriendsFillAvailability() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires two fresh disposable native accounts.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        let choose = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(choose.waitForExistence(timeout: 20)); XCTAssertTrue(choose.isEnabled)
+        nativePhase("solo-zero-ready"); capture(app, "solo-zero-responses")
+        choose.tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        first.tap(); second.tap()
+        let review = app.buttons["unified-plan-review-roster"]
+        XCTAssertTrue(review.isEnabled); review.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isEnabled)
+        XCTAssertTrue(app.steppers["unified-plan-link-count"].exists)
+        capture(app, "solo-zero-review")
+        app.buttons["返回时间表"].tap(); app.buttons["time-poll-cancel-final"].tap()
+        first.tap(); second.tap(); nativeWaitSaved(); nativePhase("solo-owner-ready")
+        choose.tap(); first.tap(); second.tap(); review.tap()
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isEnabled)
+        let stepper = app.steppers["unified-plan-link-count"]
+        XCTAssertTrue(stepper.exists)
+        stepper.buttons.element(boundBy: 1).tap()
+        XCTAssertTrue(app.staticTexts["共 3 人参加，包含你"].firstMatch.exists)
+        app.buttons["unified-plan-adjust-time"].tap()
+        XCTAssertTrue(review.waitForExistence(timeout: 10)); review.tap()
+        XCTAssertTrue(app.staticTexts["共 3 人参加，包含你"].firstMatch.waitForExistence(timeout: 10))
+        stepper.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["共 2 人参加，包含你"].firstMatch.exists)
+        nativePhase("solo-roster-reviewed"); capture(app, "solo-invitation-review")
+        send.tap()
+        let count = app.staticTexts["unified-plan-confirmation-count"]
+        wait(count, labelContains: "1/2 人已确认")
+        XCTAssertTrue(app.buttons["plan-share-primary"].isHittable)
+        app.buttons["plan-copy-link"].tap(); nativePhase("solo-link-ready")
+        capture(app, "solo-formal-invitation")
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        app.buttons["plans-open-link"].tap()
+        let link = app.alerts.textFields.firstMatch
+        XCTAssertTrue(link.waitForExistence(timeout: 10)); link.tap(); link.typeKey("v", modifierFlags: .command)
+        let allowPaste = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
+        if allowPaste.waitForExistence(timeout: 2) { allowPaste.tap() }
+        app.alerts.buttons["打开"].tap()
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 20)); XCTAssertTrue(accept.isEnabled)
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].exists)
+        let invited = app.descendants(matching: .any)["plan-invitation-cell-1"].firstMatch
+        XCTAssertTrue(invited.waitForExistence(timeout: 10)); XCTAssertTrue(invited.isSelected)
+        nativePhase("solo-participant-opened"); capture(app, "solo-peer-direct-confirmation")
+        accept.tap(); wait(count, labelContains: "2/2 人已确认")
+        nativePhase("solo-confirmed")
+        app.buttons["plan-view-calendar"].tap()
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
+        app.buttons["calendar-search"].tap()
+        let search = app.textFields["calendar-search-field"]
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.title)
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 20)); result.tap()
+        let manage = app.buttons["calendar-manage-plan"]
+        for _ in 0..<4 where !manage.isHittable { app.swipeUp() }
+        XCTAssertTrue(manage.waitForExistence(timeout: 10)); manage.tap()
+        wait(count, labelContains: "2/2 人已确认")
+        nativePhase("solo-calendar-verified"); capture(app, "solo-calendar-to-same-plan")
+    }
+
     func testNativeConfirmedPlanUsesUpcomingSummary() throws {
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
         try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires the confirmed disposable native plan.")

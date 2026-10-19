@@ -22527,6 +22527,10 @@ internal enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/SendPollInvitationsRequest/end`.
             internal var end: Foundation.Date?
+            /// Optional total including the organizer. Generates an open fixed-time invitation on the same plan/link so friends can confirm without an availability response. When omitted, attendeeIds remains a closed roster with at least one other person.
+            ///
+            /// - Remark: Generated from `#/components/schemas/SendPollInvitationsRequest/linkParticipantCount`.
+            internal var linkParticipantCount: Swift.Int?
             /// Creates a new `SendPollInvitationsRequest`.
             ///
             /// - Parameters:
@@ -22534,22 +22538,26 @@ internal enum Components {
             ///   - attendeeIds:
             ///   - version:
             ///   - end: Explicit end chosen by the creator; supports half-day/full-day ranges. If omitted, older clients keep the stored duration or 60-minute fallback.
+            ///   - linkParticipantCount: Optional total including the organizer. Generates an open fixed-time invitation on the same plan/link so friends can confirm without an availability response. When omitted, attendeeIds remains a closed roster with at least one other person.
             internal init(
                 start: Foundation.Date,
                 attendeeIds: [Swift.String],
                 version: Swift.Int,
-                end: Foundation.Date? = nil
+                end: Foundation.Date? = nil,
+                linkParticipantCount: Swift.Int? = nil
             ) {
                 self.start = start
                 self.attendeeIds = attendeeIds
                 self.version = version
                 self.end = end
+                self.linkParticipantCount = linkParticipantCount
             }
             internal enum CodingKeys: String, CodingKey {
                 case start
                 case attendeeIds
                 case version
                 case end
+                case linkParticipantCount
             }
             internal init(from decoder: any Swift.Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -22569,11 +22577,16 @@ internal enum Components {
                     Foundation.Date.self,
                     forKey: .end
                 )
+                self.linkParticipantCount = try container.decodeIfPresent(
+                    Swift.Int.self,
+                    forKey: .linkParticipantCount
+                )
                 try decoder.ensureNoAdditionalProperties(knownKeys: [
                     "start",
                     "attendeeIds",
                     "version",
-                    "end"
+                    "end",
+                    "linkParticipantCount"
                 ])
             }
         }

@@ -276,6 +276,7 @@ struct TimePollDetailView: View {
     @State private var finalRange: TimePollFinalRange?
     @State private var invitationRoster = Set<String>()
     @State private var invitationActivityID: String?
+    @State private var invitationLinkCount: Int?
     @State private var choosingAgain = false
     @State private var now = Date()
     @FocusState private var nameFocused: Bool
@@ -337,7 +338,7 @@ struct TimePollDetailView: View {
         .confirmationDialog("Delete this poll and all responses?", isPresented: $showsDelete, titleVisibility: .visible) {
             Button("Delete poll", role: .destructive) { Task { await delete() } }
         }
-        .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster, activityID: $invitationActivityID).dynamicTypeSize(typeSize) } }
+        .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster, activityID: $invitationActivityID, linkParticipantCount: $invitationLinkCount).dynamicTypeSize(typeSize) } }
         .sheet(isPresented: $showsPeople) {
             if let poll = store.poll {
                 NavigationStack {
@@ -444,7 +445,7 @@ struct TimePollDetailView: View {
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"), symbol: "person.2",
+                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : poll.participants.contains(where: { !$0.isMe }) ? "Next: review invitation list" : "Next: review invitation"), symbol: "person.2",
                                 accessibilityID: "unified-plan-review-roster") { showsInvite = true }
                     .disabled(finalRange == nil || !store.canMutate)
                 PlanActionButton(title: AppLocalization.string("Cancel time selection"), symbol: "xmark", kind: .utility,
@@ -455,11 +456,9 @@ struct TimePollDetailView: View {
             } else {
                 if editsTimetable(poll) { saveStatus(poll) }
                 if poll.isOwner {
-                    if poll.participants.contains(where: { !$0.isMe }) {
-                        PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
-                                        accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
-                            .disabled(!store.canMutate || poll.slots.isEmpty)
-                    }
+                    PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
+                                    accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
+                        .disabled(!store.canMutate || poll.slots.isEmpty)
                     PlanShareActions(poll: poll)
                 } else {
                     Text("Wait for the organizer's invitation")
@@ -477,6 +476,7 @@ struct TimePollDetailView: View {
         nameFocused = false
         invitationRoster = Set(poll.participants.map(\.id))
         invitationActivityID = poll.activitySelection?.selectedIdeaId
+        invitationLinkCount = poll.participants.contains(where: { !$0.isMe }) ? nil : 2
         finalRange = nil
         if let start = poll.chosenStart, let end = poll.chosenEnd,
            let first = poll.cells.first(where: { $0.slots[0].start == start }),

@@ -3038,3 +3038,10 @@
 "Start a plan. Choose an activity and find a time together." = "发个计划，一起选活动、找时间。";
 "Start your first plan" = "发起第一个计划";
 "%@ is organizing" = "%@ 发起";
+
+"Next: review invitation" = "下一步：确认邀请";
+"Plan for %d people, including you" = "共 %d 人参加，包含你";
+"Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first." = "朋友打开邀请链接后，直接确认这个时间是否参加，无需先填写空闲。";
+"Only invite selected people" = "仅邀请已勾选的人";
+"Invite more friends by link" = "通过链接邀请其他朋友";
+"Invite friends" = "邀请朋友";

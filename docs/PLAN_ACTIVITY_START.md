@@ -32,7 +32,10 @@ opening or cancelling review writes nothing. Sending saves the selected activity
 through the existing owner-only endpoint, then sends invitations through the
 existing invitation endpoint. If the first request fails, no invitation is sent;
 if invitation sending fails, the already-saved activity remains visible for retry.
-The send action stays disabled for an undecided activity or an empty invitee list.
+The send action stays disabled for an undecided activity. A closed roster requires
+another selected person; a shareable formal invitation instead specifies the total
+participant count and allows people to confirm without prior availability. See
+[Invite before availability responses](./UNIFIED_PLANS.md).
 
 The same plan token, link, account/guest identity and availability are retained.
 Suggestions and multiple interests never create an availability response,

@@ -41,17 +41,22 @@ struct UnifiedPlanInviteView: View {
     let range: TimePollFinalRange
     @Binding var selected: Set<String>
     @Binding var activityID: String?
+    @Binding var linkParticipantCount: Int?
     @State private var sending = false
 
-    init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>, activityID: Binding<String?>) {
+    init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>, activityID: Binding<String?>, linkParticipantCount: Binding<Int?>) {
         self.poll = poll; self.store = store; self.range = range
         _selected = selected
         _activityID = activityID
+        _linkParticipantCount = linkParticipantCount
     }
 
     private var needsActivityChoice: Bool { poll.activitySelection?.isOpen == true }
     private var activityIdeas: [NativePlanActivity.Idea] { poll.activitySelection?.ideas ?? [] }
     private var chosenActivity: NativePlanActivity.Idea? { activityIdeas.first { $0.id == activityID } }
+    private var selectedFriends: Int { poll.participants.filter { !$0.isMe && selected.contains($0.id) }.count }
+    private var hasFriends: Bool { poll.participants.contains { !$0.isMe } }
+    private var minimumLinkCount: Int { min(20, max(2, selectedFriends + 2)) }
     private var reviewLocation: String? {
         if let chosenActivity { return chosenActivity.location }
         return poll.location
@@ -101,7 +106,7 @@ struct UnifiedPlanInviteView: View {
                     Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil") }
                         .accessibilityIdentifier("unified-plan-adjust-time")
                 }
-                Section("Choose who to invite") {
+                if hasFriends { Section("Choose who to invite") {
                     ForEach(poll.participants) { person in
                         Button {
                             if selected.contains(person.id) { selected.remove(person.id) } else { selected.insert(person.id) }
@@ -122,16 +127,32 @@ struct UnifiedPlanInviteView: View {
                     }
                     Text("Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated.")
                         .font(.footnote).foregroundStyle(.secondary)
-                }
+                } }
+                Section {
+                    if linkParticipantCount != nil {
+                        Stepper(value: Binding(get: { linkParticipantCount ?? minimumLinkCount }, set: { linkParticipantCount = $0 }), in: minimumLinkCount...20) {
+                            Text(String(format: AppLocalization.string("Plan for %d people, including you"), linkParticipantCount ?? minimumLinkCount))
+                        }.accessibilityIdentifier("unified-plan-link-count")
+                        Text("Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                        if selectedFriends > 0 {
+                            Button("Only invite selected people") { linkParticipantCount = nil }
+                                .accessibilityIdentifier("unified-plan-link-off")
+                        }
+                    } else {
+                        Button("Invite more friends by link") { linkParticipantCount = minimumLinkCount }
+                            .disabled(selectedFriends >= 19).accessibilityIdentifier("unified-plan-link-on")
+                    }
+                } header: { Text("Invite friends") }
                 if let error = store.error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text(String(format: AppLocalization.string("Inviting %d people, including you"), 1 + poll.participants.filter { !$0.isMe && selected.contains($0.id) }.count))
+                    Text(String(format: AppLocalization.string(linkParticipantCount == nil ? "Inviting %d people, including you" : "Plan for %d people, including you"), linkParticipantCount ?? (selectedFriends + 1)))
                         .font(.subheadline.weight(.semibold))
                     Text("Sending confirms your participation. Everyone else confirms from the link.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    PlanActionButton(title: AppLocalization.string("Send invitations"), symbol: "paperplane.fill", kind: .commit, isLoading: sending || store.acting,
+                    PlanActionButton(title: AppLocalization.string(linkParticipantCount == nil ? "Send invitations" : "Create invitation link"), symbol: "paperplane.fill", kind: .commit, isLoading: sending || store.acting,
                                     accessibilityID: "unified-plan-send-invitations") {
                         Task {
                             sending = true
@@ -141,15 +162,19 @@ struct UnifiedPlanInviteView: View {
                                 await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: activityID), session: session)
                                 guard store.error == nil else { return }
                             }
-                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0), session: session)
+                            await store.mutate("invitations", body: SendPollInvitationsRequest(start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end), attendeeIds: selected.sorted(), version: poll.invitationVersion ?? 0, linkParticipantCount: linkParticipantCount), session: session)
                             if store.error == nil && store.poll?.planningPhase == "INVITING" { dismiss() }
                         }
                     }
                     .disabled(sending || !store.canMutate || (needsActivityChoice && chosenActivity == nil)
-                              || !poll.participants.contains { !$0.isMe && selected.contains($0.id) })
+                              || (linkParticipantCount == nil && selectedFriends == 0))
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
             }
-            .navigationTitle("Confirm invitation list").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(hasFriends ? "Confirm invitation list" : "Review invitation").navigationBarTitleDisplayMode(.inline)
+            .onChange(of: selected) { _, _ in
+                if selectedFriends == 0 && linkParticipantCount == nil { linkParticipantCount = 2 }
+                if let count = linkParticipantCount { linkParticipantCount = max(count, minimumLinkCount) }
+            }
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(sending || store.acting) } }
         }.tint(SideSeatTheme.utilityAction).interactiveDismissDisabled(sending || store.acting)
     }

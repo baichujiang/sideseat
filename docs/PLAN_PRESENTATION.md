@@ -110,7 +110,7 @@ in the existing menu. No duplicate summary/attendee cards precede the timetable.
 | Display status | Viewer's next step |
 | --- | --- |
 | Choosing activity and time | Ideas are optional inline input. Participants without a saved availability response still need to fill it; those who responded wait for the organizer. The organizer can share or choose final time, then review activity and invitees together |
-| Finding a time | Organizer can view/share immediately and edit own availability directly in the timetable, then choose a time after friends respond; other participants fill availability and wait for the organizer |
+| Finding a time | Organizer can view/share, edit availability or choose final time immediately, even with no other responses. Review either the known roster or a formal invitation link with a total participant count; friends can explicitly confirm without prior availability |
 | Awaiting confirmations | Invited viewer explicitly confirms; an accepting participant waits; manual organizer reviews replies/shares; bilateral sender waits for the recipient |
 | Awaiting confirmations, viewer declined | Own reply is saved; no claim that this viewer is waiting to attend |
 | Awaiting confirmations, viewer not selected | Explain exclusion and retain saved availability; no confirmation action for a closed roster |
