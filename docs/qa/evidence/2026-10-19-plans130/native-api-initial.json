@@ -1,0 +1,97 @@
+{
+  "checks": [
+    {
+      "phase": "owner-ready",
+      "checkedAt": "2026-10-19T00:08:19.765Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-opened",
+      "checkedAt": "2026-10-19T00:08:45.003Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-saved",
+      "checkedAt": "2026-10-19T00:08:53.474Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-edited",
+      "checkedAt": "2026-10-19T00:09:11.359Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-reopened",
+      "checkedAt": "2026-10-19T00:09:35.290Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    }
+  ]
+}

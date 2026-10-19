@@ -1,0 +1,14 @@
+{
+  "commit": "de7efa969196bdeb8b9866dd8bd158ecd1a3f344",
+  "preview": 130,
+  "sha256": {
+    "ios-native/Configuration/Preview.xcconfig": "4b8104b15cb005f70718f0b452b3a5e146e2ed4c160fdede7e3b0432dfa7a4ce",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "fc3a680baf2f4dc7983f3bdd0918b2e6b39fc384c7b2786d2d559def63352621",
+    "ios-native/SideSeat/Features/Chat/PlanCardView.swift": "fef353cb11874476e81f5b8e5becbe65cb7d2df71b2bd185247c33fa84b256e9",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "0c04d0fc374e67951cf522dd44d8f839c1234d20365e19e14168c4d440f50e2c",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "8f4c51d60bbfcdf0eeff1b3bd4c9e3e725ef4245b628163fe17788a182b230f4",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "29e2ae2607291090ccb6792b367a72e0b2fb736b8268d91dbe3c86dfc69dac00"
+  },
+  "backendDeployment": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "backendReleaseThisStage": false
+}

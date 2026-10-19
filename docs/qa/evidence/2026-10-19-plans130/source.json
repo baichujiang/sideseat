@@ -1,0 +1,23 @@
+{
+  "commit": "cfd866ddfc61a436c6834623087f575937016888",
+  "preview": 130,
+  "sha256": {
+    "ios-native/Configuration/Preview.xcconfig": "4b8104b15cb005f70718f0b452b3a5e146e2ed4c160fdede7e3b0432dfa7a4ce",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "fc3a680baf2f4dc7983f3bdd0918b2e6b39fc384c7b2786d2d559def63352621",
+    "ios-native/SideSeat/Features/Chat/PlanCardView.swift": "fef353cb11874476e81f5b8e5becbe65cb7d2df71b2bd185247c33fa84b256e9",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "0c04d0fc374e67951cf522dd44d8f839c1234d20365e19e14168c4d440f50e2c",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "d767b2678a13353174aa10e8127d89735dabd3af39467bbcee6c0fde991b0b51",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "29e2ae2607291090ccb6792b367a72e0b2fb736b8268d91dbe3c86dfc69dac00",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "7b7fa00af96440776e4bba003bef9215e57878ecdd12744f08fbabc90196a04b",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "32d736c31e88927e740c570b4194551ca6a01c6bcecce78bfe96be13a8122a48",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "11abf10f314fe5c6be942b260ec128527ba6300f998377120b03b66a1f904941"
+  },
+  "interfaceRunCommit": "de7efa96",
+  "unchangedOverviewAndChatControls": {
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": true,
+    "ios-native/SideSeat/Features/Chat/PlanCardView.swift": true,
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": true
+  },
+  "backendDeployment": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "backendReleaseThisStage": false
+}

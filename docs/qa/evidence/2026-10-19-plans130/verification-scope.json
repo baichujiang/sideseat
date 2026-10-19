@@ -1,0 +1,50 @@
+{
+  "preview": 130,
+  "interfaceBatch": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "sourceCommit": "de7efa96",
+    "overviewAndChatComponentsMatchFinalSource": true
+  },
+  "finalNativeBatch": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "journeySeconds": 265.864,
+    "realAPICheckpoints": 12
+  },
+  "finalSafariAndUpcomingBatch": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "safariJourneySeconds": 153.328,
+    "upcomingSeconds": 16.279,
+    "realAPICheckpoints": 8
+  },
+  "initialNativeBatch": {
+    "passed": 0,
+    "failed": 2,
+    "acceptedAsFinalEvidence": false,
+    "reasons": [
+      "Confirmed-list check ran before the plan existed; rerun after the complete native journey.",
+      "Maximum-text footer duplicated instructions and wrapped the long review label; compacted it and corrected one-direction scroll alignment. Fresh-account native journey passed."
+    ]
+  },
+  "newLiveAccounts": 5,
+  "temporaryAccountsDeleted": 5,
+  "plansAndLinksDeleted": 3,
+  "unitTestsRerun": false,
+  "publicWebsiteModified": false,
+  "backendDeploymentRetainedFromRecord": "dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn",
+  "localization": "New compact Review invitees label in en/de/zh-Hans; three strings files validated; physical UI tested in Chinese",
+  "productionUsesFixedCardHeight": false,
+  "visualReview": [
+    "Compact overview and explicit chat confirmation",
+    "Choose final time, share and copy controls",
+    "Final invitation roster and send control",
+    "Participant invitation and confirmation",
+    "Maximum accessibility final range and roster",
+    "Safari guest invitation"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "unit": "pt",
+  "standardChineseFixture": {
+    "upcoming": 93.66666666666669,
+    "task": 115.33333333333331,
+    "taskLongTitle": 136.33333333333331,
+    "waiting": 97.33333333333337
+  },
+  "fixedProductionHeights": false
+}

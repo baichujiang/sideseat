@@ -10,13 +10,15 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 129 紧凑卡片来源 `32848bf3`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (129)` | 三组信息的紧凑任务/等待/日程卡片，标准样例约 111/97/94pt，双行标题约 132pt；6 项真机界面回归通过；严格签名/安装/普通启动 PID 1862 核验；真实完整链路最近验收仍为 127；[129 交付](./releases/2026-10-19-preview129-compact-plan-cards.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；129 三类紧凑卡片、双行标题、最大字号、横滑/展开/返回和高度检查通过；127 真实完整链路保留；QA runner 移除 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 130 按钮语义及大字号来源 `cfd866dd`、流程基准 `4e61c282` 已推送；正式分享网页来源仍为 `e484b774` |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (130)` | 按钮按提交、选时/分享、复制、查看跳转和拒绝区分；6 项界面、修正后原生/Safari 完整链路与已确认日程通过，12+8 个 API 阶段；严格签名/安装/普通启动 PID 1932 核验；[130 交付](./releases/2026-10-19-preview130-plan-action-roles.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | 所有物理命令指定默认设备，CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；130 三类紧凑卡片、按钮层级、深色最大字号、横滑/展开/返回、原生和 Safari 全流程与日历检查通过；QA runner 移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_6kZ6PYg8h4FUUxDxXwvBXYkVirRn`，Ready | 受邀时段表格与明确确认统一；候选两轮各 8 组、正式 8 组真实浏览器流程、手机 Safari 147.349 秒及八阶段 API 通过，7 项健康 HTTP 200；[123 交付](./releases/2026-10-18-preview123-invitation-timetable.md) |
 | 生产源码 | 原生产 1,349 项校验重建，保留 1,346 项；三个网页文件更新，新增组件及来源记录；1,351 项上传 SHA-1 全匹配 | 网页来源 `e484b774`；API/Schema 保留，迁移显式跳过；同一生产候选验证后原样提升；[清单](./qa/evidence/2026-10-18-plans123/source-manifest.json)、[上传核对](./qa/evidence/2026-10-18-plans123/upload-verification.json) |
+
+130 按实际效果区分按钮：实心提交/确认、描边选时/名单/分享、文字复制、轻量查看/日历和红色拒绝；保留紧凑卡片及横向分区。6 项界面回归通过；修正大字号底栏后，原生 265.864 秒、Safari 153.328 秒、已确认日程 16.279 秒及 12+8 个 API 阶段通过。初轮 2 项失败记录保留，5 个临时账号、3 个计划/链接清理；默认手机 130 普通启动 PID 1932 核验，QA runner 移除，无后端/网页发布。[完整 QA](./qa/2026-10-19-plans130.md)。
 
 129 收为三个信息组：活动/个人状态同排，等待直接显示正在等谁，即将开始使用小型日期块。标准样例约 111/97/94pt，双行长标题约 132pt，6 项最终真机界面回归通过。没有创建真实账号，本轮未重跑 127 的真实 API 链路。默认手机 Preview 129 普通启动 PID 1862 核验；无后端/网页发布。[完整 QA](./qa/2026-10-19-plans129.md)。
 

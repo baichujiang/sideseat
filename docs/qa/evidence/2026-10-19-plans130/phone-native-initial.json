@@ -1,0 +1,57 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 2,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanPresentationPhone117 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 2,
+  "finishTime" : 1792368638.206,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792368461.421,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Failed to tap Button (Element at index 1): No matches found for Descendants matching type SegmentedControl from input {(\n    Application, pid: 1888, label: 'SideSeat Preview'\n)}\nPossibly caused by runtime issues:\nAutomation type mismatch: computed Button from legacy attributes vs DisclosureTriangle from modern attribute. Input attributes and values: {\n    \"XC_kAXXCAttributeAutomationType\" = 13;\n    \"XC_kAXXCAttributeElementBaseType\" = UIResponder;\n    \"XC_kAXXCAttributeElementType\" = \"SwiftUI.AccessibilityNode\";\n    \"XC_kAXXCAttributeTraits\" = 8589934593;\n}\nSee test report attachments for more detail.",
+      "targetName" : "PlanPresentationPhone117UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testNativeConfirmedPlanUsesUpcomingSummary()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testNativeConfirmedPlanUsesUpcomingSummary",
+      "testName" : "testNativeConfirmedPlanUsesUpcomingSummary()"
+    },
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "PlanPresentationPhone117UITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar",
+      "testName" : "testNativeParticipantDirectTimetableInviteConfirmAndCalendar()"
+    }
+  ],
+  "title" : "Test - PlanPresentationPhone117",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 2
+}
