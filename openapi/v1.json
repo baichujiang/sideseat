@@ -11283,6 +11283,189 @@
           }
         }
       }
+    },
+    "/api/v1/time-polls/{token}/activities": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "suggestTimePollActivity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestTimePollActivityRequest"
+              }
+            }
+          }
+        },
+        "description": "Suggest an activity while the shared-theme plan is collecting ideas."
+      }
+    },
+    "/api/v1/time-polls/{token}/activities/interest": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "put": {
+        "operationId": "setTimePollActivityInterest",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTimePollActivityInterestRequest"
+              }
+            }
+          }
+        },
+        "description": "Idempotently mark or remove own interest; this never confirms attendance."
+      }
+    },
+    "/api/v1/time-polls/{token}/activities/choose": {
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "chooseTimePollActivity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChooseTimePollActivityRequest"
+              }
+            }
+          }
+        },
+        "description": "Organizer explicitly sets an activity and keeps the same timetable and responses. Closed after invitations."
+      }
     }
   },
   "components": {
@@ -22768,6 +22951,9 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "activitySelection": {
+            "$ref": "#/components/schemas/TimePollActivitySelection"
           }
         }
       },
@@ -22893,6 +23079,9 @@
               "COLLECT",
               "FIXED"
             ]
+          },
+          "activitySelection": {
+            "$ref": "#/components/schemas/TimePollActivitySummary"
           }
         }
       },
@@ -22985,6 +23174,10 @@
           "fixedStart": {
             "type": "string",
             "format": "date-time"
+          },
+          "chooseActivityTogether": {
+            "type": "boolean",
+            "description": "Optional shared-theme stage before scheduling; supported with COLLECT only. Existing plans omit it."
           }
         }
       },
@@ -23146,6 +23339,183 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 60
+          }
+        }
+      },
+      "TimePollActivitySupporter": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "displayName",
+          "isMe"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "isMe": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimePollActivityIdea": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "location",
+          "authorName",
+          "isMine",
+          "interestedBy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "authorName": {
+            "type": "string"
+          },
+          "isMine": {
+            "type": "boolean"
+          },
+          "interestedBy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollActivitySupporter"
+            }
+          }
+        }
+      },
+      "TimePollActivitySummary": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": false,
+        "required": [
+          "topic",
+          "isOpen",
+          "selectedIdeaId",
+          "ideaCount",
+          "hasParticipated"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "isOpen": {
+            "type": "boolean"
+          },
+          "selectedIdeaId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ideaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasParticipated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TimePollActivitySelection": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": false,
+        "required": [
+          "topic",
+          "isOpen",
+          "selectedIdeaId",
+          "ideaCount",
+          "hasParticipated",
+          "ideas"
+        ],
+        "properties": {
+          "topic": {
+            "type": "string"
+          },
+          "isOpen": {
+            "type": "boolean"
+          },
+          "selectedIdeaId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ideaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "hasParticipated": {
+            "type": "boolean"
+          },
+          "ideas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollActivityIdea"
+            }
+          }
+        }
+      },
+      "SuggestTimePollActivityRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      },
+      "SetTimePollActivityInterestRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ideaId",
+          "interested"
+        ],
+        "properties": {
+          "ideaId": {
+            "type": "string"
+          },
+          "interested": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChooseTimePollActivityRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ideaId"
+        ],
+        "properties": {
+          "ideaId": {
+            "type": "string"
           }
         }
       }
