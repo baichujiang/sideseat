@@ -11,7 +11,7 @@ struct InboxNotification: Codable, Identifiable, Equatable, Sendable {
             case .changed: AppLocalization.string("Plan time updated")
             case .confirmed: AppLocalization.string("Plan confirmed")
             case .cancelled: AppLocalization.string("Plan cancelled")
-            case .activityChosen: AppLocalization.string("Activity chosen — share your free time")
+            case .activityChosen: AppLocalization.string("Activity chosen")
             case .verificationApproved: AppLocalization.string("Student verification approved")
             case .verificationRejected: AppLocalization.string("Student verification needs attention")
             case .accountUpdated: AppLocalization.string("Account updated")
