@@ -2,12 +2,33 @@
 
 **Status:** Frozen v1.0 for the current one-to-one flow
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+
+## Optional activity choice — Preview 131 / owner-approved 2026-10-19
+
+Plans leads with **Start a plan**. Creation offers **Activity already decided**
+and **Choose an activity together**. A shared theme can be created from one form,
+with the next seven days preselected and optional date/hour settings. The known
+activity start retains the two-part creation flow described below.
+
+Theme → share the same plan → App participants and web guests suggest activities
+and mark multiple interests → organizer selects a candidate locally → explicitly
+sets the activity → same timetable → choose final time → review invitees → send
+invitations → each selected person explicitly confirms → Calendar.
+
+During activity choice, ideas lead and **Fill free time first** opens the existing
+editable timetable. After selection, that timetable leads again. The token/link,
+names, participant identities, slots and saved availability are retained. Interest
+is neither an availability response nor attendance; counts never choose a winner.
+The organizer can choose without waiting for everyone. Existing plans skip this
+optional stage. Chat-bound bilateral plans keep their existing creation/consent;
+sharing a manual-plan link in chat opens this same manual flow. See
+[Activity-choice contract](./PLAN_ACTIVITY_START.md).
 
 ## Invitation timetable — Preview 123
 
@@ -41,7 +62,7 @@ out of the empty first-use screen and appear when there are plans to organize.
 **Your next steps** and **Waiting for others** still group active plans by role;
 **Upcoming** and **Past** retain their existing classifications and calendar rules.
 
-**Plans → Start an activity** opens a two-part creation sheet. First, describe
+**Activity already decided → Start a plan** opens a two-part creation sheet. First, describe
 what to do, optionally choose a suggested activity and location, and choose
 whether the time is still open or already set. The persistent **Next: choose dates**
 action advances only after an activity name exists. Second, choose candidate days

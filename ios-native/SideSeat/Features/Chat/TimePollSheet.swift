@@ -122,22 +122,13 @@ struct TimePollCreateView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
                         PlanTaskHeader(step: chooseActivityTogether ? "Choose together" : "Step 1 of 2", title: "What would you like to do together?", detail: chooseActivityTogether ? "Start with a theme. Friends can suggest activities and mark interest." : "Start with the activity. You can decide the time together.")
+                        if typeSize.isAccessibilitySize { activityIdentityFields }
                         let startLayout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
                         startLayout {
                             activityStartingPoint(together: false, title: "Activity already decided", symbol: "checkmark.circle")
                             activityStartingPoint(together: true, title: "Choose an activity together", symbol: "lightbulb")
                         }
-                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                            TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
-                                .font(.title3.weight(.medium)).focused($titleFocused)
-                                .submitLabel(.done).onSubmit { titleFocused = false }
-                                .accessibilityIdentifier("time-poll-title")
-                            Divider()
-                            TextField("Location (optional)", text: $location)
-                                .accessibilityIdentifier("unified-plan-location")
-                        }
-                        .padding(SideSeatTheme.spaceLG)
-                        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                        if !typeSize.isAccessibilitySize { activityIdentityFields }
                         if !chooseActivityTogether { ViewThatFits(in: .horizontal) {
                             HStack { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
                             VStack(alignment: .leading) { activityExample("Study together"); activityExample("Have a meal"); activityExample("Play sports") }
@@ -193,6 +184,20 @@ struct TimePollCreateView: View {
             .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
             .overlay(alignment: .top) { Divider() }
         }
+    }
+
+    private var activityIdentityFields: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+            TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
+                .font(.title3.weight(.medium)).focused($titleFocused)
+                .submitLabel(.done).onSubmit { titleFocused = false }
+                .accessibilityIdentifier("time-poll-title")
+            Divider()
+            TextField("Location (optional)", text: $location)
+                .accessibilityIdentifier("unified-plan-location")
+        }
+        .padding(SideSeatTheme.spaceLG)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
     }
 
     private func activityStartingPoint(together: Bool, title: String, symbol: String) -> some View {

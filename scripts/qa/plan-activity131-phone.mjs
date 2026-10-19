@@ -20,7 +20,7 @@ if (mode === 'prepare') {
   const fixture = { title: `Weekend ideas ${randomBytes(4).toString('hex')}`, bundle: 'app.sideseat.mobile.preview', accounts: [] };
   await fs.writeFile(privatePath, JSON.stringify(fixture), { mode: 0o600 });
   for (const role of ['owner', 'participant']) {
-    const account = { role, identifier: `planqa_activity131_${role}_${randomBytes(4).toString('hex')}`, password: randomBytes(22).toString('base64url') };
+    const account = { role, identifier: `planqa_i131_${role === 'owner' ? 'host' : 'peer'}_${randomBytes(4).toString('hex')}`, password: randomBytes(22).toString('base64url') };
     await api('/api/auth/signup', null, 'POST', { username: account.identifier, password: account.password, displayName: role === 'owner' ? 'Host Ming' : 'Peer Lin', school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }, 201);
     fixture.accounts.push(account); await fs.writeFile(privatePath, JSON.stringify(fixture), { mode: 0o600 });
     await login(account); await fs.writeFile(privatePath, JSON.stringify(fixture), { mode: 0o600 });
@@ -28,7 +28,7 @@ if (mode === 'prepare') {
   console.log('Two fresh activity-plan accounts prepared.');
 } else {
   const fixture = JSON.parse(await fs.readFile(privatePath, 'utf8'));
-  for (const a of fixture.accounts) { assert(a.identifier.startsWith('planqa_activity131_')); if (!a.accessToken) await login(a); }
+  for (const a of fixture.accounts) { assert(a.identifier.startsWith('planqa_i131_')); if (!a.accessToken) await login(a); }
   const owner = fixture.accounts.find(a => a.role === 'owner'), peer = fixture.accounts.find(a => a.role === 'participant');
   async function poll() {
     const item = (await api('/api/v1/time-polls', owner)).polls.find(p => p.activitySelection?.topic === fixture.title);

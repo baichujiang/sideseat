@@ -10,6 +10,9 @@ shared backend capabilities separately, only after validating their contracts.
   → explicit plan proposal. Showing interest or replying never creates attendance.
 - A conversation can propose a bilateral plan with its existing participants and
   context. Sharing an existing manual-plan link opens that same manual plan.
+- Plans also offers a shared-theme start: suggestions/interests → explicit organizer
+  activity choice → the same manual timetable and invitation flow. Existing records
+  skip it; see [Activity choice](./PLAN_ACTIVITY_START.md).
 - Plans creates manual availability collections or fixed-time invitations. Friends
   may participate through the existing public guest page without a conversation.
 
@@ -60,7 +63,13 @@ example still available. Empty accounts keep the full introduction. The next
 meet-up and Upcoming use the same compact date summary; Past retains its existing
 history, feedback and continuation actions.
 
-Manual plan detail is organized around the timetable. A flat `PlanDetailHeading`
+Manual plan detail is organized around the timetable after an activity is decided.
+During optional activity choice, compact suggestion rows lead; the timetable is
+directly reachable and can already save availability. Choosing an activity restores
+the timetable as the main surface, with ideas available as history.
+At accessibility sizes, creation places title/place inputs before the starting-point
+controls so the keyboard can be focused above the fixed action area.
+Manual scheduling detail is organized around the timetable. A flat `PlanDetailHeading`
 contains the activity, current status, role and optional location. Collection
 keeps the editable name, date range and response count close to the grid, with the
 full names behind the response-count control. Invitation/confirmed detail shows
@@ -91,6 +100,7 @@ in the existing menu. No duplicate summary/attendee cards precede the timetable.
 
 | Display status | Viewer's next step |
 | --- | --- |
+| Choosing an activity | New participants suggest/mark interest; the organizer explicitly sets an activity; contributors wait for that choice. Interest counts and suggestions replace availability counts on these cards |
 | Finding a time | Organizer can view/share immediately and edit own availability directly in the timetable, then choose a time after friends respond; other participants fill availability and wait for the organizer |
 | Awaiting confirmations | Invited viewer explicitly confirms; an accepting participant waits; manual organizer reviews replies/shares; bilateral sender waits for the recipient |
 | Awaiting confirmations, viewer declined | Own reply is saved; no claim that this viewer is waiting to attend |

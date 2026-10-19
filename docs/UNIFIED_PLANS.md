@@ -4,6 +4,17 @@ Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.m
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
 
+## Optional activity choice — Preview 131
+
+A new manual plan may start with a theme, then collect suggestions and multiple
+interests from App accounts and public guests. Only the organizer explicitly sets
+the activity. This continues the same TimePoll into scheduling, retaining its link,
+identities, slots and any free time filled beforehand. It adds no attendance or
+Calendar consent. Known activities and existing records skip the optional stage.
+The one-form theme start defaults to the next seven days; date/hour review is
+optional, and no estimated response cap is set. See
+[Activity-choice contract](./PLAN_ACTIVITY_START.md).
+
 ## Invitation timetable — Preview 123
 
 App and public-share invitation details now show a read-only timetable focused on
@@ -21,8 +32,10 @@ on confirmed details; only pending replies show the instruction to confirm.
 ## One shared lifecycle
 
 `TimePoll` is the persisted root of manual plans. `COLLECT` starts in COLLECTING;
-`FIXED` starts in INVITING with its creator accepted. Manual plans support 2–20
-expected people, with five as the native default. Existing conversation-bound
+`FIXED` starts in INVITING with its creator accepted. Known-activity creation
+supports 2–20 expected people, with five as the native default. The optional
+theme start leaves the response estimate unset; the existing invitation roster
+limit remains twenty. Existing conversation-bound
 PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.

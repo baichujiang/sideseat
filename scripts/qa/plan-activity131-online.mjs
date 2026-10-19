@@ -11,9 +11,15 @@ const out = path.resolve('docs/qa/evidence/2026-10-19-plans131'); fs.mkdirSync(o
 const privatePath = path.join(os.tmpdir(), `sideseat131-${stage}-private.json`);
 assert(!fs.existsSync(privatePath), 'Clean the previous disposable fixture first.');
 const fixture = { base, accounts: [], tokens: [] }; const checks = [];
+const cookieFile = process.env.SIDESEAT_CANDIDATE_COOKIE_FILE;
+const cookies = cookieFile ? fs.readFileSync(cookieFile, 'utf8').split('\n').filter(line => line.startsWith('#HttpOnly_') || (line && !line.startsWith('#'))).map(line => {
+  const [domain, , cookiePath, secure, expires, name, value] = line.replace(/^#HttpOnly_/, '').split('\t');
+  return { domain, path: cookiePath, secure: secure === 'TRUE', expires: Number(expires), name, value, httpOnly: line.startsWith('#HttpOnly_'), sameSite: 'Lax' };
+}) : [];
+const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
 const protection = process.env.VERCEL_OIDC_TOKEN ? { 'x-vercel-trusted-oidc-idp-token': process.env.VERCEL_OIDC_TOKEN } : {};
 async function call(route, account, method = 'GET', body, status = 200) {
-  const response = await fetch(base + route, { method, headers: { ...protection, 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios', 'Idempotency-Key': randomUUID(), ...(account ? { Authorization: `Bearer ${account.accessToken}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  const response = await fetch(base + route, { method, headers: { ...protection, ...(cookieHeader ? { Cookie: cookieHeader } : {}), 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios', 'Idempotency-Key': randomUUID(), ...(account ? { Authorization: `Bearer ${account.accessToken}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
   assert.equal(response.status, status, `${method} ${route}: expected ${status}, got ${response.status}`);
   return [200, 201].includes(status) ? (await response.json()).data : null;
 }
@@ -36,7 +42,7 @@ try {
   const date = new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10);
   for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     const browser = await engine.launch();
-    const context = await browser.newContext({ extraHTTPHeaders: protection, viewport: { width: 390, height: 844 }, colorScheme: engineName === 'webkit' ? 'dark' : 'light' });
+    const context = await browser.newContext({ extraHTTPHeaders: protection, storageState: { cookies, origins: [] }, viewport: { width: 390, height: 844 }, colorScheme: engineName === 'webkit' ? 'dark' : 'light' });
     const page = await context.newPage(), errors = []; page.on('pageerror', e => errors.push(e.message));
     try {
       let p = await call('/api/v1/time-polls', owner, 'POST', { title: '这周末一起做点什么？', timeZone: 'Europe/Berlin', dates: [date], startMinute: 540, endMinute: 660, chooseActivityTogether: true }, 201);
@@ -117,7 +123,7 @@ try {
     await call(`/api/public/time-polls/${token}`, null, 'GET', undefined, 404);
   }
   for (const account of fixture.accounts) {
-    if (!account.accessToken) continue;
+    assert(account.accessToken, 'Keep the private recovery fixture when an account has no token.');
     await call('/api/v1/me', account, 'DELETE', { confirmUsername: account.identifier }); await call('/api/v1/me', account, 'GET', undefined, 401);
   }
   cleanupPassed = true;
