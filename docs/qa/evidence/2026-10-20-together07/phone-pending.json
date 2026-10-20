@@ -9,7 +9,9 @@
   "pendingTest": "VisualQAScreenshotUITests/testRecommendationContextAndActions",
   "pendingResultBundle": "/tmp/sideseat-together163-phone.xcresult",
   "commandLog": "/tmp/sideseat-together163-phone.log",
-  "processID": 16917,
   "at": "2026-10-20T21:00:57.802687+00:00",
-  "nativeSourceCommit": "6d84d0f4"
+  "nativeSourceCommit": "6d84d0f4",
+  "priorAttemptProcessID": 16917,
+  "lockedPreflightWaitStopped": true,
+  "nextStep": "Unlock the default iPhone, verify the current installed Preview and shared workspace, then rerun the final physical context test without reverting other work."
 }

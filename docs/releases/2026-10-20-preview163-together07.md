@@ -3,7 +3,7 @@
 - 源码 `6d84d0f4` 已提交并推送；提供按真实本人意愿生成的活动／时间／差异说明，公开探索单独说明来源，默认收起。
 - 真实双账号闭环 **76.044 秒**与两个独立读库阶段通过；中文、德文最大字号、公开来源的模拟器界面三个场景通过。
 - 163 原生包已构建，严格签名和包哈希核对通过；首轮真机已安装进入界面，修正用例的活动名语言预期后，最终复验在 Xcode preflight 被默认 iPhone 锁屏阻断。**尚不能称完整真机验收通过，最终普通启动也未完成。**
-- 默认 iPhone 14 Plus：UDID `00008110-001A69110CC1401E`；Xcode 正在等待 “Unlock iPhone (4) to Continue”。上一完整验收为 Preview 162，普通版 97 在该次验收保留。
+- 默认 iPhone 14 Plus：UDID `00008110-001A69110CC1401E`；Xcode 要求 “Unlock iPhone (4) to Continue”；该次锁屏等待已停止，解锁后重跑。上一完整验收为 Preview 162，普通版 97 在该次验收保留。
 - 沿用已上线后端 `dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr`，本项没有后端、Schema、迁移或网页发布。
 
 [完整 QA 与待验收状态](../qa/2026-10-20-together07.md)、[七项逐项验收索引](../qa/2026-10-20-together-interaction-repairs.md)。
