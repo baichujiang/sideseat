@@ -7,3 +7,6 @@
 - 沿用已上线后端 `dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr`，本项没有后端、Schema、迁移或网页发布。
 
 [完整 QA 与待验收状态](../qa/2026-10-20-together07.md)、[七项逐项验收索引](../qa/2026-10-20-together-interaction-repairs.md)。
+
+
+后续结论：默认手机解锁后，本项在 Preview 165 完成最终真机复验并普通启动；163 的首轮安装及锁屏记录保留为历史，不再代表当前待办。[165 交付](./2026-10-20-preview165-together08.md)。
