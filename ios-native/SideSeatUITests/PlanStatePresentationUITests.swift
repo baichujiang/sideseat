@@ -3,7 +3,7 @@ import XCTest
 @MainActor final class PlanStatePresentationUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false, loading: Bool = false) {
+    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false, loading: Bool = false, longList: Bool = false) {
         if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
             app = XCUIApplication(bundleIdentifier: bundle)
         } else { app = XCUIApplication() }
@@ -13,6 +13,7 @@ import XCTest
         if layout { app.launchArguments += ["--ui-testing-plans-mixed-waiting", "--ui-testing-plans-waiting-rail"] }
         if reference { app.launchArguments += ["--ui-testing-mutual-opportunity"] }
         if loading { app.launchArguments += ["--ui-testing-plans-loading"] }
+        if longList { app.launchArguments += ["--ui-testing-plans-long-list"] }
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
@@ -55,7 +56,7 @@ import XCTest
 
     func testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable() {
         continueAfterFailure = false
-        launch(layout: true)
+        launch(layout: true, longList: true)
         let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertEqual(picker.buttons.count, 2)
@@ -72,6 +73,8 @@ import XCTest
         let headingY = heading.frame.minY
         let pickerY = picker.frame.minY
         app.scrollViews["plans-scroll-waitingResponse"].swipeUp(velocity: .slow)
+        XCTAssertFalse(app.buttons["plans-create-unified"].isHittable,
+                       "The long list must actually scroll before checking the fixed heading")
         XCTAssertEqual(heading.frame.minY, headingY, accuracy: 2)
         XCTAssertEqual(picker.frame.minY, pickerY, accuracy: 2)
         XCTAssertTrue(app.buttons["plans-history"].isHittable)
