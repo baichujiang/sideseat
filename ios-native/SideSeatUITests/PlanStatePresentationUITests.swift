@@ -21,6 +21,38 @@ import XCTest
 
     override func tearDown() { app?.terminate() }
 
+    func testRealSharedHistoryReturnsToTheHistoryList() throws {
+        struct Account: Decodable { let role: String; let accessToken: String }
+        struct Fixture: Decodable { let title: String; let bundle: String; let pollToken: String; let accounts: [Account] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the cancelled disposable plan from the native flow.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        continueAfterFailure = false
+        app = XCUIApplication(bundleIdentifier: fixture.bundle)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-time-poll-live", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+        app.launch(); XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
+        app.tabBars.buttons["计划"].tap()
+        XCTAssertTrue(app.buttons["plans-history"].waitForExistence(timeout: 10)); app.buttons["plans-history"].tap()
+        let history = app.descendants(matching: .any)["plans-history-root"].firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        let row = app.buttons["plans-coordinated-\(fixture.pollToken)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20)); capture("real-shared-history")
+        row.tap()
+        XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 15))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        XCTAssertTrue(app.navigationBars.firstMatch.exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(history.waitForExistence(timeout: 10)); XCTAssertTrue(row.exists)
+        capture("real-shared-history-return")
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.segmentedControls["plans-segmented-control"].buttons.count, 2)
+        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+    }
+
     func testTwoTabsHideTheRootNavigationBarAndKeepHistoryReachable() {
         continueAfterFailure = false
         launch(layout: true)

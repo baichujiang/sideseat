@@ -438,7 +438,7 @@ struct PlansRootView: View {
         let phase = plan.planningPhase(at: now)
         let presentation = plan.presentation(at: now)
         let step = presentation.nextStep
-        return Button { scrollPositions.capture(selectedSection); router.openPlan(token: plan.token) } label: {
+        return Button { scrollPositions.capture(selectedSection); router.navigate(to: .timePoll(token: plan.token)) } label: {
             SSFlowCard {
                 PlanCardHeading(title: plan.title, presentation: presentation,
                     context: AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"))
