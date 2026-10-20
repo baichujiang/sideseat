@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "reason": "Behavior passed, but native Form labels collapsed to icons and flexible rows grew taller. Preserve text labels and constrain the row to its content height before final visual acceptance."
+}

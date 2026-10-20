@@ -1,0 +1,91 @@
+{
+  "installedBuild": 154,
+  "reusedUITestSuite": "PlanDetailHierarchyUITests",
+  "screenshots": [
+    {
+      "file": "activity-choice-on-existing-review.png",
+      "test": "PlanDetailHierarchyUITests/testActivityIdeasStayInlineAndInvitationChoiceSurvivesBack()",
+      "timestamp": 1792518702.776
+    },
+    {
+      "file": "inline-ideas-in-title.png",
+      "test": "PlanDetailHierarchyUITests/testActivityIdeasStayInlineAndInvitationChoiceSurvivesBack()",
+      "timestamp": 1792518686.511
+    },
+    {
+      "file": "inline-idea-input.png",
+      "test": "PlanDetailHierarchyUITests/testActivityIdeasStayInlineAndInvitationChoiceSurvivesBack()",
+      "timestamp": 1792518679.329
+    },
+    {
+      "file": "share-dark-largest-text.png",
+      "test": "PlanDetailHierarchyUITests/testDarkLargestTextKeepsEditorsAndShareReachable()",
+      "timestamp": 1792518736.975
+    },
+    {
+      "file": "information-dark-largest-text.png",
+      "test": "PlanDetailHierarchyUITests/testDarkLargestTextKeepsEditorsAndShareReachable()",
+      "timestamp": 1792518730.432
+    },
+    {
+      "file": "inline-ideas-dark-largest-text.png",
+      "test": "PlanDetailHierarchyUITests/testDarkLargestTextKeepsEditorsAndShareReachable()",
+      "timestamp": 1792518724.737
+    },
+    {
+      "file": "cancel-confirmation.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518921.433
+    },
+    {
+      "file": "confirmed-arrangement.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518915.962
+    },
+    {
+      "file": "participant-invitation.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518889.095
+    },
+    {
+      "file": "organizer-awaiting-replies.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518872.377
+    },
+    {
+      "file": "review-invitation.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518864.299
+    },
+    {
+      "file": "final-time-selection.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518861.809
+    },
+    {
+      "file": "availability-people.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518812.165
+    },
+    {
+      "file": "share-actions.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518788.883
+    },
+    {
+      "file": "detail-draft-kept.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518786.232
+    },
+    {
+      "file": "nickname-editor.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518777.803
+    },
+    {
+      "file": "information-editor.png",
+      "test": "PlanDetailHierarchyUITests/testInformationDraftShareInvitationAndCalendar()",
+      "timestamp": 1792518766.822
+    }
+  ]
+}
