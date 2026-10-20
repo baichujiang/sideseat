@@ -778,39 +778,59 @@ private struct PlanOverviewLabel: View {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
               now: now, locale: AppLocalization.selectedLanguage.locale)
     }
-    private var secondary: Color { SideSeatTheme.textSecondaryStrong.opacity(0.82) }
+    private var secondary: Color { SideSeatTheme.textSecondaryStrong }
+    private var topic: NativeWeeklyIntentTopic { PlanHomeArtwork.activityTopic(for: title) ?? .explore }
 
     var body: some View {
-        Group {
-            switch style {
-            case .task: task
-            case .waiting: waiting
-            case .meetup: meetup
+        SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: topic) {
+            activityHeader
+            Group {
+                switch style {
+                case .task: task
+                case .waiting: waiting
+                case .meetup: meetup
+                }
             }
+            .padding(.horizontal, SideSeatTheme.spaceMD)
+            .padding(.vertical, SideSeatTheme.spaceSM)
         }
         .foregroundStyle(SideSeatTheme.textPrimary)
-        .padding(SideSeatTheme.spaceMD)
-        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-        .background(style == .waiting ? SideSeatTheme.PlanHome.sage : SideSeatTheme.surface,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
-        .overlay {
-            RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius)
-                .strokeBorder(SideSeatTheme.separator.opacity(0.45), lineWidth: 0.5)
+        .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([presentation.cardStatusTitle, title, timing.dateText, timing.clockText,
+            timing.zoneText, style == .waiting ? waitingSummary : context, location,
+            presentation.cardActionTitle].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", "))
+    }
+
+    private var activityHeader: some View {
+        SSActivityHeaderBand(topic: topic, horizontalPadding: SideSeatTheme.spaceMD, verticalPadding: SideSeatTheme.spaceSM) {
+            HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    if style != .waiting {
+                        Label(presentation.cardStatusTitle, systemImage: presentation.nextStep.symbol)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(SideSeatTheme.Together.categoryInk(for: topic))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    activityTitle(style == .waiting ? .callout : .headline)
+                }
+                if !typeSize.isAccessibilitySize {
+                    if isChoosingActivity {
+                        Image(systemName: "lightbulb")
+                            .font(.title2.weight(.light))
+                            .foregroundStyle(SideSeatTheme.Together.categoryInk(for: topic))
+                            .frame(width: 40, height: 40).accessibilityHidden(true)
+                    } else {
+                        SSActivityArtwork(topic: topic, size: style == .waiting ? 36 : 44)
+                    }
+                }
+            }
         }
-        .contentShape(Rectangle())
     }
 
     private var task: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    Text(presentation.cardStatusTitle).font(.caption.weight(.medium))
-                        .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.statusWarningText : SideSeatTheme.PlanHome.ink)
-                    activityTitle(.headline)
-                    schedule
-                }
-                if !typeSize.isAccessibilitySize { PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity) }
-            }
+            schedule
             let footer = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
@@ -819,34 +839,40 @@ private struct PlanOverviewLabel: View {
                     .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
                 action.font(.footnote.weight(.semibold))
-                    .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.PlanHome.ink)
+                    .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
                     .padding(.horizontal, SideSeatTheme.spaceSM)
-                    .frame(minHeight: 36, alignment: .leading)
-                    .background(presentation.nextStep == .confirm ? SideSeatTheme.PlanHome.ink : SideSeatTheme.PlanHome.sage,
+                    .frame(minHeight: 32, alignment: .leading)
+                    .background(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.fill : SideSeatTheme.ControlSelection.fill,
                                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    .overlay {
+                        if presentation.nextStep != .confirm {
+                            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                                .strokeBorder(SideSeatTheme.separator, lineWidth: 0.5)
+                        }
+                    }
             }
         }
     }
 
     private var waiting: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    activityTitle(.callout)
-                    schedule
-                }
-                if !typeSize.isAccessibilitySize { PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity, size: 42) }
+            schedule
+            let footer = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+            footer {
+                PlanHomePeople(people: people, text: waitingSummary)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                action.font(.caption.weight(.medium)).foregroundStyle(secondary)
             }
-            PlanHomePeople(people: people, text: waitingSummary)
-                .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
-            action.font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.PlanHome.ink)
         }
     }
 
     private var meetup: some View {
         let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
-            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
         return layout {
             if let start {
                 VStack(spacing: 2) {
@@ -855,13 +881,12 @@ private struct PlanOverviewLabel: View {
                         .foregroundStyle(SideSeatTheme.textPrimary)
                 }
                 .frame(minWidth: 44).foregroundStyle(secondary)
-                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, SideSeatTheme.spaceSM)
-                .background(SideSeatTheme.activityInset,
+                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, SideSeatTheme.spaceXS)
+                .background(SideSeatTheme.fillSubtle,
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 .accessibilityHidden(true)
             }
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                heading(status: presentation.status.title, color: SideSeatTheme.statusSuccessText, font: .headline)
                 Text((start.map { timing.datePart($0, template: "EEE") + " · " } ?? "")
                      + (timing.clockText ?? timing.dateText))
                     .font(.subheadline.weight(.medium)).monospacedDigit()
@@ -872,7 +897,7 @@ private struct PlanOverviewLabel: View {
                 }
                 let metadata = [location, context].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
                 if !metadata.isEmpty {
-                    Text(metadata).font(.caption).foregroundStyle(secondary)
+                    PlanHomePeople(people: people, text: metadata)
                         .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 }
                 zone
@@ -890,23 +915,6 @@ private struct PlanOverviewLabel: View {
             return String(format: AppLocalization.string("Waiting for %@ to confirm"), waitingFor)
         }
         return [presentation.cardStatusTitle, progress].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-    }
-
-    private var taskMetadata: String {
-        [progress ?? context, location].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-    }
-
-    private func heading(status: String, color: Color, font: Font) -> some View {
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM))
-        return layout {
-            activityTitle(font)
-            Text(status).font(.caption.weight(.medium)).foregroundStyle(color)
-                .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
-                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, 2)
-                .background(color.opacity(0.08), in: Capsule())
-        }
     }
 
     private func activityTitle(_ font: Font) -> some View {

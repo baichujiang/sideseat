@@ -104,6 +104,18 @@ Only Send invitations mutates the existing invitation API/version. Cancelling a
 draft changes nothing; rescheduling uses the same selection with the old range
 prefilled. Existing identity, consent and Calendar rules remain unchanged.
 
+## Overview appearance — Preview 144
+
+The three plan overview styles share Together's `SSFlowCard`, category header
+band, original activity artwork, radius, border and shadow. Actionable cards stay
+vertical; waiting cards stay in the horizontal rail, with the existing large-text
+vertical fallback. Confirmed cards retain their date summary. Short status,
+activity, timing, real people and the existing review action remain the content;
+opening a card does not submit availability, send or accept an invitation.
+Decorative title matching selects artwork only and never changes the stored
+activity or rules. Each entire card exposes its title, state, time and action as
+one accessible label, including when its header uses a separate visual container.
+
 ## Explicit submission and local recovery — Preview 137–141
 
 Selection gestures only update local drafts. Submit my availability / Save changes

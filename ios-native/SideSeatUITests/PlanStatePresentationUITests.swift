@@ -3,7 +3,7 @@ import XCTest
 @MainActor final class PlanStatePresentationUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private func launch(accessibility: Bool = false, layout: Bool = false) {
+    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false) {
         if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
             app = XCUIApplication(bundleIdentifier: bundle)
         } else { app = XCUIApplication() }
@@ -11,6 +11,7 @@ import XCTest
             "--ui-testing-skip-tutorial", "--ui-testing-chats", "--ui-testing-language=zh-Hans", "--ui-testing-local-api"]
         if accessibility { app.launchArguments += ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] }
         if layout { app.launchArguments += ["--ui-testing-plans-mixed-waiting", "--ui-testing-plans-waiting-rail"] }
+        if reference { app.launchArguments += ["--ui-testing-mutual-opportunity"] }
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
@@ -18,6 +19,55 @@ import XCTest
     }
 
     override func tearDown() { app?.terminate() }
+
+    func testTogetherAndPlansCardStyleReference() {
+        continueAfterFailure = false
+        launch(layout: true, reference: true)
+        app.tabBars.buttons["同行"].tap()
+        app.buttons["together-tab-recommendations"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].waitForExistence(timeout: 10))
+        capture("together-card-reference")
+        app.tabBars.buttons["计划"].tap()
+        let row = app.buttons["plans-row-ui-plan-1"]
+        reveal(row)
+        XCTAssertTrue(row.label.contains("Library study"))
+        capture("plans-card-style-overview")
+    }
+
+    func testRealPlanCardsKeepSectionsAndOpenDetails() throws {
+        struct Account: Decodable { let role: String; let accessToken: String }
+        struct Card: Decodable { let role: String; let title: String; let token: String }
+        struct Fixture: Decodable { let bundle: String; let accounts: [Account]; let cards: [Card] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CARD_STYLE_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable real card states.")
+        let f = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        app = XCUIApplication(bundleIdentifier: f.bundle)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-time-poll-live", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+        app.launch(); XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20)); app.tabBars.buttons["计划"].tap()
+        let task = try XCTUnwrap(f.cards.first { $0.role == "task" })
+        let row = app.buttons["plans-coordinated-\(task.token)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20)); XCTAssertTrue(row.label.contains(task.title))
+        capture("real-cards-needs-you")
+        row.tap(); XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 15))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, task.title)
+        app.navigationBars.buttons.firstMatch.tap()
+        let rail = app.scrollViews["plans-waiting-rail"]
+        reveal(rail)
+        for _ in 0..<3 where rail.frame.maxY >= app.tabBars.firstMatch.frame.minY - 8 { app.swipeUp(velocity: .slow) }
+        rail.swipeLeft(velocity: .slow)
+        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected)
+        capture("real-cards-waiting")
+        let meetup = try XCTUnwrap(f.cards.first { $0.role == "meetup" })
+        let upcoming = app.buttons["plans-coordinated-\(meetup.token)"]
+        reveal(upcoming)
+        for _ in 0..<3 where upcoming.frame.maxY >= app.tabBars.firstMatch.frame.minY - 8 { app.swipeUp(velocity: .slow) }
+        capture("real-cards-next-meetup")
+        upcoming.tap(); XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 15))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, meetup.title)
+    }
 
     func testListAndChatUseTheSameStatusAndConfirmationAction() {
         continueAfterFailure = false
@@ -138,7 +188,7 @@ import XCTest
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         XCTAssertTrue(row.label.contains("Dinner in town"))
         XCTAssertFalse(row.label.contains("Europe/Berlin"))
-        XCTAssertLessThanOrEqual(row.frame.height, 112, "The date summary should stay compact")
+        XCTAssertLessThanOrEqual(row.frame.height, 144, "The date summary and shared activity band should stay compact")
         print("PLAN_CARD_METRIC upcoming \(row.frame.height)")
         capture("upcoming-date-summary")
         row.tap()
