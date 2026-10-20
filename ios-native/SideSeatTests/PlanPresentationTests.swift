@@ -170,4 +170,16 @@ struct PlanPresentationTests {
         #expect(present(owner: true, responded: true, count: 1).nextStep == .shareAvailability)
     }
 
+    @Test("Set-time activity planning asks for ideas instead of availability or attendance")
+    func fixedTimeActivityTasks() {
+        let activity = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 0, hasParticipated: false)
+        func present(_ owner: Bool) -> PlanPresentation {
+            .manual(phase: "COLLECTING", isOwner: owner, didRespond: false, respondedCount: 0,
+                    myStatus: nil, isIncluded: owner, fixed: true, accepted: 0, target: 3,
+                    start: now.addingTimeInterval(3600), end: now.addingTimeInterval(7200), now: now, activity: activity)
+        }
+        #expect(present(true).nextStep == .chooseActivity)
+        #expect(present(false).nextStep == .suggestActivity)
+        #expect(present(false).status == .choosingActivity)
+    }
 }

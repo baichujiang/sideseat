@@ -3124,3 +3124,9 @@
 "Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "Everyone will see that this plan is cancelled. Its calendar entries will be removed.";
 "This deletes the plan and everyone's availability responses." = "This deletes the plan and everyone's availability responses.";
 "Plan details can only be edited before an activity or invitation is confirmed." = "Plan details can only be edited before an activity or invitation is confirmed.";
+"Time already set?" = "Time already set?";
+"Time already set" = "Time already set";
+"Time is set. Choose the activity together before sending a formal invitation." = "Time is set. Choose the activity together before sending a formal invitation.";
+"Choose activity and review invitation" = "Choose activity and review invitation";
+"Choosing an activity" = "Choosing an activity";
+"Friends receive a plan card and suggest activities for the set time." = "Friends receive a plan card and suggest activities for the set time.";

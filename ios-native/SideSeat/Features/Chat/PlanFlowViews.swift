@@ -288,9 +288,9 @@ struct PlanContactInviteSheet: View {
                             }
                             if filtered.isEmpty { Text("No matching contacts").foregroundStyle(.secondary) }
                         } header: { Text(poll.title) } footer: {
-                            Text(poll.planningPhase == "COLLECTING"
-                                ? "Friends receive a plan card and fill their availability in the App."
-                                : "Friends receive a plan card and decide whether to attend.")
+                            Text(LocalizedStringKey(poll.planningPhase == "COLLECTING"
+                                ? poll.hasFixedTime ? "Friends receive a plan card and suggest activities for the set time." : "Friends receive a plan card and fill their availability in the App."
+                                : "Friends receive a plan card and decide whether to attend."))
                         }
                     }
                 }
@@ -354,7 +354,7 @@ struct SharedPlanChatCard: View {
                             }
                             Text(poll.presentation(at: Date()).cardStatusTitle)
                                 .font(.caption).foregroundStyle(.secondary)
-                            Label(AppLocalization.string(poll.presentation(at: Date()).nextStep == .fillAvailability ? "Fill my availability"
+                            Label(AppLocalization.string(poll.planningPhase == "COLLECTING" && poll.hasFixedTime ? "View activity ideas" : poll.presentation(at: Date()).nextStep == .fillAvailability ? "Fill my availability"
                                   : poll.presentation(at: Date()).nextStep == .confirm ? "View invitation" : "View plan"), systemImage: "arrow.right")
                                 .font(.subheadline.weight(.semibold))
                         } else {

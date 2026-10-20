@@ -48,6 +48,7 @@ struct NativeTimePoll: Decodable, Sendable {
     let invitationVersion: Int?
     let chosenStart: Date?
     let chosenEnd: Date?
+    var hasFixedTime: Bool { planningMode == "FIXED" && chosenStart != nil && chosenEnd != nil }
     let invitations: [Invitation]?
     var activitySelection: NativePlanActivity? = nil
     var invitees: [Participant]? = nil

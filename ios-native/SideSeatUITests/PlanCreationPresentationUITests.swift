@@ -77,7 +77,7 @@ import XCTest
         reveal(shortcut); XCTAssertGreaterThanOrEqual(shortcut.frame.height, 44)
         XCTAssertFalse(shortcut.isSelected); shortcut.tap(); XCTAssertTrue(shortcut.isSelected)
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
-        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists)
         XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
         XCTAssertTrue(app.navigationBars["发起计划"].exists)
         XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
@@ -89,6 +89,37 @@ import XCTest
         XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
         capture("activity-ideas-checkbox-unchecked")
         cancel().tap(); assertHittable(app.buttons["plans-create-primary"])
+    }
+
+    func testSuggestionsAndFixedTimeKeepBothOptionsAndInputs() {
+        app.tabBars.buttons["计划"].tap(); openCreation()
+        let title = app.textFields["time-poll-title"]
+        title.tap(); title.typeText("周六做点什么\n")
+        let location = app.textFields["unified-plan-location"]
+        location.tap(); location.typeText("校园\n")
+        let option = app.buttons["plan-start-together"]
+        reveal(option); option.tap(); XCTAssertTrue(option.isSelected)
+        let fixed = app.buttons["plan-mode-fixed"]
+        reveal(fixed); fixed.tap()
+        let time = app.datePickers["unified-plan-fixed-start"]
+        XCTAssertTrue(time.waitForExistence(timeout: 10))
+        let timeValue = time.value as? String
+        reveal(option); XCTAssertTrue(option.isSelected)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
+        option.tap(); XCTAssertFalse(option.isSelected)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "生成邀请链接")
+        option.tap(); XCTAssertTrue(option.isSelected)
+        XCTAssertEqual(time.value as? String, timeValue)
+        XCTAssertEqual(title.value as? String, "周六做点什么")
+        XCTAssertEqual(location.value as? String, "校园")
+        capture("fixed-time-with-activity-ideas")
+        let collect = app.buttons["plan-mode-collect"]
+        reveal(collect); collect.tap()
+        reveal(option); XCTAssertTrue(option.isSelected)
+        reveal(fixed); fixed.tap()
+        XCTAssertEqual(time.value as? String, timeValue)
+        XCTAssertEqual(title.value as? String, "周六做点什么")
+        capture("fixed-time-options-restored")
     }
 
     func testFixedTimeShortcutEditsInPlaceAndKeepsInputs() {

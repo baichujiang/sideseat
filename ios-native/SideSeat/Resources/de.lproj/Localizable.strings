@@ -3123,3 +3123,9 @@
 "Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "Alle sehen, dass der Plan abgesagt wurde. Die zugehörigen Kalendereinträge werden entfernt.";
 "This deletes the plan and everyone's availability responses." = "Der Plan und alle Verfügbarkeitsantworten werden gelöscht.";
 "Plan details can only be edited before an activity or invitation is confirmed." = "Plandetails können nur vor der Festlegung einer Aktivität oder Einladung bearbeitet werden.";
+"Time already set?" = "Zeit steht bereits fest?";
+"Time already set" = "Zeit steht fest";
+"Time is set. Choose the activity together before sending a formal invitation." = "Die Zeit steht fest. Wählt gemeinsam eine Aktivität, bevor die Einladung gesendet wird.";
+"Choose activity and review invitation" = "Aktivität wählen und Einladung prüfen";
+"Choosing an activity" = "Aktivität auswählen";
+"Friends receive a plan card and suggest activities for the set time." = "Freunde erhalten eine Plankarte und schlagen Aktivitäten für die festgelegte Zeit vor.";

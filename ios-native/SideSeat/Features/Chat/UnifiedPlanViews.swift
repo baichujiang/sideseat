@@ -120,8 +120,10 @@ struct UnifiedPlanInviteView: View {
                             Text(poll.timeZone).font(.caption).foregroundStyle(.secondary)
                         }
                     } trailing: {
-                        Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil").frame(minHeight: 44) }
-                            .accessibilityIdentifier("unified-plan-adjust-time")
+                        if !poll.hasFixedTime {
+                            Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil").frame(minHeight: 44) }
+                                .accessibilityIdentifier("unified-plan-adjust-time")
+                        }
                     }
                 }
                 if hasFriends { Section("Choose who to invite") {
@@ -137,8 +139,10 @@ struct UnifiedPlanInviteView: View {
                                         if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
                                     }
                                 } trailing: {
-                                    Text(person.didRespond == false ? "Has not filled availability yet" : available(person) ? "Available for the full activity" : "Not available for the full activity")
-                                        .font(.caption).foregroundStyle(.secondary)
+                                    if !poll.hasFixedTime {
+                                        Text(person.didRespond == false ? "Has not filled availability yet" : available(person) ? "Available for the full activity" : "Not available for the full activity")
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
                                 }
                             }.frame(minHeight: 44)
                         }
@@ -342,11 +346,12 @@ struct UnifiedPlanConfirmationView: View {
 }
 
 
-private struct InvitationTimetableView: View {
+struct InvitationTimetableView: View {
     let start: Date
     let end: Date
     let timeZone: String
     let needsConfirmation: Bool
+    var isDraft = false
     @ScaledMetric(relativeTo: .caption) private var rowHeight: CGFloat = 44
     @ScaledMetric(relativeTo: .caption2) private var labelWidth: CGFloat = 64
 
@@ -355,9 +360,9 @@ private struct InvitationTimetableView: View {
         let dates = rows.map(\.date).reduce(into: [String]()) { if $0.last != $1 { $0.append($1) } }
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Text("Invited timetable").font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(isDraft ? "Time already set" : "Invited timetable")).font(.subheadline.weight(.semibold))
             }.id("invitation-timetable-focus")
-            Text(LocalizedStringKey(needsConfirmation ? "The highlighted time is the invitation. Review it, then confirm participation below." : "Highlighted cells show the final activity time."))
+            Text(LocalizedStringKey(isDraft ? "Time is set. Choose the activity together before sending a formal invitation." : needsConfirmation ? "The highlighted time is the invitation. Review it, then confirm participation below." : "Highlighted cells show the final activity time."))
                 .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             ForEach(dates, id: \.self) { date in
                 let dayRows = rows.filter { $0.date == date }

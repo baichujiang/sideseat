@@ -3124,3 +3124,9 @@
 "Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "所有参与者都会看到取消状态，相关日历安排将移除。";
 "This deletes the plan and everyone's availability responses." = "将删除这个计划及所有人的空闲填写。";
 "Plan details can only be edited before an activity or invitation is confirmed." = "活动或邀请确定后，无法直接修改计划信息。";
+"Time already set?" = "时间已定？";
+"Time already set" = "时间已定";
+"Time is set. Choose the activity together before sending a formal invitation." = "时间已定，大家先选活动，再发送正式邀请。";
+"Choose activity and review invitation" = "选活动并核对邀请";
+"Choosing an activity" = "一起选活动";
+"Friends receive a plan card and suggest activities for the set time." = "朋友收到计划卡片后，可为已定时间提议活动。";

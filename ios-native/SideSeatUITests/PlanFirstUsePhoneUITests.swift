@@ -418,6 +418,107 @@ import XCTest
         let accounts: [NativeAccount]
     }
 
+    func testFixedTimeActivityIdeasInviteAndCalendar() throws {
+        struct FixedFixture: Decodable {
+            let title: String; let activityTitle: String; let bundle: String
+            let connectionID: String; let peerID: String; let accounts: [NativeAccount]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_FIXED_ACTIVITY156_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable accepted contacts.")
+        let fixture = try JSONDecoder().decode(FixedFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        func openPlan() {
+            app.tabBars.buttons["计划"].tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND (label CONTAINS %@ OR label CONTAINS %@)", fixture.title, fixture.activityTitle)).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        }
+        func openChat() {
+            app.tabBars.buttons["消息"].tap()
+            let row = app.buttons["inbox-row-\(fixture.connectionID)"]
+            XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        let location = app.textFields["unified-plan-location"]
+        location.tap(); location.typeText("校园\n")
+        app.buttons["plan-start-together"].tap()
+        let fixed = app.buttons["plan-mode-fixed"]
+        XCTAssertTrue(fixed.isHittable); fixed.tap()
+        XCTAssertTrue(app.datePickers["unified-plan-fixed-start"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plan-start-together"].isSelected)
+        XCTAssertEqual(title.value as? String, fixture.title)
+        XCTAssertEqual(location.value as? String, "校园")
+        capture(app, "fixed-ideas-create-both-options")
+        app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        XCTAssertTrue(app.buttons["plan-activity-suggest"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-review-fixed"].isEnabled)
+        nativePhase("fixed-created"); capture(app, "fixed-ideas-awaiting-activity")
+        app.buttons["plan-share-open"].tap()
+        app.buttons["plan-invite-contacts"].tap()
+        let contact = app.buttons["plan-contact-\(fixture.peerID)"]
+        XCTAssertTrue(contact.waitForExistence(timeout: 20)); contact.tap()
+        let send = app.buttons["plan-contact-send"]; send.tap()
+        XCTAssertTrue(send.waitForNonExistence(timeout: 20))
+        app.navigationBars.buttons["完成"].tap()
+        nativePhase("fixed-delivered")
+        nativeSignIn(peer, bundle: fixture.bundle); openChat()
+        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
+        XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        app.buttons["plan-activity-suggest"].tap()
+        let idea = app.textFields["plan-activity-title"]
+        XCTAssertTrue(idea.waitForExistence(timeout: 10)); idea.tap(); idea.typeText(fixture.activityTitle + "\n")
+        app.buttons["plan-activity-add"].tap()
+        XCTAssertTrue(idea.waitForNonExistence(timeout: 20))
+        nativePhase("fixed-suggested"); capture(app, "fixed-ideas-peer-suggestion")
+        nativeSignIn(owner, bundle: fixture.bundle); openPlan()
+        app.buttons["unified-plan-review-fixed"].tap()
+        let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-'")).firstMatch
+        XCTAssertTrue(choice.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["unified-plan-send-invitations"].isEnabled)
+        choice.tap()
+        XCTAssertFalse(app.buttons["unified-plan-adjust-time"].exists)
+        capture(app, "fixed-ideas-review-before-inviting")
+        app.buttons["unified-plan-send-invitations"].tap()
+        XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
+        nativePhase("fixed-invited")
+        nativeSignIn(peer, bundle: fixture.bundle); openChat()
+        XCTAssertTrue(app.buttons["unified-plan-accept"].waitForExistence(timeout: 10))
+        app.buttons["unified-plan-accept"].tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
+        nativePhase("fixed-accepted"); capture(app, "fixed-ideas-peer-accepted")
+        nativeSignIn(owner, bundle: fixture.bundle); openPlan()
+        app.buttons["unified-plan-publish"].tap()
+        let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
+        XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        nativePhase("fixed-published")
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
+        let confirmed = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.activityTitle)).firstMatch
+        XCTAssertTrue(confirmed.waitForExistence(timeout: 20)); confirmed.tap()
+        app.buttons["plan-view-calendar"].tap()
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
+        app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.activityTitle)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.activityTitle)).firstMatch.waitForExistence(timeout: 20))
+        nativePhase("fixed-calendar"); capture(app, "fixed-ideas-calendar")
+    }
+
     func testNativeContactCardCreateFillInviteConfirmAndCalendar() throws {
         struct ContactFixture: Decodable {
             let title: String

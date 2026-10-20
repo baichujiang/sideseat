@@ -129,23 +129,21 @@ struct TimePollCreateView: View {
                 TextField("Location (optional)", text: $location)
                     .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
                     .accessibilityIdentifier("unified-plan-location")
-                if planningMode != "FIXED" {
-                    Button {
-                        chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
-                    } label: {
-                        HStack(spacing: SideSeatTheme.spaceSM) {
-                            Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
-                                .font(.title3).accessibilityHidden(true)
-                            Text("Friends can suggest activities").font(.subheadline)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 0)
-                        }.frame(minHeight: 44).contentShape(Rectangle())
-                    }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                        .accessibilityIdentifier("plan-start-together")
-                        .accessibilityLabel("Friends can suggest activities")
-                        .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
-                        .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
-                }
+                Button {
+                    chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
+                } label: {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
+                            .font(.title3).accessibilityHidden(true)
+                        Text("Friends can suggest activities").font(.subheadline)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }.frame(minHeight: 44).contentShape(Rectangle())
+                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                    .accessibilityIdentifier("plan-start-together")
+                    .accessibilityLabel("Friends can suggest activities")
+                    .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
+                    .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
             }
             Section {
                 if planningMode == "FIXED" {
@@ -186,14 +184,12 @@ struct TimePollCreateView: View {
                             ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
                         }.accessibilityIdentifier("time-poll-until")
                     }
-                    if !chooseActivityTogether {
-                        Button("Time already set? Send an invitation") { planningMode = "FIXED"; titleFocused = false }
+                        Button("Time already set?") { planningMode = "FIXED"; titleFocused = false }
                             .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-mode-fixed")
-                    }
                 }
             } header: { Text("When") } footer: {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    Text(planningMode == "FIXED" ? "Include yourself. The plan is confirmed when this many people have accepted." : "Everyone can fill free time on the same timetable.")
+                    Text(LocalizedStringKey(planningMode == "FIXED" ? (chooseActivityTogether ? "Time is set. Choose the activity together before sending a formal invitation." : "Collect replies first, then send the final plan whenever you are ready.") : "Everyone can fill free time on the same timetable."))
                     Text(String(format: AppLocalization.string("All times in %@"), TimeZone.current.identifier))
                 }
             }
@@ -207,7 +203,7 @@ struct TimePollCreateView: View {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create a plan"),
+            PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" && !chooseActivityTogether ? "Create invitation link" : "Create a plan"),
                              symbol: "plus", kind: .commit, isLoading: creating,
                              accessibilityID: "time-poll-create-confirm") {
                 titleFocused = false; locationFocused = false; Task { await create() }
@@ -255,7 +251,7 @@ struct TimePollCreateView: View {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                 "/api/v1/time-polls", method: .post,
-                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: planningMode == "FIXED" ? durationMinutes : nil, expectedCount: chooseActivityTogether ? nil : expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil, chooseActivityTogether: chooseActivityTogether ? true : nil),
+                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: planningMode == "FIXED" ? durationMinutes : nil, expectedCount: chooseActivityTogether && planningMode != "FIXED" ? nil : expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil, chooseActivityTogether: chooseActivityTogether ? true : nil),
                 idempotencyKey: createKey
             )
             onCreate(response.data)
@@ -385,7 +381,7 @@ struct TimePollDetailView: View {
     }
 
     private func editsTimetable(_ poll: NativeTimePoll) -> Bool {
-        poll.planningPhase == "COLLECTING" && !choosingAgain && !pickingFinalTime
+        poll.planningPhase == "COLLECTING" && !poll.hasFixedTime && !choosingAgain && !pickingFinalTime
     }
 
     private func collectionSurface(_ poll: NativeTimePoll) -> some View {
@@ -397,10 +393,15 @@ struct TimePollDetailView: View {
                         PlanParticipationSummary(name: store.displayName) { showsName = true }
                             .disabled(!store.canMutate).padding(.horizontal, SideSeatTheme.spaceMD)
                     }
-                    timetableHeader(poll)
-                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) {}
-                        .disabled(store.acting).allowsHitTesting(!store.acting)
-                        .id("plan-timetable")
+                    if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd {
+                        InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, needsConfirmation: false, isDraft: true)
+                            .padding(.horizontal, SideSeatTheme.spaceMD)
+                    } else {
+                        timetableHeader(poll)
+                        TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) {}
+                            .disabled(store.acting).allowsHitTesting(!store.acting)
+                            .id("plan-timetable")
+                    }
                 }
             }.scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("time-poll-detail-scroll")
@@ -498,6 +499,11 @@ struct TimePollDetailView: View {
                         }.disabled(!store.hasChanges || store.saving || store.acting)
                     }
                 }
+                if poll.isOwner && poll.hasFixedTime {
+                    PlanActionButton(title: AppLocalization.string(poll.activitySelection?.isOpen == true ? "Choose activity and review invitation" : "Review invitation"), symbol: "person.2", kind: .commit,
+                        accessibilityID: "unified-plan-review-fixed") { beginFinalSelection(poll) }
+                        .disabled(!store.canMutate || (poll.activitySelection?.isOpen == true && (poll.activitySelection?.ideas ?? []).isEmpty))
+                }
                 if !poll.isOwner {
                     Text("Wait for the organizer's invitation")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -514,15 +520,17 @@ struct TimePollDetailView: View {
         if finalRange == nil {
         invitationRoster = Set(poll.invitationCandidates.map(\.id))
         invitationActivityID = poll.activitySelection?.selectedIdeaId
-        invitationLinkCount = poll.invitationCandidates.contains(where: { !$0.isMe }) ? nil : 2
+        invitationLinkCount = poll.hasFixedTime ? poll.expectedCount : poll.invitationCandidates.contains(where: { !$0.isMe }) ? nil : 2
         finalRange = nil
-        if let start = poll.chosenStart, let end = poll.chosenEnd,
+        if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd, let date = poll.dates.first {
+            finalRange = TimePollFinalRange(date: date, start: start, end: end)
+        } else if let start = poll.chosenStart, let end = poll.chosenEnd,
            let first = poll.cells.first(where: { $0.slots[0].start == start }),
            let last = poll.cells.first(where: { $0.end == end }) {
             finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells)
         }
         }
-        pickingFinalTime = true
+        if poll.hasFixedTime { showsInvite = true } else { pickingFinalTime = true }
     }
 
     private func cancelFinalSelection() {
@@ -965,6 +973,7 @@ struct PlanActivityIdeasView: View {
         }
         .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-ideas")
         .onAppear {
+            if poll.hasFixedTime { expanded = true }
             if !draftTitle.isEmpty { expanded = true; showsSuggestion = true }
         }
     }
