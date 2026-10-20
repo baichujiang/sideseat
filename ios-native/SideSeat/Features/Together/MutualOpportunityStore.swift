@@ -297,7 +297,7 @@ extension NativeMutualOpportunity {
             id: id,
             policyVersion: "MUTUAL_OPPORTUNITY_V1",
             state: state,
-            viewerIntentId: nil,
+            viewerIntentId: arguments.contains("--ui-testing-context-owned") ? "ui-intent-coffee" : nil,
             topic: topic,
             activityText: nil,
             sportTag: topic == .sports ? .badminton : nil,

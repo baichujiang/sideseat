@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "explained",
+      "bookmarks": 0,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "saved",
+      "bookmarks": 1,
+      "messageRequests": 0,
+      "chats": 0
+    }
+  ]
+}

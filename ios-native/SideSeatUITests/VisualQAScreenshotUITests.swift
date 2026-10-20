@@ -790,6 +790,39 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testRecommendationContextAndActions() {
+        for language in ["zh-Hans", "de"] {
+            let app = togetherApp(["--ui-testing-language=\(language)", "--ui-testing-intent-card-states", "--ui-testing-context-owned", "--ui-testing-flexible-timing"]
+                + (language == "de" ? ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] : []))
+            let id = "cmutualui0000000000000001"
+            let toggle = app.buttons["mutual-opportunity-context-\(id)"]
+            let details = app.descendants(matching: .any)["mutual-opportunity-context-\(id)-details"].firstMatch
+            revealFlowElement(toggle, in: app); let collapsedValue = toggle.value as? String
+            XCTAssertFalse(details.exists); toggle.tap(); XCTAssertTrue(details.waitForExistence(timeout: 5))
+            XCTAssertNotEqual(toggle.value as? String, collapsedValue)
+            XCTAssertTrue(details.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", language == "zh-Hans" ? "咖啡" : "Kaffee")).firstMatch.exists)
+            XCTAssertTrue(details.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", language == "zh-Hans" ? "篮球" : "Basketball")).firstMatch.exists)
+            saveScreenshot(app: app, name: "recommendation-context-\(language)")
+            revealFlowElement(toggle, in: app); toggle.tap(); XCTAssertTrue(details.waitForNonExistence(timeout: 5))
+            let greet = app.buttons["mutual-opportunity-message-\(id)"]; revealFlowElement(greet, in: app)
+            XCTAssertTrue(greet.isHittable); XCTAssertGreaterThanOrEqual(greet.frame.height, 44)
+            let save = app.buttons["mutual-opportunity-bookmark-\(id)"]; revealFlowElement(save, in: app); save.tap()
+            selectTogetherSection(2, in: app); XCTAssertTrue(save.waitForExistence(timeout: 5))
+            XCTAssertFalse(toggle.exists); app.terminate()
+        }
+        let shared = togetherApp(["--ui-testing-language=zh-Hans", "--ui-testing-explore-intents"])
+        let more = shared.buttons["together-find-more"]; revealFlowElement(more, in: shared); more.tap()
+        let publicToggle = shared.buttons["explore-context-ui-explore-0"]
+        revealFlowElement(publicToggle, in: shared); publicToggle.tap()
+        let publicDetails = shared.descendants(matching: .any)["explore-context-ui-explore-0-details"].firstMatch
+        XCTAssertTrue(publicDetails.waitForExistence(timeout: 5))
+        XCTAssertTrue(publicDetails.staticTexts["这位同学主动公开了这条意愿。"].exists)
+        XCTAssertTrue(publicDetails.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "TUM")).firstMatch.exists)
+        saveScreenshot(app: shared, name: "public-intention-context-zh")
+        publicToggle.tap(); XCTAssertTrue(publicDetails.waitForNonExistence(timeout: 5)); shared.terminate()
+    }
+
+    @MainActor
     func testEmptySavedRecommendationsRoundTrip() {
         let app = togetherApp(["--ui-testing-language=zh-Hans"])
         selectTogetherSection(2, in: app)

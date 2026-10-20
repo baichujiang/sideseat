@@ -34,6 +34,23 @@ try {
       studentVerificationStatus: "VERIFIED", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR", semester: 2,
       productTutorialDismissedAt: new Date(), userLanguages: { create: { tag: "ENGLISH", proficiency: "FLUENT" } } } });
     console.log(`Prepared isolated local user ${logPath}.`);
+  } else if (mode === "observe-context") {
+    assert(logPath);
+    const users = await db.user.findMany({ where: { username: { in: ["togetherqa_07_a", "togetherqa_07_b"] } } });
+    assert.equal(users.length, 2); const ids = users.map(u => u.id); const checks = [];
+    for (const phase of ["explained", "saved"]) {
+      const deadline = Date.now() + 10 * 60_000;
+      while (!(await fs.readFile(logPath, "utf8").catch(() => "")).includes(`TOGETHER07_PHASE ${phase}`)) {
+        assert(Date.now() < deadline); await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      const bookmarks = await db.mutualOpportunityBookmark.count({ where: { userId: { in: ids } } });
+      assert.equal(bookmarks, phase === "saved" ? 1 : 0);
+      assert.equal(await db.mutualOpportunityMessageRequest.count({ where: { senderId: { in: ids } } }), 0);
+      assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: ids } }, { userBId: { in: ids } }] } }), 0);
+      checks.push({ phase, bookmarks, messageRequests: 0, chats: 0 });
+      await fs.writeFile(`${out}/api-boundaries.json`, JSON.stringify({ passed: checks.length === 2, checks }, null, 2));
+      console.log(`Context boundary passed: ${phase}`);
+    }
   } else if (mode === "observe-drafts") {
     assert(logPath);
     const users = await db.user.findMany({ where: { username: { in: ["togetherqa_05_a", "togetherqa_05_b"] } } });

@@ -1057,7 +1057,8 @@ private struct TogetherHomeView: View {
                 router.navigate(to: opportunity.conversationRoute)
             },
             onDismiss: inRecommendations ? { Task { await hideRecommendation(opportunity) } } : nil,
-            onViewProfile: { profileOpportunity = opportunity }
+            onViewProfile: { profileOpportunity = opportunity },
+            showsRecommendationContext: inRecommendations && store.intents.contains { $0.id == opportunity.viewerIntentId }
         )
     }
 
@@ -1135,6 +1136,7 @@ struct MutualOpportunityCard: View {
     let onOpenConversation: () -> Void
     var onDismiss: (() -> Void)? = nil
     var onViewProfile: (() -> Void)? = nil
+    var showsRecommendationContext = false
     var showsActions = true
 
     var body: some View {
@@ -1149,8 +1151,13 @@ struct MutualOpportunityCard: View {
                     activityHeader
                     availabilityRow
                     peerDetails
-                    if let onViewProfile {
-                        Button(AppLocalization.string("View profile"), action: onViewProfile)
+                    if showsRecommendationContext {
+                        RecommendationContextView(identifier: "mutual-opportunity-context-\(opportunity.id)",
+                            facts: recommendationFacts,
+                            profileTitle: AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"),
+                            profileIdentifier: "mutual-opportunity-profile-\(opportunity.id)", onProfile: onViewProfile)
+                    } else if let onViewProfile {
+                        Button(AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"), action: onViewProfile)
                             .font(.subheadline.weight(.medium)).frame(minHeight: 44)
                             .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
                             .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
@@ -1170,6 +1177,10 @@ struct MutualOpportunityCard: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("mutual-opportunity-\(opportunity.id)")
+    }
+
+    private var recommendationFacts: [String] {
+        [opportunity.shortActivitySummary, opportunity.shortTimeSummary] + opportunity.shortContextDifferences
     }
 
     private var activityHeader: some View {

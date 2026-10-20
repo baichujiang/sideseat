@@ -618,6 +618,29 @@ final class SocialLiveUITests: XCTestCase {
         proposer.terminate()
     }
 
+    func testTogether07ContextAndContactRoundTrip() {
+        let a = loopLogin("togetherqa_07_a"); loopCreateIntent("[together-07] Coffee", in: a); a.terminate()
+        let b = loopLogin("togetherqa_07_b"); loopCreateIntent("[together-07] Coffee", in: b)
+        loopSelectTogetherSection("recommendations", in: b)
+        let context = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-context-")).firstMatch
+        XCTAssertTrue(context.waitForExistence(timeout: 12)); loopReveal(context, in: b)
+        let id = String(context.identifier.dropFirst("mutual-opportunity-context-".count))
+        let details = b.descendants(matching: .any)[context.identifier + "-details"].firstMatch
+        XCTAssertFalse(details.exists); context.tap()
+        XCTAssertTrue(details.waitForExistence(timeout: 5))
+        XCTAssertTrue(details.staticTexts["Both: [together-07] Coffee"].exists)
+        XCTAssertTrue(details.staticTexts["Time undecided"].exists)
+        print("TOGETHER07_PHASE explained"); RunLoop.current.run(until: Date().addingTimeInterval(3)); loopCapture(b, "context-real-intentions")
+        context.tap(); XCTAssertTrue(details.waitForNonExistence(timeout: 5))
+        let save = b.buttons["mutual-opportunity-bookmark-\(id)"]; loopReveal(save, in: b); save.tap()
+        loopSelectTogetherSection("bookmarks", in: b)
+        XCTAssertTrue(save.waitForExistence(timeout: 5)); XCTAssertTrue(save.staticTexts["Saved"].exists)
+        let greet = b.buttons["mutual-opportunity-message-\(id)"]; loopReveal(greet, in: b); greet.tap()
+        XCTAssertTrue(b.textFields["opportunity-message-body"].waitForExistence(timeout: 5))
+        b.buttons["Cancel"].firstMatch.tap()
+        print("TOGETHER07_PHASE saved"); RunLoop.current.run(until: Date().addingTimeInterval(3)); loopCapture(b, "context-saved-can-contact"); b.terminate()
+    }
+
     func testTogether05DraftsSurviveClosingAndRelaunch() {
         let title = "[together-05] Coffee"
         let a = loopLogin("togetherqa_05_a")

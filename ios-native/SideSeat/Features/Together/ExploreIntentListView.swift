@@ -342,8 +342,15 @@ struct ExploreIntentCard: View {
                 header
             }
             .accessibilityIdentifier("explore-intent-header-\(intent.id)")
-            if let onViewProfile {
-                Button(AppLocalization.string("View profile"), action: onViewProfile)
+            if !compact && intent.isExample != true {
+                RecommendationContextView(identifier: "explore-context-\(intent.id)",
+                    facts: [AppLocalization.string("This student chose to share this intention."),
+                        String(format: AppLocalization.string("Shared at %@"), intent.campus), intent.time.summary],
+                    profileTitle: AppLocalization.string("Intention details"),
+                    profileIdentifier: "explore-profile-\(intent.id)", onProfile: onViewProfile)
+                    .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+            } else if let onViewProfile {
+                Button(AppLocalization.string("Intention details"), action: onViewProfile)
                     .buttonStyle(.plain).font(.subheadline.weight(.medium))
                     .foregroundStyle(SideSeatTheme.utilityAction).frame(minHeight: 44)
                     .padding(.horizontal, SideSeatTheme.Together.cardPadding)

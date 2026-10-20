@@ -588,3 +588,50 @@ struct BookmarkFlightCard: View {
         }
     }
 }
+
+
+/// Optional, factual context; profile access shares the same light secondary row.
+struct RecommendationContextView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let identifier: String
+    let facts: [String]
+    let profileTitle: String
+    let profileIdentifier: String
+    var onProfile: (() -> Void)? = nil
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            (dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+                : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceMD))) {
+                Button { isExpanded.toggle() } label: {
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        Text("Recommendation context").fixedSize(horizontal: false, vertical: true)
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down").font(.caption)
+                    }
+                    .frame(minHeight: 44, alignment: .leading).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityValue(AppLocalization.string(isExpanded ? "Expanded" : "Collapsed"))
+                .accessibilityIdentifier(identifier)
+                if let onProfile {
+                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                    Button(profileTitle, action: onProfile)
+                        .frame(minHeight: 44).fixedSize(horizontal: false, vertical: true)
+                        .buttonStyle(.plain).accessibilityIdentifier(profileIdentifier)
+                }
+            }
+            .font(.subheadline.weight(.medium)).foregroundStyle(SideSeatTheme.utilityAction)
+            if isExpanded {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    ForEach(Array(facts.enumerated()), id: \.offset) { _, fact in
+                        Text(fact).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .accessibilityElement(children: .contain).accessibilityIdentifier(identifier + "-details")
+            }
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceID": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": "163",
+  "finalPhysicalTestPassed": false,
+  "lastFullyAcceptedPreview": "162",
+  "reason": "Xcode preflight: Unlock iPhone (4) to Continue; passcodeRequired=true",
+  "pendingTest": "VisualQAScreenshotUITests/testRecommendationContextAndActions",
+  "pendingResultBundle": "/tmp/sideseat-together163-phone.xcresult",
+  "commandLog": "/tmp/sideseat-together163-phone.log",
+  "processID": 16917,
+  "at": "2026-10-20T21:00:57.802687+00:00"
+}
