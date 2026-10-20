@@ -1,0 +1,18 @@
+{
+  "baseDeployment": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj",
+  "deployment": "dpl_HFaJwZhU8fVXgpk1yYRK4bjXkdKw",
+  "state": "READY",
+  "promotedTestedProductionBuild": true,
+  "verifiedAliases": [
+    "api.sideseat.de",
+    "www.sideseat.de",
+    "sideseat.de"
+  ],
+  "sourceCommit": "07cecc3f",
+  "sourceFiles": 1381,
+  "modifiedFiles": [
+    "components/time-polls/invitation-timetable.tsx",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "apiSchemaDependenciesUnchanged": true
+}

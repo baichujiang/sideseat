@@ -1,0 +1,32 @@
+[
+  {
+    "path": "phone-invitation-midnight-normal.png",
+    "sha256": "01087b6b9dbdc2ebe6c76516c58e24278966dfa1496c48d78621208e80067d47",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindows()"
+  },
+  {
+    "path": "phone-invitation-partial-normal.png",
+    "sha256": "bbcd99c42e5481a329427239ae90ceb543661e9f5a006c510574dfe472341f02",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindows()"
+  },
+  {
+    "path": "phone-invitation-continuous-normal.png",
+    "sha256": "00f24aec090ed5735baa04bc21e90408524466f39d6c6360177ae09180f43ed9",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindows()"
+  },
+  {
+    "path": "phone-invitation-midnight-dark-largest.png",
+    "sha256": "7f90030de7d9fa1f623184396a12bef8602ff6a80332fb4e335c9d0fdc8b058c",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindowsDarkLargestText()"
+  },
+  {
+    "path": "phone-invitation-partial-dark-largest.png",
+    "sha256": "e2ca79deeab5e4947450f8b792b955b64c4ece656254ce1e54dc575588f446a5",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindowsDarkLargestText()"
+  },
+  {
+    "path": "phone-invitation-continuous-dark-largest.png",
+    "sha256": "1064e073d10a7f06deab526e2f9ae5db5b6fd5d02edbe6056072b2abbdfc06a3",
+    "test": "PlanFirstUsePhoneUITests/testContinuousInvitationWindowsDarkLargestText()"
+  }
+]

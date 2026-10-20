@@ -1,0 +1,16 @@
+{
+  "baseDeployment": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj",
+  "candidateDeployment": "dpl_HFaJwZhU8fVXgpk1yYRK4bjXkdKw",
+  "baseFiles": 1380,
+  "candidateFiles": 1381,
+  "allFilesSHA1Match": true,
+  "modified": [
+    "components/time-polls/invitation-timetable.tsx",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "added": [
+    ".sideseat-compact-invitation174-source.json"
+  ],
+  "callerPatch": "Remove three obsolete props at two JSX callsites; retain other production code.",
+  "guestIdentityReleaseIncluded": false
+}

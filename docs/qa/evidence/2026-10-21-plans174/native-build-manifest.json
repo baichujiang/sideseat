@@ -1,0 +1,38 @@
+{
+  "deliveredPreview": 174,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "baseSourceCommit": "6d26c048bb3e2c2ee206b4238d6198419473aab6",
+  "planCommit": "07cecc3f",
+  "isolatedBuild": true,
+  "unreleasedGuestIdentityIncluded": false,
+  "inputs": [
+    {
+      "path": "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+      "sha256": "ff71ec29b25d754bc0b7aea9250551e8499e94dbcfadf7589ae2c23d22333573",
+      "sourceCommit": "07cecc3f"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+      "sha256": "0fd80c5f55863e21d1a67b931d6380da1334ca77b359cad79f6f1a5968e9f78d",
+      "sourceCommit": "07cecc3f"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "47913327db3171ad68b9b8b4fa9c068d27195491d581243f055d619021ebaaee",
+      "sourceCommit": "07cecc3f"
+    }
+  ],
+  "binarySHA256": "f68af453e092a810c2f2c19caa84500ce217874f72a701850a1adf963c06837e",
+  "strictSignatureVerified": true,
+  "physicalLayoutTests": 2,
+  "physicalLayoutScenarios": 6,
+  "physicalLayoutResult": "/tmp/sideseat174-phone-final.xcresult",
+  "physicalLayoutSeconds": 40.549,
+  "normalLaunchPID": 4326,
+  "normalProcessMatched": true,
+  "runnerRemoved": true,
+  "ordinaryAppBuild": 97,
+  "webDeployment": "dpl_HFaJwZhU8fVXgpk1yYRK4bjXkdKw"
+}

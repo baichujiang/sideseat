@@ -552,10 +552,21 @@ import XCTest
             let labels = app.descendants(matching: .any).matching(identifier: "plan-invitation-window-label")
             XCTAssertEqual(labels.count, item.days, "One label per continuous day segment, including a partial boundary")
             let first = labels.firstMatch
-            for _ in 0..<12 where !first.isHittable { app.swipeUp() }
+            let footer = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "准备好就能正式发出")).firstMatch
+            XCTAssertTrue(footer.exists)
+            for _ in 0..<12 {
+                let top = app.navigationBars.firstMatch.frame.maxY + 12
+                let bottom = footer.frame.minY - 12
+                if first.frame.minY >= top && first.frame.maxY <= bottom { break }
+                let origin = app.coordinate(withNormalizedOffset: .zero)
+                let start = min(bottom - 24, app.frame.height * 0.55)
+                let delta: CGFloat = first.frame.minY < top ? 140 : -140
+                origin.withOffset(CGVector(dx: 35, dy: start)).press(forDuration: 0.05,
+                    thenDragTo: origin.withOffset(CGVector(dx: 35, dy: start + delta)))
+            }
             XCTAssertTrue(first.isHittable)
             XCTAssertGreaterThan(first.frame.minY, app.navigationBars.firstMatch.frame.maxY)
-            XCTAssertLessThan(first.frame.maxY, app.frame.maxY)
+            XCTAssertLessThan(first.frame.maxY, footer.frame.minY)
             capture(app, "invitation-\(item.name)-\(accessibility ? "dark-largest" : "normal")")
             XCTAssertFalse(app.buttons["plan-invitation-cell-1"].exists, "The merged time block remains read-only")
         }
