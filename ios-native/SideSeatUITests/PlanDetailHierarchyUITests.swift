@@ -2,7 +2,7 @@ import XCTest
 
 /// Product actions are performed on the phone; the Mac observes the real API between stages.
 @MainActor final class PlanDetailHierarchyUITests: XCTestCase {
-    private struct Account: Decodable { let role: String; let accessToken: String }
+    private struct Account: Decodable { let role: String; let accessToken: String; let identifier: String; let password: String }
     private struct Fixture: Decodable {
         let title: String; let editedTitle: String; let topic: String; let bundle: String
         let pollToken: String; let activityToken: String; let peerID: String
@@ -19,22 +19,34 @@ import XCTest
     }
     override func tearDown() { app?.terminate() }
 
-    private func launch(_ role: String, token: String? = nil, large: Bool = false) {
+    private func launch(_ role: String, token: String? = nil, large: Bool = false, actualAccount: Bool = false) {
         app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+        app.launchArguments = [actualAccount ? "--ui-testing-signed-out" : "--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
             "--ui-testing-time-poll-live", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(large ? "dark" : "light")"]
         if large { app.launchArguments += ["--ui-testing-dynamic-type-accessibility"] }
-        if let token { app.launchArguments += ["--ui-testing-deep-link=/time-polls/\(token)"] }
-        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": fixture.accounts.first { $0.role == role }!.accessToken]
-        app.launch(); XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 25))
+        if let token, !actualAccount { app.launchArguments += ["--ui-testing-deep-link=/time-polls/\(token)"] }
+        let account = fixture.accounts.first { $0.role == role }!
+        app.launchEnvironment = actualAccount ? [:] : ["SIDESEAT_QA_ACCESS_TOKEN": account.accessToken]
+        app.launch()
+        if actualAccount {
+            let identifier = app.textFields["login-identifier"]
+            XCTAssertTrue(identifier.waitForExistence(timeout: 20)); identifier.tap(); identifier.typeText(account.identifier)
+            app.secureTextFields["login-password"].tap(); app.secureTextFields["login-password"].typeText(account.password)
+            app.buttons["login-submit"].tap()
+            XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
+            app.tabBars.buttons["计划"].tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND (label CONTAINS %@ OR label CONTAINS %@)", fixture.title, fixture.editedTitle)).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20)); reveal(card); card.tap()
+        }
         if token != nil { XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 25)) }
+        else { XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 25)) }
     }
 
     func testInformationDraftShareInvitationAndCalendar() {
-        launch("owner", token: fixture.pollToken)
+        launch("owner", token: fixture.pollToken, actualAccount: true)
         XCTAssertFalse(app.buttons["plan-activity-open-ideas"].exists)
         XCTAssertTrue(app.buttons["plan-share-open"].isHittable)
-        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        var first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
         reveal(second); first.tap(); second.tap()
         reveal(app.buttons["plan-edit-information"], down: true); app.buttons["plan-edit-information"].tap()
         let title = app.textFields["plan-edit-title"]
@@ -72,13 +84,15 @@ import XCTest
         XCTAssertTrue(app.staticTexts["Host Ming"].exists); capture("availability-people")
         app.buttons["plan-people-done"].tap()
 
-        launch("participant", token: fixture.pollToken)
+        launch("participant", token: fixture.pollToken, actualAccount: true)
+        first = app.buttons["time-poll-cell-0"]; second = app.buttons["time-poll-cell-2"]
         reveal(second); first.tap(); second.tap(); app.buttons["time-poll-submit"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20)); phase("peer-submitted")
         XCTAssertFalse(app.buttons["plan-edit-information"].exists)
         XCTAssertFalse(app.buttons["unified-plan-invite-window"].exists)
 
-        launch("owner", token: fixture.pollToken)
+        launch("owner", token: fixture.pollToken, actualAccount: true)
+        first = app.buttons["time-poll-cell-0"]; second = app.buttons["time-poll-cell-2"]
         reveal(app.buttons["unified-plan-invite-window"]); app.buttons["unified-plan-invite-window"].tap()
         XCTAssertTrue(app.navigationBars["选择最终时间"].waitForExistence(timeout: 10))
         reveal(second); first.tap(); second.tap(); capture("final-time-selection")
@@ -92,11 +106,11 @@ import XCTest
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20)); phase("invited")
         capture("organizer-awaiting-replies")
 
-        launch("participant", token: fixture.pollToken)
+        launch("participant", token: fixture.pollToken, actualAccount: true)
         XCTAssertTrue(app.buttons["unified-plan-accept"].waitForExistence(timeout: 20)); capture("participant-invitation")
         app.buttons["unified-plan-accept"].tap()
         XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20)); phase("accepted")
-        launch("owner", token: fixture.pollToken)
+        launch("owner", token: fixture.pollToken, actualAccount: true)
         app.buttons["unified-plan-publish"].tap()
         let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
         XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
@@ -122,7 +136,7 @@ import XCTest
         let interests = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-'"))
         XCTAssertEqual(interests.count, 3); reveal(interests.firstMatch); interests.firstMatch.tap()
         phase("inline-idea"); capture("inline-ideas-in-title")
-        reveal(app.buttons["plan-activity-collapse"]); app.buttons["plan-activity-collapse"].tap()
+        reveal(toggle, down: true); toggle.tap()
         XCTAssertFalse(app.buttons["plan-activity-choose"].exists)
         reveal(app.buttons["unified-plan-invite-window"]); app.buttons["unified-plan-invite-window"].tap()
         let cell = app.buttons["time-poll-cell-0"]
@@ -131,7 +145,7 @@ import XCTest
         XCTAssertTrue(choice.waitForExistence(timeout: 10)); choice.tap()
         let choiceID = choice.identifier
         app.buttons["unified-plan-adjust-time"].tap(); app.buttons["unified-plan-review-roster"].tap()
-        XCTAssertEqual(app.buttons[choiceID].value as? String, "Selected")
+        XCTAssertEqual(app.buttons[choiceID].value as? String, "已选择")
         capture("activity-choice-on-existing-review")
     }
 

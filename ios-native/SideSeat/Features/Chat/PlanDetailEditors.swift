@@ -20,7 +20,7 @@ struct PlanParticipationSummary: View {
                     Label("Edit nickname", systemImage: "pencil").font(.subheadline).frame(minHeight: 44)
                 }.accessibilityIdentifier("time-poll-edit-name")
             }
-        }.accessibilityIdentifier("plan-my-participation")
+        }.accessibilityElement(children: .contain).accessibilityIdentifier("plan-my-participation")
     }
 }
 
