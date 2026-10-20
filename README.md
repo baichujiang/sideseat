@@ -42,7 +42,8 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **157** 已安装到默认 iPhone 14 Plus：同行统一「收藏／已收藏」，提示仅自己可见。真实双账号闭环 166.158 秒及独立读库通过，中文完整交互/德文最大字号两项真机通过；普通启动 PID 4068，普通版 97 保留。[交付与截图](./docs/releases/2026-10-20-preview157-private-saving.md)。
+Preview **158** 已安装到默认 iPhone 14 Plus：推荐不感兴趣、撤销与刷新持久化。2 项真机通过，普通启动 PID 4083，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview158-together02.md)。
+此前 Preview **157** 已安装到默认 iPhone 14 Plus：同行统一「收藏／已收藏」，提示仅自己可见。真实双账号闭环 166.158 秒及独立读库通过，中文完整交互/德文最大字号两项真机通过；普通启动 PID 4068，普通版 97 保留。[交付与截图](./docs/releases/2026-10-20-preview157-private-saving.md)。
 此前 Preview **156** 已安装到默认 iPhone 14 Plus：「让朋友提议活动」和「时间已定」可同时开启，保留全部输入；选定活动后再发正式邀请，App 和网页共用已定时段展示。真实双账号完整流程、七阶段 API、组合切换及深色大字号复验见[当前交付与截图](./docs/releases/2026-10-20-preview156-fixed-time-activity-ideas.md)。
 
 此前 Preview **155** 已安装到默认 iPhone 14 Plus：「让朋友提议活动」改为原表单中的勾选项，勾选/取消保留全部输入，底部统一「发起计划」。5 项真机用例、两种状态实际创建及 API 核对通过，普通启动 PID 3958；本轮无后端/网页发布。[当前交付与截图](./docs/releases/2026-10-20-preview155-friend-suggestion-checkbox.md)。

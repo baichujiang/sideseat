@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "base": "https://api.sideseat.de",
+  "checks": [
+    {
+      "route": "/api/v1/client-config",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "route": "/api/auth/signup",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "route": "/api/v1/auth/login",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "route": "/api/v1/me",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "route": "/api/v1/me/mutual-opportunities/ca7f7b2448634637653eba2f2/decision",
+      "method": "POST",
+      "status": 404
+    },
+    {
+      "route": "/api/v1/me",
+      "method": "DELETE",
+      "status": 200
+    },
+    {
+      "route": "/api/v1/me",
+      "method": "GET",
+      "status": 401
+    }
+  ],
+  "disposableAccountCreated": true,
+  "disposableAccountRemoved": true,
+  "scope": "HTTP auth, database access, owner-scoped decision route; no production matching or greeting journey",
+  "at": "2026-10-20T20:02:09.603Z"
+}
