@@ -388,7 +388,7 @@ struct InvitationTimetableView: View {
                                             .overlay { Rectangle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2) }
                                             .overlay {
                                                 if row.through - row.from >= 0.5 {
-                                                    Label("Invited time", systemImage: "calendar")
+                                                    Label(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"), systemImage: "calendar")
                                                         .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
                                                 }
                                             }
@@ -401,7 +401,7 @@ struct InvitationTimetableView: View {
                         .overlay(alignment: .bottom) { Divider() }
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(timePollDateLabel(row.date).replacingOccurrences(of: "\n", with: ", ") + ", " + row.label)
-                        .accessibilityValue(AppLocalization.string(row.highlighted ? "Invited time" : "Outside the invited time"))
+                        .accessibilityValue(AppLocalization.string(row.highlighted ? (isDraft ? "Time already set" : "Invited time") : "Outside the invited time"))
                         .accessibilityAddTraits(row.highlighted ? .isSelected : [])
                         .accessibilityIdentifier("plan-invitation-cell-\(rows.firstIndex(where: { $0.id == row.id }) ?? 0)")
                     }
