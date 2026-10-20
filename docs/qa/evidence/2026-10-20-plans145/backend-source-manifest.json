@@ -1,0 +1,13 @@
+{
+  "baseDeployment": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "baseFilesVerified": 1365,
+  "overlays": [
+    "lib/api/v1/time-poll-service.ts",
+    "lib/time-polls/public-session.ts",
+    "lib/time-polls/notifications.ts",
+    "app/api/v1/time-polls/[token]/publish/route.ts",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "schemaChanged": false,
+  "sourceCommit": "c8d308fa61a926ce211c6e80e67c2c72792a6ce2"
+}

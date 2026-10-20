@@ -1,0 +1,202 @@
+{
+  "checks": [
+    {
+      "phase": "owner-ready",
+      "checkedAt": "2026-10-20T11:18:10.757Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-opened",
+      "checkedAt": "2026-10-20T11:18:37.913Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 1,
+      "ownSlotIds": [],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-saved",
+      "checkedAt": "2026-10-20T11:18:48.902Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-edited",
+      "checkedAt": "2026-10-20T11:19:10.468Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "participant-reopened",
+      "checkedAt": "2026-10-20T11:19:41.330Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "owner-final-picked",
+      "checkedAt": "2026-10-20T11:21:09.406Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "roster-reviewed",
+      "checkedAt": "2026-10-20T11:21:32.330Z",
+      "actualPhase": "COLLECTING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 0,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "awaiting-confirmation",
+      "checkedAt": "2026-10-20T11:21:37.595Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "reschedule-cancelled",
+      "checkedAt": "2026-10-20T11:21:44.874Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "invitation-reviewed",
+      "checkedAt": "2026-10-20T11:22:08.497Z",
+      "actualPhase": "INVITING",
+      "participantCount": 2,
+      "ownSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "organizerSlotIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "acceptedCount": 1,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    }
+  ]
+}

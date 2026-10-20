@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 144** 将三类计划摘要统一为「同行」的活动色带、插画、圆角和轻阴影，保留横向分区与现有流程。16 项单元、8 项真机界面及完整原生邀请到日历流程通过。[当前交付](./releases/2026-10-20-preview144-plan-card-style.md)、[完整 QA](./qa/2026-10-20-plans144.md)。
+当前 **Preview 145** 将计划最终确定改为发起人主动「正式发出」，无需等待全部回应；只通知已接受者并同步日历，之后仍可在开始前接受。75 项原生、13 项领域、32 项发布检查、最终候选/正式各 12 组网页与三条真机完整流程通过；两条真实 APNs 接收回执。[当前交付](./releases/2026-10-20-preview145-organizer-publish.md)、[完整 QA](./qa/2026-10-20-plans145.md)。
+
+此前 **Preview 144** 将三类计划摘要统一为「同行」的活动色带、插画、圆角和轻阴影，保留横向分区与现有流程。16 项单元、8 项真机界面及完整原生邀请到日历流程通过。[当前交付](./releases/2026-10-20-preview144-plan-card-style.md)、[完整 QA](./qa/2026-10-20-plans144.md)。
 
 143 修复的连续最终选时、底栏重选，以及手动提交/本地草稿合同继续保留。[143 验收](./qa/2026-10-20-plans143.md)。
 
@@ -16,13 +18,13 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 最终原生 `f1edd7e3`、分享网页 `82967a87` 已推送；[邀请合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (144)` | 同行卡片样式、紧凑内容与横向分区；16 项单元、8 项界面、316.740 秒 App 双账号、12 个 API 阶段通过；普通启动 PID 3397；[144 交付](./releases/2026-10-20-preview144-plan-card-style.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `d9ef1e73`、网页/API `c8d308fa`、APNs `37189452` 已推送；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (145)` | 主动正式发出、只通知已接受者；三条真机流程和 30 个 API 阶段通过，普通启动 PID 3513；[145 交付](./releases/2026-10-20-preview145-organizer-publish.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终两条真机、深色最大字号和普通启动通过，QA runner、账号、计划及私密配置已清理 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ`，Ready | 手动提交及本地草稿；候选/正式各 56 项浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-20-plans137-141/release-health.json) |
-| 生产源码 | 1,364 项原生产源码逐项验证，保留 1,361 项，只覆盖 3 个分享网页文件并加来源；1,365 项上传 SHA-1 全匹配 | 网页来源 `82967a87`；同一 Production 候选测试后原样提升，无 Schema/迁移/依赖变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-20-plans137-141/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-20-plans137-141/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR`，Ready | 主动发出、接受者日历/通知、晚接受；最终候选/正式各 12 组、实际 APNs 接收 2 条；[验证](./qa/2026-10-20-plans145.md) |
+| 生产源码 | 保留原生产差异；功能 5 文件与 APNs 1 文件最小覆盖，最终 1,369 项上传 SHA-1 匹配 | 原样提升同一已测 Production 候选；无 Schema/迁移/依赖变更；[功能来源](./qa/evidence/2026-10-20-plans145/backend-source-manifest.json)、[最终来源](./qa/evidence/2026-10-20-plans145/apns-source-manifest.json) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 

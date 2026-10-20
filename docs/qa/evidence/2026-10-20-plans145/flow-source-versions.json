@@ -1,0 +1,15 @@
+{
+  "direct": {
+    "native": "c8d308fa61a926ce211c6e80e67c2c72792a6ce2",
+    "backend": "dpl_GL2NcQiCXn8kYwcHvPMh5P52iXZp"
+  },
+  "nativeFull": {
+    "native": "371894525cc58b090fd87525bc3684fbed27fd49",
+    "backend": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR"
+  },
+  "safariFinal": {
+    "native": "d9ef1e73d875f6d79af377a15e61bbe9e4fdf5e4",
+    "backend": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR"
+  },
+  "finalDelta": "The final native delta recognizes time_poll_confirmed for Plans/Calendar refresh; 22 Navigation tests and the final App/Safari flow cover it."
+}

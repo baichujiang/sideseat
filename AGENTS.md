@@ -19,7 +19,7 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Preview 144 is the current installed development build; see
+- Preview 145 is the current installed development build; see
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97
   is a separate supported older client. Do not uninstall it or drop its API/data
   compatibility as part of archival work.
@@ -29,7 +29,7 @@
 - Keep dated release and QA verdicts as evidence. Add new verification records;
   do not promote old screenshots, disabled flags or proposed designs to deployed
   functionality. The owner approved manual unified planning (time collection →
-  invitation → individual confirmation → Calendar) on 2026-10-15; see
+  invitation → individual response → organizer send → Calendar) on 2026-10-15; see
   `docs/UNIFIED_PLANS.md`. Discovery Pod and archived group routes stay frozen.
 
 ## Owner delivery rule — 2026-10-03

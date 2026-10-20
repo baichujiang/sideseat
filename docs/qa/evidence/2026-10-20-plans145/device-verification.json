@@ -1,0 +1,23 @@
+{
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDeviceID": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "name": "iPhone (4)",
+  "normalLaunchPID": 3513,
+  "arguments": [],
+  "qaEnvironmentKeys": [],
+  "processObserved": true,
+  "apps": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "version": "1.0.0",
+      "bundleVersion": "97"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "version": "1.0.0",
+      "bundleVersion": "145"
+    }
+  ],
+  "runnerRemoved": true,
+  "verifiedAt": "2026-10-20T11:45:12.880506+00:00"
+}

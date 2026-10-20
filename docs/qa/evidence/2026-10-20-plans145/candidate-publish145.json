@@ -1,0 +1,19 @@
+{
+  "base": "https://sideseat-hw55ibv4w-baichus-projects.vercel.app",
+  "checkedAt": "2026-10-20T11:12:21.818Z",
+  "passed": true,
+  "checks": [
+    "chromium: create → manual availability → select time/roster; explicit ignore preserves pending; owner/version guards",
+    "chromium: pending + declined never block publication; only accepted calendars; repeat send stays unique",
+    "chromium: published link still accepts; later account joins/calendar unique; withdrawal removes only their entry; guest may decline",
+    "chromium: owner-only publication below planned capacity; brand-new guest joins after sending",
+    "chromium: even all accepted requires organizer action; existing fixed invitation rules retain capacity",
+    "chromium: cancellation removes accepted calendars; no browser errors",
+    "webkit: create → manual availability → select time/roster; explicit ignore preserves pending; owner/version guards",
+    "webkit: pending + declined never block publication; only accepted calendars; repeat send stays unique",
+    "webkit: published link still accepts; later account joins/calendar unique; withdrawal removes only their entry; guest may decline",
+    "webkit: owner-only publication below planned capacity; brand-new guest joins after sending",
+    "webkit: even all accepted requires organizer action; existing fixed invitation rules retain capacity",
+    "webkit: cancellation removes accepted calendars; no browser errors"
+  ]
+}

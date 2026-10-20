@@ -314,6 +314,8 @@ also report EXPIRED and no longer contribute to the inbox action count.
 Existing `GET/POST /api/v1/time-polls`, `GET/DELETE /{token}` and
 `PUT /{token}/response` remain. Additive routes under `/api/v1/time-polls/{token}`:
 
+- `POST /publish {version}` — organizer explicitly sends the final plan to accepted participants; no quorum. Idempotent after publication.
+
 | Method/path | Behavior |
 | --- | --- |
 | POST `/invitations` | Owner selects future start and explicit end, response IDs, current version; omitted end retains the legacy duration/60-minute fallback |

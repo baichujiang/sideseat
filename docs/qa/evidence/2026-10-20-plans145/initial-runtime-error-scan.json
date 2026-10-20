@@ -1,0 +1,29 @@
+{
+  "deployment": "dpl_GL2NcQiCXn8kYwcHvPMh5P52iXZp",
+  "requestedWindow": "1h",
+  "records": [
+    {
+      "keys": [
+        "id",
+        "timestamp",
+        "deploymentId",
+        "projectId",
+        "level",
+        "message",
+        "source",
+        "domain",
+        "requestMethod",
+        "requestPath",
+        "responseStatusCode",
+        "environment",
+        "branch",
+        "cache",
+        "traceId",
+        "logs"
+      ],
+      "level": "error",
+      "message": "APNs push failed [redacted device token prefix] DeviceTokenNotForTopic"
+    }
+  ],
+  "verdict": "Observed DeviceTokenNotForTopic; fixed in the next minimal APNs overlay. This initial scan is not a clean final verdict."
+}

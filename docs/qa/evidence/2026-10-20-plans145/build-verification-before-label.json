@@ -1,0 +1,18 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "145",
+  "executableSHA256": "394aaedd015eaa8f6ae6e52948156973c591d02a0af0443e7221cdc8ad5953a7",
+  "signatureVerified": true,
+  "sourcesSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "1f79a39feb037500d4f95a8e8f61cca8aa6985dd056f78bdbbeffada506a6cd7",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "87863afafb9b1ab430994ed01f8b6be137bce8ab52bbc1dc169664d64a05e84d",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "e010ee1713686865610329a1d9e9d610c8b6a8f1987c40d61f18c59475fa4a77",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "17db6210fee51b2a141635da44d685beb111c4578f46083bcca45247e44a884f",
+    "ios-native/SideSeat/Features/Chat/InboxNotificationsStore.swift": "661500ac291a329776c4c967847d244bc725cd5ae36769c0b425468324709098",
+    "ios-native/Configuration/Preview.xcconfig": "64755a5e0675915068539e14d24c98c61504e1f7db8ee1fc2ef28b63d18b8434"
+  },
+  "nativeSourceCommit": "c8d308fa61a926ce211c6e80e67c2c72792a6ce2",
+  "buildLog": "/tmp/sideseat145-build-final.log",
+  "installLog": "/tmp/sideseat145-install.log"
+}

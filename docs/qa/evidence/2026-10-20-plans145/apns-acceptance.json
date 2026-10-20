@@ -1,0 +1,27 @@
+{
+  "deployment": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR",
+  "checkedAt": "2026-10-20T11:33:20.070374+00:00",
+  "apnsAccepted": 2,
+  "expectedMessages": 2,
+  "duplicateActionsSent": true,
+  "matchingReceipts": [
+    {
+      "message": "APNs accepted notification for Preview topic",
+      "level": "info",
+      "timestamp": 1792495926642,
+      "requestPath": "/api/v1/time-polls/G9ALYWvARRbUccSAbNlrikFpNqvwGViA/invitation-response",
+      "requestMethod": "PUT"
+    },
+    {
+      "message": "APNs accepted notification for Preview topic",
+      "level": "info",
+      "timestamp": 1792495925086,
+      "requestPath": "/api/v1/time-polls/3aRXpvWiSvHNZ67A7QjNoqVorLNb9o17/publish",
+      "requestMethod": "POST"
+    }
+  ],
+  "errorRecords": [],
+  "logLimit": 100,
+  "requestedWindow": "1h",
+  "meaning": "APNs returned HTTP 200 for both actual Preview topic sends. Notification banner presentation was not separately recorded."
+}

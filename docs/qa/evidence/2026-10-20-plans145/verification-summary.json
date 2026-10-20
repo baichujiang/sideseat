@@ -1,0 +1,17 @@
+{
+  "direct": {
+    "seconds": 111.89524102210999,
+    "apiBoundaries": 8
+  },
+  "native": {
+    "seconds": 353.25293695926666,
+    "apiBoundaries": 13
+  },
+  "safari": {
+    "seconds": 199.11316299438477,
+    "apiBoundaries": 9
+  },
+  "nativeUnitTests": 75,
+  "domainTests": 13,
+  "releaseConfigTests": 32
+}

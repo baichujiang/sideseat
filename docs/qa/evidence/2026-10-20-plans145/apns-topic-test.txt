@@ -1,0 +1,10 @@
+APNs accepted notification for Preview topic
+✔ APNs uses the Preview topic only after Apple's specific sandbox topic mismatch (14.921792ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.232958

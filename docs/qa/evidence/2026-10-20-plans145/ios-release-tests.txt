@@ -1,0 +1,61 @@
+
+> sideseat@0.1.0 test:ios-release:config
+> tsx --test tests/ios-release/*.test.ts
+
+▶ isApnsConfigured
+  ✔ uses a legacy key only for its declared default environment (0.488167ms)
+  ✔ selects independent credentials for Sandbox and Production (0.147542ms)
+  ✔ prefers environment-scoped credentials over the legacy key (0.100291ms)
+  ✔ honors APNS_USE_SANDBOX override (0.124292ms)
+  ✔ routes each device token to its own APNs environment (0.126541ms)
+✔ isApnsConfigured (1.707833ms)
+▶ APNs payload
+  ✔ carries routing, grouping, event context, and an exact unread badge (0.473917ms)
+  ✔ normalizes negative badge counts to zero (0.0455ms)
+  ✔ keeps discover comment routing context in the APNs payload (0.074167ms)
+✔ APNs payload (0.694833ms)
+▶ native client APNs capability
+  ✔ does not advertise TestFlight delivery when only Sandbox is configured (0.143958ms)
+  ✔ advertises TestFlight delivery only with Production credentials (0.102792ms)
+✔ native client APNs capability (0.389833ms)
+▶ isStoreKitAppleApiConfigured
+  ✔ is false without Apple API credentials (0.051167ms)
+  ✔ is true when issuer, key id and private key are set (0.03525ms)
+✔ isStoreKitAppleApiConfigured (0.171042ms)
+▶ native iOS release assets
+  ✔ loads optional local signing values in every app configuration (0.933375ms)
+  ✔ declares push and Universal Link entitlements (0.903583ms)
+  ✔ registers Debug and Release device tokens with explicit APNs environments (0.446667ms)
+  ✔ serves only the Universal Link paths understood by the native router (0.276166ms)
+  ✔ declares linked product data without tracking (0.281917ms)
+  ✔ starts the native crash reporter without default PII (0.443458ms)
+  ✔ declares that the app uses no non-exempt encryption (0.277833ms)
+  ✔ uploads Production archive dSYMs through a guarded Sentry build phase (0.414458ms)
+  ✔ requires on-device speech recognition (0.264833ms)
+  ✔ localizes sensitive permission prompts (0.553167ms)
+  ✔ rejects placeholder Associated Domains for Production (0.078459ms)
+✔ native iOS release assets (5.033833ms)
+APNs accepted notification for Preview topic
+✔ APNs uses the Preview topic only after Apple's specific sandbox topic mismatch (8.242709ms)
+▶ native performance CI configuration
+  ✔ runs every performance test in isolation from the functional suite (0.778625ms)
+✔ native performance CI configuration (1.1925ms)
+▶ physical iPhone destination resolver
+  ✔ selects the hardware iPhone UDID and ignores iPad and Simulator IDs (11.507792ms)
+  ✔ honors an explicitly selected physical device (4.838542ms)
+  ✔ fails instead of mistaking an iPhone Simulator for hardware (8.142625ms)
+✔ physical iPhone destination resolver (25.028958ms)
+▶ Production Sentry dSYM upload
+  ✔ does nothing for Development and non-archive actions (12.257ms)
+  ✔ fails a Production archive before upload when credentials are missing (24.240833ms)
+  ✔ uploads the exact generated dSYM with the configured organization and project (351.964ms)
+  ✔ loads the upload token from the macOS Keychain fallback (487.333958ms)
+✔ Production Sentry dSYM upload (876.4215ms)
+ℹ tests 32
+ℹ suites 8
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1020.741875

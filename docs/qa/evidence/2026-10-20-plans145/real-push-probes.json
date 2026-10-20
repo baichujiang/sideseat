@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "order": "accept-before-publish",
+      "token": "3aRXpvWiSvHNZ67A7QjNoqVorLNb9o17",
+      "confirmed": true,
+      "accepted": 2,
+      "capacity": 4,
+      "checkedAt": "2026-10-20T11:32:05.814Z"
+    },
+    {
+      "order": "publish-before-accept",
+      "token": "G9ALYWvARRbUccSAbNlrikFpNqvwGViA",
+      "confirmed": true,
+      "accepted": 2,
+      "capacity": 4,
+      "checkedAt": "2026-10-20T11:32:07.389Z"
+    }
+  ],
+  "note": "Disposable owner cleanup gathers both probe plans. APNs HTTP acceptance is recorded separately; this script does not assert banner presentation."
+}

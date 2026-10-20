@@ -1,0 +1,81 @@
+{
+  "accountsDeleted": 35,
+  "plansAndLinksDeleted": 53,
+  "receipts": [
+    {
+      "file": "candidate-final-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "candidate-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "direct-flow-cleanup.json",
+      "accountsDeleted": 2,
+      "plansAndLinksDeleted": 1
+    },
+    {
+      "file": "initial-calendar-selector-cleanup.json",
+      "accountsDeleted": 2,
+      "plansAndLinksDeleted": 3
+    },
+    {
+      "file": "initial-native-flow-cleanup.json",
+      "accountsDeleted": 2,
+      "plansAndLinksDeleted": 1
+    },
+    {
+      "file": "local-final-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "local-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "native-flow-cleanup.json",
+      "accountsDeleted": 2,
+      "plansAndLinksDeleted": 1
+    },
+    {
+      "file": "production-cleanup.json",
+      "accountsDeleted": 2,
+      "plansAndLinksDeleted": 10
+    },
+    {
+      "file": "production-final-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "production-publish145-cleanup.json",
+      "accountsDeleted": 4,
+      "plansAndLinksDeleted": 6
+    },
+    {
+      "file": "safari-flow-cleanup.json",
+      "accountsDeleted": 1,
+      "plansAndLinksDeleted": 1
+    }
+  ],
+  "privateFixtureFilesAbsent": true,
+  "removedPrivateConfiguration": [
+    "sideseat145-native-acceptance.xctestrun",
+    "sideseat145-native.xctestrun",
+    "sideseat145-safari.xctestrun",
+    "sideseat145-native-final.xctestrun",
+    "sideseat145-direct.xctestrun",
+    "sideseat145-apns-candidate.cookie",
+    "sideseat145-candidate.cookie"
+  ],
+  "localServerStopRequested": true,
+  "localDatabaseStopRequested": true,
+  "checkedAt": "2026-10-20T11:45:55.411538+00:00",
+  "localServerStopped": true,
+  "localDatabaseStopped": true
+}

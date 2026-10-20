@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "phase": "solo-zero-ready",
+      "checkedAt": "2026-10-20T11:15:33.351Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 0,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-owner-ready",
+      "checkedAt": "2026-10-20T11:15:48.206Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-roster-reviewed",
+      "checkedAt": "2026-10-20T11:16:03.036Z",
+      "actualPhase": "COLLECTING",
+      "planningMode": "COLLECT",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 5,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-link-ready",
+      "checkedAt": "2026-10-20T11:16:09.002Z",
+      "actualPhase": "INVITING",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 0,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-published",
+      "checkedAt": "2026-10-20T11:16:17.262Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-participant-opened",
+      "checkedAt": "2026-10-20T11:16:40.838Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 0
+    },
+    {
+      "phase": "solo-confirmed",
+      "checkedAt": "2026-10-20T11:16:45.757Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    },
+    {
+      "phase": "solo-calendar-verified",
+      "checkedAt": "2026-10-20T11:17:03.385Z",
+      "actualPhase": "CONFIRMED",
+      "planningMode": "FIXED",
+      "availabilityRespondents": 1,
+      "peerDidRespond": false,
+      "expectedCount": 2,
+      "ownerCalendarEntries": 1,
+      "participantCalendarEntries": 1
+    }
+  ]
+}
