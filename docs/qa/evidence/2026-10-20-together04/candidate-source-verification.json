@@ -1,0 +1,12 @@
+{
+  "deployment": "dpl_HWmk7kRGK3stJxo1WuU4YG21feEN",
+  "sourceFiles": 1378,
+  "allSHA1Matched": true,
+  "changedProductionFiles": [
+    "src/lib/v2/mutual-opportunities.ts"
+  ],
+  "addedFiles": [
+    "src/.sideseat-together04-source.json",
+    "src/app/api/v1/me/mutual-opportunities/[opportunityId]/safety/route.ts"
+  ]
+}

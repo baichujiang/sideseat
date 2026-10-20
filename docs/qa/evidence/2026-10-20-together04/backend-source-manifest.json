@@ -1,0 +1,14 @@
+{
+  "baseDeployment": "dpl_8SvBGqPyKdA22U4EroPEwygVKm9R",
+  "baseSourceFilesVerified": 1376,
+  "allBaseSHA1Matched": true,
+  "overlays": [
+    "lib/v2/mutual-opportunities.ts",
+    "app/api/v1/me/mutual-opportunities/[opportunityId]/safety/route.ts"
+  ],
+  "schemaChanged": false,
+  "overlaySHA256": {
+    "lib/v2/mutual-opportunities.ts": "d70674aa590f4110402c9daf9a099a1d7c6e120505487150bcfd97cab2420719",
+    "app/api/v1/me/mutual-opportunities/[opportunityId]/safety/route.ts": "4ef510dfd904cf6ae5e85c7abb86cde9fc2da7da17a772223c1dd8f4f42804bd"
+  }
+}

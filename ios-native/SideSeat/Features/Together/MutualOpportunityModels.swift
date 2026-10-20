@@ -16,6 +16,7 @@ struct NativeMutualOpportunityCourse: Codable, Hashable, Sendable {
 }
 
 struct NativeMutualOpportunityPeer: Codable, Hashable, Sendable {
+    var userId: String? = nil
     let displayName: String
     let avatarUrl: String?
     let verifiedStudent: Bool

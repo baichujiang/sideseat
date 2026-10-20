@@ -18,6 +18,7 @@ struct ExploreIntentListView: View {
     @State var store = ExploreIntentStore()
     @State private var interactionStore = MutualOpportunityStore()
     @State private var messageOpportunity: NativeMutualOpportunity?
+    @State private var profileOpportunity: NativeMutualOpportunity?
 
     private var effectiveLimit: Int { resultLimit ?? access.resultLimit }
     @State private var searchText = ""
@@ -46,6 +47,7 @@ struct ExploreIntentListView: View {
             }
         }
         .refreshable { if isEnabled { await store.load(using: session, limit: effectiveLimit) } }
+        .sheet(item: $profileOpportunity) { opportunity in TogetherPeerPreview(opportunity: opportunity) }
         .sheet(item: $messageOpportunity) { opportunity in
             OpportunityMessageComposer(opportunity: opportunity, onSend: { body in
                 let action = opportunity.messageRequest?.isIncoming == true ? "REPLY" : "SEND"
@@ -182,15 +184,21 @@ struct ExploreIntentListView: View {
                                     onOpenConversation: {
                                         router.navigate(to: opportunity.conversationRoute)
                                     },
-                                    onDismiss: onDismiss.map { action in { action(opportunity) } })
+                                    onDismiss: onDismiss.map { action in { action(opportunity) } },
+                                    onViewProfile: { profileOpportunity = opportunity })
                             }
                         } else {
                             ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext && !inlineInRecommendations,
                                 isWorking: store.mutatingIDs.contains(intent.id),
                                 onBookmark: { Task { await startInteraction(intent, bookmark: true) } },
                                 onMessage: { Task { await startInteraction(intent, bookmark: false) } },
+                                onViewProfile: intent.isExample == true ? nil : {
+                                    Task<Void, Never> {
+                                        if let prepared = await store.prepareContact(in: intent, using: session) { profileOpportunity = prepared }
+                                    }
+                                },
                                 onDismiss: onDismiss == nil ? nil : {
-                                    Task {
+                                    Task<Void, Never> {
                                         if let opportunity = await store.prepareContact(in: intent, using: session) {
                                             onOpportunityChange?(opportunity)
                                             onDismiss?(opportunity)
@@ -317,6 +325,7 @@ struct ExploreIntentCard: View {
     var isWorking = false
     var onBookmark: (() -> Void)? = nil
     var onMessage: (() -> Void)? = nil
+    var onViewProfile: (() -> Void)? = nil
     var onDismiss: (() -> Void)? = nil
 
     var body: some View {
@@ -333,6 +342,13 @@ struct ExploreIntentCard: View {
                 header
             }
             .accessibilityIdentifier("explore-intent-header-\(intent.id)")
+            if let onViewProfile {
+                Button(AppLocalization.string("View profile"), action: onViewProfile)
+                    .buttonStyle(.plain).font(.subheadline.weight(.medium))
+                    .foregroundStyle(SideSeatTheme.utilityAction).frame(minHeight: 44)
+                    .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+                    .disabled(isWorking).accessibilityIdentifier("explore-profile-\(intent.id)")
+            }
             details
                 .padding(compact ? SideSeatTheme.spaceMD : SideSeatTheme.Together.cardPadding)
         }

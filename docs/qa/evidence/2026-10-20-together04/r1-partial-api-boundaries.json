@@ -1,0 +1,19 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "preview",
+      "reports": 0,
+      "blocks": 0,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "reported",
+      "reports": 1,
+      "blocks": 0,
+      "messageRequests": 0,
+      "chats": 0
+    }
+  ]
+}

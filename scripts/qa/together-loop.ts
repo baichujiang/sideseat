@@ -34,6 +34,30 @@ try {
       studentVerificationStatus: "VERIFIED", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR", semester: 2,
       productTutorialDismissedAt: new Date(), userLanguages: { create: { tag: "ENGLISH", proficiency: "FLUENT" } } } });
     console.log(`Prepared isolated local user ${logPath}.`);
+  } else if (mode === "observe-safety") {
+    assert(logPath);
+    const a = await db.user.findUniqueOrThrow({ where: { username: "togetherqa_04_a" } });
+    const b = await db.user.findUniqueOrThrow({ where: { username: "togetherqa_04_b" } });
+    const checks = [];
+    for (const phase of ["preview", "reported", "blocked"]) {
+      const deadline = Date.now() + 10 * 60_000;
+      while (!(await fs.readFile(logPath, "utf8").catch(() => "")).includes(`TOGETHER04_PHASE ${phase}`)) {
+        assert(Date.now() < deadline); await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      const reports = await db.report.findMany({ where: { reporterId: b.id } });
+      const blocks = await db.block.count({ where: { blockerId: b.id, blockedId: a.id } });
+      assert.equal(reports.length, phase === "preview" ? 0 : 1);
+      if (reports.length) {
+        assert.equal(reports[0]!.reportedUserId, a.id);
+        assert(reports[0]!.details?.includes("[Together opportunity:"));
+      }
+      assert.equal(blocks, phase === "blocked" ? 1 : 0);
+      assert.equal(await db.mutualOpportunityMessageRequest.count({ where: { senderId: { in: [a.id, b.id] } } }), 0);
+      assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: [a.id, b.id] } }, { userBId: { in: [a.id, b.id] } }] } }), 0);
+      checks.push({ phase, reports: reports.length, blocks, messageRequests: 0, chats: 0 });
+      await fs.writeFile(`${out}/api-boundaries.json`, JSON.stringify({ passed: checks.length === 3, checks }, null, 2));
+      console.log(`Safety boundary passed: ${phase}`);
+    }
   } else if (mode === "observe-pause") {
     assert(logPath);
     const user = await db.user.findUniqueOrThrow({ where: { username: "togetherqa_03" } });

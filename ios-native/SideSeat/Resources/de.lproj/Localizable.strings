@@ -3138,3 +3138,15 @@
 
 "Pause intention" = "Suche pausieren";
 "Resume intention" = "Suche fortsetzen";
+
+"Report intention" = "Vorhaben melden";
+
+"Safety options" = "Sicherheitsoptionen";
+
+"You won't see each other's intentions or be able to contact each other." = "Ihr seht eure Vorhaben nicht mehr und könnt einander nicht kontaktieren.";
+
+"Use up to %lld characters." = "Verwende höchstens %lld Zeichen.";
+
+"Identity stays private until a greeting is sent." = "Die Identität bleibt bis zum ersten Gruß privat.";
+
+"Intention details" = "Details zum Vorhaben";

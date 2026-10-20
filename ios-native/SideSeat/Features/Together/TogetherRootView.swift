@@ -242,6 +242,7 @@ private struct TogetherHomeView: View {
     @State private var exploreStore = ExploreIntentStore()
     @State private var hasRequestedMoreRecommendations = false
     @State private var messageOpportunity: NativeMutualOpportunity?
+    @State private var profileOpportunity: NativeMutualOpportunity?
     @State private var savedWhileBrowsingIDs: Set<String> = []
     @State private var savedFeedbackID: UUID?
     @State private var pendingDismissal: NativeMutualOpportunity?
@@ -370,6 +371,9 @@ private struct TogetherHomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatTogetherNeedsRefresh)) { _ in
             Task { await loadContent() }
+        }
+        .sheet(item: $profileOpportunity) { opportunity in
+            TogetherPeerPreview(opportunity: opportunity)
         }
         .sheet(item: $messageOpportunity) { opportunity in
             OpportunityMessageComposer(opportunity: opportunity) { body in
@@ -1042,7 +1046,8 @@ private struct TogetherHomeView: View {
             onOpenConversation: {
                 router.navigate(to: opportunity.conversationRoute)
             },
-            onDismiss: inRecommendations ? { Task { await hideRecommendation(opportunity) } } : nil
+            onDismiss: inRecommendations ? { Task { await hideRecommendation(opportunity) } } : nil,
+            onViewProfile: { profileOpportunity = opportunity }
         )
     }
 
@@ -1119,6 +1124,7 @@ struct MutualOpportunityCard: View {
     let onMessage: () -> Void
     let onOpenConversation: () -> Void
     var onDismiss: (() -> Void)? = nil
+    var onViewProfile: (() -> Void)? = nil
     var showsActions = true
 
     var body: some View {
@@ -1133,6 +1139,12 @@ struct MutualOpportunityCard: View {
                     activityHeader
                     availabilityRow
                     peerDetails
+                    if let onViewProfile {
+                        Button(AppLocalization.string("View profile"), action: onViewProfile)
+                            .font(.subheadline.weight(.medium)).frame(minHeight: 44)
+                            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                            .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
+                    }
                     if opportunity.isExpired == true && opportunity.hasConversation {
                         Label(AppLocalization.string("Expired"), systemImage: "clock")
                             .font(.caption)
@@ -2399,4 +2411,104 @@ private struct WeeklyIntentTimePickerSheet: View {
         )
     }
 
+}
+
+
+/// A deliberate profile preview, with safety actions tied to the intention being viewed.
+struct TogetherPeerPreview: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(\.dismiss) private var dismiss
+    let opportunity: NativeMutualOpportunity
+    @State private var showsReport = false
+    @State private var confirmsBlock = false
+    @State private var isWorking = false
+    @State private var issue: String?
+    @State private var reportSent = false
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let userID = opportunity.peer.userId { PublicProfileView(userID: userID) }
+                else {
+                    ScrollView {
+                        MutualOpportunityCard(opportunity: opportunity, isWorking: false,
+                            onBookmark: {}, onMessage: {}, onOpenConversation: {}, showsActions: false)
+                            .padding()
+                        Text("Identity stays private until a greeting is sent.")
+                            .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong).padding()
+                    }
+                    .navigationTitle("Intention details")
+                    .accessibilityIdentifier("together-private-profile")
+                }
+            }
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { dismiss() }.accessibilityIdentifier("together-profile-done")
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button("Report intention", systemImage: "flag") { showsReport = true }
+                                .accessibilityIdentifier("together-report-intention")
+                            Button("Block", systemImage: "hand.raised", role: .destructive) { confirmsBlock = true }
+                                .accessibilityIdentifier("together-block-peer")
+                        } label: { Image(systemName: "ellipsis.circle").frame(width: 44, height: 44) }
+                        .accessibilityLabel("Safety options").accessibilityIdentifier("together-profile-safety")
+                        .disabled(isWorking)
+                    }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    if let issue { Text(issue).foregroundStyle(SideSeatTheme.danger).padding() }
+                    else if reportSent {
+                        Label("Report sent", systemImage: "checkmark.circle").padding()
+                            .accessibilityIdentifier("together-report-sent")
+                    }
+                }
+                .alert("Block this person?", isPresented: $confirmsBlock) {
+                    Button("Block", role: .destructive) { Task { await block() } }
+                        .accessibilityIdentifier("together-block-confirm")
+                    Button("Cancel", role: .cancel) { }
+                        .accessibilityIdentifier("together-block-cancel")
+                } message: { Text("You won't see each other's intentions or be able to contact each other.") }
+        }
+        .sheet(isPresented: $showsReport) {
+            ChatReportSheet(title: AppLocalization.string("Report intention")) { reason, details in
+                #if DEBUG
+                if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") { reportSent = true; return nil }
+                #endif
+                do {
+                    let _: APIEnvelope<NativeReportResult> = try await session.sendAuthorized("api/v1/me/mutual-opportunities/\(opportunity.id)/safety", method: .post,
+                        body: TogetherSafetyRequest(action: "REPORT", reason: reason.rawValue, details: details), idempotencyKey: UUID().uuidString)
+                    reportSent = true; return nil
+                } catch { return error.localizedDescription }
+            }
+        }
+        .interactiveDismissDisabled(isWorking)
+    }
+
+    private func block() async {
+        isWorking = true; issue = nil
+        defer { isWorking = false }
+        do {
+            #if DEBUG
+            if !ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+                let _: APIEnvelope<NativeConnectionBlockResult> = try await session.sendAuthorized("api/v1/me/mutual-opportunities/\(opportunity.id)/safety", method: .post,
+                    body: TogetherSafetyRequest(action: "BLOCK"), idempotencyKey: UUID().uuidString)
+            }
+            #else
+            let _: APIEnvelope<NativeConnectionBlockResult> = try await session.sendAuthorized("api/v1/me/mutual-opportunities/\(opportunity.id)/safety", method: .post,
+                body: TogetherSafetyRequest(action: "BLOCK"), idempotencyKey: UUID().uuidString)
+            #endif
+            await HomeScheduleCache.shared.clear()
+            for name in [Notification.Name.sideSeatTogetherNeedsRefresh, .sideSeatInboxNeedsRefresh, .sideSeatPlansNeedsRefresh, .sideSeatCalendarNeedsRefresh] {
+                NotificationCenter.default.post(name: name, object: nil)
+            }
+            dismiss()
+        } catch { issue = error.localizedDescription }
+    }
+}
+
+private struct TogetherSafetyRequest: Encodable {
+    let action: String
+    var reason: String? = nil
+    var details: String? = nil
 }

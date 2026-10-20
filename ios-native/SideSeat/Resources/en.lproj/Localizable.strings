@@ -3139,3 +3139,15 @@
 
 "Pause intention" = "Pause intention";
 "Resume intention" = "Resume intention";
+
+"Report intention" = "Report intention";
+
+"Safety options" = "Safety options";
+
+"You won't see each other's intentions or be able to contact each other." = "You won't see each other's intentions or be able to contact each other.";
+
+"Use up to %lld characters." = "Use up to %lld characters.";
+
+"Identity stays private until a greeting is sent." = "Identity stays private until a greeting is sent.";
+
+"Intention details" = "Intention details";

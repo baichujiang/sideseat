@@ -262,6 +262,7 @@ function viewerProjection(row: OpportunityRow, viewerId: string) {
     timeContext: (row.contextSnapshot as Prisma.JsonObject)?.timeContext ?? null,
     expiresAt: row.expiresAt.toISOString(),
     peer: {
+      userId: hideExploreIdentity ? null : peer.id,
       displayName: hideExploreIdentity ? "Student" : displayName(peer),
       avatarUrl: hideExploreIdentity ? null : peer.avatarUrl,
       verifiedStudent: peer.verifiedStudent,
@@ -984,15 +985,19 @@ export async function listMutualOpportunities(userId: string, generate: boolean)
   const now = new Date();
   await expireStaleForUser(userId, now);
   if (generate) await generateMutualOpportunitiesForUser(userId);
-  const [current, saved] = await Promise.all([
+  const [current, saved, blocks] = await Promise.all([
     rowsForUser(userId),
     prisma.mutualOpportunity.findMany({
       where: { bookmarks: { some: { userId } } },
       include: opportunityInclude,
       orderBy: { updatedAt: "desc" },
     }),
+    prisma.block.findMany({ where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
+      select: { blockerId: true, blockedId: true } }),
   ]);
-  const rows = [...new Map([...current, ...saved].map(row => [row.id, row])).values()];
+  const blockedIds = new Set(blocks.map(block => block.blockerId === userId ? block.blockedId : block.blockerId));
+  const rows = [...new Map([...current, ...saved].map(row => [row.id, row])).values()]
+    .filter(row => !blockedIds.has(row.userAId) && !blockedIds.has(row.userBId));
   const hasDiscovery = rows.some(row => activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1");
   return {
     opportunities: rows
@@ -1520,4 +1525,32 @@ export async function interactWithOpportunity(options: {
     if (cause instanceof CanonicalConnectionIntegrityError) throw new MutualOpportunityError("CONVERSATION_UNAVAILABLE");
     throw cause;
   });
+}
+
+
+/** Safety actions resolve the author server-side; private Explore previews never reveal their identity. */
+export async function performOpportunitySafetyAction(options: {
+  userId: string; opportunityId: string; action: "BLOCK" | "REPORT";
+  reason?: import("@prisma/client").ReportReason; details?: string;
+}) {
+  const row = await prisma.mutualOpportunity.findFirst({
+    where: { id: options.opportunityId, OR: [{ userAId: options.userId }, { userBId: options.userId }] },
+    include: { intentA: true, intentB: true },
+  });
+  if (!row || (row.status === "DRAFT" && (row.contextSnapshot as Prisma.JsonObject)?.explorePreparedBy !== options.userId)) {
+    throw new MutualOpportunityError("NOT_FOUND");
+  }
+  const peerId = row.userAId === options.userId ? row.userBId : row.userAId;
+  if (options.action === "BLOCK") {
+    const { installPairPeerBlock } = await import("@/lib/api/v1/pair-block-transaction");
+    await prisma.$transaction(async tx => {
+      const result = await installPairPeerBlock(tx, { userId: options.userId, blockedId: peerId, endedAt: new Date() });
+      if (result.kind !== "blocked") throw new MutualOpportunityError("NOT_FOUND");
+    });
+    return { blocked: true };
+  }
+  const peerIntent = row.userAId === options.userId ? row.intentB : row.intentA;
+  const report = await prisma.report.create({ data: { reporterId: options.userId, reportedUserId: peerId,
+    reason: options.reason ?? "OTHER", details: `[Together opportunity: ${row.id}; intention: ${peerIntent.id}]\n${peerIntent.activityText ?? peerIntent.topic}\n${options.details ?? ""}` } });
+  return { id: report.id };
 }

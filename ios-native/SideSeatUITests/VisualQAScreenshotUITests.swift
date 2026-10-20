@@ -790,6 +790,21 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testTogetherProfileAndSafety() {
+        let app = togetherApp(["--ui-testing-language=zh-Hans"])
+        let profile = app.buttons["mutual-opportunity-profile-cmutualui0000000000000001"]
+        revealFlowElement(profile, in: app); profile.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["together-private-profile"].waitForExistence(timeout: 8))
+        saveScreenshot(app: app, name: "together-profile-before-contact-zh")
+        app.buttons["together-profile-safety"].tap(); app.buttons["together-report-intention"].tap()
+        XCTAssertTrue(app.buttons["chat-report-cancel"].waitForExistence(timeout: 5)); app.buttons["chat-report-cancel"].tap()
+        app.buttons["together-profile-safety"].tap(); app.buttons["together-block-peer"].tap()
+        saveScreenshot(app: app, name: "together-profile-block-confirmation-zh")
+        app.buttons["together-block-cancel"].firstMatch.tap(); XCTAssertTrue(app.buttons["together-profile-done"].exists)
+        app.buttons["together-profile-done"].tap(); XCTAssertTrue(profile.waitForExistence(timeout: 5)); app.terminate()
+    }
+
+    @MainActor
     func testIntentionPauseResume() {
         for (language, pause, resume) in [("zh-Hans", "暂停寻找", "恢复寻找"), ("de", "Suche pausieren", "Suche fortsetzen")] {
             let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-language=\(language)"] + (language == "de" ? ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] : []))

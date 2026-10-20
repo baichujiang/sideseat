@@ -3139,3 +3139,15 @@
 
 "Pause intention" = "暂停寻找";
 "Resume intention" = "恢复寻找";
+
+"Report intention" = "举报这条意愿";
+
+"Safety options" = "安全选项";
+
+"You won't see each other's intentions or be able to contact each other." = "屏蔽后，你们将看不到彼此的意愿，也无法联系对方。";
+
+"Use up to %lld characters." = "最多输入 %lld 个字符。";
+
+"Identity stays private until a greeting is sent." = "发送招呼前，作者身份保持私密。";
+
+"Intention details" = "意愿详情";

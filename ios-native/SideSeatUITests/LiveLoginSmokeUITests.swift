@@ -618,6 +618,33 @@ final class SocialLiveUITests: XCTestCase {
         proposer.terminate()
     }
 
+    func testTogether04PreviewReportBlockBeforeContact() {
+        let author = loopLogin("togetherqa_04_a"); loopCreateIntent("[together-04] Coffee", in: author); author.terminate()
+        let viewer = loopLogin("togetherqa_04_b"); loopCreateIntent("[together-04] Coffee", in: viewer)
+        loopSelectTogetherSection("recommendations", in: viewer)
+        let profile = viewer.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-profile-")).firstMatch
+        XCTAssertTrue(profile.waitForExistence(timeout: 12)); loopReveal(profile, in: viewer); profile.tap()
+        XCTAssertTrue(viewer.descendants(matching: .any)["public-profile"].waitForExistence(timeout: 12))
+        XCTAssertTrue(viewer.staticTexts["togetherqa_04_a"].firstMatch.exists)
+        print("TOGETHER04_PHASE preview"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        loopCapture(viewer, "profile-before-contact")
+        viewer.buttons["together-profile-safety"].tap(); viewer.buttons["together-report-intention"].tap()
+        viewer.descendants(matching: .any)["chat-report-details"].firstMatch.tap(); viewer.descendants(matching: .any)["chat-report-details"].firstMatch.typeText("[together-04] QA content report")
+        viewer.buttons["chat-report-send"].tap()
+        XCTAssertTrue(viewer.descendants(matching: .any)["together-report-sent"].waitForExistence(timeout: 12))
+        print("TOGETHER04_PHASE reported"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        viewer.buttons["together-profile-safety"].tap(); viewer.buttons["together-block-peer"].tap()
+        viewer.buttons["together-block-cancel"].firstMatch.tap(); XCTAssertTrue(viewer.descendants(matching: .any)["public-profile"].exists)
+        viewer.buttons["together-profile-safety"].tap(); viewer.buttons["together-block-peer"].tap(); viewer.buttons["together-block-confirm"].firstMatch.tap()
+        XCTAssertTrue(viewer.buttons["together-profile-done"].waitForNonExistence(timeout: 12))
+        XCTAssertTrue(profile.waitForNonExistence(timeout: 12))
+        viewer.terminate()
+        let reopened = loopLogin("togetherqa_04_b")
+        tabButton(in: reopened, labels: ["Together"]).tap(); loopSelectTogetherSection("recommendations", in: reopened)
+        XCTAssertFalse(reopened.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-profile-")).firstMatch.exists)
+        print("TOGETHER04_PHASE blocked"); loopCapture(reopened, "blocked-persisted"); reopened.terminate()
+    }
+
     func testTogether03PauseEditResumePersists() {
         let app = loopLogin("togetherqa_03")
         loopCreateIntent("[together-03] Coffee", in: app)

@@ -57,6 +57,29 @@ test("A private Explore dismissal survives refresh without sending a greeting an
   } finally { await f.cleanup(); }
 });
 
+test("Pre-contact blocking removes recommendations for both participants and prevents a greeting", { skip: !local }, async () => {
+  const f = await fixture();
+  const { prepareExploreOpportunity, listMutualOpportunities, interactWithOpportunity, performOpportunitySafetyAction } = await import("../../lib/v2/mutual-opportunities");
+  const { listExploreIntents } = await import("../../lib/v2/explore-intents");
+  try {
+    const [author, viewer] = f.users;
+    const target = await f.intention(author!.id);
+    const opportunity = await prepareExploreOpportunity(viewer!.id, target.id);
+    assert.equal(opportunity.peer.userId, null, "Explore authors remain anonymous before a greeting");
+    await assert.rejects(performOpportunitySafetyAction({ userId: author!.id, opportunityId: opportunity.id, action: "REPORT", reason: "SPAM" }), { code: "NOT_FOUND" });
+    const report = await performOpportunitySafetyAction({ userId: viewer!.id, opportunityId: opportunity.id, action: "REPORT", reason: "SPAM", details: "Unwanted content" });
+    assert("id" in report);
+    const stored = await f.db.report.findUniqueOrThrow({ where: { id: report.id } });
+    assert.equal(stored.reportedUserId, author!.id); assert(stored.details?.includes(target.id));
+    await performOpportunitySafetyAction({ userId: viewer!.id, opportunityId: opportunity.id, action: "BLOCK" });
+    assert(!(await listMutualOpportunities(viewer!.id, false)).opportunities.some(o => o.id === opportunity.id));
+    assert(!(await listMutualOpportunities(author!.id, false)).opportunities.some(o => o.id === opportunity.id));
+    assert(!(await listExploreIntents(viewer!.id, 5)).intents.some(i => i.id === target.id));
+    await assert.rejects(interactWithOpportunity({ userId: viewer!.id, opportunityId: opportunity.id, action: "SEND", body: "Hello" }), { code: "NO_LONGER_AVAILABLE" });
+    assert.equal(await f.db.connection.count({ where: { OR: [{ userAId: viewer!.id }, { userBId: viewer!.id }] } }), 0);
+  } finally { await f.cleanup(); }
+});
+
 test("A dismissed recommendation does not reappear in either participant's exploration", { skip: !local }, async () => {
   const f = await fixture();
   const { generateMutualOpportunitiesForUser, decideMutualOpportunity } = await import("../../lib/v2/mutual-opportunities");
