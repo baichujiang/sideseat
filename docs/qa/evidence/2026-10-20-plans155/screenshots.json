@@ -1,0 +1,65 @@
+{
+  "installedBuild": 155,
+  "screenshots": [
+    {
+      "file": "activity-ideas-checkbox-unchecked.png",
+      "test": "PlanCreationPresentationUITests/testActivityIdeasCheckboxKeepsTheSameFormAndDraft()",
+      "timestamp": 1792520596.649
+    },
+    {
+      "file": "activity-ideas-checkbox-checked.png",
+      "test": "PlanCreationPresentationUITests/testActivityIdeasCheckboxKeepsTheSameFormAndDraft()",
+      "timestamp": 1792520594.091
+    },
+    {
+      "file": "inline-dates-dark-large.png",
+      "test": "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+      "timestamp": 1792520624.695
+    },
+    {
+      "file": "single-form-dark-large.png",
+      "test": "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+      "timestamp": 1792520618.727
+    },
+    {
+      "file": "home-first-use-dark-large.png",
+      "test": "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+      "timestamp": 1792520608.766
+    },
+    {
+      "file": "single-form-default.png",
+      "test": "PlanCreationPresentationUITests/testDefaultFormNeedsOnlyActivityAndOneCreateAction()",
+      "timestamp": 1792520639.284
+    },
+    {
+      "file": "return-to-default-form.png",
+      "test": "PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs()",
+      "timestamp": 1792520657.301
+    },
+    {
+      "file": "secondary-fixed-time.png",
+      "test": "PlanCreationPresentationUITests/testFixedTimeShortcutEditsInPlaceAndKeepsInputs()",
+      "timestamp": 1792520654.519
+    },
+    {
+      "file": "live-idea-plan-created.png",
+      "test": "PlanCreationPresentationUITests/testSuggestionCheckboxCreatesTheChosenPlanKindOnTheRealAPI()",
+      "timestamp": 1792520707.295
+    },
+    {
+      "file": "live-checkbox-checked.png",
+      "test": "PlanCreationPresentationUITests/testSuggestionCheckboxCreatesTheChosenPlanKindOnTheRealAPI()",
+      "timestamp": 1792520703.661
+    },
+    {
+      "file": "live-known-plan-created.png",
+      "test": "PlanCreationPresentationUITests/testSuggestionCheckboxCreatesTheChosenPlanKindOnTheRealAPI()",
+      "timestamp": 1792520684.365
+    },
+    {
+      "file": "live-checkbox-unchecked.png",
+      "test": "PlanCreationPresentationUITests/testSuggestionCheckboxCreatesTheChosenPlanKindOnTheRealAPI()",
+      "timestamp": 1792520680.931
+    }
+  ]
+}

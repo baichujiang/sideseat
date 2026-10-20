@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；Preview 154、原生紧凑编辑与双账号完整链路核验 2026-10-20，Europe/Berlin。
+**状态：** 当前运行清单；Preview 155、同页活动建议勾选与真实创建核验 2026-10-20，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 154** 将名称、地点、日期与时区收进一个表单组，标签/值同排；昵称、参与状态和邀请复核能并排时合并，长文本及辅助功能字号纵排。最终 3 项真机、9 阶段真实 API 通过，双账号主流程 189.931 秒，普通启动 PID 3920；6 个临时账号/计划链接清理，普通 97 保留。本轮没有后端或网页发布。[当前交付](./releases/2026-10-20-preview154-compact-plan-editors.md)、[本轮 QA](./qa/2026-10-20-plans154.md)。
+当前 **Preview 155** 将「让朋友提议活动」改为创建表单中的可取消勾选项，保留活动、地点、日期及时间，底部统一「发起计划」。5 项最终真机及真实创建两种计划、2 项 API 观察通过；普通启动 PID 3958，临时账号 1 个与计划/链接 2 个清理，普通 97 保留。本轮没有后端或网页发布。[当前交付](./releases/2026-10-20-preview155-friend-suggestion-checkbox.md)、[本轮 QA](./qa/2026-10-20-plans155.md)。
+
+此前 **Preview 154** 将名称、地点、日期与时区收进一个表单组，标签/值同排；昵称、参与状态和邀请复核能并排时合并，长文本及辅助功能字号纵排。最终 3 项真机、9 阶段真实 API 通过，双账号主流程 189.931 秒，普通启动 PID 3920；6 个临时账号/计划链接清理，普通 97 保留。本轮没有后端或网页发布。[当前交付](./releases/2026-10-20-preview154-compact-plan-editors.md)、[本轮 QA](./qa/2026-10-20-plans154.md)。
 
 此前 **Preview 153** 重排共同计划详情及全部相关编辑/邀请页面：活动建议在标题下原位展开；计划信息与个人昵称分开编辑，最终选时/核对邀请保留返回选择，分享集中在顶部，取消和删除明确提供保留选项。42 项原生单元、3 项最终真机用例（双账号主流程 188.798 秒）、9 个真实 API 阶段通过；候选/正式各 6 组信息编辑与 8 组联系人/游客兼容检查通过。默认 iPhone 14 Plus 普通启动 PID 3874；后端 `dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j`。[当前交付](./releases/2026-10-20-preview153-plan-detail-hierarchy.md)、[本轮 QA 与实际截图](./qa/2026-10-20-plans153.md)。
 
@@ -36,9 +38,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `c233db5a`、现有 API `b3ac5aa9`；已推送。逐文件保留旧生产网页和 APNs 差异；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (154)` | 紧凑编辑、长内容与深色最大字号、双账号完整流程通过；普通启动 PID 3920；[154 交付](./releases/2026-10-20-preview154-compact-plan-editors.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；154 最终三项 UI、九阶段真实 API 通过；6 个真机临时账号、6 个计划/链接回收，runner 移除；普通版 97 保留 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `e02d2d24`、现有 API `b3ac5aa9`；已推送。逐文件保留旧生产网页和 APNs 差异；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (155)` | 同页勾选/取消、草稿、大字号与实际创建通过；普通启动 PID 3958；[155 交付](./releases/2026-10-20-preview155-friend-suggestion-checkbox.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；155 最终五项 UI、两种创建 API 核对通过；1 个真机临时账号、2 个计划/链接回收，runner 移除；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j`，Ready | 1,372 个旧生产源文件核验后覆盖 4 文件，1,374 个候选上传源文件全部校验；同一已测构建提升正式，三个别名复核。候选/正式各 6+8 组通过；网页视觉保持旧生产，未重跑真实 APNs 到达；[153 QA](./qa/2026-10-20-plans153.md) |

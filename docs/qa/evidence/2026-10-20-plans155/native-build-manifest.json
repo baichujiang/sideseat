@@ -1,0 +1,16 @@
+{
+  "nativeSourceCommit": "e02d2d24d1871be456ebe7f8d60df86920d7be9a",
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "155",
+  "signatureStrictVerification": true,
+  "files": {
+    "Info.plist": "738282cfbae5c74deb9230588dfc7284387db1da658905abd81ff98998917235",
+    "SideSeat Preview": "049b90b7f7f1432bd6f7b6ea979a54963381d33192782a9eb29890fa41338909",
+    "SideSeat Preview.debug.dylib": "eb6961f32277abec7c7d6f24cb49319eb50c31e44289c0dd12d140f999bf3f89",
+    "_CodeSignature/CodeResources": "f3c19cdfc25025d25468c53332f36a18c2cc9b2625a476fcb06a19d74dadb102"
+  },
+  "buildLog": "/tmp/sideseat155-build.log",
+  "installResult": "/tmp/sideseat155-install.json",
+  "at": "2026-10-20T18:27:37.980694+00:00"
+}

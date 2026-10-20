@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "known-created",
+      "suggestionsEnabled": false,
+      "responses": 0,
+      "phaseOnServer": "COLLECTING",
+      "at": "2026-10-20T18:24:45.116Z"
+    },
+    {
+      "phase": "idea-created",
+      "suggestionsEnabled": true,
+      "responses": 0,
+      "phaseOnServer": "COLLECTING",
+      "at": "2026-10-20T18:25:07.745Z"
+    }
+  ],
+  "failure": null
+}
