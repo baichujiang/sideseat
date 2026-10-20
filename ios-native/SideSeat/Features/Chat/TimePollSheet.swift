@@ -497,7 +497,7 @@ struct TimePollDetailView: View {
     }
 
     private func saveStatus(_ poll: NativeTimePoll) -> some View {
-        let failed = !store.saved && !store.saving && store.error != nil
+        let failed = store.submissionFailed && !store.saving
         return HStack(spacing: SideSeatTheme.spaceSM) {
             if store.saving { ProgressView().controlSize(.small) }
             else { Image(systemName: failed ? "exclamationmark.circle" : store.saved ? "checkmark.circle.fill" : "circle")
@@ -575,7 +575,7 @@ private struct TimePollGrid: View {
         let rows = poll.rows
         let cells = poll.cells
         let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
-        let participantSelections = poll.timetableSelections(ownSelection: editable ? preview ?? selected : nil)
+        let participantSelections = poll.submittedTimetableSelections
         VStack(spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
@@ -611,7 +611,7 @@ private struct TimePollGrid: View {
                     Label { Text("Partially selected") } icon: {
                         Image(systemName: "minus.circle.fill").foregroundStyle(SideSeatTheme.Availability.onPartial)
                     }
-                    Text("Numbers include everyone available")
+                    Text("Numbers count submitted responses")
                 }
                 .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .frame(maxWidth: .infinity, alignment: .leading)

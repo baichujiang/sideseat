@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "phase": "manual-draft",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:41:32.467Z"
+    },
+    {
+      "phase": "manual-submitted",
+      "slots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:41:38.897Z"
+    },
+    {
+      "phase": "manual-edited",
+      "slots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:41:45.353Z"
+    },
+    {
+      "phase": "manual-resubmitted",
+      "slots": [
+        2,
+        3
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:41:50.812Z"
+    }
+  ],
+  "passed": 4
+}

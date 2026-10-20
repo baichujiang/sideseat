@@ -9,6 +9,7 @@ export function useSharedTimePoll(token: string) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [submissionFailed, setSubmissionFailed] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [switchingParticipant, setSwitchingParticipant] = useState(false);
   const [resumed, setResumed] = useState(false);
@@ -53,20 +54,20 @@ export function useSharedTimePoll(token: string) {
 
   const submit = async () => {
     if (!poll?.viewerId || poll.phase !== "COLLECTING" || !hasChanges || busy || running.current) return false;
-    running.current = true; setSaving(true); setError("");
+    running.current = true; setSaving(true); setSubmissionFailed(false); setError("");
     const submittedRevision = revision.current;
     try {
       const data = await call("/response", "PUT", { participantId: poll.viewerId, displayName: poll.myDisplayName, slotIds: selected });
       setPoll(data);
       if (submittedRevision === revision.current) { setSelected(data.mySlotIds); setEdited(false); }
       return true;
-    } catch (cause) { setError((cause as Error).message); return false; }
+    } catch (cause) { setSubmissionFailed(true); setError((cause as Error).message); return false; }
     finally { running.current = false; setSaving(false); }
   };
   const saveSelection = (slots: number[]) => {
     if (!poll?.viewerId) return;
     revision.current += 1;
-    setSelected([...new Set(slots)].sort((a, b) => a - b)); setEdited(true); setError("");
+    setSelected([...new Set(slots)].sort((a, b) => a - b)); setEdited(true); setSubmissionFailed(false); setError("");
   };
   const act = async (suffix: string, method: string, body: unknown) => {
     if (busy || running.current || hasChanges) return false;
@@ -80,7 +81,7 @@ export function useSharedTimePoll(token: string) {
     catch (cause) { setError((cause as Error).message); return false; }
     finally { setBusy(false); }
   };
-  return { poll, selected, error, busy, saving, saved, hasChanges, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, submit, retry: submit,
+  return { poll, selected, error, busy, saving, saved, hasChanges, submissionFailed, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, submit, retry: submit,
     cancelNameEditing: () => { setEditingName(false); setSwitchingParticipant(false); setError(""); },
     join: (displayName: string) => act("/participant", "POST", { displayName }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),

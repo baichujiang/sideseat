@@ -38,7 +38,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const selectedSlots = poll?.slots.filter((slot) => selected.includes(slot.id)) ?? [];
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
   const selectedHours = new Intl.NumberFormat(zh ? "zh-CN" : "en", { maximumFractionDigits: 2 }).format(selectedSlots.reduce((sum, slot) => sum + (Date.parse(slot.end) - Date.parse(slot.start)) / 3600000, 0));
-  const failed = !saved && !saving && !!error;
+  const failed = state.submissionFailed && !saving;
   const saveTitle = saving ? (zh ? "提交中…" : "Submitting…") : failed ? (zh ? "提交失败" : "Couldn't submit") : poll?.didRespond && saved ? (zh ? "已提交空闲" : "Availability submitted") : (zh ? "未提交" : "Not submitted");
   const formatWindow = (start: string, end: string) => {
     const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
@@ -143,7 +143,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
               {saving ? <Loader2 className="h-5 w-5 shrink-0 motion-safe:animate-spin" aria-hidden /> : failed ? <AlertCircle className="h-5 w-5 shrink-0 text-amber-700" aria-hidden /> : poll.didRespond && saved ? <CheckCircle2 className={"h-5 w-5 shrink-0 " + styles.savedText} aria-hidden /> : <Circle className="h-5 w-5 shrink-0" aria-hidden />}
-              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : saving ? (zh ? "本次提交完成后才能分享给其他人" : "Publishing this submission") : poll.didRespond ? (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected") : (zh ? "点亮时间表中的空闲时段" : "Tap free times in the timetable")}</p></div>
+              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected")}</p></div>
             </div>
             {!saved ? <Button data-testid="availability-submit" disabled={!state.hasChanges || saving || busy} onClick={() => void state.submit()} className={"min-h-12 w-full shrink-0 rounded-xl sm:w-auto " + styles.finishButton}>{saving ? (zh ? "提交中…" : "Submitting…") : poll.didRespond ? (zh ? "保存修改" : "Save changes") : (zh ? "提交我的空闲" : "Submit my availability")}</Button> : null}
             <p data-testid="availability-next-step" className="w-full text-xs leading-5 text-muted-foreground">{choosingActivity ? (zh ? "选好后点击「提交我的空闲」。等发起人选定活动和最终时间后，还需明确确认参加。" : "Click Submit my availability when ready. Confirm participation after the organizer chooses the activity and final time.") : zh ? "填写空闲不代表确认参加。等发起人选定最终时间后，请回到这里点「确认参加」。保留此链接，可随时查看和修改。" : "Sharing free time doesn't confirm attendance. Return here to confirm participation after the organizer picks the final time. Keep this link to view and edit."}</p>

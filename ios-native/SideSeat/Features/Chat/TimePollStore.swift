@@ -5,9 +5,10 @@ import Observation
 final class TimePollStore {
     let token: String
     private(set) var poll: NativeTimePoll?
-    var selected = Set<Int>() { didSet { if selected != oldValue { revision += 1; edited = true } } }
-    var displayName = "" { didSet { if displayName != oldValue { revision += 1; edited = true } } }
+    var selected = Set<Int>() { didSet { if selected != oldValue { draftDidChange() } } }
+    var displayName = "" { didSet { if displayName != oldValue { draftDidChange() } } }
     private(set) var saving = false
+    private(set) var submissionFailed = false
     private(set) var error: String?
     private(set) var acting = false
     private var edited = false
@@ -20,6 +21,11 @@ final class TimePollStore {
     }
     var saved: Bool { poll?.didRespond == true && !hasChanges }
     var canMutate: Bool { !acting && !saving && !hasChanges }
+
+    private func draftDidChange() {
+        revision += 1; edited = true
+        if submissionFailed { submissionFailed = false; error = nil }
+    }
 
     func showError(_ error: Error) { self.error = error.localizedDescription }
     func chooseNoFreeTime() { selected = []; edited = true; revision += 1; error = nil }
@@ -77,7 +83,7 @@ final class TimePollStore {
         let submittedRevision = revision
         let generation = session.authorizationGeneration
         let userID = session.currentUser?.id
-        saving = true; error = nil
+        saving = true; submissionFailed = false; error = nil
         defer { saving = false }
         do {
             let result: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
@@ -89,7 +95,7 @@ final class TimePollStore {
             NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
         } catch {
             if generation == session.authorizationGeneration, userID == session.currentUser?.id {
-                self.error = error.localizedDescription
+                self.error = error.localizedDescription; submissionFailed = true
             }
         }
     }

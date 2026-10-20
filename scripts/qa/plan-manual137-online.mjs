@@ -50,13 +50,28 @@ try {
       await page.waitForTimeout(2100);
       assert.equal(requests.length, 0); assert.equal((await detail()).participants.length, 0);
       checks.push(`${engineName}: ten taps and two seconds waiting publish no availability`);
+      if (stage !== 'stage1') {
+        await expect(cell(0)).toHaveAttribute('aria-label', /0 人有空$/);
+        await expect(page.getByText('已选 1 天 · 5 小时', { exact: true })).toBeVisible();
+        checks.push(`${engineName}: own draft is highlighted but excluded from submitted counts; selected duration is visible`);
+      }
       await submit(); await saved(); assert.equal(requests.length, 1);
       assert.deepEqual((await guest()).slotIds, Array.from({ length: 20 }, (_, i) => i));
       checks.push(`${engineName}: one explicit submission persists the complete selection`);
+      if (stage !== 'stage1') {
+        await expect(cell(0)).toHaveAttribute('aria-label', /1 人有空$/);
+        checks.push(`${engineName}: submitted availability updates heatmap and respondent count together`);
+      }
       let release, started;
       const gate = new Promise(r => { release = r; }), ready = new Promise(r => { started = r; });
       await page.route(responseURL, async route => { const response = await route.fetch(); started(); await gate; await route.fulfill({ response }); }, { times: 1 });
-      await cell(0).click(); await submit(); await ready;
+      await cell(0).click();
+      if (stage !== 'stage1') {
+        await expect(cell(0)).toHaveAttribute('aria-pressed', 'false');
+        await expect(cell(0)).toHaveAttribute('aria-label', /1 人有空$/);
+        checks.push(`${engineName}: editing a submitted response preserves its published heatmap until resubmission`);
+      }
+      await submit(); await ready;
       await cell(2).click(); release();
       await expect(page.getByText('未提交', { exact: true })).toBeVisible();
       await page.waitForTimeout(1100); assert.equal(requests.length, 2);
