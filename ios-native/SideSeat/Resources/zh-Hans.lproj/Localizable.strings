@@ -3098,3 +3098,28 @@
 "This plan's participant list is full. Choose fewer contacts." = "超出计划人数上限，请减少选择的联系人。";
 "This plan changed. Reopen it before inviting contacts." = "计划已更新，请重新打开后邀请联系人。";
 "This plan has ended or expired." = "计划已结束或过期。";
+
+/* Plan detail hierarchy and inline activity ideas */
+"My participation" = "我的参与信息";
+"Activity name" = "活动名称";
+"Timing" = "时间安排";
+"Edit plan information" = "编辑计划信息";
+"Choose the final time on the timetable. Editing these details keeps everyone's availability." = "最终时间在时间表中选择，修改这些信息会保留大家已填写的空闲。";
+"This nickname is shared when you submit your availability. Your selected times stay unchanged." = "提交空闲时会一并分享这个昵称，已选时段保持不变。";
+"Other participants will see this name." = "其他参与者会看到这个名字。";
+"Use nickname" = "使用这个昵称";
+"Save nickname" = "保存昵称";
+"Participants and progress" = "参与者与进度";
+"Availability responses" = "空闲填写情况";
+"Invitation replies" = "邀请回应";
+"Activity and location" = "活动与地点";
+"Adjust invitation" = "调整邀请";
+"Back to plan" = "返回计划";
+"Choose the invitation time. Your availability stays unchanged." = "正在选择邀请时段，你填写的空闲保持不变。";
+"Organizer actions" = "发起人操作";
+"Select your free time; submit to share it." = "点选我的空闲，提交后大家可见。";
+"Activity undecided · %d ideas" = "活动待定 · %d 个想法";
+"Interest is not attendance. The organizer confirms the activity when reviewing invitations." = "感兴趣不等于确认参加，发起人会在核对邀请时确定活动。";
+"Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "所有参与者都会看到取消状态，相关日历安排将移除。";
+"This deletes the plan and everyone's availability responses." = "将删除这个计划及所有人的空闲填写。";
+"Plan details can only be edited before an activity or invitation is confirmed." = "活动或邀请确定后，无法直接修改计划信息。";

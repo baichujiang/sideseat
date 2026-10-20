@@ -1,0 +1,10 @@
+{
+  "passed": false,
+  "checks": [],
+  "cleanup": {
+    "accountsRemoved": 2,
+    "deadLinks": 1
+  },
+  "failure": "Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  [\n    {\n      didRespond: true,\n      displayName: 'Host Ming',\n      id: 'cmvgx1woj000d4j238n5hhyp3',\n      isGuest: false,\n+     isMe: true,\n-     isMe: false,\n      slotIds: [\n        0,\n        1,\n        2,\n        3\n...\n      isGuest: false,\n+     isMe: false,\n-     isMe: true,\n      slotIds: [\n        0,\n        1\n      ]\n    }\n",
+  "at": "2026-10-20T16:47:19.577Z"
+}

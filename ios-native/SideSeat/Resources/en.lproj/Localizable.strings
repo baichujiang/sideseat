@@ -3098,3 +3098,28 @@
 "This plan's participant list is full. Choose fewer contacts." = "This plan's participant list is full. Choose fewer contacts.";
 "This plan changed. Reopen it before inviting contacts." = "This plan changed. Reopen it before inviting contacts.";
 "This plan has ended or expired." = "This plan has ended or expired.";
+
+/* Plan detail hierarchy and inline activity ideas */
+"My participation" = "My participation";
+"Activity name" = "Activity name";
+"Timing" = "Timing";
+"Edit plan information" = "Edit plan information";
+"Choose the final time on the timetable. Editing these details keeps everyone's availability." = "Choose the final time on the timetable. Editing these details keeps everyone's availability.";
+"This nickname is shared when you submit your availability. Your selected times stay unchanged." = "This nickname is shared when you submit your availability. Your selected times stay unchanged.";
+"Other participants will see this name." = "Other participants will see this name.";
+"Use nickname" = "Use nickname";
+"Save nickname" = "Save nickname";
+"Participants and progress" = "Participants and progress";
+"Availability responses" = "Availability responses";
+"Invitation replies" = "Invitation replies";
+"Activity and location" = "Activity and location";
+"Adjust invitation" = "Adjust invitation";
+"Back to plan" = "Back to plan";
+"Choose the invitation time. Your availability stays unchanged." = "Choose the invitation time. Your availability stays unchanged.";
+"Organizer actions" = "Organizer actions";
+"Select your free time; submit to share it." = "Select your free time; submit to share it.";
+"Activity undecided · %d ideas" = "Activity undecided · %d ideas";
+"Interest is not attendance. The organizer confirms the activity when reviewing invitations." = "Interest is not attendance. The organizer confirms the activity when reviewing invitations.";
+"Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "Everyone will see that this plan is cancelled. Its calendar entries will be removed.";
+"This deletes the plan and everyone's availability responses." = "This deletes the plan and everyone's availability responses.";
+"Plan details can only be edited before an activity or invitation is confirmed." = "Plan details can only be edited before an activity or invitation is confirmed.";

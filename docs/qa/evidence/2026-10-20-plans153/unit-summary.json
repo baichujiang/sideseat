@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "tests": 42,
+  "suites": 3,
+  "scope": [
+    "TimePollTests",
+    "PlanPresentationTests",
+    "PlanGuidanceTests"
+  ],
+  "device": "SideSeat UX QA simulator",
+  "at": "2026-10-20T16:52:58.995Z"
+}

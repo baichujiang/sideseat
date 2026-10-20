@@ -25,6 +25,7 @@ export const suggestPollActivitySchema = z.object({
   title: z.string().trim().min(1).max(120),
   location: z.string().trim().max(200).optional(),
 }).strict();
+export const updateTimePollDetailsSchema = suggestPollActivitySchema;
 export const pollActivityInterestSchema = z.object({
   ideaId: z.string().cuid(), interested: z.boolean(),
 }).strict();

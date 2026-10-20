@@ -206,6 +206,7 @@ struct CreateTimePollRequest: Encodable, Sendable {
 }
 
 struct SuggestPlanActivityRequest: Encodable, Sendable { let title: String; let location: String }
+struct UpdateTimePollDetailsRequest: Encodable, Sendable { let title: String; let location: String }
 struct PlanActivityInterestRequest: Encodable, Sendable { let ideaId: String; let interested: Bool }
 struct ChoosePlanActivityRequest: Encodable, Sendable { let ideaId: String }
 

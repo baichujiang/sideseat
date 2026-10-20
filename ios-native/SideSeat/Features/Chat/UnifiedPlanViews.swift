@@ -72,9 +72,8 @@ struct UnifiedPlanInviteView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(chosenActivity?.title ?? poll.title) {
-                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
-                        .accessibilityIdentifier("unified-plan-chosen-range")
+                Section("Activity and location") {
+                    Text(chosenActivity?.title ?? poll.title).font(.headline)
                     if let location = reviewLocation, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
                 }
                 if needsActivityChoice {
@@ -102,7 +101,9 @@ struct UnifiedPlanInviteView: View {
                     footer: { Text("Your activity choice is saved when you send invitations.") }
                 }
                 Section("Final time") {
-                    LabeledContent("Time zone", value: poll.timeZone)
+                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
+                        .font(.subheadline.weight(.medium)).accessibilityIdentifier("unified-plan-chosen-range")
+                    Text(poll.timeZone).font(.caption).foregroundStyle(.secondary)
                     Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil") }
                         .accessibilityIdentifier("unified-plan-adjust-time")
                 }
@@ -170,7 +171,7 @@ struct UnifiedPlanInviteView: View {
                               || (linkParticipantCount == nil && selectedFriends == 0))
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
             }
-            .navigationTitle(hasFriends ? "Confirm invitation list" : "Review invitation").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Review invitation").navigationBarTitleDisplayMode(.inline)
             .onChange(of: selected) { _, _ in
                 if let count = linkParticipantCount { linkParticipantCount = max(count, minimumLinkCount) }
             }
@@ -190,7 +191,6 @@ struct UnifiedPlanConfirmationView: View {
     @State private var showsName = false
     @State private var showsPeople = false
     @State private var showsPublish = false
-    @State private var draftName = ""
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
     private var presentation: PlanPresentation { poll.presentation(at: Date()) }
@@ -214,14 +214,16 @@ struct UnifiedPlanConfirmationView: View {
                         ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
                         : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
                     layout {
-                        Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
-                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                        Text("Invitation replies")
+                            .font(.headline).fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .accessibilityIdentifier("unified-plan-confirmation-count")
                         Button { showsPeople = true } label: {
                             Label("Who's joining?", systemImage: "person.2").font(.subheadline).frame(minHeight: 44)
                         }.accessibilityIdentifier("plan-people-open")
                     }
+                    Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
+                        .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                        .accessibilityIdentifier("unified-plan-confirmation-count")
                     ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
                         .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
                     if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.targetCount > poll.allInvitations.count {
@@ -231,14 +233,9 @@ struct UnifiedPlanConfirmationView: View {
                     Label(calendarExplanation, systemImage: poll.planningPhase == "CONFIRMED" && included ? "calendar.badge.checkmark" : "info.circle")
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("unified-plan-calendar-status")
-                    if poll.planningPhase == "INVITING", mine != nil {
-                        Button { draftName = poll.myDisplayName; showsName = true } label: { Label("Edit nickname", systemImage: "pencil") }
-                            .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("time-poll-edit-name")
-                    }
                 }
-                if canReply && (mine?.status == "INVITED" || mine == nil) {
-                    Button("Reply later") { dismiss() }.frame(minHeight: 44)
-                        .accessibilityIdentifier("unified-plan-ignore")
+                if mine != nil, ["INVITING", "CONFIRMED"].contains(poll.planningPhase), (poll.chosenStart ?? .distantPast) > Date() {
+                    PlanParticipationSummary(name: poll.myDisplayName) { showsName = true }.disabled(!store.canMutate)
                 }
                 if !poll.isOwner && mine == nil && poll.planningMode != "FIXED" {
                     Text("You are not included in this invitation. Your availability is saved.")
@@ -250,7 +247,7 @@ struct UnifiedPlanConfirmationView: View {
                             .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                             .accessibilityIdentifier("plan-declined-guidance")
                     }
-                    Button(action: chooseAnotherTime) { Label("Choose another time", systemImage: "calendar.badge.clock") }.frame(minHeight: 44)
+                    Button(action: chooseAnotherTime) { Label("Adjust invitation", systemImage: "calendar.badge.clock") }.frame(minHeight: 44)
                         .accessibilityIdentifier("unified-plan-choose-again")
                     Text("Choosing another time asks everyone to confirm again.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -288,13 +285,9 @@ struct UnifiedPlanConfirmationView: View {
                                      isLoading: store.acting, accessibilityID: "unified-plan-publish") {
                         showsPublish = true
                     }
-                    PlanShareActions(poll: poll, store: store)
                 } else if poll.planningPhase == "CONFIRMED" && included {
                     PlanActionButton(title: AppLocalization.string("View in Calendar"), symbol: "calendar", kind: .navigate,
                                     accessibilityID: "plan-view-calendar") { deepLinkRouter.handleAppPath("/home") }
-                    if poll.isOwner && (poll.chosenStart ?? .distantPast) > Date() {
-                        PlanShareActions(poll: poll, store: store)
-                    }
                 } else {
                     PlanActionButton(title: AppLocalization.string("Back to plans"), symbol: "list.bullet", kind: .navigate,
                                     accessibilityID: "plan-done-back") { dismiss() }
@@ -311,54 +304,10 @@ struct UnifiedPlanConfirmationView: View {
             Text(String(format: AppLocalization.string("Send to %d accepted people, including you. Pending and declined people will not be notified."), accepted))
         }
         .sheet(isPresented: $showsPeople) {
-            NavigationStack {
-                Form {
-                    Section {
-                        Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
-                        ForEach(poll.allInvitations) { person in
-                            HStack(spacing: SideSeatTheme.spaceMD) {
-                                Image(systemName: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock")
-                                    .foregroundStyle(person.status == "ACCEPTED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(person.displayName).font(.subheadline.weight(.medium))
-                                    Text(AppLocalization.string(person.status == "ACCEPTED" ? "Confirmed" : person.status == "DECLINED" ? "Declined" : "Awaiting confirmation"))
-                                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                }
-                                Spacer()
-                                if person.isMe { Text("You").font(.caption).foregroundStyle(.secondary) }
-                                else if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
-                            }.accessibilityIdentifier("unified-plan-person-\(person.id)")
-                        }
-                    }
-                }
-                .navigationTitle("Who's joining?").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { showsPeople = false }.accessibilityIdentifier("plan-people-done")
-                } }
-            }.dynamicTypeSize(typeSize)
+            PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
         }
         .sheet(isPresented: $showsName) {
-            NavigationStack {
-                Form {
-                    Section("Your name in this plan") {
-                        TextField("Your name", text: $draftName).textContentType(.nickname)
-                            .accessibilityIdentifier("time-poll-edit-name-field")
-                    }
-                    if let error = store.error { Text(error).foregroundStyle(SideSeatTheme.danger) }
-                }
-                .navigationTitle("Edit nickname").navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showsName = false }.disabled(store.acting) }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            Task {
-                                await store.mutate("display-name", method: .patch, body: TimePollDisplayNameRequest(displayName: draftName.trimmingCharacters(in: .whitespacesAndNewlines)), session: session)
-                                if store.error == nil { showsName = false }
-                            }
-                        }.disabled(!store.canMutate || draftName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftName.count > 60)
-                    }
-                }
-            }.presentationDetents([.medium, .large])
+            PlanNicknameEditor(poll: poll, store: store).dynamicTypeSize(typeSize)
         }
     }
     private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }

@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { v1Error } from "@/lib/api/v1/http";
-import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
+import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, updateTimePollDetailsSchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
 import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
 import { schedulePollInvitationNotification, schedulePublishedPollNotification } from "@/lib/time-polls/notifications";
@@ -266,6 +266,22 @@ async function syncPublishedPollCalendars(tx: Prisma.TransactionClient, poll: { 
       create: { userId: person.userId, timePollId: poll.id, title: poll.title, location: poll.location, source: "time_poll_plan", eventType: "CUSTOM", startAt: poll.chosenStart, endAt: poll.chosenEnd, companions: { create: companions } },
       update: { companions: { deleteMany: {}, create: companions } } });
   }
+}
+
+export async function updateTimePollDetails(token: string, userId: string, input: z.infer<typeof updateTimePollDetailsSchema>, appOrigin: string) {
+  await accessiblePoll(token, userId);
+  await prisma.$transaction(async (tx) => {
+    const poll = await lockPollPlan(tx, token, userId);
+    if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
+    if (timePollPhase(poll) !== "COLLECTING" || poll.activitySelectedId) {
+      throw new TimePollError(409, "Plan details can only be edited before an activity or invitation is confirmed.");
+    }
+    await tx.timePoll.update({ where: { id: poll.id }, data: {
+      title: input.title, location: input.location || null,
+      ...(poll.activityTopic ? { activityTopic: input.title } : {}),
+    } });
+  });
+  return getTimePoll(token, userId, appOrigin);
 }
 
 export async function renameTimePollParticipant(token: string, actor: TimePollActor, displayName: string, appOrigin: string) {

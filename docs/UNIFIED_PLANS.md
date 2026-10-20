@@ -3,6 +3,33 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native detail hierarchy — Preview 153
+
+The canonical detail separates plan identity, personal participation, the shared
+timetable and the current task. Only an undecided activity adds one inline row
+under the plan title: an initially collapsed idea count, interest actions and a
+single in-place suggestion field. There is no activity module, editor page or
+separate owner choice here; the existing invitation review makes the final choice.
+Known/chosen activities do not show that row. Returning from final-time selection
+keeps an unfinished suggestion and the personal availability draft.
+
+The organizer may edit title/location through `PATCH /api/v1/time-polls/{token}/details`
+while COLLECTING and before an activity has been selected. This does not alter
+candidate dates, responses or invitations. An undecided topic follows its edited
+title; selected activity identities and already-issued consent remain frozen.
+
+Nickname editing is explicit. During collection its value joins the existing
+device-local availability draft and is only shared by submitting availability;
+the editor explains this. Later nickname changes retain the existing dedicated
+endpoint. Cancelling a changed information/nickname form offers discard/keep.
+
+The timetable remains directly editable. Organizer final-time selection has a
+distinct navigation title, range color/icon and return action; review/back retains
+the draft range and roster. Sharing lives in one toolbar entry with accepted App
+contacts, web sharing and copy; it does not submit availability. The people view
+distinguishes submitted availability from invitation replies. Publication,
+individual consent, calendar and cancellation contracts are unchanged.
+
 ## Invite existing App contacts — Preview 152
 
 Create a plan → Invite App contacts → select accepted contacts → Send plan.

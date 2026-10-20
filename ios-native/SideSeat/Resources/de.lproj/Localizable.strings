@@ -3097,3 +3097,28 @@
 "This plan's participant list is full. Choose fewer contacts." = "Der Plan ist voll. Wähle weniger Kontakte aus.";
 "This plan changed. Reopen it before inviting contacts." = "Der Plan wurde geändert. Öffne ihn erneut, bevor du Kontakte einlädst.";
 "This plan has ended or expired." = "Dieser Plan ist beendet oder abgelaufen.";
+
+/* Plan detail hierarchy and inline activity ideas */
+"My participation" = "Meine Teilnahme";
+"Activity name" = "Aktivitätsname";
+"Timing" = "Zeitplanung";
+"Edit plan information" = "Planinformationen bearbeiten";
+"Choose the final time on the timetable. Editing these details keeps everyone's availability." = "Wähle die endgültige Zeit im Zeitplan. Diese Änderungen behalten alle Verfügbarkeiten bei.";
+"This nickname is shared when you submit your availability. Your selected times stay unchanged." = "Dieser Name wird mit deiner Verfügbarkeit übermittelt. Deine gewählten Zeiten bleiben erhalten.";
+"Other participants will see this name." = "Andere Teilnehmende sehen diesen Namen.";
+"Use nickname" = "Diesen Namen verwenden";
+"Save nickname" = "Namen speichern";
+"Participants and progress" = "Teilnehmende und Fortschritt";
+"Availability responses" = "Verfügbarkeitsantworten";
+"Invitation replies" = "Einladungsantworten";
+"Activity and location" = "Aktivität und Ort";
+"Adjust invitation" = "Einladung anpassen";
+"Back to plan" = "Zurück zum Plan";
+"Choose the invitation time. Your availability stays unchanged." = "Wähle die Einladungszeit. Deine Verfügbarkeit bleibt unverändert.";
+"Organizer actions" = "Aktionen für Organisierende";
+"Select your free time; submit to share it." = "Wähle deine freien Zeiten und übermittle sie zum Teilen.";
+"Activity undecided · %d ideas" = "Aktivität offen · %d Ideen";
+"Interest is not attendance. The organizer confirms the activity when reviewing invitations." = "Interesse ist keine Zusage. Die organisierende Person legt die Aktivität beim Prüfen der Einladung fest.";
+"Everyone will see that this plan is cancelled. Its calendar entries will be removed." = "Alle sehen, dass der Plan abgesagt wurde. Die zugehörigen Kalendereinträge werden entfernt.";
+"This deletes the plan and everyone's availability responses." = "Der Plan und alle Verfügbarkeitsantworten werden gelöscht.";
+"Plan details can only be edited before an activity or invitation is confirmed." = "Plandetails können nur vor der Festlegung einer Aktivität oder Einladung bearbeitet werden.";
