@@ -90,24 +90,39 @@ struct PlansRootView: View {
     private var initiallyLoading: Bool { !hasPlans && (!coordinationLoaded || !store.hasLoaded) }
 
     var body: some View {
-        VStack(spacing: 0) {
+        Group {
             if isHistory {
                 sectionScroll(.ended)
+                    .navigationTitle("Plan history")
+                    .navigationBarTitleDisplayMode(.inline)
             } else {
-                pageHeader
-                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.top, SideSeatTheme.spaceXS)
-                    .padding(.bottom, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.PlanHome.background)
-                SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
-                    sectionScroll(section)
+                VStack(spacing: 0) {
+                    sectionPicker
+                        .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                        .padding(.top, SideSeatTheme.spaceXS)
+                        .padding(.bottom, SideSeatTheme.spaceMD)
+                        .background(SideSeatTheme.bgGrouped)
+                    Divider()
+                    SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
+                        sectionScroll(section)
+                    }
+                }
+                .ssRootNavigationTitle("Plans")
+            }
+        }
+        .background(SideSeatTheme.bgGrouped)
+        .toolbar(.visible, for: .navigationBar)
+        .toolbar {
+            if !isHistory {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { router.navigate(to: .planHistory) } label: {
+                        Label("Plan history", systemImage: "clock.arrow.circlepath")
+                            .labelStyle(.iconOnly).ssIconButtonHitTarget()
+                    }
+                    .accessibilityIdentifier("plans-history")
                 }
             }
         }
-        .background(SideSeatTheme.PlanHome.background)
-        .navigationTitle(isHistory ? AppLocalization.string("Plan history") : "")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(isHistory ? .visible : .hidden, for: .navigationBar)
         .sheet(isPresented: $showsPlanCreation, onDismiss: {
             if let token = createdPlanToken { createdPlanToken = nil; selectedSection = .waitingResponse; router.openPlan(token: token) }
             Task { await loadCoordinatedPlans() }
@@ -158,58 +173,34 @@ struct PlansRootView: View {
         .accessibilityIdentifier(isHistory ? "plans-history-root" : "plans-root")
     }
 
-    private var pageHeader: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .trailing, spacing: SideSeatTheme.spaceXS))
-            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-        return layout {
-            sectionPicker
-            Button { router.navigate(to: .planHistory) } label: {
-                Label("Plan history", systemImage: "clock.arrow.circlepath")
-                    .labelStyle(.iconOnly).font(.body)
-                    .frame(minWidth: 44, minHeight: 44)
-            }
-            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
-            .accessibilityIdentifier("plans-history")
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("plans-page-header")
-    }
-
-    @ViewBuilder
     private var sectionPicker: some View {
-        if dynamicTypeSize.isAccessibilitySize {
-            HStack(spacing: SideSeatTheme.spaceXS) {
-                ForEach(MVPPlanSection.ordered) { section in
-                    Button { selectedSection = section } label: {
-                        Text(section.title)
-                            .font(.body.weight(section == selectedSection ? .semibold : .regular))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, minHeight: 44)
-                            .padding(.vertical, SideSeatTheme.spaceXS)
-                            .background(section == selectedSection ? SideSeatTheme.surface : Color.clear,
-                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    }
-                    .buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
-                    .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
-                    .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+        HStack(spacing: SideSeatTheme.spaceXS) {
+            ForEach(MVPPlanSection.ordered) { section in
+                let isSelected = section == selectedSection
+                Button { selectedSection = section } label: {
+                    Text(section.title)
+                        .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
+                        .fontWeight(isSelected ? .semibold : .medium)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.Together.ink)
+                        .padding(.horizontal, SideSeatTheme.spaceSM)
+                        .padding(.vertical, SideSeatTheme.spaceXS)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(isSelected ? SideSeatTheme.Together.navigationSelection : Color.clear,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }
-            .padding(4)
-            .background(SideSeatTheme.bgGrouped,
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + 4))
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("plans-accessible-tabs")
-        } else {
-            Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
-                ForEach(MVPPlanSection.ordered) { section in
-                    Text(section.title).tag(section)
-                        .accessibilityIdentifier("plans-tab-\(section.rawValue)")
-                }
-            }
-            .pickerStyle(.segmented)
-            .accessibilityIdentifier("plans-segmented-control")
         }
+        .padding(SideSeatTheme.spaceXS)
+        .background(SideSeatTheme.Together.decisionWell,
+            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(AppLocalization.string("Plans"))
+        .accessibilityIdentifier("plans-segmented-control")
     }
 
     private func sectionScroll(_ section: MVPPlanSection) -> some View {
@@ -218,7 +209,7 @@ struct PlansRootView: View {
                 sectionContent(section)
             }
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
-            .padding(.top, SideSeatTheme.spaceXS)
+            .padding(.top, SideSeatTheme.spaceMD)
             .padding(.bottom, SideSeatTheme.spaceXL)
             .background(PlanListScrollCapture(positions: scrollPositions, section: section))
         }

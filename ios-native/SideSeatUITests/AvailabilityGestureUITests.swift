@@ -64,7 +64,7 @@ import XCTest
         XCTAssertTrue(app.buttons["time-poll-finish"].waitForExistence(timeout: 15))
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
-        let picker = app.segmentedControls["plans-segmented-control"]
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         picker.buttons.element(boundBy: 1).tap()
         XCTAssertTrue(app.buttons["plans-coordinated-" + confirmed].waitForExistence(timeout: 10))
         capture("plans-upcoming")

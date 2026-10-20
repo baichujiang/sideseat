@@ -831,7 +831,7 @@ import XCTest
         addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
         nativeSignIn(participant, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
-        app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).tap()
+        app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: 1).tap()
         let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-'")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 20))
         XCTAssertEqual(card.value as? String, "已确认")

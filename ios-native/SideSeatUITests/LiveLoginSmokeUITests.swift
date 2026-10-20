@@ -612,7 +612,7 @@ final class SocialLiveUITests: XCTestCase {
         ] {
             let app = loopLogin(username)
             tabButton(in: app, labels: ["Plans"]).tap()
-            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Ended"].tap()
             let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
             XCTAssertTrue(occurred.waitForExistence(timeout: 12))
             let repeatBeforeFeedback = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-repeat-")).firstMatch
@@ -704,7 +704,7 @@ final class SocialLiveUITests: XCTestCase {
         loopCapture(reloaded, "same-peer-19-persisted-original-chat")
         reloaded.navigationBars.buttons.firstMatch.tap()
         tabButton(in: reloaded, labels: ["Plans"]).tap()
-        reloaded.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+        reloaded.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Ended"].tap()
         let ended = reloaded.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
         XCTAssertTrue(ended.waitForExistence(timeout: 10))
         ended.tap()
@@ -738,7 +738,7 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Selected plan"].waitForExistence(timeout: 8))
         app.navigationBars.buttons.firstMatch.tap()
         tabButton(in: app, labels: ["Plans"]).tap()
-        app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+        app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Ended"].tap()
         let ended = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plans-row-")).firstMatch
         XCTAssertTrue(ended.waitForExistence(timeout: 10))
         ended.tap()
@@ -760,7 +760,7 @@ final class SocialLiveUITests: XCTestCase {
         ] {
             let app = loopLogin(username)
             tabButton(in: app, labels: ["Plans"]).tap()
-            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Ended"].tap()
             let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
             XCTAssertTrue(occurred.waitForExistence(timeout: 12))
             loopReveal(occurred, in: app)
@@ -809,7 +809,7 @@ final class SocialLiveUITests: XCTestCase {
         ] {
             let app = loopLogin(username)
             tabButton(in: app, labels: ["Plans"]).tap()
-            app.segmentedControls["plans-segmented-control"].buttons["Ended"].tap()
+            app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Ended"].tap()
             let occurred = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-outcome-occurred-")).firstMatch
             XCTAssertTrue(occurred.waitForExistence(timeout: 12))
             loopReveal(occurred, in: app)
@@ -1094,7 +1094,7 @@ final class SocialLiveUITests: XCTestCase {
             XCTAssertTrue(app.descendants(matching: .any)["plans-section-picker"].waitForNonExistence(timeout: 8))
         } else {
             let index = ["waitingResponse", "upcoming", "ended"].firstIndex(of: section)!
-            let picker = app.segmentedControls["plans-segmented-control"]
+            let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
             XCTAssertTrue(picker.waitForExistence(timeout: 8))
             picker.buttons.element(boundBy: index).tap()
         }
@@ -1574,7 +1574,7 @@ final class SocialLiveUITests: XCTestCase {
                 ended.tap()
                 XCTAssertTrue(app.descendants(matching: .any)["plans-section-picker"].waitForNonExistence(timeout: 8))
             } else {
-                XCTAssertTrue(app.segmentedControls["plans-segmented-control"].exists)
+                XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.exists)
                 loopSelectPlanSection("ended", in: app)
             }
             let create = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-new-intention-")).firstMatch

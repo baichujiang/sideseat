@@ -102,7 +102,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         let names = ["waitingResponse", "upcoming", "ended"]
         let button = app.buttons["plans-tab-\(names[index])"].firstMatch
         if button.waitForExistence(timeout: 1) { button.tap() }
-        else { app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: index).tap() }
+        else { app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: index).tap() }
     }
 
     @MainActor
@@ -189,7 +189,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
     func testTaskPagerPlansPinnedAndIndependentPositions() {
         let app = togetherApp(["--ui-testing-chats", "--ui-testing-plans-long-list", "--ui-testing-language=en", "--ui-testing-appearance=dark"])
         tabButton(in: app, labels: ["Plans"]).tap()
-        let picker = app.segmentedControls["plans-segmented-control"]
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         XCTAssertTrue(picker.waitForExistence(timeout: 5))
         let fixedY = picker.frame.minY
         swipeTaskPage(app.scrollViews["plans-scroll-waitingResponse"].firstMatch, left: true)
@@ -283,7 +283,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         for state in ["empty", "error", "loading"] {
             let app = togetherApp(["--ui-testing-plans-\(state)", "--ui-testing-language=en"])
             tabButton(in: app, labels: ["Plans"]).tap()
-            let picker = app.segmentedControls["plans-segmented-control"]
+            let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
             XCTAssertTrue(picker.waitForExistence(timeout: 5))
             selectPlanSection(1, in: app)
             XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
@@ -2244,7 +2244,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
         XCTAssertFalse(app.buttons["plans-row-ui-plan-outgoing"].exists)
         overviewScroll.swipeDown()
         app.buttons["plans-view-upcoming"].tap()
-        let picker = app.segmentedControls["plans-segmented-control"]
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         picker.buttons.element(boundBy: 1).tap()
         let nextMorning = app.buttons["plans-row-ui-plan-tomorrow-10"]
         let nextAfternoon = app.buttons["plans-row-ui-plan-tomorrow-14"]

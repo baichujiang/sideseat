@@ -48,25 +48,34 @@ import XCTest
         XCTAssertTrue(history.waitForExistence(timeout: 10)); XCTAssertTrue(row.exists)
         capture("real-shared-history-return")
         app.navigationBars.buttons.firstMatch.tap()
-        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.segmentedControls["plans-segmented-control"].buttons.count, 2)
-        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.count, 2)
+        XCTAssertTrue(app.navigationBars["计划"].exists)
     }
 
-    func testTwoTabsHideTheRootNavigationBarAndKeepHistoryReachable() {
+    func testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable() {
         continueAfterFailure = false
         launch(layout: true)
-        let picker = app.segmentedControls["plans-segmented-control"]
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertEqual(picker.buttons.count, 2)
         XCTAssertEqual(picker.buttons.element(boundBy: 0).label, "筹划中")
         XCTAssertEqual(picker.buttons.element(boundBy: 1).label, "已确定")
-        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+        XCTAssertTrue(app.navigationBars["计划"].exists)
         XCTAssertFalse(app.buttons["plans-tab-ended"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["plans-next-meetup"].exists)
         XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
         XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
-        capture("two-tabs-no-navigation-bar")
+        let heading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
+        XCTAssertTrue(heading.isHittable)
+        XCTAssertTrue(heading.label.contains("计划"))
+        let headingY = heading.frame.minY
+        let pickerY = picker.frame.minY
+        app.scrollViews["plans-scroll-waitingResponse"].swipeUp(velocity: .slow)
+        XCTAssertEqual(heading.frame.minY, headingY, accuracy: 2)
+        XCTAssertEqual(picker.frame.minY, pickerY, accuracy: 2)
+        XCTAssertTrue(app.buttons["plans-history"].isHittable)
+        capture("two-tabs-fixed-heading")
         picker.buttons.element(boundBy: 1).tap()
         app.buttons["plans-history"].tap()
         let history = app.descendants(matching: .any)["plans-history-root"].firstMatch
@@ -83,7 +92,7 @@ import XCTest
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
-        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+        XCTAssertTrue(app.navigationBars["计划"].exists)
         app.scrollViews["plans-scroll-upcoming"].swipeLeft()
         XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
         capture("confirmed-tab-after-history")
@@ -111,8 +120,22 @@ import XCTest
         app.tabBars.buttons["同行"].tap()
         app.buttons["together-tab-recommendations"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["mutual-opportunity-cmutualui0000000000000001"].waitForExistence(timeout: 10))
+        let togetherHeading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
+        XCTAssertTrue(togetherHeading.isHittable)
+        XCTAssertTrue(togetherHeading.label.contains("同行"))
+        let headingY = togetherHeading.frame.minY
+        let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
+        let pickerY = picker.frame.minY
+        let pickerHeight = picker.frame.height
         capture("together-card-reference")
         app.tabBars.buttons["计划"].tap()
+        let planHeading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
+        XCTAssertTrue(planHeading.isHittable)
+        XCTAssertTrue(planHeading.label.contains("计划"))
+        XCTAssertEqual(planHeading.frame.minY, headingY, accuracy: 2)
+        let planPicker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
+        XCTAssertEqual(planPicker.frame.minY, pickerY, accuracy: 2)
+        XCTAssertEqual(planPicker.frame.height, pickerHeight, accuracy: 2)
         let row = app.buttons["plans-row-ui-plan-1"]
         reveal(row)
         XCTAssertTrue(row.label.contains("Library study"))
@@ -143,7 +166,7 @@ import XCTest
         reveal(rail)
         for _ in 0..<3 where rail.frame.maxY >= app.tabBars.firstMatch.frame.minY - 8 { app.swipeUp(velocity: .slow) }
         rail.swipeLeft(velocity: .slow)
-        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: 0).isSelected)
         capture("real-cards-waiting")
         let meetup = try XCTUnwrap(f.cards.first { $0.role == "meetup" })
         let upcoming = app.buttons["plans-coordinated-\(meetup.token)"]
@@ -226,7 +249,7 @@ import XCTest
         }
         XCTAssertTrue(last.isHittable)
         XCTAssertLessThanOrEqual(last.frame.maxX, rail.frame.maxX + 2)
-        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 0).isSelected,
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: 0).isSelected,
                       "Horizontal plan browsing must not switch the main section")
         XCTAssertLessThanOrEqual(last.frame.height, 140, "Waiting cards should remain compact summaries")
         print("PLAN_CARD_METRIC waiting \(last.frame.height)")
@@ -268,7 +291,7 @@ import XCTest
     func testUpcomingDateSummaryOpensTheExistingConfirmedPlan() {
         continueAfterFailure = false
         launch(layout: true)
-        app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).tap()
+        app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: 1).tap()
         let row = app.buttons["plans-row-ui-plan-accepted"]
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         XCTAssertTrue(row.label.contains("Dinner in town"))
@@ -279,7 +302,7 @@ import XCTest
         row.tap()
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
         app.navigationBars.buttons.firstMatch.tap()
-        XCTAssertTrue(app.segmentedControls["plans-segmented-control"].buttons.element(boundBy: 1).isSelected)
+        XCTAssertTrue(app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons.element(boundBy: 1).isSelected)
         XCTAssertTrue(row.waitForExistence(timeout: 10))
     }
 

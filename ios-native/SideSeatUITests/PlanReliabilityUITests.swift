@@ -87,7 +87,7 @@ import XCTest
         capture("deadline-closes-open-invitation")
         app.buttons["unified-plan-expired-back"].tap()
         XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
-        app.segmentedControls["plans-segmented-control"].buttons["Past"].tap()
+        app.descendants(matching: .any)["plans-segmented-control"].firstMatch.buttons["Past"].tap()
         XCTAssertTrue(app.buttons["plans-coordinated-\(token)"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["phase"] as? String, "EXPIRED")
         XCTAssertEqual(try calendarRows(token, auth: fixture.peer).count, 0)
