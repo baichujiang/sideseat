@@ -23,7 +23,7 @@
       "status": 200
     },
     {
-      "route": "/api/v1/me/mutual-opportunities/ce7d97fb34a46b10e392c47ef/safety",
+      "route": "/api/v1/me/mutual-opportunities/c2816ea97b28908199b19ae58/safety",
       "method": "POST",
       "status": 404
     },
@@ -41,5 +41,5 @@
   "disposableAccountCreated": true,
   "disposableAccountRemoved": true,
   "scope": "HTTP auth, database access, owner-scoped decision route; no production matching or greeting journey",
-  "at": "2026-10-20T20:21:45.483Z"
+  "at": "2026-10-20T20:28:53.309Z"
 }

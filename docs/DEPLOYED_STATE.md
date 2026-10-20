@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 160**：联系前资料与意愿举报、屏蔽。1 项真机通过，普通启动 PID 4104，普通 97 保留；[本项交付](./releases/2026-10-20-preview160-together04.md)。
+当前 **Preview 160**：联系前资料与意愿举报、屏蔽。1 项真机通过，普通启动 PID 4107，普通 97 保留；[本项交付](./releases/2026-10-20-preview160-together04.md)。
+
+此前 当前 **Preview 160**：联系前资料与意愿举报、屏蔽。1 项真机通过，普通启动 PID 4104，普通 97 保留；[本项交付](./releases/2026-10-20-preview160-together04.md)。
 
 此前 当前 **Preview 159**：意愿暂停、编辑及恢复寻找。1 项真机通过，普通启动 PID 4094，普通 97 保留；[本项交付](./releases/2026-10-20-preview159-together03.md)。
 

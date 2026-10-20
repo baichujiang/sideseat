@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "base": "https://sideseat-kptucz41g-baichus-projects.vercel.app",
+  "base": "https://sideseat-atawbkml5-baichus-projects.vercel.app",
   "checks": [
     {
       "route": "/api/v1/client-config",
@@ -23,7 +23,7 @@
       "status": 200
     },
     {
-      "route": "/api/v1/me/mutual-opportunities/c2681b320f0332c06a7f2bf2f/safety",
+      "route": "/api/v1/me/mutual-opportunities/c649478c52d537cd2b1bc85d6/safety",
       "method": "POST",
       "status": 404
     },
@@ -41,5 +41,5 @@
   "disposableAccountCreated": true,
   "disposableAccountRemoved": true,
   "scope": "HTTP auth, database access, owner-scoped decision route; no production matching or greeting journey",
-  "at": "2026-10-20T20:20:32.472Z"
+  "at": "2026-10-20T20:28:25.563Z"
 }
