@@ -1,0 +1,10 @@
+{
+  "currentObservedPreview": 173,
+  "planAcceptedInPreview": 171,
+  "planSourceCommit": "f61fa246",
+  "planViewSHA256": "592f8868f17afeffdf2064115f606dbda7bde9b039f2170b28f10d74dcfe7a1a",
+  "matchesAcceptedPlanSource": true,
+  "subsequentBuildSourceCommit": "6d26c048bb3e2c2ee206b4238d6198419473aab6",
+  "fullJourneyRerunIn173": false,
+  "scope": "Read-only retention verification after another phone delivery; do not downgrade."
+}

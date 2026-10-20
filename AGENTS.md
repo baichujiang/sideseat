@@ -19,8 +19,8 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Preview 171 is the current installed development build; continuous invitation
-  windows passed standard and maximum-text physical-device display acceptance.
+- Preview 173 is the current installed development build; it retains continuous
+  invitation windows physically accepted in Preview 171 with standard and maximum text.
   The App plan journey passed separately in Preview 168; prior spacing and plan
   changes are retained. See
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97

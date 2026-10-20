@@ -8,3 +8,5 @@
 - 测试账号、链接、本轮 Runner 和私密启动配置清理，正常启动/进程记录已核验。
 
 [完整范围、实际截图及中断记录](../qa/2026-10-20-plans167.md)、[最终签名和来源](../qa/evidence/2026-10-20-plans167/native-build-manifest.json)、[正常启动](../qa/evidence/2026-10-20-plans167/normal-launch.json)。
+
+本项 171 验收完成后，同机另一阶段接续安装 Preview **173**。已只读核对其计划页面源文件与最终 `f61fa246` 完全相同，保留本次修改；未降级，也不将 171 的验收描述为 173 重跑。见[接续版本核验](../qa/evidence/2026-10-20-plans167/subsequent-preview.json)。
