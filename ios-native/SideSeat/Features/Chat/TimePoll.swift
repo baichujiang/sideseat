@@ -71,6 +71,7 @@ struct NativeTimePoll: Decodable, Sendable {
         let selected: Bool
         let isMe: Bool
         let isGuest: Bool?
+        var needsGuestRecovery: Bool? = nil
     }
 
     struct Slot: Decodable, Sendable, Identifiable {
@@ -88,6 +89,7 @@ struct NativeTimePoll: Decodable, Sendable {
         let isMe: Bool
         let isGuest: Bool?
         var didRespond: Bool? = nil
+        var needsGuestRecovery: Bool? = nil
     }
     struct Cell: Sendable, Identifiable {
         let slots: [Slot]

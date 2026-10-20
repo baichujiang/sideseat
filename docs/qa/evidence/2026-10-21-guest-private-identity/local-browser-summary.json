@@ -1,0 +1,12 @@
+{
+  "stats": {
+    "startTime": "2026-10-20T22:12:59.246Z",
+    "duration": 87724.748,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "scope": "Chromium/WebKit first fill, return, same names, cleared storage recovery, invitation replies and Calendar; legacy migration, credential forgery and non-owner denial",
+  "passed": true
+}

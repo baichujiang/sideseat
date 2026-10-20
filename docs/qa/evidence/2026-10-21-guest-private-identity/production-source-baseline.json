@@ -1,0 +1,21 @@
+{
+  "productionBaseline": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj",
+  "verifiedProductionSourceFiles": 1380,
+  "overlaySHA1": {
+    "lib/time-polls/public-session.ts": "59bc94df442b638a73cbc310196cab9b1d2d898a",
+    "lib/time-polls/guest-credentials.ts": "2f26c1115adb9c1f27909de902d11aed4896a90c",
+    "lib/time-polls/guest-recovery.ts": "6967bd46cab78925316e713fc8b92c1c15461499",
+    "lib/time-polls/browser-types.ts": "6eb4b6779d991f18103ce8e124fa0dfb86106ea6",
+    "lib/api/v1/time-poll-service.ts": "f3c3a0675a95f641901798be5f5533769f86cf86",
+    "components/time-polls/shared-time-poll.tsx": "f8b81c674970713a2cb57454fd2ae9b5a60b4f40",
+    "components/time-polls/use-shared-time-poll.ts": "0226c241045544582ff8436f5332b821e413b313",
+    "app/api/public/time-polls/[token]/participant/route.ts": "788926ccf161ee0203b78e3f78506cd164125980",
+    "app/api/public/time-polls/[token]/participant/recovery/route.ts": "52bd5e1633438591dd153c49efe7d22543754035",
+    "app/api/v1/time-polls/[token]/guest-recovery/route.ts": "77e53856a62ed1131ef7a2c656899dc37d9fb241",
+    "lib/nav/public-app-path.ts": "5b14a4654977fc59e38d376a4fc5e889903647d5",
+    "lib/nav/legacy-web-freeze.ts": "00af0bab787bdc28751a0beec75b5c9803ccebc6",
+    "app/time-poll-recovery/[token]/page.tsx": "0a0718ca0cf3d379bc4614eaa5ce10e0dcd657f6"
+  },
+  "preserved": 1372,
+  "schemaChanged": false
+}

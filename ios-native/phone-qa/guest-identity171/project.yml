@@ -1,0 +1,26 @@
+name: GuestIdentity171
+options:
+  deploymentTarget:
+    iOS: '17.0'
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    DEVELOPMENT_TEAM: V4238R5R53
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: '1'
+targets:
+  GuestIdentity171UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [GuestIdentityUITests.swift]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.sideseat.guestidentityqa
+        GENERATE_INFOPLIST_FILE: true
+schemes:
+  GuestIdentity171:
+    build:
+      targets:
+        GuestIdentity171UITests: [test]
+    test:
+      targets: [GuestIdentity171UITests]

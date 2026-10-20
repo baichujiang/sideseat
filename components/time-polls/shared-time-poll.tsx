@@ -11,12 +11,13 @@ import { useSharedTimePoll } from "@/components/time-polls/use-shared-time-poll"
 import styles from "./shared-time-poll.module.css";
 import { POLL_LOCALE_COOKIE, pollClock, pollDate } from "@/lib/time-polls/browser-types";
 
-export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: boolean }) {
+export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: { token: string; zh: boolean; recoveryPage?: boolean }) {
   const [zh, setZh] = useState(initialZh);
   const state = useSharedTimePoll(token);
   const { poll, error, busy, saving, saved, selected, editingName, switchingParticipant, resumed } = state;
   const [name, setName] = useState("");
   const [deferred, setDeferred] = useState(false);
+  const [copiedRecoveryID, setCopiedRecoveryID] = useState<string | null>(null);
   const table = useRef<HTMLElement>(null);
   const collecting = poll?.phase === "COLLECTING";
   const fixedTime = poll?.planningMode === "FIXED" && !!poll.chosenStart && !!poll.chosenEnd;
@@ -30,11 +31,13 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const disabled = busy || saving;
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
   const viewerId = poll?.viewerId;
+  const recoveryCopied = !!viewerId && copiedRecoveryID === viewerId;
   useEffect(() => {
-    if ((collecting || poll?.phase === "INVITING") && viewerId && !choosingName) table.current?.scrollIntoView({ block: "start" });
-  }, [collecting, viewerId, choosingName, poll?.phase, poll?.invitationVersion]);
-  const errorText = zh && error === "This device could not keep your draft. Keep this page open until you submit." ? "此设备无法保留草稿，请保持页面打开并手动提交。" : zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
-    ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
+    if ((collecting || poll?.phase === "INVITING") && viewerId && !choosingName && poll?.didRespond) table.current?.scrollIntoView({ block: "start" });
+  }, [collecting, viewerId, choosingName, poll?.phase, poll?.invitationVersion, poll?.didRespond]);
+  const errorText = zh && error === "This device could not keep your draft. Keep this page open until you submit." ? "此设备无法保留草稿，请保持页面打开并手动提交。" : zh && error === "This recovery link is invalid or has been replaced. Use your personal recovery link."
+    ? "这个恢复链接无效或已被替换，请使用你保存的个人恢复链接。" : zh && error === "Use your personal recovery link to restore your response."
+    ? "请使用个人恢复链接恢复你的填写。" : error;
   const editing = collecting && !fixedTime && !!poll?.viewerId && !choosingName;
   const replying = (poll?.phase === "INVITING" || poll?.phase === "CONFIRMED") && !closed && !!poll.viewerId && included && !choosingName;
   const selectedSlots = poll?.slots.filter((slot) => selected.includes(slot.id)) ?? [];
@@ -65,7 +68,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
         <Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={30} height={30} alt="" className="rounded-lg" />SideSeat</Link>
         <div className="flex items-center gap-4">
           <button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = POLL_LOCALE_COOKIE + "=" + (next ? "zh-CN" : "en") + "; Path=/time-polls; Max-Age=31536000; SameSite=Lax"; }}>{zh ? "English" : "中文"}</button>
-          <a href={"sideseat://time-polls/" + encodeURIComponent(token)} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "打开 App" : "Open app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a>
+          {!recoveryPage ? <a href={"sideseat://time-polls/" + encodeURIComponent(token)} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "打开 App" : "Open app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a> : null}
         </div>
       </header>
       {!poll ? <section className="rounded-2xl border bg-background p-6" aria-live="polite">
@@ -93,14 +96,25 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
               <form onSubmit={(event) => { event.preventDefault(); void (editingName ? state.rename(name.trim()) : state.join(name.trim())); }} className="mt-5 space-y-3">
                 <label htmlFor="poll-nickname" className="block text-sm font-medium">{zh ? "你的名字" : "Your name"}</label>
                 <input id="poll-nickname" autoComplete="nickname" maxLength={60} required value={name} onChange={(event) => setName(event.target.value)} placeholder={zh ? "例如：小林" : "For example: Lin"} className="min-h-12 w-full rounded-xl border bg-background px-3 text-base" />
-                <p className="text-xs leading-5 text-muted-foreground">{zh ? "请用朋友能区分的名字。填过的话，输入原来的名字就能继续修改。" : "Use a name friends can recognize. Enter your previous name to continue editing."}</p>
+                <p className="text-xs leading-5 text-muted-foreground">{zh ? "名字只用于展示，同名也会分别记录。填过的话，请用你保存的个人恢复链接返回。" : "Names are display labels; matching names stay separate. To return to a previous response, use your personal recovery link."}</p>
+                {poll.legacyGuestNeedsRecovery ? <p role="status" className="text-sm leading-6" data-testid="legacy-guest-recovery">{zh ? "旧填写仍保留。为防止认错人，请让发起人从参与名单为你发送个人恢复链接。" : "Your old response is kept. To restore it safely, ask the organizer to send you a personal recovery link from the participant list."}</p> : null}
                 <div className="flex flex-wrap gap-3"><Button type="submit" disabled={disabled || !name.trim()} className={"min-h-12 w-full rounded-xl sm:w-auto " + styles.finishButton}>{busy ? (zh ? "保存中…" : "Saving…") : editingName ? (zh ? "保存昵称" : "Save name") : choosingActivity ? (zh ? "加入一起选活动" : "Join the activity ideas") : collecting ? (zh ? "下一步：选择我的空闲" : "Next: choose my free time") : (zh ? "继续查看邀请" : "Continue to invitation")}</Button>{poll.viewerId ? <Button type="button" variant="ghost" onClick={state.cancelNameEditing}>{zh ? "取消" : "Cancel"}</Button> : null}</div>
               </form>
             </section> : <section className="flex flex-wrap items-center justify-between gap-x-4 border-b py-2">
               <p className="break-words text-sm"><span className="text-muted-foreground">{zh ? "当前填写人：" : "Filling in as: "}</span><strong>{poll.myDisplayName}</strong></p>
-              <div className="flex gap-3"><button type="button" disabled={disabled} aria-label={zh ? "编辑昵称" : "Edit nickname"} onClick={() => { setName(poll.myDisplayName); state.setEditingName(true); }} className="inline-flex min-h-11 items-center gap-1 text-xs"><Pencil className="h-3.5 w-3.5" aria-hidden />{zh ? "改名字" : "Edit name"}</button><button type="button" disabled={disabled} className="min-h-11 text-xs text-muted-foreground underline underline-offset-4" onClick={() => { setName(""); state.setSwitchingParticipant(true); }}>{zh ? "切换填写人" : "Switch participant"}</button></div>
-              {resumed ? <p className={"w-full pb-1 text-xs " + styles.savedText}>{zh ? "已找到这个名字的记录，可以继续修改。" : "Found your previous response. Continue editing here."}</p> : null}
+              <div className="flex gap-3"><button type="button" disabled={disabled} aria-label={zh ? "编辑昵称" : "Edit nickname"} onClick={() => { setName(poll.myDisplayName); state.setEditingName(true); }} className="inline-flex min-h-11 items-center gap-1 text-xs"><Pencil className="h-3.5 w-3.5" aria-hidden />{zh ? "改名字" : "Edit name"}</button><button type="button" disabled={disabled} className="min-h-11 text-xs text-muted-foreground underline underline-offset-4" onClick={() => { setName(""); state.setSwitchingParticipant(true); setCopiedRecoveryID(null); }}>{zh ? "其他人填写" : "Create another response"}</button></div>
+              {resumed ? <p className={"w-full pb-1 text-xs " + styles.savedText}>{zh ? "已恢复你的填写，可以继续修改。" : "Your response is restored. You can continue editing."}</p> : null}
             </section> : null}
+
+            {poll.viewerId && !choosingName ? <details className="rounded-xl border bg-background p-4" open={!poll.didRespond || undefined} data-testid="guest-recovery-panel">
+              <summary className="min-h-11 cursor-pointer text-sm font-medium">{zh ? "保留我的个人恢复链接" : "Keep my personal recovery link"}</summary>
+              <p className="my-3 text-xs leading-5 text-muted-foreground">{zh ? "清除浏览器数据或换手机后，用此链接恢复已提交的填写。请保存到自己的备忘录；持有链接的人可以修改你的填写，请勿转发给其他人。未提交草稿只保存在当前浏览器。" : "Use this link after clearing browser data or changing phones to restore your submitted response. Save it privately: anyone holding it can edit your response. Unsubmitted drafts stay in this browser."}</p>
+              <Button type="button" variant="outline" disabled={disabled} data-testid="guest-recovery-copy" onClick={async () => {
+                const link = await state.loadRecoveryLink();
+                if (link) { try { await navigator.clipboard.writeText(link); setCopiedRecoveryID(poll.viewerId); } catch { setCopiedRecoveryID(null); } }
+              }}>{recoveryCopied ? (zh ? "已复制，请私密保存" : "Copied. Keep it private") : (zh ? "复制个人恢复链接" : "Copy personal recovery link")}</Button>
+              {state.recoveryLink && !recoveryCopied ? <div><p className="mt-3 text-xs">{zh ? "若未自动复制，请选中下方链接手动复制。" : "If it was not copied automatically, select the link below to copy it."}</p><input className="mt-2 min-h-11 w-full rounded-lg border px-3 text-sm" readOnly aria-label={zh ? "个人恢复链接" : "Personal recovery link"} value={state.recoveryLink} onFocus={event => event.target.select()} /></div> : null}
+            </details> : null}
 
             {collecting && poll.activitySelection && !choosingName ? <details ref={choosingActivity ? (node) => { table.current = node; } : undefined} open={fixedTime && choosingActivity || undefined} className="scroll-mt-4 border-y py-1" data-testid="activity-panel">
               <summary className="min-h-12 cursor-pointer py-3 text-sm font-medium">{choosingActivity ? (zh ? "活动建议" : "Activity ideas") : (zh ? "查看之前的活动建议" : "View previous activity ideas")} · {poll.activitySelection.ideaCount}<span className="ml-3 text-xs font-normal text-muted-foreground">{choosingActivity ? (zh ? "添加建议 / 表达兴趣" : "Suggest / mark interest") : (zh ? "已保留" : "Kept")}</span></summary>

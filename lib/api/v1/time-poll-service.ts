@@ -55,10 +55,14 @@ export async function getTimePoll(token: string, actor: TimePollActor | null, ap
   const viewer = userId ? await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { username: true, nickname: true } }) : null;
   const guest = actor && typeof actor !== "string" ? await prisma.timePollGuest.findUniqueOrThrow({ where: { id: actor.guestId } }) : null;
   const slots = poll.slots as unknown as PollSlot[];
-  const participants = poll.responses.map((response) => ({ id: response.id, displayName: response.displayName, slotIds: response.slotIds, isMe: isActor(response, actor), isGuest: response.guestId !== null, didRespond: true }));
+  const legacyGuestIds = poll.creatorId === userId ? new Set((await prisma.timePollGuest.findMany({
+    where: { pollId: poll.id, NOT: { credentialHash: { startsWith: "v2:" } } }, select: { id: true },
+  })).map(guest => guest.id)) : null;
+  const recoveryStatus = (guestId: string | null) => legacyGuestIds && guestId ? { needsGuestRecovery: legacyGuestIds.has(guestId) } : {};
+  const participants = poll.responses.map((response) => ({ id: response.id, displayName: response.displayName, slotIds: response.slotIds, isMe: isActor(response, actor), isGuest: response.guestId !== null, didRespond: true, ...recoveryStatus(response.guestId) }));
   const responders = new Set(poll.responses.map(identity));
   const invitees = [...participants, ...poll.invitations.filter(person => !responders.has(identity(person)))
-    .map(person => ({ id: person.id, displayName: person.displayName, slotIds: [] as number[], isMe: isActor(person, actor), isGuest: person.guestId !== null, didRespond: false }))];
+    .map(person => ({ id: person.id, displayName: person.displayName, slotIds: [] as number[], isMe: isActor(person, actor), isGuest: person.guestId !== null, didRespond: false, ...recoveryStatus(person.guestId) }))];
   const mine = participants.find((person) => person.isMe);
   const invitation = poll.invitations.find((person) => isActor(person, actor));
   return {
@@ -72,7 +76,7 @@ export async function getTimePoll(token: string, actor: TimePollActor | null, ap
     location: poll.location, durationMinutes: poll.durationMinutes, expectedCount: poll.expectedCount,
     planningMode: poll.planningMode, phase: timePollPhase(poll), expiresAt: timePollExpiresAt(poll)?.toISOString() ?? null, invitationVersion: poll.invitationVersion,
     chosenStart: poll.chosenStart?.toISOString() ?? null, chosenEnd: poll.chosenEnd?.toISOString() ?? null,
-    invitations: poll.invitations.filter(i => i.status !== "SHARED").map((i) => ({ id: i.id, displayName: i.displayName, status: i.status, selected: i.selected, isMe: isActor(i, actor), isGuest: i.guestId !== null })),
+    invitations: poll.invitations.filter(i => i.status !== "SHARED").map((i) => ({ id: i.id, displayName: i.displayName, status: i.status, selected: i.selected, isMe: isActor(i, actor), isGuest: i.guestId !== null, ...recoveryStatus(i.guestId) })),
     activitySelection: poll.activityTopic ? { ...activitySummary(poll, actor), ideas: poll.activityIdeas.map(idea => ({
       id: idea.id, title: idea.title, location: idea.location, authorName: idea.displayName, isMine: isActor(idea, actor),
       interestedBy: idea.interests.map(person => ({ displayName: person.displayName, isMe: isActor(person, actor) })),
@@ -295,9 +299,6 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
     if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) && !(poll.phase === "CONFIRMED" && poll.chosenStart && poll.chosenStart > new Date())) throw new TimePollError(409, "This plan is closed for nickname changes.");
-    if (typeof actor !== "string" && await tx.timePollGuest.findFirst({ where: {
-      pollId: poll.id, id: { not: actor.guestId }, displayName: { equals: displayName, mode: "insensitive" },
-    } })) throw new TimePollError(409, "This name already has a response. Switch participant to continue it, or choose a different name.");
     const own = typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId };
     await tx.timePollResponse.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });
     await tx.timePollInvitation.updateMany({ where: { pollId: poll.id, ...own }, data: { displayName } });

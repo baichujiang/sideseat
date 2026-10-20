@@ -3158,3 +3158,13 @@
 "This student chose to share this intention." = "Diese Person hat ihr Vorhaben öffentlich geteilt.";
 
 "Shared at %@" = "Geteilt an %@";
+
+/* Private guest recovery */
+"Recover an old guest response" = "Alte Gastantwort wiederherstellen";
+"Generate personal recovery link" = "Persönlichen Wiederherstellungslink erstellen";
+"Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it." = "Prüfe, wem die alte Antwort gehört, und sende den Link privat. Verfügbarkeit und Einladungsantwort bleiben erhalten. Ein neuer Link ersetzt noch nicht eingelöste Links. Nach der Wiederherstellung ist der private Schlüssel erforderlich.";
+"Personal recovery link" = "Persönlicher Wiederherstellungslink";
+"Send this link only to the person who owns the old response. Anyone holding it can edit that response." = "Sende diesen Link nur an die Person, der die alte Antwort gehört. Wer den Link besitzt, kann diese Antwort bearbeiten.";
+"Share personal recovery link" = "Persönlichen Wiederherstellungslink teilen";
+"Copy personal recovery link" = "Persönlichen Wiederherstellungslink kopieren";
+"Recover old guest response" = "Alte Gastantwort wiederherstellen";

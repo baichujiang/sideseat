@@ -3159,3 +3159,13 @@
 "This student chose to share this intention." = "这位同学主动公开了这条意愿。";
 
 "Shared at %@" = "来自 %@ 的公开意愿";
+
+/* Private guest recovery */
+"Recover an old guest response" = "恢复旧游客填写";
+"Generate personal recovery link" = "生成个人恢复链接";
+"Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it." = "确认旧记录属于谁后，再私下发送链接。原空闲和邀请答复都会保留。新链接会替换尚未领取的链接；对方领取后，仅凭其私密凭证才能修改。";
+"Personal recovery link" = "个人恢复链接";
+"Send this link only to the person who owns the old response. Anyone holding it can edit that response." = "只把链接发给这份旧填写的本人。持有链接的人可以修改这份填写。";
+"Share personal recovery link" = "分享个人恢复链接";
+"Copy personal recovery link" = "复制个人恢复链接";
+"Recover old guest response" = "恢复旧游客填写";

@@ -159,8 +159,18 @@ struct PlanResponseSummary: View {
 
 struct PlanPeopleView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(SessionStore.self) private var session
     let poll: NativeTimePoll
+    @State private var recoveryPersonID: String?
+    @State private var preparingRecovery = false
+    @State private var recoveryError: String?
+    @State private var recoveryShare: GuestRecoveryShare?
+    @State private var copiedRecovery = false
     private var collecting: Bool { poll.planningPhase == "COLLECTING" }
+    private struct GuestRecoveryShare: Identifiable {
+        let id: String
+        let url: URL
+    }
 
     var body: some View {
         NavigationStack {
@@ -182,6 +192,7 @@ struct PlanPeopleView: View {
                                 status: person.didRespond == false ? "Has not filled availability yet" : "Availability submitted",
                                 symbol: person.didRespond == false ? "clock" : "checkmark.circle.fill",
                                 accepted: person.didRespond != false, identifier: "plan-response-person-\(person.id)")
+                            if poll.isOwner && person.needsGuestRecovery == true { recoveryButton(person.id) }
                         }
                     } else {
                         ForEach(poll.allInvitations) { person in
@@ -189,19 +200,69 @@ struct PlanPeopleView: View {
                                 status: person.status == "ACCEPTED" ? "Accepted" : person.status == "DECLINED" ? "Declined" : "Awaiting confirmation",
                                 symbol: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock",
                                 accepted: person.status == "ACCEPTED", identifier: "unified-plan-person-\(person.id)")
+                            if poll.isOwner && person.needsGuestRecovery == true { recoveryButton(person.id) }
                         }
                     }
                 }
                 if collecting {
                     Section { Text("Filling in free time doesn't confirm attendance.").font(.footnote).foregroundStyle(.secondary) }
                 }
+                if let recoveryError { Section { Text(recoveryError).foregroundStyle(SideSeatTheme.danger) } }
             }
             .navigationTitle("Participants and progress").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) {
                 Button("Done") { dismiss() }.accessibilityIdentifier("plan-people-done")
             } }
             .accessibilityIdentifier("plan-people-list")
+            .alert("Recover an old guest response", isPresented: Binding(get: { recoveryPersonID != nil }, set: { if !$0 { recoveryPersonID = nil } }), presenting: recoveryPersonID) { id in
+                Button("Generate personal recovery link") {
+                    recoveryPersonID = nil
+                    Task { await prepareRecovery(for: id) }
+                }.accessibilityIdentifier("guest-recovery-generate")
+                Button("Cancel", role: .cancel) { recoveryPersonID = nil }
+            } message: { _ in
+                Text("Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it.")
+            }
+            .sheet(item: $recoveryShare) { share in
+                NavigationStack {
+                    ScrollView {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                        Text("Personal recovery link").font(.title2.bold())
+                        Text("Send this link only to the person who owns the old response. Anyone holding it can edit that response.")
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        ShareLink(item: share.url) { Label("Share personal recovery link", systemImage: "square.and.arrow.up") }
+                            .buttonStyle(.borderedProminent)
+                        Button(AppLocalization.string(copiedRecovery ? "Copied" : "Copy personal recovery link")) { UIPasteboard.general.string = share.url.absoluteString; copiedRecovery = true }
+                            .buttonStyle(.bordered).accessibilityIdentifier("guest-recovery-copy")
+                    }.padding(SideSeatTheme.screenHorizontal)
+                    }
+                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { recoveryShare = nil } } }
+                }.accessibilityIdentifier("guest-recovery-share")
+            }
         }
+    }
+
+    private func recoveryButton(_ id: String) -> some View {
+        Button {
+            recoveryError = nil
+            recoveryPersonID = id
+        } label: {
+            Label("Recover old guest response", systemImage: "key.horizontal")
+                .font(.subheadline).frame(minHeight: 44)
+        }.disabled(preparingRecovery).accessibilityIdentifier("guest-recovery-\(id)")
+    }
+
+    private func prepareRecovery(for id: String) async {
+        preparingRecovery = true
+        defer { preparingRecovery = false }
+        struct Body: Encodable { let participantId: String }
+        struct Result: Decodable { let recoveryUrl: URL }
+        do {
+            let response: APIEnvelope<Result> = try await session.sendAuthorized(
+                "api/v1/time-polls/\(poll.token)/guest-recovery", method: .post, body: Body(participantId: id))
+            copiedRecovery = false
+            recoveryShare = GuestRecoveryShare(id: id, url: response.data.recoveryUrl)
+        } catch { recoveryError = error.localizedDescription }
     }
 
     private func row(name: String, isMe: Bool, guest: Bool, status: String, symbol: String, accepted: Bool, identifier: String) -> some View {

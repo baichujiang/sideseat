@@ -3159,3 +3159,13 @@
 "This student chose to share this intention." = "This student chose to share this intention.";
 
 "Shared at %@" = "Shared at %@";
+
+/* Private guest recovery */
+"Recover an old guest response" = "Recover an old guest response";
+"Generate personal recovery link" = "Generate personal recovery link";
+"Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it." = "Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it.";
+"Personal recovery link" = "Personal recovery link";
+"Send this link only to the person who owns the old response. Anyone holding it can edit that response." = "Send this link only to the person who owns the old response. Anyone holding it can edit that response.";
+"Share personal recovery link" = "Share personal recovery link";
+"Copy personal recovery link" = "Copy personal recovery link";
+"Recover old guest response" = "Recover old guest response";
