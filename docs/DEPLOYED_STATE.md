@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；Preview 166 的同行卡片间距已完成真机验收，保留 165 行为与 164 计划变更；核验 2026-10-20，Europe/Berlin。
+**状态：** 当前运行清单；Preview 168 的我的意愿状态行间距已完成真机验收，保留 166 推荐卡片间距及已提交的 167 计划时间块实现；核验 2026-10-20，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 166**：收紧「推荐依据 / 查看资料」与操作区之间的间距 8pt。中文普通字号、德文深色最大字号、展开/收起与收藏往返真机复查通过，普通启动 PID 4245，Runner 已移除，普通 97 保留；本轮无后端或网页发布。[166 交付](./releases/2026-10-20-preview166-together-card-spacing.md)、[QA](./qa/2026-10-20-together-card-spacing.md)。
+当前 **Preview 168**：「我的意愿」状态行顶部 20→12pt、详情间距 12→8pt；中文普通字号、德文深色最大字号的暂停/恢复往返真机通过。普通启动 PID 4250，本项 Runner 移除，普通 97 保留。本项无后端或网页发布；包含 `00cc7c3d` 计划时间块实现，但不替代该项验收。[168 交付](./releases/2026-10-20-preview168-intent-status-spacing.md)、[QA](./qa/2026-10-20-intent-status-spacing.md)。
+
+此前 **Preview 166**：收紧「推荐依据 / 查看资料」与操作区之间的间距 8pt。中文普通字号、德文深色最大字号、展开/收起与收藏往返真机复查通过，普通启动 PID 4245，Runner 已移除，普通 97 保留；本轮无后端或网页发布。[166 交付](./releases/2026-10-20-preview166-together-card-spacing.md)、[QA](./qa/2026-10-20-together-card-spacing.md)。
 
 此前 **Preview 165**：更多推荐无结果时显示居中提示，移除孤立重试；中文／德文深色最大字号及收藏往返两项真机闭环通过。此前因锁屏中断的推荐依据三场景补验也已通过。测试 Runner 移除，普通启动 PID 4226 与实际进程一致，普通 97 保留；本轮无后端发布。[165 交付](./releases/2026-10-20-preview165-together08.md)、[本问题 QA](./qa/2026-10-20-together08.md)、[第 7 项补验](./qa/2026-10-20-together07.md)。
 
@@ -63,7 +65,7 @@
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本轮计划 `2890e590` 已推送；编译基准/覆盖与签名见 [164 QA](./qa/2026-10-20-plans164.md)。保留其他工作区及生产差异 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (166)` | 同行卡片间距复查通过，普通启动 PID 4245；[166 交付](./releases/2026-10-20-preview166-together-card-spacing.md)，保留 165 行为与 164 计划实现 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (168)` | 我的意愿间距与暂停/恢复真机通过，普通启动 PID 4250；[168 交付](./releases/2026-10-20-preview168-intent-status-spacing.md)，保留推荐卡片间距与已提交计划时间块实现 |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；164 两条真实完整流程、15 阶段 API 及两项最终呈现通过，测试数据/本轮 runner 清理；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |

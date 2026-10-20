@@ -11,3 +11,5 @@
 - [中文已暂停](./evidence/2026-10-20-intent-status-spacing/phone-intention-paused-zh-Hans.png)
 - [德文最大字号](./evidence/2026-10-20-intent-status-spacing/phone-intention-resumed-de.png)
 - [签名、构建包哈希和相关源码](./evidence/2026-10-20-intent-status-spacing/phone-build-manifest.json)
+
+实现 `87a5f32a` 已提交推送；Preview 168 本项测试 Runner 已移除，普通启动 PID 4250 与实际进程一致，普通版 97 保留。[交付](../releases/2026-10-20-preview168-intent-status-spacing.md)、[安装与普通启动](./evidence/2026-10-20-intent-status-spacing/phone-delivery.json)。
