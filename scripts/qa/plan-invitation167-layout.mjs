@@ -29,17 +29,22 @@ for (const [name, engine, width] of [['chromium', chromium, 390], ['webkit', web
       await expect(table.getByRole('heading')).toHaveCount(0);
       await expect(table.locator(':scope > p')).toHaveCount(0);
       const windows = table.getByTestId('plan-invitation-window'); await expect(windows).toHaveCount(item.days);
+      const legends = table.locator('thead').getByTestId('plan-invitation-legend'); await expect(legends).toHaveCount(item.days);
       await expect(table.getByText('受邀时段', { exact: true })).toHaveCount(item.days);
       const dimensions = await table.locator('table').evaluateAll(tables => tables.map(table => {
         const rows = [...table.querySelectorAll('tr[data-highlighted="true"]')];
         const window = table.querySelector('[data-testid="plan-invitation-window"]');
         const top = rows[0].getBoundingClientRect(), last = rows.at(-1).getBoundingClientRect(), box = window.getBoundingClientRect();
         return { rows: rows.length, rowSpan: window.parentElement.rowSpan, height: box.height, parentHeight: window.parentElement.getBoundingClientRect().height,
-          top: box.top - top.top, bottom: last.bottom - box.bottom, rowHeight: top.height, labels: window.innerText.trim(), clientWidth: table.clientWidth };
+          top: box.top - top.top, bottom: last.bottom - box.bottom, rowHeight: top.height, labels: window.innerText.trim(), clientWidth: table.clientWidth,
+          legendRight: table.querySelector('[data-testid="plan-invitation-legend"]').getBoundingClientRect().right,
+          tableRight: table.getBoundingClientRect().right,
+          sameColor: getComputedStyle(window).backgroundColor === getComputedStyle(table.querySelector('[data-testid="plan-invitation-legend"] > span')).backgroundColor };
       }));
       for (const d of dimensions) {
         assert.equal(d.rowSpan, d.rows); assert(d.height > 0); assert(d.top >= -1 && d.bottom >= -1);
-        assert(d.height <= d.parentHeight + 1); assert.equal(d.labels, '受邀时段');
+        assert(d.height <= d.parentHeight + 1); assert.equal(d.labels, '');
+        assert(d.sameColor); assert(Math.abs(d.tableRight - d.legendRight - 12) <= 2);
       }
       if (item.name === 'continuous') assert(Math.abs(dimensions[0].height - dimensions[0].rows * dimensions[0].rowHeight) <= 2);
       if (item.name === 'partial') {

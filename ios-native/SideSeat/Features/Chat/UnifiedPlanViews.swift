@@ -355,11 +355,30 @@ struct InvitationTimetableView: View {
                 let dayRows = rows.filter { $0.date == date }
                 let dayStart = max(start, dayRows.first?.start ?? start)
                 let dayEnd = min(end, dayRows.last?.end ?? end)
+                let dateHeader = VStack(alignment: .leading, spacing: 4) {
+                    Text(timePollDateLabel(date).replacingOccurrences(of: "\n", with: " ")).font(.subheadline.weight(.semibold))
+                    Text(timePollClockFormatter(timeZone).string(from: dayStart) + " – " + (dayEnd == dayRows.last?.end && dayEnd > dayStart && timePollClockFormatter(timeZone).string(from: dayEnd) == "00:00" ? "24:00" : timePollClockFormatter(timeZone).string(from: dayEnd)))
+                        .font(.caption.monospacedDigit()).accessibilityHint(timeZone)
+                }
+                let legend = HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 2).fill(SideSeatTheme.success.opacity(0.26))
+                        .overlay { RoundedRectangle(cornerRadius: 2).strokeBorder(SideSeatTheme.utilityAction, lineWidth: 1) }
+                        .frame(width: 14, height: 10).accessibilityHidden(true)
+                    Text(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"))
+                        .font(.caption2).foregroundStyle(SideSeatTheme.textSecondary)
+                }.fixedSize().accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("plan-invitation-legend")
                 VStack(spacing: 0) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(timePollDateLabel(date).replacingOccurrences(of: "\n", with: " ")).font(.subheadline.weight(.semibold))
-                        Text(timePollClockFormatter(timeZone).string(from: dayStart) + " – " + (dayEnd == dayRows.last?.end && dayEnd > dayStart && timePollClockFormatter(timeZone).string(from: dayEnd) == "00:00" ? "24:00" : timePollClockFormatter(timeZone).string(from: dayEnd)))
-                            .font(.caption.monospacedDigit()).accessibilityHint(timeZone)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                            dateHeader.fixedSize(horizontal: true, vertical: false)
+                            Spacer(minLength: SideSeatTheme.spaceSM)
+                            legend
+                        }
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                            dateHeader
+                            legend.frame(maxWidth: .infinity, alignment: .trailing)
+                        }
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceSM)
                         .id(date)
                     VStack(spacing: 0) {
@@ -386,13 +405,7 @@ struct InvitationTimetableView: View {
                                 Color.clear.frame(width: labelWidth)
                                 Rectangle().fill(SideSeatTheme.success.opacity(0.26))
                                     .overlay { Rectangle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2) }
-                                    .overlay {
-                                        Label(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"), systemImage: "calendar")
-                                            .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                                            .lineLimit(1).minimumScaleFactor(0.5)
-                                            .accessibilityIdentifier("plan-invitation-window-label")
-                                            .padding(.horizontal, 4)
-                                    }
+                                    .accessibilityHidden(true)
                             }
                             .frame(height: rowHeight * length)
                             .offset(y: rowHeight * offset)

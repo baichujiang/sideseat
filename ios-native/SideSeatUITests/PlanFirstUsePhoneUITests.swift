@@ -549,9 +549,10 @@ import XCTest
             XCTAssertFalse(app.staticTexts["受邀时间表"].exists)
             XCTAssertFalse(app.staticTexts["高亮部分表示最终活动时段。"].exists)
             XCTAssertFalse(app.staticTexts["高亮部分是受邀时段。看清时间后，再点击下方「确认参加」。"].exists)
-            let labels = app.descendants(matching: .any).matching(identifier: "plan-invitation-window-label")
-            XCTAssertEqual(labels.count, item.days, "One label per continuous day segment, including a partial boundary")
-            let first = labels.firstMatch
+            XCTAssertFalse(app.descendants(matching: .any)["plan-invitation-window-label"].exists)
+            let legends = app.descendants(matching: .any).matching(identifier: "plan-invitation-legend")
+            XCTAssertEqual(legends.count, item.days, "Each date header explains the highlight color")
+            let first = legends.firstMatch
             let footer = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "准备好就能正式发出")).firstMatch
             XCTAssertTrue(footer.exists)
             for _ in 0..<12 {
@@ -567,6 +568,7 @@ import XCTest
             XCTAssertTrue(first.isHittable)
             XCTAssertGreaterThan(first.frame.minY, app.navigationBars.firstMatch.frame.maxY)
             XCTAssertLessThan(first.frame.maxY, footer.frame.minY)
+            XCTAssertGreaterThan(first.frame.midX, app.frame.midX, "Legend remains on the right of the header")
             capture(app, "invitation-\(item.name)-\(accessibility ? "dark-largest" : "normal")")
             XCTAssertFalse(app.buttons["plan-invitation-cell-1"].exists, "The merged time block remains read-only")
         }
