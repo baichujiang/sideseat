@@ -980,8 +980,18 @@ private struct TogetherHomeView: View {
             } else if let issue = opportunityStore.issue, savedOpportunities.isEmpty {
                 loadFailure(issue: issue)
             } else if savedOpportunities.isEmpty {
-                ContentUnavailableView(AppLocalization.string("No saved intentions"), systemImage: "heart",
-                    description: Text("Save an intention to find it here later."))
+                ContentUnavailableView {
+                    Label(AppLocalization.string("No saved intentions"), systemImage: "heart")
+                } description: {
+                    Text("Save an intention to find it here later.")
+                } actions: {
+                    Button(AppLocalization.string("View recommendations")) {
+                        sectionSelection.wrappedValue = .recommendations
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("together-saved-empty-recommendations")
+                }
             } else {
                 ForEach(savedOpportunities) { opportunity in opportunityCard(opportunity, inRecommendations: false) }
                 if let issue = opportunityStore.issue { loadFailure(issue: issue) }
@@ -1418,7 +1428,8 @@ struct OpportunityMessageComposer: View {
             guard hasLoadedDraft, !didSend else { return }
             if text.isEmpty { TogetherDraftStorage.remove(messageDraftKey) }
             else { TogetherDraftStorage.write(text, key: messageDraftKey) }
-        }        .onDisappear {
+        }
+        .onDisappear {
             if hasLoadedDraft && !didSend {
                 if bodyText.isEmpty { TogetherDraftStorage.remove(messageDraftKey) }
                 else { TogetherDraftStorage.write(bodyText, key: messageDraftKey) }

@@ -790,6 +790,26 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testEmptySavedRecommendationsRoundTrip() {
+        let app = togetherApp(["--ui-testing-language=zh-Hans"])
+        selectTogetherSection(2, in: app)
+        let action = app.buttons["together-saved-empty-recommendations"]
+        XCTAssertTrue(action.waitForExistence(timeout: 5)); XCTAssertTrue(action.isHittable)
+        saveScreenshot(app: app, name: "saved-empty-action-zh"); action.tap()
+        let save = app.buttons["mutual-opportunity-bookmark-cmutualui0000000000000001"]
+        revealFlowElement(save, in: app); save.tap()
+        XCTAssertTrue(save.staticTexts["已收藏"].exists)
+        selectTogetherSection(2, in: app)
+        XCTAssertFalse(action.exists); XCTAssertTrue(save.waitForExistence(timeout: 5))
+        revealFlowElement(save, in: app); save.tap()
+        XCTAssertTrue(action.waitForExistence(timeout: 5)); action.tap()
+        XCTAssertTrue(save.waitForExistence(timeout: 5)); revealFlowElement(save, in: app)
+        XCTAssertFalse(save.staticTexts["已收藏"].exists)
+        XCTAssertTrue(app.buttons["together-tab-recommendations"].firstMatch.isSelected)
+        saveScreenshot(app: app, name: "saved-empty-returned-to-recommendations-zh"); app.terminate()
+    }
+
+    @MainActor
     func testTogetherDraftRestoreAndClear() {
         let args = ["--ui-testing-weekly-intent", "--ui-testing-language=zh-Hans"]
         let app = togetherApp(args); selectTogetherSection(1, in: app)
