@@ -11466,6 +11466,140 @@
         },
         "description": "Organizer explicitly sets an activity and keeps the same timetable and responses. Closed after invitations."
       }
+    },
+    "/api/v1/time-polls/{token}/contacts": {
+      "post": {
+        "operationId": "sharePollWithContacts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          },
+          "201": {
+            "description": "Plan membership and chat cards delivered atomically. Repeated contacts are not messaged again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharePollContactsEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SharePollContactsRequest"
+              }
+            }
+          }
+        },
+        "summary": "Deliver a native plan card to accepted App contacts without submitting availability or accepting attendance.",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 128
+            }
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "/api/v1/time-polls/{token}/publish": {
+      "post": {
+        "operationId": "publishPollPlan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time poll data scoped to the signed-in account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimePollEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error"
+          },
+          "500": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPollPlanRequest"
+              }
+            }
+          }
+        },
+        "summary": "Organizer explicitly sends the final plan; only accepted people receive Calendar entries and final alerts."
+      },
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ]
     }
   },
   "components": {
@@ -22733,6 +22867,10 @@
           "isGuest": {
             "type": "boolean",
             "description": "True for a poll-scoped guest participating through the share page."
+          },
+          "didRespond": {
+            "type": "boolean",
+            "description": "False for an App invitee who has not submitted availability."
           }
         }
       },
@@ -22954,6 +23092,20 @@
           },
           "activitySelection": {
             "$ref": "#/components/schemas/TimePollActivitySelection"
+          },
+          "invitees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimePollParticipant"
+            },
+            "description": "Owner-only invitation-review candidates including delivered App contacts who have not submitted availability."
+          },
+          "sharedWithUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Owner-only contact delivery membership; does not imply attendance or a response."
           }
         }
       },
@@ -23565,6 +23717,67 @@
         "properties": {
           "ideaId": {
             "type": "string"
+          }
+        }
+      },
+      "SharePollContactsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "connectionIds",
+          "version"
+        ],
+        "properties": {
+          "connectionIds": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 19,
+            "items": {
+              "type": "string",
+              "format": "cuid"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "SharePollContactsEnvelope": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "poll",
+              "deliveries"
+            ],
+            "properties": {
+              "poll": {
+                "$ref": "#/components/schemas/TimePoll"
+              },
+              "deliveries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "connectionId",
+                    "messageId"
+                  ],
+                  "properties": {
+                    "connectionId": {
+                      "type": "string"
+                    },
+                    "messageId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

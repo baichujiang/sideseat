@@ -35,6 +35,11 @@ export const saveTimePollResponseSchema = z.object({
 }).strict();
 export const timePollDisplayNameSchema = z.object({ displayName: saveTimePollResponseSchema.shape.displayName }).strict();
 
+export const sharePollContactsSchema = z.object({
+  connectionIds: z.array(z.string().cuid()).min(1).max(19),
+  version: z.number().int().min(0),
+}).strict();
+
 export type PollSlot = { id: number; date: string; row: string; label: string; start: string; end: string };
 export type PollParticipant = { id: string; displayName: string; slotIds: number[]; isMe: boolean };
 export type PollWindow = { start: string; end: string; attendeeIds: string[]; count: number };
