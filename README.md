@@ -42,7 +42,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **165** 已安装到默认 iPhone 14 Plus：更多推荐无结果时只显示居中提示，移除突兀重试。两项相关真机闭环及此前推荐依据补验通过，普通启动 PID 4226，普通版 97 保留。[交付与截图](./docs/releases/2026-10-20-preview165-together08.md)。
+Preview **166** 已安装到默认 iPhone 14 Plus：收紧同行卡片「推荐依据 / 查看资料」下方间距 8pt，保留点击范围。中文普通字号、德文最大字号及收藏往返真机复查通过，普通启动 PID 4245。[交付与截图](./docs/releases/2026-10-20-preview166-together-card-spacing.md)。
+
+此前 Preview **165** 已安装到默认 iPhone 14 Plus：更多推荐无结果时只显示居中提示，移除突兀重试。两项相关真机闭环及此前推荐依据补验通过，普通启动 PID 4226，普通版 97 保留。[交付与截图](./docs/releases/2026-10-20-preview165-together08.md)。
 
 此前 Preview **164** 已安装到默认 iPhone 14 Plus：共同计划移除昵称编辑与时间表说明，填写人数配三头像/+N，点开原名单，底栏并排提交/最终选时。两条真机完整流程、15 阶段 API、标准/最大字号及 38 项单元通过，普通启动 PID 4214；代码已推送，普通版 97 保留。随后并行阶段接续安装 Preview 165，已核验包含相同计划实现。[交付与截图](./docs/releases/2026-10-20-preview164-compact-plan-people.md)。
 

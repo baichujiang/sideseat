@@ -19,9 +19,9 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Preview 165 is the current installed development build; empty recommendation
-  handling and recommendation context passed physical-device acceptance. It also
-  retains the plan changes physically accepted in Preview 164. See
+- Preview 166 is the current installed development build; compact spacing below
+  the recommendation context/profile row passed physical-device acceptance. It
+  retains Preview 165 behavior and the plan changes accepted in Preview 164. See
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97
   is a separate supported older client. Do not uninstall it or drop its API/data
   compatibility as part of archival work.

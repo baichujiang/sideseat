@@ -11,3 +11,5 @@
 - [中文展开状态](./evidence/2026-10-20-together-card-spacing/phone-recommendation-context-zh-Hans.png)
 - [德文最大字号](./evidence/2026-10-20-together-card-spacing/phone-recommendation-context-collapsed-de.png)
 - [签名、包哈希与本项源码](./evidence/2026-10-20-together-card-spacing/phone-build-manifest.json)
+
+实现 `cca0cd18` 已提交推送；默认手机 Preview 166 的测试 Runner 已移除，普通启动 PID 4245 与实际进程一致，普通版 97 保留。[交付](../releases/2026-10-20-preview166-together-card-spacing.md)、[安装与普通启动](./evidence/2026-10-20-together-card-spacing/phone-delivery.json)。
