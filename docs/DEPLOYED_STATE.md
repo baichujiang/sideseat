@@ -69,7 +69,7 @@
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；164 两条真实完整流程、15 阶段 API 及两项最终呈现通过，测试数据/本轮 runner 清理；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr`，Ready | 本轮只读核验三个别名并执行真实 API 链路，无服务端发布；[164 生产核验](./qa/evidence/2026-10-20-plans164/production-state.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj`，Ready | 连续受邀时段网页合并为一块高亮和一处标签；基于前版全部 1,379 个源文件，仅修改显示组件并新增来源标记，候选/正式各六项布局与完整邀请流程通过；[源文件核验](./qa/evidence/2026-10-20-plans167/candidate-source-verification.json) |
 | 生产源码 | 沿用既有生产构建和差异，本轮未修改服务端 | 后续同行后端来源 `7a2163da`，见 [160 QA](./qa/2026-10-20-together04.md)；既有计划来源与历史覆盖见 [156 QA](./qa/2026-10-20-plans156.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
