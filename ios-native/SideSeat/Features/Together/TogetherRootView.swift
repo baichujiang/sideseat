@@ -1553,7 +1553,9 @@ private struct WeeklyIntentCard: View {
                     .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
             }
             details
-                .padding(SideSeatTheme.Together.cardPadding)
+                .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+                .padding(.top, SideSeatTheme.spaceMD)
+                .padding(.bottom, SideSeatTheme.Together.cardPadding)
         }
     }
 
@@ -1572,7 +1574,7 @@ private struct WeeklyIntentCard: View {
     }
 
     private var details: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             if let onRepeat {
                 (dynamicTypeSize.isAccessibilitySize
                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
