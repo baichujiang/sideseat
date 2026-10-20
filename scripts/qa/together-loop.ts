@@ -22,6 +22,36 @@ try {
     }, null, 2));
     await db.user.deleteMany();
     console.log("Removed this unsuccessful run's disposable accounts; no accepted plan evidence was removed.");
+  } else if (mode === "seed-single") {
+    assert(logPath && /^togetherqa_0[3-7](_[ab])?$/.test(logPath));
+    const old = await db.user.findUnique({ where: { username: logPath } });
+    if (old) {
+      assert.equal(await db.connection.count({ where: { OR: [{ userAId: old.id }, { userBId: old.id }] } }), 0);
+      await db.user.delete({ where: { id: old.id } });
+    }
+    await db.user.create({ data: { username: logPath, nickname: logPath, school: "TUM", avatarUrl: "p02",
+      hashedPassword: await bcrypt.hash("Password123", 10), onboardingComplete: true, verifiedStudent: true,
+      studentVerificationStatus: "VERIFIED", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR", semester: 2,
+      productTutorialDismissedAt: new Date(), userLanguages: { create: { tag: "ENGLISH", proficiency: "FLUENT" } } } });
+    console.log(`Prepared isolated local user ${logPath}.`);
+  } else if (mode === "observe-pause") {
+    assert(logPath);
+    const user = await db.user.findUniqueOrThrow({ where: { username: "togetherqa_03" } });
+    const checks = [];
+    for (const phase of ["paused", "edited", "resumed"]) {
+      const deadline = Date.now() + 10 * 60_000;
+      while (!(await fs.readFile(logPath, "utf8").catch(() => "")).includes(`TOGETHER03_PHASE ${phase}`)) {
+        assert(Date.now() < deadline); await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      const rows = await db.weeklyIntent.findMany({ where: { userId: user.id, exploreResponseToId: null } });
+      assert.equal(rows.length, 1);
+      assert.equal(rows[0]!.status, phase === "resumed" ? "ACTIVE" : "PAUSED");
+      assert.equal(rows[0]!.activityText, "[together-03] Coffee" + (phase === "paused" ? "" : " after class"));
+      assert.equal(await db.connection.count({ where: { OR: [{ userAId: user.id }, { userBId: user.id }] } }), 0);
+      checks.push({ phase, status: rows[0]!.status, activityText: rows[0]!.activityText, sameIntentionID: rows[0]!.id, noChatsCreated: true });
+      await fs.writeFile(`${out}/api-boundaries.json`, JSON.stringify({ passed: checks.length === 3, checks }, null, 2));
+      console.log(`Pause boundary passed: ${phase}`);
+    }
   } else if (mode === "reset-dismiss") {
     const users = await db.user.findMany({ where: { username: { startsWith: "dismissqa_" } } });
     const ids = users.map(u => u.id);

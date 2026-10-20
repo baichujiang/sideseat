@@ -651,6 +651,15 @@ private struct TogetherHomeView: View {
                         intent: intent, status: status(for: intent, at: now),
                         isWorking: store.mutatingIDs.contains(intent.id),
                         onEdit: { presentedEditor = .edit(intent) },
+                        onTogglePause: {
+                            Task {
+                                if await store.setPaused(!intent.isPaused, intent: intent,
+                                    automaticMatching: automaticMatchingEnabled, using: session) {
+                                    if publishedIntentID == intent.id { publishedIntentID = nil }
+                                    await refreshOpportunitiesAfterIntentChange()
+                                }
+                            }
+                        },
                         onDelete: {
                             Task {
                                 let changed = await store.end(intent, using: session)
@@ -1397,6 +1406,7 @@ private struct WeeklyIntentCard: View {
     let status: TogetherIntentStatus
     let isWorking: Bool
     let onEdit: () -> Void
+    var onTogglePause: (() -> Void)? = nil
     let onDelete: () -> Void
     var onRepeat: (() -> Void)? = nil
 
@@ -1524,7 +1534,24 @@ private struct WeeklyIntentCard: View {
                     .accessibilityIdentifier("weekly-intent-repeat-\(intent.id)")
                 }
             } else {
-                statusBadge
+                (dynamicTypeSize.isAccessibilitySize
+                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))) {
+                    statusBadge
+                    if let onTogglePause, !isTerminal {
+                        Button(action: onTogglePause) {
+                            Label(AppLocalization.string(intent.isPaused ? "Resume intention" : "Pause intention"),
+                                systemImage: intent.isPaused ? "play.fill" : "pause.fill")
+                                .font(.subheadline.weight(.medium))
+                                .frame(minHeight: 44)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .disabled(isWorking)
+                        .accessibilityIdentifier("weekly-intent-toggle-pause-\(intent.id)")
+                    }
+                }
             }
 
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "paused",
+      "status": "PAUSED",
+      "activityText": "[together-03] Coffee",
+      "sameIntentionID": "cmvh47jvm00j8pmnwethqmkgl",
+      "noChatsCreated": true
+    },
+    {
+      "phase": "edited",
+      "status": "PAUSED",
+      "activityText": "[together-03] Coffee after class",
+      "sameIntentionID": "cmvh47jvm00j8pmnwethqmkgl",
+      "noChatsCreated": true
+    },
+    {
+      "phase": "resumed",
+      "status": "ACTIVE",
+      "activityText": "[together-03] Coffee after class",
+      "sameIntentionID": "cmvh47jvm00j8pmnwethqmkgl",
+      "noChatsCreated": true
+    }
+  ]
+}

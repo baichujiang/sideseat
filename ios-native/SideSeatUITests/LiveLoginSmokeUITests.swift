@@ -618,6 +618,32 @@ final class SocialLiveUITests: XCTestCase {
         proposer.terminate()
     }
 
+    func testTogether03PauseEditResumePersists() {
+        let app = loopLogin("togetherqa_03")
+        loopCreateIntent("[together-03] Coffee", in: app)
+        let toggle = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-toggle-pause-")).firstMatch
+        XCTAssertTrue(toggle.waitForExistence(timeout: 10)); loopReveal(toggle, in: app); toggle.tap()
+        XCTAssertTrue(app.buttons["Resume intention"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.descendants(matching: .any)["intent-editor"].exists)
+        print("TOGETHER03_PHASE paused"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        let edit = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-edit-")).firstMatch
+        loopReveal(edit, in: app); edit.tap()
+        let field = app.textFields["intent-editor-activity"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); field.tap(); field.typeKey("a", modifierFlags: .command); field.typeText("[together-03] Coffee after class")
+        app.buttons["intent-editor-save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["Resume intention"].exists)
+        print("TOGETHER03_PHASE edited"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        app.buttons["Resume intention"].tap()
+        XCTAssertTrue(app.buttons["Pause intention"].waitForExistence(timeout: 10))
+        loopCapture(app, "pause-resumed"); app.terminate()
+        let reloaded = loopLogin("togetherqa_03")
+        tabButton(in: reloaded, labels: ["Together"]).tap(); loopSelectTogetherSection("intentions", in: reloaded)
+        XCTAssertTrue(reloaded.staticTexts["[together-03] Coffee after class"].waitForExistence(timeout: 10))
+        XCTAssertTrue(reloaded.buttons["Pause intention"].exists)
+        print("TOGETHER03_PHASE resumed"); loopCapture(reloaded, "pause-persisted"); reloaded.terminate()
+    }
+
     func testTogether02DismissUndoRefreshAndContact() {
         let title = "[together-02] Campus coffee"
         let a = loopLogin("dismissqa_a")

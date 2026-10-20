@@ -790,6 +790,23 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testIntentionPauseResume() {
+        for (language, pause, resume) in [("zh-Hans", "暂停寻找", "恢复寻找"), ("de", "Suche pausieren", "Suche fortsetzen")] {
+            let app = togetherApp(["--ui-testing-intent-card-states", "--ui-testing-language=\(language)"] + (language == "de" ? ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] : []))
+            selectTogetherSection(1, in: app)
+            let toggle = app.buttons["weekly-intent-toggle-pause-ui-intent-coffee"]
+            revealFlowElement(toggle, in: app); XCTAssertTrue(toggle.label.contains(pause)); toggle.tap()
+            let resumeButton = app.buttons.matching(NSPredicate(format: "identifier == %@ AND label CONTAINS %@", toggle.identifier, resume)).firstMatch
+            XCTAssertTrue(resumeButton.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.descendants(matching: .any)["intent-editor"].exists)
+            saveScreenshot(app: app, name: "intention-paused-\(language)")
+            revealFlowElement(resumeButton, in: app); resumeButton.tap()
+            XCTAssertTrue(toggle.label.contains(pause))
+            saveScreenshot(app: app, name: "intention-resumed-\(language)"); app.terminate()
+        }
+    }
+
+    @MainActor
     func testRecommendationDismissUndoAndRefresh() {
         let app = togetherApp(["--ui-testing-opportunity-list", "--ui-testing-language=zh-Hans"])
         let id = "cmutualui0000000000000001"
