@@ -20,7 +20,7 @@ final class TimePollStore {
             || displayName.trimmingCharacters(in: .whitespacesAndNewlines) != poll.myDisplayName
     }
     var saved: Bool { poll?.didRespond == true && !hasChanges }
-    var canMutate: Bool { !acting && !saving && !hasChanges }
+    var canMutate: Bool { !acting && !saving && (poll?.planningPhase != "COLLECTING" || !hasChanges) }
 
     private func draftDidChange() {
         revision += 1; edited = true
@@ -36,7 +36,7 @@ final class TimePollStore {
     }
 
     func load(session: SessionStore) async {
-        guard !saving && !acting && !hasChanges else { return }
+        guard !saving && !acting else { return }
         let generation = session.authorizationGeneration
         let currentRevision = revision
         let request = UUID()
@@ -44,8 +44,12 @@ final class TimePollStore {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized("/api/v1/time-polls/\(token)")
             guard generation == session.authorizationGeneration,
-                  currentRevision == revision, request == refreshID else { return }
-            if !saving && !acting && !hasChanges { accept(response.data); error = nil }
+                  request == refreshID else { return }
+            if !saving && !acting {
+                if hasChanges || currentRevision != revision { poll = response.data }
+                else { accept(response.data) }
+                if !submissionFailed { error = nil }
+            }
         } catch {
             if generation == session.authorizationGeneration, currentRevision == revision,
                request == refreshID, !saving, !acting { self.error = error.localizedDescription }
@@ -61,7 +65,7 @@ final class TimePollStore {
 
     func mutate<Body: Encodable & Sendable>(_ action: String, method: HTTPMethod = .post, body: Body, session: SessionStore) async {
         guard canMutate else { return }
-        revision += 1
+        revision += 1; refreshID = UUID()
         acting = true; defer { acting = false }
         let generation = session.authorizationGeneration
         let userID = session.currentUser?.id
@@ -80,6 +84,7 @@ final class TimePollStore {
         let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { error = AppLocalization.string("Enter your name."); return }
         let request = SaveTimePollRequest(displayName: name, slotIds: selected.sorted())
+        refreshID = UUID()
         let submittedRevision = revision
         let generation = session.authorizationGeneration
         let userID = session.currentUser?.id

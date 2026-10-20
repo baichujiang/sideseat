@@ -18,8 +18,11 @@ export function useSharedTimePoll(token: string) {
   const saved = !!poll?.didRespond && !hasChanges;
   const running = useRef(false);
   const revision = useRef(0);
+  const refreshRequest = useRef(0);
+  const dirty = useRef(false);
+  dirty.current = hasChanges;
   const pauseRefresh = useRef(false);
-  pauseRefresh.current = busy || saving || hasChanges || editingName || switchingParticipant || editingAvailability;
+  pauseRefresh.current = busy || saving || editingName || switchingParticipant || editingAvailability;
   const base = `/api/public/time-polls/${encodeURIComponent(token)}`;
   const call = useCallback(async (suffix = "", method = "GET", body?: unknown) => {
     const response = await fetch(base + suffix, { method, credentials: "same-origin", cache: "no-store", ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}) });
@@ -32,13 +35,14 @@ export function useSharedTimePoll(token: string) {
     let alive = true;
     const refresh = async () => {
       if (pauseRefresh.current || running.current) return;
-      const current = revision.current;
+      const current = revision.current, request = ++refreshRequest.current;
       try {
         const data = await call();
-        if (alive && current === revision.current && !pauseRefresh.current && !running.current) {
-          setPoll(data); setSelected(data.mySlotIds); setEdited(false); setError("");
+        if (alive && request === refreshRequest.current && !pauseRefresh.current && !running.current) {
+          setPoll(data);
+          if (!dirty.current && current === revision.current) { setSelected(data.mySlotIds); setEdited(false); }
         }
-      } catch (cause) { if (alive && current === revision.current) setError((cause as Error).message); }
+      } catch (cause) { if (alive && request === refreshRequest.current && !running.current && current === revision.current) setError((cause as Error).message); }
     };
     void refresh();
     const timer = window.setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 15000);
@@ -55,6 +59,7 @@ export function useSharedTimePoll(token: string) {
   const submit = async () => {
     if (!poll?.viewerId || poll.phase !== "COLLECTING" || !hasChanges || busy || running.current) return false;
     running.current = true; setSaving(true); setSubmissionFailed(false); setError("");
+    refreshRequest.current += 1;
     const submittedRevision = revision.current;
     try {
       const data = await call("/response", "PUT", { participantId: poll.viewerId, displayName: poll.myDisplayName, slotIds: selected });
@@ -70,8 +75,8 @@ export function useSharedTimePoll(token: string) {
     setSelected([...new Set(slots)].sort((a, b) => a - b)); setEdited(true); setSubmissionFailed(false); setError("");
   };
   const act = async (suffix: string, method: string, body: unknown) => {
-    if (busy || running.current || hasChanges) return false;
-    revision.current += 1; setBusy(true); setError("");
+    if (busy || running.current || (poll?.phase === "COLLECTING" && hasChanges)) return false;
+    revision.current += 1; refreshRequest.current += 1; setBusy(true); setError("");
     try {
       const data = await call(suffix, method, body);
       setPoll(data); setSelected(data.mySlotIds); setEdited(false); setEditingName(false); setSwitchingParticipant(false);

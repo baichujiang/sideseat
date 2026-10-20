@@ -94,16 +94,32 @@ try {
       await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
       await page.waitForTimeout(1100); assert.equal(requests.length, 6); assert.deepEqual((await guest()).slotIds, []);
       checks.push(`${engineName}: page departure never implicitly submits a draft`);
+      if (!['stage1', 'stage2'].includes(stage)) {
+        await call(api + '/response', owner, 'PUT', { displayName: 'Host Ming', slotIds: [0, 1] });
+        await expect(cell(0)).toHaveAttribute('aria-label', /1 人有空$/, { timeout: 20000 });
+        await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.getByText('未提交', { exact: true })).toBeVisible();
+        assert.deepEqual((await guest()).slotIds, []);
+        checks.push(`${engineName}: peer refresh continues with a dirty draft and never overwrites or publishes it`);
+        const before = await detail();
+        await call(api + '/invitations', owner, 'POST', { start: p.slots[0].start, end: p.slots[3].end, version: before.invitationVersion, attendeeIds: before.participants.map(x => x.id) });
+        await expect(page.getByTestId('plan-invitation-timetable')).toBeVisible({ timeout: 20000 });
+        const confirm = page.getByRole('button', { name: '确认参加', exact: true });
+        await expect(confirm).toBeEnabled(); await confirm.click();
+        await expect.poll(async () => (await detail()).phase).toBe('CONFIRMED');
+        assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, 6);
+        checks.push(`${engineName}: incoming final invitation replaces collection view and confirms without submitting the availability draft`);
+      }
       assert.deepEqual(errors, []);
       await page.setViewportSize({ width: 390, height: 844 });
-      await expect(page.getByTestId('availability-submit')).toBeInViewport();
+      if (['stage1', 'stage2'].includes(stage)) await expect(page.getByTestId('availability-submit')).toBeInViewport();
       await page.screenshot({ path: `${out}/${stage}-${engineName}.png`, fullPage: true });
     } finally { await context.close(); await browser.close(); }
   }
   fs.writeFileSync(`${out}/${stage}.json`, JSON.stringify({ base, checkedAt: new Date().toISOString(), checks, passed: checks.length, failed: 0 }, null, 2));
   console.log(`${stage}: ${checks.length} checks passed`);
 } finally {
-  for (const token of fixture.tokens) { await call(`/api/v1/time-polls/${token}`, fixture.accounts[0], 'DELETE'); await call(`/api/public/time-polls/${token}`, null, 'GET', undefined, 404); }
+  for (const token of fixture.tokens) { const p = await call(`/api/v1/time-polls/${token}`, fixture.accounts[0]); if (['INVITING', 'CONFIRMED'].includes(p.phase)) await call(`/api/v1/time-polls/${token}/cancel`, fixture.accounts[0], 'POST', { version: p.invitationVersion }); await call(`/api/v1/time-polls/${token}`, fixture.accounts[0], 'DELETE'); await call(`/api/public/time-polls/${token}`, null, 'GET', undefined, 404); }
   for (const account of fixture.accounts) { await call('/api/v1/me', account, 'DELETE', { confirmUsername: account.identifier }); await call('/api/v1/me', account, 'GET', undefined, 401); }
   fs.writeFileSync(`${out}/${stage}-cleanup.json`, JSON.stringify({ accountsDeleted: fixture.accounts.length, plansDeleted: fixture.tokens.length, links404: fixture.tokens.length, oldTokens401: fixture.accounts.length }, null, 2));
   fs.unlinkSync(privatePath);

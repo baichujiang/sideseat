@@ -1,0 +1,38 @@
+{
+  "checks": [
+    {
+      "phase": "refresh-draft",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:45:14.601Z"
+    },
+    {
+      "phase": "refresh-peers",
+      "slots": [
+        0,
+        1
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:45:23.515Z"
+    },
+    {
+      "phase": "refresh-invitation",
+      "slots": [
+        0,
+        1
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:45:33.249Z"
+    },
+    {
+      "phase": "refresh-confirmed",
+      "slots": [
+        0,
+        1
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:45:38.345Z"
+    }
+  ],
+  "passed": 4
+}

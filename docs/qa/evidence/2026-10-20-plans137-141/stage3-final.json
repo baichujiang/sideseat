@@ -1,0 +1,30 @@
+{
+  "base": "http://127.0.0.1:3400",
+  "checkedAt": "2026-10-20T00:46:35.310Z",
+  "checks": [
+    "chromium: ten taps and two seconds waiting publish no availability",
+    "chromium: own draft is highlighted but excluded from submitted counts; selected duration is visible",
+    "chromium: one explicit submission persists the complete selection",
+    "chromium: submitted availability updates heatmap and respondent count together",
+    "chromium: editing a submitted response preserves its published heatmap until resubmission",
+    "chromium: edits during a slow response stay local until a second explicit submission",
+    "chromium: failed submission keeps choices and explicit retry succeeds",
+    "chromium: empty availability is a submitted response",
+    "chromium: page departure never implicitly submits a draft",
+    "chromium: peer refresh continues with a dirty draft and never overwrites or publishes it",
+    "chromium: incoming final invitation replaces collection view and confirms without submitting the availability draft",
+    "webkit: ten taps and two seconds waiting publish no availability",
+    "webkit: own draft is highlighted but excluded from submitted counts; selected duration is visible",
+    "webkit: one explicit submission persists the complete selection",
+    "webkit: submitted availability updates heatmap and respondent count together",
+    "webkit: editing a submitted response preserves its published heatmap until resubmission",
+    "webkit: edits during a slow response stay local until a second explicit submission",
+    "webkit: failed submission keeps choices and explicit retry succeeds",
+    "webkit: empty availability is a submitted response",
+    "webkit: page departure never implicitly submits a draft",
+    "webkit: peer refresh continues with a dirty draft and never overwrites or publishes it",
+    "webkit: incoming final invitation replaces collection view and confirms without submitting the availability draft"
+  ],
+  "passed": 22,
+  "failed": 0
+}

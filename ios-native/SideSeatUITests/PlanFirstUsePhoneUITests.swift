@@ -385,7 +385,38 @@ import XCTest
     private struct NativeFixture: Decodable {
         let title: String
         let bundle: String
+        let pollToken: String?
         let accounts: [NativeAccount]
+    }
+
+    func testDirtyDraftRefreshesPeersAndIncomingInvitation() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires disposable participant fixture.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let participant = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        let token = try XCTUnwrap(fixture.pollToken)
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let open = app.buttons["plans-open-link"]
+        XCTAssertTrue(open.waitForExistence(timeout: 20)); open.tap()
+        let field = app.alerts.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeText("https://www.sideseat.de/time-polls/" + token)
+        app.alerts.buttons["打开"].tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertTrue(first.waitForExistence(timeout: 20)); first.tap(); second.tap()
+        nativePhase("refresh-draft")
+        wait(first, labelContains: ", 1")
+        XCTAssertTrue(first.isSelected && second.isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        nativePhase("refresh-peers"); capture(app, "refresh-draft-with-peer-count")
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 25)); XCTAssertTrue(accept.isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].exists)
+        nativePhase("refresh-invitation"); capture(app, "refresh-incoming-final-time")
+        accept.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        nativePhase("refresh-confirmed"); capture(app, "refresh-confirmed-without-publishing-draft")
     }
 
     func testManualAvailabilityRequiresExplicitSubmission() throws {

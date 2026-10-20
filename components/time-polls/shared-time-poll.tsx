@@ -25,7 +25,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const accepted = poll?.invitations.filter((person) => person.selected && person.status === "ACCEPTED").length ?? 0;
   const target = poll?.planningMode === "FIXED" ? poll.expectedCount : poll?.invitations.filter((person) => person.selected).length;
   const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations.filter((person) => person.selected);
-  const disabled = busy || saving || state.hasChanges;
+  const disabled = busy || saving || (collecting && state.hasChanges);
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
   const viewerId = poll?.viewerId;
   useEffect(() => {

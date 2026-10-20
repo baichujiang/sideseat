@@ -208,6 +208,25 @@ struct TimePollTests {
         #expect(await transport.writes == [[]])
     }
 
+    @Test("Dirty availability keeps refreshing peers and formal invitation phases")
+    @MainActor
+    func refreshWithDraft() async throws {
+        for phase in ["COLLECTING", "INVITING"] {
+            let transport = PollRefreshRaceTransport(initialPhase: phase, includePeer: true)
+            let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+            session.installUITestingSession()
+            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            store.selected = [2, 3]; store.displayName = "Draft name"
+            let refresh = Task { await store.load(session: session) }
+            await transport.waitForRefresh(); await transport.releaseRefresh(); await refresh.value
+            #expect(store.selected == [2, 3] && store.displayName == "Draft name" && store.hasChanges)
+            #expect(store.poll?.participants.first?.displayName == "Friend")
+            #expect(store.poll?.planningPhase == phase)
+            if phase == "INVITING" { #expect(store.canMutate) }
+            #expect(await transport.writes.isEmpty)
+        }
+    }
+
     @Test("A delayed refresh cannot undo an acknowledged save or report an old refresh error")
     @MainActor
     func refreshAfterSave() async throws {
@@ -264,9 +283,10 @@ private actor PollRefreshRaceTransport: APITransport {
     private var refreshing = false
     private let refreshStatus: Int
     private let initialPhase: String
+    private let includePeer: Bool
     private(set) var writes: [[Int]] = []
-    init(refreshStatus: Int = 200, initialPhase: String = "COLLECTING") {
-        self.refreshStatus = refreshStatus; self.initialPhase = initialPhase
+    init(refreshStatus: Int = 200, initialPhase: String = "COLLECTING", includePeer: Bool = false) {
+        self.refreshStatus = refreshStatus; self.initialPhase = initialPhase; self.includePeer = includePeer
     }
     func waitForRefresh() async {
         if !refreshing { await withCheckedContinuation { started = $0 } }
@@ -285,6 +305,7 @@ private actor PollRefreshRaceTransport: APITransport {
         }
         var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
         object["mySlotIds"] = slots; object["didRespond"] = true; object["phase"] = phase
+        if includePeer { object["participants"] = [["id": "friend", "displayName": "Friend", "slotIds": [0, 1], "isMe": false]] }
         // Use APIClient's wire date representation, not JSONEncoder's default numeric dates.
         object["updatedAt"] = "2030-10-16T07:00:00Z"
         let data = status == 200 ? try JSONSerialization.data(withJSONObject: ["data": object])
