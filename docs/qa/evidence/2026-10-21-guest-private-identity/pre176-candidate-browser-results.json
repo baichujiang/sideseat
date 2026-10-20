@@ -1,0 +1,28 @@
+{
+  "phase": "candidate",
+  "base": "https://sideseat-2b2sfrxu7-baichus-projects.vercel.app",
+  "passed": true,
+  "results": [
+    {
+      "engine": "chromium",
+      "flow": "first fill → return → same-name isolation → clear browser data → private recovery → independent invitation replies → organizer Calendar",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "flow": "real old-format row → unsigned cookie denied → same name creates independent guest → organizer reissues → old response restored in place → organizer reset denied after claim",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "flow": "first fill → return → same-name isolation → clear browser data → private recovery → independent invitation replies → organizer Calendar",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "flow": "real old-format row → unsigned cookie denied → same name creates independent guest → organizer reissues → old response restored in place → organizer reset denied after claim",
+      "passed": true
+    }
+  ],
+  "at": "2026-10-20T22:36:58.716Z"
+}

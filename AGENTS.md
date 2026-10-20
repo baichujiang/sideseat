@@ -21,15 +21,17 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 176 is the current installed development build. App and shared-web
-  invitation timetables use a right-aligned color legend in each date header;
-  highlighted ranges contain no text or icon. Two physical UI tests cover six
-  standard/maximum text scenes; candidate and production each passed six display checks.
-  Preview 173 saved-card changes are retained. The App plan journey passed
-  separately in Preview 168. See
-  `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97
-  is a separate supported older client. Do not uninstall it or drop its API/data
-  compatibility as part of archival work.
+- Preview 177 is the current installed development build. Guests use independent
+  private credentials and personal recovery links without registration; names and
+  unsigned participant-ID cookies cannot claim records. Existing verified random
+  credentials upgrade in place; organizers can reissue only unclaimed old records.
+  Candidate and production each passed four Chromium/WebKit browser/data flows.
+  Old-record recovery generation/copy passed Chinese and German largest-text tests
+  on the default iPhone 14 Plus. Ordinary launch PID 4343 was observed.
+  Preview 176 invitation header legends and Preview 173 saved-card changes are
+  retained. Prior invitation-layout tests and the App plan journey retain their
+  separately recorded scope; see `docs/DEPLOYED_STATE.md`. Ordinary
+  SideSeat/TestFlight 97 remains installed and API compatible; do not uninstall it.
 - The deployed backend contains preserved production differences from this Git
   snapshot. Use the recorded comparison before a future release; never replace
   production with the entire local checkout on the assumption that they match.

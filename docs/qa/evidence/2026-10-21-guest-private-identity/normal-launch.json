@@ -1,0 +1,11 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "build": "177",
+  "pid": 4343,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "processObserved": true,
+  "at": "2026-10-20T22:49:18.592021+00:00"
+}

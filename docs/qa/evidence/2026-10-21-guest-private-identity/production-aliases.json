@@ -1,0 +1,10 @@
+{
+  "deploymentId": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "aliases": {
+    "www.sideseat.de": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+    "api.sideseat.de": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+    "sideseat.de": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v"
+  },
+  "promotedSameTestedArtifact": true,
+  "at": "2026-10-20T22:46:25.643411+00:00"
+}

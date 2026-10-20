@@ -1,0 +1,27 @@
+{
+  "deploymentId": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "health": [
+    {
+      "host": "www.sideseat.de",
+      "status": 200,
+      "finalHost": "www.sideseat.de"
+    },
+    {
+      "host": "api.sideseat.de",
+      "status": 200,
+      "finalHost": "api.sideseat.de"
+    },
+    {
+      "host": "sideseat.de",
+      "status": 200,
+      "finalHost": "www.sideseat.de"
+    }
+  ],
+  "previousLegacyDeployment": {
+    "deploymentId": "dpl_2NNNNsJy3nwtDhksLQY87rgMPzqx",
+    "status": 302,
+    "authenticationRedirect": true
+  },
+  "appleAssociationStatus": 200,
+  "at": "2026-10-20T22:47:09.936Z"
+}

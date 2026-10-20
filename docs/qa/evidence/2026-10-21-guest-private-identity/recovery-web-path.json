@@ -1,0 +1,6 @@
+{
+  "aasaStatus": 200,
+  "personalRecoveryPath": "/time-poll-recovery/",
+  "matchingNativeComponents": [],
+  "nativePollPathRetained": "/time-polls/*"
+}

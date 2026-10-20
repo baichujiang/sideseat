@@ -1,0 +1,12 @@
+{
+  "deploymentId": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "environment": "production",
+  "window": "15m",
+  "levels": [
+    "error",
+    "fatal"
+  ],
+  "returnedGroups": 0,
+  "querySucceeded": true,
+  "at": "2026-10-20T22:47:43.707544+00:00"
+}

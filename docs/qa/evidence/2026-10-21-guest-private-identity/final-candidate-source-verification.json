@@ -1,0 +1,13 @@
+{
+  "deployment": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "sourceCommit": "16589adc",
+  "featureCommits": [
+    "26339fbe",
+    "c49a8bf3"
+  ],
+  "productionBaseline": "dpl_2NNNNsJy3nwtDhksLQY87rgMPzqx",
+  "sourceFiles": 1388,
+  "mismatches": [],
+  "preservedSourceFiles": 1374,
+  "schemaChanged": false
+}

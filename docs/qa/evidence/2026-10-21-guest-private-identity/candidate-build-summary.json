@@ -1,0 +1,10 @@
+{
+  "deploymentId": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "url": "https://sideseat-2imh71za0-baichus-projects.vercel.app",
+  "state": "READY",
+  "sourceCommit": "16589adc",
+  "target": "production",
+  "databaseMigrationsSkipped": true,
+  "promotedAtBuildVerification": false,
+  "subsequentlyPromotedSameArtifact": true
+}

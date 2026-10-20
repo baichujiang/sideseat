@@ -1,0 +1,27 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "177",
+  "sourceBaseCommit": "b5fa6256",
+  "featureCommits": [
+    "26339fbe",
+    "c49a8bf3"
+  ],
+  "nativeSourceCount": 246,
+  "nativeSourcesUnchangedDuringBuild": true,
+  "nativeFileSHA256": "a28c46082c2e88fcb1d5f23448c531c13a59a2164cb93eac9e7150dcfc0e13c0",
+  "retained176InvitationSHA256": "3c0096be7dab63a7a9c220d429152fd9de9852b15e2fba16c2e0fec09a3d701c",
+  "binarySHA256": "9d511f301467352d1344975d0fbc1cb44ec7e819c887977e0eec137d16f504e2",
+  "debugDylibSHA256": "e2fdc04e8ad80e03108b299e6e4733dab65278936f8abc8f350754daa4206030",
+  "destination": "00008110-001A69110CC1401E",
+  "built": true,
+  "sourceCommit": "16589adc",
+  "strictCodesignPassed": true,
+  "installed": true,
+  "installedVersions": {
+    "app.sideseat.mobile": "97",
+    "app.sideseat.mobile.preview": "177"
+  },
+  "physicalUITestsPassed": true,
+  "runnerRemoved": true
+}
