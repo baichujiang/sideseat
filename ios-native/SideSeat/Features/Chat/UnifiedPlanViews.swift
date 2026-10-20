@@ -369,34 +369,41 @@ struct InvitationTimetableView: View {
                         Text(timeZone).font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceSM)
                         .id(date)
-                    ForEach(dayRows) { row in
-                        HStack(spacing: 0) {
-                            Text(row.label).font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
-                                .frame(width: labelWidth, height: rowHeight)
-                            GeometryReader { geometry in
-                                ZStack(alignment: .top) {
-                                    Rectangle().fill(SideSeatTheme.success.opacity(0.04))
-                                    if row.highlighted {
-                                        Rectangle().fill(SideSeatTheme.success.opacity(0.26))
-                                            .overlay { Rectangle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2) }
-                                            .overlay {
-                                                if row.through - row.from >= 0.5 {
-                                                    Label(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"), systemImage: "calendar")
-                                                        .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                                                }
-                                            }
-                                            .frame(height: geometry.size.height * (row.through - row.from))
-                                            .offset(y: geometry.size.height * row.from)
-                                    }
-                                }
-                            }.frame(height: rowHeight)
+                    VStack(spacing: 0) {
+                        ForEach(dayRows) { row in
+                            HStack(spacing: 0) {
+                                Text(row.label).font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
+                                    .frame(width: labelWidth, height: rowHeight)
+                                Rectangle().fill(SideSeatTheme.success.opacity(0.04)).frame(height: rowHeight)
+                            }
+                            .overlay(alignment: .bottom) { Divider() }
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(timePollDateLabel(row.date).replacingOccurrences(of: "\n", with: ", ") + ", " + row.label)
+                            .accessibilityValue(AppLocalization.string(row.highlighted ? (isDraft ? "Time already set" : "Invited time") : "Outside the invited time"))
+                            .accessibilityAddTraits(row.highlighted ? .isSelected : [])
+                            .accessibilityIdentifier("plan-invitation-cell-\(rows.firstIndex(where: { $0.id == row.id }) ?? 0)")
                         }
-                        .overlay(alignment: .bottom) { Divider() }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(timePollDateLabel(row.date).replacingOccurrences(of: "\n", with: ", ") + ", " + row.label)
-                        .accessibilityValue(AppLocalization.string(row.highlighted ? (isDraft ? "Time already set" : "Invited time") : "Outside the invited time"))
-                        .accessibilityAddTraits(row.highlighted ? .isSelected : [])
-                        .accessibilityIdentifier("plan-invitation-cell-\(rows.firstIndex(where: { $0.id == row.id }) ?? 0)")
+                    }
+                    .overlay(alignment: .topLeading) {
+                        if let first = dayRows.firstIndex(where: \.highlighted),
+                           let last = dayRows.lastIndex(where: \.highlighted) {
+                            let offset = CGFloat(first) + CGFloat(dayRows[first].from)
+                            let length = CGFloat(last - first) + CGFloat(dayRows[last].through - dayRows[first].from)
+                            HStack(spacing: 0) {
+                                Color.clear.frame(width: labelWidth)
+                                Rectangle().fill(SideSeatTheme.success.opacity(0.26))
+                                    .overlay { Rectangle().strokeBorder(SideSeatTheme.utilityAction, lineWidth: 2) }
+                                    .overlay {
+                                        Label(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"), systemImage: "calendar")
+                                            .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                                            .accessibilityIdentifier("plan-invitation-window-label")
+                                            .padding(.horizontal, 4)
+                                    }
+                            }
+                            .frame(height: rowHeight * length)
+                            .offset(y: rowHeight * offset)
+                            .allowsHitTesting(false)
+                        }
                     }
                 }.background(SideSeatTheme.surface).clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
                     .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }

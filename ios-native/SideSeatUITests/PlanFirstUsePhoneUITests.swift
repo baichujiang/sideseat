@@ -678,6 +678,9 @@ import XCTest
 
         nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
         XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "plan-invitation-window-label").count, 1,
+                       "A continuous invitation has one label instead of repeating it in every half-hour cell")
+        capture(app, "invitation-one-continuous-window")
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))

@@ -24,21 +24,24 @@ export function InvitationTimetable({ title, location, start, end, timeZone, zh,
         const dayStart = new Date(Math.max(Date.parse(start), Date.parse(day[0].start))).toISOString();
         const dayEnd = new Date(Math.min(Date.parse(end), Date.parse(day.at(-1)!.end))).toISOString();
         const until = dayEnd === day.at(-1)!.end && pollClock(dayEnd, timeZone) === "00:00" ? "24:00" : pollClock(dayEnd, timeZone);
+        const first = day.findIndex(row => row.through > row.from);
+        const highlightedRows = day.filter(row => row.through > row.from);
+        const count = highlightedRows.length;
         return <table key={date} className="w-full table-fixed border-collapse text-sm" aria-label={pollDate(date, zh)}>
           <colgroup><col className="w-16" /><col /></colgroup>
           <thead className="sticky top-0 z-10 bg-background"><tr><th colSpan={2} className="border-b p-3 text-left font-medium">
             <span className="block">{pollDate(date, zh)} · {pollClock(dayStart, timeZone)}–{until}</span>
             <span className="mt-1 block text-xs font-normal text-muted-foreground">{timeZone}</span>
           </th></tr></thead>
-          <tbody>{day.map(row => {
+          <tbody>{day.map((row, index) => {
             const highlighted = row.through > row.from;
             return <tr key={row.start} data-testid={`plan-invitation-cell-${rows.indexOf(row)}`} data-highlighted={highlighted} aria-label={`${pollDate(row.date, zh)}, ${row.label}, ${highlighted ? timeLabel : (zh ? "邀请时段之外" : "Outside the invited time")}`}>
               <th scope="row" className="h-11 w-16 border-b bg-background px-1 text-xs font-normal tabular-nums">{row.label}</th>
-              <td className="relative h-11 border-b border-l bg-muted/20 p-0">
-                {highlighted ? <div className={styles.invitationWindow + " absolute inset-x-0 flex items-center justify-center gap-1.5 overflow-hidden text-xs font-semibold"} style={{ top: `${row.from * 100}%`, height: `${(row.through - row.from) * 100}%` }}>
-                  <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />{row.through - row.from >= 0.99 ? <span>{timeLabel}</span> : null}
+              {!highlighted || index === first ? <td rowSpan={highlighted ? count : 1} className="relative border-b border-l bg-muted/20 p-0">
+                {highlighted ? <div data-testid="plan-invitation-window" className={styles.invitationWindow + " absolute inset-x-0 flex items-center justify-center gap-1.5 overflow-hidden px-1 text-xs font-semibold"} style={{ top: `${day[first].from / count * 100}%`, height: `${(count - 1 + highlightedRows.at(-1)!.through - day[first].from) / count * 100}%` }}>
+                  <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden /><span>{timeLabel}</span>
                 </div> : null}
-              </td>
+              </td> : null}
             </tr>;
           })}</tbody>
         </table>;
