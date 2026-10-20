@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "7653a3a4706c56aa5500364d3d2a018e50c50e22",
+  "build": "148",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "destination": "00008110-001A69110CC1401E",
+  "buildSucceeded": true,
+  "signatureVerified": true,
+  "sourceSha256": {
+    "ios-native/Configuration/Preview.xcconfig": "7c36bd66479587d296d6737b958e125a244a911a951a2ab6a801081e2b72e31b",
+    "ios-native/SideSeat/Core/Navigation/AppRoute.swift": "d682bda90cfb3a49de5d9ad088a1cd18529350d65e422f114bddbb4c3bd85f12",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "193788d334ca7b2a3483767ac5cd2a1601901aefbe38537d8f97e34f43678061",
+    "ios-native/SideSeat/Features/Shell/AppShellView.swift": "29aeab0ce1c368c583f5de473807a2ea704efdec46f989f1bb99f814324733a5",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "4b17ffd601382f2aceea32196fe4c7c97d116ac2e0ed651333d5d59c08948e6d",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "65f258b09306ce529b03c4cfdbf0cc26d986e13641dc420e834508d3ffb1d83b",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "3fd77088fbe3d60dcf219850f58e5651428d72f0e7194c202f4655bb24a09bf2",
+    "ios-native/SideSeatTests/CurrentUserTests.swift": "3edd72bd3c06388cec5208dd76b219b678b57a574d151758929c912a1e26d3f1",
+    "ios-native/SideSeatUITests/PlanStatePresentationUITests.swift": "bde733acaf051b652da55b1a114ddff1b48dfdfbc4e6bccfc7aa152784b82a7d"
+  },
+  "appExecutableSha256": "a90360ccd2ccffb85d60ed2b7c6da7abee7223ce82695afa5b1ad2eeda13b5de"
+}

@@ -1,0 +1,19 @@
+{
+  "initialEntry": {
+    "appSource": "841100c747b1ca2a9b6c492b8601de1caa7a2055",
+    "passed": 3,
+    "failed": 1
+  },
+  "unitAndPresentation": {
+    "appSource": "e12e2fc354f55096e762b0cab1752b90aefdebc4",
+    "unitPassed": 20,
+    "presentationPassed": 12
+  },
+  "nativeAndHistory": {
+    "appSource": "7653a3a4706c56aa5500364d3d2a018e50c50e22",
+    "nativeSeconds": 353.061,
+    "nativeApiBoundaries": 13,
+    "finalHistoryTestsPassed": 3,
+    "delta": "Only history shared-card navigation changed after the unit/presentation pass; real shared history, normal root/history and maximum text confirmed tab rechecked."
+  }
+}

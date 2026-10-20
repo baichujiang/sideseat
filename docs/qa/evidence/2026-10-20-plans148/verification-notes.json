@@ -1,0 +1,11 @@
+{
+  "initialLayoutSource": "841100c747b1ca2a9b6c492b8601de1caa7a2055",
+  "initialEntryTests": {
+    "passed": 3,
+    "failed": 1,
+    "failure": "AX-size tab buttons inherited the parent identifier, masking their separate identifiers",
+    "fix": "Explicit containment for the two-tab accessibility group",
+    "fixSource": "e12e2fc354f55096e762b0cab1752b90aefdebc4"
+  },
+  "backendChanged": false
+}

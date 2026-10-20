@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 147** 修复初次读取未结束就显示空计划布局的闪屏；统一加载状态，清理旧宣传、无调用的引导/纵向分区、欢迎图片及专用文案。11 项真机界面回归通过；最终清理包复验慢加载与横向分区。本轮无后端或网页发布，未重跑服务端完整流程。[当前交付](./releases/2026-10-20-preview147-plan-loading-cleanup.md)、[本轮 QA](./qa/2026-10-20-plans147.md)。
+当前 **Preview 148** 使用「筹划中 / 已确定」两个分栏，移除首页顶部导航栏；创建/打开链接移入页面，历史作为时钟入口。原横向等待/纵向待处理保留，已成行记录集中在已确定。20 项单元、12 项界面、353.061 秒真实双账号完整流程/13 API 阶段及 3 项最终复验通过；无后端或网页发布。[当前交付](./releases/2026-10-20-preview148-two-plan-tabs.md)、[本轮 QA](./qa/2026-10-20-plans148.md)。
+
+此前 **Preview 147** 修复初次读取未结束就显示空计划布局的闪屏；统一加载状态，清理旧宣传、无调用的引导/纵向分区、欢迎图片及专用文案。11 项真机界面回归通过，最终清理包复验慢加载与横向分区；当时无后端或网页发布。[147 交付](./releases/2026-10-20-preview147-plan-loading-cleanup.md)、[147 QA](./qa/2026-10-20-plans147.md)。
 
 此前 **Preview 146** 移除无计划时的插图、宣传介绍和示例入口，直接显示「发起计划」和「打开计划链接」。4 项真机界面检查、深色最大字号及普通启动通过；当时无后端或网页发布。[146 交付](./releases/2026-10-20-preview146-direct-plans-entry.md)、[146 QA](./qa/2026-10-20-plans146.md)。
 
@@ -22,9 +24,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `229a5834`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (147)` | 首次加载与旧展示清理；11 项主体回归、最终包 3 项复验及普通启动 PID 3585；[147 交付](./releases/2026-10-20-preview147-plan-loading-cleanup.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；慢加载、浅色与深色最大字号、横向分区/详情及普通启动通过；runner 与临时测试配置清理，147 无真实账号/计划创建 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `7653a3a4`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (148)` | 两个分栏及页内操作；12 项界面、最终完整原生/13 API 与 3 项复验通过，普通启动 PID 3647；[148 交付](./releases/2026-10-20-preview148-two-plan-tabs.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；慢加载、两栏、历史/详情往返、深色最大字号和普通启动通过；2 个一次性账号/1 个计划清理，runner 与私密配置移除 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR`，Ready | 主动发出、接受者日历/通知、晚接受；最终候选/正式各 12 组、实际 APNs 接收 2 条；[验证](./qa/2026-10-20-plans145.md) |
