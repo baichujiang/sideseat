@@ -186,13 +186,31 @@ struct InboxNotificationsTests {
         #expect(await transport.paths.count == 1)
     }
 
+    @Test("Final publication notifies accepted participants only and does not repeat on refresh")
+    func publishedAudience() throws {
+        for reply in ["INVITED", "DECLINED", "ACCEPTED"] {
+            let store = InboxNotificationsStore(defaults: storage())
+            store.activate(accountID: reply)
+            store.reconcile(polls: [try poll(phase: "CONFIRMED", reply: reply)])
+            #expect(store.items.filter { $0.kind == .confirmed }.count == (reply == "ACCEPTED" ? 1 : 0))
+            store.reconcile(polls: [try poll(phase: "CONFIRMED", reply: reply)])
+            #expect(store.items.count == (reply == "ACCEPTED" ? 1 : 0))
+        }
+        let store = InboxNotificationsStore(defaults: storage())
+        store.activate(accountID: "late")
+        store.reconcile(polls: [try poll(phase: "CONFIRMED")])
+        #expect(store.items.isEmpty)
+        store.reconcile(polls: [try poll(phase: "CONFIRMED", reply: "ACCEPTED")])
+        #expect(store.items.first?.kind == .confirmed)
+    }
+
     private func poll(start: String = "2030-10-20T10:00:00Z", end: String = "2030-10-20T12:00:00Z",
-                      updated: String = "2030-10-18T09:00:00Z", included: Bool = true, phase: String = "INVITING") throws -> NativeTimePollList.Item {
+                      updated: String = "2030-10-18T09:00:00Z", included: Bool = true, phase: String = "INVITING", reply: String = "INVITED") throws -> NativeTimePollList.Item {
         let object: [String: Any] = ["token": String(repeating: "a", count: 32), "title": "Coffee",
             "timeZone": "Europe/Berlin", "dates": ["2030-10-20"], "updatedAt": updated,
             "shareUrl": "https://www.sideseat.de/time-polls/" + String(repeating: "a", count: 32),
             "phase": phase, "chosenStart": start, "chosenEnd": end,
-            "myInvitationStatus": "INVITED", "isIncluded": included]
+            "myInvitationStatus": reply, "isIncluded": included]
         let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(NativeTimePollList.Item.self, from: JSONSerialization.data(withJSONObject: object))
     }

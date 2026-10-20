@@ -194,9 +194,14 @@ import XCTest
         XCTAssertTrue(invited.isHittable); invited.tap()
         XCTAssertTrue(accept.isEnabled)
         capture(safari, "11-guest-invitation"); accept.tap()
-        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Plan confirmed", "计划已确定"])).firstMatch.waitForExistence(timeout: 25))
-        capture(safari, "12-guest-confirmed")
-        app.activate(); wait(count, labelContains: "2/2 人已确认")
+        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["You accepted. Waiting for the organizer.", "你已接受，等待发起人正式发出"])).firstMatch.waitForExistence(timeout: 25))
+        capture(safari, "12-guest-accepted")
+        app.activate(); wait(count, labelContains: "2/2 人已确认"); phase("accepted-awaiting-publish")
+        XCTAssertFalse(app.buttons["plan-view-calendar"].exists)
+        let publish = app.buttons["unified-plan-publish"]
+        XCTAssertTrue(publish.waitForExistence(timeout: 15)); publish.tap()
+        let finalSend = app.buttons["正式发出"].firstMatch
+        XCTAssertTrue(finalSend.waitForExistence(timeout: 10)); finalSend.tap()
         let calendar = app.buttons["plan-view-calendar"]
         XCTAssertTrue(calendar.waitForExistence(timeout: 15)); capture(app, "13-native-confirmed"); phase("confirmed")
         calendar.tap()
@@ -705,7 +710,20 @@ import XCTest
         XCTAssertTrue(finalAccept.waitForExistence(timeout: 15)); finalAccept.tap()
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "2/2 人已确认")
-        nativePhase("confirmed"); capture(app, "native-09-participant-confirmed")
+        nativePhase("accepted-awaiting-publish"); capture(app, "native-09-participant-accepted")
+        XCTAssertFalse(app.buttons["plan-view-calendar"].exists)
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        let publish = app.buttons["unified-plan-publish"]
+        XCTAssertTrue(publish.waitForExistence(timeout: 20)); publish.tap()
+        let finalSend = app.buttons["正式发出"].firstMatch
+        XCTAssertTrue(finalSend.waitForExistence(timeout: 10)); finalSend.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        nativePhase("confirmed"); capture(app, "native-09b-owner-published")
+        nativeSignIn(participant, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        app.buttons["plans-section-upcoming"].tap(); nativeOpenCard()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
         app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
         app.buttons["calendar-search"].tap()

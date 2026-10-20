@@ -37,9 +37,9 @@ struct PlanPresentationTests {
 
     @Test("The sender, accepting participant, declined participant and excluded participant see different tasks")
     func roles() {
-        #expect(manual(owner: true).nextStep == .reviewReplies)
-        #expect(!manual(owner: true).nextStep.needsYou)
-        #expect(manual(owner: true, fixed: true).nextStep == .shareInvitation)
+        #expect(manual(owner: true).nextStep == .publishPlan)
+        #expect(manual(owner: true).nextStep.needsYou)
+        #expect(manual(owner: true, fixed: true).nextStep == .publishPlan)
         #expect(manual(reply: "ACCEPTED").nextStep == .waitForReplies)
         #expect(manual(reply: "DECLINED", included: false).nextStep == .declined)
         #expect(manual(reply: nil, included: false).nextStep == .notIncluded)
@@ -61,6 +61,15 @@ struct PlanPresentationTests {
         #expect(ended.status == .ended && ended.nextStep == .viewPlan)
         let bilateral = PlanPresentation.conversation(chat(status: "ACCEPTED", hours: -3), viewerID: "me", now: now)
         #expect(bilateral.status == .ended && bilateral.nextStep == .recordOutcome)
+    }
+
+    @Test("Published plans distinguish accepted, pending, declined, and link participants")
+    func publishedAttendance() {
+        #expect(manual("CONFIRMED", owner: true).nextStep == .viewCalendar)
+        #expect(manual("CONFIRMED", reply: "INVITED").nextStep == .confirm)
+        #expect(manual("CONFIRMED", reply: "DECLINED").nextStep == .declined)
+        #expect(manual("CONFIRMED", reply: nil, included: false, fixed: true).nextStep == .confirm)
+        #expect(manual("CONFIRMED", reply: "ACCEPTED").nextStep == .viewCalendar)
     }
 
     @Test("Rescheduling retains the existing confirmed-time rule and never changes the persisted invitation")
@@ -88,9 +97,9 @@ struct PlanPresentationTests {
         #expect(invited.cardStatusTitle == AppLocalization.string("Your confirmation needed"))
         #expect(invited.cardActionTitle == AppLocalization.string("Review invitation"))
         #expect(accepted.cardStatusTitle == AppLocalization.string("You've confirmed"))
-        #expect(owner.cardStatusTitle == AppLocalization.string("Waiting for friends"))
+        #expect(owner.cardStatusTitle == AppLocalization.string("Ready to send final plan"))
         #expect(invited.status == accepted.status && accepted.status == owner.status)
-        #expect(invited.nextStep == .confirm && !accepted.nextStep.needsYou && !owner.nextStep.needsYou)
+        #expect(invited.nextStep == .confirm && !accepted.nextStep.needsYou && owner.nextStep.needsYou)
     }
 
     @Test("Compact dates retain cross-midnight and cross-year meaning")

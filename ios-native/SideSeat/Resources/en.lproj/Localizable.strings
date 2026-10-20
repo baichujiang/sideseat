@@ -3060,3 +3060,22 @@
 "Numbers count submitted responses" = "Numbers count submitted responses";
 
 "Draft restored · not submitted" = "Draft restored · not submitted";
+
+/* Organizer-controlled final publication */
+"Friends can accept, decline, or reply later. You decide when to send the final plan." = "Friends can accept, decline, or reply later. You decide when to send the final plan.";
+"Collect replies first, then send the final plan whenever you are ready." = "Collect replies first, then send the final plan whenever you are ready.";
+"Send final plan" = "Send final plan";
+"Send final plan?" = "Send final plan?";
+"Ready to send final plan" = "Ready to send final plan";
+"Review and send" = "Review and send";
+"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Send the final plan whenever you are ready. Only people who accepted will be notified.";
+"You accepted. Waiting for the organizer to send the final plan." = "You accepted. Waiting for the organizer to send the final plan.";
+"Accept, decline, or reply later. Only accepted participants join the final plan." = "Accept, decline, or reply later. Only accepted participants join the final plan.";
+"The organizer sent the final plan. You can still accept before it starts." = "The organizer sent the final plan. You can still accept before it starts.";
+"Only accepted participants have this plan in their calendars." = "Only accepted participants have this plan in their calendars.";
+"Reply later" = "Reply later";
+"Send whenever you are ready. Pending replies and declines do not hold up this plan." = "Send whenever you are ready. Pending replies and declines do not hold up this plan.";
+"Send to %d accepted people, including you. Pending and declined people will not be notified." = "Send to %d accepted people, including you. Pending and declined people will not be notified.";
+"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "The organizer can send at any time. Only accepted participants are notified and added to calendars.";
+"Someone declined. You can still send the final plan to the people who accepted." = "Someone declined. You can still send the final plan to the people who accepted.";
+"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan.";

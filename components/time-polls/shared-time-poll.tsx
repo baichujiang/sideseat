@@ -16,15 +16,16 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const state = useSharedTimePoll(token);
   const { poll, error, busy, saving, saved, selected, editingName, switchingParticipant, resumed } = state;
   const [name, setName] = useState("");
+  const [deferred, setDeferred] = useState(false);
   const table = useRef<HTMLElement>(null);
   const collecting = poll?.phase === "COLLECTING";
   const choosingActivity = collecting && poll?.activitySelection?.isOpen === true;
-  const closed = poll?.phase === "CONFIRMED" || poll?.phase === "CANCELLED" || poll?.phase === "EXPIRED";
+  const closed = poll?.phase === "CANCELLED" || poll?.phase === "EXPIRED" || (poll?.phase === "CONFIRMED" && !!poll.chosenStart && Date.parse(poll.chosenStart) <= Date.now());
   const mine = poll?.invitations.find((person) => person.isMe);
   const included = mine?.selected || poll?.planningMode === "FIXED";
   const accepted = poll?.invitations.filter((person) => person.selected && person.status === "ACCEPTED").length ?? 0;
   const target = poll?.planningMode === "FIXED" ? poll.expectedCount : poll?.invitations.filter((person) => person.selected).length;
-  const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations.filter((person) => person.selected);
+  const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations;
   const disabled = busy || saving;
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
   const viewerId = poll?.viewerId;
@@ -34,7 +35,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const errorText = zh && error === "This device could not keep your draft. Keep this page open until you submit." ? "此设备无法保留草稿，请保持页面打开并手动提交。" : zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
   const editing = collecting && !!poll?.viewerId && !choosingName;
-  const replying = poll?.phase === "INVITING" && !!poll.viewerId && included && !choosingName;
+  const replying = (poll?.phase === "INVITING" || poll?.phase === "CONFIRMED") && !closed && !!poll.viewerId && included && !choosingName;
   const selectedSlots = poll?.slots.filter((slot) => selected.includes(slot.id)) ?? [];
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
   const selectedHours = new Intl.NumberFormat(zh ? "zh-CN" : "en", { maximumFractionDigits: 2 }).format(selectedSlots.reduce((sum, slot) => sum + (Date.parse(slot.end) - Date.parse(slot.start)) / 3600000, 0));
@@ -115,17 +116,17 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
             </section> : null}
 
             {!collecting ? <section className="space-y-4 rounded-2xl border bg-background p-5 sm:p-6" data-testid="plan-invitation">
-              <h2 className="text-2xl font-semibold">{poll.phase === "CONFIRMED" ? (zh ? "计划已确定" : "Plan confirmed") : poll.phase === "CANCELLED" ? (zh ? "计划已取消" : "Plan cancelled") : poll.phase === "EXPIRED" ? (zh ? "计划已过期" : "Plan expired") : mine?.status === "ACCEPTED" ? (zh ? "你已确认，等待其他人" : "You've confirmed. Waiting for others.") : (zh ? "最后一步：确认最终时间" : "Last step: confirm the final time")}</h2>
+              <h2 className="text-2xl font-semibold">{poll.phase === "CONFIRMED" ? (zh ? "计划已确定" : "Plan confirmed") : poll.phase === "CANCELLED" ? (zh ? "计划已取消" : "Plan cancelled") : poll.phase === "EXPIRED" ? (zh ? "计划已过期" : "Plan expired") : mine?.status === "ACCEPTED" ? (zh ? "你已接受，等待发起人正式发出" : "You accepted. Waiting for the organizer.") : (zh ? "最后一步：确认最终时间" : "Last step: confirm the final time")}</h2>
               {poll.chosenStart && poll.chosenEnd ? <p className="text-lg font-semibold leading-7">{formatWindow(poll.chosenStart, poll.chosenEnd)}</p> : null}
               {poll.chosenStart && poll.chosenEnd ? <section ref={table} className="scroll-mt-4">
                 <InvitationTimetable title={poll.title} location={poll.location} start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} needsConfirmation={!!replying && mine?.status !== "ACCEPTED"} />
               </section> : null}
               {poll.phase === "EXPIRED" ? <p role="status" className="text-sm leading-6 text-muted-foreground">{zh ? "这次安排在确认前已过期，没有加入任何人的日历。请联系发起人重新约时间。" : "This plan expired before confirmation. No calendar entries were added. Ask the organizer to arrange another time."}</p> : poll.phase === "CANCELLED" ? <p className="text-sm text-muted-foreground">{zh ? "发起人已取消这次安排，请联系对方重新约时间。" : "This activity was cancelled. Contact the organizer to arrange another time."}</p> : <>
                 <p className={"inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium " + styles.phase}><Users className="h-4 w-4" aria-hidden />{accepted}/{target ?? 0} {zh ? "人已确认" : "confirmed"}</p>
-                {poll.phase === "CONFIRMED" ? <><p className="text-sm leading-6">{zh ? "大家已同意这个时间，按上面的时间地点参加即可。" : "Everyone agreed to this time. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>
-                  <p className="text-sm leading-6">{mine?.status === "ACCEPTED" ? (zh ? "你的确认已保存。等所有受邀朋友确认后，活动才会最终确定。" : "Your confirmation is saved. The activity is final once everyone invited confirms.") : (zh ? "现在确认的是上面的具体安排，请看好日期、时间和地点后回复。" : "You're confirming the specific arrangement above. Check the date, time and place before replying.")}</p>
-                  <p className="text-sm leading-6 text-muted-foreground">{zh ? "所有人确认后，已注册朋友的 SideSeat 日历会同步这次活动。你可以一直用这个链接查看安排。" : "After everyone confirms, registered friends receive it in their SideSeat calendars. You can keep using this link to view the plan."}</p>
-                </> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "这次邀请没有包含你。你填写的空闲仍然保留，可以联系发起人。" : "You aren't included in this invitation. Your availability is saved; contact the organizer."}</p> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "请先填写上面的名字，再回复这次邀请。" : "Enter your name above to reply to this invitation."}</p>}
+                {poll.phase === "CONFIRMED" && mine?.status === "ACCEPTED" ? <><p className="text-sm leading-6">{zh ? "发起人已正式发出，你已接受参加。按上面的时间地点参加即可。" : "The organizer sent the final plan and you accepted. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>
+                  <p className="text-sm leading-6">{mine?.status === "ACCEPTED" ? (zh ? "你已接受。由发起人决定何时正式发出，无需等待所有人回复。" : "You accepted. The organizer decides when to send the final plan, without waiting for everyone.") : (zh ? "现在确认的是上面的具体安排，请看好日期、时间和地点后回复。" : "You're confirming the specific arrangement above. Check the date, time and place before replying.")}</p>
+                  <p className="text-sm leading-6 text-muted-foreground">{zh ? "发起人可随时正式发出，只通知已接受者并同步他们的 SideSeat 日历。未回复或拒绝不会阻塞；发出后仍可在开始前接受。" : "The organizer can send at any time. Only accepted participants are notified and added to their SideSeat calendars. You may still accept before the activity starts."}</p>
+                </> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "你尚未接受这次邀请，不会收到成行通知，也不会加入日历。你填写的空闲仍然保留。" : "You have not accepted this invitation, so you won't receive the final alert or a calendar entry. Your availability is saved."}</p> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "请先填写上面的名字，再回复这次邀请。" : "Enter your name above to reply to this invitation."}</p>}
               </>}
             </section> : null}
           </div>
@@ -151,10 +152,14 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
         </div> : null}
         {replying ? <div className={styles.saveBar + " fixed inset-x-0 bottom-0 z-40 border-t bg-background px-4 pt-3 shadow-[0_-4px_24px_rgb(0_0_0_/_0.05)] sm:px-6"}>
           <div className="mx-auto max-w-4xl">
-            {mine?.status === "ACCEPTED" ? <p role="status" className="flex min-h-12 items-center justify-center gap-2 text-sm font-semibold"><Clock3 className="h-5 w-5" aria-hidden />{zh ? "你已确认参加，等待其他人" : "You've confirmed. Waiting for others."}</p> : <div className="grid grid-cols-[1fr_2fr] gap-3">
-              <Button variant="outline" disabled={disabled || mine?.status === "DECLINED"} onClick={() => void state.reply("DECLINED")} className="min-h-12 rounded-xl">{mine?.status === "DECLINED" ? (zh ? "已回复无法参加" : "Declined") : (zh ? "无法参加" : "I can't attend")}</Button>
-              <Button disabled={disabled} onClick={() => void state.reply("ACCEPTED")} className={"min-h-12 rounded-xl " + styles.finishButton}>{zh ? "确认参加" : "Confirm participation"}</Button>
-            </div>}
+            {deferred ? <div className="flex flex-wrap items-center justify-between gap-2"><p role="status" className="text-sm">{zh ? "暂不回复，不影响发起人继续安排。" : "Reply later. The organizer can continue without your response."}</p><Button variant="ghost" onClick={() => setDeferred(false)}>{zh ? "回复邀请" : "Reply to invitation"}</Button></div> : <>
+              {mine?.status === "ACCEPTED" ? <p role="status" className="mb-2 flex items-center gap-2 text-sm font-semibold"><Clock3 className="h-5 w-5" aria-hidden />{poll.phase === "CONFIRMED" ? (zh ? "已接受参加 · 安排已正式发出" : "You're attending · final plan sent") : (zh ? "你已接受，等待发起人正式发出" : "You accepted. Waiting for the organizer.")}</p> : null}
+              <div className={mine?.status === "ACCEPTED" ? "flex justify-end" : "grid grid-cols-[1fr_2fr] gap-3"}>
+                <Button variant="outline" disabled={disabled || mine?.status === "DECLINED"} onClick={() => void state.reply("DECLINED")} className="min-h-12 rounded-xl">{mine?.status === "DECLINED" ? (zh ? "已回复无法参加" : "Declined") : (zh ? "无法参加" : "I can't attend")}</Button>
+                {mine?.status !== "ACCEPTED" ? <Button disabled={disabled} onClick={() => void state.reply("ACCEPTED")} className={"min-h-12 rounded-xl " + styles.finishButton}>{zh ? "确认参加" : "Confirm participation"}</Button> : null}
+              </div>
+              {!mine || mine.status === "INVITED" ? <Button variant="ghost" className="mt-1 min-h-11 w-full" onClick={() => setDeferred(true)}>{zh ? "暂不回复" : "Reply later"}</Button> : null}
+            </>}
           </div>
         </div> : null}
       </>}

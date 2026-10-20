@@ -125,7 +125,7 @@ struct UnifiedPlanInviteView: View {
                         .accessibilityIdentifier("unified-plan-invite-person-\(person.id)")
                         .accessibilityValue(selected.contains(person.id) ? "Selected" : "Not selected")
                     }
-                    Text("Sending confirms your participation. Everyone you select must confirm this exact time before calendars are updated.")
+                    Text("Friends can accept, decline, or reply later. You decide when to send the final plan.")
                         .font(.footnote).foregroundStyle(.secondary)
                 } }
                 Section {
@@ -150,7 +150,7 @@ struct UnifiedPlanInviteView: View {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Text(String(format: AppLocalization.string(linkParticipantCount == nil ? "Inviting %d people, including you" : "Plan for %d people, including you"), linkParticipantCount ?? (selectedFriends + 1)))
                         .font(.subheadline.weight(.semibold))
-                    Text("Sending confirms your participation. Everyone else confirms from the link.")
+                    Text("Collect replies first, then send the final plan whenever you are ready.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     PlanActionButton(title: AppLocalization.string(linkParticipantCount == nil ? "Send invitations" : "Create invitation link"), symbol: "paperplane.fill", kind: .commit, isLoading: sending || store.acting,
                                     accessibilityID: "unified-plan-send-invitations") {
@@ -189,12 +189,13 @@ struct UnifiedPlanConfirmationView: View {
     let chooseAnotherTime: () -> Void
     @State private var showsName = false
     @State private var showsPeople = false
+    @State private var showsPublish = false
     @State private var draftName = ""
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
     private var presentation: PlanPresentation { poll.presentation(at: Date()) }
     private var canReply: Bool {
-        poll.planningPhase == "INVITING" && !poll.isOwner && (mine?.selected == true
+        ["INVITING", "CONFIRMED"].contains(poll.planningPhase) && (poll.chosenStart ?? .distantPast) > Date() && !poll.isOwner && (mine?.selected == true
             || poll.planningMode == "FIXED" && accepted < poll.targetCount && (mine == nil || mine?.status == "DECLINED"))
     }
 
@@ -223,8 +224,8 @@ struct UnifiedPlanConfirmationView: View {
                     }
                     ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
                         .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
-                    if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.targetCount > poll.allInvitations.filter(\.selected).count {
-                        Text(String(format: AppLocalization.string("%d places still open"), poll.targetCount - poll.allInvitations.filter(\.selected).count))
+                    if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.targetCount > poll.allInvitations.count {
+                        Text(String(format: AppLocalization.string("%d places still open"), poll.targetCount - poll.allInvitations.count))
                             .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     Label(calendarExplanation, systemImage: poll.planningPhase == "CONFIRMED" && included ? "calendar.badge.checkmark" : "info.circle")
@@ -241,7 +242,7 @@ struct UnifiedPlanConfirmationView: View {
                 }
                 if poll.isOwner && poll.planningPhase == "INVITING" && poll.planningMode != "FIXED" {
                     if poll.allInvitations.contains(where: { $0.selected && $0.status == "DECLINED" }) {
-                        Text("Someone can’t attend. Review the time or invitation list before sending a new invitation.")
+                        Text("Someone declined. You can still send the final plan to the people who accepted.")
                             .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                             .accessibilityIdentifier("plan-declined-guidance")
                     }
@@ -260,17 +261,33 @@ struct UnifiedPlanConfirmationView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
-                if canReply && mine?.status != "ACCEPTED" {
+                if canReply {
                     Text(presentation.nextStep.title).font(.caption)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("plan-next-step")
-                    PlanActionButton(title: AppLocalization.string("Confirm participation"), symbol: "checkmark.circle", kind: .commit, isLoading: store.acting,
-                                    accessibilityID: "unified-plan-accept") { reply("ACCEPTED") }
+                    if mine?.status != "ACCEPTED" {
+                        PlanActionButton(title: AppLocalization.string("Confirm participation"), symbol: "checkmark.circle", kind: .commit, isLoading: store.acting,
+                                         accessibilityID: "unified-plan-accept") { reply("ACCEPTED") }
+                    } else {
+                        Text(presentation.detail).font(.subheadline).accessibilityIdentifier("unified-plan-accepted-status")
+                        if poll.planningPhase == "CONFIRMED" {
+                            PlanActionButton(title: AppLocalization.string("View in Calendar"), symbol: "calendar", kind: .navigate,
+                                             accessibilityID: "plan-view-calendar") { deepLinkRouter.handleAppPath("/home") }
+                        }
+                    }
                     PlanActionButton(title: AppLocalization.string("I can't attend"), symbol: "xmark.circle", kind: .decline,
                                      accessibilityID: "unified-plan-decline") { reply("DECLINED") }
                         .disabled(mine?.status == "DECLINED")
+                    if mine?.status == "INVITED" || mine == nil {
+                        Button("Reply later") { dismiss() }.frame(maxWidth: .infinity, minHeight: 44)
+                            .accessibilityIdentifier("unified-plan-ignore")
+                    }
                 } else if poll.planningPhase == "INVITING" && poll.isOwner {
-                    Text("Send the link to friends so they can confirm this time.")
+                    Text("Send whenever you are ready. Pending replies and declines do not hold up this plan.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    PlanActionButton(title: AppLocalization.string("Send final plan"), symbol: "paperplane.fill", kind: .commit,
+                                     isLoading: store.acting, accessibilityID: "unified-plan-publish") {
+                        showsPublish = true
+                    }
                     PlanShareActions(poll: poll)
                 } else if poll.planningPhase == "CONFIRMED" && included {
                     PlanActionButton(title: AppLocalization.string("View in Calendar"), symbol: "calendar", kind: .navigate,
@@ -282,12 +299,20 @@ struct UnifiedPlanConfirmationView: View {
             }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
                 .overlay(alignment: .top) { Divider() }.disabled(store.acting)
         }
+        .confirmationDialog("Send final plan?", isPresented: $showsPublish, titleVisibility: .visible) {
+            Button("Send final plan") {
+                Task { await store.mutate("publish", body: CancelPollPlanRequest(version: poll.invitationVersion ?? 0), session: session) }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text(String(format: AppLocalization.string("Send to %d accepted people, including you. Pending and declined people will not be notified."), accepted))
+        }
         .sheet(isPresented: $showsPeople) {
             NavigationStack {
                 Form {
                     Section {
                         Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
-                        ForEach(poll.allInvitations.filter(\.selected)) { person in
+                        ForEach(poll.allInvitations) { person in
                             HStack(spacing: SideSeatTheme.spaceMD) {
                                 Image(systemName: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock")
                                     .foregroundStyle(person.status == "ACCEPTED" ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
@@ -333,11 +358,11 @@ struct UnifiedPlanConfirmationView: View {
             }.presentationDetents([.medium, .large])
         }
     }
-    private var included: Bool { poll.isOwner || mine?.selected == true }
+    private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }
     private var calendarExplanation: String {
         AppLocalization.string(poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed."
-            : poll.planningPhase == "CONFIRMED" ? (included ? "Synced to Sideseat calendars" : "Only invited participants have this plan in their calendars.")
-            : "The plan is added to calendars after everyone included confirms.")
+            : poll.planningPhase == "CONFIRMED" ? (included ? "Synced to Sideseat calendars" : "Only accepted participants have this plan in their calendars.")
+            : "The organizer can send at any time. Only accepted participants are notified and added to calendars.")
     }
     private func reply(_ status: String) {
         Task { await store.mutate("invitation-response", method: .put, body: RespondPollInvitationRequest(status: status, version: poll.invitationVersion ?? 0), session: session) }

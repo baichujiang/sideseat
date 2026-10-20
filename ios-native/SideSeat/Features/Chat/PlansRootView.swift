@@ -563,9 +563,9 @@ struct PlansRootView: View {
         coordinatedPlans.filter { plan in
             let phase = plan.planningPhase(at: now)
             return switch section {
-            case .waitingResponse: ["COLLECTING", "INVITING"].contains(phase)
-            case .upcoming: phase == "CONFIRMED" && plan.isIncluded != false && (plan.chosenEnd ?? .distantPast) > now
-            case .ended: ["CANCELLED", "EXPIRED"].contains(phase) || (phase == "CONFIRMED" && (plan.isIncluded == false || (plan.chosenEnd ?? .distantFuture) <= now))
+            case .waitingResponse: ["COLLECTING", "INVITING"].contains(phase) || (phase == "CONFIRMED" && plan.nextStep(at: now) == .confirm)
+            case .upcoming: phase == "CONFIRMED" && (plan.isOwner == true || plan.myInvitationStatus == "ACCEPTED") && (plan.chosenEnd ?? .distantPast) > now
+            case .ended: ["CANCELLED", "EXPIRED"].contains(phase) || (phase == "CONFIRMED" && ((plan.nextStep(at: now) != .confirm && plan.myInvitationStatus != "ACCEPTED" && plan.isOwner != true) || (plan.chosenEnd ?? .distantFuture) <= now))
             }
         }.sorted {
             section == .upcoming

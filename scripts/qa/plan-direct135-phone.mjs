@@ -98,9 +98,10 @@ if (mode === 'prepare') {
       assert.equal(ownerCalendar.length, 1); assert.equal(participantCalendar.length, 1);
       assert.equal(new Date(detail.chosenEnd) - new Date(detail.chosenStart), 3600000);
     } else {
-      assert.equal(detail.phase, ['awaiting-confirmation', 'reschedule-cancelled', 'invitation-reviewed'].includes(phase) ? 'INVITING' : 'COLLECTING');
+      assert.equal(detail.phase, ['awaiting-confirmation', 'reschedule-cancelled', 'invitation-reviewed', 'accepted-awaiting-publish'].includes(phase) ? 'INVITING' : 'COLLECTING');
       assert.equal(ownerCalendar.length, 0); assert.equal(participantCalendar.length, 0);
       if (['awaiting-confirmation', 'reschedule-cancelled', 'invitation-reviewed'].includes(phase)) { assert.equal(accepted, 1); assert.equal(detail.invitationVersion, 1); }
+      if (phase === 'accepted-awaiting-publish') assert.equal(accepted, 2);
       if (['owner-final-picked', 'roster-reviewed'].includes(phase)) assert.equal(detail.chosenStart ?? null, null, 'A local time/roster draft must not send an invitation.');
     }
     return { phase, checkedAt: new Date().toISOString(), actualPhase: detail.phase, participantCount: detail.participants.length,

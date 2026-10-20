@@ -51,7 +51,7 @@ export async function joinPublicPoll(token: string, displayName: string, appOrig
   const { guest, resumed } = await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, null);
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
-    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll))) throw new TimePollError(409, "This plan is no longer open to new participants.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) && !(poll.phase === "CONFIRMED" && poll.chosenStart && poll.chosenStart > new Date())) throw new TimePollError(409, "This plan is no longer open to new participants.");
     const existing = await tx.timePollGuest.findFirst({
       where: { pollId: poll.id, displayName: { equals: displayName, mode: "insensitive" } },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],

@@ -54,6 +54,7 @@ struct PlanPresentation: Sendable {
         case .confirm: "Your confirmation needed"
         case .waitForOrganizer: "Waiting for a final time"
         case .waitForReplies: viewerHasConfirmed ? "You've confirmed" : "Waiting for friends"
+        case .publishPlan: "Ready to send final plan"
         case .reviewReplies: "Waiting for friends"
         case .declined: "You’ve replied that you can’t attend"
         case .notIncluded: "You’re not joining this plan"
@@ -69,6 +70,7 @@ struct PlanPresentation: Sendable {
         case .fillAvailability, .waitForOrganizer: "Open timetable"
         case .chooseTime: "Choose final time"
         case .shareAvailability, .shareInvitation: "Open and share"
+        case .publishPlan: "Review and send"
         case .waitForReplies, .reviewReplies: "View progress"
         case .viewCalendar, .viewPlan, .notIncluded: "View arrangement"
         case .declined: "View my response"
@@ -110,21 +112,32 @@ struct PlanPresentation: Sendable {
                 step = .declined
                 detail = "Your reply is saved. You have not confirmed attendance."
             } else if isOwner {
-                step = fixed ? .shareInvitation : .reviewReplies
-                detail = "Send the link to friends so they can confirm this time."
+                step = .publishPlan
+                detail = "Send the final plan whenever you are ready. Only people who accepted will be notified."
             } else if myStatus == "ACCEPTED" && isIncluded {
                 step = .waitForReplies
-                detail = "You've confirmed. The plan is added to calendars after everyone included confirms."
+                detail = "You accepted. Waiting for the organizer to send the final plan."
             } else if (isIncluded && myStatus == "INVITED") || (fixed && accepted < target && myStatus == nil) {
                 step = .confirm
-                detail = "The plan is added to calendars after everyone included confirms."
+                detail = "Accept, decline, or reply later. Only accepted participants join the final plan."
             } else {
                 step = .notIncluded
                 detail = "You are not included in this invitation. Your availability is saved."
             }
         case .confirmed, .inProgress:
-            step = isIncluded ? .viewCalendar : .notIncluded
-            detail = isIncluded ? "Synced to Sideseat calendars" : "Only invited participants have this plan in their calendars."
+            if isOwner || (isIncluded && myStatus == "ACCEPTED") {
+                step = .viewCalendar
+                detail = "Synced to Sideseat calendars"
+            } else if myStatus == "DECLINED" {
+                step = .declined
+                detail = "Your reply is saved. You have not confirmed attendance."
+            } else if start.map({ $0 > now }) == true && ((isIncluded && myStatus == "INVITED") || (fixed && accepted < target)) {
+                step = .confirm
+                detail = "The organizer sent the final plan. You can still accept before it starts."
+            } else {
+                step = .notIncluded
+                detail = "Only accepted participants have this plan in their calendars."
+            }
         case .ended:
             step = .viewPlan
             detail = "This activity has ended."

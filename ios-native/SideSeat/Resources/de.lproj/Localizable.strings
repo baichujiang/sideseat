@@ -3059,3 +3059,22 @@
 "Numbers count submitted responses" = "Zahlen: gesendete Antworten";
 
 "Draft restored · not submitted" = "Entwurf wiederhergestellt · nicht gesendet";
+
+/* Organizer-controlled final publication */
+"Friends can accept, decline, or reply later. You decide when to send the final plan." = "Freunde können zusagen, absagen oder später antworten. Du entscheidest, wann du den endgültigen Plan sendest.";
+"Collect replies first, then send the final plan whenever you are ready." = "Sammle Antworten und sende den endgültigen Plan, sobald du bereit bist.";
+"Send final plan" = "Endgültigen Plan senden";
+"Send final plan?" = "Endgültigen Plan senden?";
+"Ready to send final plan" = "Bereit zum endgültigen Senden";
+"Review and send" = "Prüfen und senden";
+"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Sende den endgültigen Plan jederzeit. Nur Personen mit Zusage werden benachrichtigt.";
+"You accepted. Waiting for the organizer to send the final plan." = "Du hast zugesagt. Warte auf den endgültigen Plan des Organisators.";
+"Accept, decline, or reply later. Only accepted participants join the final plan." = "Zusagen, absagen oder später antworten. Nur Personen mit Zusage nehmen am endgültigen Plan teil.";
+"The organizer sent the final plan. You can still accept before it starts." = "Der endgültige Plan wurde gesendet. Du kannst vor Beginn noch zusagen.";
+"Only accepted participants have this plan in their calendars." = "Nur Personen mit Zusage sehen diesen Plan in ihren Kalendern.";
+"Reply later" = "Später antworten";
+"Send whenever you are ready. Pending replies and declines do not hold up this plan." = "Sende, sobald du bereit bist. Ausstehende Antworten und Absagen halten den Plan nicht auf.";
+"Send to %d accepted people, including you. Pending and declined people will not be notified." = "An %d Personen mit Zusage senden, einschließlich dir. Personen ohne Zusage werden nicht benachrichtigt.";
+"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "Der Organisator kann jederzeit senden. Nur Personen mit Zusage werden benachrichtigt und erhalten einen Kalendereintrag.";
+"Someone declined. You can still send the final plan to the people who accepted." = "Jemand hat abgesagt. Du kannst den endgültigen Plan trotzdem an Personen mit Zusage senden.";
+"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "Wähle die endgültige Zeit, sammle Antworten und sende, sobald du bereit bist. Nur Personen mit Zusage nehmen teil.";

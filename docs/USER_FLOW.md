@@ -9,6 +9,28 @@
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
 
+## Organizer-controlled final sending — owner correction / Preview 145
+
+Choose final time → review invitees → collect Accept / Decline / Reply later →
+organizer explicitly **Send final plan** at any time → only accepted participants
+receive final notifications and Calendar entries. Nobody else's reply is required;
+even the organizer alone can send. Unanimous acceptance never auto-publishes.
+Reply later leaves INVITED unchanged; no reply is recorded by simply leaving.
+
+After sending, invited participants and open-link guests may still accept before
+the chosen start (within existing capacity). Only the newcomer receives a final
+alert; existing attendees are not notified again. Changing to Declined removes
+that person's Calendar entry and updates accepted companions. Guests see the final
+arrangement on the shared page; they have no account Calendar or device push
+subscription. Existing confirmed records remain valid, and bilateral conversation
+plans retain their separate two-person contract.
+
+`POST /api/v1/time-polls/{token}/publish {version}` is owner-only, row-locked and
+idempotent. It reuses CONFIRMED/confirmedAt; no schema migration or rewriting old
+records. RSVP itself never changes INVITING to CONFIRMED. Pending and declined
+people get neither the final push nor a local inbox confirmation notice. Source
+sharing, manual availability submission, expiry, safety locks and capacity stay.
+
 ## Manual availability submission — Preview 141
 
 Tap/drag → immediate local checkmark and device-local draft → Submit my availability

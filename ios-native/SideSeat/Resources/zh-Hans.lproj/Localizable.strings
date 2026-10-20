@@ -3060,3 +3060,22 @@
 "Numbers count submitted responses" = "数字仅含已提交人数";
 
 "Draft restored · not submitted" = "已恢复草稿 · 未提交";
+
+/* Organizer-controlled final publication */
+"Friends can accept, decline, or reply later. You decide when to send the final plan." = "朋友可以接受、拒绝或暂不回复。由你决定何时正式发出。";
+"Collect replies first, then send the final plan whenever you are ready." = "先收集回复，准备好后随时正式发出。";
+"Send final plan" = "正式发出";
+"Send final plan?" = "正式发出这次安排？";
+"Ready to send final plan" = "待你正式发出";
+"Review and send" = "查看并发出";
+"Send the final plan whenever you are ready. Only people who accepted will be notified." = "你可以随时正式发出，只通知已接受的人。";
+"You accepted. Waiting for the organizer to send the final plan." = "你已接受，等待发起人正式发出。";
+"Accept, decline, or reply later. Only accepted participants join the final plan." = "可以接受、拒绝或暂不回复。正式安排只包含已接受的人。";
+"The organizer sent the final plan. You can still accept before it starts." = "发起人已正式发出，你仍可在开始前接受参加。";
+"Only accepted participants have this plan in their calendars." = "只有已接受的参与者会在日历中看到这次安排。";
+"Reply later" = "暂不回复";
+"Send whenever you are ready. Pending replies and declines do not hold up this plan." = "准备好就能正式发出，无需等待未回复或拒绝的人。";
+"Send to %d accepted people, including you. Pending and declined people will not be notified." = "将向 %d 位已接受者（含你）正式发出。未回复和拒绝的人不会收到通知。";
+"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "发起人可随时正式发出，只有已接受者会收到通知并加入日历。";
+"Someone declined. You can still send the final plan to the people who accepted." = "有人拒绝了，你仍可向已接受的人正式发出。";
+"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "选定最终时间并收集回复，准备好即可正式发出。最终安排只包含已接受的人。";

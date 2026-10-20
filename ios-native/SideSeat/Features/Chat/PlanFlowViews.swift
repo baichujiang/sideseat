@@ -85,7 +85,7 @@ struct PlanPurposeExample: View {
             Label("Saturday at 15:00 works for all three", systemImage: "checkmark.circle.fill")
                 .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.statusSuccessText)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("You pick the final time. Everyone confirms, then it appears in Calendar.")
+            Text("Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan.")
                 .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
         }.accessibilityIdentifier("plans-purpose-illustration")
@@ -95,9 +95,9 @@ struct PlanPurposeExample: View {
 enum PlanNextStep: String, Sendable {
     case suggestActivity, chooseActivity, waitForActivity
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan
-    case shareInvitation, reviewReplies, declined, notIncluded, viewCalendar, recordOutcome
+    case publishPlan, shareInvitation, reviewReplies, declined, notIncluded, viewCalendar, recordOutcome
 
-    var needsYou: Bool { [.suggestActivity, .chooseActivity, .fillAvailability, .shareAvailability, .chooseTime, .confirm, .shareInvitation].contains(self) }
+    var needsYou: Bool { [.suggestActivity, .chooseActivity, .fillAvailability, .shareAvailability, .chooseTime, .confirm, .shareInvitation, .publishPlan].contains(self) }
     var title: String {
         let key: String.LocalizationValue = switch self {
         case .suggestActivity: "Suggest an activity"
@@ -110,6 +110,7 @@ enum PlanNextStep: String, Sendable {
         case .waitForOrganizer: "Waiting for the organizer"
         case .waitForReplies: "Waiting for confirmations"
         case .viewPlan: "View plan"
+        case .publishPlan: "Send final plan"
         case .shareInvitation: "Invite friends to confirm"
         case .reviewReplies: "Review replies and arrange the next step"
         case .declined: "You’ve replied that you can’t attend"
@@ -129,6 +130,7 @@ enum PlanNextStep: String, Sendable {
         case .waitForOrganizer: "View saved availability"
         case .waitForReplies: "View confirmation progress"
         case .viewPlan: "View plan"
+        case .publishPlan: "Review and send"
         case .shareInvitation: "Share invitation"
         case .reviewReplies: "View confirmation progress"
         case .declined: "View my response"
@@ -147,6 +149,7 @@ enum PlanNextStep: String, Sendable {
         case .confirm: "envelope.badge"
         case .waitForOrganizer, .waitForReplies: "hourglass"
         case .viewPlan, .viewCalendar: "calendar"
+        case .publishPlan: "paperplane.fill"
         case .shareInvitation: "square.and.arrow.up"
         case .reviewReplies: "person.2.badge.gearshape"
         case .declined, .notIncluded: "person.crop.circle.badge.xmark"
@@ -158,6 +161,7 @@ enum PlanNextStep: String, Sendable {
         switch self {
         case .suggestActivity, .chooseActivity, .waitForActivity: "lightbulb"
         case .fillAvailability, .waitForOrganizer: "calendar"
+        case .publishPlan: "paperplane"
         case .shareAvailability, .shareInvitation: "square.and.arrow.up"
         case .chooseTime: "calendar.badge.clock"
         case .confirm: "envelope.open"

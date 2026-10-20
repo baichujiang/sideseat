@@ -8,6 +8,7 @@ import { v1Error } from "@/lib/api/v1/http";
 import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
 import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
+import { schedulePublishedPollNotification } from "@/lib/time-polls/notifications";
 
 export class TimePollError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
@@ -93,7 +94,7 @@ export async function listTimePolls(userId: string, appOrigin: string) {
   return { polls: polls.map(({ _count, invitations, responses, creator, creatorId, endMinute, activityIdeas, activityTopic, activityChosenAt, activitySelectedId, ...poll }) => ({ ...poll, updatedAt: poll.updatedAt.toISOString(),
     organizer: { displayName: responses.find(person => person.userId === creatorId)?.displayName
       ?? invitations.find(person => person.userId === creatorId)?.displayName ?? (creator.nickname?.trim() || creator.username), avatarUrl: creator.avatarUrl },
-    peoplePreview: (["INVITING", "CONFIRMED"].includes(poll.phase) ? invitations.filter(person => person.selected) : responses)
+    peoplePreview: (["INVITING", "CONFIRMED"].includes(poll.phase) ? invitations.filter(person => person.selected && (poll.phase !== "CONFIRMED" || person.status === "ACCEPTED")) : responses)
       .filter(person => person.userId !== userId && person.userId !== creatorId && (!person.userId || !hidden.includes(person.userId)))
       .slice(0, 3).map(person => ({ displayName: person.displayName, avatarUrl: person.user?.avatarUrl ?? null })),
     activitySelection: activitySummary({ activityIdeas, activityTopic, activityChosenAt, activitySelectedId }, userId),
@@ -185,13 +186,15 @@ export async function sendPollInvitations(token: string, userId: string, input: 
 
 export async function respondPollInvitation(token: string, actor: TimePollActor, input: z.infer<typeof respondPollInvitationSchema>, appOrigin: string) {
   await accessiblePoll(token, actor);
+  let notifyUserId: string | null = null;
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
     const mine = poll.invitations.find((i) => isActor(i, actor));
     if (poll.invitationVersion !== input.version) throw new TimePollError(409, "The invitation time changed. Reopen the plan.");
-    if (poll.phase === "CONFIRMED" && mine?.status === input.status) return;
-    if (poll.phase !== "INVITING" || !poll.chosenStart || !poll.chosenEnd || poll.chosenStart <= new Date()) throw new TimePollError(409, "This invitation is no longer awaiting confirmation.");
+    if (!["INVITING", "CONFIRMED"].includes(poll.phase) || !poll.chosenStart || !poll.chosenEnd || poll.chosenStart <= new Date()) throw new TimePollError(409, "This invitation is no longer awaiting confirmation.");
+    if (accountId(actor) === poll.creatorId) throw new TimePollError(409, "The organizer participates in this plan. Cancel the plan if you cannot attend.");
+    if (mine?.status === input.status) return;
     const fixed = poll.planningMode === "FIXED";
     const selected = poll.invitations.filter((i) => i.selected);
     if (!mine && !fixed) throw new TimePollError(403, "You are not included in this invitation.");
@@ -205,21 +208,47 @@ export async function respondPollInvitation(token: string, actor: TimePollActor,
       where: typeof actor === "string" ? { pollId_userId: { pollId: poll.id, userId: actor } } : { pollId_guestId: { pollId: poll.id, guestId: actor.guestId } },
       create: { pollId: poll.id, ...(typeof actor === "string" ? { userId: actor } : { guestId: actor.guestId }), displayName: guest?.displayName ?? (viewer ? viewer.nickname?.trim() || viewer.username : ""), status: input.status, version: input.version, selected: fixed ? wantsSeat : true },
       update: { status: input.status, selected: fixed ? wantsSeat : true } });
-    const invitations = await tx.timePollInvitation.findMany({ where: { pollId: poll.id, selected: true } });
-    const target = fixed ? poll.expectedCount ?? 2 : invitations.length;
-    if (invitations.length >= target && invitations.length >= 2 && invitations.every((i) => i.status === "ACCEPTED")) {
-      await tx.timePoll.update({ where: { id: poll.id }, data: { phase: "CONFIRMED", confirmedAt: new Date() } });
-      for (const person of invitations) {
-        // Guests confirm in the browser; only actual accounts own Calendar rows.
-        if (!person.userId) continue;
-        await tx.calendarEntry.upsert({ where: { userId_timePollId: { userId: person.userId, timePollId: poll.id } },
-          create: { userId: person.userId, timePollId: poll.id, title: poll.title, location: poll.location, source: "time_poll_plan", eventType: "CUSTOM", startAt: poll.chosenStart, endAt: poll.chosenEnd,
-            companions: { create: invitations.filter((other) => other.id !== person.id).map((other) => ({ userId: other.userId, displayName: other.displayName })) } },
-          update: {} });
-      }
-    } else { await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } }); }
+    await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } });
+    if (poll.phase === "CONFIRMED") {
+      await syncPublishedPollCalendars(tx, { ...poll, chosenStart: poll.chosenStart, chosenEnd: poll.chosenEnd });
+      if (wantsSeat) notifyUserId = accountId(actor);
+    }
   });
+  if (notifyUserId) schedulePublishedPollNotification(token, [notifyUserId]);
   return getTimePoll(token, actor, appOrigin);
+}
+
+/** A reply is consent; only the organizer's explicit publish makes the plan final. */
+export async function publishPollPlan(token: string, userId: string, version: number, appOrigin: string) {
+  await accessiblePoll(token, userId);
+  let recipients: string[] = [];
+  await prisma.$transaction(async tx => {
+    const poll = await lockPollPlan(tx, token, userId);
+    if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
+    if (poll.invitationVersion !== version) throw new TimePollError(409, "This plan changed. Reopen it.");
+    if (poll.phase === "CONFIRMED") return;
+    if (timePollPhase(poll) !== "INVITING" || !poll.chosenStart || !poll.chosenEnd) throw new TimePollError(409, "Choose a future final time and send invitations before publishing.");
+    const accepted = poll.invitations.filter(i => i.selected && i.status === "ACCEPTED");
+    if (await hasPlanningBlock(tx, accepted.flatMap(i => i.userId ? [i.userId] : []))) throw new TimePollError(409, "This participant list is unavailable.");
+    await tx.timePoll.update({ where: { id: poll.id }, data: { phase: "CONFIRMED", confirmedAt: new Date() } });
+    await syncPublishedPollCalendars(tx, { ...poll, chosenStart: poll.chosenStart, chosenEnd: poll.chosenEnd });
+    recipients = accepted.flatMap(i => i.userId && i.userId !== userId ? [i.userId] : []);
+  });
+  if (recipients.length) schedulePublishedPollNotification(token, recipients);
+  return getTimePoll(token, userId, appOrigin);
+}
+
+async function syncPublishedPollCalendars(tx: Prisma.TransactionClient, poll: { id: string; title: string; location: string | null; chosenStart: Date; chosenEnd: Date }) {
+  const accepted = await tx.timePollInvitation.findMany({ where: { pollId: poll.id, selected: true, status: "ACCEPTED" } });
+  const accountIds = accepted.flatMap(person => person.userId ? [person.userId] : []);
+  await tx.calendarEntry.deleteMany({ where: { timePollId: poll.id, userId: { notIn: accountIds } } });
+  for (const person of accepted) {
+    if (!person.userId) continue; // Guests use the shared page; accounts own Calendar rows.
+    const companions = accepted.filter(other => other.id !== person.id).map(other => ({ userId: other.userId, displayName: other.displayName }));
+    await tx.calendarEntry.upsert({ where: { userId_timePollId: { userId: person.userId, timePollId: poll.id } },
+      create: { userId: person.userId, timePollId: poll.id, title: poll.title, location: poll.location, source: "time_poll_plan", eventType: "CUSTOM", startAt: poll.chosenStart, endAt: poll.chosenEnd, companions: { create: companions } },
+      update: { companions: { deleteMany: {}, create: companions } } });
+  }
 }
 
 export async function renameTimePollParticipant(token: string, actor: TimePollActor, displayName: string, appOrigin: string) {
@@ -227,7 +256,7 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, accountId(actor));
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
-    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll))) throw new TimePollError(409, "This plan is closed for nickname changes.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) && !(poll.phase === "CONFIRMED" && poll.chosenStart && poll.chosenStart > new Date())) throw new TimePollError(409, "This plan is closed for nickname changes.");
     if (typeof actor !== "string" && await tx.timePollGuest.findFirst({ where: {
       pollId: poll.id, id: { not: actor.guestId }, displayName: { equals: displayName, mode: "insensitive" },
     } })) throw new TimePollError(409, "This name already has a response. Switch participant to continue it, or choose a different name.");
@@ -238,6 +267,9 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
     await tx.timePollActivityInterest.updateMany({ where: { idea: { pollId: poll.id }, ...own }, data: { displayName } });
     if (typeof actor !== "string") await tx.timePollGuest.update({ where: { id: actor.guestId }, data: { displayName } });
     await tx.timePoll.update({ where: { id: poll.id }, data: { updatedAt: new Date() } });
+    if (poll.phase === "CONFIRMED" && poll.chosenStart && poll.chosenEnd) {
+      await syncPublishedPollCalendars(tx, { ...poll, chosenStart: poll.chosenStart, chosenEnd: poll.chosenEnd });
+    }
   });
   return getTimePoll(token, actor, appOrigin);
 }

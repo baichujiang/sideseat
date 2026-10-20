@@ -3,6 +3,28 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Organizer-controlled final sending — owner correction / Preview 145
+
+Choose final time → review invitees → collect Accept / Decline / Reply later →
+organizer explicitly **Send final plan** at any time → only accepted participants
+receive final notifications and Calendar entries. Nobody else's reply is required;
+even the organizer alone can send. Unanimous acceptance never auto-publishes.
+Reply later leaves INVITED unchanged; no reply is recorded by simply leaving.
+
+After sending, invited participants and open-link guests may still accept before
+the chosen start (within existing capacity). Only the newcomer receives a final
+alert; existing attendees are not notified again. Changing to Declined removes
+that person's Calendar entry and updates accepted companions. Guests see the final
+arrangement on the shared page; they have no account Calendar or device push
+subscription. Existing confirmed records remain valid, and bilateral conversation
+plans retain their separate two-person contract.
+
+`POST /api/v1/time-polls/{token}/publish {version}` is owner-only, row-locked and
+idempotent. It reuses CONFIRMED/confirmedAt; no schema migration or rewriting old
+records. RSVP itself never changes INVITING to CONFIRMED. Pending and declined
+people get neither the final push nor a local inbox confirmation notice. Source
+sharing, manual availability submission, expiry, safety locks and capacity stay.
+
 ## Invite before availability responses — owner correction 2026-10-19
 
 The organizer can choose the final time immediately, including zero responses or
@@ -18,8 +40,8 @@ optional linkParticipantCount on the existing invitation request explicitly opts
 into the existing FIXED link-joining/capacity/confirmation rules on this same plan;
 token, candidate slots, saved responses and activity records are preserved. There
 is no duplicate plan or automatic confirmation for a friend. The organizer accepts
-on sending, and Calendar still waits for the displayed total and every selected
-person's explicit acceptance. Cancelled drafts change nothing; old requests retain
+on sending the invitation; under Preview 145, Calendar waits for the organizer
+to explicitly send the final plan, including only accepted participants. Cancelled drafts change nothing; old requests retain
 closed-roster behavior. Existing FIXED cancellation and version rules apply.
 
 
@@ -251,18 +273,18 @@ Editing and group results remain available. The final invitation shows the actua
 time/place and a persistent **Confirm participation** action. FIXED links skip
 availability and still require explicit confirmation after entering a name.
 
-- COLLECTING: immutable candidate slots, one autosaved response/account or browser guest.
+- COLLECTING: immutable candidate slots, one explicitly submitted response/account or browser guest.
   The complete heatmap and response count are primary. No duration is required,
   and no common-time/maximum-attendance cards are shown. The older summary/window
   fields remain compatible for existing clients.
 - INVITING: a chosen future start/end and explicit roster. Creator send is explicit
   acceptance; each other selected person accepts or declines. For FIXED,
   link holders can join until the target count is filled. Declining that open link
-  does not consume a seat. No Calendar entry exists before completion.
-- CONFIRMED: every selected participant accepted the same invitationVersion.
-  All projections and companion rows are written atomically in that transaction.
-  Repeated acceptance never duplicates projections. A four-account roster creates
-  exactly four projections; guests confirm on the web and have no personal Calendar row; excluded respondents retain history, not membership.
+  does not consume a seat. No Calendar entry exists before the organizer explicitly sends the final plan.
+- CONFIRMED: the organizer explicitly sent the final arrangement. Only selected
+  ACCEPTED participants receive Calendar projections and accepted companions,
+  atomically in the publishing transaction. Repeated sending/acceptance never
+  duplicates projections. Pending and declined participants have no projection; guests confirm on the web and have no personal Calendar row; excluded respondents retain history, not membership.
 - CANCELLED: creator cancellation, Block or affected account deletion removes all
   Calendar projections. Unblock does not restore them. Collecting/cancelled roots
   may be deleted by their creator. Confirmed plans do not support in-place

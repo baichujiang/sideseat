@@ -68,6 +68,8 @@ if (mode === 'prepare') {
       if (['guest-saved', 'owner-edited', 'owner-restored'].includes(phase)) { assert.equal(detail.phase, 'COLLECTING'); assert.equal(entries.length, 0); }
       else if (phase === 'awaiting-confirmation') {
         assert.equal(detail.phase, 'INVITING'); assert.equal(acceptedCount, 1); assert.equal(entries.length, 0);
+      } else if (phase === 'accepted-awaiting-publish') {
+        assert.equal(detail.phase, 'INVITING'); assert.equal(acceptedCount, 2); assert.equal(entries.length, 0);
       } else {
         assert.equal(detail.phase, 'CONFIRMED'); assert.equal(acceptedCount, 2); assert.equal(entries.length, 1);
         assert.equal(new Date(detail.chosenEnd) - new Date(detail.chosenStart), 60 * 60 * 1000);

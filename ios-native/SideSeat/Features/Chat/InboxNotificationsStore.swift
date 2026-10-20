@@ -233,7 +233,7 @@ final class InboxNotificationsStore {
             } else if poll.phase == "COLLECTING", poll.isOwner != true,
                       let activity = poll.activitySelection, !activity.isOpen, activity.hasParticipated {
                 kind = .activityChosen
-            } else if poll.phase == "CONFIRMED", (poll.chosenEnd ?? .distantPast) > now {
+            } else if poll.phase == "CONFIRMED", poll.myInvitationStatus == "ACCEPTED", (poll.chosenEnd ?? .distantPast) > now {
                 kind = .confirmed
             } else if poll.phase == "CANCELLED", now.timeIntervalSince(poll.updatedAt) < 30 * 86400 {
                 kind = .cancelled
