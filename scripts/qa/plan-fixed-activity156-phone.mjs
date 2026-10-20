@@ -78,6 +78,7 @@ if (mode === 'prepare') {
       const day = (p.chosenStart || p.slots[0].start).slice(0, 10);
       const calendars = await Promise.all([owner, peer].map(async a => (await call(`/api/v1/home/schedule?windowStart=${day}T00:00:00Z&windowEnd=${day}T23:59:59Z`, a)).studyEntries.filter(e => e.timePollToken === f.pollToken)));
       assert(calendars.every(items => items.length === (published ? 1 : 0)));
+      if (published) assert(calendars.every(items => items[0].startISO === p.chosenStart && items[0].endISO === p.chosenEnd));
       return { phase, actualPhase: p.phase, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
         cardCount: messages.length, accepted: p.invitations.filter(i => i.status === 'ACCEPTED').length, calendars: calendars.map(items => items.length), at: new Date().toISOString() };
     }

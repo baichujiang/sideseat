@@ -29,7 +29,7 @@ async function calendar(p, a) {
   const day = (p.chosenStart || p.slots[0].start).slice(0, 10);
   return (await call(`/api/v1/home/schedule?windowStart=${day}T00:00:00Z&windowEnd=${day}T23:59:59Z`, a)).studyEntries.filter(e => e.timePollToken === p.token);
 }
-let failure;
+let failure; const browserErrors = [];
 try {
   persist();
   for (const role of ['owner', 'peer']) {
@@ -67,6 +67,7 @@ try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     if (cookies.length) await context.addCookies(cookies.map(c => ({ ...c, expires: c.expires || -1 })));
     const page = await context.newPage();
+    page.on('pageerror', error => browserErrors.push(error.message));
     await page.goto(base + '/time-polls/' + p.token);
     await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
     await page.getByRole('button', { name: '加入一起选活动', exact: true }).click();
@@ -108,6 +109,7 @@ try {
     }
     await page.reload(); await expect(page.getByText('计划已确定', { exact: true }).first()).toBeVisible();
     check('App and guest explicitly accept, only organizer publication writes one exact two-hour calendar entry per account; retry never duplicates it');
+    assert.deepEqual(browserErrors, []);
     await context.close();
   } finally { await browser.close(); }
   for (const [mode, ideas] of [['COLLECT', false], ['COLLECT', true], ['FIXED', false]]) {
@@ -129,5 +131,5 @@ finally {
   if (!cleanup.errors.length) fs.unlinkSync(privatePath);
   else failure ||= new Error(cleanup.errors.join('; '));
 }
-fs.writeFileSync(`${out}/${stage}-fixed-activity156.json`, JSON.stringify({ passed: !failure, checks, failure: failure?.message ?? null, at: new Date().toISOString() }, null, 2));
+fs.writeFileSync(`${out}/${stage}-fixed-activity156.json`, JSON.stringify({ passed: !failure, checks, browserErrors, failure: failure?.message ?? null, at: new Date().toISOString() }, null, 2));
 if (failure) throw failure;
