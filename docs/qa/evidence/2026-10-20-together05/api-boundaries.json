@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "draftClosed",
+      "publishedIntentions": 0,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "published",
+      "publishedIntentions": 1,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "messageClosed",
+      "publishedIntentions": 2,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "sent",
+      "publishedIntentions": 2,
+      "messageRequests": 1,
+      "chats": 0
+    }
+  ]
+}

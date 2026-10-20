@@ -1309,6 +1309,7 @@ struct MutualOpportunityCard: View {
 
 /// The same sheet introduces a first contact and accepts it with a written reply.
 struct OpportunityMessageComposer: View {
+    @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     let opportunity: NativeMutualOpportunity
     let onSend: (String) async -> NativeMutualOpportunity?
@@ -1316,8 +1317,13 @@ struct OpportunityMessageComposer: View {
     @State private var bodyText = ""
     @State private var isSending = false
     @State private var failed = false
+    @State private var hasLoadedDraft = false
+    @State private var didSend = false
     @FocusState private var isFocused: Bool
 
+    private var messageDraftKey: String? {
+        session.currentUser.map { "sideseat.together.draft.\($0.id).message.\(opportunity.id).\(isReply)" }
+    }
     private var isReply: Bool { opportunity.messageRequest?.isIncoming == true }
     private var trimmedText: String { bodyText.trimmingCharacters(in: .whitespacesAndNewlines) }
 
@@ -1387,6 +1393,8 @@ struct OpportunityMessageComposer: View {
                             let result = await onSend(trimmedText)
                             isSending = false
                             if let result {
+                                didSend = true
+                                TogetherDraftStorage.remove(messageDraftKey)
                                 dismiss()
                                 onConversation(result)
                             } else { failed = true }
@@ -1400,6 +1408,23 @@ struct OpportunityMessageComposer: View {
             }
             .interactiveDismissDisabled(isSending)
         }
+        .task {
+            if !hasLoadedDraft {
+                bodyText = TogetherDraftStorage.read(String.self, key: messageDraftKey) ?? ""
+                hasLoadedDraft = true
+            }
+        }
+        .onChange(of: bodyText) { _, text in
+            guard hasLoadedDraft, !didSend else { return }
+            if text.isEmpty { TogetherDraftStorage.remove(messageDraftKey) }
+            else { TogetherDraftStorage.write(text, key: messageDraftKey) }
+        }        .onDisappear {
+            if hasLoadedDraft && !didSend {
+                if bodyText.isEmpty { TogetherDraftStorage.remove(messageDraftKey) }
+                else { TogetherDraftStorage.write(bodyText, key: messageDraftKey) }
+            }
+        }
+
     }
 }
 
@@ -1655,7 +1680,7 @@ private struct WeeklyIntentCard: View {
     }
 }
 
-private struct WeeklyIntentWindowDraft: Identifiable {
+private struct WeeklyIntentWindowDraft: Identifiable, Codable, Equatable {
     let id: UUID
     var startAt: Date
     var endAt: Date
@@ -1738,6 +1763,7 @@ private struct WeeklyIntentDateTimePicker: UIViewRepresentable {
 }
 
 private struct WeeklyIntentEditorView: View {
+    @Environment(SessionStore.self) private var session
     @Environment(ClientConfigurationStore.self) private var clientConfiguration
     @Environment(\.dismiss) private var dismiss
     @State private var topic: NativeWeeklyIntentTopic
@@ -1748,6 +1774,10 @@ private struct WeeklyIntentEditorView: View {
     @State private var timeIsUndecided: Bool
     @State private var exploreVisible: Bool
     @State private var note: String
+    @State private var hasLoadedDraft = false
+    @State private var didSave = false
+    @State private var restoredDraft = false
+    @State private var initialDraftSnapshot: WeeklyIntentEditorDraft?
     @State private var isSaving = false
     @State private var showingTimePicker = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -1839,6 +1869,11 @@ private struct WeeklyIntentEditorView: View {
                 ScrollViewReader { scroll in
                     Form {
                         activityFields
+                        if restoredDraft {
+                            Text("Draft restored on this device")
+                                .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .accessibilityIdentifier("intent-editor-draft-restored")
+                        }
                         if completedPlanDraft != nil {
                             Text("Publish a new intention to find company. Choose a new time or leave it undecided.")
                                 .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -1939,6 +1974,19 @@ private struct WeeklyIntentEditorView: View {
             }
         }
         .ssFlowSheet(isSaving: isSaving)
+        .task {
+            guard !hasLoadedDraft else { return }
+            initialDraftSnapshot = draftSnapshot
+            if let draft = TogetherDraftStorage.read(WeeklyIntentEditorDraft.self, key: intentionDraftKey) {
+                topic = draft.topic; hasChosenTopic = draft.hasChosenTopic; activityText = draft.activityText
+                timeWindows = draft.timeWindows; preservedTimePreference = draft.timePreference
+                timeIsUndecided = draft.timeIsUndecided; exploreVisible = draft.exploreVisible; note = draft.note
+                restoredDraft = true
+            }
+            hasLoadedDraft = true
+        }
+        .onChange(of: draftSnapshot) { _, _ in persistIntentionDraft() }
+        .onDisappear { persistIntentionDraft() }
         .accessibilityIdentifier("intent-editor")
         .sheet(isPresented: $showingTimePicker) {
             WeeklyIntentTimePickerSheet(
@@ -2161,11 +2209,34 @@ private struct WeeklyIntentEditorView: View {
         defer { isSaving = false }
         let sportSelection = NativeSportInput.normalized(activityText)
         // The editor shares one description; the existing API still uses topic-specific fields.
-        _ = await onSave(
+        let saved = await onSave(
             topic, activityText, sportSelection.tag, sportSelection.otherNote ?? "",
             (intent ?? template)?.effectiveTogetherMode ?? .sameActivity, activityText, intent?.courseId,
             normalizedTimeWindows, submittedTiming, exploreVisible, note
         )
+        if saved { didSave = true; TogetherDraftStorage.remove(intentionDraftKey) }
+    }
+
+    private func persistIntentionDraft() {
+        guard hasLoadedDraft, !didSave else { return }
+        if restoredDraft || draftSnapshot != initialDraftSnapshot { TogetherDraftStorage.write(draftSnapshot, key: intentionDraftKey) }
+        else { TogetherDraftStorage.remove(intentionDraftKey) }
+    }
+
+    private var intentionDraftKey: String? {
+        guard let userID = session.currentUser?.id else { return nil }
+        let context: String
+        if let intent { context = "edit.\(intent.id).v\(intent.version)" }
+        else if let template { context = "repeat.\(template.id).v\(template.version)" }
+        else if let rebookingPlan { context = "plan.\(rebookingPlan.id)" }
+        else if let completedPlanDraft { context = "completed.\(completedPlanDraft.sourcePlanID)" }
+        else { context = "new" }
+        return "sideseat.together.draft.\(userID).intention.\(context)"
+    }
+    private var draftSnapshot: WeeklyIntentEditorDraft {
+        WeeklyIntentEditorDraft(topic: topic, hasChosenTopic: hasChosenTopic, activityText: activityText,
+            timeWindows: timeWindows, timePreference: preservedTimePreference, timeIsUndecided: timeIsUndecided,
+            exploreVisible: exploreVisible, note: note)
     }
 
     private var normalizedTimeWindows: [NativeWeeklyIntentTimeWindow] {
@@ -2511,4 +2582,30 @@ private struct TogetherSafetyRequest: Encodable {
     let action: String
     var reason: String? = nil
     var details: String? = nil
+}
+
+
+private struct WeeklyIntentEditorDraft: Codable, Equatable {
+    let topic: NativeWeeklyIntentTopic
+    let hasChosenTopic: Bool
+    let activityText: String
+    let timeWindows: [WeeklyIntentWindowDraft]
+    let timePreference: NativeIntentTimePreference?
+    let timeIsUndecided: Bool
+    let exploreVisible: Bool
+    let note: String
+}
+
+private enum TogetherDraftStorage {
+    static func read<Value: Decodable>(_ type: Value.Type, key: String?) -> Value? {
+        guard let key, let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+    static func write<Value: Encodable>(_ value: Value, key: String?) {
+        guard let key, let data = try? JSONEncoder().encode(value) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+    static func remove(_ key: String?) {
+        if let key { UserDefaults.standard.removeObject(forKey: key) }
+    }
 }

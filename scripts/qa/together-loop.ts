@@ -34,6 +34,25 @@ try {
       studentVerificationStatus: "VERIFIED", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR", semester: 2,
       productTutorialDismissedAt: new Date(), userLanguages: { create: { tag: "ENGLISH", proficiency: "FLUENT" } } } });
     console.log(`Prepared isolated local user ${logPath}.`);
+  } else if (mode === "observe-drafts") {
+    assert(logPath);
+    const users = await db.user.findMany({ where: { username: { in: ["togetherqa_05_a", "togetherqa_05_b"] } } });
+    assert.equal(users.length, 2); const ids = users.map(u => u.id); const checks = [];
+    for (const phase of ["draftClosed", "published", "messageClosed", "sent"]) {
+      const deadline = Date.now() + 10 * 60_000;
+      while (!(await fs.readFile(logPath, "utf8").catch(() => "")).includes(`TOGETHER05_PHASE ${phase}`)) {
+        assert(Date.now() < deadline); await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      const intentions = await db.weeklyIntent.count({ where: { userId: { in: ids }, exploreResponseToId: null } });
+      assert.equal(intentions, phase === "draftClosed" ? 0 : phase === "published" ? 1 : 2);
+      const messages = await db.mutualOpportunityMessageRequest.findMany({ where: { senderId: { in: ids } } });
+      assert.equal(messages.length, phase === "sent" ? 1 : 0);
+      if (messages.length) assert.equal(messages[0]!.body, "[together-05] Hello from a saved draft");
+      assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: ids } }, { userBId: { in: ids } }] } }), 0);
+      checks.push({ phase, publishedIntentions: intentions, messageRequests: messages.length, chats: 0 });
+      await fs.writeFile(`${out}/api-boundaries.json`, JSON.stringify({ passed: checks.length === 4, checks }, null, 2));
+      console.log(`Draft boundary passed: ${phase}`);
+    }
   } else if (mode === "observe-safety") {
     assert(logPath);
     const a = await db.user.findUniqueOrThrow({ where: { username: "togetherqa_04_a" } });

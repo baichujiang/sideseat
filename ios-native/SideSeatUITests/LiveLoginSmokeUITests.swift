@@ -618,6 +618,49 @@ final class SocialLiveUITests: XCTestCase {
         proposer.terminate()
     }
 
+    func testTogether05DraftsSurviveClosingAndRelaunch() {
+        let title = "[together-05] Coffee"
+        let a = loopLogin("togetherqa_05_a")
+        tabButton(in: a, labels: ["Together"]).tap(); loopSelectTogetherSection("intentions", in: a)
+        a.buttons["together-add-first-intent"].tap()
+        let field = a.textFields["intent-editor-activity"]
+        XCTAssertTrue(field.waitForExistence(timeout: 8)); field.tap(); field.typeText(title)
+        a.buttons["Cancel"].firstMatch.tap()
+        print("TOGETHER05_PHASE draftClosed"); RunLoop.current.run(until: Date().addingTimeInterval(3)); a.terminate()
+        let other = loopLogin("togetherqa_05_b")
+        tabButton(in: other, labels: ["Together"]).tap(); loopSelectTogetherSection("intentions", in: other)
+        other.buttons["together-add-first-intent"].tap()
+        XCTAssertTrue(other.textFields["intent-editor-activity"].waitForExistence(timeout: 8))
+        XCTAssertNotEqual(other.textFields["intent-editor-activity"].value as? String, title)
+        XCTAssertFalse(other.staticTexts["intent-editor-draft-restored"].exists)
+        other.buttons["Cancel"].firstMatch.tap(); other.terminate()
+        let restored = loopLogin("togetherqa_05_a")
+        tabButton(in: restored, labels: ["Together"]).tap(); loopSelectTogetherSection("intentions", in: restored)
+        restored.buttons["together-add-first-intent"].tap()
+        XCTAssertTrue(restored.textFields["intent-editor-activity"].waitForExistence(timeout: 8))
+        XCTAssertEqual(restored.textFields["intent-editor-activity"].value as? String, title)
+        restored.buttons["intent-editor-save"].tap()
+        XCTAssertTrue(restored.descendants(matching: .any)["intent-editor"].waitForNonExistence(timeout: 15))
+        print("TOGETHER05_PHASE published"); RunLoop.current.run(until: Date().addingTimeInterval(3)); restored.terminate()
+        let b = loopLogin("togetherqa_05_b"); loopCreateIntent(title, in: b); loopSelectTogetherSection("recommendations", in: b)
+        let greet = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-")).firstMatch
+        XCTAssertTrue(greet.waitForExistence(timeout: 12)); loopReveal(greet, in: b); greet.tap()
+        let body = b.textFields["opportunity-message-body"]
+        XCTAssertTrue(body.waitForExistence(timeout: 8)); body.tap(); body.typeText("[together-05] Hello from a saved draft")
+        b.buttons["Cancel"].firstMatch.tap()
+        print("TOGETHER05_PHASE messageClosed"); RunLoop.current.run(until: Date().addingTimeInterval(3)); b.terminate()
+        let reopen = loopLogin("togetherqa_05_b")
+        tabButton(in: reopen, labels: ["Together"]).tap(); loopSelectTogetherSection("recommendations", in: reopen)
+        let again = reopen.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-")).firstMatch
+        XCTAssertTrue(again.waitForExistence(timeout: 12)); loopReveal(again, in: reopen); again.tap()
+        XCTAssertTrue(reopen.textFields["opportunity-message-body"].waitForExistence(timeout: 8))
+        XCTAssertEqual(reopen.textFields["opportunity-message-body"].value as? String, "[together-05] Hello from a saved draft")
+        loopCapture(reopen, "greeting-draft-restored")
+        reopen.buttons["opportunity-message-submit"].tap()
+        XCTAssertTrue(reopen.staticTexts["intention-chat-first-message"].waitForExistence(timeout: 12))
+        print("TOGETHER05_PHASE sent"); loopCapture(reopen, "greeting-draft-sent-once"); reopen.terminate()
+    }
+
     func testTogether04PreviewReportBlockBeforeContact() {
         let author = loopLogin("togetherqa_04_a"); loopCreateIntent("[together-04] Coffee", in: author); author.terminate()
         let viewer = loopLogin("togetherqa_04_b"); loopCreateIntent("[together-04] Coffee", in: viewer)

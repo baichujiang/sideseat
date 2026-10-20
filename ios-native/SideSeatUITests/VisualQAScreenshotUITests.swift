@@ -790,6 +790,51 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testTogetherDraftRestoreAndClear() {
+        let args = ["--ui-testing-weekly-intent", "--ui-testing-language=zh-Hans"]
+        let app = togetherApp(args); selectTogetherSection(1, in: app)
+        app.buttons["together-add-first-intent"].tap()
+        let field = app.textFields["intent-editor-activity"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); field.tap(); field.typeText("草稿咖啡")
+        let choose = app.buttons["intent-timing-choose"]; revealFlowElement(choose, in: app); choose.tap()
+        app.buttons["intent-time-picker-done"].tap()
+        let slot = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH %@", "intent-selected-time-")).firstMatch
+        XCTAssertTrue(slot.waitForExistence(timeout: 5)); let time = slot.label
+        app.buttons["取消"].firstMatch.tap()
+        app.buttons["together-add-first-intent"].tap()
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); XCTAssertEqual(field.value as? String, "草稿咖啡")
+        XCTAssertEqual(slot.label, time)
+        saveScreenshot(app: app, name: "intention-draft-restored-zh")
+        let sheet = app.descendants(matching: .any)["intent-editor"].firstMatch
+        let cancel = app.buttons["取消"].firstMatch
+        app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: app.frame.midX, dy: cancel.frame.midY))
+            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)))
+        XCTAssertTrue(sheet.waitForNonExistence(timeout: 5))
+        app.buttons["together-add-first-intent"].tap()
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); XCTAssertEqual(field.value as? String, "草稿咖啡")
+        app.buttons["intent-editor-save"].tap(); XCTAssertTrue(sheet.waitForNonExistence(timeout: 8))
+        let add = app.buttons["together-add-intent"]; revealFlowElement(add, in: app); add.tap()
+        XCTAssertTrue(field.waitForExistence(timeout: 5)); XCTAssertNotEqual(field.value as? String, "草稿咖啡")
+        XCTAssertFalse(app.staticTexts["intent-editor-draft-restored"].exists); app.buttons["取消"].firstMatch.tap()
+        selectTogetherSection(0, in: app)
+        let greet = app.buttons["mutual-opportunity-message-cmutualui0000000000000001"]
+        revealFlowElement(greet, in: app); greet.tap()
+        let body = app.textFields["opportunity-message-body"]
+        XCTAssertTrue(body.waitForExistence(timeout: 5)); body.tap(); body.typeText("草稿招呼")
+        app.buttons["取消"].firstMatch.tap(); greet.tap()
+        XCTAssertTrue(body.waitForExistence(timeout: 5)); XCTAssertEqual(body.value as? String, "草稿招呼")
+        saveScreenshot(app: app, name: "greeting-draft-restored-zh")
+        app.buttons["opportunity-message-submit"].tap()
+        XCTAssertTrue(app.staticTexts["intention-chat-first-message"].waitForExistence(timeout: 8)); app.terminate()
+        let fresh = togetherApp(args); selectTogetherSection(0, in: fresh)
+        let newGreet = fresh.buttons["mutual-opportunity-message-cmutualui0000000000000001"]
+        revealFlowElement(newGreet, in: fresh); newGreet.tap()
+        XCTAssertTrue(fresh.textFields["opportunity-message-body"].waitForExistence(timeout: 5))
+        XCTAssertNotEqual(fresh.textFields["opportunity-message-body"].value as? String, "草稿招呼")
+        fresh.buttons["取消"].firstMatch.tap(); fresh.terminate()
+    }
+
+    @MainActor
     func testTogetherProfileAndSafety() {
         let app = togetherApp(["--ui-testing-language=zh-Hans"])
         let profile = app.buttons["mutual-opportunity-profile-cmutualui0000000000000001"]
