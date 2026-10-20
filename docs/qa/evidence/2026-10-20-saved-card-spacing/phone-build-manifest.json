@@ -1,0 +1,34 @@
+{
+  "previewBuild": "169",
+  "strictSignatureVerified": true,
+  "stageSourcesMatchBuiltInputs": true,
+  "sourceSHA256": {
+    "ios-native/SideSeat/Features/Together/TogetherRootView.swift": "0e04b63ca30864d1d97a1f89a145e6dfa149af92640fe7a822821ff53a961fb8",
+    "ios-native/Configuration/Preview.xcconfig": "ae0c580e012007af6e4f2b6cbe54b8f4df53fa12733716cf2d62bd3265aaf6be",
+    "ios-native/SideSeatUITests/VisualQAScreenshotUITests.swift": "1d6bb6e18e6ac510787f6cb48d2cf6c1b2a81705de717cf97a7c263f9ce0277a"
+  },
+  "sha256": {
+    "AppIcon60x60@2x.png": "067320a4433ff78e40ec8d2b53fe9e1b1302fa656b764ddf4e0e11bfc81ef055",
+    "AppIcon76x76@2x~ipad.png": "99d3367caaf1c86d8c11b561b02e78eb1264f43480a794d65b7395258db89bd2",
+    "Assets.car": "a1ba98fd091f190921a819abc27f7fbce97c147a893b165181bb2ad8dbf931fe",
+    "CalendarSmartInputPolicy.json": "c5ea26274843bac8f97a6231adc4388b9640dad53c152ea5caa869138be1edc9",
+    "Frameworks/Sentry.framework/Info.plist": "a62058479663e0fa02fb0b5e692b770aa6c382a4d6507f8fd184cbde862c490c",
+    "Frameworks/Sentry.framework/PrivacyInfo.xcprivacy": "118b16e0e97ffe8b6f1f01b7e04f68e5da764474a4d39d2933b0eeaef3cdc0ca",
+    "Frameworks/Sentry.framework/Sentry": "129e364b03ef3b41da8619987953c7e7657e9e334d8978954c27b2cf81664b47",
+    "Frameworks/Sentry.framework/_CodeSignature/CodeResources": "d11cbe39f6ef86c05d5abc619eddd1d269a0d8475773eac234b628b97b154a01",
+    "Info.plist": "53bba4e34706c59e67fc6e1732f4ee3637a4b1a33fe4d58bc64ceb692359b7ff",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "PrivacyInfo.xcprivacy": "9cd23f17d6d8d13cc29a3c907b44ebe4691b113a635f85a6a29b62e8c5aa5211",
+    "SideSeat Preview": "0226d9f2d2da31e3b5f72e12173269b27d9a69bf5e8cfeac9e44aea13e12cae7",
+    "SideSeat Preview.debug.dylib": "48713a1e2e17302254017d98ca56f4772aa2c7266309a3f50c3628ce94fd0bbb",
+    "_CodeSignature/CodeResources": "5869083be8750a662d80f914a85bc4947e90536ba1d13e0b2163240a73c3adde",
+    "__preview.dylib": "75a546dc2a882223a936319a7bcc3dc34368eff62fcd3daaabf398042e61d20b",
+    "de.lproj/InfoPlist.strings": "9656fc7dd801e33ff8cbe0016b2fd5af7be8f19faf3246fe4952f189e95bb2c0",
+    "de.lproj/Localizable.strings": "86f04eeb79f854863980afb97795c8bf924789c92bb7e3e05be6f51dfa8f0ddd",
+    "embedded.mobileprovision": "0241f27b0d1d40e6446dc43bdcc8bb3f4122eab53c60c95ed119539b9fde9672",
+    "en.lproj/InfoPlist.strings": "0e31f9d2b621c6857ed8ff0c62dbe10fbf9c8de28669ed3a18c1aba35d62408c",
+    "en.lproj/Localizable.strings": "5b5aff776054c248abc4002fb885f60c94c171c0c96254403365589d86357aa4",
+    "zh-Hans.lproj/InfoPlist.strings": "46826b11ae8bef0d188b1555ee4200516d17cef1d9013511b77a9ae8bfc4e97a",
+    "zh-Hans.lproj/Localizable.strings": "3fcd676781e727880d7eec8048828c2e64c646178ddc0cf29f93a019046c4729"
+  }
+}

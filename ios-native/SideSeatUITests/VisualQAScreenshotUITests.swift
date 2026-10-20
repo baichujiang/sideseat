@@ -165,23 +165,37 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
     @MainActor
     func testSavedIntentionsHaveTheirOwnPage() {
-        let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-language=zh-Hans"])
-        let id = "cmutualui0000000000000001"
-        let heart = app.buttons["mutual-opportunity-bookmark-\(id)"]
-        revealFlowElement(heart, in: app)
-        heart.tap()
-        selectTogetherSection(2, in: app)
-        XCTAssertEqual(app.buttons["together-tab-bookmarks"].label, "我的收藏")
-        XCTAssertTrue(heart.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["explore-bookmark-ui-explore-0"].exists)
-        saveScreenshot(app: app, name: "together-saved-intentions-zh")
-        heart.tap()
-        XCTAssertTrue(heart.waitForNonExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["还没有收藏"].exists)
-        selectTogetherSection(0, in: app)
-        revealFlowElement(heart, in: app)
-        XCTAssertEqual(heart.label, "收藏意愿")
-        app.terminate()
+        for language in ["zh-Hans", "de"] {
+            let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-language=\(language)"]
+                + (language == "de" ? ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] : []))
+            let id = "cmutualui0000000000000001"
+            let heart = app.buttons["mutual-opportunity-bookmark-\(id)"]
+            revealFlowElement(heart, in: app)
+            let unsavedLabel = heart.label
+            heart.tap()
+            selectTogetherSection(2, in: app)
+            if language == "zh-Hans" { XCTAssertEqual(app.buttons["together-tab-bookmarks"].label, "我的收藏") }
+            XCTAssertTrue(heart.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.buttons["explore-bookmark-ui-explore-0"].exists)
+            let profile = app.buttons["mutual-opportunity-profile-\(id)"]
+            revealFlowElement(profile, in: app)
+            XCTAssertTrue(profile.isHittable); XCTAssertGreaterThanOrEqual(profile.frame.height, 44)
+            let message = app.buttons["mutual-opportunity-message-\(id)"]
+            revealFlowElement(message, in: app)
+            XCTAssertTrue(message.isHittable); XCTAssertGreaterThanOrEqual(message.frame.height, 44)
+            saveScreenshot(app: app, name: "together-saved-intentions-\(language)")
+            message.tap()
+            XCTAssertTrue(app.textFields["opportunity-message-body"].waitForExistence(timeout: 5))
+            app.navigationBars.buttons.firstMatch.tap()
+            revealFlowElement(heart, in: app)
+            heart.tap()
+            XCTAssertTrue(heart.waitForNonExistence(timeout: 5))
+            XCTAssertTrue(app.buttons["together-saved-empty-recommendations"].waitForExistence(timeout: 5))
+            selectTogetherSection(0, in: app)
+            revealFlowElement(heart, in: app)
+            XCTAssertEqual(heart.label, unsavedLabel)
+            app.terminate()
+        }
     }
 
 

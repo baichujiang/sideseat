@@ -1058,7 +1058,8 @@ private struct TogetherHomeView: View {
             },
             onDismiss: inRecommendations ? { Task { await hideRecommendation(opportunity) } } : nil,
             onViewProfile: { profileOpportunity = opportunity },
-            showsRecommendationContext: inRecommendations && store.intents.contains { $0.id == opportunity.viewerIntentId }
+            showsRecommendationContext: inRecommendations && store.intents.contains { $0.id == opportunity.viewerIntentId },
+            compact: !inRecommendations
         )
     }
 
@@ -1138,11 +1139,13 @@ struct MutualOpportunityCard: View {
     var onViewProfile: (() -> Void)? = nil
     var showsRecommendationContext = false
     var showsActions = true
+    var compact = false
 
     var body: some View {
         SSFlowCard(contentPadding: 0, activityTopic: opportunity.peerActivityTopic) {
             VStack(alignment: .leading, spacing: 0) {
-                SSActivityHeaderBand(topic: opportunity.peerActivityTopic) {
+                SSActivityHeaderBand(topic: opportunity.peerActivityTopic,
+                    verticalPadding: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD) {
                     peerRow
                 }
                 .accessibilityIdentifier("mutual-opportunity-peer-\(opportunity.id)")
@@ -1172,7 +1175,7 @@ struct MutualOpportunityCard: View {
                     }
                 }
                 .padding(.horizontal, SideSeatTheme.Together.cardPadding)
-                .padding(.vertical, SideSeatTheme.spaceMD)
+                .padding(.vertical, compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD)
             }
         }
         .accessibilityElement(children: .contain)
