@@ -716,15 +716,7 @@ private struct PlanOverviewLabel: View {
     private var activityHeader: some View {
         SSActivityHeaderBand(topic: topic, horizontalPadding: SideSeatTheme.spaceMD, verticalPadding: SideSeatTheme.spaceSM) {
             HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    if style != .waiting {
-                        Label(presentation.cardStatusTitle, systemImage: presentation.nextStep.symbol)
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(SideSeatTheme.Together.categoryInk(for: topic))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    activityTitle(style == .waiting ? .callout : .headline)
-                }
+                activityTitle(style == .waiting ? .callout : .headline)
                 if !typeSize.isAccessibilitySize {
                     if isChoosingActivity {
                         Image(systemName: "lightbulb")
