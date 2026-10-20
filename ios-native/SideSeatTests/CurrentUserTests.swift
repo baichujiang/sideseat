@@ -118,6 +118,7 @@ struct MVPRoutePolicyTests {
             .courses,
             .archivedCourses,
             .plans,
+            .planHistory,
             .settings,
             .blockedUsers,
             .feedback,
@@ -159,6 +160,7 @@ struct MVPRoutePolicyTests {
     func mapsOwnerTabs() {
         #expect(MVPRoutePolicy.tab(for: .directChat(connectionID: "connection-1")) == .chats)
         #expect(MVPRoutePolicy.tab(for: .plans) == .plans)
+        #expect(MVPRoutePolicy.tab(for: .planHistory) == .plans)
         #expect(MVPRoutePolicy.tab(for: .eventShare(token: "event-1")) == .home)
         #expect(MVPRoutePolicy.tab(for: .courses) == .me)
     }
@@ -241,13 +243,12 @@ struct MVPConversationInfoTests {
 
 @Suite("MVP Plan presentation")
 struct MVPPlanPresentationTests {
-    @Test("Keeps the three Plan Center tabs in order")
+    @Test("Keeps two active Plan tabs and history outside the primary tabs")
     func keepsSectionOrder() {
-        #expect(MVPPlanSection.ordered == [.waitingResponse, .upcoming, .ended])
+        #expect(MVPPlanSection.ordered == [.waitingResponse, .upcoming])
         #expect(MVPPlanSection.ordered.map(\.title) == [
-            "Overview",
-            "Upcoming",
-            "Ended",
+            "Planning",
+            "Confirmed plans",
         ].map { AppLocalization.string($0) })
     }
 

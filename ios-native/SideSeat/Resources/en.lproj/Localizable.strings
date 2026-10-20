@@ -3069,3 +3069,13 @@
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "The organizer can send at any time. Only accepted participants are notified and added to calendars.";
 "Someone declined. You can still send the final plan to the people who accepted." = "Someone declined. You can still send the final plan to the people who accepted.";
 "Waiting for the organizer to send" = "Waiting for the organizer to send";
+
+"Confirmed plans" = "Confirmed";
+
+"Plan history" = "Plan history";
+
+"No plans in progress" = "No plans in progress";
+
+"No confirmed plans" = "No confirmed plans";
+
+"Your confirmed plans will appear here until they finish." = "Your confirmed plans will appear here until they finish.";

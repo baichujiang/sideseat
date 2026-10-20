@@ -21,6 +21,42 @@ import XCTest
 
     override func tearDown() { app?.terminate() }
 
+    func testTwoTabsHideTheRootNavigationBarAndKeepHistoryReachable() {
+        continueAfterFailure = false
+        launch(layout: true)
+        let picker = app.segmentedControls["plans-segmented-control"]
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        XCTAssertEqual(picker.buttons.count, 2)
+        XCTAssertEqual(picker.buttons.element(boundBy: 0).label, "筹划中")
+        XCTAssertEqual(picker.buttons.element(boundBy: 1).label, "已确定")
+        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+        XCTAssertFalse(app.buttons["plans-tab-ended"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["plans-next-meetup"].exists)
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        capture("two-tabs-no-navigation-bar")
+        picker.buttons.element(boundBy: 1).tap()
+        app.buttons["plans-history"].tap()
+        let history = app.descendants(matching: .any)["plans-history-root"].firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["历史计划"].exists)
+        let completed = app.buttons["plans-row-ui-plan-completed"]
+        XCTAssertTrue(completed.waitForExistence(timeout: 10))
+        capture("history-secondary-entry")
+        completed.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars.firstMatch.exists)
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        app.navigationBars.buttons.firstMatch.tap()
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        XCTAssertFalse(app.navigationBars.firstMatch.exists)
+        app.scrollViews["plans-scroll-upcoming"].swipeLeft()
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        capture("confirmed-tab-after-history")
+    }
+
     func testInitialLoadingDoesNotShowTheEmptyPlanLayout() {
         continueAfterFailure = false
         launch(loading: true)
@@ -218,9 +254,10 @@ import XCTest
     func testUpcomingSummaryReflowsWithMaximumText() {
         continueAfterFailure = false
         launch(accessibility: true, layout: true)
-        app.buttons["plans-section-menu"].tap()
         let upcoming = app.buttons["plans-tab-upcoming"]
         XCTAssertTrue(upcoming.waitForExistence(timeout: 10)); upcoming.tap()
+        XCTAssertTrue(app.buttons["plans-tab-waitingResponse"].isHittable)
+        XCTAssertFalse(app.buttons["plans-section-menu"].exists)
         let row = app.buttons["plans-row-ui-plan-accepted"]
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         let scroll = app.scrollViews["plans-scroll-upcoming"]

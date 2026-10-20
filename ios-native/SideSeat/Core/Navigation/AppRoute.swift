@@ -31,6 +31,7 @@ enum AppRoute: Hashable, Sendable {
     case profile(userID: String)
     case contacts
     case plans
+    case planHistory
     case exploreIntents
     case settings
     case blockedUsers
@@ -78,6 +79,7 @@ enum MVPRoutePolicy {
         case .courses,
              .archivedCourses,
              .plans,
+             .planHistory,
              .exploreIntents,
              .settings,
              .blockedUsers,
@@ -113,7 +115,7 @@ enum MVPRoutePolicy {
         switch route {
         case .courses, .archivedCourses, .course:
             return .me
-        case .plans, .timePoll:
+        case .plans, .planHistory, .timePoll:
             return .plans
         case .notifications, .messageRequests, .intentionChat, .directChat, .courseChat, .groupChat, .groupChatInfo, .contacts, .scheduleShare,
              .actionResponses, .coordinationShell:

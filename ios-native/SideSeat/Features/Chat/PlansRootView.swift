@@ -7,14 +7,14 @@ enum MVPPlanSection: String, CaseIterable, Equatable, Sendable, Identifiable {
     case upcoming
     case ended
 
-    static let ordered: [MVPPlanSection] = [.waitingResponse, .upcoming, .ended]
+    static let ordered: [MVPPlanSection] = [.waitingResponse, .upcoming]
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .waitingResponse: AppLocalization.string("Planning")
-        case .upcoming: AppLocalization.string("Upcoming")
+        case .upcoming: AppLocalization.string("Confirmed plans")
         case .ended: AppLocalization.string("Past")
         }
     }
@@ -68,7 +68,6 @@ struct PlansRootView: View {
     @State private var selectedSection: MVPPlanSection = .waitingResponse
     @State private var scrollPositions = PlanListScrollPositions()
     @State private var now = Date()
-    @State private var showsSectionPicker = false
     @State private var coordinatedPlans: [NativeTimePollList.Item] = []
     @State private var showsAllWaiting = false
     @State private var waitingScrollID: String?
@@ -80,46 +79,35 @@ struct PlansRootView: View {
     @State private var coordinationLoaded = false
     @State private var coordinationError: String?
     @State private var repeatPlan: NativePlanRequest?
+    private let isHistory: Bool
+
+    init(isHistory: Bool = false) {
+        self.isHistory = isHistory
+        _selectedSection = State(initialValue: isHistory ? .ended : .waitingResponse)
+    }
 
     private var hasPlans: Bool { !coordinatedPlans.isEmpty || !store.plans.isEmpty }
     private var initiallyLoading: Bool { !hasPlans && (!coordinationLoaded || !store.hasLoaded) }
 
     var body: some View {
         VStack(spacing: 0) {
-            if !coordinatedPlans.isEmpty || !store.plans.isEmpty || selectedSection != .waitingResponse {
-                sectionPicker
-                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.vertical, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.PlanHome.background)
-            }
-
-            SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                        sectionContent(section)
-                    }
+            if isHistory {
+                sectionScroll(.ended)
+            } else {
+                pageHeader
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
                     .padding(.top, SideSeatTheme.spaceXS)
-                    .padding(.bottom, SideSeatTheme.spaceXL)
-                    .background(PlanListScrollCapture(positions: scrollPositions, section: section))
+                    .padding(.bottom, SideSeatTheme.spaceMD)
+                    .background(SideSeatTheme.PlanHome.background)
+                SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
+                    sectionScroll(section)
                 }
-                .accessibilityIdentifier("plans-scroll-\(section.rawValue)")
-                .refreshable { await store.load(using: session); await loadCoordinatedPlans() }
             }
         }
         .background(SideSeatTheme.PlanHome.background)
-        .navigationTitle("Plans")
-        .navigationBarTitleDisplayMode(.large)
-        .toolbarBackground(SideSeatTheme.PlanHome.background, for: .navigationBar)
-        .toolbar {
-            if hasPlans || initiallyLoading {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showsPlanCreation = true } label: { Label("Start a plan", systemImage: "plus").font(.subheadline.weight(.semibold)).labelStyle(.titleAndIcon) }
-                        .tint(SideSeatTheme.PlanHome.ink)
-                        .accessibilityIdentifier("plans-create-unified")
-                }
-            }
-        }
+        .navigationTitle(isHistory ? AppLocalization.string("Plan history") : "")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(isHistory ? .visible : .hidden, for: .navigationBar)
         .sheet(isPresented: $showsPlanCreation, onDismiss: {
             if let token = createdPlanToken { createdPlanToken = nil; selectedSection = .waitingResponse; router.openPlan(token: token) }
             Task { await loadCoordinatedPlans() }
@@ -167,70 +155,50 @@ struct PlansRootView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("plans-root")
+        .accessibilityIdentifier(isHistory ? "plans-history-root" : "plans-root")
+    }
+
+    private var pageHeader: some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .trailing, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        return layout {
+            sectionPicker
+            Button { router.navigate(to: .planHistory) } label: {
+                Label("Plan history", systemImage: "clock.arrow.circlepath")
+                    .labelStyle(.iconOnly).font(.body)
+                    .frame(minWidth: 44, minHeight: 44)
+            }
+            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
+            .accessibilityIdentifier("plans-history")
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("plans-page-header")
     }
 
     @ViewBuilder
     private var sectionPicker: some View {
         if dynamicTypeSize.isAccessibilitySize {
-            Button { showsSectionPicker = true } label: {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Text(selectedSection.title)
-                        .font(.body.weight(.semibold))
-                        .fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.down")
-                        .font(.subheadline.weight(.semibold))
-                        .accessibilityHidden(true)
-                }
-                .padding(.horizontal, SideSeatTheme.spaceMD)
-                .padding(.vertical, SideSeatTheme.spaceXS)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .background(SideSeatTheme.surface,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(SideSeatTheme.utilityAction)
-            .accessibilityLabel(AppLocalization.string("Plan sections"))
-            .accessibilityValue(selectedSection.title)
-            .accessibilityHint(AppLocalization.string("Choose a section"))
-            .accessibilityIdentifier("plans-section-menu")
-            .sheet(isPresented: $showsSectionPicker) {
-                NavigationStack {
-                    List(MVPPlanSection.ordered) { section in
-                        Button {
-                            selectedSection = section
-                            showsSectionPicker = false
-                        } label: {
-                            HStack(spacing: SideSeatTheme.spaceSM) {
-                                Text(section.title)
-                                    .font(.body.weight(section == selectedSection ? .semibold : .regular))
-                                    .fixedSize(horizontal: false, vertical: true)
-                                Spacer(minLength: 0)
-                                if section == selectedSection {
-                                    Image(systemName: "checkmark").accessibilityHidden(true)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        }
-                        .foregroundStyle(SideSeatTheme.utilityAction)
-                        .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
-                        .accessibilityIdentifier("plans-tab-\(section.rawValue)")
+            HStack(spacing: SideSeatTheme.spaceXS) {
+                ForEach(MVPPlanSection.ordered) { section in
+                    Button { selectedSection = section } label: {
+                        Text(section.title)
+                            .font(.body.weight(section == selectedSection ? .semibold : .regular))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .padding(.vertical, SideSeatTheme.spaceXS)
+                            .background(section == selectedSection ? SideSeatTheme.surface : Color.clear,
+                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                     }
-                    .navigationTitle("Plans")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") { showsSectionPicker = false }
-                        }
-                    }
+                    .buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
+                    .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
+                    .accessibilityIdentifier("plans-tab-\(section.rawValue)")
                 }
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("plans-section-picker")
-                .presentationDetents([.large])
-                .dynamicTypeSize(dynamicTypeSize)
             }
+            .padding(4)
+            .background(SideSeatTheme.bgGrouped,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + 4))
+            .accessibilityIdentifier("plans-accessible-tabs")
         } else {
             Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
                 ForEach(MVPPlanSection.ordered) { section in
@@ -243,14 +211,28 @@ struct PlansRootView: View {
         }
     }
 
+    private func sectionScroll(_ section: MVPPlanSection) -> some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                sectionContent(section)
+            }
+            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+            .padding(.top, SideSeatTheme.spaceXS)
+            .padding(.bottom, SideSeatTheme.spaceXL)
+            .background(PlanListScrollCapture(positions: scrollPositions, section: section))
+        }
+        .accessibilityIdentifier("plans-scroll-\(section.rawValue)")
+        .refreshable { await store.load(using: session); await loadCoordinatedPlans() }
+    }
+
     @ViewBuilder
     private func sectionContent(_ section: MVPPlanSection) -> some View {
+        if section != .ended { planActions }
         if initiallyLoading {
             SSLoadingState("Loading plans")
                 .frame(maxWidth: .infinity, minHeight: 200)
                 .accessibilityIdentifier("plans-loading")
         } else {
-            if section == .waitingResponse { planActions }
             if let coordinationError {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
                     Text(coordinationError).font(.footnote).foregroundStyle(SideSeatTheme.danger)
@@ -304,30 +286,20 @@ struct PlansRootView: View {
     }
 
     private var planActions: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-            if hasPlans {
-                openLink
-            } else {
-                Button { showsPlanCreation = true } label: {
-                    Label("Start a plan", systemImage: "plus")
-                        .font(.headline).frame(maxWidth: .infinity, minHeight: 52)
-                        .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-                        .background(SideSeatTheme.PlanHome.ink, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-create-primary")
-                openLink
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        return layout {
+            PlanActionButton(title: AppLocalization.string("Start a plan"), symbol: "plus", kind: .commit,
+                accessibilityID: hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary") {
+                showsPlanCreation = true
+            }
+            PlanActionButton(title: AppLocalization.string("Open a plan link"), symbol: "link", kind: .edit,
+                accessibilityID: "plans-open-link") {
+                planLink = ""; showsOpenPlanLink = true
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
-    }
-
-    private var openLink: some View {
-        Button { planLink = ""; showsOpenPlanLink = true } label: {
-            Label("Open a plan link", systemImage: "link")
-                .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 44, alignment: .leading)
-        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
-            .accessibilityIdentifier("plans-open-link")
     }
 
     private var actionOverview: some View {
@@ -400,22 +372,12 @@ struct PlansRootView: View {
                     }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-waiting-others")
             }
-            let shared = coordinated(in: .upcoming).first
-            let chat = plans(in: .upcoming).first
-            if shared != nil || chat != nil {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    HStack {
-                        Text("Next meet-up").font(.headline)
-                        Spacer()
-                        Button("View all") { selectedSection = .upcoming }
-                            .font(.footnote.weight(.medium)).frame(minHeight: 44)
-                            .accessibilityIdentifier("plans-view-shared-upcoming")
-                    }
-                    if let shared, (shared.chosenStart ?? .distantFuture) <= (chat?.startDate ?? .distantFuture) {
-                        coordinatedOverview(shared, style: .meetup)
-                    } else if let chat { conversationOverview(chat, style: .meetup) }
-                }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-next-meetup")
-
+            if manual.isEmpty && incoming.isEmpty && outgoing.isEmpty,
+               coordinationLoaded, store.hasLoaded, coordinationError == nil, store.issue == nil {
+                Text("No plans in progress")
+                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .frame(maxWidth: .infinity).padding(.vertical, SideSeatTheme.spaceXL)
+                    .accessibilityIdentifier("plans-empty-waitingResponse")
             }
         }
     }
@@ -611,7 +573,7 @@ struct PlansRootView: View {
     private func sectionEmptyTitle(_ section: MVPPlanSection) -> String {
         switch section {
         case .waitingResponse: AppLocalization.string("No current plans")
-        case .upcoming: AppLocalization.string("No upcoming plans")
+        case .upcoming: AppLocalization.string("No confirmed plans")
         case .ended: AppLocalization.string("No ended plans")
         }
     }
@@ -619,7 +581,7 @@ struct PlansRootView: View {
     private func sectionEmptyDescription(_ section: MVPPlanSection) -> String {
         switch section {
         case .waitingResponse: AppLocalization.string("Create a plan or open a friend’s shared link to get started.")
-        case .upcoming: AppLocalization.string("Accepted plans will appear here until they finish.")
+        case .upcoming: AppLocalization.string("Your confirmed plans will appear here until they finish.")
         case .ended: AppLocalization.string("Completed, declined, canceled, and expired plans will appear here.")
         }
     }

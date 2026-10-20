@@ -2647,7 +2647,7 @@
 "Back to plans" = "返回计划";
 
 /* Plan guidance and task-oriented planning, Preview 114 */
-"Planning" = "待安排";
+"Planning" = "筹划中";
 "Fill in your free time" = "先填写你的空闲时间";
 "Invite friends to fill in" = "邀请朋友填写时间";
 "Choose a time for everyone" = "看看大家的时间，再发邀请";
@@ -3069,3 +3069,13 @@
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "发起人可随时正式发出，只有已接受者会收到通知并加入日历。";
 "Someone declined. You can still send the final plan to the people who accepted." = "有人拒绝了，你仍可向已接受的人正式发出。";
 "Waiting for the organizer to send" = "待发起人正式发出";
+
+"Confirmed plans" = "已确定";
+
+"Plan history" = "历史计划";
+
+"No plans in progress" = "暂时没有筹划中的活动";
+
+"No confirmed plans" = "暂时没有已确定的活动";
+
+"Your confirmed plans will appear here until they finish." = "正式确定并由你参加的活动会显示在这里。";

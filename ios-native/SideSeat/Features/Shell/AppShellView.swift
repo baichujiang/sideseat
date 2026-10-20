@@ -448,6 +448,8 @@ private extension View {
                     ArchivedCourseListView()
                 case .plans:
                     PlansRootView()
+                case .planHistory:
+                    PlansRootView(isHistory: true)
                 case .exploreIntents:
                     if readinessProfile.profile?.readiness?.ready == true {
                         ExploreIntentListView()
@@ -466,6 +468,7 @@ private extension View {
                     ScheduleShareRecipientView(token: token)
                 case .timePoll(let token):
                     TimePollDetailView(token: token)
+                        .toolbar(.visible, for: .navigationBar)
                         .toolbar(.hidden, for: .tabBar)
                 case .eventShare(let token):
                     CalendarEventShareRecipientView(token: token)
@@ -478,6 +481,7 @@ private extension View {
                         .toolbar(.hidden, for: .tabBar)
                 case .directChat(let id, let focus):
                     DirectChatView(connectionID: id, initialFocus: focus)
+                        .toolbar(.visible, for: .navigationBar)
                         .toolbar(.hidden, for: .tabBar)
                 case .course(let id):
                     CourseDetailView(courseID: id)
