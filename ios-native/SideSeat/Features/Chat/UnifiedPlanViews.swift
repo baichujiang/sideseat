@@ -61,6 +61,13 @@ struct UnifiedPlanInviteView: View {
         if let chosenActivity { return chosenActivity.location }
         return poll.location
     }
+    private var reviewTime: String {
+        let formatter = DateIntervalFormatter()
+        formatter.locale = AppLocalization.selectedLanguage.locale
+        formatter.timeZone = TimeZone(identifier: poll.timeZone)
+        formatter.dateStyle = .medium; formatter.timeStyle = .short
+        return formatter.string(from: range.start, to: range.end)
+    }
 
     private var rangeIds: Set<Int> {
         Set(poll.slots.filter { $0.date == range.date && $0.start >= range.start && $0.end <= range.end }.map(\.id))
@@ -73,8 +80,13 @@ struct UnifiedPlanInviteView: View {
         NavigationStack {
             Form {
                 Section("Activity and location") {
-                    Text(chosenActivity?.title ?? poll.title).font(.headline)
-                    if let location = reviewLocation, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse") }
+                    PlanAdaptiveRow {
+                        Text(chosenActivity?.title ?? poll.title).font(.headline)
+                    } trailing: {
+                        if let location = reviewLocation, !location.isEmpty {
+                            Label(location, systemImage: "mappin.and.ellipse").font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    }
                 }
                 if needsActivityChoice {
                     Section {
@@ -101,11 +113,16 @@ struct UnifiedPlanInviteView: View {
                     footer: { Text("Your activity choice is saved when you send invitations.") }
                 }
                 Section("Final time") {
-                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
-                        .font(.subheadline.weight(.medium)).accessibilityIdentifier("unified-plan-chosen-range")
-                    Text(poll.timeZone).font(.caption).foregroundStyle(.secondary)
-                    Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil") }
-                        .accessibilityIdentifier("unified-plan-adjust-time")
+                    PlanAdaptiveRow {
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                            Text(reviewTime).font(.subheadline.weight(.medium))
+                                .accessibilityIdentifier("unified-plan-chosen-range")
+                            Text(poll.timeZone).font(.caption).foregroundStyle(.secondary)
+                        }
+                    } trailing: {
+                        Button { dismiss() } label: { Label("Adjust time", systemImage: "pencil").frame(minHeight: 44) }
+                            .accessibilityIdentifier("unified-plan-adjust-time")
+                    }
                 }
                 if hasFriends { Section("Choose who to invite") {
                     ForEach(poll.invitationCandidates) { person in
@@ -114,9 +131,12 @@ struct UnifiedPlanInviteView: View {
                         } label: {
                             HStack {
                                 Image(systemName: selected.contains(person.id) ? "checkmark.circle.fill" : "circle")
-                                VStack(alignment: .leading) {
-                                    Text(person.displayName).foregroundStyle(SideSeatTheme.textPrimary)
-                                    if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
+                                PlanAdaptiveRow {
+                                    HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+                                        Text(person.displayName).foregroundStyle(SideSeatTheme.textPrimary)
+                                        if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
+                                    }
+                                } trailing: {
                                     Text(person.didRespond == false ? "Has not filled availability yet" : available(person) ? "Available for the full activity" : "Not available for the full activity")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }

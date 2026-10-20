@@ -1,5 +1,62 @@
 import SwiftUI
 
+/// Short values share a row; longer values and accessibility text keep their full width.
+struct PlanAdaptiveRow<Leading: View, Trailing: View>: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let leading: Leading
+    let trailing: Trailing
+
+    init(@ViewBuilder leading: () -> Leading, @ViewBuilder trailing: () -> Trailing) {
+        self.leading = leading(); self.trailing = trailing()
+    }
+
+    var body: some View {
+        if typeSize.isAccessibilitySize {
+            stacked
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
+                    leading.fixedSize()
+                    Spacer(minLength: SideSeatTheme.spaceSM)
+                    trailing.fixedSize()
+                }
+                stacked
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .labelStyle(.titleAndIcon)
+        }
+    }
+
+    private var stacked: some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            leading
+            trailing
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct PlanEditorField: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let title: LocalizedStringKey
+    @Binding var text: String
+    let accessibilityID: String
+
+    var body: some View {
+        let stacked = typeSize.isAccessibilitySize
+        let layout = stacked
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceMD))
+        layout {
+            Text(title).foregroundStyle(.secondary).fixedSize(horizontal: !stacked, vertical: true)
+            TextField("", text: $text).submitLabel(.done)
+                .multilineTextAlignment(stacked ? .leading : .trailing)
+                .frame(maxWidth: .infinity)
+                .accessibilityLabel(Text(title)).accessibilityIdentifier(accessibilityID)
+        }.frame(minHeight: 44)
+            .listRowInsets(EdgeInsets(top: stacked ? 8 : 0, leading: 20, bottom: stacked ? 8 : 0, trailing: 20))
+    }
+}
+
 struct PlanParticipationSummary: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     let name: String
@@ -7,11 +64,11 @@ struct PlanParticipationSummary: View {
 
     var body: some View {
         SSFlowCard(contentSpacing: SideSeatTheme.spaceXS) {
-            Text("My participation").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             let layout = typeSize.isAccessibilitySize
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
                 : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
             layout {
+                Text("My participation").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 Text(name).font(.subheadline.weight(.medium))
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,22 +100,28 @@ struct PlanInformationEditor: View {
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedLocation: String { location.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var hasChanges: Bool { trimmedTitle != poll.title || trimmedLocation != (poll.location ?? "") }
+    private var candidateDates: String {
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = TimeZone(secondsFromGMT: 0); parser.dateFormat = "yyyy-MM-dd"
+        let output = DateFormatter()
+        output.locale = AppLocalization.selectedLanguage.locale; output.timeZone = parser.timeZone
+        output.setLocalizedDateFormatFromTemplate("MMMd")
+        return poll.dates.map { key in parser.date(from: key).map { output.string(from: $0) } ?? key }.joined(separator: " · ")
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Activity name") {
-                    TextField("Activity name", text: $title).submitLabel(.done)
-                        .accessibilityIdentifier("plan-edit-title")
-                }
-                Section("Location (optional)") {
-                    TextField("Location (optional)", text: $location).submitLabel(.done)
-                        .accessibilityIdentifier("plan-edit-location")
-                }
-                Section("Timing") {
-                    Label(poll.dates.map { timePollDateLabel($0).replacingOccurrences(of: "\n", with: " ") }.joined(separator: ", "), systemImage: "calendar")
+                Section {
+                    PlanEditorField(title: "Activity name", text: $title, accessibilityID: "plan-edit-title")
+                    PlanEditorField(title: "Location (optional)", text: $location, accessibilityID: "plan-edit-location")
+                    LabeledContent("Candidate dates") {
+                        Text(candidateDates)
+                            .multilineTextAlignment(.trailing).fixedSize(horizontal: false, vertical: true)
+                    }
+                    LabeledContent("Time zone", value: poll.timeZone)
+                } footer: {
                     Text("Choose the final time on the timetable. Editing these details keeps everyone's availability.")
-                        .font(.footnote).foregroundStyle(.secondary)
                 }
                 if attemptedSave, let error = store.error { Text(error).foregroundStyle(SideSeatTheme.danger) }
             }
@@ -115,10 +178,9 @@ struct PlanNicknameEditor: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("Your name", text: $name).textContentType(.nickname).submitLabel(.done)
-                        .accessibilityIdentifier("time-poll-edit-name-field")
-                } header: { Text("Your name in this plan") }
-                footer: {
+                    PlanEditorField(title: "Nickname", text: $name, accessibilityID: "time-poll-edit-name-field")
+                        .textContentType(.nickname)
+                } footer: {
                     Text(savesWithAvailability
                          ? "This nickname is shared when you submit your availability. Your selected times stay unchanged."
                          : "Other participants will see this name.")
@@ -165,11 +227,14 @@ struct PlanPeopleView: View {
         NavigationStack {
             List {
                 Section {
-                    Text(poll.title).font(.headline)
-                    Text(collecting
-                         ? String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)
-                         : String(format: AppLocalization.string("%d of %d confirmed"), poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count, poll.targetCount))
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    PlanAdaptiveRow {
+                        Text(poll.title).font(.headline)
+                    } trailing: {
+                        Text(collecting
+                             ? String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)
+                             : String(format: AppLocalization.string("%d of %d confirmed"), poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count, poll.targetCount))
+                            .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    }
                 }
                 Section(collecting ? "Availability responses" : "Invitation replies") {
                     if collecting {
@@ -204,10 +269,13 @@ struct PlanPeopleView: View {
         HStack(spacing: SideSeatTheme.spaceMD) {
             Text(String(name.prefix(1)).uppercased()).font(.subheadline.weight(.medium))
                 .frame(width: 36, height: 36).background(SideSeatTheme.fillTertiary, in: Circle()).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(name).font(.subheadline.weight(.medium))
-                if isMe { Text("You").font(.caption).foregroundStyle(.secondary) }
-                else if guest { Text("Guest").font(.caption).foregroundStyle(.secondary) }
+            PlanAdaptiveRow {
+                HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+                    Text(name).font(.subheadline.weight(.medium))
+                    if isMe { Text("You").font(.caption).foregroundStyle(.secondary) }
+                    else if guest { Text("Guest").font(.caption).foregroundStyle(.secondary) }
+                }
+            } trailing: {
                 Label(LocalizedStringKey(status), systemImage: symbol).font(.caption)
                     .foregroundStyle(accepted ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
             }
