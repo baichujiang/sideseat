@@ -52,6 +52,9 @@ try {
         assert(reports[0]!.details?.includes("[Together opportunity:"));
       }
       assert.equal(blocks, phase === "blocked" ? 1 : 0);
+      if (phase === "blocked") assert.equal(await db.mutualOpportunity.count({ where: {
+        OR: [{ userAId: a.id, userBId: b.id }, { userAId: b.id, userBId: a.id }], status: { in: ["PENDING", "DRAFT", "MUTUAL"] },
+      } }), 0, "Blocked recommendations must release both intentions for future matching");
       assert.equal(await db.mutualOpportunityMessageRequest.count({ where: { senderId: { in: [a.id, b.id] } } }), 0);
       assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: [a.id, b.id] } }, { userBId: { in: [a.id, b.id] } }] } }), 0);
       checks.push({ phase, reports: reports.length, blocks, messageRequests: 0, chats: 0 });

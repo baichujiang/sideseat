@@ -1535,9 +1535,10 @@ export async function performOpportunitySafetyAction(options: {
 }) {
   const row = await prisma.mutualOpportunity.findFirst({
     where: { id: options.opportunityId, OR: [{ userAId: options.userId }, { userBId: options.userId }] },
-    include: { intentA: true, intentB: true },
+    include: { intentA: true, intentB: true, messageRequest: { select: { opportunityId: true } } },
   });
-  if (!row || (row.status === "DRAFT" && (row.contextSnapshot as Prisma.JsonObject)?.explorePreparedBy !== options.userId)) {
+  const privateOwner = (row?.contextSnapshot as Prisma.JsonObject)?.explorePreparedBy;
+  if (!row || (typeof privateOwner === "string" && privateOwner !== options.userId && !row.messageRequest)) {
     throw new MutualOpportunityError("NOT_FOUND");
   }
   const peerId = row.userAId === options.userId ? row.userBId : row.userAId;
@@ -1546,6 +1547,11 @@ export async function performOpportunitySafetyAction(options: {
     await prisma.$transaction(async tx => {
       const result = await installPairPeerBlock(tx, { userId: options.userId, blockedId: peerId, endedAt: new Date() });
       if (result.kind !== "blocked") throw new MutualOpportunityError("NOT_FOUND");
+      await tx.mutualOpportunity.updateMany({
+        where: { OR: [{ userAId: options.userId, userBId: peerId }, { userAId: peerId, userBId: options.userId }],
+          status: { in: ["PENDING", "DRAFT", "MUTUAL"] } },
+        data: { status: "UNAVAILABLE", terminalAt: new Date(), version: { increment: 1 } },
+      });
     });
     return { blocked: true };
   }

@@ -1,0 +1,12 @@
+{
+  "baseDeployment": "dpl_HWmk7kRGK3stJxo1WuU4YG21feEN",
+  "baseSourceFilesVerified": 1378,
+  "allBaseSHA1Matched": true,
+  "overlays": [
+    "lib/v2/mutual-opportunities.ts"
+  ],
+  "overlaySHA256": "d782910107a2653e9c2d2c6e17a99714f55bf73a934aa3b7d5fd5356540d9c47",
+  "schemaChanged": false,
+  "nativeSource": "3a6af1c2",
+  "reason": "Terminalize blocked recommendations within the block transaction and preserve private ownership after terminalization"
+}

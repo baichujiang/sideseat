@@ -72,6 +72,8 @@ test("Pre-contact blocking removes recommendations for both participants and pre
     const stored = await f.db.report.findUniqueOrThrow({ where: { id: report.id } });
     assert.equal(stored.reportedUserId, author!.id); assert(stored.details?.includes(target.id));
     await performOpportunitySafetyAction({ userId: viewer!.id, opportunityId: opportunity.id, action: "BLOCK" });
+    assert.equal((await f.db.mutualOpportunity.findUniqueOrThrow({ where: { id: opportunity.id } })).status, "UNAVAILABLE", "Blocking releases the old recommendation so intentions can find other people");
+    await assert.rejects(performOpportunitySafetyAction({ userId: author!.id, opportunityId: opportunity.id, action: "REPORT", reason: "SPAM" }), { code: "NOT_FOUND" });
     assert(!(await listMutualOpportunities(viewer!.id, false)).opportunities.some(o => o.id === opportunity.id));
     assert(!(await listMutualOpportunities(author!.id, false)).opportunities.some(o => o.id === opportunity.id));
     assert(!(await listExploreIntents(viewer!.id, 5)).intents.some(i => i.id === target.id));

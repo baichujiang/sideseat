@@ -1,5 +1,5 @@
 {
-  "passed": false,
+  "passed": true,
   "checks": [
     {
       "phase": "preview",
@@ -12,6 +12,13 @@
       "phase": "reported",
       "reports": 1,
       "blocks": 0,
+      "messageRequests": 0,
+      "chats": 0
+    },
+    {
+      "phase": "blocked",
+      "reports": 1,
+      "blocks": 1,
       "messageRequests": 0,
       "chats": 0
     }
