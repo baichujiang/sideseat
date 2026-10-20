@@ -13,7 +13,7 @@ export function ActivityIdeas({ activity, canEdit, busy, zh, onSuggest, onIntere
   const [location, setLocation] = useState("");
   return <section className="pb-4" data-testid="activity-ideas">
     <h2 className="flex items-center gap-2 text-base font-semibold"><Lightbulb className="h-5 w-5 shrink-0" aria-hidden />{activity.isOpen ? (zh ? "大家想做什么" : "What everyone wants to do") : (zh ? "大家的活动提议" : "Everyone’s activity ideas")}</h2>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{activity.isOpen ? (zh ? "提议和填写空闲可以同时进行，发起人会参考大家的想法定案。" : "Suggest activities and share free time together. The organizer makes the final choice.") : (zh ? "活动已选定。之前的提议与兴趣仍保留，下面可以继续填写空闲。" : "The activity is chosen. Your ideas and interests are kept; continue with free time below.")}</p>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">{activity.isOpen ? (zh ? "提议你想一起做的活动，发起人会参考大家的想法定案。" : "Suggest activities you'd enjoy doing together. The organizer makes the final choice.") : (zh ? "活动已选定，之前的提议与兴趣会保留。" : "The activity is chosen. Your ideas and interests are kept.")}</p>
     <p className="mt-2 text-xs font-medium leading-5">{zh ? "感兴趣不代表确认参加，最终安排之后再确认。" : "Interest does not confirm attendance. Confirm the final arrangement later."}</p>
     <ul className="mt-4 divide-y" aria-label={zh ? "活动候选" : "Activity options"}>
       {activity.ideas.map(idea => {

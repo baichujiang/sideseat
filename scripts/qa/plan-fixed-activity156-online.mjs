@@ -72,6 +72,7 @@ try {
     await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
     await page.getByRole('button', { name: '加入一起选活动', exact: true }).click();
     await expect(page.getByRole('heading', { name: '时间已定', exact: true })).toBeVisible();
+    await expect(page.getByText('提议你想一起做的活动，发起人会参考大家的想法定案。', { exact: true })).toBeVisible();
     await expect(page.getByTestId('time-poll-grid')).toHaveCount(0);
     await expect(page.getByRole('button', { name: '提交我的空闲', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: '确认参加', exact: true })).toHaveCount(0);
