@@ -123,7 +123,7 @@ struct TimePollTests {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         for id in 0..<10 { store.selected.insert(id) }
         try await Task.sleep(for: .seconds(2))
         #expect(await transport.writes.isEmpty)
@@ -144,7 +144,7 @@ struct TimePollTests {
         let transport = PollSaveTransport(firstStatus: 503)
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         store.selected = [0]
         let submit = Task { await store.submit(session: session) }
         await transport.waitUntilFirstStarted(); store.selected = [1, 2]
@@ -163,7 +163,7 @@ struct TimePollTests {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         store.selected = [0]
         let submit = Task { await store.submit(session: session) }
         await transport.waitUntilFirstStarted(); store.selected = [1, 2]
@@ -182,7 +182,7 @@ struct TimePollTests {
             let transport = PollSaveTransport(firstStatus: status)
             let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
             session.installUITestingSession()
-            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
             store.selected = [0]
             let submit = Task { await store.submit(session: session) }
             await transport.waitUntilFirstStarted()
@@ -200,12 +200,66 @@ struct TimePollTests {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         store.chooseNoFreeTime()
         let submit = Task { await store.submit(session: session) }
         await transport.waitUntilFirstStarted(); await transport.finishFirst(); await submit.value
         #expect(store.saved && store.poll?.didRespond == true && store.selected.isEmpty)
         #expect(await transport.writes == [[]])
+    }
+
+    @Test("Drafts restore per account and plan without publishing")
+    @MainActor
+    func localDraftRecovery() async throws {
+        let suite = "sideseat-draft-test-" + UUID().uuidString
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let transport = PollSaveTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let first = TimePollStore(token: "poll", draftDefaults: defaults)
+        await first.load(session: session)
+        first.selected = [0, 1]; first.displayName = "My draft"
+        let reopened = TimePollStore(token: "poll", draftDefaults: defaults)
+        await reopened.load(session: session)
+        #expect(reopened.selected == [0, 1] && reopened.displayName == "My draft")
+        #expect(reopened.restoredDraft && reopened.hasChanges && !reopened.saved)
+        let otherPlan = TimePollStore(token: "other-plan", draftDefaults: defaults)
+        await otherPlan.load(session: session)
+        #expect(otherPlan.selected.isEmpty && !otherPlan.restoredDraft)
+        await session.login(identifier: "other", password: "test")
+        await reopened.load(session: session)
+        #expect(reopened.selected.isEmpty && !reopened.restoredDraft && reopened.displayName == "Ming")
+        #expect(await transport.writes.isEmpty)
+    }
+
+    @Test("Old acknowledgements and failures keep the newer durable draft")
+    @MainActor
+    func durableDraftDuringSubmission() async throws {
+        for status in [200, 503] {
+            let suite = "sideseat-draft-test-" + UUID().uuidString
+            let defaults = UserDefaults(suiteName: suite)!
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let transport = PollSaveTransport(firstStatus: status, initialSlots: [])
+            let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+            session.installUITestingSession()
+            let store = TimePollStore(token: "poll", draftDefaults: defaults)
+            await store.load(session: session); store.selected = [0, 1]
+            let submit = Task { await store.submit(session: session) }
+            await transport.waitUntilFirstStarted(); store.selected = []
+            let during = TimePollStore(token: "poll", draftDefaults: defaults)
+            await during.load(session: session)
+            #expect(during.selected.isEmpty && during.restoredDraft && during.hasChanges)
+            await transport.finishFirst(); await submit.value
+            let reopened = TimePollStore(token: "poll", draftDefaults: defaults)
+            await reopened.load(session: session)
+            #expect(reopened.selected.isEmpty && reopened.restoredDraft && reopened.hasChanges)
+            await reopened.submit(session: session)
+            #expect(reopened.saved && !reopened.restoredDraft)
+            let after = TimePollStore(token: "poll", draftDefaults: defaults)
+            await after.load(session: session)
+            #expect(after.saved && !after.restoredDraft && !after.hasChanges)
+        }
     }
 
     @Test("Organizer invitation does not submit or discard an availability draft")
@@ -214,7 +268,7 @@ struct TimePollTests {
         let transport = PollRefreshRaceTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         store.selected = [2, 3]; store.displayName = "Local nickname"
         #expect(store.canMutate)
         await store.mutate("invitations", body: SendPollInvitationsRequest(start: "2030-10-16T07:00:00Z", end: "2030-10-16T08:00:00Z", attendeeIds: [], version: 0, linkParticipantCount: 2), session: session)
@@ -230,7 +284,7 @@ struct TimePollTests {
             let transport = PollRefreshRaceTransport(initialPhase: phase, includePeer: true)
             let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
             session.installUITestingSession()
-            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
             store.selected = [2, 3]; store.displayName = "Draft name"
             let refresh = Task { await store.load(session: session) }
             await transport.waitForRefresh(); await transport.releaseRefresh(); await refresh.value
@@ -249,7 +303,7 @@ struct TimePollTests {
             let transport = PollRefreshRaceTransport(refreshStatus: status)
             let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
             session.installUITestingSession()
-            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
             let refresh = Task { await store.load(session: session) }
             await transport.waitForRefresh()
             store.selected = [2, 3]; await store.submit(session: session)
@@ -269,7 +323,7 @@ struct TimePollTests {
         let transport = PollRefreshRaceTransport(initialPhase: "CONFIRMED")
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll")
+        let store = TimePollStore(token: "poll", draftDefaults: nil)
         let refresh = Task { await store.load(session: session) }
         await transport.waitForRefresh()
         await store.mutate("cancel", body: CancelPollPlanRequest(version: 1), session: session)
@@ -283,7 +337,7 @@ struct TimePollTests {
         let transport = PollRefreshRaceTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
         let refresh = Task { await store.load(session: session) }
         await transport.waitForRefresh()
         store.displayName = "New nickname"
@@ -331,7 +385,20 @@ private actor PollRefreshRaceTransport: APITransport {
 }
 
 private func collectingPollData() -> Data {
-    Data(#"{"token":"poll","title":"Dinner","timeZone":"Europe/Berlin","dates":["2026-10-16"],"startMinute":540,"endMinute":600,"slots":[],"participants":[],"mySlotIds":[],"myDisplayName":"Ming","didRespond":false,"isOwner":true,"updatedAt":"2026-10-16T07:00:00Z","shareUrl":"https://www.sideseat.de/time-polls/poll","summary":{"counts":[],"participantCount":0,"maximum":0,"common":false,"windows":[]}}"#.utf8)
+    let start = ISO8601DateFormatter().date(from: "2030-10-16T07:00:00Z")!
+    let formatter = ISO8601DateFormatter()
+    var slots = [[String: Any]]()
+    for id in 0..<12 {
+        let from = formatter.string(from: start.addingTimeInterval(Double(id * 900)))
+        let until = formatter.string(from: start.addingTimeInterval(Double((id + 1) * 900)))
+        slots.append(["id": id, "date": "2030-10-16", "row": String(id), "label": String(id), "start": from, "end": until])
+    }
+    return try! JSONSerialization.data(withJSONObject: [
+        "token": "poll", "title": "Dinner", "timeZone": "Europe/Berlin", "dates": ["2030-10-16"], "startMinute": 540, "endMinute": 720,
+        "slots": slots, "participants": [], "mySlotIds": [], "myDisplayName": "Ming", "didRespond": false, "isOwner": true,
+        "updatedAt": "2030-10-16T07:00:00Z", "shareUrl": "https://www.sideseat.de/time-polls/poll",
+        "summary": ["counts": [], "participantCount": 0, "maximum": 0, "common": false, "windows": []],
+    ])
 }
 
 private func collectingPoll() throws -> NativeTimePoll {
@@ -345,7 +412,14 @@ private actor PollSaveTransport: APITransport {
     private var firstPending: CheckedContinuation<Void, Never>?
     private let firstStatus: Int
     private(set) var refreshCount = 0
-    init(firstStatus: Int = 200) { self.firstStatus = firstStatus }
+    private var acknowledged: [Int]?
+    private var acknowledgedName = "Ming"
+    init(firstStatus: Int = 200, initialSlots: [Int]? = nil) { self.firstStatus = firstStatus; acknowledged = initialSlots }
+    private func response(_ request: URLRequest) throws -> (Data, URLResponse) {
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["mySlotIds"] = acknowledged ?? []; object["myDisplayName"] = acknowledgedName; object["didRespond"] = acknowledged != nil
+        return (try JSONSerialization.data(withJSONObject: ["data": object]), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    }
     func waitUntilFirstStarted() async {
         if writes.isEmpty { await withCheckedContinuation { firstStarted = $0 } }
     }
@@ -356,6 +430,7 @@ private actor PollSaveTransport: APITransport {
             let body = #"{"data":{"user":{"id":"other-user","username":"other","nickname":"Other","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"other-access","accessExpiresIn":900,"refreshToken":"other-refresh","refreshExpiresAt":"2026-10-17T00:00:00Z"}}}"#
             return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
         }
+        if request.httpMethod == "GET" { return try response(request) }
         let input = try JSONDecoder().decode(SaveTimePollRequest.self, from: request.httpBody!)
         writes.append(input.slotIds)
         if writes.count == 1 {
@@ -367,12 +442,7 @@ private actor PollSaveTransport: APITransport {
                 return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: firstStatus, httpVersion: nil, headerFields: nil)!)
             }
         }
-        let data = try JSONSerialization.data(withJSONObject: ["data": [
-            "token": "poll", "title": "Dinner", "timeZone": "Europe/Berlin", "dates": ["2026-10-16"], "startMinute": 540, "endMinute": 600,
-            "slots": [], "participants": [], "mySlotIds": input.slotIds, "myDisplayName": input.displayName,
-            "didRespond": true, "isOwner": true, "updatedAt": "2026-10-16T07:00:00Z", "shareUrl": "https://www.sideseat.de/time-polls/poll",
-            "summary": ["counts": [], "participantCount": 1, "maximum": 1, "common": true, "windows": []],
-        ]])
-        return (data, HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+        acknowledged = input.slotIds; acknowledgedName = input.displayName
+        return try response(request)
     }
 }

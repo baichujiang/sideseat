@@ -94,6 +94,49 @@ try {
       await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
       await page.waitForTimeout(1100); assert.equal(requests.length, 6); assert.deepEqual((await guest()).slotIds, []);
       checks.push(`${engineName}: page departure never implicitly submits a draft`);
+      let expectedWrites = 6;
+      if (['stage5', 'candidate', 'production'].includes(stage)) {
+        const restored = () => expect(page.getByText('已恢复草稿 · 未提交', { exact: true })).toBeVisible();
+        await page.reload(); await restored(); await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
+        assert.equal(requests.length, 6); assert.deepEqual((await guest()).slotIds, []);
+        checks.push(`${engineName}: reload restores an explicitly unsubmitted local draft without any save`);
+        const switchTo = async name => {
+          await page.getByRole('button', { name: '切换填写人', exact: true }).click();
+          await page.getByLabel('你的名字', { exact: true }).fill(name);
+          await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
+        };
+        await switchTo('Guest Other'); await expect(cell(0)).toHaveAttribute('aria-pressed', 'false');
+        await cell(2).click(); await switchTo('Guest Lin'); await restored();
+        await expect(cell(0)).toHaveAttribute('aria-pressed', 'true'); await expect(cell(2)).toHaveAttribute('aria-pressed', 'false');
+        await switchTo('Guest Other'); await expect(cell(2)).toHaveAttribute('aria-pressed', 'true');
+        await switchTo('Guest Lin');
+        checks.push(`${engineName}: switching identities isolates and restores each guest's own draft`);
+        const other = await call('/api/v1/time-polls', owner, 'POST', { title: 'Separate draft scope', timeZone: 'Europe/Berlin', dates: p.dates, startMinute: 540, endMinute: 660 }, 201);
+        fixture.tokens.push(other.token); persist();
+        await page.goto(`${base}/time-polls/${other.token}`);
+        await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
+        await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
+        await expect(cell(0)).toHaveAttribute('aria-pressed', 'false');
+        await page.goto(`${base}/time-polls/${p.token}`); await restored(); await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
+        checks.push(`${engineName}: drafts do not leak between plans`);
+        let releaseOld, oldStarted;
+        const oldGate = new Promise(r => { releaseOld = r; }), oldReady = new Promise(r => { oldStarted = r; });
+        await page.route(responseURL, async route => { const response = await route.fetch(); oldStarted(); await oldGate; await route.fulfill({ response }); }, { times: 1 });
+        await submit(); await oldReady; await cell(0).click(); releaseOld();
+        await expect(page.getByTestId('availability-submit')).toBeEnabled();
+        await page.reload(); await restored(); await expect(cell(0)).toHaveAttribute('aria-pressed', 'false');
+        assert.deepEqual((await guest()).slotIds, [0, 1]); assert.equal(requests.length, 7);
+        await submit(); await saved(); await page.reload(); await saved();
+        assert.equal(requests.length, 8); assert.deepEqual((await guest()).slotIds, []);
+        checks.push(`${engineName}: a newer draft that reverts to the previous server value survives an older acknowledgement and reload; its own acknowledgement clears it`);
+        await page.route(responseURL, route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: { message: 'Durable draft QA failure' } }) }), { times: 1 });
+        await cell(0).click(); await submit(); await expect(page.getByText('提交失败', { exact: true })).toBeVisible();
+        await page.reload(); await restored(); await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
+        assert.equal(requests.length, 9); assert.deepEqual((await guest()).slotIds, []);
+        await cell(0).click(); await submit(); await saved(); await cell(0).click();
+        expectedWrites = 10;
+        checks.push(`${engineName}: failed submissions restore after reload and remain private until explicit retry`);
+      }
       if (!['stage1', 'stage2'].includes(stage)) {
         if (!['stage3', 'stage3-final'].includes(stage)) {
           await page.getByRole('button', { name: '编辑昵称', exact: true }).click();
@@ -101,13 +144,13 @@ try {
           await page.getByRole('button', { name: '保存昵称', exact: true }).click();
           await expect(page.getByText('Guest Renamed', { exact: true }).first()).toBeVisible();
           await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
-          assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, 6);
+          assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, expectedWrites);
           checks.push(`${engineName}: nickname action works with a draft and neither publishes nor clears availability`);
         }
         await call(api + '/response', owner, 'PUT', { displayName: 'Host Ming', slotIds: [0, 1] });
         await expect(cell(0)).toHaveAttribute('aria-label', /1 人有空$/, { timeout: 20000 });
         await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
-        await expect(page.getByText('未提交', { exact: true })).toBeVisible();
+        await expect(page.getByRole('status').filter({ hasText: '未提交' })).toBeVisible();
         assert.deepEqual((await guest()).slotIds, []);
         checks.push(`${engineName}: peer refresh continues with a dirty draft and never overwrites or publishes it`);
         const before = await detail();
@@ -116,7 +159,7 @@ try {
         const confirm = page.getByRole('button', { name: '确认参加', exact: true });
         await expect(confirm).toBeEnabled(); await confirm.click();
         await expect.poll(async () => (await detail()).phase).toBe('CONFIRMED');
-        assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, 6);
+        assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, expectedWrites);
         checks.push(`${engineName}: incoming final invitation replaces collection view and confirms without submitting the availability draft`);
       }
       assert.deepEqual(errors, []);

@@ -503,7 +503,7 @@ struct TimePollDetailView: View {
             else { Image(systemName: failed ? "exclamationmark.circle" : store.saved ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(failed ? SideSeatTheme.danger : store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong) }
             VStack(alignment: .leading, spacing: 3) {
-                Text(store.saving ? "Submitting…" : failed ? "Couldn't submit" : store.saved ? "Availability submitted" : "Not submitted")
+                Text(store.saving ? "Submitting…" : failed ? "Couldn't submit" : store.saved ? "Availability submitted" : store.restoredDraft ? "Draft restored · not submitted" : "Not submitted")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textPrimary)
                     .accessibilityIdentifier(store.saved ? "time-poll-saved" : "time-poll-save-state")

@@ -1,0 +1,34 @@
+{
+  "checks": [
+    {
+      "phase": "draft-local",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:58:19.737Z"
+    },
+    {
+      "phase": "draft-reopened",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:58:30.315Z"
+    },
+    {
+      "phase": "draft-other-account",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:58:55.095Z"
+    },
+    {
+      "phase": "draft-submitted",
+      "slots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "respondents": 1,
+      "checkedAt": "2026-10-20T00:59:14.761Z"
+    }
+  ],
+  "passed": 4
+}

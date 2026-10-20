@@ -64,8 +64,8 @@ import XCTest
         XCTAssertTrue(firstOwn.isHittable); XCTAssertTrue(secondOwn.isHittable)
         firstOwn.press(forDuration: 0.6, thenDragTo: secondOwn)
         XCTAssertTrue(firstOwn.isSelected); XCTAssertTrue(secondOwn.isSelected)
-        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
-        firstOwn.tap()
+        nativeWaitSaved()
+        firstOwn.tap(); nativeWaitSaved()
         XCTAssertFalse(firstOwn.isSelected); wait(firstOwn, labelContains: ", 0")
         app.buttons["time-poll-undo"].tap()
         XCTAssertTrue(firstOwn.isSelected)
@@ -75,7 +75,7 @@ import XCTest
         app.buttons["time-poll-undo"].tap()
         XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
         XCTAssertTrue(firstOwn.isSelected); XCTAssertTrue(secondOwn.isSelected)
-        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
+        nativeWaitSaved()
         capture(app, "04-owner-saved"); phase("created-and-saved")
         XCTAssertFalse(app.buttons["time-poll-finish"].exists, "Inline edits must not require a second completion step")
         app.navigationBars.buttons.element(boundBy: 0).tap()
@@ -141,7 +141,7 @@ import XCTest
         XCTAssertLessThan(second.frame.maxY, nextStep.frame.minY, "Name submission must reveal the time cells above the fixed save bar")
         capture(safari, "06a-guest-editor")
         first.tap(); second.tap()
-        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Saved automatically", "已自动保存"])).firstMatch.waitForExistence(timeout: 20))
+        webWaitSaved()
         capture(safari, "06-guest-saved"); phase("guest-saved")
         XCTAssertTrue(first.exists, "Autosave must keep the same editable timetable visible")
         XCTAssertTrue(nextStep.exists)
@@ -157,19 +157,19 @@ import XCTest
         app.buttons["plan-people-done"].tap()
         let sharedCell = app.buttons["time-poll-cell-0"]
         wait(sharedCell, labelContains: ", 2")
-        sharedCell.tap()
+        sharedCell.tap(); nativeWaitSaved()
         wait(sharedCell, labelContains: ", 1")
         XCTAssertFalse(sharedCell.isSelected)
-        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
+        nativeWaitSaved()
         capture(app, "08a-own-time-removed-friend-kept"); phase("owner-edited")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(card.waitForExistence(timeout: 15)); card.tap()
         XCTAssertTrue(sharedCell.waitForExistence(timeout: 15))
         XCTAssertFalse(sharedCell.isSelected); wait(sharedCell, labelContains: ", 1")
-        sharedCell.tap()
+        sharedCell.tap(); nativeWaitSaved()
         wait(sharedCell, labelContains: ", 2")
         XCTAssertTrue(sharedCell.isSelected)
-        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
+        nativeWaitSaved()
         phase("owner-restored")
         reviewFinalHour()
         let send = app.buttons["unified-plan-send-invitations"]
@@ -294,7 +294,7 @@ import XCTest
         let webSecond = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 09:30")).firstMatch
         XCTAssertTrue(webFirst.waitForExistence(timeout: 20)); activityRevealWeb(webSecond)
         webFirst.tap(); webSecond.tap()
-        XCTAssertTrue(safari.staticTexts["已自动保存"].waitForExistence(timeout: 20))
+        webWaitSaved()
         activityPhase("guest-filled"); capture(safari, "activity-06-guest-free-time")
 
         nativeSignIn(owner, bundle: fixture.bundle)
@@ -387,6 +387,46 @@ import XCTest
         let bundle: String
         let pollToken: String?
         let accounts: [NativeAccount]
+    }
+
+    func testAvailabilityDraftSurvivesReopenAndAccountSwitch() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires disposable draft recovery accounts.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertTrue(first.waitForExistence(timeout: 20)); first.tap(); second.tap()
+        app.buttons["plan-copy-link"].tap(); nativePhase("draft-local")
+        XCUIDevice.shared.press(.home); app.activate()
+        app.navigationBars.buttons.element(boundBy: 0).tap(); nativeOpenCard()
+        XCTAssertTrue(first.waitForExistence(timeout: 20))
+        XCTAssertTrue(first.isSelected && second.isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "已恢复草稿 · 未提交")
+        nativePhase("draft-reopened"); capture(app, "draft-recovered-on-device")
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-open-link"].tap()
+        let field = app.alerts.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); field.tap(); field.typeKey("v", modifierFlags: .command)
+        let allowPaste = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons.matching(NSPredicate(format: "label IN %@", ["Allow Paste", "允许粘贴"])).firstMatch
+        if allowPaste.waitForExistence(timeout: 2) { allowPaste.tap() }
+        app.alerts.buttons["打开"].tap()
+        XCTAssertTrue(first.waitForExistence(timeout: 20)); XCTAssertFalse(first.isSelected || second.isSelected)
+        nativePhase("draft-other-account"); capture(app, "draft-separated-by-account")
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        XCTAssertTrue(first.waitForExistence(timeout: 20))
+        XCTAssertTrue(first.isSelected && second.isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "已恢复草稿 · 未提交")
+        nativeWaitSaved(); nativePhase("draft-submitted"); capture(app, "draft-explicitly-submitted")
     }
 
     func testOrganizerInvitesWithUnsubmittedAvailability() throws {
@@ -906,6 +946,13 @@ import XCTest
         Thread.sleep(forTimeInterval: 3)
     }
 
+    private func webWaitSaved() {
+        let submit = webButton("Submit my availability", "提交我的空闲")
+        let update = webButton("Save changes", "保存修改")
+        if submit.exists && submit.isEnabled { submit.tap() }
+        else if update.exists && update.isEnabled { update.tap() }
+        XCTAssertTrue(safari.staticTexts.matching(NSPredicate(format: "label IN %@", ["Availability submitted", "已提交空闲"])).firstMatch.waitForExistence(timeout: 20))
+    }
     private func webButton(_ en: String, _ zh: String) -> XCUIElement {
         safari.buttons.matching(NSPredicate(format: "label IN %@", [en, zh])).firstMatch
     }

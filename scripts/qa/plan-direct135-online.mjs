@@ -90,6 +90,7 @@ try {
       await expect(page.getByTestId('time-poll-grid')).toBeVisible();
       await page.getByTestId('time-poll-cell-0').click(); await page.getByTestId('time-poll-cell-2').click();
       await expect(page.getByTestId('time-poll-cell-2')).toHaveAttribute('aria-pressed', 'true');
+      if (process.env.SIDESEAT_QA_MANUAL === '1') await page.getByTestId('availability-submit').click();
       await expect.poll(async () => (await call(route(p), owner)).participants.find(x => x.isGuest)?.slotIds).toEqual([0, 1, 2, 3]);
       const hostRow = (await call('/api/v1/time-polls', owner)).polls.find(row => row.token === p.token);
       assert.equal(hostRow.didRespond, false, 'Other people filling availability must not mark the organizer as responded.');

@@ -31,7 +31,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   useEffect(() => {
     if ((collecting || poll?.phase === "INVITING") && viewerId && !choosingName) table.current?.scrollIntoView({ block: "start" });
   }, [collecting, viewerId, choosingName, poll?.phase, poll?.invitationVersion]);
-  const errorText = zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
+  const errorText = zh && error === "This device could not keep your draft. Keep this page open until you submit." ? "此设备无法保留草稿，请保持页面打开并手动提交。" : zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
   const editing = collecting && !!poll?.viewerId && !choosingName;
   const replying = poll?.phase === "INVITING" && !!poll.viewerId && included && !choosingName;
@@ -39,7 +39,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
   const selectedHours = new Intl.NumberFormat(zh ? "zh-CN" : "en", { maximumFractionDigits: 2 }).format(selectedSlots.reduce((sum, slot) => sum + (Date.parse(slot.end) - Date.parse(slot.start)) / 3600000, 0));
   const failed = state.submissionFailed && !saving;
-  const saveTitle = saving ? (zh ? "提交中…" : "Submitting…") : failed ? (zh ? "提交失败" : "Couldn't submit") : poll?.didRespond && saved ? (zh ? "已提交空闲" : "Availability submitted") : (zh ? "未提交" : "Not submitted");
+  const saveTitle = saving ? (zh ? "提交中…" : "Submitting…") : failed ? (zh ? "提交失败" : "Couldn't submit") : poll?.didRespond && saved ? (zh ? "已提交空闲" : "Availability submitted") : state.restoredDraft ? (zh ? "已恢复草稿 · 未提交" : "Draft restored · not submitted") : (zh ? "未提交" : "Not submitted");
   const formatWindow = (start: string, end: string) => {
     const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
     const first = formatter.format(new Date(start)), last = formatter.format(new Date(end));

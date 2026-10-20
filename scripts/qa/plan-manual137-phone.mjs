@@ -16,7 +16,7 @@ if (mode === 'prepare') {
   await assert.rejects(fs.access(privatePath));
   const stage = process.env.SIDESEAT_MANUAL_PHONE_STAGE ?? '1';
   const f = { stage, title: `Manual ${randomBytes(4).toString('hex')}`, bundle: 'app.sideseat.mobile.preview', accounts: [] }; await persist(f);
-  for (const role of (stage === '3' ? ['owner', 'participant'] : ['owner'])) {
+  for (const role of (['3', '5'].includes(stage) ? ['owner', 'participant'] : ['owner'])) {
     const a = { role, identifier: `planqa_manualphone_${randomBytes(5).toString('hex')}`, password: randomBytes(22).toString('base64url') };
     await call('/api/auth/signup', null, 'POST', { username: a.identifier, password: a.password, displayName: role === 'owner' ? 'Host Ming' : 'Peer Lin', school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }, 201);
     f.accounts.push(a); await persist(f);
@@ -42,11 +42,17 @@ if (mode === 'prepare') {
     const expected = { 'manual-draft': [], 'manual-submitted': [0, 1, 2, 3], 'manual-edited': [0, 1, 2, 3], 'manual-resubmitted': [2, 3] };
     for (let tick = 0; tick < 240; tick++) {
       const text = await fs.readFile(log, 'utf8').catch(() => '');
-      for (const [, phase] of text.matchAll(/NATIVE_PARTICIPANT_PHASE ((?:manual|refresh|invite)-[a-z-]+)/g)) {
+      for (const [, phase] of text.matchAll(/NATIVE_PARTICIPANT_PHASE ((?:manual|refresh|invite|draft)-[a-z-]+)/g)) {
         if (seen.has(phase)) continue;
         const p = (await call('/api/v1/time-polls', owner)).polls.find(p => p.title === f.title); assert(p);
         const detail = await call(`/api/v1/time-polls/${p.token}`, owner);
-        if (phase.startsWith('invite-')) {
+        if (phase.startsWith('draft-')) {
+          const submitted = phase === 'draft-submitted';
+          assert.equal(detail.didRespond, submitted); assert.deepEqual(detail.mySlotIds, submitted ? [0, 1, 2, 3] : []);
+          assert.equal(detail.summary.participantCount, submitted ? 1 : 0);
+          const peer = await call(`/api/v1/time-polls/${p.token}`, f.accounts.find(a => a.role === 'participant'));
+          assert.equal(peer.didRespond, false); assert.deepEqual(peer.mySlotIds, []);
+        } else if (phase.startsWith('invite-')) {
           assert.equal(detail.didRespond, false); assert.deepEqual(detail.mySlotIds, []); assert.equal(detail.summary.participantCount, 0);
           assert.equal(detail.phase, phase === 'invite-sent' ? 'INVITING' : 'COLLECTING');
           if (phase === 'invite-sent') { assert.equal(detail.chosenStart, detail.slots[4].start); assert.equal(detail.chosenEnd, detail.slots[7].end); assert.equal(detail.expectedCount, 2); }
