@@ -42,7 +42,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **155** 已安装到默认 iPhone 14 Plus：「让朋友提议活动」改为原表单中的勾选项，勾选/取消保留全部输入，底部统一「发起计划」。5 项真机用例、两种状态实际创建及 API 核对通过，普通启动 PID 3958；本轮无后端/网页发布。[当前交付与截图](./docs/releases/2026-10-20-preview155-friend-suggestion-checkbox.md)。
+Preview **156** 已安装到默认 iPhone 14 Plus：「让朋友提议活动」和「时间已定」可同时开启，保留全部输入；选定活动后再发正式邀请，App 和网页共用已定时段展示。真实双账号完整流程、七阶段 API、组合切换及深色大字号复验见[当前交付与截图](./docs/releases/2026-10-20-preview156-fixed-time-activity-ideas.md)。
+
+此前 Preview **155** 已安装到默认 iPhone 14 Plus：「让朋友提议活动」改为原表单中的勾选项，勾选/取消保留全部输入，底部统一「发起计划」。5 项真机用例、两种状态实际创建及 API 核对通过，普通启动 PID 3958；本轮无后端/网页发布。[当前交付与截图](./docs/releases/2026-10-20-preview155-friend-suggestion-checkbox.md)。
 此前 Preview **154** 已安装到默认 iPhone 14 Plus：名称、地点、日期、时区按左右同排收进一组；昵称、参与状态、邀请复核与调整入口一起收紧，长内容及辅助功能字号自动纵排。最终 3 项真机、9 个真实 API 阶段通过，普通启动 PID 3920；本轮仅改原生布局。[当前交付与截图](./docs/releases/2026-10-20-preview154-compact-plan-editors.md)。
 此前 Preview **153** 已安装到默认 iPhone 14 Plus：共同计划详情明确区分活动信息、个人昵称、时间表与当前操作；活动建议在标题下原位展开，最终选时与核对邀请保留草稿和返回选择。分享汇总 App 联系人、网页链接与复制，取消/删除采用明确的双选确认。42 项单元、3 项最终真机及 9 个真实 API 阶段通过，普通启动 PID 3874；后端已上线。[当前交付与验证范围](./docs/releases/2026-10-20-preview153-plan-detail-hierarchy.md)。
 此前 Preview **152** 已安装到默认 iPhone 14 Plus：发起计划后直接选择 App 联系人发送计划卡片，朋友从私聊或计划列表填写空闲、查看最终邀请并明确确认。最终双账号完整流程 165.526 秒、8 个真实 API 阶段和深色最大字号复验通过；后端同一候选提升正式，普通启动 PID 3802 核验。[当前交付与验证范围](./docs/releases/2026-10-20-preview152-app-contact-plans.md)。

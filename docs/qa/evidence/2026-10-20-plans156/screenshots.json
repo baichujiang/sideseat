@@ -1,0 +1,176 @@
+[
+  {
+    "file": "before-date-fix-fixed-ideas-calendar.png",
+    "attachment": "EA7477E7-A48E-412F-BD2F-A4432FC21109.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "bd97c96fed9d1f706c0bd3cfd3dad97c9cce0185180c9152d6217dba405e68a2"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-peer-accepted.png",
+    "attachment": "05034E67-3F83-447B-B31F-1E3290EC8D3A.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "947509e0a22d7b3288dbd3be5594420a7bae53dbff32dd99c670ac423650b427"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-review-before-inviting.png",
+    "attachment": "C1728ABD-4880-475C-BD11-041A04CAE7E6.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "854a1a26633f6eeaa6d4d0d9fbcf10238d49f529fb9ef3f2b239c57d6f2763a2"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-peer-suggestion.png",
+    "attachment": "E1351EA3-43A1-4C35-A6EF-C9DBE6E52DC8.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "0d8fc50fe0276189702a1b870e4a3119b80f77c714e8d174d0fc6b49b6826486"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-awaiting-activity.png",
+    "attachment": "6BA89E2C-8686-4239-BEB2-F8FAA9C27984.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "71e3345a63cf192ac0216cc876120bbd565533f0e4378b04da2109bf80852f0c"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-create-both-options.png",
+    "attachment": "C8B8D700-813B-46FD-A934-214A4C446722.png",
+    "xcresult": "sideseat156-native-final.xcresult",
+    "sha256": "af6f138384a9b5dc2b6d0e96e4787a319721735cc1ec7a7ccb3881e97389d76b"
+  },
+  {
+    "file": "activity-ideas-checkbox-unchecked.png",
+    "attachment": "3FA04608-E5EB-4724-B6CF-E1F6F85BA6B5.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "7832cd3be7c50a8ede2a48a8f0e057592d15797ca3c2d7abed2d44088b3bcb55"
+  },
+  {
+    "file": "activity-ideas-checkbox-checked.png",
+    "attachment": "330D137C-1E22-4C79-BBEE-669861A382A7.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "a3465c0ad79021b39da6c79c3346e2d51547a9bd64634c63c3b4e28bb9a5944a"
+  },
+  {
+    "file": "before-date-fix-inline-dates-dark-large.png",
+    "attachment": "01D4EE8E-7110-41C8-9165-A105769A14B8.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "f268d15f9902c0af2f3f92ceee40f5438deededa296f625f8b20ac10a0e12039"
+  },
+  {
+    "file": "before-date-fix-fixed-ideas-dark-large.png",
+    "attachment": "F4CC4A5F-3444-454F-A2E5-DD72D7CCA53C.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "9cb721a848b51c0e790dc2a3f1be3addfc288ac711716af71762cf2d763974a3"
+  },
+  {
+    "file": "before-date-fix-single-form-dark-large.png",
+    "attachment": "F2BEA1A0-8F3F-4656-BF15-4197BE7BC1D0.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "c9ddfa3c418021fb0a58b0247b3332da2525f80b708a0bd716157fa332252141"
+  },
+  {
+    "file": "before-date-fix-home-first-use-dark-large.png",
+    "attachment": "CB001462-81C0-46BF-93A3-C7ABAA3F6CAE.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "83a37e10c2e6ce8b460a02304fd9746c7615c5b359f988f7459b17262fed3765"
+  },
+  {
+    "file": "return-to-default-form.png",
+    "attachment": "16C3F705-68EB-4D87-9F2A-0318009323C7.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "0760969c3c3f7812224dd32f2252fbe7a7f105d3c94799e688eab509ce7e6b77"
+  },
+  {
+    "file": "secondary-fixed-time.png",
+    "attachment": "90F610F3-6010-4076-AB7F-B6B01C72ED1A.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "d1ba8280b5580c66d72058693ab3cb5e49dd17dc1c076549fbdad11e3abc7070"
+  },
+  {
+    "file": "before-date-fix-fixed-time-options-restored.png",
+    "attachment": "02A61955-9422-429D-8DB0-C4D2F97A99AB.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "3929ab8f98fc74a55711adb97cc6d2c70aaa9c01ff1fe5b8c21de81697f9d824"
+  },
+  {
+    "file": "before-date-fix-fixed-time-with-activity-ideas.png",
+    "attachment": "F73147D0-3AA3-41EB-8F64-47F30F6B7CF1.png",
+    "xcresult": "sideseat156-layout-corrected.xcresult",
+    "sha256": "3929ab8f98fc74a55711adb97cc6d2c70aaa9c01ff1fe5b8c21de81697f9d824"
+  },
+  {
+    "file": "fixed-ideas-calendar.png",
+    "attachment": "FE70FEC5-3D27-478A-9EF4-5E20518C13E4.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "0b3a1934665238065f97ab59805db388761d8d0bfe0c3973117124589fe36c07"
+  },
+  {
+    "file": "fixed-ideas-peer-accepted.png",
+    "attachment": "5F1B083E-BA07-41B6-A8ED-2C9F5B12DC38.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "4b65d5d4bae77f99bded0509e4b88b592c274b62533860e7f80d00c0eab31aa2"
+  },
+  {
+    "file": "fixed-ideas-review-before-inviting.png",
+    "attachment": "1F724544-12A0-439C-8002-0ECA8AF2D595.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "4d6d263cf608fc384fe3c45ee3c1ad8dfa2800df6d9c2ea2c51d5723fac3ba4b"
+  },
+  {
+    "file": "fixed-ideas-peer-suggestion.png",
+    "attachment": "1529D080-8616-4A60-83C6-9AF30EC3FEE1.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "69892038b481aed50ec02c36bf478f126534d15e6e72d48dc3fc4ce4dfd5dc0d"
+  },
+  {
+    "file": "fixed-ideas-awaiting-activity.png",
+    "attachment": "2CC58E66-9C9F-4EAD-BE49-5A221917F08A.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "1d108cfe422bfefa0c75769abb88658afa66832f3f18b20b2cd0910cf3ffdb14"
+  },
+  {
+    "file": "fixed-ideas-create-both-options.png",
+    "attachment": "CB4BDFD1-B1EB-4E88-8836-2F5FD24C7FAA.png",
+    "xcresult": "sideseat156-acceptance.xcresult",
+    "sha256": "ab22968c24e9525eb3c51fe920a8cd5cc5c0a1e13da8857fcbf9b69a61d05c93"
+  },
+  {
+    "file": "inline-dates-dark-large.png",
+    "attachment": "1C8F895A-F84F-4A14-AFCF-A3B3F046195C.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "9b530f6eadb614704041022b90c59e7363d72c4af64100a595299d544007198e"
+  },
+  {
+    "file": "fixed-time-picker-dark-large.png",
+    "attachment": "A57C3C78-C2D4-462E-BFC7-4417CC4D8DCE.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "e08a12259a8966f24b97564b5eba6f7366b30a8ab4f0c1b121aac7acd2407e74"
+  },
+  {
+    "file": "fixed-ideas-dark-large.png",
+    "attachment": "860411FC-64A9-41FC-9227-81AD7756BDDF.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "e08a12259a8966f24b97564b5eba6f7366b30a8ab4f0c1b121aac7acd2407e74"
+  },
+  {
+    "file": "single-form-dark-large.png",
+    "attachment": "8756770F-4C9D-43A6-A645-82AC1F3D5514.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "80c26c27240cc11589099f128919c7e92371b7b00ed509e89873e7dc31471bc1"
+  },
+  {
+    "file": "home-first-use-dark-large.png",
+    "attachment": "28746639-581D-4310-92EB-6B9E607902D2.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "a34a7fa6aeac08105b9905d56438a2367e8378d2dd25e46ca7d301e3a958e50c"
+  },
+  {
+    "file": "fixed-time-options-restored.png",
+    "attachment": "5E4AA118-A9CA-4A3C-8871-78B41AEF6F2F.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "911261c15bd3dc56206c78dc009f9ba7465d1667070a69fc96604a1456b91bda"
+  },
+  {
+    "file": "fixed-time-with-activity-ideas.png",
+    "attachment": "7CB7E0B7-8EC8-40D8-AC5B-36872AA707F1.png",
+    "xcresult": "sideseat156-acceptance-controls.xcresult",
+    "sha256": "9997a7686f248825f2c56aabed649c376b02bc98c3034e8025c98d83c59d660a"
+  }
+]

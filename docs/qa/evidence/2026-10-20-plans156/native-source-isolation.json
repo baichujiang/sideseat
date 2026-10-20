@@ -1,0 +1,12 @@
+{
+  "baseCommit": "11b7aa5a4936383ac73aef1627e542237cd46b38",
+  "overlayCommit": "3ea651df12108410c44e1ac73c264363d2e8cc72",
+  "overlays": [
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift"
+  ],
+  "unrelatedWorkExcluded": true,
+  "sharedResourceFromBase": "lib/calendar/CalendarSmartInputPolicy.json",
+  "localSigningConfigurationApplied": true,
+  "dateInputLayoutCommit": "91a8cc07a2e8ed26a4ff8472d3bb59c37569b892"
+}

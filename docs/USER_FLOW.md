@@ -8,6 +8,20 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+## Activity undecided, time already set — Preview 156
+
+Enter topic/place → optionally enable Friends can suggest activities and set an
+exact time in the same form → Create → share to App contacts or web guests →
+suggest/mark interest beside the read-only set time → organizer reviews activity
+and invitees → explicitly send formal invitations → each person accepts/declines
+or leaves pending → organizer sends final plan → accepted people enter Calendar.
+
+Activity and time controls remain visible and preserve their inputs when toggled.
+This combination requests no availability form and creates no early attendance.
+Activity choice preserves the exact time and retains the common location when
+the selected idea has none. The existing known-activity and flexible-time paths
+continue, with no extra selection screen.
+
 ## App contact plan delivery — Preview 152
 
 Organizer creates plan → Invite App contacts → search/select contacts → Send.

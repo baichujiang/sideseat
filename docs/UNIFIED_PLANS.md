@@ -3,6 +3,27 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Independent activity and time choices — Preview 156
+
+Friends can suggest activities and Time already set are independent controls in
+the same creation form. Toggling either keeps title, place, candidate dates,
+exact start, duration and group size. With both enabled, the existing FIXED plan
+starts in COLLECTING at invitation version zero, retaining chosenStart/chosenEnd.
+No invitation, availability response or creator acceptance is created yet.
+
+App and share-page participants see the read-only set time and inline activity
+ideas. They suggest/mark interest without filling availability or accepting.
+The organizer reviews the same time, selects an activity and invitees, then
+explicitly sends invitations. Review/cancel alone writes nothing. Choosing an
+idea without its own location preserves the plan's existing location. The set
+time cannot be changed by sending a different invitation interval.
+
+The same existing activity-choice and invitation endpoints perform this flow;
+no new mode, database field, schema migration or alternate invitation engine.
+Formal invitation version one enables explicit RSVP. Organizer publication still
+governs Calendar/final alerts, and unconfirmed planning expires at the set start.
+Ordinary fixed invitations without activity ideas continue to start in INVITING.
+
 ## Native detail hierarchy — Preview 153
 
 The canonical detail separates plan identity, personal participation, the shared
@@ -152,7 +173,8 @@ on confirmed details; only pending replies show the instruction to confirm.
 ## One shared lifecycle
 
 `TimePoll` is the persisted root of manual plans. `COLLECT` starts in COLLECTING;
-`FIXED` starts in INVITING with its creator accepted. Known-activity creation
+`FIXED` with a known activity starts in INVITING with its creator accepted;
+the optional activity-ideas combination starts in COLLECTING as described above. Known-activity creation
 supports 2–20 expected people, with five as the native default. The optional
 theme start leaves the response estimate unset; the existing invitation roster
 limit remains twenty. Existing conversation-bound

@@ -1,0 +1,23 @@
+{
+  "baseDeployment": "dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j",
+  "baseFilesVerified": 1374,
+  "allBaseSHA1Matched": true,
+  "overlays": [
+    "lib/api/v1/time-poll-service.ts",
+    "lib/time-polls/lifecycle.ts",
+    "openapi/v1.json",
+    "components/time-polls/shared-time-poll.tsx",
+    "components/time-polls/invitation-timetable.tsx"
+  ],
+  "overlaidFileBasesMatchGitHEAD": true,
+  "schemaChanged": false,
+  "unrelatedProductionDifferencesPreserved": true,
+  "sourceCommit": "f703ee5b295603a9cc500ce7631f9bd79425ecf1",
+  "overlaySha256": {
+    "lib/api/v1/time-poll-service.ts": "52fe109a1fc44faa6ebfc81454ce7b9fe8d606075d797195c94290a05710ccd3",
+    "lib/time-polls/lifecycle.ts": "a97abfaa367a4e249a5859e3252290e9514255c3ac4cec2b23a263cc34e0c115",
+    "openapi/v1.json": "ad7131dbcd61e3770c5d5b1ace839dc42b8655c35e788a29474712cc3feec766",
+    "components/time-polls/shared-time-poll.tsx": "1b681b624f4d3d924a4ed2fb0afb90f34f7e7506933c6c37c930b20d65470050",
+    "components/time-polls/invitation-timetable.tsx": "635babb40f85c66cdab01385c91408cb531f46e446981ae4b88e1825589268a6"
+  }
+}

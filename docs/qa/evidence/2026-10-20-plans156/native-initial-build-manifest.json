@@ -1,0 +1,27 @@
+{
+  "sourceCommit": "11b7aa5a4936383ac73aef1627e542237cd46b38",
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "156",
+  "version": "1.0.0",
+  "buildCompletedBeforeUnrelatedEdits": true,
+  "files": {
+    "Info.plist": "f0808a0f5cd45c1eb668a403f332af1db491f871b7acd55e0bcd8180683cbc32",
+    "SideSeat Preview": "079d60a36adb8cf58e3d2194058957c8e1ea7d8a2479f869e617b467f47405d9",
+    "SideSeat Preview.debug.dylib": "a8f01df6daedce528242b38e160145c974170a40a3f2bbef0f7d0164e48c0714",
+    "_CodeSignature/CodeResources": "33c794dbce85f8e491f69785a5e2a4a20363f2c88981ba22afeb1d069286ddb4"
+  },
+  "signatureStrictVerification": true,
+  "install": {
+    "deviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "installedApplications": [
+      {
+        "bundleID": "app.sideseat.mobile.preview",
+        "databaseSequenceNumber": 7980,
+        "databaseUUID": "276D1289-E615-446C-A59C-EB70B8BD5E32",
+        "installationURL": "file:///private/var/containers/Bundle/Application/A14070A6-3B50-41BC-951B-280586C7825B/SideSeat%20Preview.app/",
+        "launchServicesIdentifier": "unknown",
+        "options": {}
+      }
+    ]
+  }
+}

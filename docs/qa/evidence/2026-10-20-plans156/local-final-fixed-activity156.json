@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": [
+    "fixed time and activity ideas coexist with zero responses, invitations or calendars; early attendance and invitations are blocked",
+    "App contact receives a card and list entry without fake availability or acceptance",
+    "guest web shows a read-only fixed timetable, opens activity ideas directly and accepts suggestions/interests without an availability form or RSVP",
+    "activity selection preserves place and exact cross-midnight time; only an explicit send creates invitation version one",
+    "App and guest explicitly accept, only organizer publication writes one exact two-hour calendar entry per account; retry never duplicates it",
+    "ordinary collection, flexible-time activity ideas and immediate fixed invitations retain their existing creation contracts"
+  ],
+  "failure": null,
+  "at": "2026-10-20T18:58:05.806Z"
+}

@@ -2,6 +2,19 @@
 
 Owner approval: 2026-10-19. Delivery status belongs to [Deployed state](./DEPLOYED_STATE.md).
 
+## Independent time setting — Preview 156
+
+The activity-ideas checkbox can be combined with exact time/duration/group size.
+Both remain in the original form and preserve entered values. The existing plan
+keeps FIXED time and starts COLLECTING/version zero with no response, invitation
+or implicit acceptance. App/web show the set time read-only and collect only
+activity suggestions/interests. Organizer review chooses an activity and roster,
+then explicitly sends invitations for that exact time. Calendar still waits for
+organizer publication after individual acceptance. Without a location on the
+chosen idea, the common location is retained. Unconfirmed planning ends at the
+set start. This supersedes the always-editable timetable wording below for
+plans whose time is already set; flexible-time activity planning stays unchanged.
+
 Owner refinement — Preview 132: one default creation form, with optional shortcuts.
 The form opens directly on activity name, optional location and a visible date/hour
 summary. The next seven candidate days are preselected; expanding the time row edits

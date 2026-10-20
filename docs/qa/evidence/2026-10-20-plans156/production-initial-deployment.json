@@ -1,0 +1,23 @@
+{
+  "deploymentId": "dpl_HbBK9xuZKwNCJHEeQ52T49b6v8Ed",
+  "sourceCommit": "f703ee5b295603a9cc500ce7631f9bd79425ecf1",
+  "readyState": "READY",
+  "sameTestedProductionCandidatePromoted": true,
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "deploymentId": "dpl_HbBK9xuZKwNCJHEeQ52T49b6v8Ed",
+      "url": "sideseat-871g4a65i-baichus-projects.vercel.app"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "deploymentId": "dpl_HbBK9xuZKwNCJHEeQ52T49b6v8Ed",
+      "url": "sideseat-871g4a65i-baichus-projects.vercel.app"
+    },
+    {
+      "alias": "sideseat.de",
+      "deploymentId": "dpl_HbBK9xuZKwNCJHEeQ52T49b6v8Ed",
+      "url": "sideseat-871g4a65i-baichus-projects.vercel.app"
+    }
+  ]
+}

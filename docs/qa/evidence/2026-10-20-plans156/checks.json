@@ -1,0 +1,12 @@
+{
+  "typescript": "passed",
+  "focusedESLint": "passed",
+  "domainTests": 14,
+  "openAPITests": 13,
+  "openAPIImplementedOperations": 197,
+  "nativeNavigationAndPlanPresentationTests": 38,
+  "localFullStoryGroups": 6,
+  "schemaMigration": false,
+  "newAPIEndpoints": 0,
+  "newDatabaseFields": 0
+}

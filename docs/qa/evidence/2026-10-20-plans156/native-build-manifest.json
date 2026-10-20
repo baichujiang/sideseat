@@ -1,0 +1,37 @@
+{
+  "sourceIsolation": {
+    "baseCommit": "11b7aa5a4936383ac73aef1627e542237cd46b38",
+    "overlayCommit": "3ea651df12108410c44e1ac73c264363d2e8cc72",
+    "overlays": [
+      "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+      "ios-native/SideSeat/Features/Chat/TimePollSheet.swift"
+    ],
+    "unrelatedWorkExcluded": true,
+    "sharedResourceFromBase": "lib/calendar/CalendarSmartInputPolicy.json",
+    "localSigningConfigurationApplied": true,
+    "dateInputLayoutCommit": "91a8cc07a2e8ed26a4ff8472d3bb59c37569b892"
+  },
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "156",
+  "signatureStrictVerification": true,
+  "files": {
+    "Info.plist": "f0808a0f5cd45c1eb668a403f332af1db491f871b7acd55e0bcd8180683cbc32",
+    "SideSeat Preview": "16340f1f726485ea7789606319de4ab731d561273bd77a381b418197e082fd74",
+    "SideSeat Preview.debug.dylib": "ff84fbee66aa319018c3a33a3f79474b9932e59eefa5e022ecc37440db2eff96",
+    "_CodeSignature/CodeResources": "f236fdc2c36963970a26973a9019a743381af0d86c233213b8ba7aaa350bf7d4"
+  },
+  "install": {
+    "deviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "installedApplications": [
+      {
+        "bundleID": "app.sideseat.mobile.preview",
+        "databaseSequenceNumber": 8036,
+        "databaseUUID": "276D1289-E615-446C-A59C-EB70B8BD5E32",
+        "installationURL": "file:///private/var/containers/Bundle/Application/219E0751-B4B3-4390-ACDA-50FEBEFF21F9/SideSeat%20Preview.app/",
+        "launchServicesIdentifier": "unknown",
+        "options": {}
+      }
+    ]
+  },
+  "sourceCommit": "91a8cc07a2e8ed26a4ff8472d3bb59c37569b892"
+}

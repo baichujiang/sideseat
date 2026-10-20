@@ -1,0 +1,17 @@
+{
+  "baseDeployment": "dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j",
+  "baseFilesVerified": 1374,
+  "allBaseSHA1Matched": true,
+  "overlays": [
+    "lib/api/v1/time-poll-service.ts",
+    "lib/time-polls/lifecycle.ts",
+    "openapi/v1.json",
+    "components/time-polls/shared-time-poll.tsx",
+    "components/time-polls/invitation-timetable.tsx",
+    "components/time-polls/activity-ideas.tsx"
+  ],
+  "overlaidFileBasesMatchGitHEAD": true,
+  "schemaChanged": false,
+  "unrelatedProductionDifferencesPreserved": true,
+  "activityCopyBaseMatchesPriorGit": true
+}

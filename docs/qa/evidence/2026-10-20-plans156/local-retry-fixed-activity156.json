@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "checks": [],
+  "failure": "POST /api/v1/time-polls/JUCISQKonpb9MxbAkzPPqx-4GkYWEO89/invitation-response: 405; \n\n405 !== 422\n",
+  "at": "2026-10-20T18:54:39.470Z"
+}
