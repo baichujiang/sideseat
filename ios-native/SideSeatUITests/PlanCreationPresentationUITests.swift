@@ -17,17 +17,20 @@ import XCTest
 
     override func tearDownWithError() throws { app?.terminate() }
 
-    func testFirstHomeShowsPurposeAndOnePrimaryEntry() {
+    func testFirstHomeOpensCreateAndPlanLinkDirectly() {
         app.tabBars.buttons["计划"].tap()
-        XCTAssertTrue(app.staticTexts["把「改天约」\n变成「周末见」"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.buttons["plans-create-primary"].isHittable)
+        assertHittable(app.buttons["plans-create-primary"])
+        XCTAssertEqual(app.buttons["plans-create-primary"].label, "发起计划")
         XCTAssertFalse(app.buttons["plans-create-unified"].exists)
         XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        XCTAssertEqual(app.buttons["plans-open-link"].label, "打开计划链接")
+        XCTAssertFalse(app.staticTexts["把「改天约」\n变成「周末见」"].exists)
+        XCTAssertFalse(app.buttons["plans-purpose-example"].exists)
         capture("home-first-use")
-        app.buttons["plans-purpose-example"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["plans-purpose-illustration"].waitForExistence(timeout: 5))
-        capture("home-example")
-        app.buttons["完成"].tap()
+        app.buttons["plans-open-link"].tap()
+        let linkPrompt = app.alerts.firstMatch
+        XCTAssertTrue(linkPrompt.textFields.firstMatch.waitForExistence(timeout: 5))
+        linkPrompt.buttons["取消"].tap()
         openCreation()
         cancel().tap()
         XCTAssertTrue(homeCreate.isHittable)
@@ -97,7 +100,11 @@ import XCTest
     func testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable() {
         app.terminate()
         app.launchArguments.append(contentsOf: ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
-        app.launch(); app.tabBars.buttons["计划"].tap(); openCreation()
+        app.launch(); app.tabBars.buttons["计划"].tap()
+        assertHittable(homeCreate)
+        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        capture("home-first-use-dark-large")
+        openCreation()
         let title = app.textFields["time-poll-title"]
         reveal(title); title.tap(); title.typeText("Accessible activity\n")
         let create = app.buttons["time-poll-create-confirm"]

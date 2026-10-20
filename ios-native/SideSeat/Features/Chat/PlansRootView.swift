@@ -73,7 +73,6 @@ struct PlansRootView: View {
     @State private var showsOutgoing = false
     @State private var showsSectionPicker = false
     @State private var coordinatedPlans: [NativeTimePollList.Item] = []
-    @State private var showsPurposeExample = false
     @State private var showsAllWaiting = false
     @State private var waitingScrollID: String?
     @State private var showsPlanCreation = false
@@ -138,9 +137,6 @@ struct PlansRootView: View {
                 else { coordinationError = AppLocalization.string("Enter a Sideseat time poll link.") }
             }
             Button("Cancel", role: .cancel) {}
-        }
-        .onChange(of: coordinatedPlans.isEmpty && store.plans.isEmpty) { _, isEmpty in
-            if !isEmpty { showsPurposeExample = false }
         }
         .onChange(of: router.path) { old, new in
             if !old.isEmpty && new.isEmpty { Task { await loadCoordinatedPlans() } }
@@ -320,41 +316,13 @@ struct PlansRootView: View {
                     openLink
                 }
             } else {
-                Text("Turn things to do into time together.")
-                    .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-                Image("PlanHomeHero").resizable().scaledToFit()
-                    .frame(maxWidth: .infinity).frame(maxHeight: dynamicTypeSize.isAccessibilitySize ? 120 : 185)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    Text("Turn ‘sometime’ into ‘see you soon’.")
-                        .font(.title.weight(.bold)).foregroundStyle(SideSeatTheme.PlanHome.ink)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("Start a plan. Choose an activity and find a time together.")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
                 Button { showsPlanCreation = true } label: {
-                    Label("Start your first plan", systemImage: "plus")
+                    Label("Start a plan", systemImage: "plus")
                         .font(.headline).frame(maxWidth: .infinity, minHeight: 52)
                         .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                         .background(SideSeatTheme.PlanHome.ink, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("plans-create-primary")
                 openLink
-                Button { showsPurposeExample = true } label: {
-                    Label("See an example: a weekend study session", systemImage: "book")
-                        .font(.subheadline).frame(minHeight: 44)
-                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
-                    .accessibilityIdentifier("plans-purpose-example")
-                    .sheet(isPresented: $showsPurposeExample) {
-                        NavigationStack {
-                            ScrollView { PlanPurposeExample().padding(SideSeatTheme.spaceLG) }
-                                .navigationTitle("Example").navigationBarTitleDisplayMode(.inline)
-                                .toolbar { ToolbarItem(placement: .confirmationAction) {
-                                    Button("Done") { showsPurposeExample = false }
-                                } }
-                        }.tint(SideSeatTheme.PlanHome.ink).dynamicTypeSize(dynamicTypeSize)
-                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -363,7 +331,7 @@ struct PlansRootView: View {
 
     private var openLink: some View {
         Button { planLink = ""; showsOpenPlanLink = true } label: {
-            Label(hasPlans ? "Open a plan link" : "Got a friend's link? Fill it in here", systemImage: "link")
+            Label("Open a plan link", systemImage: "link")
                 .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 44, alignment: .leading)
         }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.PlanHome.ink)
