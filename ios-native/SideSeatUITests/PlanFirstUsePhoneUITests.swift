@@ -389,6 +389,39 @@ import XCTest
         let accounts: [NativeAccount]
     }
 
+    func testOrganizerInvitesWithUnsubmittedAvailability() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires disposable organizer fixture.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertTrue(first.waitForExistence(timeout: 20)); first.tap(); second.tap()
+        let choose = app.buttons["unified-plan-invite-window"]
+        XCTAssertTrue(choose.isEnabled); nativePhase("invite-draft")
+        choose.tap(); app.buttons["time-poll-cell-4"].tap(); app.buttons["time-poll-cell-6"].tap()
+        let review = app.buttons["unified-plan-review-roster"]
+        XCTAssertTrue(review.isEnabled); review.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); XCTAssertTrue(send.isEnabled)
+        app.buttons["返回时间表"].tap(); app.buttons["time-poll-cancel-final"].tap()
+        XCTAssertTrue(first.isSelected && second.isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        nativePhase("invite-cancelled-review"); capture(app, "invite-kept-unsubmitted-draft")
+        choose.tap(); app.buttons["time-poll-cell-4"].tap(); app.buttons["time-poll-cell-6"].tap(); review.tap()
+        XCTAssertTrue(send.waitForExistence(timeout: 10)); nativePhase("invite-reviewed")
+        send.tap()
+        wait(app.staticTexts["unified-plan-confirmation-count"], labelContains: "1/2 人已确认")
+        nativePhase("invite-sent"); capture(app, "invite-sent-without-availability-submit")
+    }
+
     func testDirtyDraftRefreshesPeersAndIncomingInvitation() throws {
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
         try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires disposable participant fixture.")

@@ -42,11 +42,15 @@ if (mode === 'prepare') {
     const expected = { 'manual-draft': [], 'manual-submitted': [0, 1, 2, 3], 'manual-edited': [0, 1, 2, 3], 'manual-resubmitted': [2, 3] };
     for (let tick = 0; tick < 240; tick++) {
       const text = await fs.readFile(log, 'utf8').catch(() => '');
-      for (const [, phase] of text.matchAll(/NATIVE_PARTICIPANT_PHASE ((?:manual|refresh)-[a-z]+)/g)) {
+      for (const [, phase] of text.matchAll(/NATIVE_PARTICIPANT_PHASE ((?:manual|refresh|invite)-[a-z-]+)/g)) {
         if (seen.has(phase)) continue;
         const p = (await call('/api/v1/time-polls', owner)).polls.find(p => p.title === f.title); assert(p);
         const detail = await call(`/api/v1/time-polls/${p.token}`, owner);
-        if (phase.startsWith('refresh-')) {
+        if (phase.startsWith('invite-')) {
+          assert.equal(detail.didRespond, false); assert.deepEqual(detail.mySlotIds, []); assert.equal(detail.summary.participantCount, 0);
+          assert.equal(detail.phase, phase === 'invite-sent' ? 'INVITING' : 'COLLECTING');
+          if (phase === 'invite-sent') { assert.equal(detail.chosenStart, detail.slots[4].start); assert.equal(detail.chosenEnd, detail.slots[7].end); assert.equal(detail.expectedCount, 2); }
+        } else if (phase.startsWith('refresh-')) {
           const participant = f.accounts.find(a => a.role === 'participant');
           const peer = await call(`/api/v1/time-polls/${p.token}`, participant);
           assert.equal(peer.didRespond, false); assert.deepEqual(peer.mySlotIds, []);

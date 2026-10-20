@@ -17,6 +17,7 @@ export function useSharedTimePoll(token: string) {
   const hasChanges = !!poll?.viewerId && ((!poll.didRespond && edited) || selected.join(",") !== poll.mySlotIds.join(","));
   const saved = !!poll?.didRespond && !hasChanges;
   const running = useRef(false);
+  const acting = useRef(false);
   const revision = useRef(0);
   const refreshRequest = useRef(0);
   const dirty = useRef(false);
@@ -75,16 +76,20 @@ export function useSharedTimePoll(token: string) {
     setSelected([...new Set(slots)].sort((a, b) => a - b)); setEdited(true); setSubmissionFailed(false); setError("");
   };
   const act = async (suffix: string, method: string, body: unknown) => {
-    if (busy || running.current || (poll?.phase === "COLLECTING" && hasChanges)) return false;
+    if (acting.current || running.current) return false;
+    acting.current = true;
     revision.current += 1; refreshRequest.current += 1; setBusy(true); setError("");
     try {
       const data = await call(suffix, method, body);
-      setPoll(data); setSelected(data.mySlotIds); setEdited(false); setEditingName(false); setSwitchingParticipant(false);
+      const changedParticipant = data.viewerId !== poll?.viewerId;
+      setPoll(data);
+      if (changedParticipant || !dirty.current) { setSelected(data.mySlotIds); setEdited(false); }
+      setEditingName(false); setSwitchingParticipant(false);
       if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);
       return true;
     }
     catch (cause) { setError((cause as Error).message); return false; }
-    finally { setBusy(false); }
+    finally { acting.current = false; setBusy(false); }
   };
   return { poll, selected, error, busy, saving, saved, hasChanges, submissionFailed, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, submit, retry: submit,
     cancelNameEditing: () => { setEditingName(false); setSwitchingParticipant(false); setError(""); },

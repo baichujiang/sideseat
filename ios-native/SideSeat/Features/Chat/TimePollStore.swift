@@ -20,7 +20,7 @@ final class TimePollStore {
             || displayName.trimmingCharacters(in: .whitespacesAndNewlines) != poll.myDisplayName
     }
     var saved: Bool { poll?.didRespond == true && !hasChanges }
-    var canMutate: Bool { !acting && !saving && (poll?.planningPhase != "COLLECTING" || !hasChanges) }
+    var canMutate: Bool { !acting && !saving }
 
     private func draftDidChange() {
         revision += 1; edited = true
@@ -72,7 +72,7 @@ final class TimePollStore {
         do {
             let result: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized("/api/v1/time-polls/\(token)/\(action)", method: method, body: body)
             guard generation == session.authorizationGeneration, userID == session.currentUser?.id else { return }
-            accept(result.data); error = nil
+            if hasChanges { poll = result.data } else { accept(result.data) }; error = nil
             NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
             NotificationCenter.default.post(name: .sideSeatCalendarNeedsRefresh, object: nil)
         } catch { self.error = error.localizedDescription }

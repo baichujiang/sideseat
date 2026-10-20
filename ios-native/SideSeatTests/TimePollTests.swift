@@ -208,6 +208,21 @@ struct TimePollTests {
         #expect(await transport.writes == [[]])
     }
 
+    @Test("Organizer invitation does not submit or discard an availability draft")
+    @MainActor
+    func invitationWithDraft() async throws {
+        let transport = PollRefreshRaceTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll())
+        store.selected = [2, 3]; store.displayName = "Local nickname"
+        #expect(store.canMutate)
+        await store.mutate("invitations", body: SendPollInvitationsRequest(start: "2030-10-16T07:00:00Z", end: "2030-10-16T08:00:00Z", attendeeIds: [], version: 0, linkParticipantCount: 2), session: session)
+        #expect(store.poll?.planningPhase == "INVITING")
+        #expect(store.selected == [2, 3] && store.displayName == "Local nickname" && store.hasChanges)
+        #expect(await transport.writes.isEmpty)
+    }
+
     @Test("Dirty availability keeps refreshing peers and formal invitation phases")
     @MainActor
     func refreshWithDraft() async throws {
@@ -299,6 +314,7 @@ private actor PollRefreshRaceTransport: APITransport {
             await withCheckedContinuation { gate = $0; started?.resume(); started = nil }
             status = refreshStatus
         } else if request.url!.path.hasSuffix("/cancel") { phase = "CANCELLED" }
+        else if request.url!.path.hasSuffix("/invitations") { phase = "INVITING" }
         else {
             let body = try JSONDecoder().decode(SaveTimePollRequest.self, from: request.httpBody!)
             slots = body.slotIds; writes.append(slots)

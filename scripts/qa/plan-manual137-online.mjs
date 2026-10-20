@@ -95,6 +95,15 @@ try {
       await page.waitForTimeout(1100); assert.equal(requests.length, 6); assert.deepEqual((await guest()).slotIds, []);
       checks.push(`${engineName}: page departure never implicitly submits a draft`);
       if (!['stage1', 'stage2'].includes(stage)) {
+        if (!['stage3', 'stage3-final'].includes(stage)) {
+          await page.getByRole('button', { name: '编辑昵称', exact: true }).click();
+          await page.getByLabel('你的名字', { exact: true }).fill('Guest Renamed');
+          await page.getByRole('button', { name: '保存昵称', exact: true }).click();
+          await expect(page.getByText('Guest Renamed', { exact: true }).first()).toBeVisible();
+          await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');
+          assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, 6);
+          checks.push(`${engineName}: nickname action works with a draft and neither publishes nor clears availability`);
+        }
         await call(api + '/response', owner, 'PUT', { displayName: 'Host Ming', slotIds: [0, 1] });
         await expect(cell(0)).toHaveAttribute('aria-label', /1 人有空$/, { timeout: 20000 });
         await expect(cell(0)).toHaveAttribute('aria-pressed', 'true');

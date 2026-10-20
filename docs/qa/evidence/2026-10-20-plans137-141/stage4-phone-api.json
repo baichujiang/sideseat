@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "phase": "invite-draft",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:50:30.510Z"
+    },
+    {
+      "phase": "invite-cancelled-review",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:50:40.907Z"
+    },
+    {
+      "phase": "invite-reviewed",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:50:49.290Z"
+    },
+    {
+      "phase": "invite-sent",
+      "slots": [],
+      "respondents": 0,
+      "checkedAt": "2026-10-20T00:50:54.716Z"
+    }
+  ],
+  "passed": 4
+}
