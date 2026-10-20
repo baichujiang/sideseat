@@ -21,7 +21,7 @@ const localLink=url=>phase==='production'?url:new URL(url).pathname+new URL(url)
 const artifactDir=process.env.GUEST_QA_EVIDENCE_DIR;assert(artifactDir?.includes('guest-private-identity'));await fs.mkdir(artifactDir,{recursive:true});
 async function enter(page,name){await page.getByLabel('你的名字',{exact:true}).fill(name);await page.getByRole('button',{name:'下一步：选择我的空闲',exact:true}).click();await page.getByRole('button',{name:'编辑昵称',exact:true}).waitFor();}
 async function save(page,id){await page.getByTestId('time-poll-cell-'+id).click();const response=page.waitForResponse(r=>r.url().endsWith('/response')&&r.request().method()==='PUT');await page.getByTestId('availability-submit').click();assert.equal((await response).status(),200);await page.getByText('已提交空闲',{exact:true}).waitFor();}
-async function recovery(page){const panel=page.getByTestId('guest-recovery-panel');if(await panel.getAttribute('open')===null)await panel.locator('summary').click();const response=page.waitForResponse(r=>r.url().includes('/participant/recovery?'));await page.getByTestId('guest-recovery-copy').click();const r=await response;assert.equal(r.status(),200);return (await r.json()).data.recoveryUrl;}
+async function recovery(page){const panel=page.getByTestId('guest-recovery-panel');if(await panel.getAttribute('open')===null)await panel.locator('summary').click();const response=page.waitForResponse(r=>r.url().includes('/participant/recovery?'));await page.getByTestId('guest-recovery-copy').click();const r=await response;assert.equal(r.status(),200);assert(r.headers()['cache-control']?.includes('no-store'));return (await r.json()).data.recoveryUrl;}
 try{
  for(const [engineName,engine]of [['chromium',chromium],['webkit',webkit]]){
   const browser=await engine.launch(),contexts=await Promise.all([0,1,2].map(()=>browser.newContext({baseURL:base,viewport:{width:390,height:844},isMobile:true,hasTouch:true})));
@@ -37,6 +37,7 @@ try{
    assert(['https://sideseat.de','https://www.sideseat.de'].includes(new URL(link).origin));assert.equal(new URL(link).search,'');
    await save(a,0);const first=await call(contexts[0].request,publicPath);
    assert.deepEqual(first.mySlotIds,[0,1]);assert(contexts[0]!==contexts[1]);
+   const access=(await contexts[0].cookies()).find(c=>c.name==='sideseat_poll_access_v2'&&c.path===publicPath);assert(access?.secure&&access.httpOnly&&access.sameSite==='Lax');
    const responseId=first.participants.find(p=>p.isMe).id;
    await a.close();a=await contexts[0].newPage();await a.goto('/time-polls/'+poll.token);
    await a.getByTestId('time-poll-cell-0').waitFor();assert.equal((await call(contexts[0].request,publicPath)).viewerId,first.viewerId);

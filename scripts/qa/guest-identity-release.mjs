@@ -35,6 +35,19 @@ if(mode==='prepare-old'){
   const saved=await call('/api/public/time-polls/'+poll.token+'/response','PUT',{participantId:guest.viewerId,displayName:'旧游客',slotIds:[0,1]});record.responseId=saved.participants.find(p=>p.isMe).id;await save();
  }
  console.log('Prepared four old-format guest responses in disposable plans. No private credentials printed.');
+}else if(mode==='prepare-candidate-retest'){
+ const state=JSON.parse(await fs.readFile(fixturePath));
+ const save=()=>fs.writeFile(fixturePath,JSON.stringify(state),{mode:0o600});
+ const date=new Date(Date.now()+3*86400000).toISOString().slice(0,10);
+ for(const engine of ['chromium','webkit']){
+  for(const previous of state.plans.filter(p=>p.phase==='candidate'&&p.engine===engine))previous.engine+='-previous';
+  const poll=await call('/api/v1/time-polls','POST',{title:'[QA] Retested old guest '+engine,timeZone:'Europe/Berlin',dates:[date],startMinute:540,endMinute:720,durationMinutes:60,expectedCount:3},state.accessToken,201);
+  const record={phase:'candidate',engine,token:poll.token};state.plans.push(record);await save();
+  const guest=await call('/api/public/time-polls/'+poll.token+'/participant','POST',{displayName:'旧游客'});record.guestId=guest.viewerId;
+  assert(!(await api.storageState()).cookies.some(c=>c.name==='sideseat_poll_access_v2'&&c.path.endsWith(poll.token)),'Old-format fixtures must be created before private identity goes live');
+  const saved=await call('/api/public/time-polls/'+poll.token+'/response','PUT',{participantId:guest.viewerId,displayName:'旧游客',slotIds:[0,1]});record.responseId=saved.participants.find(p=>p.isMe).id;await save();
+ }
+ console.log('Two old-format responses prepared for the rebased candidate; previous fixtures retained for cleanup.');
 }else if(mode==='prepare-native'){
  const state=JSON.parse(await fs.readFile(fixturePath));
  assert(!state.plans.some(p=>p.engine==='native'),'Native legacy fixture already exists');
