@@ -11,5 +11,12 @@
     "lib/v2/explore-intents.ts"
   ],
   "schemaChanged": false,
-  "preservedProductionDifferences": true
+  "preservedProductionDifferences": true,
+  "sourceCommit": "ad45b79f17c06f83842ecdf28af8c9e5b86fe611",
+  "overlaySha256": {
+    "lib/v2/mutual-opportunities.ts": "39b20fca3d3e217a7ce3484e2d375687c955eac221bcf007e4c079d68b02171f",
+    "lib/v2/explore-intents.ts": "949b26a47ccd9a20b517d65a2cad749c07082c5b2d106804bdfbbb5f20df5c14"
+  },
+  "finalCandidate": "dpl_8SvBGqPyKdA22U4EroPEwygVKm9R",
+  "additionalChange": "Exclude the same terminal NO opportunity from both participants exploration"
 }

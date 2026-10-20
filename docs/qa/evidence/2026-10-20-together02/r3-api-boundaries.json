@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "undo",
+      "privateRejections": 0,
+      "connections": 0,
+      "messageRequests": 0,
+      "at": "2026-10-20T19:36:50.047Z"
+    },
+    {
+      "phase": "dismissed",
+      "privateRejections": 1,
+      "connections": 0,
+      "messageRequests": 0,
+      "at": "2026-10-20T19:37:00.599Z"
+    },
+    {
+      "phase": "replied",
+      "privateRejections": 1,
+      "connections": 1,
+      "messageRequests": 1,
+      "at": "2026-10-20T19:39:04.643Z"
+    }
+  ]
+}

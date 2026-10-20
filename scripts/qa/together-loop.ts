@@ -25,9 +25,11 @@ try {
   } else if (mode === "reset-dismiss") {
     const users = await db.user.findMany({ where: { username: { startsWith: "dismissqa_" } } });
     const ids = users.map(u => u.id);
-    assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: ids } }, { userBId: { in: ids } }] } }), 0);
+    const connections = await db.connection.count({ where: { OR: [{ userAId: { in: ids } }, { userBId: { in: ids } }] } });
+    assert(connections <= 1, "Only the known disposable dismissal journey may be reset.");
+    await fs.writeFile(`${out}/state-before-reset-${Date.now()}.json`, JSON.stringify({ users: users.length, connections, at: new Date().toISOString() }));
     await db.user.deleteMany({ where: { id: { in: ids } } });
-    console.log("Reset only the unfinished dismissal cohort; first-stage evidence preserved.");
+    console.log("Reset only the disposable dismissal cohort; first-stage evidence preserved.");
   } else if (mode === "seed-dismiss") {
     assert.equal(await db.user.count({ where: { username: { startsWith: "dismissqa_" } } }), 0);
     const hashedPassword = await bcrypt.hash("Password123", 10);

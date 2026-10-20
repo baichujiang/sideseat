@@ -1,0 +1,9 @@
+{
+  "deployment": "dpl_8SvBGqPyKdA22U4EroPEwygVKm9R",
+  "sourceFiles": 1376,
+  "allSHA1Matched": true,
+  "changedProductionFiles": [
+    "src/lib/v2/explore-intents.ts",
+    "src/lib/v2/mutual-opportunities.ts"
+  ]
+}

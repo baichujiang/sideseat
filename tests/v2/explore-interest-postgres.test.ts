@@ -57,6 +57,23 @@ test("A private Explore dismissal survives refresh without sending a greeting an
   } finally { await f.cleanup(); }
 });
 
+test("A dismissed recommendation does not reappear in either participant's exploration", { skip: !local }, async () => {
+  const f = await fixture();
+  const { generateMutualOpportunitiesForUser, decideMutualOpportunity } = await import("../../lib/v2/mutual-opportunities");
+  const { listExploreIntents } = await import("../../lib/v2/explore-intents");
+  try {
+    const [author, viewer] = f.users;
+    const theirs = await f.intention(author!.id, true);
+    const mine = await f.intention(viewer!.id, true);
+    const matches = await generateMutualOpportunitiesForUser(viewer!.id);
+    const opportunity = matches[0];
+    assert(opportunity);
+    await decideMutualOpportunity({ userId: viewer!.id, opportunityId: opportunity.opportunityId, decision: "NO" });
+    assert(!(await listExploreIntents(viewer!.id, 5)).intents.some(i => i.id === theirs.id));
+    assert(!(await listExploreIntents(author!.id, 5)).intents.some(i => i.id === mine.id));
+  } finally { await f.cleanup(); }
+});
+
 test("Explore draft and bookmark stay private, do not reserve supply, and only a written reply opens chat", { skip: !local }, async () => {
   const f = await fixture();
   const { prepareExploreOpportunity, listMutualOpportunities, listOpportunityMessageRequests, interactWithOpportunity,
