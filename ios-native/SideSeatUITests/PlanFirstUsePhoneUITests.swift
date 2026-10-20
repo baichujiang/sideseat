@@ -191,7 +191,7 @@ import XCTest
         safari.activate()
         let accept = webButton("Confirm participation", "确认参加")
         XCTAssertTrue(accept.waitForExistence(timeout: 35))
-        XCTAssertTrue(safari.staticTexts["受邀时间表"].waitForExistence(timeout: 15))
+        XCTAssertFalse(safari.staticTexts["受邀时间表"].exists)
         let invited = safari.staticTexts.matching(NSPredicate(format: "label == %@", "受邀时段")).firstMatch
         XCTAssertTrue(invited.isHittable); invited.tap()
         XCTAssertTrue(accept.isEnabled)
@@ -335,7 +335,8 @@ import XCTest
         safari.activate()
         let confirm = webButton("Confirm participation", "确认参加")
         XCTAssertTrue(confirm.waitForExistence(timeout: 35))
-        XCTAssertTrue(safari.staticTexts["受邀时间表"].waitForExistence(timeout: 15))
+        XCTAssertTrue(safari.staticTexts["受邀时段"].firstMatch.waitForExistence(timeout: 15))
+        XCTAssertFalse(safari.staticTexts["受邀时间表"].exists)
         capture(safari, "activity-09b-guest-invitation"); confirm.tap()
         XCTAssertTrue(safari.staticTexts["计划已确定"].waitForExistence(timeout: 25))
         activityPhase("all-confirmed"); capture(safari, "activity-10-guest-confirmed")
@@ -545,6 +546,9 @@ import XCTest
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
             app.launch()
             XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 25))
+            XCTAssertFalse(app.staticTexts["受邀时间表"].exists)
+            XCTAssertFalse(app.staticTexts["高亮部分表示最终活动时段。"].exists)
+            XCTAssertFalse(app.staticTexts["高亮部分是受邀时段。看清时间后，再点击下方「确认参加」。"].exists)
             let labels = app.descendants(matching: .any).matching(identifier: "plan-invitation-window-label")
             XCTAssertEqual(labels.count, item.days, "One label per continuous day segment, including a partial boundary")
             let first = labels.firstMatch

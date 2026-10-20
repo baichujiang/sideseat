@@ -121,7 +121,7 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
               <ActivityIdeas activity={poll.activitySelection} canEdit={!!poll.viewerId && !disabled && choosingActivity} busy={busy} zh={zh} onSuggest={state.suggestActivity} onInterest={state.setActivityInterest} />
             </details> : null}
 
-            {collecting && fixedTime && !choosingName && poll.chosenStart && poll.chosenEnd ? <InvitationTimetable title={poll.title} location={poll.location} start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} needsConfirmation={false} isDraft /> : null}
+            {collecting && fixedTime && !choosingName && poll.chosenStart && poll.chosenEnd ? <InvitationTimetable start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} isDraft /> : null}
             {collecting && !fixedTime && !choosingName ? <section ref={choosingActivity ? undefined : table} className="scroll-mt-4 bg-background py-3" data-testid="plan-collection-timetable">
               <div className="mb-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -137,7 +137,7 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
               <h2 className="text-2xl font-semibold">{poll.phase === "CONFIRMED" ? (zh ? "计划已确定" : "Plan confirmed") : poll.phase === "CANCELLED" ? (zh ? "计划已取消" : "Plan cancelled") : poll.phase === "EXPIRED" ? (zh ? "计划已过期" : "Plan expired") : mine?.status === "ACCEPTED" ? (zh ? "你已接受，等待发起人正式发出" : "You accepted. Waiting for the organizer.") : (zh ? "最后一步：确认最终时间" : "Last step: confirm the final time")}</h2>
               {poll.chosenStart && poll.chosenEnd ? <p className="text-lg font-semibold leading-7">{formatWindow(poll.chosenStart, poll.chosenEnd)}</p> : null}
               {poll.chosenStart && poll.chosenEnd ? <section ref={table} className="scroll-mt-4">
-                <InvitationTimetable title={poll.title} location={poll.location} start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} needsConfirmation={!!replying && mine?.status !== "ACCEPTED"} />
+                <InvitationTimetable start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} />
               </section> : null}
               {poll.phase === "EXPIRED" ? <p role="status" className="text-sm leading-6 text-muted-foreground">{zh ? "这次安排在确认前已过期，没有加入任何人的日历。请联系发起人重新约时间。" : "This plan expired before confirmation. No calendar entries were added. Ask the organizer to arrange another time."}</p> : poll.phase === "CANCELLED" ? <p className="text-sm text-muted-foreground">{zh ? "发起人已取消这次安排，请联系对方重新约时间。" : "This activity was cancelled. Contact the organizer to arrange another time."}</p> : <>
                 <p className={"inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium " + styles.phase}><Users className="h-4 w-4" aria-hidden />{accepted}/{target ?? 0} {zh ? "人已确认" : "confirmed"}</p>

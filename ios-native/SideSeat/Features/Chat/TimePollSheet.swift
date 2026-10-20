@@ -391,7 +391,7 @@ struct TimePollDetailView: View {
                 VStack(spacing: SideSeatTheme.spaceMD) {
                     collectionHeader(poll)
                     if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd {
-                        InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, needsConfirmation: false, isDraft: true)
+                        InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, isDraft: true)
                             .padding(.horizontal, SideSeatTheme.spaceMD)
                     } else {
                         PlanResponseSummary(poll: poll) { showsPeople = true }

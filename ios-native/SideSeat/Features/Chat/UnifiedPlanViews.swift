@@ -229,7 +229,7 @@ struct UnifiedPlanConfirmationView: View {
                 PlanDetailHeading(poll: poll, statusIdentifier: "unified-plan-phase")
                     .id("plan-detail-start")
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
-                    InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, needsConfirmation: canReply && mine?.status != "ACCEPTED")
+                    InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone)
                 }
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Divider()
@@ -343,7 +343,6 @@ struct InvitationTimetableView: View {
     let start: Date
     let end: Date
     let timeZone: String
-    let needsConfirmation: Bool
     var isDraft = false
     @ScaledMetric(relativeTo: .caption) private var rowHeight: CGFloat = 44
     @ScaledMetric(relativeTo: .caption2) private var labelWidth: CGFloat = 64
@@ -352,11 +351,6 @@ struct InvitationTimetableView: View {
         let rows = TimePollInvitationRow.rows(start: start, end: end, timeZone: timeZone)
         let dates = rows.map(\.date).reduce(into: [String]()) { if $0.last != $1 { $0.append($1) } }
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                Text(LocalizedStringKey(isDraft ? "Time already set" : "Invited timetable")).font(.subheadline.weight(.semibold))
-            }.id("invitation-timetable-focus")
-            Text(LocalizedStringKey(isDraft ? "Time is set. Choose the activity together before sending a formal invitation." : needsConfirmation ? "The highlighted time is the invitation. Review it, then confirm participation below." : "Highlighted cells show the final activity time."))
-                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
             ForEach(dates, id: \.self) { date in
                 let dayRows = rows.filter { $0.date == date }
                 let dayStart = max(start, dayRows.first?.start ?? start)
@@ -365,8 +359,7 @@ struct InvitationTimetableView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(timePollDateLabel(date).replacingOccurrences(of: "\n", with: " ")).font(.subheadline.weight(.semibold))
                         Text(timePollClockFormatter(timeZone).string(from: dayStart) + " – " + (dayEnd == dayRows.last?.end && dayEnd > dayStart && timePollClockFormatter(timeZone).string(from: dayEnd) == "00:00" ? "24:00" : timePollClockFormatter(timeZone).string(from: dayEnd)))
-                            .font(.caption.monospacedDigit())
-                        Text(timeZone).font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .font(.caption.monospacedDigit()).accessibilityHint(timeZone)
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(SideSeatTheme.spaceSM)
                         .id(date)
                     VStack(spacing: 0) {
@@ -409,6 +402,6 @@ struct InvitationTimetableView: View {
                 }.background(SideSeatTheme.surface).clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
                     .overlay { RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius).strokeBorder(SideSeatTheme.separator, lineWidth: 0.5) }
             }
-        }
+        }.id("invitation-timetable-focus")
     }
 }

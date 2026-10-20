@@ -26,6 +26,8 @@ for (const [name, engine, width] of [['chromium', chromium, 390], ['webkit', web
     for (const item of fixture.invitationCases) {
       await page.goto(`${base}/time-polls/${item.token}`);
       const table = page.getByTestId('plan-invitation-timetable'); await expect(table).toBeVisible();
+      await expect(table.getByRole('heading')).toHaveCount(0);
+      await expect(table.locator(':scope > p')).toHaveCount(0);
       const windows = table.getByTestId('plan-invitation-window'); await expect(windows).toHaveCount(item.days);
       await expect(table.getByText('受邀时段', { exact: true })).toHaveCount(item.days);
       const dimensions = await table.locator('table').evaluateAll(tables => tables.map(table => {

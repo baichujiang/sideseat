@@ -71,7 +71,7 @@ try {
     await page.goto(base + '/time-polls/' + p.token);
     await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
     await page.getByRole('button', { name: '加入一起选活动', exact: true }).click();
-    await expect(page.getByRole('heading', { name: '时间已定', exact: true })).toBeVisible();
+    await expect(page.getByTestId('plan-invitation-timetable')).toBeVisible();
     await expect(page.getByText('提议你想一起做的活动，发起人会参考大家的想法定案。', { exact: true })).toBeVisible();
     await expect(page.getByTestId('time-poll-grid')).toHaveCount(0);
     await expect(page.getByRole('button', { name: '提交我的空闲', exact: true })).toHaveCount(0);
@@ -97,7 +97,8 @@ try {
     check('activity selection preserves place and exact cross-midnight time; only an explicit send creates invitation version one');
     await page.reload();
     await expect(page.getByRole('button', { name: '确认参加', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '受邀时间表', exact: true })).toBeVisible();
+    await expect(page.getByTestId('plan-invitation-timetable')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '受邀时间表', exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: '确认参加', exact: true }).click();
     await expect(page.getByText('你已接受，等待发起人正式发出', { exact: true }).first()).toBeVisible();
     p = await call(route(p) + '/invitation-response', peer, 'PUT', { status: 'ACCEPTED', version: 1 });

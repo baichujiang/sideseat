@@ -4,8 +4,8 @@ import { CalendarDays } from "lucide-react";
 import { invitationTimetableRows, pollClock, pollDate } from "@/lib/time-polls/browser-types";
 import styles from "./shared-time-poll.module.css";
 
-export function InvitationTimetable({ title, location, start, end, timeZone, zh, needsConfirmation, isDraft = false }: {
-  title: string; location: string | null; start: string; end: string; timeZone: string; zh: boolean; needsConfirmation: boolean; isDraft?: boolean;
+export function InvitationTimetable({ start, end, timeZone, zh, isDraft = false }: {
+  start: string; end: string; timeZone: string; zh: boolean; isDraft?: boolean;
 }) {
   const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => { if (scroll.current) scroll.current.scrollTop = 0; }, [start, end]);
@@ -13,11 +13,7 @@ export function InvitationTimetable({ title, location, start, end, timeZone, zh,
   const dates = [...new Set(rows.map(row => row.date))];
   const heading = isDraft ? (zh ? "时间已定" : "Time already set") : (zh ? "受邀时间表" : "Invited timetable");
   const timeLabel = isDraft ? (zh ? "已定时段" : "Set time") : (zh ? "受邀时段" : "Invited time");
-  return <section className="space-y-3" aria-label={heading} data-testid="plan-invitation-timetable">
-    <h3 className="text-lg font-semibold">{heading}</h3>
-    <p className="break-words font-semibold">{title}</p>
-    {location ? <p className="break-words text-sm text-muted-foreground">{location}</p> : null}
-    <p className="text-sm leading-6 text-muted-foreground">{isDraft ? (zh ? "时间已定，大家先选活动；收到正式邀请后再确认参加。" : "The time is set. Choose an activity together; confirm attendance after the formal invitation.") : needsConfirmation ? (zh ? "高亮部分是受邀时段。看清时间后，再点击下方「确认参加」。" : "The highlighted time is the invitation. Review it, then confirm participation below.") : (zh ? "高亮部分表示最终活动时段。" : "Highlighted cells show the final activity time.")}</p>
+  return <section aria-label={heading} data-testid="plan-invitation-timetable">
     <div ref={scroll} className="max-h-[min(44dvh,360px)] overflow-auto rounded-xl border bg-background" tabIndex={0} aria-label={isDraft ? (zh ? "只读已定时间表，可滚动查看" : "Read-only set time; scroll to view") : (zh ? "只读受邀时间表，可滚动查看" : "Read-only invited timetable; scroll to view")}>
       {dates.map(date => {
         const day = rows.filter(row => row.date === date);
@@ -31,7 +27,7 @@ export function InvitationTimetable({ title, location, start, end, timeZone, zh,
           <colgroup><col className="w-16" /><col /></colgroup>
           <thead className="sticky top-0 z-10 bg-background"><tr><th colSpan={2} className="border-b p-3 text-left font-medium">
             <span className="block">{pollDate(date, zh)} · {pollClock(dayStart, timeZone)}–{until}</span>
-            <span className="mt-1 block text-xs font-normal text-muted-foreground">{timeZone}</span>
+            <span className="sr-only">{timeZone}</span>
           </th></tr></thead>
           <tbody>{day.map((row, index) => {
             const highlighted = row.through > row.from;
