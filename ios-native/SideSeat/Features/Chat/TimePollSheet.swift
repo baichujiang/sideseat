@@ -129,20 +129,22 @@ struct TimePollCreateView: View {
                 TextField("Location (optional)", text: $location)
                     .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
                     .accessibilityIdentifier("unified-plan-location")
-                if chooseActivityTogether {
-                    HStack(alignment: .firstTextBaseline) {
-                        Label("Friends can suggest activities", systemImage: "lightbulb")
-                            .font(.subheadline).fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: SideSeatTheme.spaceSM)
-                        Button("Cancel") { chooseActivityTogether = false }
-                            .font(.subheadline).frame(minHeight: 44)
-                            .accessibilityIdentifier("plan-start-known-activity")
-                    }
-                } else if planningMode != "FIXED" {
-                    Button { chooseActivityTogether = true; titleFocused = false } label: {
-                        Text("Not sure what to do? Ask friends for ideas")
-                            .font(.subheadline).fixedSize(horizontal: false, vertical: true).frame(minHeight: 44)
-                    }.accessibilityIdentifier("plan-start-together")
+                if planningMode != "FIXED" {
+                    Button {
+                        chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
+                    } label: {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
+                                .font(.title3).accessibilityHidden(true)
+                            Text("Friends can suggest activities").font(.subheadline)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                        }.frame(minHeight: 44).contentShape(Rectangle())
+                    }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                        .accessibilityIdentifier("plan-start-together")
+                        .accessibilityLabel("Friends can suggest activities")
+                        .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
+                        .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
                 }
             }
             Section {
@@ -205,8 +207,8 @@ struct TimePollCreateView: View {
             ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            PlanActionButton(title: AppLocalization.string(chooseActivityTogether ? "Start choosing an activity" : planningMode == "FIXED" ? "Create invitation link" : "Create timetable"),
-                             symbol: chooseActivityTogether ? "lightbulb" : "plus", kind: .commit, isLoading: creating,
+            PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" ? "Create invitation link" : "Create a plan"),
+                             symbol: "plus", kind: .commit, isLoading: creating,
                              accessibilityID: "time-poll-create-confirm") {
                 titleFocused = false; locationFocused = false; Task { await create() }
             }.disabled(!canCreate)

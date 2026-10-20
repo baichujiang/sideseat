@@ -38,7 +38,7 @@ import XCTest
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
         XCTAssertFalse(app.buttons["plan-change-method"].exists)
         let create = app.buttons["time-poll-create-confirm"]
-        XCTAssertEqual(create.label, "创建时间表"); XCTAssertFalse(create.isEnabled)
+        XCTAssertEqual(create.label, "发起计划"); XCTAssertFalse(create.isEnabled)
         let title = app.textFields["time-poll-title"]
         title.tap(); title.typeText("周末聚餐\n")
         XCTAssertTrue(create.isEnabled); XCTAssertTrue(create.isHittable)
@@ -64,7 +64,7 @@ import XCTest
         openCreation(); cancel().tap(); assertHittable(homeCreate)
     }
 
-    func testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm() {
+    func testActivityIdeasCheckboxKeepsTheSameFormAndDraft() {
         app.tabBars.buttons["计划"].tap(); openCreation()
         let title = app.textFields["time-poll-title"]
         title.tap(); title.typeText("周末一起出去\n")
@@ -74,17 +74,20 @@ import XCTest
         let dates = app.buttons["plan-date-options"]
         reveal(dates); let dateSummary = dates.label
         let shortcut = app.buttons["plan-start-together"]
-        reveal(shortcut); XCTAssertGreaterThanOrEqual(shortcut.frame.height, 44); shortcut.tap()
+        reveal(shortcut); XCTAssertGreaterThanOrEqual(shortcut.frame.height, 44)
+        XCTAssertFalse(shortcut.isSelected); shortcut.tap(); XCTAssertTrue(shortcut.isSelected)
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
         XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
-        capture("secondary-activity-ideas")
-        let cancelIdeas = app.buttons["plan-start-known-activity"]
-        reveal(cancelIdeas); cancelIdeas.tap()
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
+        XCTAssertTrue(app.navigationBars["发起计划"].exists)
+        XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
+        capture("activity-ideas-checkbox-checked")
+        reveal(shortcut); shortcut.tap(); XCTAssertFalse(shortcut.isSelected)
         XCTAssertEqual(title.value as? String, "周末一起出去")
         XCTAssertEqual(location.value as? String, "校园")
         XCTAssertEqual(dates.label, dateSummary)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "创建时间表")
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
+        capture("activity-ideas-checkbox-unchecked")
         cancel().tap(); assertHittable(app.buttons["plans-create-primary"])
     }
 
@@ -123,6 +126,9 @@ import XCTest
         let create = app.buttons["time-poll-create-confirm"]
         XCTAssertTrue(create.isEnabled); XCTAssertTrue(create.isHittable)
         XCTAssertLessThanOrEqual(create.frame.maxX, app.frame.maxX + 1)
+        let suggestionOption = app.buttons["plan-start-together"]
+        reveal(suggestionOption); suggestionOption.tap(); XCTAssertTrue(suggestionOption.isSelected)
+        XCTAssertEqual(create.label, "发起计划")
         capture("single-form-dark-large")
         let options = app.buttons["plan-date-options"]
         reveal(options); options.tap()
@@ -130,6 +136,38 @@ import XCTest
         reveal(dates); capture("inline-dates-dark-large")
         XCTAssertTrue(create.isHittable)
         cancel().tap(); assertHittable(homeCreate)
+    }
+
+    func testSuggestionCheckboxCreatesTheChosenPlanKindOnTheRealAPI() throws {
+        struct Fixture: Decodable { let bundle: String; let accessToken: String; let knownTitle: String; let ideaTitle: String }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_OPTION_JSON"]
+        try XCTSkipIf(raw == nil, "Requires a disposable real API account.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        for suggestions in [false, true] {
+            app.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-time-poll-live",
+                "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": fixture.accessToken]
+            app.launch(); XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
+            app.tabBars.buttons["计划"].tap(); openCreation()
+            let title = suggestions ? fixture.ideaTitle : fixture.knownTitle
+            let titleField = app.textFields["time-poll-title"]
+            titleField.tap(); titleField.typeText(title + "\n")
+            app.textFields["unified-plan-location"].tap(); app.textFields["unified-plan-location"].typeText("校园\n")
+            let option = app.buttons["plan-start-together"]
+            reveal(option); XCTAssertFalse(option.isSelected)
+            if suggestions { option.tap(); XCTAssertTrue(option.isSelected) }
+            XCTAssertEqual(titleField.value as? String, title)
+            let create = app.buttons["time-poll-create-confirm"]
+            XCTAssertEqual(create.label, "发起计划"); capture(suggestions ? "live-checkbox-checked" : "live-checkbox-unchecked")
+            create.tap()
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 25))
+            XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, title)
+            XCTAssertEqual(app.buttons["plan-activity-open-ideas"].exists, suggestions)
+            capture(suggestions ? "live-idea-plan-created" : "live-known-plan-created")
+            print("PLAN_OPTION155_PHASE \(suggestions ? "idea-created" : "known-created")")
+            Thread.sleep(forTimeInterval: 3)
+        }
     }
 
     func testPlansCreateCancelReturnsToPlansInOneStep() {

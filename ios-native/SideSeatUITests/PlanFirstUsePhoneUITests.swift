@@ -235,7 +235,7 @@ import XCTest
         let title = app.textFields["time-poll-title"]
         title.tap(); title.typeText(fixture.title + "\n")
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起一起选活动")
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
         capture(app, "activity-01-create"); app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 25))
         XCTAssertTrue(app.buttons["time-poll-cell-0"].exists)
