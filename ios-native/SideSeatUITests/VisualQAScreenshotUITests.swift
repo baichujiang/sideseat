@@ -1717,6 +1717,37 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testMoreRecommendationsEmptyStateStaysInline() {
+        for language in ["zh-Hans", "de"] {
+            let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-explore-empty",
+                "--ui-testing-recommendation-slow", "--ui-testing-language=\(language)"]
+                + (language == "de" ? ["--ui-testing-mutual-opportunity-empty",
+                    "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] : []), findMore: false)
+            selectTogetherSection(0, in: app)
+            let more = app.buttons["together-find-more"]
+            revealFlowElement(more, in: app)
+            XCTAssertTrue(more.isEnabled)
+            more.tap()
+            XCTAssertFalse(more.isEnabled, "The original full-width action shows loading and prevents duplicate requests")
+            let empty = app.staticTexts["explore-intents-empty"]
+            XCTAssertTrue(empty.waitForExistence(timeout: 8))
+            revealFlowElement(empty, in: app)
+            XCTAssertEqual(empty.frame.midX, app.frame.midX, accuracy: 2)
+            XCTAssertFalse(more.exists, "A successful empty result is a status, not another retry action")
+            let retryLabel = language == "zh-Hans" ? "重试" : "Erneut versuchen"
+            XCTAssertFalse(app.buttons[retryLabel].exists, "Do not render an orphan retry button for an empty result")
+            saveScreenshot(app: app, name: "more-recommendations-empty-\(language)")
+            selectTogetherSection(2, in: app)
+            XCTAssertFalse(empty.exists)
+            app.buttons["together-saved-empty-recommendations"].tap()
+            revealFlowElement(empty, in: app)
+            XCTAssertFalse(more.exists)
+            XCTAssertFalse(app.buttons[retryLabel].exists)
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testEmptyExplorationDoesNotHideRecommendationsOrBookmarks() {
         let app = togetherApp(["--ui-testing-explore-intents", "--ui-testing-explore-empty", "--ui-testing-language=en"])
         let id = "cmutualui0000000000000001"

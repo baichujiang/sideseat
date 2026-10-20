@@ -146,11 +146,11 @@ struct ExploreIntentListView: View {
                     } else if store.hasLoaded && !store.isLoading {
                         Text("No new recommendations right now.")
                             .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity)
+                            .padding(.vertical, SideSeatTheme.spaceSM)
                             .accessibilityIdentifier("explore-intents-empty")
-                        Button(AppLocalization.string("Try again")) {
-                            Task { await store.load(using: session, limit: effectiveLimit) }
-                        }.buttonStyle(.bordered)
                     }
                 } else if store.isLoading, store.intents.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 120)
