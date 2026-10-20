@@ -2539,12 +2539,16 @@ final class VisualQAScreenshotUITests: XCTestCase {
         if let raw = ProcessInfo.processInfo.environment["VISUAL_QA_DIR"], !raw.isEmpty {
             return URL(fileURLWithPath: raw, isDirectory: true)
         }
+        #if !targetEnvironment(simulator)
+        return FileManager.default.temporaryDirectory.appendingPathComponent("sideseat-visual-qa", isDirectory: true)
+        #else
         let thisFile = URL(fileURLWithPath: #filePath)
         let repoRoot = thisFile
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         return repoRoot.appendingPathComponent("docs/visual-qa", isDirectory: true)
+        #endif
     }
 
     /// Host script writes `docs/visual-qa/.appearance` (light|dark) before each run.

@@ -424,12 +424,12 @@ for additional public intentions. Results appear in the same feed, with no separ
 The native access configuration allows five results for Free and ten for Plus;
 Plus is currently a DEBUG preview only. Production membership entitlements are not
 connected and the server still caps results at five.
-Explore cards use exactly the same private Interested/save and Say hello controls
+Explore cards use exactly the same private Save/Saved and Say hello controls
 as recommendations. Opening the composer needs no prior interest action and creates
 no notification; canceling sends nothing. The private contact draft does not reserve
 matching supply. Preparing an opportunity updates its card in place. Saving keeps
 the card and scroll position in the current browsing list, with a filled heart and
-Interest shown state. It neither flies to nor opens Saved intentions; that page is
+Saved state. It neither flies to nor opens Saved intentions; that page is
 entered explicitly. An explicit refresh or new search can replace the result set
 and omit already saved cards. A successfully sent message removes the card from recommendations
 and exploration; eligible cards refill the requested result set up to its access
@@ -442,7 +442,7 @@ My intentions keeps its existing editing and deletion behavior.
 Recommendation cards show the other person's avatar/name, activity, declared timing, school, primary language, intention course and public description preview when available. Private notes and missing details are omitted.
 They do not repeat the viewer's intention, display scores or explain matching.
 Two equal-width buttons sit at the bottom of each recommendation card: a heart
-with **Interested** for private saving, and **Say hello** for the first message.
+with **Save** for private saving, and **Say hello** for the first message.
 A filled heart indicates a saved intention. Accessibility text sizes stack the
 buttons vertically so their labels remain readable.
 
