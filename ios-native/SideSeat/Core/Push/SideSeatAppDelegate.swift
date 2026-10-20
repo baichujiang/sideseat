@@ -18,11 +18,11 @@ struct ForegroundPushNotice: Equatable, Sendable {
     }
 
     var isPlanUpdate: Bool {
-        kind?.hasPrefix("plan_") == true
+        kind?.hasPrefix("plan_") == true || kind == "time_poll_confirmed"
     }
 
     var updatesCalendar: Bool {
-        kind == "plan_accepted" || kind == "plan_canceled"
+        kind == "plan_accepted" || kind == "plan_canceled" || kind == "time_poll_confirmed"
     }
 
     var isMutualOpportunity: Bool {

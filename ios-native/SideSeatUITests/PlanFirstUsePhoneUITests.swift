@@ -724,7 +724,8 @@ import XCTest
         nativePhase("confirmed"); capture(app, "native-09b-owner-published")
         nativeSignIn(participant, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
-        app.buttons["plans-section-upcoming"].tap(); nativeOpenCard()
+        let upcoming = app.buttons["plans-tab-upcoming"]
+        XCTAssertTrue(upcoming.waitForExistence(timeout: 15)); upcoming.tap(); nativeOpenCard()
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
         app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)

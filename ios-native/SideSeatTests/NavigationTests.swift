@@ -284,6 +284,26 @@ struct NavigationTests {
         #expect(!ActiveChatPresentation.isDisplaying(notice))
     }
 
+    @Test("Published shared-plan pushes open the plan and refresh both Plans and Calendar")
+    @MainActor
+    func publishedSharedPlanPush() async {
+        let token = String(repeating: "a", count: 32)
+        let notice = ForegroundPushNotice(title: "Your plan is confirmed", body: "Dinner",
+            url: "/time-polls/" + token, userInfo: ["kind": "time_poll_confirmed", "timePollToken": token])
+        #expect(notice.isPlanUpdate && notice.updatesCalendar)
+        #expect(notice.navigationURL == "/time-polls/" + token)
+        #expect(DeepLinkRouter.route(forPath: notice.navigationURL!) == .timePoll(token: token))
+        let probe = NavigationNotificationProbe()
+        let observers = [Notification.Name.sideSeatPlansNeedsRefresh, .sideSeatCalendarNeedsRefresh].map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { probe.record($0.name) }
+        }
+        defer { observers.forEach { NotificationCenter.default.removeObserver($0) } }
+        SideSeatAppDelegate.refreshAppState(for: notice)
+        for _ in 0..<10 where probe.count(for: .sideSeatCalendarNeedsRefresh) == 0 { await Task.yield() }
+        #expect(probe.count(for: .sideSeatPlansNeedsRefresh) == 1)
+        #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 1)
+    }
+
     @Test("Builds notification routes from structured conversation identifiers")
     func buildsStructuredNotificationRoutes() {
         let direct = ForegroundPushNotice(
