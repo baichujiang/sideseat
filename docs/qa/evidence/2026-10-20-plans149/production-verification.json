@@ -1,0 +1,9 @@
+{
+  "recordedAt": "2026-10-20T13:22:44.084505+00:00",
+  "checkedDuringStage": "Preview 149; read-only alias and deployment lookup",
+  "alias": "api.sideseat.de",
+  "deploymentId": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR",
+  "readyState": "READY",
+  "backendPublished": false,
+  "webPublished": false
+}

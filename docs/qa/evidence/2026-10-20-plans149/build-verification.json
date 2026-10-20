@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-10-20T13:21:16.549719+00:00",
+  "sourceCommit": "d2430c75b02a9804581edfa0cbcbd921cd2d51b1",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "149",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "buildResult": "BUILD SUCCEEDED",
+  "codesign": "codesign --verify --deep --strict passed",
+  "sourceSHA256": "3ea242a16fd891b5b866afc1df0910008aeb83e0a812b8274c7ee48da594b55d",
+  "executableSHA256": "d0b3a7a6734936642b6c122fc6fbe49e917e1898926d652fbee12e0efe38d80c",
+  "backendDeploymentId": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR",
+  "backendReadyState": "READY",
+  "backendChanged": false
+}
