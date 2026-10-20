@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；原生安装/卡片核验与此前计划完整链路证据 2026-10-20；生产部署与公开配置按下方记录日期，Europe/Berlin。
+**状态：** 当前运行清单；Preview 153、生产部署、详情编辑与双账号完整链路核验 2026-10-20，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 152** 新增「邀请 App 联系人」：勾选后向私聊发送原生计划卡片，同时进入对方计划列表；从同一卡片填写空闲或查看最终邀请并明确确认。未填写联系人仍可选入正式邀请，投递不代填或自动接受，草稿和手动提交保留。37 项原生单元、候选/正式各 8 组、最终完整真机流程 165.526 秒/8 个 API 阶段及深色最大字号 33.156 秒通过；普通启动 PID 3802。后端正式部署 `dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL`，所有生产差异按核验基础保留。[当前交付](./releases/2026-10-20-preview152-app-contact-plans.md)、[本轮 QA](./qa/2026-10-20-plans152.md)。
+当前 **Preview 153** 重排共同计划详情及全部相关编辑/邀请页面：活动建议在标题下原位展开；计划信息与个人昵称分开编辑，最终选时/核对邀请保留返回选择，分享集中在顶部，取消和删除明确提供保留选项。42 项原生单元、3 项最终真机用例（双账号主流程 188.798 秒）、9 个真实 API 阶段通过；候选/正式各 6 组信息编辑与 8 组联系人/游客兼容检查通过。默认 iPhone 14 Plus 普通启动 PID 3874；后端 `dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j`。[当前交付](./releases/2026-10-20-preview153-plan-detail-hierarchy.md)、[本轮 QA 与实际截图](./qa/2026-10-20-plans153.md)。
+
+此前 **Preview 152** 新增「邀请 App 联系人」：勾选后向私聊发送原生计划卡片，同时进入对方计划列表；从同一卡片填写空闲或查看最终邀请并明确确认。未填写联系人仍可选入正式邀请，投递不代填或自动接受，草稿和手动提交保留。37 项原生单元、候选/正式各 8 组、最终完整真机流程 165.526 秒/8 个 API 阶段及深色最大字号 33.156 秒通过；普通启动 PID 3802。后端正式部署 `dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL`，所有生产差异按核验基础保留。[当前交付](./releases/2026-10-20-preview152-app-contact-plans.md)、[本轮 QA](./qa/2026-10-20-plans152.md)。
 
 此前 **Preview 151** 移除首页「打开计划链接」和粘贴弹窗，只保留发起计划；空状态说明发起/收到的计划，已有卡片、聊天邀请和通知保留原生详情入口，网页分享保留。6 项界面检查通过，普通启动 PID 3744。该阶段没有新增邀请投递机制，无后端/网页发布，未重跑真实 API 完整流程或实际通知投递。[151 交付](./releases/2026-10-20-preview151-native-plan-entry.md)、[151 QA](./qa/2026-10-20-plans151.md)。
 
@@ -32,13 +34,13 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `69f3ef8d`、本次 API `a0dc2fba`，保留生产基础内的 `c8d308fa` 网页及 `37189452` APNs；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (152)` | 联系人投递、聊天卡片、完整邀请到日历及深色最大字号通过；普通启动 PID 3802；[152 交付](./releases/2026-10-20-preview152-app-contact-plans.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；152 两轮双账号完整流程及最终深色最大字号通过，8 阶段 API 各核对；4 个一次性账号、2 个计划/链接回收，runner 移除；普通版 97 保留 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `b1a31844`、本次 API `b3ac5aa9`；已推送。逐文件保留旧生产网页和 APNs 差异；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (153)` | 详情/编辑/原位活动、深色最大字号、真实双账号完整流程通过；普通启动 PID 3874；[153 交付](./releases/2026-10-20-preview153-plan-detail-hierarchy.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终三项 UI、九阶段真实 API 通过；8 个真机临时账号、8 个计划/链接回收，runner 移除；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL`，Ready | 1,369 个旧生产源文件核验，仅叠加本次 6 文件，候选 1,372 个上传源文件核对；同一构建提升正式，三个别名复核。最终候选/正式各 8 组及双账号真机通过；本次未声称新 APNs 实际锁屏到达，[152 验证](./qa/2026-10-20-plans152.md)；145 的实际 APNs 2 条为此前证据 |
-| 生产源码 | 保留原生产差异；功能 5 文件与 APNs 1 文件最小覆盖，最终 1,369 项上传 SHA-1 匹配 | 原样提升同一已测 Production 候选；无 Schema/迁移/依赖变更；[功能来源](./qa/evidence/2026-10-20-plans145/backend-source-manifest.json)、[最终来源](./qa/evidence/2026-10-20-plans145/apns-source-manifest.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_GSXLqYWLiQ1AzjpzPt3dtEdSB52j`，Ready | 1,372 个旧生产源文件核验后覆盖 4 文件，1,374 个候选上传源文件全部校验；同一已测构建提升正式，三个别名复核。候选/正式各 6+8 组通过；网页视觉保持旧生产，未重跑真实 APNs 到达；[153 QA](./qa/2026-10-20-plans153.md) |
+| 生产源码 | 保留原生产差异；新增信息编辑 API/领域/OpenAPI 四文件最小覆盖 | 来源 `b3ac5aa9`；无 Schema/迁移/依赖变化；[来源](./qa/evidence/2026-10-20-plans153/backend-source-manifest.json)、[候选上传校验](./qa/evidence/2026-10-20-plans153/candidate-source-verification.json) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 

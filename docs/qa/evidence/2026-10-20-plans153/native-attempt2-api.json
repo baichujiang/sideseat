@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "inline-idea",
+      "ideas": 3,
+      "responses": 0,
+      "at": "2026-10-20T17:08:49.016Z"
+    }
+  ],
+  "failure": "Interrupted after the invitation choice correctly returned its Chinese selected label; runner assertion corrected, and nickname accessibility grouping repaired before full rerun."
+}

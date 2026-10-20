@@ -1,0 +1,171 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "inline-idea",
+      "ideas": 3,
+      "responses": 0,
+      "at": "2026-10-20T17:26:02.984Z"
+    },
+    {
+      "phase": "details-draft",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "cardCount": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:27:45.302Z"
+    },
+    {
+      "phase": "contacts-delivered",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "cardCount": 1,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:28:00.852Z"
+    },
+    {
+      "phase": "owner-submitted",
+      "actualPhase": "COLLECTING",
+      "responses": 1,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:28:05.431Z"
+    },
+    {
+      "phase": "peer-submitted",
+      "actualPhase": "COLLECTING",
+      "responses": 2,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:28:35.335Z"
+    },
+    {
+      "phase": "invited",
+      "actualPhase": "INVITING",
+      "responses": 2,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:29:09.914Z"
+    },
+    {
+      "phase": "accepted",
+      "actualPhase": "INVITING",
+      "responses": 2,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:29:31.390Z"
+    },
+    {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "responses": 2,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-20T17:29:53.919Z"
+    },
+    {
+      "phase": "calendar",
+      "actualPhase": "CONFIRMED",
+      "responses": 2,
+      "cardCount": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-20T17:30:04.402Z"
+    }
+  ],
+  "failure": null
+}

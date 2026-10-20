@@ -1,0 +1,25 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "inline-idea",
+      "ideas": 3,
+      "responses": 0,
+      "at": "2026-10-20T17:13:56.749Z"
+    },
+    {
+      "phase": "details-draft",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "cardCount": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T17:15:26.655Z"
+    }
+  ],
+  "failure": "Phone UI test failed; partial API observations preserved."
+}

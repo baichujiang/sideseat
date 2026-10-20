@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "environments": [
+    {
+      "stage": "candidate",
+      "detailsChecks": 6,
+      "compatibilityChecks": 8
+    },
+    {
+      "stage": "production",
+      "detailsChecks": 6,
+      "compatibilityChecks": 8
+    }
+  ],
+  "apiOperations": 197,
+  "openApiContractTests": 13,
+  "nativeUnitTests": 42,
+  "productionErrorLogEntries": 0,
+  "nativeUITests": 3,
+  "nativeUIFailures": 0,
+  "nativeLiveAPIStages": 9,
+  "nativeMainFlowSeconds": 188.798,
+  "normalLaunchPID": 3874
+}

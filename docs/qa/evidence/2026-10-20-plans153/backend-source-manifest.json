@@ -1,0 +1,19 @@
+{
+  "baseDeployment": "dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL",
+  "baseFilesVerified": 1372,
+  "overlays": [
+    "lib/api/v1/time-poll-service.ts",
+    "lib/time-polls/domain.ts",
+    "app/api/v1/time-polls/[token]/details/route.ts",
+    "openapi/v1.json"
+  ],
+  "schemaChanged": false,
+  "unrelatedProductionDifferencesPreserved": true,
+  "sourceCommit": "b3ac5aa98e09c1d1411c111477f9bb07b1b9078a",
+  "overlaySha256": {
+    "lib/api/v1/time-poll-service.ts": "5de120201358c15aec786400f942e26af64e52831055f614d7158cbc37ea0d71",
+    "lib/time-polls/domain.ts": "d7791a11abf3340e52d766f9ebcfa2ac9740ca3fbc31b52d238128c08cabae21",
+    "app/api/v1/time-polls/[token]/details/route.ts": "cc6f10033e62e2b0b777d64eceea6dc5a978738319a291fb29d98a45f79b945e",
+    "openapi/v1.json": "00cb520d70ee1f421861d503cf1d7f2e7410c2504e0d9c646dc522e86872909e"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "nativeSourceCommit": "b1a318440fe5b6ee85946d6b291babc442b11e36",
+  "bundle": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "153",
+  "signatureStrictVerification": true,
+  "files": {
+    "Info.plist": "a101a4c8df46c97ab3dfae40ad361685a7cb4e3c63d68007f09de4ec49791d30",
+    "SideSeat Preview": "aa495699fd5976c46be3e7b27f85000ccc3abcca22125c798617ce174501186b",
+    "SideSeat Preview.debug.dylib": "f758e2c88d57e67965588ba072b96696721fc6d4bb9ecca93f8c9bdae5ac25a6",
+    "_CodeSignature/CodeResources": "d12a614b05e44cd6bf2f6c8128a125bbd83afb616f831484513f777f53f2bd8c"
+  },
+  "installedOn": {
+    "model": "iPhone 14 Plus",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A"
+  },
+  "buildLog": "/tmp/sideseat-plans153-native-alert-build.log",
+  "installResult": "/tmp/sideseat-plans153-final-install.json",
+  "at": "2026-10-20T17:31:39.435843+00:00"
+}

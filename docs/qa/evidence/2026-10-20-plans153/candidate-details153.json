@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "owner edits title and location; shared list updates and every submitted response stays intact",
+    "only the organizer can edit information; time changes cannot enter the information form API",
+    "clearing an optional location works; sending an invitation freezes the activity details",
+    "individual acceptance remains separate from publication; final calendars use the edited plan once",
+    "editing an undecided activity updates its topic without creating attendance or losing suggestions",
+    "a chosen activity is preserved and cannot be silently overwritten by the information editor"
+  ],
+  "cleanup": {
+    "accountsRemoved": 2,
+    "deadLinks": 2
+  },
+  "failure": null,
+  "at": "2026-10-20T17:02:26.210Z"
+}

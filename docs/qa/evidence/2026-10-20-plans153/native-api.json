@@ -1,0 +1,5 @@
+{
+  "passed": false,
+  "checks": [],
+  "failure": "Phone UI test failed; partial API observations preserved."
+}
