@@ -1,0 +1,13 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": "161",
+  "ordinaryBuildPreserved": "97",
+  "normalPID": 4117,
+  "normalArguments": [],
+  "physicalTestsPassed": true,
+  "testCount": 1,
+  "sourceCommit": "dc43678b039cca533d09c94f53bdb1515e7ec43e",
+  "backend": "dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr",
+  "normalProcessVerified": true
+}
