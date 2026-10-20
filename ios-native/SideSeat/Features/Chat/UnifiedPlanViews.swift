@@ -54,8 +54,8 @@ struct UnifiedPlanInviteView: View {
     private var needsActivityChoice: Bool { poll.activitySelection?.isOpen == true }
     private var activityIdeas: [NativePlanActivity.Idea] { poll.activitySelection?.ideas ?? [] }
     private var chosenActivity: NativePlanActivity.Idea? { activityIdeas.first { $0.id == activityID } }
-    private var selectedFriends: Int { poll.participants.filter { !$0.isMe && selected.contains($0.id) }.count }
-    private var hasFriends: Bool { poll.participants.contains { !$0.isMe } }
+    private var selectedFriends: Int { poll.invitationCandidates.filter { !$0.isMe && selected.contains($0.id) }.count }
+    private var hasFriends: Bool { poll.invitationCandidates.contains { !$0.isMe } }
     private var minimumLinkCount: Int { min(20, max(2, selectedFriends + 2)) }
     private var reviewLocation: String? {
         if let chosenActivity { return chosenActivity.location }
@@ -107,7 +107,7 @@ struct UnifiedPlanInviteView: View {
                         .accessibilityIdentifier("unified-plan-adjust-time")
                 }
                 if hasFriends { Section("Choose who to invite") {
-                    ForEach(poll.participants) { person in
+                    ForEach(poll.invitationCandidates) { person in
                         Button {
                             if selected.contains(person.id) { selected.remove(person.id) } else { selected.insert(person.id) }
                         } label: {
@@ -116,7 +116,7 @@ struct UnifiedPlanInviteView: View {
                                 VStack(alignment: .leading) {
                                     Text(person.displayName).foregroundStyle(SideSeatTheme.textPrimary)
                                     if person.isGuest == true { Text("Guest").font(.caption).foregroundStyle(.secondary) }
-                                    Text(available(person) ? "Available for the full activity" : "Not available for the full activity")
+                                    Text(person.didRespond == false ? "Has not filled availability yet" : available(person) ? "Available for the full activity" : "Not available for the full activity")
                                         .font(.caption).foregroundStyle(.secondary)
                                 }
                             }.frame(minHeight: 44)
@@ -288,10 +288,13 @@ struct UnifiedPlanConfirmationView: View {
                                      isLoading: store.acting, accessibilityID: "unified-plan-publish") {
                         showsPublish = true
                     }
-                    PlanShareActions(poll: poll)
+                    PlanShareActions(poll: poll, store: store)
                 } else if poll.planningPhase == "CONFIRMED" && included {
                     PlanActionButton(title: AppLocalization.string("View in Calendar"), symbol: "calendar", kind: .navigate,
                                     accessibilityID: "plan-view-calendar") { deepLinkRouter.handleAppPath("/home") }
+                    if poll.isOwner && (poll.chosenStart ?? .distantPast) > Date() {
+                        PlanShareActions(poll: poll, store: store)
+                    }
                 } else {
                     PlanActionButton(title: AppLocalization.string("Back to plans"), symbol: "list.bullet", kind: .navigate,
                                     accessibilityID: "plan-done-back") { dismiss() }

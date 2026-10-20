@@ -18,7 +18,7 @@ struct ForegroundPushNotice: Equatable, Sendable {
     }
 
     var isPlanUpdate: Bool {
-        kind?.hasPrefix("plan_") == true || kind == "time_poll_confirmed"
+        kind?.hasPrefix("plan_") == true || kind == "time_poll_confirmed" || kind == "time_poll_invitation"
     }
 
     var updatesCalendar: Bool {

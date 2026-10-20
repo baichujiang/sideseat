@@ -304,6 +304,34 @@ struct NavigationTests {
         #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 1)
     }
 
+    @Test("Shared-plan invitations refresh Plans without adding a Calendar commitment")
+    @MainActor
+    func sharedPlanInvitationPush() async {
+        let token = String(repeating: "b", count: 32)
+        let notice = ForegroundPushNotice(title: "A plan is waiting for you", body: "Dinner",
+            url: "/time-polls/" + token, userInfo: ["kind": "time_poll_invitation", "timePollToken": token])
+        #expect(notice.isPlanUpdate && !notice.updatesCalendar)
+        #expect(DeepLinkRouter.route(forPath: notice.navigationURL!) == .timePoll(token: token))
+        let probe = NavigationNotificationProbe()
+        let observers = [Notification.Name.sideSeatPlansNeedsRefresh, .sideSeatCalendarNeedsRefresh].map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { probe.record($0.name) }
+        }
+        defer { observers.forEach { NotificationCenter.default.removeObserver($0) } }
+        SideSeatAppDelegate.refreshAppState(for: notice)
+        for _ in 0..<10 where probe.count(for: .sideSeatPlansNeedsRefresh) == 0 { await Task.yield() }
+        #expect(probe.count(for: .sideSeatPlansNeedsRefresh) == 1)
+        #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 0)
+    }
+
+    @Test("Native plan cards preserve readable fallback and accept only supported plan URLs")
+    func nativeContactPlanMessage() {
+        let token = String(repeating: "b", count: 32)
+        let card = NativeSharedPlanMessage.parse("📅 Coffee\nhttps://www.sideseat.de/time-polls/" + token)
+        #expect(card?.title == "Coffee" && card?.token == token)
+        #expect(NativeSharedPlanMessage.parse("Hello\nhttps://www.sideseat.de/time-polls/" + token) == nil)
+        #expect(NativeSharedPlanMessage.parse("📅 Coffee\nhttps://example.com/time-polls/" + token) == nil)
+    }
+
     @Test("Builds notification routes from structured conversation identifiers")
     func buildsStructuredNotificationRoutes() {
         let direct = ForegroundPushNotice(

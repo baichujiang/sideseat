@@ -3079,3 +3079,20 @@
 "No confirmed plans" = "No confirmed plans";
 
 "Your confirmed plans will appear here until they finish." = "Your confirmed plans will appear here until they finish.";
+
+"Invite App contacts" = "Invite contacts";
+"Sent · invite more" = "Sent · invite more";
+"Share web link" = "Share web link";
+"Web link" = "Web link";
+"Couldn't load contacts" = "Couldn't load contacts";
+"Add friends to your contacts to invite them in the App. Use a web link for friends without the App." = "Add friends to your contacts to invite them in the App. Use a web link for friends without the App.";
+"Already sent" = "Already sent";
+"Friends receive a plan card and fill their availability in the App." = "Friends receive a plan card and fill their availability in the App.";
+"Friends receive a plan card and decide whether to attend." = "Friends receive a plan card and decide whether to attend.";
+"Send plan to %d contacts" = "Send plan to %d contacts";
+"Invite contacts" = "Invite contacts";
+"Has not filled availability yet" = "Has not filled availability yet";
+"One of these contacts is unavailable. Refresh your contacts." = "One of these contacts is unavailable. Refresh your contacts.";
+"This plan's participant list is full. Choose fewer contacts." = "This plan's participant list is full. Choose fewer contacts.";
+"This plan changed. Reopen it before inviting contacts." = "This plan changed. Reopen it before inviting contacts.";
+"This plan has ended or expired." = "This plan has ended or expired.";

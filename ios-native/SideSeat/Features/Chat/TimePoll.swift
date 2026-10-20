@@ -50,6 +50,9 @@ struct NativeTimePoll: Decodable, Sendable {
     let chosenEnd: Date?
     let invitations: [Invitation]?
     var activitySelection: NativePlanActivity? = nil
+    var invitees: [Participant]? = nil
+    var sharedWithUserIds: [String]? = nil
+    var invitationCandidates: [Participant] { invitees ?? participants }
     var expirationDate: Date? {
         expiresAt ?? (phase == "INVITING" ? chosenStart : (phase == nil || phase == "COLLECTING") ? slots.last?.end : nil)
     }
@@ -83,6 +86,7 @@ struct NativeTimePoll: Decodable, Sendable {
         let slotIds: [Int]
         let isMe: Bool
         let isGuest: Bool?
+        var didRespond: Bool? = nil
     }
     struct Cell: Sendable, Identifiable {
         let slots: [Slot]
@@ -118,6 +122,25 @@ struct NativeTimePoll: Decodable, Sendable {
         let cells = self.cells
         return dates.map { date in cells.filter { $0.date == date } }
             .max(by: { $0.count < $1.count })?.map(\.row) ?? []
+    }
+}
+
+struct SharePlanContactsRequest: Encodable, Sendable {
+    let connectionIds: [String]
+    let version: Int
+}
+
+struct SharePlanContactsResult: Decodable, Sendable {
+    let poll: NativeTimePoll
+}
+
+enum NativeSharedPlanMessage {
+    /// Readable TEXT fallback for supported older clients, with no database enum change.
+    static func parse(_ text: String) -> (token: String, title: String)? {
+        let lines = text.components(separatedBy: "\n")
+        guard lines.count == 2, lines[0].hasPrefix("📅 "),
+              let token = TimePollLink.token(from: lines[1]) else { return nil }
+        return (token, String(lines[0].dropFirst(2)))
     }
 }
 

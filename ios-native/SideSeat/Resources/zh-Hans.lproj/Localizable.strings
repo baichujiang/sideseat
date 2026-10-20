@@ -3079,3 +3079,20 @@
 "No confirmed plans" = "暂时没有已确定的活动";
 
 "Your confirmed plans will appear here until they finish." = "正式确定并由你参加的活动会显示在这里。";
+
+"Invite App contacts" = "邀请联系人";
+"Sent · invite more" = "已发送 · 继续邀请";
+"Share web link" = "分享网页链接";
+"Web link" = "网页链接";
+"Couldn't load contacts" = "无法加载联系人";
+"Add friends to your contacts to invite them in the App. Use a web link for friends without the App." = "添加联系人后，就能在 App 内发送计划；没有 App 的朋友可通过网页参与。";
+"Already sent" = "已发送";
+"Friends receive a plan card and fill their availability in the App." = "朋友收到计划卡片后，可直接在 App 内填写空闲。";
+"Friends receive a plan card and decide whether to attend." = "朋友收到计划卡片后，可直接确认是否参加。";
+"Send plan to %d contacts" = "发送给 %d 位联系人";
+"Invite contacts" = "邀请联系人";
+"Has not filled availability yet" = "尚未填写空闲";
+"One of these contacts is unavailable. Refresh your contacts." = "部分联系人目前无法接收，请刷新联系人后重试。";
+"This plan's participant list is full. Choose fewer contacts." = "超出计划人数上限，请减少选择的联系人。";
+"This plan changed. Reopen it before inviting contacts." = "计划已更新，请重新打开后邀请联系人。";
+"This plan has ended or expired." = "计划已结束或过期。";

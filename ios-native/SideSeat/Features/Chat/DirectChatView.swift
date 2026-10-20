@@ -2056,6 +2056,8 @@ private struct DirectMessageBubble: View {
             ) {
                 onProposeFromMutualOpportunity(opportunity)
             }
+        } else if message.type == "TEXT", let plan = NativeSharedPlanMessage.parse(displayBody) {
+            SharedPlanChatCard(token: plan.token, title: plan.title)
         } else if message.type == "SCHEDULE_SHARE_CARD",
                   let shareURL = message.body?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !shareURL.isEmpty {

@@ -3078,3 +3078,20 @@
 "No confirmed plans" = "Keine bestätigten Pläne";
 
 "Your confirmed plans will appear here until they finish." = "Deine bestätigten Pläne bleiben hier bis zu ihrem Ende.";
+
+"Invite App contacts" = "Kontakte einladen";
+"Sent · invite more" = "Gesendet · mehr einladen";
+"Share web link" = "Weblink teilen";
+"Web link" = "Weblink";
+"Couldn't load contacts" = "Kontakte konnten nicht geladen werden";
+"Add friends to your contacts to invite them in the App. Use a web link for friends without the App." = "Füge Freunde zu deinen Kontakten hinzu, um sie in der App einzuladen. Freunde ohne App können über den Weblink teilnehmen.";
+"Already sent" = "Bereits gesendet";
+"Friends receive a plan card and fill their availability in the App." = "Freunde erhalten eine Plankarte und tragen ihre freien Zeiten direkt in der App ein.";
+"Friends receive a plan card and decide whether to attend." = "Freunde erhalten eine Plankarte und entscheiden, ob sie teilnehmen.";
+"Send plan to %d contacts" = "Plan an %d Kontakte senden";
+"Invite contacts" = "Kontakte einladen";
+"Has not filled availability yet" = "Noch keine freien Zeiten eingetragen";
+"One of these contacts is unavailable. Refresh your contacts." = "Ein Kontakt ist nicht verfügbar. Aktualisiere deine Kontakte.";
+"This plan's participant list is full. Choose fewer contacts." = "Der Plan ist voll. Wähle weniger Kontakte aus.";
+"This plan changed. Reopen it before inviting contacts." = "Der Plan wurde geändert. Öffne ihn erneut, bevor du Kontakte einlädst.";
+"This plan has ended or expired." = "Dieser Plan ist beendet oder abgelaufen.";

@@ -174,24 +174,193 @@ struct PlanActionButton: View {
 }
 
 struct PlanShareActions: View {
+    @Environment(SessionStore.self) private var session
     @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
+    @Bindable var store: TimePollStore
     @State private var copied = false
+    @State private var showsContacts = false
+    @State private var sent = false
 
     var body: some View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceXS)) : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
         layout {
-            ShareLink(item: poll.shareUrl) {
-                PlanActionLabel(title: AppLocalization.string(poll.activitySelection?.isOpen == true ? "Invite activity ideas" : poll.planningPhase == "COLLECTING" ? "Send link to friends" : "Share invitation"),
-                                symbol: "square.and.arrow.up")
-            }.buttonStyle(.plain).accessibilityIdentifier("plan-share-primary")
-            PlanActionButton(title: AppLocalization.string(copied ? "Link copied" : "Copy link"),
-                             symbol: copied ? "checkmark" : "doc.on.doc", kind: .utility,
-                             accessibilityID: "plan-copy-link") {
-                UIPasteboard.general.url = poll.shareUrl
-                copied = true
+            if poll.isOwner {
+                PlanActionButton(title: AppLocalization.string(sent ? "Sent · invite more" : "Invite App contacts"),
+                    symbol: sent ? "checkmark" : "person.crop.circle.badge.plus", kind: .edit,
+                    accessibilityID: "plan-invite-contacts") { showsContacts = true }
+            }
+            HStack(spacing: SideSeatTheme.spaceXS) {
+                ShareLink(item: poll.shareUrl) {
+                    PlanActionLabel(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Web link" : "Share web link"),
+                                    symbol: "square.and.arrow.up", kind: .utility)
+                }.buttonStyle(.plain).accessibilityIdentifier("plan-share-primary")
+                Button {
+                    UIPasteboard.general.url = poll.shareUrl; copied = true
+                } label: {
+                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        .ssIconButtonHitTarget()
+                }.buttonStyle(.plain)
+                    .accessibilityLabel(AppLocalization.string(copied ? "Link copied" : "Copy link"))
+                    .accessibilityIdentifier("plan-copy-link")
             }
         }
+        .sheet(isPresented: $showsContacts) {
+            PlanContactInviteSheet(poll: poll) {
+                sent = true
+                await store.load(session: session)
+                NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+                NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+            }.dynamicTypeSize(typeSize)
+        }
+    }
+}
+
+struct PlanContactInviteSheet: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(\.dismiss) private var dismiss
+    let poll: NativeTimePoll
+    let onSent: () async -> Void
+    @State private var contacts = ContactsStore()
+    @State private var search = ""
+    @State private var selected = Set<String>()
+    @State private var sending = false
+    @State private var issue: String?
+    @State private var requestKey = UUID().uuidString
+
+    private var sentTo: Set<String> { Set(poll.sharedWithUserIds ?? []) }
+    private var filtered: [NativeContactRow] {
+        let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
+        return contacts.contacts.filter { query.isEmpty || $0.displayName.localizedCaseInsensitiveContains(query)
+            || $0.peer.username.localizedCaseInsensitiveContains(query) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if contacts.isLoading && !contacts.hasLoaded {
+                    ProgressView("Loading contacts")
+                } else if let error = contacts.issue {
+                    ContentUnavailableView {
+                        Label("Couldn't load contacts", systemImage: "wifi.exclamationmark")
+                    } description: { Text(error) } actions: {
+                        Button("Retry") { Task { await contacts.load(using: session) } }
+                    }
+                } else if contacts.contacts.isEmpty {
+                    ContentUnavailableView("No contacts yet", systemImage: "person.crop.circle.badge.plus",
+                        description: Text("Add friends to your contacts to invite them in the App. Use a web link for friends without the App."))
+                } else {
+                    List {
+                        Section {
+                            ForEach(filtered) { contact in
+                                let alreadySent = sentTo.contains(contact.peer.id)
+                                Button {
+                                    if selected.contains(contact.id) { selected.remove(contact.id) }
+                                    else if selected.count < 19 { selected.insert(contact.id) }
+                                    issue = nil; requestKey = UUID().uuidString
+                                } label: {
+                                    HStack(spacing: SideSeatTheme.spaceSM) {
+                                        InitialAvatar(name: contact.displayName, url: contact.peer.avatarUrl, size: 40)
+                                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                            Text(contact.displayName).foregroundStyle(SideSeatTheme.textPrimary)
+                                            if alreadySent { Text("Already sent").font(.caption).foregroundStyle(.secondary) }
+                                        }
+                                        Spacer(minLength: 0)
+                                        Image(systemName: alreadySent || selected.contains(contact.id) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(alreadySent ? SideSeatTheme.textSecondaryStrong : SideSeatTheme.utilityAction)
+                                    }.padding(.vertical, SideSeatTheme.spaceXS)
+                                }
+                                .disabled(sending || alreadySent || selected.count >= 19 && !selected.contains(contact.id))
+                                .accessibilityIdentifier("plan-contact-\(contact.peer.id)")
+                                .accessibilityValue(alreadySent ? AppLocalization.string("Already sent") : selected.contains(contact.id) ? "Selected" : "Not selected")
+                            }
+                            if filtered.isEmpty { Text("No matching contacts").foregroundStyle(.secondary) }
+                        } header: { Text(poll.title) } footer: {
+                            Text(poll.planningPhase == "COLLECTING"
+                                ? "Friends receive a plan card and fill their availability in the App."
+                                : "Friends receive a plan card and decide whether to attend.")
+                        }
+                    }
+                }
+            }
+            .searchable(text: $search, prompt: "Search contacts")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    if let issue { Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger).accessibilityIdentifier("plan-contact-error") }
+                    PlanActionButton(title: String(format: AppLocalization.string("Send plan to %d contacts"), selected.count),
+                        symbol: "paperplane.fill", kind: .commit, isLoading: sending,
+                        accessibilityID: "plan-contact-send") { Task { await send() } }
+                        .disabled(selected.isEmpty || sending)
+                }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
+                    .overlay(alignment: .top) { Divider() }
+            }
+            .navigationTitle("Invite contacts").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(sending) } }
+            .task { await contacts.load(using: session) }
+        }.interactiveDismissDisabled(sending)
+    }
+
+    private func send() async {
+        guard !sending && !selected.isEmpty else { return }
+        sending = true; issue = nil
+        defer { sending = false }
+        do {
+            let _: APIEnvelope<SharePlanContactsResult> = try await session.sendAuthorized(
+                "/api/v1/time-polls/\(poll.token)/contacts", method: .post,
+                body: SharePlanContactsRequest(connectionIds: selected.sorted(), version: poll.invitationVersion ?? 0), idempotencyKey: requestKey)
+            await onSent(); dismiss()
+        } catch { issue = AppLocalization.string(String.LocalizationValue(error.localizedDescription)) }
+    }
+}
+
+struct SharedPlanChatCard: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(DeepLinkRouter.self) private var router
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let token: String
+    let title: String
+    @State private var store: TimePollStore
+
+    init(token: String, title: String) {
+        self.token = token; self.title = title
+        _store = State(initialValue: TimePollStore(token: token))
+    }
+
+    var body: some View {
+        Button { router.handleAppRoute(.timePoll(token: token)) } label: {
+            SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: .study) {
+                VStack(alignment: .leading, spacing: 0) {
+                    SSActivityHeaderBand(topic: .study, verticalPadding: SideSeatTheme.spaceSM) {
+                        Text(store.poll?.title ?? title).font(.headline)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        if let poll = store.poll {
+                            if let start = poll.chosenStart, let end = poll.chosenEnd {
+                                Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
+                                    .font(.subheadline).fixedSize(horizontal: false, vertical: true)
+                            }
+                            Text(poll.presentation(at: Date()).cardStatusTitle)
+                                .font(.caption).foregroundStyle(.secondary)
+                            Label(poll.presentation(at: Date()).nextStep == .fillAvailability ? "Fill my availability"
+                                  : poll.presentation(at: Date()).nextStep == .confirm ? "View invitation" : "View plan", systemImage: "arrow.right")
+                                .font(.subheadline.weight(.semibold))
+                        } else {
+                            Label("View plan", systemImage: "calendar.badge.clock").font(.subheadline.weight(.semibold))
+                        }
+                    }.padding(SideSeatTheme.spaceMD)
+                }
+            }
+        }.buttonStyle(SSPressButtonStyle())
+            .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 320, alignment: .leading)
+            .accessibilityIdentifier("shared-plan-card-\(token)")
+            .task { await store.load(session: session) }
+            .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
+                Task { await store.load(session: session) }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                Task { await store.load(session: session) }
+            }
     }
 }
 

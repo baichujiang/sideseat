@@ -506,6 +506,9 @@ struct NativeInboxConversation: Codable, Identifiable, Hashable, Sendable {
     private var contentPreview: String {
         guard let lastMessage else { return AppLocalization.string( "No messages yet") }
         if lastMessage.deletedAt != nil { return AppLocalization.string( "Message deleted") }
+        if let body = lastMessage.body, let plan = NativeSharedPlanMessage.parse(body) {
+            return AppLocalization.string("Plan invite") + " · " + plan.title
+        }
         switch lastMessage.type {
         case "IMAGE": return AppLocalization.string( "Photo")
         case "LOCATION": return AppLocalization.string( "Location")

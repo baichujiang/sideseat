@@ -479,7 +479,7 @@ struct TimePollDetailView: View {
                     PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
                                     accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
                         .disabled(!store.canMutate || poll.slots.isEmpty)
-                    PlanShareActions(poll: poll)
+                    PlanShareActions(poll: poll, store: store)
                 } else {
                     Text("Wait for the organizer's invitation")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -494,9 +494,9 @@ struct TimePollDetailView: View {
 
     private func beginFinalSelection(_ poll: NativeTimePoll) {
         nameFocused = false
-        invitationRoster = Set(poll.participants.map(\.id))
+        invitationRoster = Set(poll.invitationCandidates.map(\.id))
         invitationActivityID = poll.activitySelection?.selectedIdeaId
-        invitationLinkCount = poll.participants.contains(where: { !$0.isMe }) ? nil : 2
+        invitationLinkCount = poll.invitationCandidates.contains(where: { !$0.isMe }) ? nil : 2
         finalRange = nil
         if let start = poll.chosenStart, let end = poll.chosenEnd,
            let first = poll.cells.first(where: { $0.slots[0].start == start }),

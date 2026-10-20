@@ -418,6 +418,157 @@ import XCTest
         let accounts: [NativeAccount]
     }
 
+    func testNativeContactCardCreateFillInviteConfirmAndCalendar() throws {
+        struct ContactFixture: Decodable {
+            let title: String
+            let bundle: String
+            let connectionID: String
+            let peerID: String
+            let accounts: [NativeAccount]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable accepted App contacts.")
+        let fixture = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+
+        func openListCard() {
+            app.tabBars.buttons["计划"].tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        }
+        func openChatCard() {
+            app.tabBars.buttons["消息"].tap()
+            let row = app.buttons["inbox-row-\(fixture.connectionID)"]
+            XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20))
+            capture(app, "contacts-received-chat-card"); card.tap()
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+            XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        }
+
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+        nativePhase("contacts-created")
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        app.buttons["plan-invite-contacts"].tap()
+        let contact = app.buttons["plan-contact-\(fixture.peerID)"]
+        XCTAssertTrue(contact.waitForExistence(timeout: 15)); contact.tap()
+        let send = app.buttons["plan-contact-send"]
+        XCTAssertTrue(send.isHittable && send.isEnabled)
+        capture(app, "contacts-select-and-send"); send.tap()
+        XCTAssertTrue(send.waitForNonExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["plan-invite-contacts"].label.contains("已发送"))
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+        XCTAssertTrue(app.buttons["time-poll-cell-2"].isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        nativePhase("contacts-delivered"); capture(app, "contacts-draft-kept-after-send")
+        // Already delivered contacts remain visible and cannot accidentally be sent twice.
+        app.buttons["plan-invite-contacts"].tap()
+        XCTAssertTrue(contact.waitForExistence(timeout: 15)); XCTAssertFalse(contact.isEnabled)
+        XCTAssertFalse(app.buttons["plan-contact-send"].isEnabled)
+        app.navigationBars.buttons["取消"].tap()
+        nativeWaitSaved(); nativePhase("contacts-owner-submitted")
+
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch.waitForExistence(timeout: 20))
+        openChatCard()
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].isSelected)
+        XCTAssertFalse(app.buttons["plan-invite-contacts"].exists)
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        nativeWaitSaved(); nativePhase("contacts-peer-submitted")
+        capture(app, "contacts-peer-inline-availability")
+
+        nativeSignIn(owner, bundle: fixture.bundle); openListCard()
+        app.buttons["unified-plan-invite-window"].tap()
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        let review = app.buttons["unified-plan-review-roster"]
+        XCTAssertTrue(review.isEnabled); review.tap()
+        let invitation = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(invitation.waitForExistence(timeout: 10)); XCTAssertTrue(invitation.isEnabled)
+        capture(app, "contacts-review-final-invitees"); invitation.tap()
+        XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
+        nativePhase("contacts-formal-invitation")
+
+        nativeSignIn(peer, bundle: fixture.bundle); openChatCard()
+        XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
+        nativePhase("contacts-peer-accepted"); capture(app, "contacts-explicit-acceptance")
+
+        nativeSignIn(owner, bundle: fixture.bundle); openListCard()
+        app.buttons["unified-plan-publish"].tap()
+        let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
+        XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        nativePhase("contacts-published")
+
+        nativeSignIn(peer, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
+        let confirmed = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(confirmed.waitForExistence(timeout: 20)); confirmed.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20)); app.buttons["plan-view-calendar"].tap()
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
+        app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(fixture.title)
+        let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(result.waitForExistence(timeout: 20))
+        nativePhase("contacts-calendar-verified"); capture(app, "contacts-calendar-result")
+    }
+
+    func testNativeContactCardDarkAccessibilityAfterFullFlow() throws {
+        struct ContactFixture: Decodable {
+            let title: String
+            let bundle: String
+            let connectionID: String
+            let peerID: String
+            let accounts: [NativeAccount]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the completed disposable contact flow.")
+        let fixture = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(peer, bundle: fixture.bundle, accessibility: true)
+        app.tabBars.buttons["消息"].tap()
+        let row = app.buttons["inbox-row-\(fixture.connectionID)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20)); XCTAssertTrue(card.isHittable)
+        XCTAssertGreaterThanOrEqual(card.frame.minX, 0)
+        XCTAssertLessThanOrEqual(card.frame.maxX, app.frame.width)
+        capture(app, "contacts-chat-dark-accessibility"); card.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        capture(app, "contacts-detail-dark-accessibility")
+        nativeSignIn(owner, bundle: fixture.bundle, accessibility: true)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
+        let plan = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(plan.waitForExistence(timeout: 20)); plan.tap()
+        let invite = app.buttons["plan-invite-contacts"]
+        XCTAssertTrue(invite.waitForExistence(timeout: 20)); invite.tap()
+        let contact = app.buttons["plan-contact-\(fixture.peerID)"]
+        XCTAssertTrue(contact.waitForExistence(timeout: 20)); XCTAssertFalse(contact.isEnabled)
+        let send = app.buttons["plan-contact-send"]
+        XCTAssertTrue(send.isHittable); XCTAssertFalse(send.isEnabled)
+        XCTAssertLessThanOrEqual(send.frame.maxY, app.frame.maxY)
+        capture(app, "contacts-picker-dark-accessibility")
+    }
+
     func testAvailabilityDraftSurvivesReopenAndAccountSwitch() throws {
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
         try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires disposable draft recovery accounts.")
@@ -1007,11 +1158,15 @@ import XCTest
         capture(app, "invitation-01-dark-large")
     }
 
-    private func nativeSignIn(_ account: NativeAccount, bundle: String) {
+    private func nativeSignIn(_ account: NativeAccount, bundle: String, accessibility: Bool = false) {
         app?.terminate()
         app = XCUIApplication(bundleIdentifier: bundle)
         app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
             "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
+        if accessibility {
+            app.launchArguments.removeLast()
+            app.launchArguments += ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+        }
         app.launchEnvironment = [:]
         app.launch()
         let identifier = app.textFields["login-identifier"]
