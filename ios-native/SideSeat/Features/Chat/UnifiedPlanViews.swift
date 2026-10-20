@@ -58,7 +58,7 @@ struct UnifiedPlanInviteView: View {
     private var hasFriends: Bool { poll.invitationCandidates.contains { !$0.isMe } }
     private var minimumLinkCount: Int { min(20, max(2, selectedFriends + 2)) }
     private var reviewLocation: String? {
-        if let chosenActivity { return chosenActivity.location }
+        if let chosenActivity { return chosenActivity.location ?? poll.location }
         return poll.location
     }
     private var reviewTime: String {

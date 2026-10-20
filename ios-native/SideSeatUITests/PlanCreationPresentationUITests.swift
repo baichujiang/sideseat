@@ -161,6 +161,13 @@ import XCTest
         reveal(suggestionOption); suggestionOption.tap(); XCTAssertTrue(suggestionOption.isSelected)
         XCTAssertEqual(create.label, "发起计划")
         capture("single-form-dark-large")
+        let fixed = app.buttons["plan-mode-fixed"]
+        reveal(fixed); fixed.tap()
+        reveal(suggestionOption); XCTAssertTrue(suggestionOption.isSelected)
+        XCTAssertEqual(create.label, "发起计划"); XCTAssertTrue(create.isHittable)
+        capture("fixed-ideas-dark-large")
+        let collect = app.buttons["plan-mode-collect"]
+        reveal(collect); collect.tap()
         let options = app.buttons["plan-date-options"]
         reveal(options); options.tap()
         let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
