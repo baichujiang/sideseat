@@ -158,6 +158,7 @@ struct PlanResponseSummary: View {
 }
 
 struct PlanPeopleView: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
     let poll: NativeTimePoll
@@ -230,14 +231,16 @@ struct PlanPeopleView: View {
                         Text("Personal recovery link").font(.title2.bold())
                         Text("Send this link only to the person who owns the old response. Anyone holding it can edit that response.")
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        ShareLink(item: share.url) { Label("Share personal recovery link", systemImage: "square.and.arrow.up") }
-                            .buttonStyle(.borderedProminent)
-                        Button(AppLocalization.string(copiedRecovery ? "Copied" : "Copy personal recovery link")) { UIPasteboard.general.string = share.url.absoluteString; copiedRecovery = true }
-                            .buttonStyle(.bordered).accessibilityIdentifier("guest-recovery-copy")
+                        ShareLink(item: share.url) {
+                            PlanActionLabel(title: AppLocalization.string("Share personal recovery link"), symbol: "square.and.arrow.up", kind: .commit, isLoading: false)
+                        }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("guest-recovery-share-link")
+                        PlanActionButton(title: AppLocalization.string(copiedRecovery ? "Copied" : "Copy personal recovery link"), symbol: copiedRecovery ? "checkmark" : "doc.on.doc", kind: .edit, accessibilityID: "guest-recovery-copy") {
+                            UIPasteboard.general.string = share.url.absoluteString; copiedRecovery = true
+                        }
                     }.padding(SideSeatTheme.screenHorizontal)
                     }
                         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { recoveryShare = nil } } }
-                }.accessibilityIdentifier("guest-recovery-share")
+                }.dynamicTypeSize(typeSize).accessibilityIdentifier("guest-recovery-share")
             }
         }
     }

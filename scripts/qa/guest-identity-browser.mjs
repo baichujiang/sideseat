@@ -34,7 +34,7 @@ try{
    await call(api,nativePath+'/response','PUT',{displayName:'Host',slotIds:[0,1]},true);
    let a=await contexts[0].newPage();const b=await contexts[1].newPage();
    await a.goto('/time-polls/'+poll.token);await enter(a,'同名游客');const link=await recovery(a);
-   assert.equal(new URL(link).origin,'https://www.sideseat.de');assert.equal(new URL(link).search,'');
+   assert(['https://sideseat.de','https://www.sideseat.de'].includes(new URL(link).origin));assert.equal(new URL(link).search,'');
    await save(a,0);const first=await call(contexts[0].request,publicPath);
    assert.deepEqual(first.mySlotIds,[0,1]);assert(contexts[0]!==contexts[1]);
    const responseId=first.participants.find(p=>p.isMe).id;

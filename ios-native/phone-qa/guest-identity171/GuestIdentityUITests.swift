@@ -16,9 +16,23 @@ final class GuestIdentityUITests: XCTestCase {
             if let base = fixture.apiBaseURL { app.launchArguments.append("--ui-testing-local-api"); app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = base }
             app.launch()
             let people = app.buttons["plan-people-open"]
-            XCTAssertTrue(people.waitForExistence(timeout: 25)); reveal(people, in: app); people.tap()
+            XCTAssertTrue(people.waitForExistence(timeout: 25))
+            let saved = app.staticTexts["time-poll-saved"]
+            let unsaved = app.staticTexts["time-poll-save-state"]
+            for _ in 0..<14 {
+                let footerLabelTop = saved.exists ? saved.frame.minY : unsaved.frame.minY
+                let footerTop = min(app.scrollViews["time-poll-detail-scroll"].frame.maxY, footerLabelTop - 80)
+                if people.frame.minY > 110 && people.frame.maxY < footerTop - 8 { break }
+                // Scroll inside the visible content, above the fixed action area.
+                // XCUI's isHittable alone also reports obscured SwiftUI buttons.
+                let origin = app.coordinate(withNormalizedOffset: .zero)
+                origin.withOffset(CGVector(dx: app.frame.midX, dy: footerTop - 16))
+                    .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: app.frame.midX, dy: 115)))
+            }
+            people.tap()
+            XCTAssertTrue(app.buttons["plan-people-done"].waitForExistence(timeout: 5))
             let recover = app.buttons["guest-recovery-\(fixture.responseId)"]
-            XCTAssertTrue(recover.waitForExistence(timeout: 10)); reveal(recover, in: app); recover.tap()
+            reveal(recover, in: app); XCTAssertTrue(recover.exists); recover.tap()
             let generate = app.buttons["guest-recovery-generate"].firstMatch
             XCTAssertTrue(generate.waitForExistence(timeout: 5)); generate.tap()
             let copy = app.buttons["guest-recovery-copy"]

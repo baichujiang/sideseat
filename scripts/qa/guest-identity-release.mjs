@@ -45,9 +45,22 @@ if(mode==='prepare-old'){
  const guest=await call('/api/public/time-polls/'+poll.token+'/participant','POST',{displayName:'旧游客'});record.guestId=guest.viewerId;
  const saved=await call('/api/public/time-polls/'+poll.token+'/response','PUT',{participantId:guest.viewerId,displayName:'旧游客',slotIds:[0,1]});record.responseId=saved.participants.find(p=>p.isMe).id;await save();
  console.log('Prepared one disposable old-format response for native organizer recovery.');
+}else if(mode==='refresh'){
+ const state=JSON.parse(await fs.readFile(fixturePath));
+ const auth=await call('/api/v1/auth/login','POST',{identifier:state.username,password:state.password,device:{id:randomUUID(),name:'Guest identity QA',appVersion:'1.0.0',platformVersion:'26.6.1'}});
+ state.accessToken=auth.tokens.accessToken;await fs.writeFile(fixturePath,JSON.stringify(state),{mode:0o600});console.log('Disposable organizer session refreshed privately.');
 }else if(mode==='cleanup'){
  const state=JSON.parse(await fs.readFile(fixturePath));
- for(const poll of state.plans){await call('/api/v1/time-polls/'+poll.token,'DELETE',undefined,state.accessToken);await call('/api/public/time-polls/'+poll.token,'GET',undefined,undefined,404);}
+ for(const poll of state.plans){
+  const route='/api/v1/time-polls/'+poll.token;
+  const existing=await api.get(route,{headers:{Authorization:'Bearer '+state.accessToken}});
+  if(existing.status()!==404){
+   assert.equal(existing.status(),200);const data=(await existing.json()).data;
+   if(['INVITING','CONFIRMED'].includes(data.phase))await call(route+'/cancel','POST',{version:data.invitationVersion},state.accessToken);
+   await call(route,'DELETE',undefined,state.accessToken);
+  }
+  await call('/api/public/time-polls/'+poll.token,'GET',undefined,undefined,404);
+ }
  await call('/api/v1/me','DELETE',{confirmUsername:state.username},state.accessToken);await call('/api/v1/me','GET',undefined,state.accessToken,401);
  await fs.writeFile(path.join(privateDir,'cleanup.json'),JSON.stringify({accountRemoved:true,plansRemoved:state.plans.length,at:new Date().toISOString()}));
  await fs.rm(fixturePath);console.log('Disposable account and all retained legacy plans removed; links and token rejected.');
