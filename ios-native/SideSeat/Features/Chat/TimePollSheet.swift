@@ -340,7 +340,7 @@ struct TimePollDetailView: View {
                 }
             }
         }
-        .confirmationDialog("Cancel this plan for everyone?", isPresented: $showsCancelPlan, titleVisibility: .visible) {
+        .alert("Cancel this plan for everyone?", isPresented: $showsCancelPlan) {
             Button("Cancel plan", role: .destructive) {
                 Task { await store.mutate("cancel", body: CancelPollPlanRequest(version: store.poll?.invitationVersion ?? 0), session: session) }
             }
@@ -348,7 +348,7 @@ struct TimePollDetailView: View {
         } message: {
             Text("Everyone will see that this plan is cancelled. Its calendar entries will be removed.")
         }
-        .confirmationDialog("Delete this poll and all responses?", isPresented: $showsDelete, titleVisibility: .visible) {
+        .alert("Delete this poll and all responses?", isPresented: $showsDelete) {
             Button("Delete poll", role: .destructive) { Task { await delete() } }
             Button("Keep plan", role: .cancel) { }
         } message: {
