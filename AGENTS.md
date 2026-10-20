@@ -19,6 +19,8 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
+- Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
+  acceptance; physical-device installation and ordinary launch are verified.
 - Preview 173 is the current installed development build; it retains continuous
   invitation windows physically accepted in Preview 171 with standard and maximum text.
   The App plan journey passed separately in Preview 168; prior spacing and plan

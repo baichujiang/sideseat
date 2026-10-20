@@ -1,0 +1,17 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": "173",
+  "ordinaryBuildPreserved": "97",
+  "stageRunnerRemoved": true,
+  "normalPID": 4296,
+  "normalArguments": [],
+  "normalProcessVerified": true,
+  "sourceCommit": "6d26c048bb3e2c2ee206b4238d6198419473aab6",
+  "physicalUITestAcceptance": false,
+  "physicalUITestNote": "Device installation and ordinary launch verified; final UI acceptance uses the same committed source on Simulator after physical UI attempts were interrupted by device contention.",
+  "backendChangedByThisStage": false,
+  "simulatorUITestAcceptance": true,
+  "simulatorTestsPassed": 1,
+  "recordedBackendDeployment": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj"
+}

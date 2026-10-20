@@ -1,0 +1,17 @@
+{
+  "attempts": [
+    {
+      "build": "169",
+      "status": "interrupted",
+      "reason": "Consolidate the final package with committed Preview 170 plan changes.",
+      "log": "/tmp/sideseat-saved169-phone.log"
+    },
+    {
+      "build": "171",
+      "status": "interrupted",
+      "reason": "Another UI test began using the same physical device; wait for exclusive device access before acceptance.",
+      "log": "/tmp/sideseat-saved171-phone.log"
+    }
+  ],
+  "countedAsPass": false
+}

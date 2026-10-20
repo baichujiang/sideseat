@@ -1,0 +1,14 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": "171",
+  "ordinaryBuildPreserved": "97",
+  "stageRunnerRemoved": true,
+  "normalPID": 4293,
+  "normalArguments": [],
+  "normalProcessVerified": true,
+  "sourceCommit": "5bf4c14a",
+  "physicalUITestAcceptance": false,
+  "physicalUITestNote": "Interrupted due to concurrent device occupation; final UI acceptance uses the same committed source on Simulator.",
+  "backendChangedByThisStage": false
+}
