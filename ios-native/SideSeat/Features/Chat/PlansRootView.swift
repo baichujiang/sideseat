@@ -73,8 +73,6 @@ struct PlansRootView: View {
     @State private var waitingScrollID: String?
     @State private var showsPlanCreation = false
     @State private var createdPlanToken: String?
-    @State private var showsOpenPlanLink = false
-    @State private var planLink = ""
     @State private var coordinationLoading = false
     @State private var coordinationLoaded = false
     @State private var coordinationError: String?
@@ -130,14 +128,6 @@ struct PlansRootView: View {
             NavigationStack {
                 TimePollCreateView { poll in createdPlanToken = poll.token; showsPlanCreation = false }
             }.tint(SideSeatTheme.utilityAction).dynamicTypeSize(dynamicTypeSize)
-        }
-        .alert("Open a plan link", isPresented: $showsOpenPlanLink) {
-            TextField("Paste the plan link", text: $planLink).textInputAutocapitalization(.never).autocorrectionDisabled()
-            Button("Open") {
-                if let token = TimePollLink.token(from: planLink) { coordinationError = nil; router.openPlan(token: token) }
-                else { coordinationError = AppLocalization.string("Enter a Sideseat time poll link.") }
-            }
-            Button("Cancel", role: .cancel) {}
         }
         .onChange(of: router.path) { old, new in
             if !old.isEmpty && new.isEmpty { Task { await loadCoordinatedPlans() } }
@@ -278,17 +268,10 @@ struct PlansRootView: View {
     }
 
     private var planActions: some View {
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
-            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-        return layout {
+        VStack(spacing: 0) {
             PlanActionButton(title: AppLocalization.string("Start a plan"), symbol: "plus", kind: .commit,
                 accessibilityID: hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary") {
                 showsPlanCreation = true
-            }
-            PlanActionButton(title: AppLocalization.string("Open a plan link"), symbol: "link", kind: .edit,
-                accessibilityID: "plans-open-link") {
-                planLink = ""; showsOpenPlanLink = true
             }
         }
         .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
@@ -572,7 +555,7 @@ struct PlansRootView: View {
 
     private func sectionEmptyDescription(_ section: MVPPlanSection) -> String {
         switch section {
-        case .waitingResponse: AppLocalization.string("Create a plan or open a friend’s shared link to get started.")
+        case .waitingResponse: AppLocalization.string("Plans you create and invitations you receive appear here.")
         case .upcoming: AppLocalization.string("Your confirmed plans will appear here until they finish.")
         case .ended: AppLocalization.string("Completed, declined, canceled, and expired plans will appear here.")
         }

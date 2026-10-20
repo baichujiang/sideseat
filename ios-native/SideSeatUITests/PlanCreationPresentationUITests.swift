@@ -17,20 +17,15 @@ import XCTest
 
     override func tearDownWithError() throws { app?.terminate() }
 
-    func testFirstHomeOpensCreateAndPlanLinkDirectly() {
+    func testFirstHomeOpensCreateDirectlyWithoutLinkEntry() {
         app.tabBars.buttons["计划"].tap()
         assertHittable(app.buttons["plans-create-primary"])
         XCTAssertEqual(app.buttons["plans-create-primary"].label, "发起计划")
         XCTAssertFalse(app.buttons["plans-create-unified"].exists)
-        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
-        XCTAssertEqual(app.buttons["plans-open-link"].label, "打开计划链接")
+        XCTAssertFalse(app.buttons["plans-open-link"].exists)
         XCTAssertFalse(app.staticTexts["把「改天约」\n变成「周末见」"].exists)
         XCTAssertFalse(app.buttons["plans-purpose-example"].exists)
         capture("home-first-use")
-        app.buttons["plans-open-link"].tap()
-        let linkPrompt = app.alerts.firstMatch
-        XCTAssertTrue(linkPrompt.textFields.firstMatch.waitForExistence(timeout: 5))
-        linkPrompt.buttons["取消"].tap()
         openCreation()
         cancel().tap()
         XCTAssertTrue(homeCreate.isHittable)
@@ -64,7 +59,7 @@ import XCTest
         XCTAssertFalse(loading.exists)
         XCTAssertFalse(app.buttons["plans-create-unified"].exists)
         XCTAssertFalse(app.buttons["plans-purpose-example"].exists)
-        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        XCTAssertFalse(app.buttons["plans-open-link"].exists)
         capture("empty-home-after-loading")
         openCreation(); cancel().tap(); assertHittable(homeCreate)
     }
@@ -120,7 +115,7 @@ import XCTest
         app.launchArguments.append(contentsOf: ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
         app.launch(); app.tabBars.buttons["计划"].tap()
         assertHittable(homeCreate)
-        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        XCTAssertFalse(app.buttons["plans-open-link"].exists)
         capture("home-first-use-dark-large")
         openCreation()
         let title = app.textFields["time-poll-title"]

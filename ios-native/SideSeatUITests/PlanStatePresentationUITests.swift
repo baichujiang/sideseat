@@ -66,7 +66,7 @@ import XCTest
         XCTAssertFalse(app.buttons["plans-tab-ended"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["plans-next-meetup"].exists)
         XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
-        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        XCTAssertFalse(app.buttons["plans-open-link"].exists)
         let heading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
         XCTAssertTrue(heading.isHittable)
         XCTAssertTrue(heading.label.contains("计划"))
