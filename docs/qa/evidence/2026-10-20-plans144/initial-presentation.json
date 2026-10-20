@@ -1,0 +1,31 @@
+{
+  "result": "Failed",
+  "passedTests": 4,
+  "failedTests": 3,
+  "testFailures": [
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "PlanPresentationPhone117UITests",
+      "testIdentifier": 3,
+      "testIdentifierString": "PlanStatePresentationUITests/testTogetherAndPlansCardStyleReference()",
+      "testIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testTogetherAndPlansCardStyleReference",
+      "testName": "testTogetherAndPlansCardStyleReference()"
+    },
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "PlanPresentationPhone117UITests",
+      "testIdentifier": 4,
+      "testIdentifierString": "PlanStatePresentationUITests/testUpcomingDateSummaryOpensTheExistingConfirmedPlan()",
+      "testIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testUpcomingDateSummaryOpensTheExistingConfirmedPlan",
+      "testName": "testUpcomingDateSummaryOpensTheExistingConfirmedPlan()"
+    },
+    {
+      "failureText": "XCTAssertTrue failed",
+      "targetName": "PlanPresentationPhone117UITests",
+      "testIdentifier": 5,
+      "testIdentifierString": "PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText()",
+      "testIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText",
+      "testName": "testUpcomingSummaryReflowsWithMaximumText()"
+    }
+  ]
+}

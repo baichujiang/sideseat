@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-20T10:46:29.977Z",
+  "states": [
+    {
+      "role": "task",
+      "phase": "COLLECTING",
+      "invitationVersion": 0
+    },
+    {
+      "role": "waiting",
+      "phase": "INVITING",
+      "invitationVersion": 1
+    },
+    {
+      "role": "waiting",
+      "phase": "INVITING",
+      "invitationVersion": 1
+    },
+    {
+      "role": "meetup",
+      "phase": "CONFIRMED",
+      "invitationVersion": 1
+    }
+  ],
+  "passed": 4,
+  "note": "Opening cards and browsing the rail preserved all seeded phases and invitation versions."
+}

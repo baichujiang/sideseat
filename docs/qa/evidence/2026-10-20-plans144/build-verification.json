@@ -1,0 +1,15 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "144",
+  "executableSHA256": "4c4eaa5f1c43735b444ce0816c72ad9d41e8deee6fd810bb9c29e757483065b5",
+  "signatureVerified": true,
+  "sourcesSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "efc2c9c82cd8ad3a80ceced8d9975fd2a6fad60eac5fea12a58483a88714e49e",
+    "ios-native/SideSeat/Features/Chat/PlanHomeArtwork.swift": "4391ee4f8bfb31f03561ca2de73ff3e9edc11d179d46c92031f5cd227638ba41",
+    "ios-native/Configuration/Preview.xcconfig": "a23647c781d67f6383c9913ad8f62fd405d9430e5e8b1fe4581163f8720ed8f3"
+  },
+  "buildLog": "/tmp/sideseat144-final-build-retry.log",
+  "installLog": "/tmp/sideseat144-final-install.log",
+  "nativeSourceCommit": "f1edd7e38349a5e6d02d179d94a634f38eac075d"
+}
