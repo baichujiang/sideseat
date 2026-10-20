@@ -1,0 +1,29 @@
+{
+  "scope": "Current native Plans tab and routes reachable from it; no archived or frozen compatibility code modified",
+  "checkedAt": "2026-10-20T12:21:21.871929+00:00",
+  "initialLoadingRootCause": "Both plan arrays start empty; planActions rendered the empty layout before either request completed. Two independent loading presentations also appeared.",
+  "changes": [
+    "Gate first empty content on completion of both initial reads unless actual plans already exist",
+    "Use one initial loading view, keep creation in the toolbar while loading",
+    "Render loaded shared plans independently of chat plan loading/errors",
+    "Remove duplicate onAppear shared-plan request; task, return, foreground and notification reloads remain",
+    "Remove the remaining Plans slogan",
+    "Remove unused PlanTaskHeader and PlanGuideRow",
+    "Delete unused PlanHomeHero asset and 11 welcome/example strings per language (33 total)",
+    "Remove unused coordinatedSection vertical renderer, two retired expansion states and unused DeepLinkRouter environment dependency"
+  ],
+  "entryAudit": {
+    "plansTab": "AppShellView.rootView(.plans) -> PlansRootView",
+    "messagesEntry": "RouterPath.openPlans -> Plans tab; no TimePollSheet",
+    "planLinksAndCards": "AppRoute.timePoll -> TimePollDetailView",
+    "oldTimePollSheet": "Only current Swift caller is CommunityChatView; group/course chat routes are legacyUnavailable under MVPRoutePolicy. Retained frozen compatibility surface, not the first-load path.",
+    "globalProductTutorial": "App-wide tutorial; not a per-Plans loading fallback; unchanged"
+  },
+  "beforeReproduction": {
+    "installedPreviewBuild": "146",
+    "appSourceCommit": "64d6c3fba9eeb0ad5a7afac0075239cdb5ecfc26",
+    "result": "Failed the targeted assertion: empty layout exists while initial request is still pending"
+  },
+  "backendChanged": false,
+  "cleanupSourceCommit": "229a5834e45e9a0d8923608a7316f06cf353ffed"
+}
