@@ -19,8 +19,8 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Preview 163 is installed for QA, with its final physical-device retest awaiting
-  the default iPhone unlock. Preview 162 is the last fully accepted build; see
+- Preview 165 is currently installed for a separate QA stage and includes the
+  plan changes physically accepted in Preview 164. See
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97
   is a separate supported older client. Do not uninstall it or drop its API/data
   compatibility as part of archival work.

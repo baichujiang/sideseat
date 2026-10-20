@@ -1,0 +1,11 @@
+{
+  "observedPreviewBuild": "165",
+  "bundle": "app.sideseat.mobile.preview",
+  "subsequentCommit": "f5ba2c1a",
+  "includesPlanCommit": "2890e590",
+  "nativePlanFilesUnchanged": true,
+  "builtBinaryContainsPlanResponseSummary": true,
+  "builtBinaryOmitsRemovedNicknameEditor": true,
+  "planAcceptanceBuild": "164",
+  "separateStageDeviceQAInProgress": true
+}

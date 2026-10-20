@@ -1,0 +1,82 @@
+[
+  {
+    "file": "contacts-calendar-result.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "ec5e2c2271451a14f9e2597182fc1ed00433fc6b0548fc2fd57c8c3f574498d9"
+  },
+  {
+    "file": "contacts-explicit-acceptance.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "4a89ee8e2082169ab97ea7d80d3be30c423961ce618a64b815472b13a1cd2c27"
+  },
+  {
+    "file": "contacts-review-final-invitees.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "813d63e4062a03606c34735b93bcfbf139bc4573d57ffaa269209f22512eb65e"
+  },
+  {
+    "file": "compact-responded-people.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "d5f9faab5a371b43dec27ccd49c3d031857687afda1ee810ed689a3512dbd7a8"
+  },
+  {
+    "file": "contacts-draft-kept-after-send.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "54960b6fb347431d02c1bfabf1c4e4fdddff64607c1e65f81f30e6bb7469b8f4"
+  },
+  {
+    "file": "compact-empty-timetable.png",
+    "sourceResult": "/tmp/sideseat164-native-flow.xcresult",
+    "sha256": "1ac2dd87c40b36288a3cd671205e68189248368b220fe59c7b1c99f4b3fe35d2"
+  },
+  {
+    "file": "compact-people-dark-largest.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "3040116d8bdb15288c3782899ac4b65c7462491e88f20dd347664b7b740d7769"
+  },
+  {
+    "file": "compact-avatars-dark-largest.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "9c9c8fdeee79a50a8f1e6c3717af186f2e07f4fe33aa21bec1182d5a7e756659"
+  },
+  {
+    "file": "compact-people-eight.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "e25167efe6ebad92b9e59569538a71bab49820c718a3a6c4ff80c8a15f750f0c"
+  },
+  {
+    "file": "compact-avatars-eight.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "312673beda662b99047e516c49f8b70630e6db62393505d7430867c2527d0011"
+  },
+  {
+    "file": "fixed-ideas-calendar.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "8a922a5c4542ae133a62def3e66859eb4d3982c868e98defdca5e958bdc64a39"
+  },
+  {
+    "file": "fixed-ideas-peer-accepted.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "6dc7ab4e0df1569d4dc4d104a6f3d68ed8a0da9830c2c58b1a6a967ab781fa9d"
+  },
+  {
+    "file": "fixed-ideas-review-before-inviting.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "deceb3795ca65d7065e0fea802c23e7cd3f6adfd202d9d86e3204e4b75b68ca2"
+  },
+  {
+    "file": "fixed-ideas-peer-suggestion.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "eab2e22f6122424717f89a0233da75108506065aad4b9d28eb2ee64c7f111c78"
+  },
+  {
+    "file": "fixed-ideas-awaiting-activity.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "f68d46f9432c502dc62a79263e08ce7299dbf7274ae81b583b9a0819a5754cdf"
+  },
+  {
+    "file": "fixed-ideas-create-both-options.png",
+    "sourceResult": "/tmp/sideseat164-final-phone.xcresult",
+    "sha256": "356b30a57a8f5edb9885154917bfdbc67e4a26f47ce0f90f41dfa7806f38f7ad"
+  }
+]

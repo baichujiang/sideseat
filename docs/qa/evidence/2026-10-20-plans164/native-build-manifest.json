@@ -1,0 +1,42 @@
+{
+  "baseCommit": "b81cf1ed4433dea6e93022ff3df9db2169c2ffb6",
+  "overlayCommit": "2890e5907926eff1b0afc83cc93490421e1c0665",
+  "overlays": [
+    "ios-native/SideSeat/Features/Chat/PlanDetailEditors.swift",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+    "ios-native/Configuration/Preview.xcconfig"
+  ],
+  "baseOtherSourceMatched": true,
+  "laterUnrelatedWorkingEditsExcluded": true,
+  "bundle": "app.sideseat.mobile.preview",
+  "build": "164",
+  "binarySHA256": {
+    "Info.plist": "28f70b8280038fbb0647f21023620f2dd0f03885b463ca2d227442d76e716341",
+    "SideSeat Preview": "3decc6bc3bd281acb08ece4b8405aae96d7a6facd72a931be796d03ea98698b2",
+    "SideSeat Preview.debug.dylib": "00bc78d7895a3bdbbc5f19600987097217f24f36945dc4ed8fab0154d5957858",
+    "_CodeSignature/CodeResources": "28a4d838fc95d2bbaa110d44cedfd7e1f1104a3b1f668040d1f6961423d0ac3b"
+  },
+  "sourceSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlanDetailEditors.swift": "2bba2b9550a4d1842129aa050f466b397786a7354e0a942f26dc063323a7e605",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "4e9ae8db4f453c630ce37831b18a9ab005480c59404cda18e800c95814c42b8b",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "cebb1133b096fc73f66246789ca0aa5bd750d4113c5d6babaddf4a6b47113b75",
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "f423a73c3014283f918508494d053ff02fa1cb27c128f9467ce85d38c40fd0e5",
+    "ios-native/Configuration/Preview.xcconfig": "4d489539c2817b19002511abb48adf14d9f76cbce3afbfa28ceb40185d21f5f0"
+  },
+  "finalInstall": {
+    "deviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "installedApplications": [
+      {
+        "bundleID": "app.sideseat.mobile.preview",
+        "databaseSequenceNumber": 8252,
+        "databaseUUID": "276D1289-E615-446C-A59C-EB70B8BD5E32",
+        "installationURL": "file:///private/var/containers/Bundle/Application/DA4A5462-77FA-4C37-A184-DD37D8B731B0/SideSeat%20Preview.app/",
+        "launchServicesIdentifier": "unknown",
+        "options": {}
+      }
+    ]
+  },
+  "signatureStrictVerification": true
+}

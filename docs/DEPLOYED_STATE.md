@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前运行清单；Preview 163 等待解锁复验，上一完整验收 Preview 162；同行交互核验 2026-10-20，Europe/Berlin。
+**状态：** 当前运行清单；Preview 165 已由并行阶段安装，本轮计划变更在 164 完整验收且保留于 165；核验 2026-10-20，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-进行中：Preview 163 已构建并安装进入第 7 项真机测试。真实账号和模拟器界面闭环已通过，最终真机复验在 Xcode preflight 等待解锁；未完成最终普通启动，不能视为已验收。[第 7 项状态](./qa/2026-10-20-together07.md)。
+本轮 **Preview 164 计划验收**：共同计划人数/三头像/+N、完整名单、紧凑活动信息和底栏；移除昵称编辑、时间表标题及填写说明。真机完整主流程 181.087 秒/八阶段 API、已定时间活动流程 151.484 秒/七阶段 API，标准/最大字号与 38 项单元通过。普通启动 PID 4214，普通 97 保留；6 个临时账号和 5 个计划链接清理。[164 交付](./releases/2026-10-20-preview164-compact-plan-people.md)、[本轮 QA](./qa/2026-10-20-plans164.md)。
+
+随后并行阶段接续安装 **Preview 165**，其四个计划页面文件与 `2890e590` 相同，构建二进制含新摘要组件并移除昵称编辑；该阶段自身验收见对应记录。本轮不覆盖其升级。此前 Preview 163 的同行第 7 项原待复验结论继续由对应阶段维护，本轮没有重跑该同行场景。[第 7 项状态](./qa/2026-10-20-together07.md)。
 
 上一完整验收 **Preview 162**：空收藏直接查看推荐并完成收藏往返。1 项真机通过，普通启动 PID 4126，普通 97 保留；[本项交付](./releases/2026-10-20-preview162-together06.md)。
 
@@ -56,13 +58,13 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `91a8cc07`；主体 API `f703ee5b`，网页说明 `d9398fb5`。保留其他生产差异；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (157)` | 收藏语义、两项真机界面及普通启动 PID 4068；[157 交付](./releases/2026-10-20-preview157-private-saving.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；156 三轮真实完整流程及七阶段 API 各通过，6 个临时账号/3 个计划链接回收；普通版 97 保留 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本轮计划 `2890e590` 已推送；编译基准/覆盖与签名见 [164 QA](./qa/2026-10-20-plans164.md)。保留其他工作区及生产差异 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (165)` | 并行阶段接续安装且保留本轮计划实现；本轮计划 164 完整验收/普通启动 PID 4214，见 [164 交付](./releases/2026-10-20-preview164-compact-plan-people.md)、[165 保留核验](./qa/evidence/2026-10-20-plans164/subsequent-preview.json) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；164 两条真实完整流程、15 阶段 API 及两项最终呈现通过，测试数据/本轮 runner 清理；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_DMk4xG553JZ8xfc8RNufv5jgswrW`，Ready | 保留 1,374 个生产源文件基础，覆盖 6 文件；候选 1,375 文件全哈希匹配。同一已测构建提升正式，三个别名核对；[156 QA](./qa/2026-10-20-plans156.md) |
-| 生产源码 | 保留原生产差异；服务/到期/OpenAPI/三份网页组件六文件覆盖 | 主体 `f703ee5b`、最终说明 `d9398fb5`；无 Schema/迁移/依赖变化；[来源](./qa/evidence/2026-10-20-plans156/backend-source-manifest.json)、[最终候选上传](./qa/evidence/2026-10-20-plans156/candidate-source-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr`，Ready | 本轮只读核验三个别名并执行真实 API 链路，无服务端发布；[164 生产核验](./qa/evidence/2026-10-20-plans164/production-state.json) |
+| 生产源码 | 沿用既有生产构建和差异，本轮未修改服务端 | 后续同行后端来源 `7a2163da`，见 [160 QA](./qa/2026-10-20-together04.md)；既有计划来源与历史覆盖见 [156 QA](./qa/2026-10-20-plans156.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 
