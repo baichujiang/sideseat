@@ -42,7 +42,8 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **161** 已安装到默认 iPhone 14 Plus：意愿与招呼草稿恢复、成功后清空。1 项真机通过，普通启动 PID 4117，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview161-together05.md)。
+Preview **162** 已安装到默认 iPhone 14 Plus：空收藏直接查看推荐并完成收藏往返。1 项真机通过，普通启动 PID 4126，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview162-together06.md)。
+此前 Preview **161** 已安装到默认 iPhone 14 Plus：意愿与招呼草稿恢复、成功后清空。1 项真机通过，普通启动 PID 4117，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview161-together05.md)。
 此前 Preview **160** 已安装到默认 iPhone 14 Plus：联系前资料与意愿举报、屏蔽。1 项真机通过，普通启动 PID 4107，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview160-together04.md)。
 此前 Preview **160** 已安装到默认 iPhone 14 Plus：联系前资料与意愿举报、屏蔽。1 项真机通过，普通启动 PID 4104，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview160-together04.md)。
 此前 Preview **159** 已安装到默认 iPhone 14 Plus：意愿暂停、编辑及恢复寻找。1 项真机通过，普通启动 PID 4094，普通版 97 保留。[交付与验证](./docs/releases/2026-10-20-preview159-together03.md)。
