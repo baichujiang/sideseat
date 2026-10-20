@@ -1,0 +1,30 @@
+{
+  "build": "159",
+  "sourceCommit": "df30e31db4e9604baca3b80bb3249a3db32ab827",
+  "backend": "dpl_8SvBGqPyKdA22U4EroPEwygVKm9R",
+  "strictSignatureVerified": true,
+  "sha256": {
+    "AppIcon60x60@2x.png": "067320a4433ff78e40ec8d2b53fe9e1b1302fa656b764ddf4e0e11bfc81ef055",
+    "AppIcon76x76@2x~ipad.png": "99d3367caaf1c86d8c11b561b02e78eb1264f43480a794d65b7395258db89bd2",
+    "Assets.car": "a1ba98fd091f190921a819abc27f7fbce97c147a893b165181bb2ad8dbf931fe",
+    "CalendarSmartInputPolicy.json": "c5ea26274843bac8f97a6231adc4388b9640dad53c152ea5caa869138be1edc9",
+    "Frameworks/Sentry.framework/Info.plist": "a62058479663e0fa02fb0b5e692b770aa6c382a4d6507f8fd184cbde862c490c",
+    "Frameworks/Sentry.framework/PrivacyInfo.xcprivacy": "118b16e0e97ffe8b6f1f01b7e04f68e5da764474a4d39d2933b0eeaef3cdc0ca",
+    "Frameworks/Sentry.framework/Sentry": "129e364b03ef3b41da8619987953c7e7657e9e334d8978954c27b2cf81664b47",
+    "Frameworks/Sentry.framework/_CodeSignature/CodeResources": "d11cbe39f6ef86c05d5abc619eddd1d269a0d8475773eac234b628b97b154a01",
+    "Info.plist": "7a4c79bac631d2a0cecccc02216e26cf0cecfeb9dabd6faa39a559c9ceea6b68",
+    "PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "PrivacyInfo.xcprivacy": "9cd23f17d6d8d13cc29a3c907b44ebe4691b113a635f85a6a29b62e8c5aa5211",
+    "SideSeat Preview": "06dacf39f9682d5fe372a1db3660e2bd1f9e3e43a8b41049a8020de973303719",
+    "SideSeat Preview.debug.dylib": "35d7289e9f690bdaff43c69895fcdc78a2edf746dffd0ecb87c0d1b39bbc15b3",
+    "_CodeSignature/CodeResources": "ef2279b5ed9aafff4695cf79c26e2aae8864c48332ac0d7c80f746a2ba6e6acb",
+    "__preview.dylib": "69f4d4f7c441069fb8dfbfa3747c29794a6cc66fea9d1a3b72291e1f4b98d3a4",
+    "de.lproj/InfoPlist.strings": "9656fc7dd801e33ff8cbe0016b2fd5af7be8f19faf3246fe4952f189e95bb2c0",
+    "de.lproj/Localizable.strings": "75dc9f8ad2256cfd934a784fe3bb598035adb9bfa7d7ef5cfeebeed2bae70c82",
+    "embedded.mobileprovision": "0241f27b0d1d40e6446dc43bdcc8bb3f4122eab53c60c95ed119539b9fde9672",
+    "en.lproj/InfoPlist.strings": "0e31f9d2b621c6857ed8ff0c62dbe10fbf9c8de28669ed3a18c1aba35d62408c",
+    "en.lproj/Localizable.strings": "a69bd5d65bdd02f8052ac57c9a6960264f97ab90eff4f9a1755fe4f0e401d1fe",
+    "zh-Hans.lproj/InfoPlist.strings": "46826b11ae8bef0d188b1555ee4200516d17cef1d9013511b77a9ae8bfc4e97a",
+    "zh-Hans.lproj/Localizable.strings": "dfd8a8b10c9bec9f19fe9b5122e6f18d82fb2e357573a94df2f11f030111bf03"
+  }
+}
