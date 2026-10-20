@@ -42,7 +42,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **145** 已安装到默认 iPhone 14 Plus：发起人可随时正式发出，只通知已接受的人并同步日历，无需等齐回复；App/网页和三条真机完整流程通过，Apple 接收两条实际 Preview 通知。[当前交付与完整验证](./docs/releases/2026-10-20-preview145-organizer-publish.md)。
+Preview **146** 已安装到默认 iPhone 14 Plus：移除无计划时的欢迎式介绍，直接显示「发起计划」和「打开计划链接」。4 项真机界面检查及普通启动通过；本轮无后端或网页发布。[当前交付与验证范围](./docs/releases/2026-10-20-preview146-direct-plans-entry.md)。
+
+Preview **145**：发起人可随时正式发出，只通知已接受的人并同步日历，无需等齐回复；App/网页和三条真机完整流程通过，Apple 接收两条实际 Preview 通知。[145 交付与完整验证](./docs/releases/2026-10-20-preview145-organizer-publish.md)。
 
 此前 Preview **144** 已安装到默认 iPhone 14 Plus：三类计划摘要使用「同行」同款活动色带、插画、圆角和轻阴影，保留待处理纵向、等待他人横向及紧凑内容。16 项单元、8 项真机界面检查、316.740 秒原生完整流程与 12 个 API 阶段通过；4 个临时账号、5 个计划/链接清理，普通启动 PID 3397 核验。本轮无网页或后端发布。[当前交付与真机效果](./docs/releases/2026-10-20-preview144-plan-card-style.md)。
 

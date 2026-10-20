@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 145** 将计划最终确定改为发起人主动「正式发出」，无需等待全部回应；只通知已接受者并同步日历，之后仍可在开始前接受。75 项原生、13 项领域、32 项发布检查、最终候选/正式各 12 组网页与三条真机完整流程通过；两条真实 APNs 接收回执。[当前交付](./releases/2026-10-20-preview145-organizer-publish.md)、[完整 QA](./qa/2026-10-20-plans145.md)。
+当前 **Preview 146** 移除无计划时的插图、宣传介绍和示例入口，直接显示「发起计划」和「打开计划链接」。4 项真机界面检查、深色最大字号及普通启动通过；本轮无后端或网页发布，未重跑服务端完整流程。[当前交付](./releases/2026-10-20-preview146-direct-plans-entry.md)、[本轮 QA](./qa/2026-10-20-plans146.md)。
+
+此前 **Preview 145** 将计划最终确定改为发起人主动「正式发出」，无需等待全部回应；只通知已接受者并同步日历，之后仍可在开始前接受。75 项原生、13 项领域、32 项发布检查、最终候选/正式各 12 组网页与三条真机完整流程通过；两条真实 APNs 接收回执。[145 交付](./releases/2026-10-20-preview145-organizer-publish.md)、[完整 QA](./qa/2026-10-20-plans145.md)。
 
 此前 **Preview 144** 将三类计划摘要统一为「同行」的活动色带、插画、圆角和轻阴影，保留横向分区与现有流程。16 项单元、8 项真机界面及完整原生邀请到日历流程通过。[当前交付](./releases/2026-10-20-preview144-plan-card-style.md)、[完整 QA](./qa/2026-10-20-plans144.md)。
 
@@ -18,9 +20,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `d9ef1e73`、网页/API `c8d308fa`、APNs `37189452` 已推送；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (145)` | 主动正式发出、只通知已接受者；三条真机流程和 30 个 API 阶段通过，普通启动 PID 3513；[145 交付](./releases/2026-10-20-preview145-organizer-publish.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终两条真机、深色最大字号和普通启动通过，QA runner、账号、计划及私密配置已清理 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `64d6c3fb`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (146)` | 首次进入直接操作；4 项真机界面检查通过，普通启动 PID 3543；[146 交付](./releases/2026-10-20-preview146-direct-plans-entry.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；首次入口、深色最大字号和普通启动通过，QA runner 与临时测试配置已清理；146 无真实账号/计划创建 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR`，Ready | 主动发出、接受者日历/通知、晚接受；最终候选/正式各 12 组、实际 APNs 接收 2 条；[验证](./qa/2026-10-20-plans145.md) |

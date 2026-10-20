@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "64d6c3fba9eeb0ad5a7afac0075239cdb5ecfc26",
+  "build": "146",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "destination": "00008110-001A69110CC1401E",
+  "buildSucceeded": true,
+  "signatureVerified": true,
+  "sourceSha256": {
+    "ios-native/Configuration/Preview.xcconfig": "d956e5c5e320aff92eaa4c758caa7076b73cd1dcef3c07e56943a8ceeea89562",
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "27c3a9fb6fe16dbf945e405f2cf9a4c518e4d383ba39136901256c65d3c07a91",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "471e8611a5e29222fa41663f8df798d5fcd405b76ce110edbf5e856b7be0fc2e",
+    "ios-native/SideSeatUITests/PlanCreationPresentationUITests.swift": "9eca6de3dbb30963c717f764d93952468383505e1e6d6dce6157fca3460762b6"
+  },
+  "appExecutableSha256": "5ccc92a08fd937c438f6a6b8c42dcac1a68f7a191a5ec0b9d9e37cc574ef766f"
+}
