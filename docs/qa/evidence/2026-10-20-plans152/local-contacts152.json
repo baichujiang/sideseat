@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "checks": [],
+  "failure": "POST /api/auth/signup: 422; \n\n422 !== 201\n",
+  "at": "2026-10-20T15:41:13.026Z"
+}

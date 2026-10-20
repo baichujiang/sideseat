@@ -3,6 +3,28 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Invite existing App contacts — Preview 152
+
+Create a plan → Invite App contacts → select accepted contacts → Send plan.
+Each friend receives one native plan card in their existing direct chat and an
+entry in Plans, even before opening or filling it. Search and multi-selection
+use the existing contact list. Already delivered contacts are marked and cannot
+be sent the same card twice. Public web sharing remains a secondary action.
+
+For a collecting plan, the card opens the inline availability timetable. Sending
+or opening a card records neither availability nor acceptance. Unfilled contacts
+can still be explicitly selected when the organizer chooses final time and reviews
+the invitation roster. For a formal invitation, the same card shows the final
+time and opens the highlighted timetable with explicit Accept / Decline / Reply
+later. The organizer may also invite contacts to an already published future plan;
+their Calendar entry still waits for their own acceptance.
+
+Delivery uses existing contact, chat safety, membership, consent-version and
+capacity rules. Availability remains manually submitted, and opening the contact
+picker or sending a card preserves unsaved local selections. Organizer-controlled
+final sending below continues to govern Calendar and final alerts. This adds the
+delivery mechanism that Preview 151's entry-only change did not provide.
+
 ## Native entry and public sharing — owner correction / Preview 151
 
 App participants open a received plan card, chat invitation or notification to

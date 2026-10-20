@@ -1,0 +1,79 @@
+[
+  {
+    "file": "contacts-calendar-result.png",
+    "attachment": "0CAF5955-043B-480A-BA36-F69A370789E4.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "803d09b9b478315eb11991cd9b04c98fceb17735623adac795fc87568b78eee2"
+  },
+  {
+    "file": "contacts-explicit-acceptance.png",
+    "attachment": "9589BBE5-7C10-4871-9451-A60C7D9E6A7E.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "c5f41861b3e29c62865da5895ced43233141c7d00b560c4456fa3856d5594243"
+  },
+  {
+    "file": "contacts-received-chat-card.png",
+    "attachment": "B3D6DC5E-A34F-4B31-B5A6-5CCCD44C3F7B.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "94c9b6f0470ff4770b86f807d97e16a5c028728a63ed205a41992b1b9d7e6fa1"
+  },
+  {
+    "file": "contacts-review-final-invitees.png",
+    "attachment": "4135C515-3F2B-41C8-9670-A604881DD6AF.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "5efcbd70bd290b91a8dedebd622599a67061d4582a53bca2fc74a7fcf40ea3bb"
+  },
+  {
+    "file": "contacts-peer-inline-availability.png",
+    "attachment": "FB526162-F1B9-4FE1-9238-71D77EB74B90.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "a8a73a0582d91234c413d6a8e0fd8875d0dd2c1c95ac6face0b4c48c0d427ced"
+  },
+  {
+    "file": "contacts-received-chat-card-collecting.png",
+    "attachment": "ABCFAC72-5D5F-482E-B1F1-F9EFCAEB4A2F.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "69350b04002f4f2cb09724a014bb847924edd473ead54743aedfe2e29e57cce0"
+  },
+  {
+    "file": "contacts-draft-kept-after-send.png",
+    "attachment": "D63FF6A7-0057-4085-84CE-2D96C1148E5F.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "46d6275adfaa73ee8cc2b235ec7b9d92db59f5feb74738fb086266f869c3faad"
+  },
+  {
+    "file": "contacts-select-and-send.png",
+    "attachment": "214B03C7-F8D4-4A39-89CD-A619A8C06C14.png",
+    "xcresult": "sideseat152-native-final.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "2159487e518a8ad1b69b25f1eacf33126f1fe92789fc8edd1a2d62ab9dde5ab5"
+  },
+  {
+    "file": "contacts-picker-dark-accessibility.png",
+    "attachment": "A8EE7EC6-317B-4FE8-BF4C-0E10C583653A.png",
+    "xcresult": "sideseat152-native-final-ax.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "e98faaf3f5a851e4cc1eb2be353352c957484bbc8c10af899ea948985fe11f3b"
+  },
+  {
+    "file": "contacts-detail-dark-accessibility.png",
+    "attachment": "6A6A8EC7-6675-468B-A443-17B395BCED13.png",
+    "xcresult": "sideseat152-native-final-ax.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "18a2f4190ac2a21dd723b371c22a818b429ed0f22cf7dc66c1fe1e7b71adf74b"
+  },
+  {
+    "file": "contacts-chat-dark-accessibility.png",
+    "attachment": "649ACD11-2873-4A23-BCF9-06C5F882402B.png",
+    "xcresult": "sideseat152-native-final-ax.xcresult",
+    "sourceCommit": "69f3ef8dc8c5f56df163934bdaebe12881286dd1",
+    "sha256": "ea06aa73562cc1782095f3b881d12d99ee3d9096839d121e9698a1d6bf780fac"
+  }
+]

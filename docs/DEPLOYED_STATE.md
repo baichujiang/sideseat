@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 151** 移除首页「打开计划链接」和粘贴弹窗，只保留发起计划；空状态说明发起/收到的计划，已有卡片、聊天邀请和通知保留原生详情入口，网页分享保留。6 项界面检查通过，普通启动 PID 3744。没有新增邀请投递机制，无后端/网页发布，本轮未重跑真实 API 完整流程或实际通知投递。[当前交付](./releases/2026-10-20-preview151-native-plan-entry.md)、[本轮 QA](./qa/2026-10-20-plans151.md)。
+当前 **Preview 152** 新增「邀请 App 联系人」：勾选后向私聊发送原生计划卡片，同时进入对方计划列表；从同一卡片填写空闲或查看最终邀请并明确确认。未填写联系人仍可选入正式邀请，投递不代填或自动接受，草稿和手动提交保留。37 项原生单元、候选/正式各 8 组、最终完整真机流程 165.526 秒/8 个 API 阶段及深色最大字号 33.156 秒通过；普通启动 PID 3802。后端正式部署 `dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL`，所有生产差异按核验基础保留。[当前交付](./releases/2026-10-20-preview152-app-contact-plans.md)、[本轮 QA](./qa/2026-10-20-plans152.md)。
+
+此前 **Preview 151** 移除首页「打开计划链接」和粘贴弹窗，只保留发起计划；空状态说明发起/收到的计划，已有卡片、聊天邀请和通知保留原生详情入口，网页分享保留。6 项界面检查通过，普通启动 PID 3744。该阶段没有新增邀请投递机制，无后端/网页发布，未重跑真实 API 完整流程或实际通知投递。[151 交付](./releases/2026-10-20-preview151-native-plan-entry.md)、[151 QA](./qa/2026-10-20-plans151.md)。
 
 此前 **Preview 150** 使用与其他主页面相同的固定品牌抬头，历史移到右上角；两个分栏采用同行样式，底色/边距同步，内容单独滚动。8 项界面及长列表真实滚动补验通过，标题/分栏与同行位置对齐，普通启动 PID 3689。仅改原生布局，无后端或网页发布，本轮未重跑真实 API 完整流程。[当前交付](./releases/2026-10-20-preview150-plans-heading.md)、[本轮 QA](./qa/2026-10-20-plans150.md)。
 
@@ -30,12 +32,12 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `806cba04`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (151)` | 首页单一创建入口，无手动粘贴链接；6 项界面通过，普通启动 PID 3744；[151 交付](./releases/2026-10-20-preview151-native-plan-entry.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；151 单一创建/慢加载/消息入口/已有邀请确认/固定抬头/历史往返/深色最大字号及普通启动通过，runner 移除；148 完整流程/历史往返作为此前证据，临时账号/计划已清理 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `69f3ef8d`、本次 API `a0dc2fba`，保留生产基础内的 `c8d308fa` 网页及 `37189452` APNs；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (152)` | 联系人投递、聊天卡片、完整邀请到日历及深色最大字号通过；普通启动 PID 3802；[152 交付](./releases/2026-10-20-preview152-app-contact-plans.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；152 两轮双账号完整流程及最终深色最大字号通过，8 阶段 API 各核对；4 个一次性账号、2 个计划/链接回收，runner 移除；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR`，Ready | 主动发出、接受者日历/通知、晚接受；最终候选/正式各 12 组、实际 APNs 接收 2 条；[验证](./qa/2026-10-20-plans145.md) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_BgDTcfFfXnT2UFTbhsgHjrtf85pL`，Ready | 1,369 个旧生产源文件核验，仅叠加本次 6 文件，候选 1,372 个上传源文件核对；同一构建提升正式，三个别名复核。最终候选/正式各 8 组及双账号真机通过；本次未声称新 APNs 实际锁屏到达，[152 验证](./qa/2026-10-20-plans152.md)；145 的实际 APNs 2 条为此前证据 |
 | 生产源码 | 保留原生产差异；功能 5 文件与 APNs 1 文件最小覆盖，最终 1,369 项上传 SHA-1 匹配 | 原样提升同一已测 Production 候选；无 Schema/迁移/依赖变更；[功能来源](./qa/evidence/2026-10-20-plans145/backend-source-manifest.json)、[最终来源](./qa/evidence/2026-10-20-plans145/apns-source-manifest.json) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。

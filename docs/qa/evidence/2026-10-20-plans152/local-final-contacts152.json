@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "checks": [
+    "contact delivery creates one readable card and a native list entry, with zero submitted responses or attendance",
+    "idempotent replay and fresh-key retry do not resend cards; owner and version boundaries hold",
+    "unanswered contact can be explicitly selected; excluded delivery member cannot accept; publish and late acceptance preserve unique calendars",
+    "a published future plan can invite another contact without accepting for them",
+    "already fixed plan opens directly to explicit RSVP; public guest timetable and confirmation still work beside App contacts",
+    "capacity and unavailable contacts fail atomically, without partial membership or card delivery",
+    "normal unreplied-message gate applies to plan cards and rolls back the complete batch",
+    "blocked contacts cannot receive plan membership or cards"
+  ],
+  "failure": null,
+  "at": "2026-10-20T15:44:59.453Z"
+}

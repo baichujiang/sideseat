@@ -1,0 +1,23 @@
+{
+  "device": "00008110-001A69110CC1401E",
+  "processIdentifier": 3802,
+  "arguments": [],
+  "noQAEnvironment": true,
+  "processVisible": true,
+  "apps": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "bundleVersion": "97",
+      "version": "1.0.0",
+      "name": "SideSeat"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "bundleVersion": "152",
+      "version": "1.0.0",
+      "name": "SideSeat Preview"
+    }
+  ],
+  "runnerRemoved": true,
+  "privateFixtureAndXctestrunRemoved": true
+}

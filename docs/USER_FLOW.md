@@ -8,6 +8,21 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+## App contact plan delivery — Preview 152
+
+Organizer creates plan → Invite App contacts → search/select contacts → Send.
+Recipient sees a plan card in direct chat and in Plans without copying a link.
+While collecting, tap card → fill availability directly → manually submit.
+Organizer selects final time → reviews respondents and any unfilled App contacts
+to invite → sends formal invitation. Recipient taps the same card → sees the
+highlighted final time → explicitly accepts, declines or leaves it pending.
+Organizer sends final plan whenever ready; only accepted people enter Calendar.
+Later invitees can explicitly accept before the published activity starts.
+
+Selecting contacts never creates a response or accepts on their behalf. Existing
+delivered contacts are disabled in the picker, and retries cannot duplicate cards.
+Unsaved availability survives sending. Guests retain the existing web share flow.
+
 ## Native plan entry and guest sharing — Preview 151
 
 App participants enter the native detail through a received plan card, chat

@@ -1,0 +1,15 @@
+{
+  "typescript": "passed",
+  "focusedESLint": "passed",
+  "domainTests": 13,
+  "openAPITests": 13,
+  "openAPIImplementedOperations": 196,
+  "nativeNavigationAndPlanPresentationTests": 37,
+  "candidateIntegrationGroups": 8,
+  "productionIntegrationGroups": 8,
+  "localFinalIntegrationGroups": 8,
+  "physicalDevice": "00008110-001A69110CC1401E",
+  "ordinaryClientRetainedRequirement": "app.sideseat.mobile / 97",
+  "schemaMigration": false,
+  "dependencyChange": false
+}
