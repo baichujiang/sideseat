@@ -166,10 +166,15 @@ import XCTest
         reveal(suggestionOption, towardTop: true); XCTAssertTrue(suggestionOption.isSelected)
         XCTAssertEqual(create.label, "发起计划"); XCTAssertTrue(create.isHittable)
         capture("fixed-ideas-dark-large")
+        let fixedTime = app.datePickers["unified-plan-fixed-start"]
+        reveal(fixedTime)
+        XCTAssertGreaterThanOrEqual(fixedTime.frame.minX, 0)
+        XCTAssertLessThanOrEqual(fixedTime.frame.maxX, app.frame.maxX)
+        capture("fixed-time-picker-dark-large")
         let collect = app.buttons["plan-mode-collect"]
         reveal(collect); collect.tap()
         let options = app.buttons["plan-date-options"]
-        reveal(options); options.tap()
+        reveal(options, towardTop: true); options.tap()
         let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
         reveal(dates); capture("inline-dates-dark-large")
         XCTAssertTrue(create.isHittable)

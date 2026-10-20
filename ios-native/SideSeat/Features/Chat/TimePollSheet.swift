@@ -147,8 +147,13 @@ struct TimePollCreateView: View {
             }
             Section {
                 if planningMode == "FIXED" {
-                    DatePicker("Starts", selection: $fixedStart, in: Date()...)
-                        .accessibilityIdentifier("unified-plan-fixed-start")
+                    PlanAdaptiveRow {
+                        Text("Starts")
+                    } trailing: {
+                        DatePicker("Starts", selection: $fixedStart, in: Date()...).labelsHidden()
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .accessibilityIdentifier("unified-plan-fixed-start")
+                    }
                     Picker("Activity duration", selection: $durationMinutes) {
                         ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) {
                             Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0)
