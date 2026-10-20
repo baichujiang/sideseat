@@ -198,6 +198,7 @@ struct PlansRootView: View {
             .padding(4)
             .background(SideSeatTheme.bgGrouped,
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + 4))
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("plans-accessible-tabs")
         } else {
             Picker(AppLocalization.string("Plans"), selection: $selectedSection) {
