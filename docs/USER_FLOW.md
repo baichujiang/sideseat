@@ -8,6 +8,14 @@
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
+## Native plan entry and guest sharing — Preview 151
+
+App participants enter the native detail through a received plan card, chat
+invitation or notification. Plans home keeps Start a plan as its sole creation
+action and removes the manual link/paste entry. Public sharing serves friends
+without the App through the web flow. Existing deep links, native destinations,
+membership and invitation/Calendar consent are preserved.
+
 
 ## Organizer-controlled final sending — owner correction / Preview 145
 

@@ -3,6 +3,17 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native entry and public sharing — owner correction / Preview 151
+
+App participants open a received plan card, chat invitation or notification to
+reach its native detail. Plans home offers Start a plan; it has no separate
+Open a plan link button, paste dialog or fallback menu item. Its empty state
+describes created plans and received invitations. Public share links let friends
+without the App fill availability and respond on the web. Existing external
+deep-link routing remains compatible; native entry does not ask people to copy
+or paste a URL. This presentation change does not add a new recipient-discovery
+or invitation-delivery mechanism, or alter existing membership/consent rules.
+
 ## Organizer-controlled final sending — owner correction / Preview 145
 
 Choose final time → review invitees → collect Accept / Decline / Reply later →
@@ -100,7 +111,7 @@ PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.
 
-The native first-level Plans page owns creation, shared-link entry, confirmation
+The native first-level Plans page owns creation, plan-card entry, confirmation
 progress and availability collections. An existing card, successful creation,
 message link or external deep link opens one canonical detail above that root.
 Back returns directly to Plans, including after Done selecting. Creation alone

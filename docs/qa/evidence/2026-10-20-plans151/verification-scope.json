@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "806cba04f4b928273d0e62d0a1fab480e1717d5b",
+  "presentationChecksPassed": 6,
+  "fixtures": "Offline UI; 127.0.0.1:9 intentionally unreachable",
+  "realAPIFullFlowRerun": false,
+  "shareWebFlowRerun": false,
+  "notificationDeliveryRerun": false,
+  "recipientDiscoveryOrDeliveryChanged": false,
+  "backendPublished": false,
+  "webPublished": false,
+  "backendDeploymentFromExistingRecord": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR",
+  "backendReadinessNotRecheckedThisStage": true
+}

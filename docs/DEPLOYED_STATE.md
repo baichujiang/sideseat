@@ -6,7 +6,9 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 150** 使用与其他主页面相同的固定品牌抬头，历史移到右上角；两个分栏采用同行样式，底色/边距同步，内容单独滚动。8 项界面及长列表真实滚动补验通过，标题/分栏与同行位置对齐，普通启动 PID 3689。仅改原生布局，无后端或网页发布，本轮未重跑真实 API 完整流程。[当前交付](./releases/2026-10-20-preview150-plans-heading.md)、[本轮 QA](./qa/2026-10-20-plans150.md)。
+当前 **Preview 151** 移除首页「打开计划链接」和粘贴弹窗，只保留发起计划；空状态说明发起/收到的计划，已有卡片、聊天邀请和通知保留原生详情入口，网页分享保留。6 项界面检查通过，普通启动 PID 3744。没有新增邀请投递机制，无后端/网页发布，本轮未重跑真实 API 完整流程或实际通知投递。[当前交付](./releases/2026-10-20-preview151-native-plan-entry.md)、[本轮 QA](./qa/2026-10-20-plans151.md)。
+
+此前 **Preview 150** 使用与其他主页面相同的固定品牌抬头，历史移到右上角；两个分栏采用同行样式，底色/边距同步，内容单独滚动。8 项界面及长列表真实滚动补验通过，标题/分栏与同行位置对齐，普通启动 PID 3689。仅改原生布局，无后端或网页发布，本轮未重跑真实 API 完整流程。[当前交付](./releases/2026-10-20-preview150-plans-heading.md)、[本轮 QA](./qa/2026-10-20-plans150.md)。
 
 此前 **Preview 149** 的计划卡片彩色标题区只保留活动名称与原插画，移除状态/邀请说明；时间、参与人、进度和操作保留在下方。5 项真机界面检查通过，三类卡片、长标题、横向等待及深色最大字号截图复核通过；普通启动 PID 3666。本轮仅改呈现，未重跑真实 API 完整流程，无网页或后端发布。[当前交付](./releases/2026-10-20-preview149-plan-title-only.md)、[本轮 QA](./qa/2026-10-20-plans149.md)。
 
@@ -28,9 +30,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `3ace153a`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (150)` | 固定品牌抬头和同行样式分栏，历史在右上角；8 项界面及长列表滚动补验通过，普通启动 PID 3689；[150 交付](./releases/2026-10-20-preview150-plans-heading.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；150 固定抬头/同行对齐/历史往返/长列表实际滚动/深色最大字号及普通启动通过，runner 移除；148 完整流程/历史往返作为此前证据，临时账号/计划已清理 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `806cba04`、网页/API `c8d308fa`、APNs `37189452`；[当前合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (151)` | 首页单一创建入口，无手动粘贴链接；6 项界面通过，普通启动 PID 3744；[151 交付](./releases/2026-10-20-preview151-native-plan-entry.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；151 单一创建/慢加载/消息入口/已有邀请确认/固定抬头/历史往返/深色最大字号及普通启动通过，runner 移除；148 完整流程/历史往返作为此前证据，临时账号/计划已清理 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR`，Ready | 主动发出、接受者日历/通知、晚接受；最终候选/正式各 12 组、实际 APNs 接收 2 条；[验证](./qa/2026-10-20-plans145.md) |

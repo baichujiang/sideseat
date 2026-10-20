@@ -1,0 +1,18 @@
+{
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "preview": {
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "version": "1.0.0",
+    "build": "151",
+    "sourceCommit": "806cba04f4b928273d0e62d0a1fab480e1717d5b"
+  },
+  "ordinaryBuild97Retained": true,
+  "qaRunnerRemoved": true,
+  "normalLaunchPID": 3744,
+  "launchArguments": [],
+  "qaEnvironmentVariables": false,
+  "processObserved": true,
+  "verifiedAt": "2026-10-20T15:20:44.694741+00:00"
+}

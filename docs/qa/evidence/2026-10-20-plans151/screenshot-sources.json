@@ -1,0 +1,20 @@
+[
+  {
+    "evidence": "empty-dark-max.png",
+    "attachment": "plan-creation-132-home-first-use-dark-large_0_E945D548-3FE7-4249-8404-14F86AC842E0.png",
+    "sourceCommit": "806cba04f4b928273d0e62d0a1fab480e1717d5b",
+    "build": "151"
+  },
+  {
+    "evidence": "empty-home.png",
+    "attachment": "plan-creation-132-home-first-use_0_75059DFB-E3A9-4090-B89F-0F17283B093A.png",
+    "sourceCommit": "806cba04f4b928273d0e62d0a1fab480e1717d5b",
+    "build": "151"
+  },
+  {
+    "evidence": "invitation-entry.png",
+    "attachment": "shared-plan-117-list-awaiting-confirmation_0_64E7F20C-1165-42D5-97EC-F9D3EC4EF632.png",
+    "sourceCommit": "806cba04f4b928273d0e62d0a1fab480e1717d5b",
+    "build": "151"
+  }
+]
