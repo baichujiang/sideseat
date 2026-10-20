@@ -9,14 +9,29 @@
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
 
-## Availability autosave — Preview 136
+## Manual availability submission — Preview 141
 
-Tap/drag → immediate local checkmark and count → 700 ms without another committed
-edit → save the newest complete selection → server acknowledgement → Saved.
-Further edits remain available while saving and follow serially. Leaving the detail
-or backgrounding requests an early flush. A failed save keeps the newest choices,
-shows Retry, and cannot be mistaken for saved. Final-time/invitation actions wait
-for acknowledgement. No additional save or completion step is introduced.
+Tap/drag → immediate local checkmark and device-local draft → Submit my availability
+(or Save changes for an existing response) → server acknowledgement → Submitted.
+There is no intermediate completion page. The footer shows selected days/hours and
+Not submitted, Submitting, Submitted or a submission failure. Empty availability
+can be explicitly submitted. A failed request keeps the draft for manual retry.
+Edits made during a request stay private until their own explicit submission.
+A read-error Retry only reloads; it never publishes availability (Preview 142).
+
+Heatmap numbers, response counts and people lists use submitted records only;
+personal draft checkmarks remain visible separately. Peer responses and final
+invitations continue refreshing while a draft exists. An invitation shows its
+highlighted final time and enables explicit confirmation without publishing the
+draft. Organizers can choose final time and send with zero replies, only their own
+response or an unsubmitted draft. Activity/name actions do not submit availability.
+
+Back, backgrounding and browser reload preserve local drafts without a server
+write. Recovery is scoped by account + plan in App and guest identity + plan on
+web, clearly marked Draft restored · not submitted. Only the acknowledged current
+snapshot is cleared; newer edits and failures remain. Existing saved responses,
+invitation versions, roster/capacity rules and Calendar consent stay intact.
+This supersedes Preview 136's autosave and mutation-blocking descriptions.
 
 ## Formal invitation before availability — owner correction / Preview 135
 

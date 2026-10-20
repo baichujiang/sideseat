@@ -1,0 +1,13 @@
+{
+  "baseDeployment": "dpl_4ky937DveSrBpgzRVY6baFwfYBZ2",
+  "sourceCommit": "82967a87536ef1cf1c04a355ecd85b041f888763",
+  "sourceFiles": 1364,
+  "preservedFiles": 1361,
+  "overlay": {
+    "components/time-polls/use-shared-time-poll.ts": "502d2f611509f44cf39b002e4d741cfecb6d7d66",
+    "components/time-polls/shared-time-poll.tsx": "4e562fa692adf62e78f078d3dde8b445e0607d42",
+    "components/time-polls/availability-editor.tsx": "4a119fc7cf7fa5af40eaba247267a87d3b5d03f3"
+  },
+  "databaseMigration": "none",
+  "buildMigrationPolicy": "SKIP_DATABASE_MIGRATIONS=1"
+}

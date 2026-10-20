@@ -1,0 +1,13 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "142",
+  "nativeSourceCommit": "919b451a3e197db20c3b91937fd341932e9956e5",
+  "webSourceCommit": "82967a87536ef1cf1c04a355ecd85b041f888763",
+  "binarySHA256": "e4700efa8459fcea5a5555b4edfe02b6f0ac643a2aa3ae1df109a77482d0b12f",
+  "codesignStrict": "passed",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "nativeTests": 23,
+  "domainTests": 13,
+  "serverSchemaChange": false
+}

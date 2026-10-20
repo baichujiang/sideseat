@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-20T01:13:20.565813+00:00",
+  "deploymentId": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "queryWindow": "last 1 hour; available retained request logs",
+  "limitPerLevel": 100,
+  "levels": [
+    {
+      "level": "error",
+      "records": 0
+    },
+    {
+      "level": "fatal",
+      "records": 0
+    }
+  ]
+}

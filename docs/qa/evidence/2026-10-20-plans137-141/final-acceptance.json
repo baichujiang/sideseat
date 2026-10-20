@@ -1,0 +1,33 @@
+{
+  "verdict": "passed",
+  "previewBuild": 142,
+  "nativeSourceCommit": "919b451a3e197db20c3b91937fd341932e9956e5",
+  "webSourceCommit": "82967a87536ef1cf1c04a355ecd85b041f888763",
+  "deploymentId": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "nativeTests": 23,
+  "domainTests": 13,
+  "candidateBrowserChecks": 56,
+  "productionBrowserChecks": 56,
+  "finalPhysicalUserFlows": [
+    {
+      "role": "App and Safari guest",
+      "seconds": 164.024,
+      "apiBoundaries": 8
+    },
+    {
+      "role": "App organizer and participant",
+      "seconds": 306.047,
+      "apiBoundaries": 12
+    }
+  ],
+  "sequentialStages": [
+    137,
+    138,
+    139,
+    140,
+    141
+  ],
+  "finalReadRetryFixBuild": 142,
+  "normalLaunchPID": 3031,
+  "checkedAt": "2026-10-20T01:23:27.591Z"
+}

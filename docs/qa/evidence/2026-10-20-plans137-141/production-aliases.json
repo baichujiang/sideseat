@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-20T01:09:13.919821+00:00",
+  "deploymentId": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "aliases": [
+    "api.sideseat.de",
+    "www.sideseat.de",
+    "sideseat.de"
+  ],
+  "productionCandidatePromotedWithoutRebuild": true,
+  "baseDeployment": "dpl_4ky937DveSrBpgzRVY6baFwfYBZ2"
+}

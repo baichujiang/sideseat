@@ -104,6 +104,8 @@ try {
           await page.getByRole('button', { name: '切换填写人', exact: true }).click();
           await page.getByLabel('你的名字', { exact: true }).fill(name);
           await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
+          await expect(page.getByLabel('你的名字', { exact: true })).not.toBeVisible();
+          await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
         };
         await switchTo('Guest Other'); await expect(cell(0)).toHaveAttribute('aria-pressed', 'false');
         await cell(2).click(); await switchTo('Guest Lin'); await restored();

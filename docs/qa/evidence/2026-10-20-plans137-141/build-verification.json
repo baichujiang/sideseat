@@ -1,0 +1,25 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "141",
+  "binarySHA256": "5a5491e26ce8a1d9473fe40da1235f7b21bb47493de858f3b50d052f2a0c8398",
+  "codesignStrict": "passed",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "installed": [
+    {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "bundleVersion": "97",
+      "version": "1.0.0"
+    },
+    {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "bundleVersion": "141",
+      "version": "1.0.0"
+    }
+  ],
+  "nativeTests": 22,
+  "domainTests": 13,
+  "typeScript": "passed",
+  "targetedESLint": "passed",
+  "buildSkippedDatabaseMigrations": true
+}

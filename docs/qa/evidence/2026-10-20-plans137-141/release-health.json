@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-20T01:08:47.618Z",
+  "deploymentId": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "checks": [
+    {
+      "url": "https://api.sideseat.de/api/v1/client-config",
+      "finalURL": "https://api.sideseat.de/api/v1/client-config",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/privacy",
+      "finalURL": "https://www.sideseat.de/privacy",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/support",
+      "finalURL": "https://www.sideseat.de/support",
+      "status": 200
+    },
+    {
+      "url": "https://api.sideseat.de/.well-known/apple-app-site-association",
+      "finalURL": "https://api.sideseat.de/.well-known/apple-app-site-association",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de",
+      "finalURL": "https://www.sideseat.de/",
+      "status": 200
+    },
+    {
+      "url": "https://sideseat.de",
+      "finalURL": "https://www.sideseat.de/",
+      "status": 200
+    },
+    {
+      "url": "https://www.sideseat.de/api/v1/client-config",
+      "finalURL": "https://www.sideseat.de/api/v1/client-config",
+      "status": 200
+    }
+  ],
+  "passed": 7
+}

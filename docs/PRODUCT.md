@@ -35,15 +35,18 @@ Plans owns manual coordination from availability collection through individual
 confirmation and Calendar projection. A creator can collect availability first or
 choose a concrete time directly. Both routes use one shared plan and the same
 invitation, confirmation and cancellation lifecycle. Native SwiftUI and Sideseat's
-API/database retain 30-minute paint/erase over existing quarter-hour storage, autosave and attendance
+API/database retain 30-minute paint/erase over existing quarter-hour storage, explicit submission and attendance
 heatmap mechanism; provider pages, advertisements and storage are excluded.
 
-**2026-10-20 availability autosave amendment:** App and shared-web selections
-highlight immediately. A burst of edits saves its newest complete selection after
-700 ms of quiet, with one write in flight per viewer and acknowledgement-based
-save feedback. Leaving/backgrounding requests an early flush; failures retain the
-current choices for retry. This introduces no save button or extra planning step.
-Explicit attendance confirmation and existing quarter-hour records remain intact.
+**2026-10-20 owner-approved manual submission amendment:** App and share-web
+selection changes are private local drafts, with one explicit Submit my availability
+or Save changes button and acknowledgement-based feedback. Drafts recover per
+account/guest and plan; leaving/backgrounding never submits them. Submitted data
+alone drives attendance counts, while peer and invitation refresh continues.
+Invitation and activity/name actions do not publish or discard availability drafts.
+A dirty draft does not prevent choosing final time, sending or confirming an
+invitation. Existing records, quarter-hour storage and Calendar consent remain
+intact. This supersedes the earlier Preview 136 autosave amendment.
 
 **2026-10-16 timetable amendment:** Availability is input, never acceptance.
 Collection shows the complete availability heatmap and response progress, without

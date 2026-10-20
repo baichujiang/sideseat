@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-20T01:22:44.534975+00:00",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDeviceID": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": "142",
+  "ordinarySideSeatBuild": "97",
+  "normalLaunchPID": 3031,
+  "processObserved": true,
+  "launchArguments": [],
+  "qaEnvironmentPresent": false,
+  "qaRunnerInstalled": false
+}

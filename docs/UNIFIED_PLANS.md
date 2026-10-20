@@ -98,23 +98,36 @@ Only Send invitations mutates the existing invitation API/version. Cancelling a
 draft changes nothing; rescheduling uses the same selection with the old range
 prefilled. Existing identity, consent and Calendar rules remain unchanged.
 
-## Coalesced availability autosave — Preview 136
+## Explicit submission and local recovery — Preview 137–141
 
-App and public web debounce committed selections for 700 ms. Local checkmarks and
-counts update immediately; pending and in-flight selections both remain unsaved
-until the final snapshot is acknowledged. A new edit during a request has its own
-quiet period and cannot start a concurrent write. Leaving/backgrounding and Retry
-flush the pending snapshot. Failures preserve the latest draft and cancel automatic
-continuation; a new edit or explicit retry can save again. Native drafts capture
-account generation before debounce. Refresh cannot overwrite pending choices;
-mutation controls retain the save acknowledgement boundary.
+Selection gestures only update local drafts. Submit my availability / Save changes
+sends one complete snapshot; failures retain it for an explicit retry. Later edits
+are neither published by that request nor cleared by its acknowledgement. Empty
+responses are valid. Submitted counts, heatmaps and rosters stay on the server
+baseline; draft checkmarks and selected-day/hour summaries remain separate.
 
-The public response endpoint returns the already computed authenticated save result
-with its existing viewerId. Identical saved slot/name snapshots skip response,
-guest and updatedAt writes inside the existing validation and lock boundary. API
-shape, records, invitations and Calendar rules are unchanged. Existing read polling
-is unchanged. Browser unload delivery remains best effort, with the existing
-unsaved-changes warning; no offline or force-quit delivery guarantee is added.
+Peer responses and plan phases refresh during editing without replacing local
+selections or nickname drafts. Older reads cannot roll back submitted or mutated
+state. Final invitations display their actual highlighted time and can be accepted
+without publishing a draft. Dirty availability does not block final-time selection,
+roster review, invitation sending or other plan actions. Only requests actually in
+flight block conflicting/duplicate mutations. The existing invitation/capacity,
+version, expiry and explicit Calendar confirmation rules remain unchanged.
+
+Native drafts are device-local and scoped by account ID + plan token. Browser
+drafts use versioned localStorage keyed by plan token + viewer identity, preserving
+separate drafts when switching guests. Recovery is explicitly unsubmitted. Leaving
+or backgrounding sends no availability request; an acknowledgement clears only its
+matching draft, retaining newer edits, including reverting during a slow request.
+If browser storage fails, the page reports it and keeps the unsaved-leave warning.
+There is no cross-device draft sync or automatic availability retry.
+
+The existing API and quarter-hour records are unchanged. Public response returns
+the already computed authenticated result; identical submitted snapshots still
+skip redundant response/guest/updatedAt writes inside existing validation/locks.
+This supersedes Preview 136's 700 ms timer, background flush and draft-blocked
+mutation rules, and earlier autosave descriptions below. Dated release evidence
+remains historical.
 
 ## Native participant timetable — Preview 121
 

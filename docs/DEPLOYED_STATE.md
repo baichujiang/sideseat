@@ -6,19 +6,21 @@
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前分阶段更新：默认手机已安装 **Preview 141**，五项已依次完成阶段验收，来源 `82967a87`。生产分享网页仍为下表的 136，正在进行最终完整流程与网页发布验收。[141 阶段范围与证据](./releases/2026-10-20-preview141-draft-recovery.md)。
+五项已按序实现、测试和交付 Preview 137–141；收尾补正读取失败的重试入口，最终 **Preview 142** 与正式分享网页均已完整验收。[当前交付](./releases/2026-10-20-preview142-manual-availability.md)、[完整 QA](./qa/2026-10-20-plans137-142.md)。
 
 ## 版本与核验依据
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 136 保存相关原生/网页/API 来源 `ab5ba6f7` 已推送；[邀请合同](./UNIFIED_PLANS.md) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (136)` | 连续选时合并保存，真实确认后显示已保存；300.021 秒 App 双账号/12 API、168.116 秒 App/Safari/8 API 通过；普通启动 PID 2890；[136 交付](./releases/2026-10-20-preview136-coalesced-autosave.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终包两条完整流程、最大字号/深色与普通启动通过，QA runner 与临时账号/计划已清理 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 最终原生 `919b451a`、分享网页 `82967a87` 已推送；五阶段 137–141 逐项验收；[邀请合同](./UNIFIED_PLANS.md) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (142)` | 手动提交、仅统计正式答复、草稿刷新/恢复和邀请解耦；23 项原生、164.024 秒 App/Safari 与 306.047 秒 App 双账号、20 个 API 阶段通过；普通启动 PID 3031；[142 交付](./releases/2026-10-20-preview142-manual-availability.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；最终两条真机、深色最大字号和普通启动通过，QA runner、账号、计划及私密配置已清理 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_4ky937DveSrBpgzRVY6baFwfYBZ2`，Ready | 700 毫秒合并保存，去除重复读取、重复写入；候选/正式各 32 项浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-20-plans136/release-health.json) |
-| 生产源码 | 1,363 项当前线上源码逐项验证重建；保留 1,360 项，仅覆盖网页 hook、public response route 和保存服务，并添加来源记录；1,364 项上传 SHA-1 全匹配 | 来源 `ab5ba6f7`；同一 Production 候选测试后原样提升，无 Schema/迁移变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-20-plans136/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-20-plans136/upload-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ`，Ready | 手动提交及本地草稿；候选/正式各 56 项浏览器检查、7 项健康 HTTP 200；[发布核验](./qa/evidence/2026-10-20-plans137-141/release-health.json) |
+| 生产源码 | 1,364 项原生产源码逐项验证，保留 1,361 项，只覆盖 3 个分享网页文件并加来源；1,365 项上传 SHA-1 全匹配 | 网页来源 `82967a87`；同一 Production 候选测试后原样提升，无 Schema/迁移/依赖变化，构建明确跳过迁移；[来源](./qa/evidence/2026-10-20-plans137-141/backend-source-manifest.json)、[上传核对](./qa/evidence/2026-10-20-plans137-141/upload-verification.json) |
+
+142 当前交互：时间格只改本机草稿，点击「提交我的空闲 / 保存修改」才同步；底栏显示状态和时长，数字只含已提交答复。草稿不会阻止朋友/邀请刷新、最终选时和发送，离开后按账号/填写人和计划恢复，旧确认不清除新编辑。读取重试只重读。五项逐项验收后，最终 23 项原生、13 项领域、候选/正式各 56 项网页和两条完整真机、20 API 阶段通过。普通启动 PID 3031，普通版 97 保留，未上传 TestFlight/App Store。下方为保留的历史版本证据。
 
 136 将连续点选改成即时显示、700 毫秒安静期后合并保存，同一填写者串行提交并保留最新草稿；离开/后台提前提交，失败保留并可重试。网页去除保存后的重复全量读取，同一快照不再重复更新答复/昵称/计划。实测旧网页连续 10 次点选产生 2/3 次请求，新候选与正式两浏览器均为 1 次；18 项原生、13 项领域、候选/正式各 32 项检查通过。App 双账号 300.021 秒/12 API，最终正式环境 App/Safari 168.116 秒/8 API；完整覆盖创建、分享、填写、邀请、明确确认和唯一日历。11 个临时账号、29 个计划/链接清理，QA runner 移除，136 普通启动 PID 2890；[完整 QA 与范围](./qa/2026-10-20-plans136.md)。
 
