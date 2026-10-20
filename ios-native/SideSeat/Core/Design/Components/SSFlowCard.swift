@@ -440,7 +440,7 @@ struct SSIntentionActionRow<Contact: View>: View {
         layout {
             Button(action: onBookmark) {
                 SSIntentionActionLabel(
-                    title: AppLocalization.string(isBookmarked ? "Interest shown" : "Interested"),
+                    title: AppLocalization.string(isBookmarked ? "Saved (intention)" : "Save (intention)"),
                     icon: isBookmarked ? "heart.fill" : "heart"
                 )
                 .foregroundStyle(SideSeatTheme.utilityAction)

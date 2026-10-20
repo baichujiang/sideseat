@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "bookmarked",
+      "privateBookmarks": 1,
+      "requests": 0,
+      "connections": 0,
+      "plans": 0,
+      "calendarEntries": 0,
+      "at": "2026-10-20T19:08:54.512Z"
+    },
+    {
+      "phase": "greeted",
+      "privateBookmarks": 1,
+      "requests": 1,
+      "connections": 0,
+      "plans": 0,
+      "calendarEntries": 0,
+      "at": "2026-10-20T19:09:09.267Z"
+    },
+    {
+      "phase": "replied",
+      "privateBookmarks": 1,
+      "requests": 1,
+      "connections": 1,
+      "plans": 0,
+      "calendarEntries": 0,
+      "at": "2026-10-20T19:09:39.484Z"
+    }
+  ]
+}

@@ -537,6 +537,11 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(bookmark.exists, "Saving keeps the recommendation in place until refresh")
         let savedBookmark = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == %@", "Remove bookmark"), object: bookmark)
         XCTAssertEqual(XCTWaiter.wait(for: [savedBookmark], timeout: 8), .completed)
+        XCTAssertTrue(bookmark.staticTexts["Saved"].exists)
+        if ProcessInfo.processInfo.environment["SIDESEAT_TOGETHER_QA"] == "1" {
+            print("TOGETHER_QA_PHASE bookmarked")
+            RunLoop.current.run(until: Date().addingTimeInterval(4))
+        }
         loopSelectTogetherSection("bookmarks", in: b)
         XCTAssertTrue(bookmark.waitForExistence(timeout: 10))
         loopCapture(b, "03-saved")
@@ -549,6 +554,10 @@ final class SocialLiveUITests: XCTestCase {
         b.buttons["opportunity-message-submit"].tap()
         XCTAssertTrue(b.staticTexts["intention-chat-first-message"].waitForExistence(timeout: 15))
         XCTAssertFalse(b.buttons["chat-composer-send"].exists)
+        if ProcessInfo.processInfo.environment["SIDESEAT_TOGETHER_QA"] == "1" {
+            print("TOGETHER_QA_PHASE greeted")
+            RunLoop.current.run(until: Date().addingTimeInterval(4))
+        }
         loopCapture(b, "04-first-message")
         b.terminate()
 
@@ -565,6 +574,10 @@ final class SocialLiveUITests: XCTestCase {
         XCTAssertTrue(receiver.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 15))
         XCTAssertTrue(receiver.staticTexts["[loop-qa] Hello, may I join?"].waitForExistence(timeout: 12))
         XCTAssertTrue(receiver.staticTexts["[loop-qa] Yes, let's meet!"].waitForExistence(timeout: 12))
+        if ProcessInfo.processInfo.environment["SIDESEAT_TOGETHER_QA"] == "1" {
+            print("TOGETHER_QA_PHASE replied")
+            RunLoop.current.run(until: Date().addingTimeInterval(4))
+        }
         loopCapture(receiver, "05-replied-chat")
         receiver.buttons["conversation-context-bar"].tap()
         let makePlan = receiver.buttons["conversation-context-make-plan"]
@@ -586,7 +599,7 @@ final class SocialLiveUITests: XCTestCase {
 
         let accepter = loopLogin("loopqa_b")
         openDirectChat(in: accepter, peerName: "Loop Alex")
-        let accept = accepter.buttons["Accept"].firstMatch
+        let accept = accepter.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "plan-card-accept-")).firstMatch
         XCTAssertTrue(accept.waitForExistence(timeout: 12))
         loopReveal(accept, in: accepter)
         accept.tap()

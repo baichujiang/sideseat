@@ -314,7 +314,7 @@ private struct TogetherHomeView: View {
         }
         .overlay(alignment: .bottom) {
             if savedFeedbackID != nil {
-                Label("Added to saved intentions", systemImage: "heart.fill")
+                Label("Saved privately. Only you can see this.", systemImage: "heart.fill")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.utilityAction)
                     .padding(SideSeatTheme.spaceMD)
@@ -1005,7 +1005,7 @@ private struct TogetherHomeView: View {
     private func bookmarkDidSave(_ opportunity: NativeMutualOpportunity) {
         savedWhileBrowsingIDs.insert(opportunity.id)
         savedFeedbackID = UUID()
-        UIAccessibility.post(notification: .announcement, argument: AppLocalization.string("Added to saved intentions"))
+        UIAccessibility.post(notification: .announcement, argument: AppLocalization.string("Saved privately. Only you can see this."))
     }
 
     private func loadContent() async {

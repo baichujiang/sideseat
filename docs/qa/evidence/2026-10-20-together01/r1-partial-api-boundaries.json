@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "bookmarked",
+      "privateBookmarks": 1,
+      "requests": 0,
+      "connections": 0,
+      "plans": 0,
+      "calendarEntries": 0,
+      "at": "2026-10-20T19:06:00.981Z"
+    }
+  ]
+}
