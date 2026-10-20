@@ -1160,10 +1160,14 @@ struct MutualOpportunityCard: View {
                             profileTitle: AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"),
                             profileIdentifier: "mutual-opportunity-profile-\(opportunity.id)", onProfile: onViewProfile)
                     } else if let onViewProfile {
-                        Button(AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"), action: onViewProfile)
-                            .font(.subheadline.weight(.medium)).frame(minHeight: 44)
-                            .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                            .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
+                        Button(action: onViewProfile) {
+                            Text(AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"))
+                                .font(.subheadline.weight(.medium))
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                        .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
                     }
                     if opportunity.isExpired == true && opportunity.hasConversation {
                         Label(AppLocalization.string("Expired"), systemImage: "clock")
