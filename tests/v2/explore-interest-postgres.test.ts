@@ -36,6 +36,27 @@ async function fixture() {
   } };
 }
 
+test("A private Explore dismissal survives refresh without sending a greeting and leaves other intentions available", { skip: !local }, async () => {
+  const f = await fixture();
+  const { prepareExploreOpportunity, decideMutualOpportunity, listOpportunityMessageRequests } = await import("../../lib/v2/mutual-opportunities");
+  const { listExploreIntents } = await import("../../lib/v2/explore-intents");
+  try {
+    const [author, viewer, third] = f.users;
+    const target = await f.intention(author!.id);
+    const other = await f.intention(third!.id);
+    const draft = await prepareExploreOpportunity(viewer!.id, target.id);
+    await assert.rejects(decideMutualOpportunity({ userId: author!.id, opportunityId: draft.id, decision: "NO" }));
+    const hidden = await decideMutualOpportunity({ userId: viewer!.id, opportunityId: draft.id, decision: "NO" });
+    assert.equal(hidden.opportunity.state, "UNAVAILABLE");
+    const refreshed = await listExploreIntents(viewer!.id, 5);
+    assert(!refreshed.intents.some(i => i.id === target.id));
+    assert(refreshed.intents.some(i => i.id === other.id));
+    assert.equal((await listOpportunityMessageRequests(author!.id)).length, 0);
+    assert.equal(await f.db.connection.count({ where: { OR: [{ userAId: viewer!.id }, { userBId: viewer!.id }] } }), 0);
+    assert.equal(await f.db.mutualOpportunityBookmark.count({ where: { userId: viewer!.id } }), 0);
+  } finally { await f.cleanup(); }
+});
+
 test("Explore draft and bookmark stay private, do not reserve supply, and only a written reply opens chat", { skip: !local }, async () => {
   const f = await fixture();
   const { prepareExploreOpportunity, listMutualOpportunities, listOpportunityMessageRequests, interactWithOpportunity,

@@ -22,6 +22,51 @@ try {
     }, null, 2));
     await db.user.deleteMany();
     console.log("Removed this unsuccessful run's disposable accounts; no accepted plan evidence was removed.");
+  } else if (mode === "reset-dismiss") {
+    const users = await db.user.findMany({ where: { username: { startsWith: "dismissqa_" } } });
+    const ids = users.map(u => u.id);
+    assert.equal(await db.connection.count({ where: { OR: [{ userAId: { in: ids } }, { userBId: { in: ids } }] } }), 0);
+    await db.user.deleteMany({ where: { id: { in: ids } } });
+    console.log("Reset only the unfinished dismissal cohort; first-stage evidence preserved.");
+  } else if (mode === "seed-dismiss") {
+    assert.equal(await db.user.count({ where: { username: { startsWith: "dismissqa_" } } }), 0);
+    const hashedPassword = await bcrypt.hash("Password123", 10);
+    for (const [username, nickname] of [["dismissqa_a", "Dismiss Alex"], ["dismissqa_b", "Dismiss Mia"], ["dismissqa_c", "Dismiss Lee"]]) {
+      await db.user.create({ data: { username, nickname, nicknameKey: nickname.toLowerCase(), hashedPassword,
+        school: "TUM", avatarUrl: "p02", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR",
+        major: "Informatics", semester: 2, onboardingComplete: true, verifiedStudent: true,
+        studentVerificationStatus: "VERIFIED", productTutorialDismissedAt: new Date(),
+        userLanguages: { create: { tag: "ENGLISH", proficiency: "FLUENT" } } } });
+    }
+    console.log("Prepared three fresh dismissal QA accounts; first-stage evidence remains intact.");
+  } else if (mode === "observe-dismiss") {
+    assert(logPath);
+    const users = await db.user.findMany({ where: { username: { startsWith: "dismissqa_" } } });
+    assert.equal(users.length, 3); const ids = users.map(u => u.id);
+    const checks: object[] = [];
+    for (const phase of ["undo", "dismissed", "replied"]) {
+      const deadline = Date.now() + 15 * 60_000;
+      while (!(await fs.readFile(logPath, "utf8").catch(() => "")).includes(`TOGETHER02_PHASE ${phase}`)) {
+        assert(Date.now() < deadline, `Timed out waiting for ${phase}`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+      let no = 0, connections = 0, requests = 0;
+      const expectedNo = phase === "undo" ? 0 : 1, expectedContact = phase === "replied" ? 1 : 0;
+      const persistedBy = Date.now() + 8_000;
+      do {
+        no = await db.mutualOpportunityDecision.count({ where: { userId: { in: ids }, value: "NO" } });
+        connections = await db.connection.count({ where: { userAId: { in: ids }, userBId: { in: ids } } });
+        requests = await db.mutualOpportunityMessageRequest.count({ where: { senderId: { in: ids } } });
+        if (no === expectedNo && connections === expectedContact && requests === expectedContact) break;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } while (Date.now() < persistedBy);
+      assert.equal(no, phase === "undo" ? 0 : 1);
+      assert.equal(connections, phase === "replied" ? 1 : 0);
+      assert.equal(requests, phase === "replied" ? 1 : 0);
+      checks.push({ phase, privateRejections: no, connections, messageRequests: requests, at: new Date().toISOString() });
+      await fs.writeFile(`${out}/api-boundaries.json`, JSON.stringify({ passed: checks.length === 3, checks }, null, 2));
+      console.log(`Together dismissal boundary passed: ${phase}`);
+    }
   } else if (mode === "seed") {
     assert.equal(await db.user.count(), 0);
     const hashedPassword = await bcrypt.hash("Password123", 10);

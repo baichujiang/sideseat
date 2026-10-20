@@ -227,6 +227,7 @@ private struct TogetherHomeView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.scenePhase) private var scenePhase
     @State private var store = WeeklyIntentStore()
     @State private var matchingSessionStore = TogetherMatchingSessionStore()
     @State private var opportunityStore = MutualOpportunityStore()
@@ -243,6 +244,8 @@ private struct TogetherHomeView: View {
     @State private var messageOpportunity: NativeMutualOpportunity?
     @State private var savedWhileBrowsingIDs: Set<String> = []
     @State private var savedFeedbackID: UUID?
+    @State private var pendingDismissal: NativeMutualOpportunity?
+    @State private var hiddenRecommendationIDs: Set<String> = []
 
     private var automaticMatchingEnabled: Bool {
         v2Store.isMutualOpportunityEnabled && clientConfiguration.configuration?.isFeatureEnabled("v2AutomaticMatching") == true
@@ -313,7 +316,26 @@ private struct TogetherHomeView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            if savedFeedbackID != nil {
+            if pendingDismissal != nil {
+                HStack(spacing: SideSeatTheme.spaceMD) {
+                    Text("Recommendation hidden")
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button("Undo hiding") {
+                        if let pendingDismissal { hiddenRecommendationIDs.remove(pendingDismissal.id) }
+                        pendingDismissal = nil
+                    }
+                    .fontWeight(.semibold)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("recommendation-dismiss-undo")
+                }
+                .font(.footnote)
+                .foregroundStyle(SideSeatTheme.utilityAction)
+                .padding(.horizontal, SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .padding(SideSeatTheme.spaceMD)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("recommendation-dismiss-feedback")
+            } else if savedFeedbackID != nil {
                 Label("Saved privately. Only you can see this.", systemImage: "heart.fill")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.utilityAction)
@@ -329,6 +351,16 @@ private struct TogetherHomeView: View {
             do { try await Task.sleep(for: .seconds(1.8)) } catch { return }
             savedFeedbackID = nil
         }
+        .task(id: pendingDismissal?.id) {
+            guard pendingDismissal != nil else { return }
+            do { try await Task.sleep(for: .seconds(5)) } catch { return }
+            // The request must outlive the undo banner's task identity.
+            Task { await commitPendingDismissal() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { Task { await commitPendingDismissal() } }
+        }
+        .onDisappear { Task { await commitPendingDismissal() } }
         .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Together")
         .task { await loadContent(); consumeRebooking(); await consumePublication() }
@@ -673,6 +705,8 @@ private struct TogetherHomeView: View {
                             isPageActive: selectedSection == .recommendations,
                             onOpportunityChange: { opportunity in opportunityStore.upsert(opportunity) },
                             onBookmarkSaved: { bookmarkDidSave($0) },
+                            onDismiss: { opportunity in Task { await hideRecommendation(opportunity) } },
+                            hiddenOpportunityIDs: hiddenRecommendationIDs,
                             onShowRecommendations: nil,
                             inlineInRecommendations: true,
                             opportunities: opportunityStore.opportunities,
@@ -916,7 +950,7 @@ private struct TogetherHomeView: View {
     private var displayedOpportunities: [NativeMutualOpportunity] {
         let explorationIDs = Set(exploreStore.intents.compactMap { $0.interest?.opportunityId })
         return opportunityStore.opportunities.filter {
-            !$0.isUnavailable && !$0.hasConversation
+            !$0.isUnavailable && !$0.hasConversation && !hiddenRecommendationIDs.contains($0.id)
                 && ($0.isBookmarked != true || savedWhileBrowsingIDs.contains($0.id))
                 && !explorationIDs.contains($0.id)
         }
@@ -998,8 +1032,26 @@ private struct TogetherHomeView: View {
             onMessage: { messageOpportunity = opportunity },
             onOpenConversation: {
                 router.navigate(to: opportunity.conversationRoute)
-            }
+            },
+            onDismiss: inRecommendations ? { Task { await hideRecommendation(opportunity) } } : nil
         )
+    }
+
+    private func hideRecommendation(_ opportunity: NativeMutualOpportunity) async {
+        await commitPendingDismissal()
+        hiddenRecommendationIDs.insert(opportunity.id)
+        pendingDismissal = opportunity
+        savedFeedbackID = nil
+    }
+
+    private func commitPendingDismissal() async {
+        guard let opportunity = pendingDismissal else { return }
+        pendingDismissal = nil
+        if await opportunityStore.decide("NO", opportunity: opportunity, using: session) {
+            await loadExploration()
+        } else {
+            hiddenRecommendationIDs.remove(opportunity.id)
+        }
     }
 
     private func bookmarkDidSave(_ opportunity: NativeMutualOpportunity) {
@@ -1057,6 +1109,7 @@ struct MutualOpportunityCard: View {
     let onBookmark: () -> Void
     let onMessage: () -> Void
     let onOpenConversation: () -> Void
+    var onDismiss: (() -> Void)? = nil
     var showsActions = true
 
     var body: some View {
@@ -1123,6 +1176,10 @@ struct MutualOpportunityCard: View {
 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if let onDismiss, !opportunity.hasConversation, !opportunity.isUnavailable, opportunity.isBookmarked != true {
+                RecommendationOptionsMenu(identifier: "mutual-opportunity-menu-\(opportunity.id)", onDismiss: onDismiss)
+                    .disabled(isWorking)
+            }
         }
     }
 

@@ -1168,7 +1168,9 @@ export async function decideMutualOpportunity(options: {
         throw new MutualOpportunityError("NOT_FOUND");
       }
       const now = new Date();
-      if (row.status !== "PENDING" || row.expiresAt <= now || (row.startsAt !== null && row.startsAt <= now)) {
+      const privateDraft = row.status === "DRAFT" && options.decision === "NO" &&
+        (row.contextSnapshot as Prisma.JsonObject)?.explorePreparedBy === options.userId;
+      if ((row.status !== "PENDING" && !privateDraft) || row.expiresAt <= now || (row.startsAt !== null && row.startsAt <= now)) {
         throw new MutualOpportunityError("NO_LONGER_AVAILABLE");
       }
       if (options.decision === "YES" && activityFitProjection(row.contextSnapshot, true)?.policyVersion === "DISCOVERY_FIT_V1") {

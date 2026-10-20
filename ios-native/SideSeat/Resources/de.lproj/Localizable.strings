@@ -2083,6 +2083,9 @@
 "Save (intention)" = "Merken";
 "Saved (intention)" = "Gemerkt";
 "Saved privately. Only you can see this." = "Privat gemerkt. Nur du kannst das sehen.";
+"Recommendation options" = "Empfehlungsoptionen";
+"Recommendation hidden" = "Empfehlung ausgeblendet";
+"Undo hiding" = "Rückgängig";
 
 "Find more recommendations" = "Weitere Vorschläge finden";
 

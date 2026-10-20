@@ -2084,6 +2084,9 @@
 "Save (intention)" = "收藏";
 "Saved (intention)" = "已收藏";
 "Saved privately. Only you can see this." = "已收藏，仅自己可见";
+"Recommendation options" = "推荐选项";
+"Recommendation hidden" = "已隐藏这条推荐";
+"Undo hiding" = "撤销";
 
 "Find more recommendations" = "寻找更多推荐";
 

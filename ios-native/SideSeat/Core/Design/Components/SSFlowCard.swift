@@ -421,6 +421,25 @@ extension View {
     }
 }
 
+struct RecommendationOptionsMenu: View {
+    let identifier: String
+    let onDismiss: () -> Void
+
+    var body: some View {
+        Menu {
+            Button("Not interested", systemImage: "eye.slash", action: onDismiss)
+                .accessibilityIdentifier("recommendation-dismiss")
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.subheadline.weight(.semibold))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel("Recommendation options")
+        .accessibilityIdentifier(identifier)
+    }
+}
+
 /// Private save and first contact use the same controls in recommendations and exploration.
 struct SSIntentionActionRow<Contact: View>: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize

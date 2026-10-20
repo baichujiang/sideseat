@@ -169,12 +169,13 @@ final class MutualOpportunityStore {
         catch { issue = error.localizedDescription; return nil }
     }
 
+    @discardableResult
     func decide(
         _ decision: String,
         opportunity: NativeMutualOpportunity,
         using session: SessionStore
-    ) async {
-        guard !mutatingIDs.contains(opportunity.id) else { return }
+    ) async -> Bool {
+        guard !mutatingIDs.contains(opportunity.id) else { return false }
         mutatingIDs.insert(opportunity.id)
         issue = nil
         notice = nil
@@ -187,15 +188,15 @@ final class MutualOpportunityStore {
                 // Offline UI fixture: exercise a real failed release, then an explicit retry.
                 simulatedDecisionFailures += 1
                 issue = "UI test: choice was not saved."
-                return
+                return false
             }
             if decision == "YES" {
                 upsert(.uiTestingFixture(id: opportunity.id, stateOverride: "DECIDED"))
             } else {
-                opportunities.removeAll { $0.id == opportunity.id }
+                upsert(.uiTestingFixture(id: opportunity.id, stateOverride: "UNAVAILABLE"))
             }
             notice = AppLocalization.string("Your choice was saved privately.")
-            return
+            return true
         }
         #endif
 
@@ -218,8 +219,10 @@ final class MutualOpportunityStore {
                 notice = AppLocalization.string("SideSeat is looking for another match.")
                 await load(using: session)
             }
+            return true
         } catch {
             issue = error.localizedDescription
+            return false
         }
     }
 

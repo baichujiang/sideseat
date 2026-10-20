@@ -618,6 +618,68 @@ final class SocialLiveUITests: XCTestCase {
         proposer.terminate()
     }
 
+    func testTogether02DismissUndoRefreshAndContact() {
+        let title = "[together-02] Campus coffee"
+        let a = loopLogin("dismissqa_a")
+        loopCreateIntent(title, in: a); a.terminate()
+        let b = loopLogin("dismissqa_b")
+        loopCreateIntent(title, in: b)
+        loopSelectTogetherSection("recommendations", in: b)
+        let menu = b.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-menu-")).firstMatch
+        XCTAssertTrue(menu.waitForExistence(timeout: 15)); menu.tap()
+        let hide = b.buttons["recommendation-dismiss"]
+        XCTAssertTrue(hide.waitForExistence(timeout: 5)); hide.tap()
+        XCTAssertFalse(menu.exists)
+        let undo = b.buttons["recommendation-dismiss-undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 2), b.debugDescription); undo.tap()
+        XCTAssertTrue(menu.waitForExistence(timeout: 5))
+        print("TOGETHER02_PHASE undo"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        loopCapture(b, "dismiss-undo")
+        menu.tap(); hide.tap()
+        XCTAssertTrue(undo.waitForNonExistence(timeout: 10))
+        print("TOGETHER02_PHASE dismissed"); RunLoop.current.run(until: Date().addingTimeInterval(3))
+        b.terminate()
+        let reloaded = loopLogin("dismissqa_b")
+        tabButton(in: reloaded, labels: ["Together"]).tap()
+        loopSelectTogetherSection("recommendations", in: reloaded)
+        XCTAssertTrue(reloaded.descendants(matching: .any)["together-opportunities-empty"].waitForExistence(timeout: 12))
+        XCTAssertFalse(reloaded.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-menu-")).firstMatch.exists)
+        loopCapture(reloaded, "dismiss-persisted"); reloaded.terminate()
+
+        let former = loopLogin("dismissqa_a")
+        tabButton(in: former, labels: ["Together"]).tap()
+        loopSelectTogetherSection("intentions", in: former)
+        let remove = former.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-delete-")).firstMatch
+        XCTAssertTrue(remove.waitForExistence(timeout: 12)); remove.tap()
+        former.buttons["Delete"].tap()
+        XCTAssertTrue(remove.waitForNonExistence(timeout: 12)); former.terminate()
+
+        let c = loopLogin("dismissqa_c")
+        loopCreateIntent(title, in: c); c.terminate()
+        let sender = loopLogin("dismissqa_b")
+        tabButton(in: sender, labels: ["Together"]).tap()
+        loopSelectTogetherSection("recommendations", in: sender)
+        let greeting = sender.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "mutual-opportunity-message-")).firstMatch
+        XCTAssertTrue(greeting.waitForExistence(timeout: 15)); loopReveal(greeting, in: sender)
+        let opportunityID = String(greeting.identifier.dropFirst("mutual-opportunity-message-".count))
+        greeting.tap()
+        let body = sender.textFields["opportunity-message-body"]
+        XCTAssertTrue(body.waitForExistence(timeout: 8)); body.tap(); body.typeText("[together-02] May I join?")
+        sender.buttons["opportunity-message-submit"].tap()
+        XCTAssertTrue(sender.staticTexts["intention-chat-first-message"].waitForExistence(timeout: 15)); sender.terminate()
+        let receiver = loopLogin("dismissqa_c")
+        tabButton(in: receiver, labels: ["Messages"]).tap()
+        receiver.buttons["inbox-message-requests"].tap()
+        let request = receiver.buttons["message-request-\(opportunityID)"]
+        XCTAssertTrue(request.waitForExistence(timeout: 15)); request.tap()
+        let reply = receiver.textViews["chat-composer-field"]
+        XCTAssertTrue(reply.waitForExistence(timeout: 8)); reply.tap(); reply.typeText("[together-02] Yes, see you!")
+        receiver.buttons["chat-composer-send"].tap()
+        XCTAssertTrue(receiver.descendants(matching: .any)["direct-chat"].waitForExistence(timeout: 15))
+        XCTAssertTrue(receiver.staticTexts["[together-02] May I join?"].waitForExistence(timeout: 12))
+        print("TOGETHER02_PHASE replied"); loopCapture(receiver, "dismiss-new-conversation"); receiver.terminate()
+    }
+
     func testSamePeerLoop02OutcomesInOriginalChat() {
         for (username, peer, text) in [
             ("loopqa_a", "Loop Mia", "[same-peer] Thanks for today!"),

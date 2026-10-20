@@ -8,6 +8,8 @@ struct ExploreIntentListView: View {
     var isPageActive = true
     var onOpportunityChange: ((NativeMutualOpportunity) -> Void)? = nil
     var onBookmarkSaved: ((NativeMutualOpportunity) -> Void)? = nil
+    var onDismiss: ((NativeMutualOpportunity) -> Void)? = nil
+    var hiddenOpportunityIDs: Set<String> = []
     var onShowRecommendations: (() -> Void)? = nil
     var inlineInRecommendations = false
     var resultLimit: Int? = nil
@@ -179,13 +181,22 @@ struct ExploreIntentListView: View {
                                     onMessage: { messageOpportunity = opportunity },
                                     onOpenConversation: {
                                         router.navigate(to: opportunity.conversationRoute)
-                                    })
+                                    },
+                                    onDismiss: onDismiss.map { action in { action(opportunity) } })
                             }
                         } else {
                             ExploreIntentCard(intent: intent, compact: false, showsPlusContext: access.showsAdvancedContext && !inlineInRecommendations,
                                 isWorking: store.mutatingIDs.contains(intent.id),
                                 onBookmark: { Task { await startInteraction(intent, bookmark: true) } },
-                                onMessage: { Task { await startInteraction(intent, bookmark: false) } })
+                                onMessage: { Task { await startInteraction(intent, bookmark: false) } },
+                                onDismiss: onDismiss == nil ? nil : {
+                                    Task {
+                                        if let opportunity = await store.prepareContact(in: intent, using: session) {
+                                            onOpportunityChange?(opportunity)
+                                            onDismiss?(opportunity)
+                                        }
+                                    }
+                                })
                         }
                     }
                     if visibleIntents.isEmpty && !inlineInRecommendations {
@@ -279,9 +290,10 @@ struct ExploreIntentListView: View {
     private var visibleIntents: [NativeExploreIntent] {
         let candidates = store.intents.filter { intent in
             guard let interest = intent.interest else { return true }
+            if hiddenOpportunityIDs.contains(interest.opportunityId) { return false }
             // The parent holds newer changes made from Saved intentions.
             let opportunity = (opportunities + interactionStore.opportunities).first { $0.id == interest.opportunityId }
-            return interest.coordination == nil && opportunity?.hasConversation != true
+            return interest.coordination == nil && opportunity?.hasConversation != true && opportunity?.isUnavailable != true
         }
         guard access == .plus && !inlineInRecommendations else { return Array(candidates.prefix(effectiveLimit)) }
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -305,6 +317,7 @@ struct ExploreIntentCard: View {
     var isWorking = false
     var onBookmark: (() -> Void)? = nil
     var onMessage: (() -> Void)? = nil
+    var onDismiss: (() -> Void)? = nil
 
     var body: some View {
         SSFlowCard(
@@ -340,6 +353,10 @@ struct ExploreIntentCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             SSActivityArtwork(topic: intent.topic, size: compact ? 36 : 44)
+            if let onDismiss, intent.isExample != true {
+                RecommendationOptionsMenu(identifier: "explore-menu-\(intent.id)", onDismiss: onDismiss)
+                    .disabled(isWorking)
+            }
         }
     }
 

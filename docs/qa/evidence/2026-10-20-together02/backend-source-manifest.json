@@ -1,0 +1,15 @@
+{
+  "baseDeployment": "dpl_DMk4xG553JZ8xfc8RNufv5jgswrW",
+  "baseSourceFilesVerified": 1375,
+  "allBaseSHA1Matched": true,
+  "overlayBaseMatchesGit": {
+    "lib/v2/mutual-opportunities.ts": true,
+    "lib/v2/explore-intents.ts": true
+  },
+  "overlays": [
+    "lib/v2/mutual-opportunities.ts",
+    "lib/v2/explore-intents.ts"
+  ],
+  "schemaChanged": false,
+  "preservedProductionDifferences": true
+}

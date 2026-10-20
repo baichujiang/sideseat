@@ -67,7 +67,8 @@ export async function listExploreIntents(userId: string, requestedLimit = 3) {
   const handled: Prisma.MutualOpportunityWhereInput = {
     AND: [
       { OR: [{ userAId: userId }, { userBId: userId }] },
-      { OR: [{ messageRequest: { isNot: null } }, { connectionId: { not: null } }, { bookmarks: { some: { userId } } }] },
+      { OR: [{ messageRequest: { isNot: null } }, { connectionId: { not: null } }, { bookmarks: { some: { userId } } },
+        { decisions: { some: { userId, value: "NO" } } }] },
     ],
   };
   const rows = await prisma.weeklyIntent.findMany({

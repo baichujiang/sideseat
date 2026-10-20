@@ -790,6 +790,32 @@ final class VisualQAScreenshotUITests: XCTestCase {
 
 
     @MainActor
+    func testRecommendationDismissUndoAndRefresh() {
+        let app = togetherApp(["--ui-testing-opportunity-list", "--ui-testing-language=zh-Hans"])
+        let id = "cmutualui0000000000000001"
+        let menu = app.buttons["mutual-opportunity-menu-\(id)"]
+        revealFlowElement(menu, in: app); menu.tap()
+        let hide = app.buttons["recommendation-dismiss"]
+        XCTAssertTrue(hide.waitForExistence(timeout: 5))
+        saveScreenshot(app: app, name: "recommendation-dismiss-menu-zh")
+        hide.tap()
+        let undo = app.buttons["recommendation-dismiss-undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 2))
+        saveScreenshot(app: app, name: "recommendation-dismiss-undo-zh")
+        undo.tap(); XCTAssertTrue(menu.waitForExistence(timeout: 5))
+        menu.tap(); hide.tap()
+        XCTAssertTrue(undo.waitForNonExistence(timeout: 10))
+        XCTAssertTrue(menu.waitForNonExistence(timeout: 5))
+        app.scrollViews["together-section-recommendations"].swipeDown()
+        let other = app.buttons["mutual-opportunity-bookmark-cmutualui0000000000000002"]
+        revealFlowElement(other, in: app)
+        XCTAssertFalse(menu.exists)
+        other.tap(); XCTAssertTrue(other.staticTexts["已收藏"].exists)
+        saveScreenshot(app: app, name: "recommendation-dismiss-others-kept-zh")
+        app.terminate()
+    }
+
+    @MainActor
     func testOpportunityBookmarkAtLargeText() {
         let app = togetherApp(["--ui-testing-language=de", "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"])
         let id = "cmutualui0000000000000001"
