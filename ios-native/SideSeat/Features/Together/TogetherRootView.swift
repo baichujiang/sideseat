@@ -1168,7 +1168,7 @@ struct MutualOpportunityCard: View {
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     if showsActions {
-                        decisionArea.padding(.top, SideSeatTheme.spaceSM)
+                        decisionArea
                     }
                 }
                 .padding(.horizontal, SideSeatTheme.Together.cardPadding)

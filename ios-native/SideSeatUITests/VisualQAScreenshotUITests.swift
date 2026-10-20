@@ -798,6 +798,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             let toggle = app.buttons["mutual-opportunity-context-\(id)"]
             let details = app.descendants(matching: .any)["mutual-opportunity-context-\(id)-details"].firstMatch
             revealFlowElement(toggle, in: app); let collapsedValue = toggle.value as? String
+            saveScreenshot(app: app, name: "recommendation-context-collapsed-\(language)")
             XCTAssertFalse(details.exists); toggle.tap(); XCTAssertTrue(details.waitForExistence(timeout: 5))
             XCTAssertNotEqual(toggle.value as? String, collapsedValue)
             XCTAssertTrue(details.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", language == "zh-Hans" ? "咖啡" : "Kaffee")).firstMatch.exists)
