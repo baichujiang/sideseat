@@ -1,0 +1,15 @@
+{
+  "nativeSourceCommit": "3ace153adbff293ce7d6283d399b538cd5a53254",
+  "initialPresentationSourceCommit": "3ace153adbff293ce7d6283d399b538cd5a53254",
+  "initialPresentationChecksPassed": 8,
+  "supplementalQASourceCommit": "42558bd670675a25bfc91f7268ea41e66af7fc05",
+  "supplementalLongListCheckPassed": true,
+  "supplementalTestSHA256": "4d753c5ed43435ad36667bed2ee703349f3d5b2083bc2705d57c506992891dd1",
+  "nativeCodeChangedAfterBuild": false,
+  "realAPIFullFlowRerun": false,
+  "shareWebFlowRerun": false,
+  "backendPublished": false,
+  "webPublished": false,
+  "backendDeploymentFromExistingRecord": "dpl_5YEFNQih1dkZX6LnurN1D2s3cLQR",
+  "backendReadinessNotRecheckedThisStage": true
+}

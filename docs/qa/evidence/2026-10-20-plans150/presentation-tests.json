@@ -1,0 +1,124 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64e",
+      "deviceId" : "00008110-001A69110CC1401E",
+      "deviceName" : "iPhone (4)",
+      "modelName" : "iPhone 14 Plus",
+      "osBuildNumber" : "23G83",
+      "osVersion" : "26.6.1",
+      "platform" : "iOS"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "27秒",
+                  "durationInSeconds" : 27.156324982643127,
+                  "name" : "testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "14秒",
+                  "durationInSeconds" : 14.715155005455017,
+                  "name" : "testFirstHomeOpensCreateAndPlanLinkDirectly()",
+                  "nodeIdentifier" : "PlanCreationPresentationUITests/testFirstHomeOpensCreateAndPlanLinkDirectly()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests/testFirstHomeOpensCreateAndPlanLinkDirectly",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanCreationPresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanCreationPresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            },
+            {
+              "children" : [
+                {
+                  "duration" : "11秒",
+                  "durationInSeconds" : 11.276336073875427,
+                  "name" : "testInitialLoadingDoesNotShowTheEmptyPlanLayout()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testInitialLoadingDoesNotShowTheEmptyPlanLayout()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testInitialLoadingDoesNotShowTheEmptyPlanLayout",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "13秒",
+                  "durationInSeconds" : 13.708222031593323,
+                  "name" : "testTogetherAndPlansCardStyleReference()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testTogetherAndPlansCardStyleReference()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testTogetherAndPlansCardStyleReference",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "20秒",
+                  "durationInSeconds" : 20.48135507106781,
+                  "name" : "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "11秒",
+                  "durationInSeconds" : 11.37788701057434,
+                  "name" : "testUpcomingSummaryReflowsWithMaximumText()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testUpcomingSummaryReflowsWithMaximumText",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "23秒",
+                  "durationInSeconds" : 23.25517499446869,
+                  "name" : "testWaitingPlansReflowWithMaximumTextAndStayOpenable()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testWaitingPlansReflowWithMaximumTextAndStayOpenable()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testWaitingPlansReflowWithMaximumTextAndStayOpenable",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "43秒",
+                  "durationInSeconds" : 43.11304199695587,
+                  "name" : "testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan()",
+                  "nodeIdentifier" : "PlanStatePresentationUITests/testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan()",
+                  "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests/testWaitingRailScrollsWithoutChangingSectionAndViewAllKeepsEveryPlan",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                }
+              ],
+              "name" : "PlanStatePresentationUITests",
+              "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanStatePresentationUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Passed"
+            }
+          ],
+          "name" : "PlanPresentationPhone117UITests",
+          "nodeIdentifierURL" : "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Passed"
+        }
+      ],
+      "name" : "PlanPresentationPhone117",
+      "nodeType" : "Test Plan",
+      "result" : "Passed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}
