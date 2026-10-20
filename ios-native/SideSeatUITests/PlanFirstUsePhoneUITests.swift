@@ -439,12 +439,13 @@ import XCTest
             XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
             XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
         }
-        func openChatCard() {
+        func openChatCard(expectedAction: String = "填写我的空闲") {
             app.tabBars.buttons["消息"].tap()
             let row = app.buttons["inbox-row-\(fixture.connectionID)"]
             XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
             let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
             XCTAssertTrue(card.waitForExistence(timeout: 20))
+            XCTAssertTrue(app.staticTexts[expectedAction].waitForExistence(timeout: 10))
             capture(app, "contacts-received-chat-card"); card.tap()
             XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
             XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
@@ -502,7 +503,7 @@ import XCTest
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
         nativePhase("contacts-formal-invitation")
 
-        nativeSignIn(peer, bundle: fixture.bundle); openChatCard()
+        nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
         XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()

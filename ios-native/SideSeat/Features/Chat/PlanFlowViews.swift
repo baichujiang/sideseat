@@ -342,8 +342,8 @@ struct SharedPlanChatCard: View {
                             }
                             Text(poll.presentation(at: Date()).cardStatusTitle)
                                 .font(.caption).foregroundStyle(.secondary)
-                            Label(poll.presentation(at: Date()).nextStep == .fillAvailability ? "Fill my availability"
-                                  : poll.presentation(at: Date()).nextStep == .confirm ? "View invitation" : "View plan", systemImage: "arrow.right")
+                            Label(AppLocalization.string(poll.presentation(at: Date()).nextStep == .fillAvailability ? "Fill my availability"
+                                  : poll.presentation(at: Date()).nextStep == .confirm ? "View invitation" : "View plan"), systemImage: "arrow.right")
                                 .font(.subheadline.weight(.semibold))
                         } else {
                             Label("View plan", systemImage: "calendar.badge.clock").font(.subheadline.weight(.semibold))
