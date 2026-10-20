@@ -2854,9 +2854,10 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "Deine Freunde haben geantwortet. Wähle die endgültige Zeit direkt im Zeitplan.";
 
-"Tap the first and last time cells, or hold and drag." = "Tippe auf die erste und letzte Zeitzelle oder halte und ziehe.";
+"Tap cells to extend one continuous time range." = "Tippe auf Zeitfelder, um einen zusammenhängenden Zeitraum zu verlängern.";
 
-"Tap the first and last time cells, or hold and drag. Tap a date to select that day." = "Tippe auf die erste und letzte Zeitzelle oder halte und ziehe. Tippe auf ein Datum, um den ganzen Tag zu wählen.";
+"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "Weitere Zeitfelder verlängern den Zeitraum. Wähle zum Neustart erneut oder halte und ziehe. Ein anderer Tag ersetzt den Zeitraum. Tippe auf ein Datum für den ganzen Tag.";
+"Clear final time" = "Zeit neu wählen";
 
 "Next: review invitation list" = "Weiter: Einladungsliste prüfen";
 

@@ -271,6 +271,13 @@ struct TimePollFinalRange: Equatable, Sendable {
         cell.date == date && cell.slots[0].start >= start && cell.end <= end
     }
 
+    /// Further taps grow the same interval instead of restarting every third tap.
+    static func selecting(_ cell: NativeTimePoll.Cell, in range: Self?, cells: [NativeTimePoll.Cell]) -> Self? {
+        guard let range, range.date == cell.date else { return spanning(cell, cell, cells: cells) }
+        let included = (cells.filter { range.contains($0) } + [cell]).sorted { $0.slots[0].start < $1.slots[0].start }
+        return spanning(included.first!, included.last!, cells: cells) ?? range
+    }
+
     static func spanning(_ first: NativeTimePoll.Cell, _ last: NativeTimePoll.Cell, cells: [NativeTimePoll.Cell]) -> Self? {
         guard first.date == last.date else { return nil }
         let start = min(first.slots[0].start, last.slots[0].start), end = max(first.end, last.end)

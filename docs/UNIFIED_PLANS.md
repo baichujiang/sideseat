@@ -88,8 +88,14 @@ current Plans or Messages navigation. Root cards refresh after saved responses.
 ## Final-time selection in the timetable — Preview 122
 
 The organizer explicitly starts **Choose final time**, then picks a continuous
-candidate-backed range in the same timetable by tapping start/end or holding and
-dragging. A date selects all configured hours for that date. An unsent label,
+candidate-backed range in the same timetable. In Preview 143, every additional
+tap on the same date extends the existing interval, filling the cells between;
+tapping within it leaves it selected. There is no two-tap cycle or hidden reset.
+**Choose time again** explicitly clears only this invitation-time draft. Holding
+and dragging replaces the interval; choosing another date starts a new interval,
+as explained above the table. A date header selects all configured hours for that
+date. Personal availability continues to allow separate cells across dates, with
+tap-to-toggle, paint/erase, day selection and undo. An unsent label,
 calendar icon and separate outline distinguish this draft from personal availability;
 counts stay visible and no response is changed. New invitations start without a
 preselected range. The next action opens a roster-only review with exact time and

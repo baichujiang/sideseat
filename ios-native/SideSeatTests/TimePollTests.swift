@@ -76,6 +76,42 @@ struct TimePollTests {
         #expect(cells.flatMap { $0.slots.map(\.id) } == Array(0..<8))
     }
 
+    @Test("Repeated final-time taps preserve the full interval in either direction")
+    func repeatedFinalTimeTaps() {
+        let slots = (0..<12).map { id in NativeTimePoll.Slot(id: id, date: "2030-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+        let cells = TimePollSelection.cells(slots)
+        for order in [[0, 1, 2, 3, 4, 5], [5, 4, 3, 2, 1, 0], [2, 4, 0, 5, 1, 3]] {
+            var range: TimePollFinalRange?
+            var visited: [NativeTimePoll.Cell] = []
+            for index in order {
+                visited.append(cells[index])
+                range = TimePollFinalRange.selecting(cells[index], in: range, cells: cells)
+                #expect(visited.allSatisfy { range?.contains($0) == true })
+            }
+            let full = range
+            for cell in cells { range = TimePollFinalRange.selecting(cell, in: range, cells: cells); #expect(range == full) }
+            // Explicit reset starts a fresh interval; a later tap still extends it.
+            range = TimePollFinalRange.selecting(cells[3], in: nil, cells: cells)
+            #expect(range == TimePollFinalRange.spanning(cells[3], cells[3], cells: cells))
+        }
+    }
+
+    @Test("Availability taps retain other days, while final time explicitly changes day and preserves invalid ranges")
+    func selectionModes() {
+        let slots = (0..<16).map { id in NativeTimePoll.Slot(id: id, date: id < 8 ? "2030-10-19" : "2030-10-20", row: String(id % 8), label: String(id % 8), start: Date(timeIntervalSince1970: Double((id < 8 ? id : id + 88) * 900)), end: Date(timeIntervalSince1970: Double((id < 8 ? id : id + 88) * 900 + 900))) }
+        let cells = TimePollSelection.cells(slots)
+        var available = Set<Int>()
+        for cell in cells {
+            let previous = available
+            available = TimePollSelection.toggle(cell, original: available)
+            #expect(previous.isSubset(of: available))
+        }
+        #expect(TimePollSelection.toggle(cells[2], original: available) == available.subtracting(cells[2].slotIds))
+        let range = TimePollFinalRange.spanning(cells[0], cells[1], cells: cells)
+        #expect(TimePollFinalRange.selecting(cells[4], in: range, cells: cells) == TimePollFinalRange.spanning(cells[4], cells[4], cells: cells))
+        #expect(TimePollFinalRange.selecting(cells[3], in: range, cells: cells.filter { $0.id != cells[2].id }) == range)
+    }
+
     @Test("Final time cannot span different dates or gaps")
     func finalTimeBoundaries() {
         let slots = (0..<6).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-19" : "2026-10-20", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }

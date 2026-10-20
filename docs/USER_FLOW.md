@@ -169,11 +169,13 @@ share page follows the same direct editing flow after a name is entered/resumed.
 Availability never accepts an invitation. Invitation/confirmed/cancelled/expired
 surfaces retain their existing confirmation and read-only rules.
 
-**Final-time amendment — 2026-10-18 / Preview 122:** the creator selects
+**Final-time amendment — 2026-10-20 / Preview 143 (updates Preview 122):** the creator selects
 **Choose final time** on the existing timetable. This explicitly changes the table's
 interaction to a local invitation-time draft, with a distinct outline/icon and an
-unsent label. Tap the first and last cells, or hold and drag within one date to
-choose a continuous range. Tap a date to choose all its configured hours. The
+unsent label. Tap cells on the same date to extend one continuous range. Further
+taps preserve earlier cells; tapping inside the range does not reset it. Use
+**Choose time again** to clear only the final-time draft, or hold and drag to
+replace it. Tap a date to choose all its configured hours. The
 draft starts empty for a new invitation; selecting another date starts a new range.
 Ordinary swipes still scroll. This does not save availability, send an invitation,
 or create Calendar entries. Cancel restores the normal availability table.

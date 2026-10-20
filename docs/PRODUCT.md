@@ -48,6 +48,14 @@ A dirty draft does not prevent choosing final time, sending or confirming an
 invitation. Existing records, quarter-hour storage and Calendar consent remain
 intact. This supersedes the earlier Preview 136 autosave amendment.
 
+**2026-10-20 / Preview 143 final-time amendment:** repeated taps on one date
+extend one continuous invitation-time interval; tapping an included cell keeps
+it selected. No hidden third-tap reset is permitted. Choose time again clears
+only that draft from the fixed bottom bar; a new hold/drag or another date
+explicitly replaces the range. Availability still supports separate cells across
+dates and explicit deselection, day selection and undo. Final-time edits never
+submit personal availability or send invitations.
+
 **2026-10-16 timetable amendment:** Availability is input, never acceptance.
 Collection shows the complete availability heatmap and response progress, without
 common-time or maximum-attendance recommendation cards. Creating a collection does

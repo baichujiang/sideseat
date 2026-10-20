@@ -434,7 +434,17 @@ struct TimePollDetailView: View {
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
-                Text("Choose final time").font(.subheadline.weight(.semibold)).accessibilityIdentifier("time-poll-final-heading")
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout(spacing: 8))
+                layout {
+                    Text("Choose final time").font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading).accessibilityIdentifier("time-poll-final-heading")
+                    Button { finalRange = nil } label: {
+                        Label("Clear final time", systemImage: "arrow.counterclockwise").font(.caption.weight(.medium)).frame(minHeight: 44)
+                    }
+                    .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                    .disabled(finalRange == nil)
+                    .accessibilityIdentifier("time-poll-reset-final")
+                }
                 if let finalRange {
                     Text(timePollDateLabel(finalRange.date).replacingOccurrences(of: "\n", with: " "))
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -442,7 +452,7 @@ struct TimePollDetailView: View {
                         .font(.subheadline.monospacedDigit()).fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("time-poll-final-range")
                 } else if !typeSize.isAccessibilitySize {
-                    Text("Tap the first and last time cells, or hold and drag.")
+                    Text("Tap cells to extend one continuous time range.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -565,7 +575,6 @@ private struct TimePollGrid: View {
     @State private var preview: Set<Int>?
     @State private var selecting = true
     @State private var undoSelection: Set<Int>?
-    @State private var finalAnchor: NativeTimePoll.Cell?
     @State private var originalFinalRange: TimePollFinalRange?
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
@@ -581,7 +590,7 @@ private struct TimePollGrid: View {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Label("Final time · not sent yet", systemImage: "calendar.badge.clock")
                         .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                    Text("Tap the first and last time cells, or hold and drag. Tap a date to select that day.")
+                    Text("Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     Text("Numbers show how many people are free. Your availability stays unchanged.")
                         .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -629,8 +638,8 @@ private struct TimePollGrid: View {
             }
             .frame(height: headerHeight + cellHeight * CGFloat(rows.count))
         }
-        .onChange(of: editable) { _, _ in clearPreview(); finalAnchor = nil }
-        .onChange(of: pickingFinalTime) { _, _ in clearPreview(); finalAnchor = nil }
+        .onChange(of: editable) { _, _ in clearPreview() }
+        .onChange(of: pickingFinalTime) { _, _ in clearPreview() }
         .onDisappear { clearPreview() }
     }
 
@@ -718,7 +727,6 @@ private struct TimePollGrid: View {
         return Button {
             if pickingFinalTime {
                 if let first = day.first, let last = day.last { finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells) }
-                finalAnchor = nil
             } else { apply(allSelected ? selected.subtracting(slots) : selected.union(slots)) }
         } label: {
             HStack(spacing: 4) {
@@ -776,7 +784,7 @@ private struct TimePollGrid: View {
         case .began:
             guard let start = position(point, rows: rows, cellWidth: cellWidth),
                   let cell = lookup["\(poll.dates[start.0])|\(rows[start.1])"] else { return }
-            originalFinalRange = finalRange; dragStart = start; finalAnchor = nil
+            originalFinalRange = finalRange; dragStart = start
             finalRange = TimePollFinalRange.spanning(cell, cell, cells: poll.cells)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         case .changed:
@@ -795,13 +803,7 @@ private struct TimePollGrid: View {
 
     private func toggle(_ cell: NativeTimePoll.Cell) {
         if pickingFinalTime {
-            if let anchor = finalAnchor, anchor.date == cell.date {
-                finalRange = TimePollFinalRange.spanning(anchor, cell, cells: poll.cells)
-                finalAnchor = nil
-            } else {
-                finalRange = TimePollFinalRange.spanning(cell, cell, cells: poll.cells)
-                finalAnchor = cell
-            }
+            finalRange = TimePollFinalRange.selecting(cell, in: finalRange, cells: poll.cells)
             return
         }
         guard editable else { return }

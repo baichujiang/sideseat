@@ -2855,9 +2855,10 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "Friends have filled in. Choose the final time directly in the timetable.";
 
-"Tap the first and last time cells, or hold and drag." = "Tap the first and last time cells, or hold and drag.";
+"Tap cells to extend one continuous time range." = "Tap cells to extend one continuous time range.";
 
-"Tap the first and last time cells, or hold and drag. Tap a date to select that day." = "Tap the first and last time cells, or hold and drag. Tap a date to select that day.";
+"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range. Tap a date to select that day.";
+"Clear final time" = "Choose time again";
 
 "Next: review invitation list" = "Next: review invitation list";
 

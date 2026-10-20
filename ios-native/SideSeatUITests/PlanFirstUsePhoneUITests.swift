@@ -141,6 +141,13 @@ import XCTest
         XCTAssertLessThan(second.frame.maxY, nextStep.frame.minY, "Name submission must reveal the time cells above the fixed save bar")
         capture(safari, "06a-guest-editor")
         first.tap(); second.tap()
+        let third = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 10:00")).firstMatch
+        let fourth = safari.switches.matching(NSPredicate(format: "label CONTAINS %@", ", 10:30")).firstMatch
+        for cell in [third, fourth] { revealWebTimeCell(cell, above: nextStep); cell.tap(); waitWebSelection(cell, selected: true) }
+        for cell in [first, second, third, fourth] { waitWebSelection(cell, selected: true) }
+        third.tap(); waitWebSelection(third, selected: false)
+        fourth.tap(); waitWebSelection(fourth, selected: false)
+        waitWebSelection(first, selected: true); waitWebSelection(second, selected: true)
         webWaitSaved()
         capture(safari, "06-guest-saved"); phase("guest-saved")
         XCTAssertTrue(first.exists, "Autosave must keep the same editable timetable visible")
@@ -364,6 +371,21 @@ import XCTest
             if element.frame.midY < safari.frame.midY { safari.swipeDown() } else { safari.swipeUp() }
         }
         XCTAssertTrue(element.isHittable)
+    }
+    private func revealWebTimeCell(_ cell: XCUIElement, above footer: XCUIElement) {
+        XCTAssertTrue(cell.waitForExistence(timeout: 15))
+        for _ in 0..<8 where !cell.isHittable || cell.frame.maxY >= footer.frame.minY - 12 {
+            let origin = safari.coordinate(withNormalizedOffset: .zero)
+            let start = CGPoint(x: cell.frame.midX, y: footer.frame.minY - 40)
+            origin.withOffset(CGVector(dx: start.x, dy: start.y)).press(forDuration: 0.05,
+                thenDragTo: origin.withOffset(CGVector(dx: start.x, dy: start.y - 100)))
+        }
+        XCTAssertTrue(cell.isHittable)
+        XCTAssertLessThan(cell.frame.maxY, footer.frame.minY - 12, "The time cell must be above the fixed invitation guidance")
+    }
+    private func waitWebSelection(_ cell: XCUIElement, selected: Bool) {
+        let expectation = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", selected ? "1" : "0"), object: cell)
+        XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 10), .completed, "Unexpected web selection: \(cell.label)")
     }
     private func activityOpenSafari(_ raw: String) {
         safari.terminate(); safari.launch()
@@ -796,6 +818,52 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-view-calendar"].isEnabled)
     }
 
+    func testFinalTimeRepeatedTapsPreserveRange() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires a disposable owner and an existing plan.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap(); nativeOpenCard()
+        let cells = [0, 2, 4, 6].map { app.buttons["time-poll-cell-\($0)"] }
+        XCTAssertTrue(cells[0].waitForExistence(timeout: 20))
+        for (index, cell) in cells.enumerated() {
+            cell.tap()
+            for previous in cells.prefix(index + 1) { XCTAssertTrue(previous.isSelected, "Availability taps must preserve previous cells") }
+        }
+        cells[1].tap()
+        XCTAssertFalse(cells[1].isSelected)
+        XCTAssertTrue([cells[0], cells[2], cells[3]].allSatisfy(\.isSelected))
+        app.buttons["time-poll-undo"].tap(); XCTAssertTrue(cells.allSatisfy(\.isSelected))
+        cells[0].press(forDuration: 0.6, thenDragTo: cells[1])
+        XCTAssertFalse(cells[0].isSelected || cells[1].isSelected)
+        XCTAssertTrue(cells[2].isSelected && cells[3].isSelected)
+        app.buttons["time-poll-undo"].tap(); XCTAssertTrue(cells.allSatisfy(\.isSelected))
+        app.buttons["unified-plan-invite-window"].tap()
+        for (index, cell) in cells.enumerated() {
+            cell.tap()
+            for previous in cells.prefix(index + 1) { XCTAssertTrue(previous.isSelected, "Every final-time tap must preserve the existing range") }
+        }
+        cells[1].tap()
+        XCTAssertTrue(cells.allSatisfy(\.isSelected), "Tapping inside the final interval must not restart it")
+        capture(app, "final-repeated-taps")
+        let reset = app.buttons["time-poll-reset-final"], review = app.buttons["unified-plan-review-roster"]
+        reset.tap(); XCTAssertFalse(review.isEnabled); XCTAssertTrue(cells.allSatisfy { !$0.isSelected })
+        for cell in cells.reversed() { cell.tap() }
+        XCTAssertTrue(cells.allSatisfy(\.isSelected), "Reverse-order taps must preserve the interval too")
+        let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).firstMatch
+        day.tap(); cells[1].tap()
+        XCTAssertTrue(cells.allSatisfy(\.isSelected), "A tap inside a whole-day interval must not discard the day")
+        cells[0].press(forDuration: 0.6, thenDragTo: cells[1])
+        XCTAssertTrue(cells[0].isSelected && cells[1].isSelected)
+        XCTAssertFalse(cells[2].isSelected || cells[3].isSelected)
+        app.buttons["time-poll-cancel-final"].tap()
+        XCTAssertTrue(cells.allSatisfy(\.isSelected), "Cancelling final-time selection must preserve my availability draft")
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        capture(app, "final-cancel-preserves-availability")
+    }
+
     private func reviewFinalHour(mark: (String) -> Void = { _ in }) {
         let choose = app.buttons["unified-plan-invite-window"]
         XCTAssertTrue(choose.waitForExistence(timeout: 15))
@@ -810,6 +878,12 @@ import XCTest
         XCTAssertFalse(first.isSelected, "Final time starts empty even if my availability is selected")
         first.tap(); XCTAssertTrue(first.isSelected); XCTAssertFalse(second.isSelected)
         second.tap(); XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
+        let third = app.buttons["time-poll-cell-4"], fourth = app.buttons["time-poll-cell-6"]
+        third.tap(); fourth.tap()
+        XCTAssertTrue([first, second, third, fourth].allSatisfy(\.isSelected))
+        second.tap(); XCTAssertTrue([first, second, third, fourth].allSatisfy(\.isSelected))
+        app.buttons["time-poll-reset-final"].tap(); XCTAssertFalse(review.isEnabled)
+        first.tap(); second.tap()
         XCTAssertTrue(app.staticTexts["time-poll-final-range"].label.contains("10:00"))
         mark("owner-final-picked"); capture(app, "final-01-tap-range")
         app.buttons["time-poll-cancel-final"].tap()

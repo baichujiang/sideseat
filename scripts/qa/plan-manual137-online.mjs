@@ -31,10 +31,12 @@ try {
   owner.accessToken = (await call('/api/v1/auth/login', null, 'POST', { identifier: owner.identifier, password: owner.password, device: { id: randomUUID(), name: 'Manual availability QA', appVersion: '1.0.0', platformVersion: '26.6.1' } })).tokens.accessToken; persist();
   for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     const browser = await engine.launch();
-    const context = await browser.newContext({ storageState: { cookies, origins: [] }, viewport: { width: 1280, height: 1200 }, locale: 'zh-CN' });
+    const context = await browser.newContext({ storageState: { cookies, origins: [] }, viewport: { width: 1280, height: 1200 }, locale: 'zh-CN', hasTouch: stage === 'selection143' });
     const page = await context.newPage(), requests = [], errors = [];
     try {
-      const p = await call('/api/v1/time-polls', owner, 'POST', { title: '手动提交完整验收', timeZone: 'Europe/Berlin', dates: [new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10)], startMinute: 540, endMinute: 900 }, 201);
+      const dates = [new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10)];
+      if (stage === 'selection143') dates.push(new Date(Date.now() + 4 * 864e5).toISOString().slice(0, 10));
+      const p = await call('/api/v1/time-polls', owner, 'POST', { title: '手动提交完整验收', timeZone: 'Europe/Berlin', dates, startMinute: 540, endMinute: 900 }, 201);
       fixture.tokens.push(p.token); persist();
       const api = `/api/v1/time-polls/${p.token}`, responseURL = `**/api/public/time-polls/${p.token}/response`;
       const detail = () => call(api, owner), guest = async () => (await detail()).participants.find(x => x.isGuest);
@@ -46,6 +48,39 @@ try {
       await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
       const cell = n => page.getByTestId(`time-poll-cell-${n}`), submit = () => page.getByTestId('availability-submit').click();
       const saved = () => expect(page.getByText('已提交空闲', { exact: true })).toBeVisible();
+      if (stage === 'selection143') {
+        const assertSelected = async ids => {
+          for (const slot of p.slots.filter(s => s.id % 2 === 0)) await expect(cell(slot.id)).toHaveAttribute('aria-pressed', String(ids.includes(slot.id)));
+        };
+        const undo = () => page.getByTestId('time-poll-undo').click();
+        for (const id of [0, 4, 8, 24]) await cell(id).click();
+        await assertSelected([0, 4, 8, 24]);
+        await cell(4).click(); await assertSelected([0, 8, 24]);
+        await undo(); await assertSelected([0, 4, 8, 24]);
+        checks.push(`${engineName}: repeated disjoint taps retain every earlier cell across dates; erasing and undo affect only the intended change`);
+        const drag = async (from, to) => {
+          const a = await cell(from).boundingBox(), b = await cell(to).boundingBox();
+          await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.down();
+          await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 6 }); await page.mouse.up();
+        };
+        await drag(12, 14); await assertSelected([0, 4, 8, 12, 14, 24]);
+        await drag(0, 4); await assertSelected([8, 12, 14, 24]);
+        await undo(); await assertSelected([0, 4, 8, 12, 14, 24]);
+        checks.push(`${engineName}: paint and erase drags preserve selections outside the rectangle; undo restores the exact previous selection`);
+        const secondDay = page.getByTestId(`time-poll-day-${dates[1]}`);
+        const wholeSecondDay = p.slots.filter(s => s.date === dates[1] && s.id % 2 === 0).map(s => s.id);
+        await secondDay.click(); await assertSelected([0, 4, 8, 12, 14, ...wholeSecondDay]);
+        await secondDay.click(); await assertSelected([0, 4, 8, 12, 14]);
+        await undo(); await assertSelected([0, 4, 8, 12, 14, ...wholeSecondDay]);
+        checks.push(`${engineName}: date select/deselect never clears another day; undo retains both days`);
+        const box = await cell(18).boundingBox();
+        await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+        await assertSelected([0, 4, 8, 12, 14, 18, ...wholeSecondDay]);
+        assert.equal(requests.length, 0); assert.equal((await detail()).participants.length, 0);
+        checks.push(`${engineName}: touch tap preserves existing mouse/day selections without auto-submitting`);
+        await page.getByRole('button', { name: '这些时间我都没空', exact: true }).click();
+        await assertSelected([]);
+      }
       for (let n = 0; n < 20; n += 2) { await cell(n).click(); await expect(cell(n)).toHaveAttribute('aria-pressed', 'true'); }
       await page.waitForTimeout(2100);
       assert.equal(requests.length, 0); assert.equal((await detail()).participants.length, 0);

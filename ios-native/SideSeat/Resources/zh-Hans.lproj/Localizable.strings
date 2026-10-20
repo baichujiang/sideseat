@@ -2855,9 +2855,10 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "朋友已填写，直接在时间表里选最终时段。";
 
-"Tap the first and last time cells, or hold and drag." = "点选开始和结束的时间格，也可长按拖选。";
+"Tap cells to extend one continuous time range." = "点选时间格，延长一段连续时间。";
 
-"Tap the first and last time cells, or hold and drag. Tap a date to select that day." = "点选开始和结束的时间格，也可长按拖选；点日期可选整天。";
+"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "继续点选可延长连续时段；重新选择可点重选按钮或长按拖选。换一天会替换当前时段，点日期可选整天。";
+"Clear final time" = "重新选择时间";
 
 "Next: review invitation list" = "下一步：确认邀请名单";
 
