@@ -1,0 +1,50 @@
+[
+  {
+    "file": "native-invitation-midnight-normal.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533745.937,
+    "sha256": "32be7d57981331cfa75af28d7ad8563966df3f99adf5627a0f48c53324b9ee08",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  },
+  {
+    "file": "native-invitation-partial-normal.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533740.853,
+    "sha256": "a827d67a43cf2c735f97826fa1e2c7b55bc225c0fd464868eb320f0ac280368a",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  },
+  {
+    "file": "native-invitation-continuous-normal.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533735.632,
+    "sha256": "e7b01a90e8c9f88fa68744d8bccb85b179239056136c29fe52465beb3071db42",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  },
+  {
+    "file": "native-invitation-midnight-dark-largest.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533769.731,
+    "sha256": "4745b4b85ea9dcafd4a59b6fa9189a26b05e7e7763521bb2ac185ac9c61db1a2",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  },
+  {
+    "file": "native-invitation-partial-dark-largest.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533761.828,
+    "sha256": "fd26105dde8a043d34a1f7580984023b4c7cd55b5c159efe7784b46da2e0ed80",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  },
+  {
+    "file": "native-invitation-continuous-dark-largest.png",
+    "deviceUDID": "00008110-001A69110CC1401E",
+    "timestamp": 1792533754.046,
+    "sha256": "1f2be901d63f6dfbc8a3e0995b7c93ded082b28debf8a655e0ddb6fecd9273bf",
+    "source": "/tmp/sideseat171-final-layout.xcresult",
+    "build": 171
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "deliveredPreview": 171,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "sourceCommit": "5bf4c14a",
+  "planCommit": "f61fa246",
+  "planViewSHA256": "592f8868f17afeffdf2064115f606dbda7bde9b039f2170b28f10d74dcfe7a1a",
+  "binarySHA256": "17bbb7263422f08506e9d385b3c02bafa1c327c55e8bd60a978e1aa321993d88",
+  "strictSignatureVerified": true,
+  "owned170BuildSucceeded": true,
+  "owned170InstalledBefore171": true,
+  "owned170LaterIncrementalAssetsInvalid": true,
+  "owned170NotFinalDelivery": true,
+  "physicalAcceptanceResult": "/tmp/sideseat171-final-layout.xcresult",
+  "primaryBusinessFlowResult": "/tmp/sideseat167-native-flow.xcresult",
+  "primaryBusinessFlowBuild": 168,
+  "primaryBusinessFlowSeconds": 179.989,
+  "primaryBusinessFlowApiStages": 8,
+  "finalLayoutTests": 2,
+  "finalLayoutScenarios": 6,
+  "normalSeconds": 15.56,
+  "darkLargestSeconds": 23.762
+}

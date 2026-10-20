@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "baseDeployment": "dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr",
+  "candidateDeployment": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj",
+  "baseFiles": 1379,
+  "candidateFiles": 1380,
+  "modified": [
+    "components/time-polls/invitation-timetable.tsx"
+  ],
+  "added": [
+    ".sideseat-invitation167-source.json"
+  ],
+  "allSha1Match": true
+}

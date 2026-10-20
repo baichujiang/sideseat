@@ -1,0 +1,142 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "engine": "chromium",
+      "width": 390,
+      "case": "continuous",
+      "windows": 1,
+      "dimensions": [
+        {
+          "rows": 4,
+          "rowSpan": 4,
+          "height": 175,
+          "parentHeight": 176,
+          "top": 0.5,
+          "bottom": 0.5,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 314
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "case": "partial",
+      "windows": 1,
+      "dimensions": [
+        {
+          "rows": 3,
+          "rowSpan": 3,
+          "height": 87.328125,
+          "parentHeight": 132,
+          "top": 22.328125,
+          "bottom": 22.34375,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 314
+        }
+      ]
+    },
+    {
+      "engine": "chromium",
+      "width": 390,
+      "case": "midnight",
+      "windows": 2,
+      "dimensions": [
+        {
+          "rows": 1,
+          "rowSpan": 1,
+          "height": 21.5,
+          "parentHeight": 44,
+          "top": 22,
+          "bottom": 0.5,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 314
+        },
+        {
+          "rows": 2,
+          "rowSpan": 2,
+          "height": 65.25,
+          "parentHeight": 88,
+          "top": 0.5,
+          "bottom": 22.25,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 314
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "case": "continuous",
+      "windows": 1,
+      "dimensions": [
+        {
+          "rows": 4,
+          "rowSpan": 4,
+          "height": 175,
+          "parentHeight": 176,
+          "top": 1,
+          "bottom": 0,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 244
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "case": "partial",
+      "windows": 1,
+      "dimensions": [
+        {
+          "rows": 3,
+          "rowSpan": 3,
+          "height": 87.328125,
+          "parentHeight": 132,
+          "top": 22.828125,
+          "bottom": 21.84375,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 244
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "width": 320,
+      "case": "midnight",
+      "windows": 2,
+      "dimensions": [
+        {
+          "rows": 1,
+          "rowSpan": 1,
+          "height": 21.5,
+          "parentHeight": 44,
+          "top": 22.5,
+          "bottom": 0,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 244
+        },
+        {
+          "rows": 2,
+          "rowSpan": 2,
+          "height": 65.25,
+          "parentHeight": 88,
+          "top": 1,
+          "bottom": 21.75,
+          "rowHeight": 44,
+          "labels": "受邀时段",
+          "clientWidth": 244
+        }
+      ]
+    }
+  ],
+  "pageErrors": []
+}

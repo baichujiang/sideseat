@@ -1,0 +1,22 @@
+{
+  "deploymentId": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj",
+  "state": "READY",
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "deploymentId": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "deploymentId": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj"
+    },
+    {
+      "alias": "sideseat.de",
+      "deploymentId": "dpl_2ifkV5RZ2Dy2cguEeBfoaAo7LLWj"
+    }
+  ],
+  "promotedSameTestedProductionBuild": true,
+  "previousDeployment": "dpl_BVCgbmcppQWWQ1G4dA8xToHc1bNr",
+  "sourceComponentCommit": "00cc7c3d2b54a53e3104e26723aff35df119c929",
+  "schemaOrApiChanged": false
+}

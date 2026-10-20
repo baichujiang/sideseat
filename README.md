@@ -42,7 +42,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 - **Me**：完整基本资料、学生认证、课程、语言、主题/图标/个人展示样式、隐私、安全和设置。
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
-Preview **168** 已安装到默认 iPhone 14 Plus：「我的意愿」卡片收紧「正在寻找」上下留白，顶部 20→12pt、详情行距 12→8pt。普通/最大字号暂停恢复真机复查通过，普通启动 PID 4250。[交付与截图](./docs/releases/2026-10-20-preview168-intent-status-spacing.md)。
+Preview **171** 已包含连续受邀时段的最终修正：App/分享网页合并为一块高亮与一个标签，跨午夜分日，大字号短段文字完整。最终两项真机覆盖六场景，原生完整业务链 179.989 秒/八阶段 API；候选/正式网页布局和真实邀请流程通过，普通启动 PID 4295、普通版 97 保留。[交付与实际截图](./docs/releases/2026-10-20-preview171-continuous-invitation.md)。
+
+此前 Preview **168** 已安装到默认 iPhone 14 Plus：「我的意愿」卡片收紧「正在寻找」上下留白，顶部 20→12pt、详情行距 12→8pt。普通/最大字号暂停恢复真机复查通过，普通启动 PID 4250。[交付与截图](./docs/releases/2026-10-20-preview168-intent-status-spacing.md)。
 
 此前 Preview **166** 已安装到默认 iPhone 14 Plus：收紧同行卡片「推荐依据 / 查看资料」下方间距 8pt，保留点击范围。中文普通字号、德文最大字号及收藏往返真机复查通过，普通启动 PID 4245。[交付与截图](./docs/releases/2026-10-20-preview166-together-card-spacing.md)。
 

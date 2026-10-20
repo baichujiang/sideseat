@@ -1,0 +1,11 @@
+{
+  "passed": 3,
+  "failed": 0,
+  "command": "node --import tsx --test tests/time-polls/invitation-timetable.test.ts",
+  "checks": [
+    "Final time independent of collection grid",
+    "Quarter-hour boundary fractions",
+    "Midnight and repeated DST labels"
+  ],
+  "basis": "Actual command result earlier in this task; no business-domain changes."
+}

@@ -19,9 +19,10 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Preview 168 is the current installed development build; compact spacing around
-  the intention status row passed physical-device acceptance. It retains Preview
-  166 spacing and the committed plan time-block changes from Preview 167. See
+- Preview 171 is the current installed development build; continuous invitation
+  windows passed standard and maximum-text physical-device display acceptance.
+  The App plan journey passed separately in Preview 168; prior spacing and plan
+  changes are retained. See
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97
   is a separate supported older client. Do not uninstall it or drop its API/data
   compatibility as part of archival work.

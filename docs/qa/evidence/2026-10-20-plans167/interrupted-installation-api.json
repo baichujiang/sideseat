@@ -1,0 +1,20 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "contacts-created",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-20T22:00:24.289Z"
+    }
+  ],
+  "failure": "Phone test failed; partial API checks retained."
+}
