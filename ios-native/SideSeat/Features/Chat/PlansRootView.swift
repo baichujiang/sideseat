@@ -63,14 +63,11 @@ enum MVPPlanRoute {
 struct PlansRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
-    @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = PlansStore()
     @State private var selectedSection: MVPPlanSection = .waitingResponse
     @State private var scrollPositions = PlanListScrollPositions()
     @State private var now = Date()
-    @State private var showsAllIncoming = false
-    @State private var showsOutgoing = false
     @State private var showsSectionPicker = false
     @State private var coordinatedPlans: [NativeTimePollList.Item] = []
     @State private var showsAllWaiting = false
@@ -472,18 +469,6 @@ struct PlansRootView: View {
         .accessibilityIdentifier("plans-row-\(plan.id)")
         .accessibilityValue(PlanPresentation.conversation(plan, viewerID: currentUserID, now: now).cardStatusTitle)
         .accessibilityHint("Open Plan in conversation")
-    }
-
-    @ViewBuilder private func coordinatedSection(_ title: LocalizedStringKey, plans: [NativeTimePollList.Item], identifier: String) -> some View {
-        if !plans.isEmpty {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                HStack {
-                    Text(title).font(.headline)
-                    Text(plans.count.formatted()).font(.caption.weight(.medium)).foregroundStyle(.secondary)
-                }.accessibilityAddTraits(.isHeader)
-                ForEach(plans) { plan in coordinatedCard(plan) }
-            }.accessibilityElement(children: .contain).accessibilityIdentifier(identifier)
-        }
     }
 
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
