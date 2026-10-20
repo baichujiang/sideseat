@@ -2789,18 +2789,12 @@
 "Find a time your friends can all make" = "Find a time your friends can all make";
 "For meals, study sessions and sports with friends." = "For meals, study sessions and sports with friends.";
 "Find a time with friends" = "Find a time with friends";
-"Got a friend's link? Fill it in here" = "Got a friend's link? Fill it in here";
-"See an example: a weekend study session" = "See an example: a weekend study session";
 "Example" = "Example";
-"Three friends want to study together" = "Three friends want to study together";
-"One link collects everyone's free time." = "One link collects everyone's free time.";
 "Friend Lin" = "Friend Lin";
 "Friend Chen" = "Friend Chen";
 "Sat\n14:00" = "Sat\n14:00";
 "Sat\n15:00" = "Sat\n15:00";
 "Sun\n10:00" = "Sun\n10:00";
-"You, Lin and Chen are all free on Saturday at 15:00." = "You, Lin and Chen are all free on Saturday at 15:00.";
-"Saturday at 15:00 works for all three" = "Saturday at 15:00 works for all three";
 "You pick the final time. Everyone confirms, then it appears in Calendar." = "You pick the final time. Everyone confirms, then it appears in Calendar.";
 
 "Review replies and arrange the next step" = "Review replies and arrange the next step";
@@ -3034,10 +3028,6 @@
 "Add an activity idea in the plan before sending invitations." = "Add an activity idea in the plan before sending invitations.";
 
 // Plans home: activity identity and friends
-"Turn things to do into time together." = "Turn things to do into time together.";
-"Turn ‘sometime’ into ‘see you soon’." = "Turn ‘sometime’ into ‘see you soon’.";
-"Start a plan. Choose an activity and find a time together." = "Start a plan. Choose an activity and find a time together.";
-"Start your first plan" = "Start your first plan";
 "%@ is organizing" = "%@ is organizing";
 
 "Next: review invitation" = "Next: review invitation";
@@ -3078,5 +3068,4 @@
 "Send to %d accepted people, including you. Pending and declined people will not be notified." = "Send to %d accepted people, including you. Pending and declined people will not be notified.";
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "The organizer can send at any time. Only accepted participants are notified and added to calendars.";
 "Someone declined. You can still send the final plan to the people who accepted." = "Someone declined. You can still send the final plan to the people who accepted.";
-"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan.";
 "Waiting for the organizer to send" = "Waiting for the organizer to send";

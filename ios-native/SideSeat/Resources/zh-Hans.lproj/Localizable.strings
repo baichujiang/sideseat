@@ -2789,18 +2789,12 @@
 "Find a time your friends can all make" = "找个大家都能来的时间";
 "For meals, study sessions and sports with friends." = "约吃饭、自习、运动，都可以用。";
 "Find a time with friends" = "和朋友约时间";
-"Got a friend's link? Fill it in here" = "收到朋友链接？点这里填写";
-"See an example: a weekend study session" = "看个例子：周末一起自习";
 "Example" = "示例";
-"Three friends want to study together" = "三位朋友想一起自习";
-"One link collects everyone's free time." = "发一个链接，就能把大家的空闲放到同一张表里。";
 "Friend Lin" = "小林";
 "Friend Chen" = "小陈";
 "Sat\n14:00" = "周六\n14:00";
 "Sat\n15:00" = "周六\n15:00";
 "Sun\n10:00" = "周日\n10:00";
-"You, Lin and Chen are all free on Saturday at 15:00." = "你、小林和小陈在周六 15:00 都有空。";
-"Saturday at 15:00 works for all three" = "周六 15:00，3 人都有空";
 "You pick the final time. Everyone confirms, then it appears in Calendar." = "你选最终时间，大家确认后，这次自习就会进入日历。";
 
 "Review replies and arrange the next step" = "查看回复，安排下一步";
@@ -3034,10 +3028,6 @@
 "Add an activity idea in the plan before sending invitations." = "先返回计划添加一个活动建议，再发送邀请。";
 
 // Plans home: activity identity and friends
-"Turn things to do into time together." = "把想做的事，约成见面";
-"Turn ‘sometime’ into ‘see you soon’." = "把「改天约」\n变成「周末见」";
-"Start a plan. Choose an activity and find a time together." = "发个计划，一起选活动、找时间。";
-"Start your first plan" = "发起第一个计划";
 "%@ is organizing" = "%@ 发起";
 
 "Next: review invitation" = "下一步：确认邀请";
@@ -3078,5 +3068,4 @@
 "Send to %d accepted people, including you. Pending and declined people will not be notified." = "将向 %d 位已接受者（含你）正式发出。未回复和拒绝的人不会收到通知。";
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "发起人可随时正式发出，只有已接受者会收到通知并加入日历。";
 "Someone declined. You can still send the final plan to the people who accepted." = "有人拒绝了，你仍可向已接受的人正式发出。";
-"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "选定最终时间并收集回复，准备好即可正式发出。最终安排只包含已接受的人。";
 "Waiting for the organizer to send" = "待发起人正式发出";

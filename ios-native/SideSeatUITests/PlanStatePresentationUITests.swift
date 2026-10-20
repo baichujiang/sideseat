@@ -3,7 +3,7 @@ import XCTest
 @MainActor final class PlanStatePresentationUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false) {
+    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false, loading: Bool = false) {
         if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
             app = XCUIApplication(bundleIdentifier: bundle)
         } else { app = XCUIApplication() }
@@ -12,6 +12,7 @@ import XCTest
         if accessibility { app.launchArguments += ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] }
         if layout { app.launchArguments += ["--ui-testing-plans-mixed-waiting", "--ui-testing-plans-waiting-rail"] }
         if reference { app.launchArguments += ["--ui-testing-mutual-opportunity"] }
+        if loading { app.launchArguments += ["--ui-testing-plans-loading"] }
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
@@ -19,6 +20,22 @@ import XCTest
     }
 
     override func tearDown() { app?.terminate() }
+
+    func testInitialLoadingDoesNotShowTheEmptyPlanLayout() {
+        continueAfterFailure = false
+        launch(loading: true)
+        let loading = app.descendants(matching: .any)["plans-loading"].firstMatch
+        XCTAssertTrue(loading.waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["plans-create-primary"].exists,
+                       "Do not display the empty plan layout before the first response")
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        capture("initial-loading")
+        let row = app.buttons["plans-row-ui-plan-1"]
+        XCTAssertTrue(row.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["plans-create-primary"].exists)
+        XCTAssertFalse(loading.exists)
+        capture("initial-loading-to-plans")
+    }
 
     func testTogetherAndPlansCardStyleReference() {
         continueAfterFailure = false

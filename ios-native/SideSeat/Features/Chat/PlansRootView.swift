@@ -85,6 +85,7 @@ struct PlansRootView: View {
     @State private var repeatPlan: NativePlanRequest?
 
     private var hasPlans: Bool { !coordinatedPlans.isEmpty || !store.plans.isEmpty }
+    private var initiallyLoading: Bool { !hasPlans && (!coordinationLoaded || !store.hasLoaded) }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -114,7 +115,7 @@ struct PlansRootView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbarBackground(SideSeatTheme.PlanHome.background, for: .navigationBar)
         .toolbar {
-            if hasPlans {
+            if hasPlans || initiallyLoading {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showsPlanCreation = true } label: { Label("Start a plan", systemImage: "plus").font(.subheadline.weight(.semibold)).labelStyle(.titleAndIcon) }
                         .tint(SideSeatTheme.PlanHome.ink)
@@ -144,7 +145,7 @@ struct PlansRootView: View {
         .task { await loadCoordinatedPlans() }
         .background(PlanListReturnObserver(positions: scrollPositions))
         .task { if !store.hasLoaded { await store.load(using: session) } }
-        .onAppear { now = Date(); Task { await loadCoordinatedPlans() } }
+        .onAppear { now = Date() }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
             if date.timeIntervalSince(now) >= 60 || coordinatedPlans.contains(where: {
                 ($0.expiresAt ?? $0.chosenStart).map { now < $0 && $0 <= date } == true
@@ -247,57 +248,60 @@ struct PlansRootView: View {
 
     @ViewBuilder
     private func sectionContent(_ section: MVPPlanSection) -> some View {
-        if section == .waitingResponse { planActions }
-        if !coordinationLoaded && coordinatedPlans.isEmpty {
-            ProgressView("Loading plans").frame(maxWidth: .infinity, minHeight: 70)
-        } else if section != .waitingResponse {
-            ForEach(coordinated(in: section)) { plan in
-                if section == .upcoming { coordinatedOverview(plan, style: .meetup) }
-                else { coordinatedCard(plan) }
-            }
-        }
-        if let coordinationError {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                Text(coordinationError).font(.footnote).foregroundStyle(SideSeatTheme.danger)
-                Button("Try again") { Task { await loadCoordinatedPlans() } }.frame(minHeight: 44)
-            }
-        }
-
-        if (!store.hasLoaded || store.isLoading) && store.plans.isEmpty {
+        if initiallyLoading {
             SSLoadingState("Loading plans")
                 .frame(maxWidth: .infinity, minHeight: 200)
                 .accessibilityIdentifier("plans-loading")
-        } else if let issue = store.issue, store.plans.isEmpty {
-            ContentUnavailableView {
-                Label("Plans unavailable", systemImage: "calendar.badge.exclamationmark")
-            } description: { Text(issue) } actions: {
-                Button("Try again") { Task { await store.load(using: session) } }
-            }
-            .accessibilityIdentifier("plans-load-error")
         } else {
+            if section == .waitingResponse { planActions }
+            if let coordinationError {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    Text(coordinationError).font(.footnote).foregroundStyle(SideSeatTheme.danger)
+                    Button("Try again") { Task { await loadCoordinatedPlans() } }.frame(minHeight: 44)
+                }
+            }
             if let issue = store.issue {
-                Label(issue, systemImage: "wifi.exclamationmark")
-                    .font(.footnote).foregroundStyle(SideSeatTheme.danger)
-                    .padding(SideSeatTheme.spaceMD)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(SideSeatTheme.danger.opacity(0.08),
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    .accessibilityIdentifier("plans-issue-banner")
+                if hasPlans {
+                    Label(issue, systemImage: "wifi.exclamationmark")
+                        .font(.footnote).foregroundStyle(SideSeatTheme.danger)
+                        .padding(SideSeatTheme.spaceMD)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(SideSeatTheme.danger.opacity(0.08),
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .accessibilityIdentifier("plans-issue-banner")
+                } else {
+                    ContentUnavailableView {
+                        Label("Plans unavailable", systemImage: "calendar.badge.exclamationmark")
+                    } description: { Text(issue) } actions: {
+                        Button("Try again") { Task { await store.load(using: session) } }
+                    }
+                    .accessibilityIdentifier("plans-load-error")
+                }
             }
             let visiblePlans = plans(in: section)
             if section == .waitingResponse {
                 actionOverview
-            } else if visiblePlans.isEmpty { if coordinated(in: section).isEmpty { emptyState(for: section) } }
-            else {
-                LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                    if section == .upcoming {
-                        upcomingPlanGroups(visiblePlans)
-                    } else {
-                        ForEach(visiblePlans) { plan in planRow(plan, section: section) }
-                    }
+            } else {
+                ForEach(coordinated(in: section)) { plan in
+                    if section == .upcoming { coordinatedOverview(plan, style: .meetup) }
+                    else { coordinatedCard(plan) }
                 }
-                .accessibilityIdentifier(section.accessibilityIdentifier)
-                .accessibilityValue("\(visiblePlans.count)")
+                if visiblePlans.isEmpty {
+                    if coordinated(in: section).isEmpty, coordinationLoaded, store.hasLoaded,
+                       coordinationError == nil, store.issue == nil {
+                        emptyState(for: section)
+                    }
+                } else {
+                    LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                        if section == .upcoming {
+                            upcomingPlanGroups(visiblePlans)
+                        } else {
+                            ForEach(visiblePlans) { plan in planRow(plan, section: section) }
+                        }
+                    }
+                    .accessibilityIdentifier(section.accessibilityIdentifier)
+                    .accessibilityValue("\(visiblePlans.count)")
+                }
             }
         }
     }
@@ -305,16 +309,7 @@ struct PlansRootView: View {
     private var planActions: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             if hasPlans {
-                let layout = dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-                layout {
-                    Text("Turn things to do into time together.")
-                        .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                    openLink
-                }
+                openLink
             } else {
                 Button { showsPlanCreation = true } label: {
                     Label("Start a plan", systemImage: "plus")

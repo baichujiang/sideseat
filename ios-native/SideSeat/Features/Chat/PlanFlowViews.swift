@@ -1,41 +1,5 @@
 import SwiftUI
 
-/// A screen tells the viewer the one task to finish before moving on.
-struct PlanTaskHeader: View {
-    let step: String
-    let title: String
-    let detail: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            Text(LocalizedStringKey(step)).font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            Text(LocalizedStringKey(title)).font(.title2.weight(.bold)).fixedSize(horizontal: false, vertical: true)
-            Text(LocalizedStringKey(detail)).font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-        }.frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-struct PlanGuideRow: View {
-    let number: Int
-    let title: String
-    let detail: String
-    var complete = false
-
-    var body: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
-            Image(systemName: complete ? "checkmark.circle.fill" : "\(number).circle.fill")
-                .font(.title3).foregroundStyle(complete ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
-                .frame(width: 28).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
-                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }.accessibilityElement(children: .combine)
-    }
-}
-
 enum PlanNextStep: String, Sendable {
     case suggestActivity, chooseActivity, waitForActivity
     case fillAvailability, shareAvailability, chooseTime, confirm, waitForOrganizer, waitForReplies, viewPlan

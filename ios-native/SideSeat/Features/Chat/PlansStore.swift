@@ -27,7 +27,7 @@ final class PlansStore {
                 return
             }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-loading") {
-                do { try await Task.sleep(for: .seconds(3)) } catch { return }
+                do { try await Task.sleep(for: .seconds(6)) } catch { return }
             }
             if ProcessInfo.processInfo.arguments.contains("--ui-testing-plans-error") {
                 plans = []; issue = "UI test: plans unavailable"; return

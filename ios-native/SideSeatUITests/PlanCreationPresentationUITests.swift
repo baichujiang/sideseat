@@ -51,6 +51,24 @@ import XCTest
         capture("single-form-default")
     }
 
+    func testEmptyHomeWaitsForInitialLoadBeforeShowingItsActions() {
+        app.terminate()
+        app.launchArguments.append("--ui-testing-plans-loading")
+        app.launch(); app.tabBars.buttons["计划"].tap()
+        let loading = app.descendants(matching: .any)["plans-loading"].firstMatch
+        XCTAssertTrue(loading.waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["plans-create-primary"].exists)
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable)
+        capture("empty-home-initial-loading")
+        XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 10))
+        XCTAssertFalse(loading.exists)
+        XCTAssertFalse(app.buttons["plans-create-unified"].exists)
+        XCTAssertFalse(app.buttons["plans-purpose-example"].exists)
+        XCTAssertTrue(app.buttons["plans-open-link"].isHittable)
+        capture("empty-home-after-loading")
+        openCreation(); cancel().tap(); assertHittable(homeCreate)
+    }
+
     func testActivityIdeasIsASecondaryShortcutAndKeepsTheSameForm() {
         app.tabBars.buttons["计划"].tap(); openCreation()
         let title = app.textFields["time-poll-title"]

@@ -2788,18 +2788,12 @@
 "Find a time your friends can all make" = "Eine Zeit finden, die allen passt";
 "For meals, study sessions and sports with friends." = "Für Essen, Lernen und Sport mit Freunden.";
 "Find a time with friends" = "Zeit mit Freunden finden";
-"Got a friend's link? Fill it in here" = "Link von Freunden erhalten? Hier antworten";
-"See an example: a weekend study session" = "Beispiel: am Wochenende zusammen lernen";
 "Example" = "Beispiel";
-"Three friends want to study together" = "Drei Freunde möchten zusammen lernen";
-"One link collects everyone's free time." = "Ein Link sammelt die freien Zeiten aller.";
 "Friend Lin" = "Lin";
 "Friend Chen" = "Chen";
 "Sat\n14:00" = "Sa\n14:00";
 "Sat\n15:00" = "Sa\n15:00";
 "Sun\n10:00" = "So\n10:00";
-"You, Lin and Chen are all free on Saturday at 15:00." = "Du, Lin und Chen habt am Samstag um 15:00 Zeit.";
-"Saturday at 15:00 works for all three" = "Samstag 15:00 passt allen drei";
 "You pick the final time. Everyone confirms, then it appears in Calendar." = "Du wählst die Zeit. Nach allen Zusagen erscheint das Treffen im Kalender.";
 
 "Review replies and arrange the next step" = "Antworten prüfen und weiter planen";
@@ -3033,10 +3027,6 @@
 "Add an activity idea in the plan before sending invitations." = "Füge im Plan eine Aktivitätsidee hinzu, bevor du Einladungen sendest.";
 
 // Plans home: activity identity and friends
-"Turn things to do into time together." = "Aus Ideen wird gemeinsame Zeit.";
-"Turn ‘sometime’ into ‘see you soon’." = "Aus „irgendwann“ wird „bis bald“.";
-"Start a plan. Choose an activity and find a time together." = "Starte einen Plan. Findet gemeinsam eine Aktivität und einen Termin.";
-"Start your first plan" = "Ersten Plan starten";
 "%@ is organizing" = "%@ organisiert";
 
 "Next: review invitation" = "Weiter: Einladung prüfen";
@@ -3077,5 +3067,4 @@
 "Send to %d accepted people, including you. Pending and declined people will not be notified." = "An %d Personen mit Zusage senden, einschließlich dir. Personen ohne Zusage werden nicht benachrichtigt.";
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "Der Organisator kann jederzeit senden. Nur Personen mit Zusage werden benachrichtigt und erhalten einen Kalendereintrag.";
 "Someone declined. You can still send the final plan to the people who accepted." = "Jemand hat abgesagt. Du kannst den endgültigen Plan trotzdem an Personen mit Zusage senden.";
-"Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "Wähle die endgültige Zeit, sammle Antworten und sende, sobald du bereit bist. Nur Personen mit Zusage nehmen teil.";
 "Waiting for the organizer to send" = "Wartet auf endgültigen Versand";
