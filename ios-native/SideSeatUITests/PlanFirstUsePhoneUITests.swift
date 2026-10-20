@@ -184,6 +184,8 @@ import XCTest
         let count = app.staticTexts["unified-plan-confirmation-count"]
         wait(count, labelContains: "1/2 人已确认")
         XCTAssertEqual(app.buttons["unified-plan-choose-again"].label, "另选时间")
+        let finalStatus = app.descendants(matching: .any)["unified-plan-phase"].firstMatch
+        XCTAssertTrue(finalStatus.label.contains("待你正式发出"))
         capture(app, "10-awaiting-confirmation"); phase("awaiting-confirmation")
 
         safari.activate()

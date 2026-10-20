@@ -72,6 +72,22 @@ export async function sendApnsNotification(
   payload: UserPushPayload,
   environment: ApnsEnvironment,
 ): Promise<ApnsSendResult> {
+  const topic = apnsBundleId();
+  const result = await sendToApnsTopic(deviceToken, payload, environment, topic);
+  // Preview is a separate development app. Older registrations have no bundle
+  // metadata; APNs can identify this exact mismatch without altering stored tokens.
+  if (environment === "sandbox" && topic === "app.sideseat.mobile" && !result.ok
+      && result.reason === "DeviceTokenNotForTopic") {
+    const preview = await sendToApnsTopic(deviceToken, payload, environment, "app.sideseat.mobile.preview");
+    if (preview.ok) console.info("APNs accepted notification for Preview topic");
+    return preview;
+  }
+  return result;
+}
+
+async function sendToApnsTopic(
+  deviceToken: string, payload: UserPushPayload, environment: ApnsEnvironment, topic: string,
+): Promise<ApnsSendResult> {
   const credentials = apnsCredentialsForEnvironment(environment);
   if (!credentials) {
     return {
@@ -84,7 +100,6 @@ export async function sendApnsNotification(
 
   const token = createApnsProviderToken(credentials, environment);
   const host = apnsHostForEnvironment(environment);
-  const topic = apnsBundleId();
   const body = JSON.stringify(buildApnsPayload(payload));
 
   return await new Promise<ApnsSendResult>((resolve) => {

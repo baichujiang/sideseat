@@ -236,6 +236,10 @@ struct UnifiedPlanConfirmationView: View {
                             .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("time-poll-edit-name")
                     }
                 }
+                if canReply && (mine?.status == "INVITED" || mine == nil) {
+                    Button("Reply later") { dismiss() }.frame(minHeight: 44)
+                        .accessibilityIdentifier("unified-plan-ignore")
+                }
                 if !poll.isOwner && mine == nil && poll.planningMode != "FIXED" {
                     Text("You are not included in this invitation. Your availability is saved.")
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("unified-plan-not-included")
@@ -277,10 +281,6 @@ struct UnifiedPlanConfirmationView: View {
                     PlanActionButton(title: AppLocalization.string("I can't attend"), symbol: "xmark.circle", kind: .decline,
                                      accessibilityID: "unified-plan-decline") { reply("DECLINED") }
                         .disabled(mine?.status == "DECLINED")
-                    if mine?.status == "INVITED" || mine == nil {
-                        Button("Reply later") { dismiss() }.frame(maxWidth: .infinity, minHeight: 44)
-                            .accessibilityIdentifier("unified-plan-ignore")
-                    }
                 } else if poll.planningPhase == "INVITING" && poll.isOwner {
                     Text("Send whenever you are ready. Pending replies and declines do not hold up this plan.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
