@@ -1,0 +1,15 @@
+{
+  "productionUnchanged": true,
+  "deploymentId": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "state": "READY",
+  "target": "production",
+  "url": "https://sideseat-qzui3anno-baichus-projects.vercel.app",
+  "aliases": [
+    "api.sideseat.de",
+    "www.sideseat.de",
+    "sideseat.de"
+  ],
+  "webChanges": false,
+  "apiChanges": false,
+  "schemaChanges": false
+}

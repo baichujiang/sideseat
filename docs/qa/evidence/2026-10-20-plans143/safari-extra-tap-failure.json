@@ -1,0 +1,15 @@
+{
+  "children": [
+    {
+      "name": "PlanFirstUsePhoneUITests.swift:147: XCTAssertEqual failed: (\"Optional(\"0\")\") is not equal to (\"Optional(\"1\")\") - Web taps must retain previously selected free time",
+      "nodeType": "Failure Message"
+    }
+  ],
+  "duration": "1分钟26秒",
+  "durationInSeconds": 86.23099100589752,
+  "name": "testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+  "nodeIdentifier": "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+  "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+  "nodeType": "Test Case",
+  "result": "Failed"
+}

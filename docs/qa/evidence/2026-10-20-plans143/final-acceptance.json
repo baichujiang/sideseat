@@ -1,0 +1,24 @@
+{
+  "nativeSourceCommit": "9aec15d4bba5c83c3a7cd9df4fc47ab8bb1c16d9",
+  "previewBuild": 143,
+  "productionUnchanged": "dpl_D7xgQPzwtP4GC9nhTLQoLtgwM8cJ",
+  "nativeTests": 25,
+  "domainTests": 13,
+  "productionBrowserChecks": 32,
+  "nativePhone": {
+    "result": "Passed",
+    "seconds": 311.9977959394455,
+    "apiBoundaries": 12
+  },
+  "safariPhone": {
+    "result": "Passed",
+    "seconds": 194.4456090927124,
+    "apiBoundaries": 8
+  },
+  "normalLaunchPID": 3339,
+  "deviceProcessObserved": true,
+  "historicalFailuresRetained": true,
+  "accountsDeleted": 12,
+  "plansDeleted": 9,
+  "finalVerdict": "Passed"
+}

@@ -1,0 +1,14 @@
+{
+  "complete": false,
+  "verifiedPhasesBeforeInterrupt": {
+    "native": [],
+    "safari": [
+      "created-empty",
+      "created-and-saved",
+      "guest-saved",
+      "owner-edited",
+      "owner-restored"
+    ]
+  },
+  "note": "Interrupted after reset-button failure. Previous-run temporary observer receipts were discarded; these are log-observed partial checks only."
+}

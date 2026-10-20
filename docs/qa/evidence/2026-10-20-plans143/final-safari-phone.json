@@ -1,0 +1,20 @@
+{
+  "device": {
+    "architecture": "arm64e",
+    "deviceId": "00008110-001A69110CC1401E",
+    "deviceName": "iPhone (4)",
+    "modelName": "iPhone 14 Plus",
+    "osBuildNumber": "23G83",
+    "osVersion": "26.6.1",
+    "platform": "iOS"
+  },
+  "test": {
+    "duration": "3分钟14秒",
+    "durationInSeconds": 194.4456090927124,
+    "name": "testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+    "nodeIdentifier": "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+    "nodeIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+    "nodeType": "Test Case",
+    "result": "Passed"
+  }
+}

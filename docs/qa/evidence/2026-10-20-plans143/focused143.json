@@ -1,0 +1,30 @@
+{
+  "result": "Passed",
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "startTime": 1792490523.58,
+  "finishTime": 1792490558.674,
+  "testFailures": [],
+  "deviceConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64e",
+        "deviceId": "00008110-001A69110CC1401E",
+        "deviceName": "iPhone (4)",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23G83",
+        "osVersion": "26.6.1",
+        "platform": "iOS"
+      },
+      "expectedFailures": 0,
+      "failedTests": 0,
+      "passedTests": 1,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ]
+}

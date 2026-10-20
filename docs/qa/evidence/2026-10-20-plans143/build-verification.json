@@ -1,0 +1,18 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": "143",
+  "executableSHA256": "b50ed026e6723ad42f1a66993ebc58dbc14bb5f628e3bb3d11c673b282cec574",
+  "signatureVerified": true,
+  "buildLog": "/tmp/sideseat143-final-build.log",
+  "installLog": "/tmp/sideseat143-final-install.log",
+  "sourcesSHA256": {
+    "ios-native/SideSeat/Features/Chat/TimePoll.swift": "0976c821832b4a692b0be27b349a6f1bfa722a6f583e1e44cc065f35bd58a2f3",
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift": "f6812aac71d5148b7a32107d01077e55f136a9f98ee5daf0e4ed99d5222dc687",
+    "ios-native/Configuration/Preview.xcconfig": "ad26e709bdcf1ae746f75479d1668caa463da5efbc5e5add0ed06e7e7d82b0cd",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings": "8dabcbfeb489b2f264fa8ede235c079a6adc0278d31b32f7e3293bc3e0c63f23",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings": "b8ab2209768601b5793a0ca7dc2f558f0221bc3e362af3880b18a7e176edc98f",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings": "65c55e01109afb363041a8ce2d99dab86faf4c89d39ee12119e9d777d0050913"
+  },
+  "nativeSourceCommit": "9aec15d4bba5c83c3a7cd9df4fc47ab8bb1c16d9"
+}

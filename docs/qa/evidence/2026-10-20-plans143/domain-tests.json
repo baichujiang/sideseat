@@ -1,0 +1,6 @@
+{
+  "command": "npx tsx --test tests/time-polls/*.test.ts",
+  "passed": 13,
+  "failed": 0,
+  "exitCode": 0
+}

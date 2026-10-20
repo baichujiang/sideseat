@@ -1,0 +1,15 @@
+{
+  "accountsDeleted": 12,
+  "plansDeletedAndShareLinks404": 9,
+  "receipts": [
+    "repro-fixture-cleanup",
+    "focused-cleanup",
+    "selection143-cleanup",
+    "initial-full-native-cleanup",
+    "initial-full-safari-cleanup",
+    "final-native-cleanup",
+    "safari-extra-tap-cleanup",
+    "final-safari-cleanup"
+  ],
+  "remainingLiveCredentialFixtures": 0
+}

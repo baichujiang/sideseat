@@ -1,0 +1,27 @@
+{
+  "result": "Failed",
+  "passedTests": 0,
+  "failedTests": 2,
+  "skippedTests": 0,
+  "startTime": 1792490589.186,
+  "finishTime": 1792490757.771,
+  "testFailures": [
+    {
+      "failureText": "XCTAssertFalse failed",
+      "targetName": "PlanPresentationPhone117UITests",
+      "testIdentifier": 1,
+      "testIdentifierString": "PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar()",
+      "testIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testFirstVisitCreateShareFillInviteConfirmAndCalendar",
+      "testName": "testFirstVisitCreateShareFillInviteConfirmAndCalendar()"
+    },
+    {
+      "failureText": "Testing was canceled",
+      "targetName": "PlanPresentationPhone117UITests",
+      "testIdentifier": 2,
+      "testIdentifierString": "PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar()",
+      "testIdentifierURL": "test://com.apple.xcode/PlanPresentationPhone117/PlanPresentationPhone117UITests/PlanFirstUsePhoneUITests/testNativeParticipantDirectTimetableInviteConfirmAndCalendar",
+      "testName": "testNativeParticipantDirectTimetableInviteConfirmAndCalendar()"
+    }
+  ],
+  "note": "Stopped after the reset button hit the system AssistiveTouch overlay; second journey interrupted. Final layout moves reset into the fixed bottom bar."
+}
