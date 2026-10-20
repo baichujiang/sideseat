@@ -163,7 +163,7 @@ import XCTest
         capture("single-form-dark-large")
         let fixed = app.buttons["plan-mode-fixed"]
         reveal(fixed); fixed.tap()
-        reveal(suggestionOption); XCTAssertTrue(suggestionOption.isSelected)
+        reveal(suggestionOption, towardTop: true); XCTAssertTrue(suggestionOption.isSelected)
         XCTAssertEqual(create.label, "发起计划"); XCTAssertTrue(create.isHittable)
         capture("fixed-ideas-dark-large")
         let collect = app.buttons["plan-mode-collect"]
@@ -238,12 +238,12 @@ import XCTest
         XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["time-poll-create-confirm"].exists)
     }
-    private func reveal(_ element: XCUIElement) {
+    private func reveal(_ element: XCUIElement, towardTop: Bool = false) {
         for _ in 0..<8 {
             let top = app.navigationBars.firstMatch.frame.maxY + 8
             let bottom = app.buttons["time-poll-create-confirm"].frame.minY - 8
             if element.exists && element.isHittable && element.frame.midY > top && element.frame.midY < bottom { break }
-            if element.exists && element.frame.midY < top { app.swipeDown() } else { app.swipeUp() }
+            if element.exists && element.frame.midY.isFinite ? element.frame.midY < top : towardTop { app.swipeDown() } else { app.swipeUp() }
         }
         XCTAssertTrue(element.waitForExistence(timeout: 10))
         XCTAssertTrue(element.isHittable)
