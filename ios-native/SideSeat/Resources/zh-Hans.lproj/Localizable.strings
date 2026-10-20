@@ -3045,3 +3045,13 @@
 "Only invite selected people" = "仅邀请已勾选的人";
 "Invite more friends by link" = "通过链接邀请其他朋友";
 "Invite friends" = "邀请朋友";
+
+"Submit my availability" = "提交我的空闲";
+
+"Submitting…" = "提交中…";
+
+"Couldn't submit" = "提交失败";
+
+"Availability submitted" = "已提交空闲";
+
+"Not submitted" = "未提交";

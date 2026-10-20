@@ -119,97 +119,95 @@ struct TimePollTests {
         #expect(try collectingPoll().timetableSelections(ownSelection: [0, 1]) == [[0, 1]])
     }
 
-    @Test("Ten rapid taps update immediately and coalesce into one durable snapshot")
+    @Test("Selections stay local until one explicit submission")
     @MainActor
-    func autosaveDebounce() async throws {
+    func manualSubmission() async throws {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
         let store = TimePollStore(token: "poll", poll: try collectingPoll())
-        for id in 0..<10 { store.selected.insert(id); store.save(session: session) }
-        #expect(store.selected == Set(0..<10)); #expect(!store.saved && store.saving && !store.canMutate)
-        try await Task.sleep(for: .milliseconds(250))
+        for id in 0..<10 { store.selected.insert(id) }
+        try await Task.sleep(for: .seconds(2))
         #expect(await transport.writes.isEmpty)
+        #expect(store.hasChanges && !store.saved && !store.saving)
+        let submit = Task { await store.submit(session: session) }
         await transport.waitUntilFirstStarted()
+        await store.submit(session: session)
         #expect(await transport.writes == [Array(0..<10)])
-        await transport.finishFirst()
-        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(store.saved && store.canMutate)
-        store.save(session: session)
-        #expect(!store.saving); #expect(await transport.writes.count == 1)
+        await transport.finishFirst(); await submit.value
+        #expect(store.saved && !store.hasChanges)
+        await store.submit(session: session)
+        #expect(await transport.writes.count == 1)
     }
 
-    @Test("Leaving bypasses debounce and a failed save keeps the latest choices for retry")
+    @Test("Failed submission keeps newer edits and only explicit retry publishes them")
     @MainActor
-    func autosaveFlushAndRetry() async throws {
+    func manualRetry() async throws {
         let transport = PollSaveTransport(firstStatus: 503)
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
         let store = TimePollStore(token: "poll", poll: try collectingPoll())
-        store.selected = [0]; store.save(session: session); store.flush(session: session)
-        await transport.waitUntilFirstStarted()
-        store.selected = [1, 2]; store.save(session: session)
-        await transport.finishFirst()
-        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(store.selected == [1, 2]); #expect(!store.saved && store.error != nil && !store.canMutate)
-        try await Task.sleep(for: .milliseconds(800))
+        store.selected = [0]
+        let submit = Task { await store.submit(session: session) }
+        await transport.waitUntilFirstStarted(); store.selected = [1, 2]
+        await transport.finishFirst(); await submit.value
+        try await Task.sleep(for: .seconds(1))
+        #expect(store.selected == [1, 2] && store.hasChanges && store.error != nil)
         #expect(await transport.writes == [[0]])
-        store.flush(session: session)
-        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(store.saved && store.error == nil && store.canMutate)
+        await store.submit(session: session)
+        #expect(store.saved && store.error == nil)
         #expect(await transport.writes == [[0], [1, 2]])
     }
 
-    @Test("Switching accounts during debounce never submits the previous account's choices")
+    @Test("Editing during submission never publishes or discards the newer draft")
     @MainActor
-    func autosaveAccountDuringDebounce() async throws {
+    func manualSubmissionSnapshot() async throws {
         let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
         let store = TimePollStore(token: "poll", poll: try collectingPoll())
-        store.selected = [0]; store.save(session: session)
-        await session.login(identifier: "other", password: "test")
-        try await Task.sleep(for: .milliseconds(800))
-        #expect(await transport.writes.isEmpty); #expect(!store.saving && !store.saved)
+        store.selected = [0]
+        let submit = Task { await store.submit(session: session) }
+        await transport.waitUntilFirstStarted(); store.selected = [1, 2]
+        await transport.finishFirst(); await submit.value
+        #expect(store.selected == [1, 2] && store.poll?.mySlotIds == [0] && !store.saved)
+        try await Task.sleep(for: .seconds(1))
+        #expect(await transport.writes == [[0]])
+        await store.submit(session: session)
+        #expect(store.saved && store.poll?.mySlotIds == [1, 2])
     }
 
-    @Test("Quick consecutive drags save in order and leave the latest draft acknowledged")
+    @Test("Acknowledgement from a previous account never changes the current view")
     @MainActor
-    func autosaveOrder() async throws {
-        let transport = PollSaveTransport()
-        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
-        session.installUITestingSession()
-        let store = TimePollStore(token: "poll", poll: try collectingPoll())
-        store.displayName = "Ming"
-        store.selected = [0]; store.save(session: session)
-        await transport.waitUntilFirstStarted()
-        store.selected = [1, 2]; store.save(session: session)
-        await transport.finishFirst()
-        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(!store.saving); #expect(store.saved)
-        #expect(store.selected == [1, 2]); #expect(store.poll?.mySlotIds == [1, 2])
-        #expect(await transport.writes == [[0], [1, 2]])
-    }
-
-    @Test("Switching accounts drops queued availability from the previous account")
-    @MainActor
-    func autosaveAccountScope() async throws {
+    func manualSubmissionAccountScope() async throws {
         for status in [200, 401] {
-        let transport = PollSaveTransport(firstStatus: status)
+            let transport = PollSaveTransport(firstStatus: status)
+            let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+            session.installUITestingSession()
+            let store = TimePollStore(token: "poll", poll: try collectingPoll())
+            store.selected = [0]
+            let submit = Task { await store.submit(session: session) }
+            await transport.waitUntilFirstStarted()
+            await session.login(identifier: "other", password: "test")
+            await transport.finishFirst(); await submit.value
+            #expect(!store.saved && !store.saving && store.poll?.didRespond == false)
+            #expect(await transport.writes == [[0]])
+            #expect(await transport.refreshCount == 0)
+        }
+    }
+
+    @Test("No free time is a valid explicit response")
+    @MainActor
+    func manualEmptyResponse() async throws {
+        let transport = PollSaveTransport()
         let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
         session.installUITestingSession()
         let store = TimePollStore(token: "poll", poll: try collectingPoll())
-        store.displayName = "Ming"; store.selected = [0]; store.save(session: session)
-        await transport.waitUntilFirstStarted()
-        store.selected = [1, 2]; store.save(session: session)
-        await session.login(identifier: "other", password: "test")
-        #expect(session.currentUser?.id == "other-user")
-        await transport.finishFirst()
-        for _ in 0..<100 where store.saving { try await Task.sleep(for: .milliseconds(10)) }
-        #expect(!store.saving); #expect(!store.saved)
-        #expect(await transport.writes == [[0]])
-        #expect(await transport.refreshCount == 0)
-        }
+        store.chooseNoFreeTime()
+        let submit = Task { await store.submit(session: session) }
+        await transport.waitUntilFirstStarted(); await transport.finishFirst(); await submit.value
+        #expect(store.saved && store.poll?.didRespond == true && store.selected.isEmpty)
+        #expect(await transport.writes == [[]])
     }
 
     @Test("A delayed refresh cannot undo an acknowledged save or report an old refresh error")
@@ -222,12 +220,12 @@ struct TimePollTests {
             let store = TimePollStore(token: "poll", poll: try collectingPoll())
             let refresh = Task { await store.load(session: session) }
             await transport.waitForRefresh()
-            store.selected = [2, 3]; store.save(session: session)
+            store.selected = [2, 3]; await store.submit(session: session)
             while store.saving { await Task.yield() }
             await transport.releaseRefresh(); await refresh.value
             #expect(store.selected == [2, 3] && store.poll?.mySlotIds == [2, 3])
             #expect(store.saved && store.error == nil)
-            store.selected.insert(4); store.save(session: session)
+            store.selected.insert(4); await store.submit(session: session)
             while store.saving { await Task.yield() }
             #expect(await transport.writes == [[2, 3], [2, 3, 4]])
         }

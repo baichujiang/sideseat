@@ -25,7 +25,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const accepted = poll?.invitations.filter((person) => person.selected && person.status === "ACCEPTED").length ?? 0;
   const target = poll?.planningMode === "FIXED" ? poll.expectedCount : poll?.invitations.filter((person) => person.selected).length;
   const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations.filter((person) => person.selected);
-  const disabled = busy || saving || !saved;
+  const disabled = busy || saving || state.hasChanges;
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
   const viewerId = poll?.viewerId;
   useEffect(() => {
@@ -39,7 +39,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
   const selectedHours = new Intl.NumberFormat(zh ? "zh-CN" : "en", { maximumFractionDigits: 2 }).format(selectedSlots.reduce((sum, slot) => sum + (Date.parse(slot.end) - Date.parse(slot.start)) / 3600000, 0));
   const failed = !saved && !saving && !!error;
-  const saveTitle = saving ? (zh ? "正在保存…" : "Saving…") : failed ? (zh ? "保存失败" : "Couldn't save") : poll?.didRespond && saved ? (zh ? "已自动保存" : "Saved automatically") : (zh ? "还没有选择空闲" : "No free time selected yet");
+  const saveTitle = saving ? (zh ? "提交中…" : "Submitting…") : failed ? (zh ? "提交失败" : "Couldn't submit") : poll?.didRespond && saved ? (zh ? "已提交空闲" : "Availability submitted") : (zh ? "未提交" : "Not submitted");
   const formatWindow = (start: string, end: string) => {
     const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: poll!.timeZone, year: "numeric", month: "2-digit", day: "2-digit" });
     const first = formatter.format(new Date(start)), last = formatter.format(new Date(end));
@@ -50,12 +50,12 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
     : collecting
       ? choosingActivity
         ? (zh ? "活动还没定，也可以先填空闲。展开活动建议，一起决定做什么。" : "Share free time now, even while choosing what to do. Open activity ideas to suggest or mark interest.")
-        : (zh ? "直接在时间表里填写空闲，收到最终邀请后再确认参加。" : "Share free time in the timetable. Confirm participation when the final invitation arrives.")
+        : (zh ? "在时间表里选好空闲并提交，收到最终邀请后再确认参加。" : "Select free time and submit it. Confirm participation when the final invitation arrives.")
       : replying && mine?.status !== "ACCEPTED"
         ? (zh ? "看清高亮的最终时段，再确认参加。" : "Review the highlighted final time, then confirm participation.")
         : (zh ? "在这里查看最新安排和确认进度。" : "See the latest arrangement and confirmation progress here.");
 
-  return <main lang={zh ? "zh-CN" : "en"} className={styles.page + " min-h-dvh px-4 pt-4 sm:px-6 " + (editing || replying ? "pb-44" : "pb-12")}>
+  return <main lang={zh ? "zh-CN" : "en"} className={styles.page + " min-h-dvh px-4 pt-4 sm:px-6 " + (editing || replying ? "pb-60" : "pb-12")}>
     <div className="mx-auto max-w-4xl lg:max-w-[1440px]">
       <header className="mb-4 flex items-center justify-between gap-4">
         <Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={30} height={30} alt="" className="rounded-lg" />SideSeat</Link>
@@ -143,10 +143,10 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
           <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
               {saving ? <Loader2 className="h-5 w-5 shrink-0 motion-safe:animate-spin" aria-hidden /> : failed ? <AlertCircle className="h-5 w-5 shrink-0 text-amber-700" aria-hidden /> : poll.didRespond && saved ? <CheckCircle2 className={"h-5 w-5 shrink-0 " + styles.savedText} aria-hidden /> : <Circle className="h-5 w-5 shrink-0" aria-hidden />}
-              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : saving ? (zh ? "改动会自动保存" : "Changes save automatically") : poll.didRespond ? (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected") : (zh ? "点亮时间表中的空闲时段" : "Tap free times in the timetable")}</p></div>
+              <div><p role="status" aria-live="polite" aria-atomic="true" className={"text-sm font-semibold " + (saved && poll.didRespond ? styles.savedText : "")}>{saveTitle}</p><p className="mt-0.5 text-xs text-muted-foreground">{failed ? (zh ? "选择仍保留，请重试" : "Your choices are kept. Please retry.") : saving ? (zh ? "本次提交完成后才能分享给其他人" : "Publishing this submission") : poll.didRespond ? (zh ? "已选 " + selectedDays + " 天 · " + selectedHours + " 小时" : selectedDays + " days · " + selectedHours + " hours selected") : (zh ? "点亮时间表中的空闲时段" : "Tap free times in the timetable")}</p></div>
             </div>
-            {failed ? <Button onClick={() => void state.retry()} className={"min-h-12 shrink-0 rounded-xl " + styles.finishButton}>{zh ? "重试保存" : "Retry save"}</Button> : null}
-            <p data-testid="availability-next-step" className="w-full text-xs leading-5 text-muted-foreground">{choosingActivity ? (zh ? "空闲会自动保存。等发起人选定活动和最终时间后，还需明确确认参加。" : "Free time saves automatically. Confirm participation after the organizer chooses the activity and final time.") : zh ? "填写空闲不代表确认参加。等发起人选定最终时间后，请回到这里点「确认参加」。保留此链接，可随时查看和修改。" : "Sharing free time doesn't confirm attendance. Return here to confirm participation after the organizer picks the final time. Keep this link to view and edit."}</p>
+            {!saved ? <Button data-testid="availability-submit" disabled={!state.hasChanges || saving || busy} onClick={() => void state.submit()} className={"min-h-12 w-full shrink-0 rounded-xl sm:w-auto " + styles.finishButton}>{saving ? (zh ? "提交中…" : "Submitting…") : poll.didRespond ? (zh ? "保存修改" : "Save changes") : (zh ? "提交我的空闲" : "Submit my availability")}</Button> : null}
+            <p data-testid="availability-next-step" className="w-full text-xs leading-5 text-muted-foreground">{choosingActivity ? (zh ? "选好后点击「提交我的空闲」。等发起人选定活动和最终时间后，还需明确确认参加。" : "Click Submit my availability when ready. Confirm participation after the organizer chooses the activity and final time.") : zh ? "填写空闲不代表确认参加。等发起人选定最终时间后，请回到这里点「确认参加」。保留此链接，可随时查看和修改。" : "Sharing free time doesn't confirm attendance. Return here to confirm participation after the organizer picks the final time. Keep this link to view and edit."}</p>
           </div>
         </div> : null}
         {replying ? <div className={styles.saveBar + " fixed inset-x-0 bottom-0 z-40 border-t bg-background px-4 pt-3 shadow-[0_-4px_24px_rgb(0_0_0_/_0.05)] sm:px-6"}>

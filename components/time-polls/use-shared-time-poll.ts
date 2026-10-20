@@ -2,28 +2,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SharedTimePoll } from "@/lib/time-polls/browser-types";
 
-type Draft = { participantId: string; displayName: string; slotIds: number[] };
 export function useSharedTimePoll(token: string) {
   const [poll, setPoll] = useState<SharedTimePoll | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+  const [edited, setEdited] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [switchingParticipant, setSwitchingParticipant] = useState(false);
   const [resumed, setResumed] = useState(false);
   const [editingAvailability, setEditingAvailability] = useState(false);
-  const pending = useRef<Draft | null>(null);
-  const running = useRef<Promise<boolean> | null>(null);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const pendingReady = useRef(false);
+  const hasChanges = !!poll?.viewerId && ((!poll.didRespond && edited) || selected.join(",") !== poll.mySlotIds.join(","));
+  const saved = !!poll?.didRespond && !hasChanges;
+  const running = useRef(false);
   const revision = useRef(0);
   const pauseRefresh = useRef(false);
-  pauseRefresh.current = busy || saving || editingName || switchingParticipant || editingAvailability;
+  pauseRefresh.current = busy || saving || hasChanges || editingName || switchingParticipant || editingAvailability;
   const base = `/api/public/time-polls/${encodeURIComponent(token)}`;
   const call = useCallback(async (suffix = "", method = "GET", body?: unknown) => {
-    const response = await fetch(base + suffix, { method, credentials: "same-origin", cache: "no-store", keepalive: method !== "GET", ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}) });
+    const response = await fetch(base + suffix, { method, credentials: "same-origin", cache: "no-store", ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}) });
     const value = await response.json();
     if (!response.ok) throw new Error(value.error?.message ?? "The plan could not be loaded or saved.");
     return value.data as SharedTimePoll & { resumed?: boolean };
@@ -32,12 +30,12 @@ export function useSharedTimePoll(token: string) {
   useEffect(() => {
     let alive = true;
     const refresh = async () => {
-      if (pauseRefresh.current || pending.current || running.current) return;
+      if (pauseRefresh.current || running.current) return;
       const current = revision.current;
       try {
         const data = await call();
-        if (alive && current === revision.current && !pauseRefresh.current && !pending.current && !running.current) {
-          setPoll(data); setSelected(data.mySlotIds); setError("");
+        if (alive && current === revision.current && !pauseRefresh.current && !running.current) {
+          setPoll(data); setSelected(data.mySlotIds); setEdited(false); setError("");
         }
       } catch (cause) { if (alive && current === revision.current) setError((cause as Error).message); }
     };
@@ -47,76 +45,42 @@ export function useSharedTimePoll(token: string) {
   }, [call]);
 
   useEffect(() => {
-    if (saved) return;
+    if (!hasChanges) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [saved]);
+  }, [hasChanges]);
 
-  const flush = useCallback((): Promise<boolean> => {
-    clearTimeout(saveTimer.current); saveTimer.current = undefined;
-    pendingReady.current = true;
-    if (running.current) return running.current;
-    if (!pending.current) return Promise.resolve(true);
-    setSaving(true); setError("");
-    running.current = (async () => {
-      let succeeded = true;
-      while (pendingReady.current && pending.current) {
-        const draft = pending.current; pending.current = null; pendingReady.current = false;
-        try {
-          const data = await call("/response", "PUT", draft);
-          setPoll(data);
-          if (!pending.current) { setSelected(data.mySlotIds); setSaved(true); }
-        } catch (cause) {
-          if (!pending.current) pending.current = draft;
-          clearTimeout(saveTimer.current); saveTimer.current = undefined;
-          pendingReady.current = false;
-          setError((cause as Error).message); setSaved(false);
-          succeeded = false;
-          break;
-        }
-      }
-      running.current = null;
-      setSaving(succeeded && pending.current !== null);
-      return succeeded;
-    })();
-    return running.current;
-  }, [call]);
-
-  useEffect(() => {
-    const leave = () => { void flush(); };
-    const visibility = () => { if (document.visibilityState === "hidden") leave(); };
-    window.addEventListener("pagehide", leave);
-    document.addEventListener("visibilitychange", visibility);
-    return () => {
-      window.removeEventListener("pagehide", leave);
-      document.removeEventListener("visibilitychange", visibility);
-      leave();
-    };
-  }, [flush]);
+  const submit = async () => {
+    if (!poll?.viewerId || poll.phase !== "COLLECTING" || !hasChanges || busy || running.current) return false;
+    running.current = true; setSaving(true); setError("");
+    const submittedRevision = revision.current;
+    try {
+      const data = await call("/response", "PUT", { participantId: poll.viewerId, displayName: poll.myDisplayName, slotIds: selected });
+      setPoll(data);
+      if (submittedRevision === revision.current) { setSelected(data.mySlotIds); setEdited(false); }
+      return true;
+    } catch (cause) { setError((cause as Error).message); return false; }
+    finally { running.current = false; setSaving(false); }
+  };
   const saveSelection = (slots: number[]) => {
     if (!poll?.viewerId) return;
     revision.current += 1;
-    const next = [...new Set(slots)].sort((a, b) => a - b);
-    setSelected(next); setSaved(false); setSaving(true); setError("");
-    pending.current = { participantId: poll.viewerId, displayName: poll.myDisplayName, slotIds: next };
-    pendingReady.current = false;
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => { void flush(); }, 700);
+    setSelected([...new Set(slots)].sort((a, b) => a - b)); setEdited(true); setError("");
   };
   const act = async (suffix: string, method: string, body: unknown) => {
+    if (busy || running.current || hasChanges) return false;
     revision.current += 1; setBusy(true); setError("");
     try {
-      if (!await flush() || pending.current) return false;
       const data = await call(suffix, method, body);
-      setPoll(data); setSelected(data.mySlotIds); setEditingName(false); setSwitchingParticipant(false);
+      setPoll(data); setSelected(data.mySlotIds); setEdited(false); setEditingName(false); setSwitchingParticipant(false);
       if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);
       return true;
     }
     catch (cause) { setError((cause as Error).message); return false; }
     finally { setBusy(false); }
   };
-  return { poll, selected, error, busy, saving, saved, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, retry: flush,
+  return { poll, selected, error, busy, saving, saved, hasChanges, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, setEditingAvailability, saveSelection, submit, retry: submit,
     cancelNameEditing: () => { setEditingName(false); setSwitchingParticipant(false); setError(""); },
     join: (displayName: string) => act("/participant", "POST", { displayName }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),

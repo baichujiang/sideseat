@@ -1,0 +1,95 @@
+// Explicit-submission acceptance against an isolated database or a verified deployment.
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { randomBytes, randomUUID } from 'node:crypto';
+import { chromium, webkit, expect } from '@playwright/test';
+const base = process.argv[2], stage = process.argv[3] ?? 'stage1';
+assert(base);
+const out = path.resolve(process.env.SIDESEAT_QA_OUTPUT ?? 'docs/qa/evidence/2026-10-20-plans137-141');
+fs.mkdirSync(out, { recursive: true });
+const privatePath = path.join(os.tmpdir(), `sideseat-manual-${stage}-private.json`);
+assert(!fs.existsSync(privatePath));
+const fixture = { accounts: [], tokens: [] }, checks = [];
+const persist = () => fs.writeFileSync(privatePath, JSON.stringify(fixture), { mode: 0o600 });
+const cookies = process.env.SIDESEAT_CANDIDATE_COOKIE_FILE ? fs.readFileSync(process.env.SIDESEAT_CANDIDATE_COOKIE_FILE, 'utf8').split('\n').filter(l => l.startsWith('#HttpOnly_') || (l && !l.startsWith('#'))).map(l => {
+  const [domain, , cookiePath, secure, expires, name, value] = l.replace(/^#HttpOnly_/, '').split('\t');
+  return { domain, path: cookiePath, secure: secure === 'TRUE', expires: Number(expires), name, value, httpOnly: l.startsWith('#HttpOnly_'), sameSite: 'Lax' };
+}) : [];
+const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+async function call(route, account, method = 'GET', body, expected = 200) {
+  const response = await fetch(base + route, { method, headers: { 'Content-Type': 'application/json', 'x-sideseat-platform': 'ios', 'Idempotency-Key': randomUUID(), ...(cookieHeader ? { Cookie: cookieHeader } : {}), ...(account ? { Authorization: `Bearer ${account.accessToken}` } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  assert.equal(response.status, expected, `${method} ${route}: ${response.status}`);
+  return [200, 201].includes(expected) ? (await response.json()).data : null;
+}
+try {
+  persist();
+  const owner = { identifier: `planqa_manual_${randomBytes(5).toString('hex')}`, password: randomBytes(22).toString('base64url') };
+  await call('/api/auth/signup', null, 'POST', { username: owner.identifier, password: owner.password, displayName: 'Host Ming', school: 'TUM', studentStatus: 'CURRENT_STUDENT', degreeLevel: 'BACHELOR', semester: 3 }, 201);
+  fixture.accounts.push(owner); persist();
+  owner.accessToken = (await call('/api/v1/auth/login', null, 'POST', { identifier: owner.identifier, password: owner.password, device: { id: randomUUID(), name: 'Manual availability QA', appVersion: '1.0.0', platformVersion: '26.6.1' } })).tokens.accessToken; persist();
+  for (const [engineName, engine] of [['chromium', chromium], ['webkit', webkit]]) {
+    const browser = await engine.launch();
+    const context = await browser.newContext({ storageState: { cookies, origins: [] }, viewport: { width: 1280, height: 1200 }, locale: 'zh-CN' });
+    const page = await context.newPage(), requests = [], errors = [];
+    try {
+      const p = await call('/api/v1/time-polls', owner, 'POST', { title: '手动提交完整验收', timeZone: 'Europe/Berlin', dates: [new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10)], startMinute: 540, endMinute: 900 }, 201);
+      fixture.tokens.push(p.token); persist();
+      const api = `/api/v1/time-polls/${p.token}`, responseURL = `**/api/public/time-polls/${p.token}/response`;
+      const detail = () => call(api, owner), guest = async () => (await detail()).participants.find(x => x.isGuest);
+      page.on('request', r => { if (r.method() === 'PUT' && r.url().endsWith(`/time-polls/${p.token}/response`)) requests.push(r.postDataJSON().slotIds); });
+      page.on('pageerror', e => errors.push(e.message));
+      page.on('dialog', d => void d.accept());
+      await page.goto(`${base}/time-polls/${p.token}`);
+      await page.getByLabel('你的名字', { exact: true }).fill('Guest Lin');
+      await page.getByRole('button', { name: '下一步：选择我的空闲', exact: true }).click();
+      const cell = n => page.getByTestId(`time-poll-cell-${n}`), submit = () => page.getByTestId('availability-submit').click();
+      const saved = () => expect(page.getByText('已提交空闲', { exact: true })).toBeVisible();
+      for (let n = 0; n < 20; n += 2) { await cell(n).click(); await expect(cell(n)).toHaveAttribute('aria-pressed', 'true'); }
+      await page.waitForTimeout(2100);
+      assert.equal(requests.length, 0); assert.equal((await detail()).participants.length, 0);
+      checks.push(`${engineName}: ten taps and two seconds waiting publish no availability`);
+      await submit(); await saved(); assert.equal(requests.length, 1);
+      assert.deepEqual((await guest()).slotIds, Array.from({ length: 20 }, (_, i) => i));
+      checks.push(`${engineName}: one explicit submission persists the complete selection`);
+      let release, started;
+      const gate = new Promise(r => { release = r; }), ready = new Promise(r => { started = r; });
+      await page.route(responseURL, async route => { const response = await route.fetch(); started(); await gate; await route.fulfill({ response }); }, { times: 1 });
+      await cell(0).click(); await submit(); await ready;
+      await cell(2).click(); release();
+      await expect(page.getByText('未提交', { exact: true })).toBeVisible();
+      await page.waitForTimeout(1100); assert.equal(requests.length, 2);
+      await expect(cell(2)).toHaveAttribute('aria-pressed', 'false');
+      assert.deepEqual((await guest()).slotIds, Array.from({ length: 18 }, (_, i) => i + 2));
+      await submit(); await saved(); assert.equal(requests.length, 3);
+      assert.deepEqual((await guest()).slotIds, Array.from({ length: 16 }, (_, i) => i + 4));
+      checks.push(`${engineName}: edits during a slow response stay local until a second explicit submission`);
+      await page.route(responseURL, route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: { message: 'Submission QA failure' } }) }), { times: 1 });
+      await cell(4).click(); await submit();
+      await expect(page.getByText('提交失败', { exact: true })).toBeVisible();
+      await page.waitForTimeout(1100); assert.equal(requests.length, 4);
+      await expect(cell(4)).toHaveAttribute('aria-pressed', 'false');
+      await submit(); await saved(); assert.equal(requests.length, 5);
+      checks.push(`${engineName}: failed submission keeps choices and explicit retry succeeds`);
+      await page.getByRole('button', { name: '这些时间我都没空', exact: true }).click();
+      await submit(); await saved(); assert.deepEqual((await guest()).slotIds, []); assert.equal((await detail()).summary.participantCount, 1);
+      checks.push(`${engineName}: empty availability is a submitted response`);
+      await cell(0).click();
+      await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+      await page.waitForTimeout(1100); assert.equal(requests.length, 6); assert.deepEqual((await guest()).slotIds, []);
+      checks.push(`${engineName}: page departure never implicitly submits a draft`);
+      assert.deepEqual(errors, []);
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(page.getByTestId('availability-submit')).toBeInViewport();
+      await page.screenshot({ path: `${out}/${stage}-${engineName}.png`, fullPage: true });
+    } finally { await context.close(); await browser.close(); }
+  }
+  fs.writeFileSync(`${out}/${stage}.json`, JSON.stringify({ base, checkedAt: new Date().toISOString(), checks, passed: checks.length, failed: 0 }, null, 2));
+  console.log(`${stage}: ${checks.length} checks passed`);
+} finally {
+  for (const token of fixture.tokens) { await call(`/api/v1/time-polls/${token}`, fixture.accounts[0], 'DELETE'); await call(`/api/public/time-polls/${token}`, null, 'GET', undefined, 404); }
+  for (const account of fixture.accounts) { await call('/api/v1/me', account, 'DELETE', { confirmUsername: account.identifier }); await call('/api/v1/me', account, 'GET', undefined, 401); }
+  fs.writeFileSync(`${out}/${stage}-cleanup.json`, JSON.stringify({ accountsDeleted: fixture.accounts.length, plansDeleted: fixture.tokens.length, links404: fixture.tokens.length, oldTokens401: fixture.accounts.length }, null, 2));
+  fs.unlinkSync(privatePath);
+}

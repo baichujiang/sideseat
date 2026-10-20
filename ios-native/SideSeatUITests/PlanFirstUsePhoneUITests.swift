@@ -388,6 +388,33 @@ import XCTest
         let accounts: [NativeAccount]
     }
 
+    func testManualAvailabilityRequiresExplicitSubmission() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires a fresh disposable native account.")
+        let fixture = try JSONDecoder().decode(NativeFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        app.buttons["time-poll-create-confirm"].tap()
+        let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+        XCTAssertTrue(first.waitForExistence(timeout: 20)); first.tap(); second.tap()
+        Thread.sleep(forTimeInterval: 2)
+        XCTAssertFalse(app.staticTexts["time-poll-saved"].exists)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        nativePhase("manual-draft"); capture(app, "manual-draft-not-published")
+        nativeWaitSaved(); nativePhase("manual-submitted")
+        first.tap(); Thread.sleep(forTimeInterval: 2)
+        XCTAssertFalse(app.staticTexts["time-poll-saved"].exists)
+        XCTAssertEqual(app.buttons["time-poll-submit"].label, "保存修改")
+        nativePhase("manual-edited"); nativeWaitSaved()
+        nativePhase("manual-resubmitted"); capture(app, "manual-submitted")
+    }
+
     func testNativeParticipantDirectTimetableInviteConfirmAndCalendar() throws {
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_NATIVE_PARTICIPANT_JSON"]
         try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires two fresh disposable native accounts.")
@@ -802,7 +829,11 @@ import XCTest
         XCTAssertFalse(app.buttons["time-poll-finish"].exists)
         XCTAssertFalse(app.staticTexts["plan-handoff-guidance"].exists)
     }
-    private func nativeWaitSaved() { XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20)) }
+    private func nativeWaitSaved() {
+        let submit = app.buttons["time-poll-submit"]
+        if submit.exists && submit.isEnabled { submit.tap() }
+        XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20))
+    }
     private func nativePhase(_ value: String) {
         print("NATIVE_PARTICIPANT_PHASE \(value)")
         // Keep each UI state stable while the Mac checks its real API boundary.

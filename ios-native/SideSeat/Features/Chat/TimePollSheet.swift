@@ -293,7 +293,7 @@ struct TimePollDetailView: View {
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
-                        Button("Retry") { if deleting { Task { await delete() } } else { store.save(session: session); store.flush(session: session) } }
+                        Button("Retry") { if deleting { Task { await delete() } } else { Task { await store.submit(session: session) } } }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
                 } else {
@@ -359,7 +359,6 @@ struct TimePollDetailView: View {
             }
         }
         .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false; pickingFinalTime = false; finalRange = nil }
-        .onChange(of: nameFocused) { old, new in if old && !new && store.displayName.trimmingCharacters(in: .whitespacesAndNewlines) != store.poll?.myDisplayName { store.save(session: session) } }
         .task {
             await store.load(session: session)
             while !Task.isCancelled {
@@ -367,10 +366,8 @@ struct TimePollDetailView: View {
                 if scenePhase == .active && !nameFocused { await store.load(session: session) }
             }
         }
-        .onDisappear { store.flush(session: session) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.load(session: session) } }
-            else { store.flush(session: session) }
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
             if let expiry = store.poll?.expirationDate, now < expiry, expiry <= date { now = date }
@@ -391,7 +388,7 @@ struct TimePollDetailView: View {
                             .padding(.horizontal, SideSeatTheme.spaceMD)
                     }
                     timetableHeader(poll)
-                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) { store.save(session: session) }
+                    TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalRange: $finalRange) {}
                         .disabled(store.acting).allowsHitTesting(!store.acting)
                         .id("plan-timetable")
                 }
@@ -420,13 +417,13 @@ struct TimePollDetailView: View {
                     TextField("Your name", text: $store.displayName)
                         .disabled(store.acting)
                         .font(.subheadline.weight(.medium)).focused($nameFocused).submitLabel(.done)
-                        .onSubmit { store.save(session: session); nameFocused = false }
+                        .onSubmit { nameFocused = false }
                         .accessibilityLabel("Your name in this plan").accessibilityIdentifier("time-poll-name")
                     Button { nameFocused = true } label: { Image(systemName: "pencil") }
                         .frame(minWidth: 44, minHeight: 44).accessibilityLabel("Edit nickname")
                         .accessibilityIdentifier("time-poll-edit-name")
                     if !poll.didRespond && store.selected.isEmpty {
-                        Button("No free time") { store.save(session: session) }
+                        Button("No free time") { store.chooseNoFreeTime() }
                             .font(.caption).accessibilityIdentifier("time-poll-none")
                     }
                 }
@@ -458,7 +455,16 @@ struct TimePollDetailView: View {
                     if choosingAgain { choosingAgain = false }
                 }
             } else {
-                if editsTimetable(poll) { saveStatus(poll) }
+                if editsTimetable(poll) {
+                    saveStatus(poll)
+                    if !store.saved {
+                        PlanActionButton(title: AppLocalization.string(poll.didRespond ? "Save changes" : "Submit my availability"), symbol: "checkmark", kind: .commit,
+                                         isLoading: store.saving, accessibilityID: "time-poll-submit") {
+                            nameFocused = false
+                            Task { await store.submit(session: session) }
+                        }.disabled(!store.hasChanges || store.saving || store.acting)
+                    }
+                }
                 if poll.isOwner {
                     PlanActionButton(title: AppLocalization.string("Choose final time"), symbol: "calendar.badge.clock",
                                     accessibilityID: "unified-plan-invite-window") { beginFinalSelection(poll) }
@@ -497,11 +503,11 @@ struct TimePollDetailView: View {
             else { Image(systemName: failed ? "exclamationmark.circle" : store.saved ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(failed ? SideSeatTheme.danger : store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong) }
             VStack(alignment: .leading, spacing: 3) {
-                Text(store.saving ? "Saving…" : failed ? "Couldn't save" : store.saved ? "Availability saved automatically" : "Choose when you're free")
+                Text(store.saving ? "Submitting…" : failed ? "Couldn't submit" : store.saved ? "Availability submitted" : "Not submitted")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textPrimary)
                     .accessibilityIdentifier(store.saved ? "time-poll-saved" : "time-poll-save-state")
-                Text(failed ? AppLocalization.string("Your choices are kept. Please retry.") : store.saving ? AppLocalization.string("Changes save automatically") : store.saved ? selectionSummary(poll) : AppLocalization.string("Changes save automatically"))
+                Text(failed ? AppLocalization.string("Your choices are kept. Please retry.") : selectionSummary(poll))
                     .font(.caption).foregroundStyle(.secondary)
             }.accessibilityElement(children: .contain)
         }
