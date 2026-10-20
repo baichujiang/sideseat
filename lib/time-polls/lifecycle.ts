@@ -10,7 +10,7 @@ type TimedPoll = {
 
 /** Expiry is derived from the existing plan, without changing confirmed facts. */
 export function timePollExpiresAt(poll: TimedPoll): Date | null {
-  if (poll.phase === "INVITING") return poll.chosenStart ? new Date(poll.chosenStart) : null;
+  if (poll.chosenStart && (poll.phase === "INVITING" || poll.phase === "COLLECTING")) return new Date(poll.chosenStart);
   if (poll.phase !== "COLLECTING" || !poll.dates.length) return null;
   let date = [...poll.dates].sort().at(-1)!;
   if (poll.endMinute === 1440) {

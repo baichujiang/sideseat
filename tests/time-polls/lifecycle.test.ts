@@ -19,3 +19,11 @@ test("collection expires only after the last configured window, respecting zone,
   assert.equal(timePollPhase(collecting, new Date("2026-10-25T22:59:59Z")), "COLLECTING");
   assert.equal(timePollPhase(collecting, new Date("2026-10-25T23:00:00Z")), "EXPIRED");
 });
+
+// A set time expires at its start even while the group is still choosing an activity.
+test("fixed-time activity collection expires at its chosen start", () => {
+  const draft = { ...poll, phase: "COLLECTING" };
+  assert.equal(timePollExpiresAt(draft)!.toISOString(), poll.chosenStart.toISOString());
+  assert.equal(timePollPhase(draft, new Date(poll.chosenStart.getTime() - 1)), "COLLECTING");
+  assert.equal(timePollPhase(draft, poll.chosenStart), "EXPIRED");
+});

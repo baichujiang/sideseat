@@ -117,16 +117,16 @@ export async function createTimePoll(userId: string, input: z.infer<typeof creat
   const slots = buildPollSlots(input);
   if (!slots.length) throw new TimePollError(422, "Choose a time range with available time slots.");
   const fixed = input.planningMode === "FIXED";
-  if (fixed && chooseActivityTogether) throw new TimePollError(422, "Choose an activity before creating a fixed invitation.");
   const start = fixedStart ? new Date(fixedStart) : null;
   if (fixed && (!start || start <= new Date() || !input.durationMinutes || !input.expectedCount)) throw new TimePollError(422, "Choose a future time, duration and participant count.");
+  const inviting = fixed && !chooseActivityTogether;
   const viewer = await prisma.user.findUniqueOrThrow({ where: { id: userId }, select: { username: true, nickname: true } });
   const poll = await prisma.timePoll.create({ data: {
     ...values, dates: [...new Set(input.dates)].sort(), slots, token: randomBytes(24).toString("base64url"), creatorId: userId,
-    phase: fixed ? "INVITING" : "COLLECTING", invitationVersion: fixed ? 1 : 0,
+    phase: inviting ? "INVITING" : "COLLECTING", invitationVersion: inviting ? 1 : 0,
     activityTopic: chooseActivityTogether ? input.title : null,
     chosenStart: fixed ? start : null, chosenEnd: fixed ? new Date(start!.getTime() + input.durationMinutes! * 60_000) : null,
-    ...(fixed ? { invitations: { create: { userId, displayName: viewer.nickname?.trim() || viewer.username, status: "ACCEPTED", version: 1 } } } : {}),
+    ...(inviting ? { invitations: { create: { userId, displayName: viewer.nickname?.trim() || viewer.username, status: "ACCEPTED", version: 1 } } } : {}),
   } });
   return getTimePoll(poll.token, userId, appOrigin);
 }
@@ -138,6 +138,7 @@ export async function saveTimePollResponse(token: string, actor: TimePollActor, 
     if (!poll) throw new TimePollError(404, "Plan unavailable.");
     if (timePollPhase(poll) === "EXPIRED") throw new TimePollError(409, "This plan expired before it was confirmed. Create a new plan to arrange another time.");
     if (poll.phase !== "COLLECTING") throw new TimePollError(409, "An invitation has been sent. Respond to the proposed time.");
+    if (poll.planningMode === "FIXED") throw new TimePollError(409, "The time is already set. Suggest an activity, then respond when the organizer sends an invitation.");
     if (await hasPlanningBlock(tx, [accountId(actor), poll.creatorId].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
     if (poll.expectedCount && accountId(actor) !== poll.creatorId && !poll.responses.some((r) => isActor(r, actor))
       && poll.responses.filter((r) => r.userId !== poll.creatorId).length >= poll.expectedCount - 1) throw new TimePollError(409, "This plan's participant list is full.");
@@ -163,11 +164,15 @@ export async function sendPollInvitations(token: string, userId: string, input: 
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
     if (poll.activityTopic && !poll.activityChosenAt) throw new TimePollError(409, "Choose the activity before sending invitations.");
-    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) || poll.invitationVersion !== input.version || poll.planningMode === "FIXED") throw new TimePollError(409, "This plan changed or expired. Reopen it before sending an invitation.");
+    if (!["COLLECTING", "INVITING"].includes(timePollPhase(poll)) || poll.invitationVersion !== input.version || (poll.planningMode === "FIXED" && poll.phase !== "COLLECTING")) throw new TimePollError(409, "This plan changed or expired. Reopen it before sending an invitation.");
     const start = new Date(input.start), end = input.end ? new Date(input.end) : new Date(start.getTime() + (poll.durationMinutes ?? 60) * 60_000);
     if (start <= new Date()) throw new TimePollError(422, "Choose a future start time.");
-    const range = (poll.slots as unknown as PollSlot[]).filter((s) => s.start >= start.toISOString() && s.end <= end.toISOString());
-    if (!range.length || range[0].start !== start.toISOString() || range.at(-1)!.end !== end.toISOString() || range.some((s, i) => i > 0 && range[i - 1].end !== s.start)) throw new TimePollError(422, "Choose a complete activity window from this poll.");
+    if (poll.planningMode === "FIXED") {
+      if (start.getTime() !== poll.chosenStart?.getTime() || end.getTime() !== poll.chosenEnd?.getTime()) throw new TimePollError(422, "Keep the time already set for this plan.");
+    } else {
+      const range = (poll.slots as unknown as PollSlot[]).filter((s) => s.start >= start.toISOString() && s.end <= end.toISOString());
+      if (!range.length || range[0].start !== start.toISOString() || range.at(-1)!.end !== end.toISOString() || range.some((s, i) => i > 0 && range[i - 1].end !== s.start)) throw new TimePollError(422, "Choose a complete activity window from this poll.");
+    }
     const ids = new Set(input.attendeeIds);
     const responders = new Set(poll.responses.map(identity));
     const candidates = [...poll.responses, ...poll.invitations.filter(person => !responders.has(identity(person)))];
@@ -383,7 +388,7 @@ export async function choosePollActivity(token: string, userId: string, ideaId: 
     const idea = await tx.timePollActivityIdea.findFirst({ where: { id: ideaId, pollId: poll.id } });
     if (!idea) throw new TimePollError(404, "Activity suggestion unavailable.");
     if (await hasPlanningBlock(tx, [userId, idea.userId].filter((id): id is string => id !== null))) throw new TimePollError(404, "Plan unavailable.");
-    await tx.timePoll.update({ where: { id: poll.id }, data: { title: idea.title, location: idea.location, activitySelectedId: idea.id, activityChosenAt: new Date() } });
+    await tx.timePoll.update({ where: { id: poll.id }, data: { title: idea.title, location: idea.location ?? poll.location, activitySelectedId: idea.id, activityChosenAt: new Date() } });
     // Availability, participant identities and invitation version are deliberately retained.
   });
   return getTimePoll(token, userId, appOrigin);

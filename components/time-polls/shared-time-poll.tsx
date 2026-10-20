@@ -19,6 +19,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const [deferred, setDeferred] = useState(false);
   const table = useRef<HTMLElement>(null);
   const collecting = poll?.phase === "COLLECTING";
+  const fixedTime = poll?.planningMode === "FIXED" && !!poll.chosenStart && !!poll.chosenEnd;
   const choosingActivity = collecting && poll?.activitySelection?.isOpen === true;
   const closed = poll?.phase === "CANCELLED" || poll?.phase === "EXPIRED" || (poll?.phase === "CONFIRMED" && !!poll.chosenStart && Date.parse(poll.chosenStart) <= Date.now());
   const mine = poll?.invitations.find((person) => person.isMe);
@@ -34,7 +35,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   }, [collecting, viewerId, choosingName, poll?.phase, poll?.invitationVersion]);
   const errorText = zh && error === "This device could not keep your draft. Keep this page open until you submit." ? "此设备无法保留草稿，请保持页面打开并手动提交。" : zh && error === "This name already has a response. Switch participant to continue it, or choose a different name."
     ? "这个名字已有填写。请点击“切换填写人”继续修改该记录，或使用另一个名字。" : error;
-  const editing = collecting && !!poll?.viewerId && !choosingName;
+  const editing = collecting && !fixedTime && !!poll?.viewerId && !choosingName;
   const replying = (poll?.phase === "INVITING" || poll?.phase === "CONFIRMED") && !closed && !!poll.viewerId && included && !choosingName;
   const selectedSlots = poll?.slots.filter((slot) => selected.includes(slot.id)) ?? [];
   const selectedDays = new Set(selectedSlots.map((slot) => slot.date)).size;
@@ -49,7 +50,9 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
   const currentTask = choosingName
     ? (zh ? "填个名字，就能在这里参与。" : "Enter your name to take part here.")
     : collecting
-      ? choosingActivity
+      ? fixedTime
+        ? (zh ? "时间已定，展开活动建议，一起决定做什么；收到正式邀请后再确认参加。" : "The time is set. Open activity ideas to choose what to do; confirm attendance after the formal invitation.")
+        : choosingActivity
         ? (zh ? "活动还没定，也可以先填空闲。展开活动建议，一起决定做什么。" : "Share free time now, even while choosing what to do. Open activity ideas to suggest or mark interest.")
         : (zh ? "在时间表里选好空闲并提交，收到最终邀请后再确认参加。" : "Select free time and submit it. Confirm participation when the final invitation arrives.")
       : replying && mine?.status !== "ACCEPTED"
@@ -73,7 +76,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
           <p className="mb-2 text-xs font-medium text-muted-foreground">{choosingActivity ? (zh ? "朋友想和你一起决定做什么" : "A friend wants to choose an activity with you") : collecting ? (zh ? "朋友想和你找个合适的时间" : "A friend wants to find a time with you") : (zh ? "朋友发来的活动安排" : "An activity shared by a friend")}</p>
           <h1 className="break-words text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">{poll.title}</h1>
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span>{!collecting && poll.chosenStart && poll.chosenEnd ? formatWindow(poll.chosenStart, poll.chosenEnd) : (zh ? "候选日期：" : "Possible days: ") + pollDate(poll.dates[0], zh) + (poll.dates.length > 1 ? " – " + pollDate(poll.dates.at(-1)!, zh) : "")}</span></p>
+            <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span>{(!collecting || fixedTime) && poll.chosenStart && poll.chosenEnd ? formatWindow(poll.chosenStart, poll.chosenEnd) : (zh ? "候选日期：" : "Possible days: ") + pollDate(poll.dates[0], zh) + (poll.dates.length > 1 ? " – " + pollDate(poll.dates.at(-1)!, zh) : "")}</span></p>
             {poll.location ? <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span className="break-words">{poll.location}</span></p> : null}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{zh ? "时区：" : "Time zone: "}{poll.timeZone}</p>
@@ -82,11 +85,11 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
         {!closed ? <p className="mb-5 text-sm leading-6 text-muted-foreground" role="status" data-testid="plan-next-step">{currentTask}</p> : null}
 
         {error ? <div role="alert" className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-stone-900">{errorText}{!saved && !editing ? <button type="button" disabled={saving} onClick={() => void state.retry()} className="ml-3 min-h-11 underline">{zh ? "重试保存" : "Retry save"}</button> : null}</div> : null}
-        <div className="grid grid-cols-1 items-start gap-5 md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)] lg:grid-cols-[minmax(0,1fr)_224px]">
+        <div className={"grid grid-cols-1 items-start gap-5 " + (collecting && fixedTime ? "" : "md:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)] lg:grid-cols-[minmax(0,1fr)_224px]")}>
           <div className="min-w-0 space-y-4">
             {!closed ? choosingName ? <section className="rounded-2xl border bg-background p-5 sm:p-6">
               <h2 className="text-xl font-semibold">{editingName ? (zh ? "修改这次活动中的名字" : "Edit your name for this activity") : collecting ? (zh ? "先告诉朋友你是谁" : "First, tell your friends who you are") : (zh ? "填个名字，再确认参加" : "Enter your name, then confirm")}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{choosingActivity ? (zh ? "填个名字，就能提出活动、标记兴趣；空闲也能提前填写。" : "Enter your name to suggest activities and mark interest. You can share free time too.") : collecting ? (zh ? "接下来勾选你有空的时间，最终活动时间之后再确认。" : "Next, mark when you're free. You'll confirm the final activity time later.") : (zh ? "无需注册或下载 App，就能在这里回复邀请。" : "Reply here without an account or app download.")}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{fixedTime && collecting ? (zh ? "填个名字，就能提出活动或标记兴趣。时间已定，无需再填写空闲。" : "Enter your name to suggest activities or mark interest. The time is set; no availability form is needed.") : choosingActivity ? (zh ? "填个名字，就能提出活动、标记兴趣；空闲也能提前填写。" : "Enter your name to suggest activities and mark interest. You can share free time too.") : collecting ? (zh ? "接下来勾选你有空的时间，最终活动时间之后再确认。" : "Next, mark when you're free. You'll confirm the final activity time later.") : (zh ? "无需注册或下载 App，就能在这里回复邀请。" : "Reply here without an account or app download.")}</p>
               <form onSubmit={(event) => { event.preventDefault(); void (editingName ? state.rename(name.trim()) : state.join(name.trim())); }} className="mt-5 space-y-3">
                 <label htmlFor="poll-nickname" className="block text-sm font-medium">{zh ? "你的名字" : "Your name"}</label>
                 <input id="poll-nickname" autoComplete="nickname" maxLength={60} required value={name} onChange={(event) => setName(event.target.value)} placeholder={zh ? "例如：小林" : "For example: Lin"} className="min-h-12 w-full rounded-xl border bg-background px-3 text-base" />
@@ -99,12 +102,13 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
               {resumed ? <p className={"w-full pb-1 text-xs " + styles.savedText}>{zh ? "已找到这个名字的记录，可以继续修改。" : "Found your previous response. Continue editing here."}</p> : null}
             </section> : null}
 
-            {collecting && poll.activitySelection && !choosingName ? <details ref={choosingActivity ? (node) => { table.current = node; } : undefined} className="scroll-mt-4 border-y py-1" data-testid="activity-panel">
+            {collecting && poll.activitySelection && !choosingName ? <details ref={choosingActivity ? (node) => { table.current = node; } : undefined} open={fixedTime && choosingActivity || undefined} className="scroll-mt-4 border-y py-1" data-testid="activity-panel">
               <summary className="min-h-12 cursor-pointer py-3 text-sm font-medium">{choosingActivity ? (zh ? "活动建议" : "Activity ideas") : (zh ? "查看之前的活动建议" : "View previous activity ideas")} · {poll.activitySelection.ideaCount}<span className="ml-3 text-xs font-normal text-muted-foreground">{choosingActivity ? (zh ? "添加建议 / 表达兴趣" : "Suggest / mark interest") : (zh ? "已保留" : "Kept")}</span></summary>
               <ActivityIdeas activity={poll.activitySelection} canEdit={!!poll.viewerId && !disabled && choosingActivity} busy={busy} zh={zh} onSuggest={state.suggestActivity} onInterest={state.setActivityInterest} />
             </details> : null}
 
-            {collecting && !choosingName ? <section ref={choosingActivity ? undefined : table} className="scroll-mt-4 bg-background py-3" data-testid="plan-collection-timetable">
+            {collecting && fixedTime && !choosingName && poll.chosenStart && poll.chosenEnd ? <InvitationTimetable title={poll.title} location={poll.location} start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} needsConfirmation={false} isDraft /> : null}
+            {collecting && !fixedTime && !choosingName ? <section ref={choosingActivity ? undefined : table} className="scroll-mt-4 bg-background py-3" data-testid="plan-collection-timetable">
               <div className="mb-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-xl font-semibold">{zh ? "大家的时间表" : "Group timetable"}</h2>
@@ -130,7 +134,7 @@ export function SharedTimePoll({ token, zh: initialZh }: { token: string; zh: bo
               </>}
             </section> : null}
           </div>
-          {poll.viewerId && !choosingName ? <aside className="border-t py-4 md:border-t-0 md:border-l md:pl-5">
+          {poll.viewerId && !choosingName && !(collecting && fixedTime) ? <aside className="border-t py-4 md:border-t-0 md:border-l md:pl-5">
             <h2 className="flex items-center gap-2 text-base font-semibold"><Users className="h-4 w-4" aria-hidden />{collecting ? (zh ? "已填写空闲的人" : "Availability responses") : (zh ? "受邀名单" : "Invitation list")}<span className="text-sm font-normal text-muted-foreground">{people?.length ?? 0}</span></h2>
             <ul className="mt-3 divide-y">{people?.map((person) => <li key={person.id} className="flex items-center justify-between gap-3 py-3">
               <div><p className="break-words text-sm font-medium">{person.displayName}{person.isMe ? <span className="ml-2 text-xs font-normal text-muted-foreground">{zh ? "你" : "You"}</span> : null}</p><p className="mt-1 text-xs text-muted-foreground">{person.isGuest ? (zh ? "通过链接参加" : "Joined by link") : "SideSeat"}</p></div>

@@ -23432,7 +23432,7 @@
           },
           "chooseActivityTogether": {
             "type": "boolean",
-            "description": "Optional shared-theme stage before scheduling; supported with COLLECT only. Existing plans omit it."
+            "description": "Optional activity suggestions with either flexible or fixed time. With FIXED, the chosen time is retained in COLLECTING at version zero until the activity is chosen and invitations are explicitly sent. Existing plans omit it."
           }
         }
       },
