@@ -3100,6 +3100,7 @@
 "This plan has ended or expired." = "计划已结束或过期。";
 
 /* Plan detail hierarchy and inline activity ideas */
+"Review plan invitation" = "核对邀请";
 "My participation" = "我的参与信息";
 "Activity name" = "活动名称";
 "Timing" = "时间安排";

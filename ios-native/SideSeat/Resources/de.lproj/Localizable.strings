@@ -3099,6 +3099,7 @@
 "This plan has ended or expired." = "Dieser Plan ist beendet oder abgelaufen.";
 
 /* Plan detail hierarchy and inline activity ideas */
+"Review plan invitation" = "Einladung prüfen";
 "My participation" = "Meine Teilnahme";
 "Activity name" = "Aktivitätsname";
 "Timing" = "Zeitplanung";

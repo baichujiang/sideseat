@@ -171,7 +171,7 @@ struct UnifiedPlanInviteView: View {
                               || (linkParticipantCount == nil && selectedFriends == 0))
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
             }
-            .navigationTitle("Review invitation").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Review plan invitation").navigationBarTitleDisplayMode(.inline)
             .onChange(of: selected) { _, _ in
                 if let count = linkParticipantCount { linkParticipantCount = max(count, minimumLinkCount) }
             }
