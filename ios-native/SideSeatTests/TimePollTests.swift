@@ -152,7 +152,7 @@ struct TimePollTests {
         try await Task.sleep(for: .seconds(1))
         #expect(store.selected == [1, 2] && store.hasChanges && store.error != nil)
         #expect(await transport.writes == [[0]])
-        await store.submit(session: session)
+        await store.retry(session: session)
         #expect(store.saved && store.error == nil)
         #expect(await transport.writes == [[0], [1, 2]])
     }
@@ -206,6 +206,21 @@ struct TimePollTests {
         await transport.waitUntilFirstStarted(); await transport.finishFirst(); await submit.value
         #expect(store.saved && store.poll?.didRespond == true && store.selected.isEmpty)
         #expect(await transport.writes == [[]])
+    }
+
+    @Test("Retrying a failed refresh never submits private availability")
+    @MainActor
+    func refreshRetryDoesNotSubmit() async throws {
+        let transport = PollSaveTransport(readStatus: 503)
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
+        store.selected = [0, 1]
+        await store.load(session: session)
+        #expect(store.error != nil && !store.submissionFailed)
+        await store.retry(session: session)
+        #expect(await transport.writes.isEmpty)
+        #expect(store.selected == [0, 1] && store.hasChanges && store.error != nil)
     }
 
     @Test("Drafts restore per account and plan without publishing")
@@ -412,9 +427,10 @@ private actor PollSaveTransport: APITransport {
     private var firstPending: CheckedContinuation<Void, Never>?
     private let firstStatus: Int
     private(set) var refreshCount = 0
+    private let readStatus: Int
     private var acknowledged: [Int]?
     private var acknowledgedName = "Ming"
-    init(firstStatus: Int = 200, initialSlots: [Int]? = nil) { self.firstStatus = firstStatus; acknowledged = initialSlots }
+    init(firstStatus: Int = 200, initialSlots: [Int]? = nil, readStatus: Int = 200) { self.firstStatus = firstStatus; acknowledged = initialSlots; self.readStatus = readStatus }
     private func response(_ request: URLRequest) throws -> (Data, URLResponse) {
         var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
         object["mySlotIds"] = acknowledged ?? []; object["myDisplayName"] = acknowledgedName; object["didRespond"] = acknowledged != nil
@@ -430,7 +446,12 @@ private actor PollSaveTransport: APITransport {
             let body = #"{"data":{"user":{"id":"other-user","username":"other","nickname":"Other","gender":"PRIVATE","onboardingComplete":true,"isGuest":false,"verifiedStudent":true,"studentVerificationStatus":"VERIFIED","locale":"en"},"tokens":{"accessToken":"other-access","accessExpiresIn":900,"refreshToken":"other-refresh","refreshExpiresAt":"2026-10-17T00:00:00Z"}}}"#
             return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
         }
-        if request.httpMethod == "GET" { return try response(request) }
+        if request.httpMethod == "GET" {
+            if readStatus != 200 {
+                return (Data(#"{"error":{"code":"UNAVAILABLE","message":"Refresh failed","retryable":false}}"#.utf8), HTTPURLResponse(url: request.url!, statusCode: readStatus, httpVersion: nil, headerFields: nil)!)
+            }
+            return try response(request)
+        }
         let input = try JSONDecoder().decode(SaveTimePollRequest.self, from: request.httpBody!)
         writes.append(input.slotIds)
         if writes.count == 1 {

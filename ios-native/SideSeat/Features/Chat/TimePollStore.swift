@@ -131,6 +131,11 @@ final class TimePollStore {
         } catch { self.error = error.localizedDescription }
     }
 
+    func retry(session: SessionStore) async {
+        if submissionFailed { await submit(session: session) }
+        else { await load(session: session) }
+    }
+
     /// Only this explicit action publishes availability. Later edits remain a separate draft.
     func submit(session: SessionStore) async {
         bindDraft(session: session)

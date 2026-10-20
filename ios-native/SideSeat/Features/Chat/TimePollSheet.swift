@@ -293,7 +293,7 @@ struct TimePollDetailView: View {
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
-                        Button("Retry") { if deleting { Task { await delete() } } else { Task { await store.submit(session: session) } } }
+                        Button("Retry") { if deleting { Task { await delete() } } else { Task { await store.retry(session: session) } } }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
                 } else {
