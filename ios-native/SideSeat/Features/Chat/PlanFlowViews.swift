@@ -304,7 +304,10 @@ struct PlanDetailHeading: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("time-poll-detail-title")
                 PlanStatusBadge(status: poll.presentation(at: Date()).status,
-                    needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier)
+                    needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
+                    titleOverride: poll.planningPhase == "INVITING" ? AppLocalization.string(poll.isOwner
+                        ? "Ready to send final plan" : poll.allInvitations.contains { $0.isMe && $0.status == "ACCEPTED" }
+                        ? "Waiting for the organizer to send" : "Your confirmation needed") : nil)
             }
             Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
                 .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -322,6 +325,7 @@ struct PlanStatusBadge: View {
     let status: PlanDisplayStatus
     var needsYou = false
     var identifier: String = "plan-display-status"
+    var titleOverride: String? = nil
 
     private var foreground: Color {
         if status == .confirmed || status == .inProgress { return SideSeatTheme.statusSuccessText }
@@ -330,7 +334,7 @@ struct PlanStatusBadge: View {
     }
 
     var body: some View {
-        Label(status.title, systemImage: status.symbol)
+        Label(titleOverride ?? status.title, systemImage: status.symbol)
             .font(.caption.weight(.semibold)).foregroundStyle(foreground)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, SideSeatTheme.spaceSM)

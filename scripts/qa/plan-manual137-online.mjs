@@ -195,6 +195,9 @@ try {
         await expect(page.getByTestId('plan-invitation-timetable')).toBeVisible({ timeout: 20000 });
         const confirm = page.getByRole('button', { name: '确认参加', exact: true });
         await expect(confirm).toBeEnabled(); await confirm.click();
+        await expect.poll(async () => (await detail()).invitations.filter(p => p.selected && p.status === 'ACCEPTED').length).toBe(2);
+        assert.equal((await detail()).phase, 'INVITING');
+        await call(api + '/publish', owner, 'POST', { version: (await detail()).invitationVersion });
         await expect.poll(async () => (await detail()).phase).toBe('CONFIRMED');
         assert.deepEqual((await guest()).slotIds, []); assert.equal(requests.length, expectedWrites);
         checks.push(`${engineName}: incoming final invitation replaces collection view and confirms without submitting the availability draft`);

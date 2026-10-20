@@ -3079,3 +3079,4 @@
 "The organizer can send at any time. Only accepted participants are notified and added to calendars." = "发起人可随时正式发出，只有已接受者会收到通知并加入日历。";
 "Someone declined. You can still send the final plan to the people who accepted." = "有人拒绝了，你仍可向已接受的人正式发出。";
 "Pick the final time, collect replies, then send whenever you are ready. Only accepted people join the final plan." = "选定最终时间并收集回复，准备好即可正式发出。最终安排只包含已接受的人。";
+"Waiting for the organizer to send" = "待发起人正式发出";

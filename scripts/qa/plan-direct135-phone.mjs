@@ -77,12 +77,12 @@ if (mode === 'prepare') {
       assert.equal(detail.participants.length, zero ? 0 : 1);
       assert.deepEqual(detail.mySlotIds, zero ? [] : [0, 1, 2, 3]);
       assert.deepEqual(peer.mySlotIds, []); assert.equal(peer.didRespond, false);
-      const sent = ['solo-link-ready', 'solo-participant-opened', 'solo-confirmed', 'solo-calendar-verified'].includes(phase);
+      const sent = ['solo-link-ready', 'solo-published', 'solo-participant-opened', 'solo-confirmed', 'solo-calendar-verified'].includes(phase);
       assert.equal(detail.planningMode, sent ? 'FIXED' : 'COLLECT');
-      assert.equal(detail.phase, ['solo-confirmed', 'solo-calendar-verified'].includes(phase) ? 'CONFIRMED' : sent ? 'INVITING' : 'COLLECTING');
+      assert.equal(detail.phase, ['solo-published', 'solo-participant-opened', 'solo-confirmed', 'solo-calendar-verified'].includes(phase) ? 'CONFIRMED' : sent ? 'INVITING' : 'COLLECTING');
       if (sent) { assert.equal(detail.expectedCount, 2); assert.equal(detail.invitationVersion, 1); }
       assert.equal(ownerCalendar.length, detail.phase === 'CONFIRMED' ? 1 : 0);
-      assert.equal(participantCalendar.length, detail.phase === 'CONFIRMED' ? 1 : 0);
+      assert.equal(participantCalendar.length, ['solo-confirmed', 'solo-calendar-verified'].includes(phase) ? 1 : 0);
       if (sent) assert.equal(new Date(detail.chosenEnd) - new Date(detail.chosenStart), 3600000);
       return { phase, checkedAt: new Date().toISOString(), actualPhase: detail.phase, planningMode: detail.planningMode, availabilityRespondents: detail.participants.length, peerDidRespond: peer.didRespond, expectedCount: detail.expectedCount, ownerCalendarEntries: ownerCalendar.length, participantCalendarEntries: participantCalendar.length };
     }

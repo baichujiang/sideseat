@@ -200,7 +200,7 @@ import XCTest
         XCTAssertFalse(app.buttons["plan-view-calendar"].exists)
         let publish = app.buttons["unified-plan-publish"]
         XCTAssertTrue(publish.waitForExistence(timeout: 15)); publish.tap()
-        let finalSend = app.buttons["正式发出"].firstMatch
+        let finalSend = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
         XCTAssertTrue(finalSend.waitForExistence(timeout: 10)); finalSend.tap()
         let calendar = app.buttons["plan-view-calendar"]
         XCTAssertTrue(calendar.waitForExistence(timeout: 15)); capture(app, "13-native-confirmed"); phase("confirmed")
@@ -716,7 +716,7 @@ import XCTest
         app.tabBars.buttons["计划"].tap(); nativeOpenCard()
         let publish = app.buttons["unified-plan-publish"]
         XCTAssertTrue(publish.waitForExistence(timeout: 20)); publish.tap()
-        let finalSend = app.buttons["正式发出"].firstMatch
+        let finalSend = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
         XCTAssertTrue(finalSend.waitForExistence(timeout: 10)); finalSend.tap()
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
         nativePhase("confirmed"); capture(app, "native-09b-owner-published")
@@ -784,6 +784,12 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-share-primary"].isHittable)
         app.buttons["plan-copy-link"].tap(); nativePhase("solo-link-ready")
         capture(app, "solo-formal-invitation")
+        let publish = app.buttons["unified-plan-publish"]
+        XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
+        let finalSend = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
+        XCTAssertTrue(finalSend.waitForExistence(timeout: 10)); finalSend.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 15))
+        nativePhase("solo-published"); capture(app, "solo-published-before-replies")
         nativeSignIn(peer, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
         app.buttons["plans-open-link"].tap()
