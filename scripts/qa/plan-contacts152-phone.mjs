@@ -43,11 +43,25 @@ if (mode === 'prepare') {
     const tokens = owner?.accessToken ? (await call('/api/v1/time-polls', owner)).polls.filter(p => p.title === f.title && p.isOwner).map(p => p.token) : [];
     if (f.pollToken && !tokens.includes(f.pollToken)) tokens.push(f.pollToken);
     if (f.compactToken && !tokens.includes(f.compactToken)) tokens.push(f.compactToken);
+    for (const item of f.invitationCases ?? []) if (!tokens.includes(item.token)) tokens.push(item.token);
     let removed = 0;
     for (const a of f.accounts) { if (!a.accessToken) await login(a); await call('/api/v1/me', a, 'DELETE', { confirmUsername: a.identifier }); await call('/api/v1/me', a, 'GET', undefined, 401); removed++; }
     for (const token of tokens) assert.equal((await fetch(base + '/api/public/time-polls/' + token)).status, 404);
     await fs.writeFile(`${out}/${label}-cleanup.json`, JSON.stringify({ accountsRemoved: removed, tokens401: removed, links404: tokens.length, at: new Date().toISOString() }, null, 2));
     await fs.unlink(privatePath); console.log('Disposable phone accounts, plan and link removed; 401/404 checked.');
+  } else if (mode === 'invitation-layout') {
+    assert(!f.invitationCases, 'Use each disposable layout fixture once.');
+    f.invitationCases = [];
+    const date = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+    for (const [name, clock, minutes, days] of [['continuous', '07:00', 120, 1], ['partial', '07:15', 60, 1], ['midnight', '21:45', 60, 2]]) {
+      const p = await call('/api/v1/time-polls', owner, 'POST', {
+        title: `Invitation ${name}`, location: 'Library', planningMode: 'FIXED', timeZone: 'Europe/Berlin',
+        dates: [date], startMinute: 540, endMinute: 720, fixedStart: `${date}T${clock}:00.000Z`, durationMinutes: minutes, expectedCount: 2,
+      }, 201);
+      f.invitationCases.push({ name, token: p.token, days, start: p.chosenStart, end: p.chosenEnd });
+      await fs.writeFile(privatePath, JSON.stringify(f), { mode: 0o600 });
+    }
+    console.log('Prepared three read-only invitation layout cases: continuous, partial boundary, and midnight.');
   } else if (mode === 'compact-layout') {
     assert(!f.compactToken, 'Use each disposable layout plan once.');
     f.compactTitle = '图书馆一起复习 ' + randomBytes(3).toString('hex');

@@ -396,6 +396,7 @@ struct InvitationTimetableView: View {
                                     .overlay {
                                         Label(LocalizedStringKey(isDraft ? "Time already set" : "Invited time"), systemImage: "calendar")
                                             .font(.caption2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                                            .lineLimit(1).minimumScaleFactor(0.5)
                                             .accessibilityIdentifier("plan-invitation-window-label")
                                             .padding(.horizontal, 4)
                                     }

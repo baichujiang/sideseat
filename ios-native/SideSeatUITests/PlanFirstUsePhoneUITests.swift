@@ -524,6 +524,39 @@ import XCTest
 
     func testCompactResponseAvatarsDarkLargestText() throws { try compactResponseAvatars(accessibility: true) }
 
+    func testContinuousInvitationWindows() throws { try invitationWindows(accessibility: false) }
+
+    func testContinuousInvitationWindowsDarkLargestText() throws { try invitationWindows(accessibility: true) }
+
+    private func invitationWindows(accessibility: Bool) throws {
+        struct Window: Decodable { let name: String; let token: String; let days: Int }
+        struct Fixture: Decodable { let bundle: String; let accounts: [NativeAccount]; let invitationCases: [Window] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable invitation layout plans.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        for item in fixture.invitationCases {
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+                "--ui-testing-time-poll-live", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=\(accessibility ? "dark" : "light")",
+                "--ui-testing-deep-link=/time-polls/\(item.token)"]
+            if accessibility { app.launchArguments += ["--ui-testing-dynamic-type-accessibility"] }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 25))
+            let labels = app.descendants(matching: .any).matching(identifier: "plan-invitation-window-label")
+            XCTAssertEqual(labels.count, item.days, "One label per continuous day segment, including a partial boundary")
+            let first = labels.firstMatch
+            for _ in 0..<12 where !first.isHittable { app.swipeUp() }
+            XCTAssertTrue(first.isHittable)
+            XCTAssertGreaterThan(first.frame.minY, app.navigationBars.firstMatch.frame.maxY)
+            XCTAssertLessThan(first.frame.maxY, app.frame.maxY)
+            capture(app, "invitation-\(item.name)-\(accessibility ? "dark-largest" : "normal")")
+            XCTAssertFalse(app.buttons["plan-invitation-cell-1"].exists, "The merged time block remains read-only")
+        }
+    }
+
     private func compactResponseAvatars(accessibility: Bool) throws {
         struct CompactFixture: Decodable {
             let compactToken: String
