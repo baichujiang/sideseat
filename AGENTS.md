@@ -21,10 +21,10 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 174 is the current installed development build. App and shared-web
-  invitation timetables show dates, ranges and continuous highlights without a
-  separate heading/description. Two physical UI tests cover six standard/maximum
-  text scenes; candidate and production each passed six display checks.
+- Preview 176 is the current installed development build. App and shared-web
+  invitation timetables use a right-aligned color legend in each date header;
+  highlighted ranges contain no text or icon. Two physical UI tests cover six
+  standard/maximum text scenes; candidate and production each passed six display checks.
   Preview 173 saved-card changes are retained. The App plan journey passed
   separately in Preview 168. See
   `docs/DEPLOYED_STATE.md` for verification status. Ordinary SideSeat/TestFlight 97

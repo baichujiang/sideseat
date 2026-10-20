@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前 Preview 174 的紧凑受邀时间表已完成六个真机场景验收，分享网页已同步发布；保留 173 收藏间距及先前计划规则，核验 2026-10-21，Europe/Berlin。
+**状态：** 当前 Preview 176 的受邀时段表头图例已完成六个真机场景验收，分享网页已同步发布；核验 2026-10-21，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 174，紧凑受邀时间表**：App/分享网页删去独立标题、说明和表格内重复活动信息，保留日期、起止时间、连续高亮与时区辅助功能信息。两个真机用例覆盖六个标准/深色最大字号场景，40.549 秒通过；候选/正式网页各六项显示检查通过，API/规则未改。本轮未重跑完整业务链。默认手机安装/严格签名/普通启动 PID 4326 核验，普通 97 保留，测试数据及 Runner 清理。[174 交付](./releases/2026-10-21-preview174-compact-invitation.md)、[QA 和截图](./qa/2026-10-21-plans174.md)。
+当前 **Preview 176，受邀时段图例**：App/分享网页每个日期抬头右侧显示色块与「受邀时段」，高亮块内无文字或图标。普通/深色最大字号两项真机覆盖六场景，30.265 秒通过；候选/正式网页各六项显示检查通过。本轮未改规则或重跑完整业务链。默认手机严格签名/安装/普通启动 PID 4336 核验，普通 97 保留，测试数据和 Runner 清理。[176 交付](./releases/2026-10-21-preview176-invitation-legend.md)、[QA 和截图](./qa/2026-10-21-plans176.md)。
+
+此前 **Preview 174，紧凑受邀时间表**：App/分享网页删去独立标题、说明和表格内重复活动信息，保留日期、起止时间、连续高亮与时区辅助功能信息。两个真机用例覆盖六个标准/深色最大字号场景，40.549 秒通过；候选/正式网页各六项显示检查通过，API/规则未改。本轮未重跑完整业务链。默认手机安装/严格签名/普通启动 PID 4326 核验，普通 97 保留，测试数据及 Runner 清理。[174 交付](./releases/2026-10-21-preview174-compact-invitation.md)、[QA 和截图](./qa/2026-10-21-plans174.md)。
 
 此前 **Preview 173，收藏卡片**：头像区/内容区上下 12→8pt，内部间距 8pt，资料点击范围补齐 44pt。中文普通字号、德文深色最大字号的收藏/招呼表单往返模拟器通过；默认手机安装/普通启动 PID 4296 已核验，普通 97 保留。真机 UI 中断未计为通过，本项无后端发布。[收藏间距交付](./releases/2026-10-20-preview173-saved-card-spacing.md)、[QA](./qa/2026-10-20-saved-card-spacing.md)。
 
@@ -70,12 +72,12 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本轮计划 `07cecc3f` 已推送；隔离来源和生产差异见 [174 QA](./qa/2026-10-21-plans174.md)，保留其他工作 |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (174)` | 六个显示场景/严格签名/普通启动 PID 4326；[来源与验证](./qa/evidence/2026-10-21-plans174/native-build-manifest.json)、[交付](./releases/2026-10-21-preview174-compact-invitation.md) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 本轮计划 `b5fa6256` 已推送；隔离来源和生产差异见 [176 QA](./qa/2026-10-21-plans176.md)，保留其他工作 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (176)` | 六个显示场景/严格签名/普通启动 PID 4336；[来源与验证](./qa/evidence/2026-10-21-plans176/native-build-manifest.json)、[交付](./releases/2026-10-21-preview176-invitation-legend.md) |
 | 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；164 两条真实完整流程、15 阶段 API 及两项最终呈现通过，测试数据/本轮 runner 清理；普通版 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_HFaJwZhU8fVXgpk1yYRK4bjXkdKw`，Ready | 受邀时间表无独立标题/说明；基于生产全部 1,380 个源文件，仅改两个显示文件并新增来源标记，候选/正式各六项显示检查通过；[源文件核验](./qa/evidence/2026-10-21-plans174/candidate-source-verification.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_2NNNNsJy3nwtDhksLQY87rgMPzqx`，Ready | 表头右侧受邀时段图例，高亮块内无文字/图标；基于生产 1,381 个源文件仅改一个显示组件并新增来源标记，候选/正式各六项显示检查通过；[源文件核验](./qa/evidence/2026-10-21-plans176/candidate-source-verification.json) |
 | 生产源码 | 沿用既有生产构建和差异，本轮未修改服务端 | 后续同行后端来源 `7a2163da`，见 [160 QA](./qa/2026-10-20-together04.md)；既有计划来源与历史覆盖见 [156 QA](./qa/2026-10-20-plans156.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。

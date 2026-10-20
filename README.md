@@ -43,7 +43,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
 
-当前 Preview **174**：App/分享网页受邀时间表删去标题和说明，直接显示日期、起止时间及连续高亮。普通/深色最大字号六个真机场景、候选/正式网页各六项显示检查通过；默认 iPhone 14 Plus 已安装并普通启动 PID 4326，普通 97 保留。[交付与截图](./docs/releases/2026-10-21-preview174-compact-invitation.md)。本轮未重跑完整业务链。
+当前 Preview **176**：App/分享网页把「受邀时段」改为表头右侧的色块图例，高亮块内部留空。普通/深色最大字号六个真机场景、候选/正式网页各六项显示检查通过；默认 iPhone 14 Plus 已安装并普通启动 PID 4336，普通 97 保留。[交付与截图](./docs/releases/2026-10-21-preview176-invitation-legend.md)。本轮未重跑完整业务链。
+
+此前 Preview **174**：App/分享网页受邀时间表删去标题和说明，直接显示日期、起止时间及连续高亮。普通/深色最大字号六个真机场景、候选/正式网页各六项显示检查通过；默认 iPhone 14 Plus 已安装并普通启动 PID 4326，普通 97 保留。[交付与截图](./docs/releases/2026-10-21-preview174-compact-invitation.md)。本轮未重跑完整业务链。
 
 Preview **173** 的「我的收藏」卡片上下留白 12→8pt，内部行距统一 8pt，资料按钮补齐 44pt 点击范围。中文普通字号/德文最大字号收藏与招呼往返模拟器通过；默认 iPhone 14 Plus 已安装并普通启动 PID 4296。本项真机验证为安装/启动。[交付与截图](./docs/releases/2026-10-20-preview173-saved-card-spacing.md)。
 

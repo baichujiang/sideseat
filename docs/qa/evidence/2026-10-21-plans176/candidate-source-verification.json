@@ -1,0 +1,15 @@
+{
+  "baseDeployment": "dpl_HFaJwZhU8fVXgpk1yYRK4bjXkdKw",
+  "candidateDeployment": "dpl_2NNNNsJy3nwtDhksLQY87rgMPzqx",
+  "sourceCommit": "b5fa6256",
+  "baseSourceFiles": 1381,
+  "candidateSourceFiles": 1382,
+  "allFilesSHA1Match": true,
+  "modified": [
+    "components/time-polls/invitation-timetable.tsx"
+  ],
+  "added": [
+    ".sideseat-invitation-legend176-source.json"
+  ],
+  "apiSchemaDependenciesUnchanged": true
+}

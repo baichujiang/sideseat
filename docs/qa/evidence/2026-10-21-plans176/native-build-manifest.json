@@ -1,0 +1,32 @@
+{
+  "deliveredPreview": 176,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "baseSource": "Verified installed Preview 174 isolated source; 6d26c048 plus 07cecc3f plan files",
+  "planCommit": "b5fa6256",
+  "isolatedBuild": true,
+  "unreleasedGuestIdentityIncluded": false,
+  "inputs": [
+    {
+      "path": "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+      "sha256": "3c0096be7dab63a7a9c220d429152fd9de9852b15e2fba16c2e0fec09a3d701c",
+      "sourceCommit": "b5fa6256"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "ab6e615c94c137f7c38583e00680aedba44ef799ada5dca4179d9c9300412881",
+      "sourceCommit": "b5fa6256"
+    }
+  ],
+  "binarySHA256": "977b618d6be64942d865ab919cadd9841acea18952014122bdf1342358ada9be",
+  "strictSignatureVerified": true,
+  "physicalLayoutTests": 2,
+  "physicalLayoutScenarios": 6,
+  "physicalLayoutResult": "/tmp/sideseat176-phone.xcresult",
+  "physicalLayoutSeconds": 30.265,
+  "normalLaunchPID": 4336,
+  "normalProcessMatched": true,
+  "runnerRemoved": true,
+  "ordinaryAppBuild": 97
+}
