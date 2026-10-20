@@ -3,6 +3,21 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native compact participant row — Preview 164
+
+The native plan detail removes its nickname editor and participation card. Existing
+names, responses and guest/web naming rules remain unchanged. Activity and status
+share a heading, with organizer/location/edit together and dates/time zone below.
+Above the editable timetable, the submitted response count sits beside at most
+three participant initials and a +N overflow indicator. Tapping the row opens the
+existing complete people/progress sheet, including unsubmitted invitees. The
+count and avatars include submitted responses only. Timetable title, availability
+instructions and legend are omitted; undo stays in the grid's time-header corner.
+Manual submit and organizer final-time selection share the bottom action area,
+stacking at accessibility sizes. Drafts, explicit invitations, RSVP, publication,
+expiry and Calendar rules are unchanged. Physical delivery status is recorded in
+[deployed state](./DEPLOYED_STATE.md).
+
 ## Independent activity and time choices — Preview 156
 
 Friends can suggest activities and Time already set are independent controls in

@@ -42,11 +42,38 @@ if (mode === 'prepare') {
   if (mode === 'cleanup') {
     const tokens = owner?.accessToken ? (await call('/api/v1/time-polls', owner)).polls.filter(p => p.title === f.title && p.isOwner).map(p => p.token) : [];
     if (f.pollToken && !tokens.includes(f.pollToken)) tokens.push(f.pollToken);
+    if (f.compactToken && !tokens.includes(f.compactToken)) tokens.push(f.compactToken);
     let removed = 0;
     for (const a of f.accounts) { if (!a.accessToken) await login(a); await call('/api/v1/me', a, 'DELETE', { confirmUsername: a.identifier }); await call('/api/v1/me', a, 'GET', undefined, 401); removed++; }
     for (const token of tokens) assert.equal((await fetch(base + '/api/public/time-polls/' + token)).status, 404);
     await fs.writeFile(`${out}/${label}-cleanup.json`, JSON.stringify({ accountsRemoved: removed, tokens401: removed, links404: tokens.length, at: new Date().toISOString() }, null, 2));
     await fs.unlink(privatePath); console.log('Disposable phone accounts, plan and link removed; 401/404 checked.');
+  } else if (mode === 'compact-layout') {
+    assert(!f.compactToken, 'Use each disposable layout plan once.');
+    f.compactTitle = '图书馆一起复习 ' + randomBytes(3).toString('hex');
+    const dates = [1, 2, 3].map(offset => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10));
+    const created = await call('/api/v1/time-polls', owner, 'POST', {
+      title: f.compactTitle, location: '图书馆二楼', planningMode: 'COLLECT', timeZone: 'Europe/Berlin',
+      dates, startMinute: 540, endMinute: 720,
+    }, 201);
+    f.compactToken = created.token;
+    await fs.writeFile(privatePath, JSON.stringify(f), { mode: 0o600 });
+    const endpoint = '/api/public/time-polls/' + f.compactToken;
+    for (const [index, displayName] of ['林悦', '安然', 'Jonas', '小杨', '小陈', 'Nora', 'Leo', '夏雨'].entries()) {
+      const joined = await fetch(base + endpoint + '/participant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ displayName }) });
+      assert.equal(joined.status, 200);
+      const cookie = joined.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
+      const data = (await joined.json()).data;
+      const response = await fetch(base + endpoint + '/response', { method: 'PUT', headers: {
+        'Content-Type': 'application/json', Cookie: cookie,
+      }, body: JSON.stringify({ participantId: data.viewerId, displayName, slotIds: index % 2 === 0 ? [0, 1, 2, 3] : [4, 5] }) });
+      assert.equal(response.status, 200, 'Layout guest must explicitly submit availability.');
+    }
+    const p = await call('/api/v1/time-polls/' + f.compactToken, owner);
+    assert.equal(p.summary.participantCount, 8); assert.equal(p.didRespond, false);
+    await fs.writeFile(`${out}/${label}-layout-data.json`, JSON.stringify({ submitted: 8, ownerSubmitted: false,
+      phase: p.phase, invitationVersion: p.invitationVersion, at: new Date().toISOString() }, null, 2));
+    console.log('Prepared eight submitted guest responses for the separate presentation check.');
   } else if (mode === 'observe') {
     assert(logPath);
     const phases = ['contacts-created', 'contacts-delivered', 'contacts-owner-submitted', 'contacts-peer-submitted', 'contacts-formal-invitation', 'contacts-peer-accepted', 'contacts-published', 'contacts-calendar-verified'];

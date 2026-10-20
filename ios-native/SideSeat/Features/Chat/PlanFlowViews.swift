@@ -378,28 +378,43 @@ struct SharedPlanChatCard: View {
 
 /// A flat identity header keeps the timetable as the dominant detail surface.
 struct PlanDetailHeading: View {
-    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
     var statusIdentifier = "plan-display-status"
+    var edit: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            Text(poll.title).font(.title2.weight(.semibold))
+            PlanAdaptiveRow {
+                Text(poll.title).font(.title2.weight(.semibold))
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityIdentifier("time-poll-detail-title")
+            } trailing: {
                 PlanStatusBadge(status: poll.presentation(at: Date()).status,
                     needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
                     titleOverride: poll.planningPhase == "INVITING" ? AppLocalization.string(poll.isOwner
                         ? "Ready to send final plan" : poll.allInvitations.contains { $0.isMe && $0.status == "ACCEPTED" }
                         ? "Waiting for the organizer to send" : "Your confirmation needed") : nil)
-            Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
-                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-            if let location = poll.location, !location.isEmpty {
-                Label(location, systemImage: "mappin.and.ellipse").font(.caption)
-                    .foregroundStyle(SideSeatTheme.textSecondaryStrong).fixedSize(horizontal: false, vertical: true)
             }
+            HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: SideSeatTheme.spaceSM) { metadata }
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) { metadata }
+                }
+                Spacer(minLength: 0)
+                if let edit {
+                    Button(action: edit) { Label("Edit", systemImage: "pencil").font(.caption).frame(minHeight: 44) }
+                        .accessibilityLabel("Edit plan information").accessibilityIdentifier("plan-edit-information")
+                }
+            }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder private var metadata: some View {
+        Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
+        if let location = poll.location, !location.isEmpty {
+            Label(location, systemImage: "mappin.and.ellipse")
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

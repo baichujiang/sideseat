@@ -75,7 +75,7 @@ if (mode === 'prepare') {
       assert.equal(p.summary.participantCount, index >= 3 ? 2 : index >= 2 ? 1 : 0);
       assert.deepEqual(p.mySlotIds, index >= 2 ? [0, 1, 2, 3] : []);
       assert.deepEqual(theirs.mySlotIds, index >= 3 ? [0, 1, 2, 3] : []);
-      assert.equal(p.myDisplayName, index >= 2 ? 'Host Ming' : 'Ming');
+      assert.equal(p.myDisplayName, 'Ming');
       const messages = (await call(`/api/v1/connections/${f.connectionID}/messages`, peer)).messages.filter(m => m.body?.includes('/time-polls/' + f.pollToken));
       assert.equal(messages.length, index >= 1 ? 1 : 0);
       if (formal) { assert.equal(p.invitationVersion, 1); assert.equal(p.invitations.filter(i => i.status === 'ACCEPTED').length, index >= 5 ? 2 : 1); }

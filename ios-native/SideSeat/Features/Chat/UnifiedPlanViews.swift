@@ -212,7 +212,6 @@ struct UnifiedPlanConfirmationView: View {
     let poll: NativeTimePoll
     @Bindable var store: TimePollStore
     let chooseAnotherTime: () -> Void
-    @State private var showsName = false
     @State private var showsPeople = false
     @State private var showsPublish = false
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
@@ -257,9 +256,6 @@ struct UnifiedPlanConfirmationView: View {
                     Label(calendarExplanation, systemImage: poll.planningPhase == "CONFIRMED" && included ? "calendar.badge.checkmark" : "info.circle")
                         .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("unified-plan-calendar-status")
-                }
-                if mine != nil, ["INVITING", "CONFIRMED"].contains(poll.planningPhase), (poll.chosenStart ?? .distantPast) > Date() {
-                    PlanParticipationSummary(name: poll.myDisplayName) { showsName = true }.disabled(!store.canMutate)
                 }
                 if !poll.isOwner && mine == nil && poll.planningMode != "FIXED" {
                     Text("You are not included in this invitation. Your availability is saved.")
@@ -329,9 +325,6 @@ struct UnifiedPlanConfirmationView: View {
         }
         .sheet(isPresented: $showsPeople) {
             PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
-        }
-        .sheet(isPresented: $showsName) {
-            PlanNicknameEditor(poll: poll, store: store).dynamicTypeSize(typeSize)
         }
     }
     private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }

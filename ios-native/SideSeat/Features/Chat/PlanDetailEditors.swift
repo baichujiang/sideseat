@@ -57,30 +57,6 @@ private struct PlanEditorField: View {
     }
 }
 
-struct PlanParticipationSummary: View {
-    @Environment(\.dynamicTypeSize) private var typeSize
-    let name: String
-    let edit: () -> Void
-
-    var body: some View {
-        SSFlowCard(contentSpacing: SideSeatTheme.spaceXS) {
-            let layout = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
-            layout {
-                Text("My participation").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                Text(name).font(.subheadline.weight(.medium))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityIdentifier("plan-my-nickname")
-                Button(action: edit) {
-                    Label("Edit nickname", systemImage: "pencil").font(.subheadline).frame(minHeight: 44)
-                }.accessibilityIdentifier("time-poll-edit-name")
-            }
-        }.accessibilityElement(children: .contain).accessibilityIdentifier("plan-my-participation")
-    }
-}
-
 struct PlanInformationEditor: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
@@ -151,70 +127,33 @@ struct PlanInformationEditor: View {
     }
 }
 
-struct PlanNicknameEditor: View {
-    @Environment(SessionStore.self) private var session
-    @Environment(\.dismiss) private var dismiss
+struct PlanResponseSummary: View {
     let poll: NativeTimePoll
-    @Bindable var store: TimePollStore
-    @State private var name: String
-    @State private var showsDiscard = false
-    @State private var attemptedSave = false
-    private let original: String
-    private let savesWithAvailability: Bool
-
-    init(poll: NativeTimePoll, store: TimePollStore) {
-        self.poll = poll; self.store = store
-        let withAvailability = poll.planningPhase == "COLLECTING"
-        let initialName = withAvailability ? store.displayName : poll.myDisplayName
-        savesWithAvailability = withAvailability
-        original = initialName
-        _name = State(initialValue: initialName)
-    }
-
-    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var hasChanges: Bool { trimmedName != original }
+    let openPeople: () -> Void
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    PlanEditorField(title: "Nickname", text: $name, accessibilityID: "time-poll-edit-name-field")
-                        .textContentType(.nickname)
-                } footer: {
-                    Text(savesWithAvailability
-                         ? "This nickname is shared when you submit your availability. Your selected times stay unchanged."
-                         : "Other participants will see this name.")
-                }
-                if attemptedSave, let error = store.error { Text(error).foregroundStyle(SideSeatTheme.danger) }
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Edit nickname").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { if hasChanges { showsDiscard = true } else { dismiss() } }.disabled(store.acting)
-            } }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                PlanActionButton(title: AppLocalization.string(savesWithAvailability ? "Use nickname" : "Save nickname"),
-                                 symbol: "checkmark", kind: .commit, isLoading: store.acting,
-                                 accessibilityID: "plan-nickname-save") {
-                    if savesWithAvailability {
-                        store.displayName = trimmedName; dismiss()
-                    } else {
-                        attemptedSave = true
-                        Task {
-                            await store.mutate("display-name", method: .patch,
-                                body: TimePollDisplayNameRequest(displayName: trimmedName), session: session)
-                            if store.error == nil { dismiss() }
-                        }
+        Button(action: openPeople) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
+                    .font(.subheadline.weight(.medium))
+                    .accessibilityIdentifier("time-poll-response-count")
+                Spacer(minLength: 0)
+                HStack(spacing: -6) {
+                    ForEach(poll.participants.prefix(3)) { person in
+                        PlanParticipantAvatar(name: person.displayName)
+                            .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
                     }
-                }.disabled(trimmedName.isEmpty || name.count > 60 || !store.canMutate || !hasChanges)
-                    .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-                    .overlay(alignment: .top) { Divider() }
-            }
-            .confirmationDialog("Discard changes?", isPresented: $showsDiscard, titleVisibility: .visible) {
-                Button("Discard changes", role: .destructive) { dismiss() }
-                Button("Keep editing", role: .cancel) { }
-            }
-        }.interactiveDismissDisabled(hasChanges || store.acting).presentationDetents([.medium, .large])
+                    if poll.summary.participantCount > 3 {
+                        Text("+\(poll.summary.participantCount - 3)").font(.system(size: 12, weight: .medium))
+                            .frame(width: 30, height: 30)
+                            .background(SideSeatTheme.fillTertiary, in: Circle())
+                            .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
+                            .accessibilityIdentifier("plan-response-overflow")
+                    }
+                }
+            }.frame(minHeight: 44).contentShape(Rectangle())
+        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.textPrimary)
+            .accessibilityIdentifier("plan-people-open")
     }
 }
 
@@ -267,8 +206,7 @@ struct PlanPeopleView: View {
 
     private func row(name: String, isMe: Bool, guest: Bool, status: String, symbol: String, accepted: Bool, identifier: String) -> some View {
         HStack(spacing: SideSeatTheme.spaceMD) {
-            Text(String(name.prefix(1)).uppercased()).font(.subheadline.weight(.medium))
-                .frame(width: 36, height: 36).background(SideSeatTheme.fillTertiary, in: Circle()).accessibilityHidden(true)
+            PlanParticipantAvatar(name: name, size: 36)
             PlanAdaptiveRow {
                 HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
                     Text(name).font(.subheadline.weight(.medium))
@@ -281,5 +219,16 @@ struct PlanPeopleView: View {
             }
         }.padding(.vertical, SideSeatTheme.spaceXS)
             .accessibilityElement(children: .combine).accessibilityIdentifier(identifier)
+    }
+}
+
+private struct PlanParticipantAvatar: View {
+    let name: String
+    var size: CGFloat = 30
+
+    var body: some View {
+        Text(String(name.prefix(1)).uppercased()).font(.system(size: size * 0.4, weight: .medium))
+            .frame(width: size, height: size)
+            .background(SideSeatTheme.fillTertiary, in: Circle()).accessibilityHidden(true)
     }
 }

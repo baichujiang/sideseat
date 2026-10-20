@@ -56,12 +56,8 @@ import XCTest
         app.buttons["plan-edit-save"].tap()
         XCTAssertTrue(title.waitForNonExistence(timeout: 20))
         XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.editedTitle)
-        reveal(app.buttons["time-poll-edit-name"]); app.buttons["time-poll-edit-name"].tap()
-        let name = app.textFields["time-poll-edit-name-field"]
-        XCTAssertTrue(name.waitForExistence(timeout: 10)); replace(name, "Host Ming\n")
-        capture("nickname-editor"); app.buttons["plan-nickname-save"].tap()
-        XCTAssertTrue(name.waitForNonExistence(timeout: 10))
-        XCTAssertEqual(app.staticTexts["plan-my-nickname"].label, "Host Ming")
+        XCTAssertFalse(app.buttons["time-poll-edit-name"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["plan-my-participation"].exists)
         reveal(second); XCTAssertTrue(first.isSelected && second.isSelected)
         XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
         phase("details-draft"); capture("detail-draft-kept")
@@ -81,7 +77,7 @@ import XCTest
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 20)); phase("owner-submitted")
         reveal(app.buttons["plan-people-open"], down: true); app.buttons["plan-people-open"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["plan-people-list"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["Host Ming"].exists); capture("availability-people")
+        XCTAssertTrue(app.staticTexts["Ming"].exists); capture("availability-people")
         app.buttons["plan-people-done"].tap()
 
         launch("participant", token: fixture.pollToken, actualAccount: true)
