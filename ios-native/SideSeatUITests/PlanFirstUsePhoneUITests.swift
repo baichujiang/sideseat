@@ -490,6 +490,7 @@ import XCTest
         XCTAssertTrue(choice.waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["unified-plan-send-invitations"].isEnabled)
         choice.tap()
+        XCTAssertTrue(app.staticTexts["校园"].exists)
         XCTAssertFalse(app.buttons["unified-plan-adjust-time"].exists)
         capture(app, "fixed-ideas-review-before-inviting")
         app.buttons["unified-plan-send-invitations"].tap()
