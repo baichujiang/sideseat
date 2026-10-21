@@ -60,7 +60,7 @@ the editor explains this. Later nickname changes retain the existing dedicated
 endpoint. Cancelling a changed information/nickname form offers discard/keep.
 
 The timetable remains directly editable. Organizer final-time selection has a
-distinct navigation title, range color/icon and return action; review/back retains
+distinct navigation title, movable time block with resize grips and return action; review/back retains
 the draft range and roster. Sharing lives in one toolbar entry with accepted App
 contacts, web sharing and copy; it does not submit availability. The people view
 distinguishes submitted availability from invitation replies. Publication,

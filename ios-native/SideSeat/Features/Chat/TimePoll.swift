@@ -293,26 +293,40 @@ struct TimePollFinalRange: Equatable, Sendable {
     let date: String
     let start: Date
     let end: Date
+    var duration: TimeInterval { end.timeIntervalSince(start) }
 
     func contains(_ cell: NativeTimePoll.Cell) -> Bool {
         cell.date == date && cell.slots[0].start >= start && cell.end <= end
     }
 
-    /// Further taps grow the same interval instead of restarting every third tap.
-    static func selecting(_ cell: NativeTimePoll.Cell, in range: Self?, cells: [NativeTimePoll.Cell]) -> Self? {
-        guard let range, range.date == cell.date else { return spanning(cell, cell, cells: cells) }
-        let included = (cells.filter { range.contains($0) } + [cell]).sorted { $0.slots[0].start < $1.slots[0].start }
-        return spanning(included.first!, included.last!, cells: cells) ?? range
+    static func validated(date: String, start: Date, end: Date, slots: [NativeTimePoll.Slot]) -> Self? {
+        let included = slots.filter { $0.date == date && $0.start >= start && $0.end <= end }.sorted { $0.start < $1.start }
+        guard start < end, included.first?.start == start, included.last?.end == end,
+              zip(included, included.dropFirst()).allSatisfy({ pair in pair.0.end == pair.1.start }) else { return nil }
+        return .init(date: date, start: start, end: end)
     }
 
-    static func spanning(_ first: NativeTimePoll.Cell, _ last: NativeTimePoll.Cell, cells: [NativeTimePoll.Cell]) -> Self? {
-        guard first.date == last.date else { return nil }
-        let start = min(first.slots[0].start, last.slots[0].start), end = max(first.end, last.end)
-        let range = cells.filter { $0.date == first.date && $0.slots[0].start >= start && $0.end <= end }
-            .sorted { $0.slots[0].start < $1.slots[0].start }
-        guard range.first?.slots[0].start == start, range.last?.end == end,
-              zip(range, range.dropFirst()).allSatisfy({ pair in pair.0.end == pair.1.slots[0].start }) else { return nil }
-        return .init(date: first.date, start: start, end: end)
+    /// Keep the duration when moving; clamp the whole block at the day's edges.
+    static func placing(date: String, start: Date, duration: TimeInterval, slots: [NativeTimePoll.Slot]) -> Self? {
+        let day = slots.filter { $0.date == date }.sorted { $0.start < $1.start }
+        guard let first = day.first, let last = day.last, duration <= last.end.timeIntervalSince(first.start) else { return nil }
+        let from = min(max(start, first.start), last.end.addingTimeInterval(-duration))
+        return validated(date: date, start: from, end: from.addingTimeInterval(duration), slots: slots)
+    }
+
+    static func starting(at cell: NativeTimePoll.Cell, duration: TimeInterval, slots: [NativeTimePoll.Slot]) -> Self? {
+        let day = slots.filter { $0.date == cell.date }
+        guard let last = day.last else { return nil }
+        return placing(date: cell.date, start: cell.slots[0].start,
+                       duration: min(duration, last.end.timeIntervalSince(cell.slots[0].start)), slots: slots)
+    }
+
+    func onDay(_ date: String, timeZone: String, slots: [NativeTimePoll.Slot]) -> Self? {
+        guard let first = slots.first(where: { $0.date == date }) else { return nil }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: timeZone) ?? .current
+        guard let from = calendar.date(bySettingHour: calendar.component(.hour, from: start), minute: calendar.component(.minute, from: start), second: 0, of: first.start) else { return nil }
+        return Self.placing(date: date, start: from, duration: duration, slots: slots)
     }
 }
 

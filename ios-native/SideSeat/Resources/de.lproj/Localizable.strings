@@ -2856,9 +2856,7 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "Deine Freunde haben geantwortet. Wähle die endgültige Zeit direkt im Zeitplan.";
 
-"Tap cells to extend one continuous time range." = "Tippe auf Zeitfelder, um einen zusammenhängenden Zeitraum zu verlängern.";
 
-"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "Weitere Zeitfelder verlängern den Zeitraum. Wähle zum Neustart erneut oder halte und ziehe. Ein anderer Tag ersetzt den Zeitraum. Tippe auf ein Datum für den ganzen Tag.";
 "Clear final time" = "Zeit neu wählen";
 
 "Next: review invitation list" = "Weiter: Einladungsliste prüfen";
@@ -2873,7 +2871,6 @@
 
 "Select final time" = "Endgültige Zeit auswählen";
 
-"Select this day as the final time" = "Alle Zeiten dieses Tages als endgültige Zeit wählen";
 
 "Final time" = "Endgültige Zeit";
 
@@ -3168,3 +3165,11 @@
 "Share personal recovery link" = "Persönlichen Wiederherstellungslink teilen";
 "Copy personal recovery link" = "Persönlichen Wiederherstellungslink kopieren";
 "Recover old guest response" = "Alte Gastantwort wiederherstellen";
+
+"Tap to place a time block. Drag its ends to resize, or its middle to move." = "Tippen, um einen Zeitblock zu setzen. Ziehe die Enden zum Anpassen oder die Mitte zum Verschieben.";
+
+"Tap the timetable to place a time block." = "Tippe in den Zeitplan, um einen Zeitblock zu setzen.";
+
+"Move the selected time to this day" = "Die gewählte Zeit auf diesen Tag verschieben";
+
+"%d min" = "%d Min.";

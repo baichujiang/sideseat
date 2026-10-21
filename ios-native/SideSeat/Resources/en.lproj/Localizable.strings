@@ -2857,9 +2857,7 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "Friends have filled in. Choose the final time directly in the timetable.";
 
-"Tap cells to extend one continuous time range." = "Tap cells to extend one continuous time range.";
 
-"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range. Tap a date to select that day.";
 "Clear final time" = "Choose time again";
 
 "Next: review invitation list" = "Next: review invitation list";
@@ -2874,7 +2872,6 @@
 
 "Select final time" = "Select final time";
 
-"Select this day as the final time" = "Select this day as the final time";
 
 "Final time" = "Final time";
 
@@ -3169,3 +3166,11 @@
 "Share personal recovery link" = "Share personal recovery link";
 "Copy personal recovery link" = "Copy personal recovery link";
 "Recover old guest response" = "Recover old guest response";
+
+"Tap to place a time block. Drag its ends to resize, or its middle to move." = "Tap to place a time block. Drag its ends to resize, or its middle to move.";
+
+"Tap the timetable to place a time block." = "Tap the timetable to place a time block.";
+
+"Move the selected time to this day" = "Move the selected time to this day";
+
+"%d min" = "%d min";

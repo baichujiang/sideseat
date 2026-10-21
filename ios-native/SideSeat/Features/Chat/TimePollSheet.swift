@@ -432,29 +432,8 @@ struct TimePollDetailView: View {
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
-                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout(spacing: 8))
-                layout {
-                    Text("Choose final time").font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity, alignment: .leading).accessibilityIdentifier("time-poll-final-heading")
-                    Button { finalRange = nil } label: {
-                        Label("Clear final time", systemImage: "arrow.counterclockwise").font(.caption.weight(.medium)).frame(minHeight: 44)
-                    }
-                    .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                    .disabled(finalRange == nil)
-                    .accessibilityIdentifier("time-poll-reset-final")
-                }
-                if let finalRange {
-                    Text(timePollDateLabel(finalRange.date).replacingOccurrences(of: "\n", with: " "))
-                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    Text(timePollClockFormatter(poll.timeZone).string(from: finalRange.start) + " – " + timePollClockFormatter(poll.timeZone).string(from: finalRange.end))
-                        .font(.subheadline.monospacedDigit()).fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("time-poll-final-range")
-                } else if !typeSize.isAccessibilitySize {
-                    Text("Tap cells to extend one continuous time range.")
-                        .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitation" : "Next: review invitation"), symbol: "person.2", kind: .commit,
+                FinalTimeControls(poll: poll, range: $finalRange)
+                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"), symbol: "person.2", kind: .commit,
                                 accessibilityID: "unified-plan-review-roster") { showsInvite = true }
                     .disabled(finalRange == nil || !store.canMutate)
             } else {
@@ -502,10 +481,8 @@ struct TimePollDetailView: View {
         finalRange = nil
         if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd, let date = poll.dates.first {
             finalRange = TimePollFinalRange(date: date, start: start, end: end)
-        } else if let start = poll.chosenStart, let end = poll.chosenEnd,
-           let first = poll.cells.first(where: { $0.slots[0].start == start }),
-           let last = poll.cells.first(where: { $0.end == end }) {
-            finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells)
+        } else if let start = poll.chosenStart, let end = poll.chosenEnd, let date = poll.slots.first(where: { $0.start == start })?.date {
+            finalRange = TimePollFinalRange.validated(date: date, start: start, end: end, slots: poll.slots)
         }
         }
         if poll.hasFixedTime { showsInvite = true } else { pickingFinalTime = true }
@@ -572,6 +549,9 @@ private struct TimePollGrid: View {
     @State private var selecting = true
     @State private var undoSelection: Set<Int>?
     @State private var originalFinalRange: TimePollFinalRange?
+    @State private var finalDragMode: FinalTimeDrag?
+    @GestureState private var finalGestureActive = false
+    private enum FinalTimeDrag { case start, end, move }
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
     private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? 128 : 48 }
@@ -586,7 +566,7 @@ private struct TimePollGrid: View {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Label("Final time · not sent yet", systemImage: "calendar.badge.clock")
                         .font(.subheadline.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                    Text("Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range.")
+                    Text("Tap to place a time block. Drag its ends to resize, or its middle to move.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     Text("Numbers show how many people are free. Your availability stays unchanged.")
                         .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -609,6 +589,11 @@ private struct TimePollGrid: View {
         .onChange(of: editable) { _, _ in clearPreview() }
         .onChange(of: pickingFinalTime) { _, _ in clearPreview() }
         .onDisappear { clearPreview() }
+        .onChange(of: finalGestureActive) { _, active in
+            if !active, let originalFinalRange {
+                finalRange = originalFinalRange; self.originalFinalRange = nil; finalDragMode = nil
+            }
+        }
     }
 
     private func timetable(rows: [String], lookup: [String: NativeTimePoll.Cell], participantSelections: [Set<Int>], width: CGFloat) -> some View {
@@ -661,12 +646,9 @@ private struct TimePollGrid: View {
                                         let finalActive = pickingFinalTime && finalRange?.contains(slot) == true
                                         ZStack {
                                             Rectangle().fill(SideSeatTheme.success.opacity(count == 0 ? 0.06 : 0.14 + 0.42 * Double(count) / Double(max(1, participantSelections.count))))
-                                            if finalActive { Rectangle().fill(SideSeatTheme.statusWarningText.opacity(0.16)) }
-                                            Rectangle().strokeBorder(finalActive ? SideSeatTheme.statusWarningText : editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: finalActive || editable && (active || partial) ? 2 : 0.5)
+                                            Rectangle().strokeBorder(editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator, lineWidth: editable && (active || partial) ? 2 : 0.5)
                                             HStack(spacing: 5) {
-                                                if finalActive {
-                                                    Image(systemName: "calendar.badge.checkmark").foregroundStyle(SideSeatTheme.textPrimary)
-                                                } else if editable && (active || partial) {
+                                                if editable && (active || partial) {
                                                     Image(systemName: active ? "checkmark.circle.fill" : "minus.circle.fill")
                                                         .foregroundStyle(active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
                                                 }
@@ -685,17 +667,40 @@ private struct TimePollGrid: View {
                             }
                         }
                     }
-                    .overlay {
-                        if editable || pickingFinalTime {
-                            TimePollTouchSurface(
-                                onTap: { point in
-                                    if let position = position(point, rows: rows, cellWidth: cellWidth),
-                                       let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot) }
-                                },
-                                onRange: { state, point in updateRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup) }
-                            ).accessibilityHidden(true)
+                    .overlay(alignment: .topLeading) {
+                        ZStack(alignment: .topLeading) {
+                            if editable || pickingFinalTime {
+                                TimePollTouchSurface(
+                                    onTap: { point in
+                                        if let position = position(point, rows: rows, cellWidth: cellWidth),
+                                           let slot = lookup["\(poll.dates[position.0])|\(rows[position.1])"] { toggle(slot) }
+                                    },
+                                    onRange: pickingFinalTime ? nil : { state, point in updateRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup) }
+
+                                ).accessibilityHidden(true)
+                            }
+                            if pickingFinalTime, let range = finalRange,
+                               let frame = finalFrame(range, rows: rows, cellWidth: cellWidth, lookup: lookup) {
+                                FinalTimeBlock(start: timeFormatter.string(from: range.start), end: timeFormatter.string(from: range.end))
+                                    .frame(width: frame.width, height: frame.height)
+                                    .contentShape(Rectangle().inset(by: -4))
+                                    .highPriorityGesture(DragGesture(minimumDistance: 3, coordinateSpace: .named("plan-final-grid"))
+                                        .updating($finalGestureActive) { _, active, _ in active = true }
+                                        .onChanged { value in
+                                            let translation = CGPoint(x: value.translation.width, y: value.translation.height)
+                                            if originalFinalRange == nil {
+                                                updateFinalRange(.began, origin: value.startLocation, translation: translation, rows: rows, cellWidth: cellWidth, lookup: lookup)
+                                            }
+                                            updateFinalRange(.changed, origin: value.startLocation, translation: translation, rows: rows, cellWidth: cellWidth, lookup: lookup)
+                                        }
+                                        .onEnded { value in
+                                            updateFinalRange(.ended, origin: value.startLocation, translation: .zero, rows: rows, cellWidth: cellWidth, lookup: lookup)
+                                        })
+                                    .offset(x: frame.minX, y: frame.minY)
+                            }
                         }
                     }
+                    .coordinateSpace(name: "plan-final-grid")
                 }
             }.frame(width: max(0, width - labelWidth), height: headerHeight + cellHeight * CGFloat(rows.count))
         }
@@ -708,17 +713,18 @@ private struct TimePollGrid: View {
         let day = poll.cells.filter { $0.date == date }
         return Button {
             if pickingFinalTime {
-                if let first = day.first, let last = day.last { finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells) }
+                if let range = finalRange { finalRange = range.onDay(date, timeZone: poll.timeZone, slots: poll.slots) ?? range }
+                else if let first = day.first { finalRange = TimePollFinalRange.starting(at: first, duration: Double(poll.durationMinutes ?? 60) * 60, slots: poll.slots) }
             } else { apply(allSelected ? selected.subtracting(slots) : selected.union(slots)) }
         } label: {
             HStack(spacing: 4) {
                 Text(timePollDateLabel(date)).multilineTextAlignment(.center).lineLimit(2).minimumScaleFactor(0.75)
-                Image(systemName: pickingFinalTime ? "calendar" : allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle")
+                if !pickingFinalTime { Image(systemName: allSelected ? "checkmark.circle.fill" : partlySelected ? "minus.circle" : "circle") }
             }
             .font(.caption.weight(.semibold))
             .frame(width: width - 6, height: headerHeight - 4)
             .foregroundStyle(pickingFinalTime ? SideSeatTheme.textPrimary : allSelected ? SideSeatTheme.Availability.onSelected : partlySelected ? SideSeatTheme.Availability.onPartial : SideSeatTheme.textPrimary)
-            .background(pickingFinalTime ? Color.clear : allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.partialFill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
+            .background(pickingFinalTime ? (finalRange?.date == date ? SideSeatTheme.statusWarningText.opacity(0.12) : Color.clear) : allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.partialFill : Color.clear, in: RoundedRectangle(cornerRadius: 8))
             .overlay {
                 RoundedRectangle(cornerRadius: 8).strokeBorder(pickingFinalTime ? SideSeatTheme.separator : allSelected ? SideSeatTheme.Availability.selectedFill : partlySelected ? SideSeatTheme.Availability.onPartial.opacity(0.5) : SideSeatTheme.separator, lineWidth: 0.5)
             }
@@ -729,16 +735,12 @@ private struct TimePollGrid: View {
         .disabled(slots.isEmpty || dragStart != nil)
         .accessibilityLabel(timePollDateLabel(date).replacingOccurrences(of: "\n", with: ", "))
         .accessibilityValue(pickingFinalTime ? "" : AppLocalization.string(allSelected ? "All times selected" : partlySelected ? "Some times selected" : "No times selected"))
-        .accessibilityHint(AppLocalization.string(pickingFinalTime ? "Select this day as the final time" : allSelected ? "Deselect all times for this day" : "Select all times for this day"))
+        .accessibilityHint(AppLocalization.string(pickingFinalTime ? "Move the selected time to this day" : allSelected ? "Deselect all times for this day" : "Select all times for this day"))
         .accessibilityAddTraits(!pickingFinalTime && allSelected ? .isSelected : [])
         .accessibilityIdentifier("time-poll-day-\(date)")
     }
 
     private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
-        if pickingFinalTime {
-            updateFinalRange(state, point: point, rows: rows, cellWidth: cellWidth, lookup: lookup)
-            return
-        }
         switch state {
         case .began:
             guard let start = position(point, rows: rows, cellWidth: cellWidth),
@@ -761,31 +763,72 @@ private struct TimePollGrid: View {
         }
     }
 
-    private func updateFinalRange(_ state: UIGestureRecognizer.State, point: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
+    private func finalFrame(_ range: TimePollFinalRange, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) -> CGRect? {
+        guard let column = poll.dates.firstIndex(of: range.date) else { return nil }
+        func y(_ time: Date, ending: Bool) -> CGFloat? {
+            for (index, row) in rows.enumerated() {
+                guard let cell = lookup["\(range.date)|\(row)"] else { continue }
+                let from = cell.slots[0].start
+                if ending ? (time > from && time <= cell.end) : (time >= from && time < cell.end) {
+                    return (CGFloat(index) + CGFloat(time.timeIntervalSince(from) / cell.end.timeIntervalSince(from))) * cellHeight
+                }
+            }
+            return nil
+        }
+        guard let top = y(range.start, ending: false), let bottom = y(range.end, ending: true) else { return nil }
+        return CGRect(x: CGFloat(column) * cellWidth + 3, y: top, width: cellWidth - 6, height: bottom - top)
+    }
+
+    private func finalDrag(at point: CGPoint, frame: CGRect) -> FinalTimeDrag? {
+        if CGRect(x: frame.maxX - 44, y: frame.minY - 4, width: 44, height: 44).contains(point) { return .start }
+        if CGRect(x: frame.minX, y: frame.maxY - 40, width: 44, height: 44).contains(point) { return .end }
+        return frame.contains(point) ? .move : nil
+    }
+
+    private func boundary(at y: CGFloat, date: String, rows: [String], lookup: [String: NativeTimePoll.Cell]) -> Date? {
+        let index = min(max(Int(floor(y / cellHeight)), 0), rows.count - 1)
+        guard let cell = lookup["\(date)|\(rows[index])"] else { return nil }
+        let fraction = min(max(y / cellHeight - CGFloat(index), 0), 1)
+        let quarters = (Double(fraction) * Double(cell.slots.count)).rounded()
+        return cell.slots[0].start.addingTimeInterval(quarters * 900)
+    }
+
+    private func updateFinalRange(_ state: UIGestureRecognizer.State, origin: CGPoint, translation: CGPoint, rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
         switch state {
         case .began:
-            guard let start = position(point, rows: rows, cellWidth: cellWidth),
-                  let cell = lookup["\(poll.dates[start.0])|\(rows[start.1])"] else { return }
-            originalFinalRange = finalRange; dragStart = start
-            finalRange = TimePollFinalRange.spanning(cell, cell, cells: poll.cells)
+            guard let range = finalRange, let frame = finalFrame(range, rows: rows, cellWidth: cellWidth, lookup: lookup) else { return }
+            originalFinalRange = range; finalDragMode = finalDrag(at: origin, frame: frame)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         case .changed:
-            guard let start = dragStart,
-                  let end = position(point, rows: rows, cellWidth: cellWidth, clamped: true),
-                  let first = lookup["\(poll.dates[start.0])|\(rows[start.1])"],
-                  let last = lookup["\(poll.dates[start.0])|\(rows[end.1])"] else { return }
-            finalRange = TimePollFinalRange.spanning(first, last, cells: poll.cells)
-        case .ended:
-            clearPreview()
+            guard let range = originalFinalRange, let mode = finalDragMode,
+                  let frame = finalFrame(range, rows: rows, cellWidth: cellWidth, lookup: lookup) else { return }
+            if mode == .move {
+                let column = min(max(Int(floor((origin.x + translation.x) / cellWidth)), 0), poll.dates.count - 1)
+                let date = poll.dates[column]
+                if let start = boundary(at: frame.minY + translation.y, date: date, rows: rows, lookup: lookup) {
+                    finalRange = TimePollFinalRange.placing(date: date, start: start, duration: range.duration, slots: poll.slots) ?? finalRange
+                }
+            } else if let edge = boundary(at: (mode == .start ? frame.minY : frame.maxY) + translation.y, date: range.date, rows: rows, lookup: lookup) {
+                let start = mode == .start ? min(edge, range.end.addingTimeInterval(-900)) : range.start
+                let end = mode == .end ? max(edge, range.start.addingTimeInterval(900)) : range.end
+                finalRange = TimePollFinalRange.validated(date: range.date, start: start, end: end, slots: poll.slots) ?? finalRange
+            }
         case .cancelled, .failed:
-            finalRange = originalFinalRange; clearPreview()
+            finalRange = originalFinalRange; originalFinalRange = nil; finalDragMode = nil
+        case .ended:
+            originalFinalRange = nil; finalDragMode = nil
         default: break
         }
     }
 
     private func toggle(_ cell: NativeTimePoll.Cell) {
         if pickingFinalTime {
-            finalRange = TimePollFinalRange.selecting(cell, in: finalRange, cells: poll.cells)
+            if let range = finalRange, range.date == cell.date, cell.slots[0].start >= range.start, cell.slots[0].start < range.end { return }
+            if let range = finalRange {
+                finalRange = TimePollFinalRange.placing(date: cell.date, start: cell.slots[0].start, duration: range.duration, slots: poll.slots) ?? range
+            } else {
+                finalRange = TimePollFinalRange.starting(at: cell, duration: Double(poll.durationMinutes ?? 60) * 60, slots: poll.slots)
+            }
             return
         }
         guard editable else { return }
@@ -814,35 +857,35 @@ private struct TimePollGrid: View {
 /// Once the hold recognizes, it owns that touch until release or cancellation.
 private struct TimePollTouchSurface: UIViewRepresentable {
     let onTap: (CGPoint) -> Void
-    let onRange: (UIGestureRecognizer.State, CGPoint) -> Void
+    var onRange: ((UIGestureRecognizer.State, CGPoint) -> Void)? = nil
 
     func makeUIView(context: Context) -> TimePollTouchView { TimePollTouchView() }
     func updateUIView(_ view: TimePollTouchView, context: Context) {
-        view.onTap = onTap
-        view.onRange = onRange
+        view.onTap = onTap; view.onRange = onRange
     }
 }
 
 private final class TimePollTouchView: UIView {
     var onTap: ((CGPoint) -> Void)?
-    var onRange: ((UIGestureRecognizer.State, CGPoint) -> Void)?
+    var onRange: ((UIGestureRecognizer.State, CGPoint) -> Void)? { didSet { if hold.isEnabled != (onRange != nil) { hold.isEnabled = onRange != nil } } }
+    private let hold = UILongPressGestureRecognizer()
 
     init() {
         super.init(frame: .zero)
         backgroundColor = .clear
         isAccessibilityElement = false
-        let hold = UILongPressGestureRecognizer(target: self, action: #selector(handleHold))
+        hold.addTarget(self, action: #selector(handleHold))
         hold.minimumPressDuration = 0.4
         hold.allowableMovement = 10
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         tap.require(toFail: hold)
-        addGestureRecognizer(hold)
-        addGestureRecognizer(tap)
+        addGestureRecognizer(hold); addGestureRecognizer(tap)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     @objc private func handleTap(_ gesture: UITapGestureRecognizer) { onTap?(gesture.location(in: self)) }
     @objc private func handleHold(_ gesture: UILongPressGestureRecognizer) { onRange?(gesture.state, gesture.location(in: self)) }
+
 }
 
 struct TimePollMessageContent: View {

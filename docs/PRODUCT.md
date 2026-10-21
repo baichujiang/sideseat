@@ -48,7 +48,17 @@ A dirty draft does not prevent choosing final time, sending or confirming an
 invitation. Existing records, quarter-hour storage and Calendar consent remain
 intact. This supersedes the earlier Preview 136 autosave amendment.
 
-**2026-10-20 / Preview 143 final-time amendment:** repeated taps on one date
+**2026-10-21 owner-approved final-time interaction:** An organizer places one
+continuous time block with a tap, using the activity duration or one hour by
+default (shortened only on initial placement if the candidate window ends sooner).
+Taps inside keep it unchanged; taps outside move it while retaining its duration.
+Visible start/end grips resize it; dragging the middle moves it. Date changes retain
+local start time and duration, within candidate boundaries. The bottom controls
+edit date/start/end directly, then proceed to review invitees. Availability, manual
+submission, invitation versions and Calendar consent are unchanged. This replaces
+the Preview 143 grow-only tap interaction below.
+
+**Historical 2026-10-20 / Preview 143 final-time amendment (superseded above):** repeated taps on one date
 extend one continuous invitation-time interval; tapping an included cell keeps
 it selected. No hidden third-tap reset is permitted. Choose time again clears
 only that draft from the fixed bottom bar; a new hold/drag or another date

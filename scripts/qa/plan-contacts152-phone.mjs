@@ -43,12 +43,27 @@ if (mode === 'prepare') {
     const tokens = owner?.accessToken ? (await call('/api/v1/time-polls', owner)).polls.filter(p => p.title === f.title && p.isOwner).map(p => p.token) : [];
     if (f.pollToken && !tokens.includes(f.pollToken)) tokens.push(f.pollToken);
     if (f.compactToken && !tokens.includes(f.compactToken)) tokens.push(f.compactToken);
+    if (f.finalBlockToken && !tokens.includes(f.finalBlockToken)) tokens.push(f.finalBlockToken);
     for (const item of f.invitationCases ?? []) if (!tokens.includes(item.token)) tokens.push(item.token);
     let removed = 0;
     for (const a of f.accounts) { if (!a.accessToken) await login(a); await call('/api/v1/me', a, 'DELETE', { confirmUsername: a.identifier }); await call('/api/v1/me', a, 'GET', undefined, 401); removed++; }
     for (const token of tokens) assert.equal((await fetch(base + '/api/public/time-polls/' + token)).status, 404);
     await fs.writeFile(`${out}/${label}-cleanup.json`, JSON.stringify({ accountsRemoved: removed, tokens401: removed, links404: tokens.length, at: new Date().toISOString() }, null, 2));
     await fs.unlink(privatePath); console.log('Disposable phone accounts, plan and link removed; 401/404 checked.');
+  } else if (mode === 'verify-final-block') {
+    assert(f.finalBlockToken);
+    const p = await call('/api/v1/time-polls/' + f.finalBlockToken, owner);
+    assert.equal(p.phase, 'COLLECTING'); assert.equal(p.summary.participantCount, 0);
+    assert.deepEqual(p.mySlotIds, []); assert.equal(p.invitationVersion ?? 0, 0);
+    await fs.writeFile(`${out}/picker-api.json`, JSON.stringify({ passed: true, phase: p.phase, responses: 0, invitationVersion: 0, ownSubmittedSlots: [] }, null, 2));
+    console.log('Picker interactions left availability and invitations unchanged on the server.');
+  } else if (mode === 'final-block-layout') {
+    assert(!f.finalBlockToken);
+    const dates = [3, 4].map(days => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10));
+    const p = await call('/api/v1/time-polls', owner, 'POST', { title: 'Final time picker layout ' + randomBytes(3).toString('hex'), dates, startMinute: 540, endMinute: 1260, timeZone: 'Europe/Berlin' }, 201);
+    f.finalBlockToken = p.token;
+    await fs.writeFile(privatePath, JSON.stringify(f), { mode: 0o600 });
+    console.log('Prepared a separate collecting plan for maximum-text picker checks.');
   } else if (mode === 'invitation-layout') {
     assert(!f.invitationCases, 'Use each disposable layout fixture once.');
     f.invitationCases = [];

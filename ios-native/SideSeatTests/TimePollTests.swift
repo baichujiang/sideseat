@@ -62,72 +62,58 @@ struct TimePollTests {
         #expect(repeated.contains { $0.label == "02:30 +01:00" })
     }
 
-    @Test("Final time spans continuous half-hour cells in either direction without changing replies")
-    func finalTimeRange() {
-        let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
+    @Test("Placing and moving a time block preserves duration, including at the day edge")
+    func finalTimePlacement() throws {
+        let slots = (0..<16).map { id in NativeTimePoll.Slot(id: id, date: "2030-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
         let cells = TimePollSelection.cells(slots)
-        let forward = TimePollFinalRange.spanning(cells[0], cells[2], cells: cells)
-        let reverse = TimePollFinalRange.spanning(cells[2], cells[0], cells: cells)
-        #expect(forward == reverse)
-        #expect(forward?.start == slots[0].start)
-        #expect(forward?.end == slots[5].end)
-        #expect(forward?.contains(cells[1]) == true)
-        #expect(forward?.contains(cells[3]) == false)
-        #expect(cells.flatMap { $0.slots.map(\.id) } == Array(0..<8))
+        let initial = try #require(TimePollFinalRange.starting(at: cells[2], duration: 3600, slots: slots))
+        #expect(initial.start == slots[4].start)
+        #expect(initial.end == slots[7].end)
+        #expect(initial.duration == 3600)
+        let moved = try #require(TimePollFinalRange.placing(date: initial.date, start: slots[15].start, duration: initial.duration, slots: slots))
+        #expect(moved.start == slots[12].start)
+        #expect(moved.end == slots[15].end)
+        #expect(moved.duration == initial.duration)
+        let late = try #require(TimePollFinalRange.starting(at: cells.last!, duration: 3600, slots: slots))
+        #expect(late.start == cells.last!.slots[0].start)
+        #expect(late.duration == 1800)
+        #expect(slots.map(\.id) == Array(0..<16))
     }
 
-    @Test("Repeated final-time taps preserve the full interval in either direction")
-    func repeatedFinalTimeTaps() {
+    @Test("Both endpoints can shrink or extend independently on quarter-hour boundaries")
+    func finalTimeEndpoints() throws {
         let slots = (0..<12).map { id in NativeTimePoll.Slot(id: id, date: "2030-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let cells = TimePollSelection.cells(slots)
-        for order in [[0, 1, 2, 3, 4, 5], [5, 4, 3, 2, 1, 0], [2, 4, 0, 5, 1, 3]] {
-            var range: TimePollFinalRange?
-            var visited: [NativeTimePoll.Cell] = []
-            for index in order {
-                visited.append(cells[index])
-                range = TimePollFinalRange.selecting(cells[index], in: range, cells: cells)
-                #expect(visited.allSatisfy { range?.contains($0) == true })
-            }
-            let full = range
-            for cell in cells { range = TimePollFinalRange.selecting(cell, in: range, cells: cells); #expect(range == full) }
-            // Explicit reset starts a fresh interval; a later tap still extends it.
-            range = TimePollFinalRange.selecting(cells[3], in: nil, cells: cells)
-            #expect(range == TimePollFinalRange.spanning(cells[3], cells[3], cells: cells))
+        let short = try #require(TimePollFinalRange.validated(date: slots[0].date, start: slots[1].start, end: slots[2].end, slots: slots))
+        #expect(short.duration == 1800)
+        let extended = try #require(TimePollFinalRange.validated(date: short.date, start: short.start, end: slots[5].end, slots: slots))
+        #expect(extended.start == short.start)
+        #expect(extended.duration == 4500)
+        #expect(TimePollFinalRange.validated(date: short.date, start: short.end, end: short.start, slots: slots) == nil)
+        #expect(TimePollFinalRange.validated(date: short.date, start: short.start, end: extended.end, slots: slots.filter { $0.id != 3 }) == nil)
+    }
+
+    @Test("Changing day retains local start time and duration across daylight saving")
+    func finalTimeDate() throws {
+        let formatter = ISO8601DateFormatter()
+        let days = [("2026-10-24", "2026-10-24T07:00:00Z"), ("2026-10-25", "2026-10-25T08:00:00Z")]
+        let slots = days.enumerated().flatMap { index, item in
+            (0..<16).map { id in NativeTimePoll.Slot(id: index * 16 + id, date: item.0, row: String(id), label: String(id), start: formatter.date(from: item.1)!.addingTimeInterval(Double(id * 900)), end: formatter.date(from: item.1)!.addingTimeInterval(Double((id + 1) * 900))) }
         }
+        let initial = try #require(TimePollFinalRange.starting(at: TimePollSelection.cells(slots)[0], duration: 3600, slots: slots))
+        let moved = try #require(initial.onDay("2026-10-25", timeZone: "Europe/Berlin", slots: slots))
+        #expect(moved.start == formatter.date(from: "2026-10-25T08:00:00Z"))
+        #expect(moved.duration == 3600)
+        #expect(TimePollFinalRange.validated(date: initial.date, start: initial.start, end: moved.end, slots: slots) == nil)
     }
 
-    @Test("Availability taps retain other days, while final time explicitly changes day and preserves invalid ranges")
-    func selectionModes() {
-        let slots = (0..<16).map { id in NativeTimePoll.Slot(id: id, date: id < 8 ? "2030-10-19" : "2030-10-20", row: String(id % 8), label: String(id % 8), start: Date(timeIntervalSince1970: Double((id < 8 ? id : id + 88) * 900)), end: Date(timeIntervalSince1970: Double((id < 8 ? id : id + 88) * 900 + 900))) }
-        let cells = TimePollSelection.cells(slots)
-        var available = Set<Int>()
-        for cell in cells {
-            let previous = available
-            available = TimePollSelection.toggle(cell, original: available)
-            #expect(previous.isSubset(of: available))
-        }
-        #expect(TimePollSelection.toggle(cells[2], original: available) == available.subtracting(cells[2].slotIds))
-        let range = TimePollFinalRange.spanning(cells[0], cells[1], cells: cells)
-        #expect(TimePollFinalRange.selecting(cells[4], in: range, cells: cells) == TimePollFinalRange.spanning(cells[4], cells[4], cells: cells))
-        #expect(TimePollFinalRange.selecting(cells[3], in: range, cells: cells.filter { $0.id != cells[2].id }) == range)
-    }
-
-    @Test("Final time cannot span different dates or gaps")
-    func finalTimeBoundaries() {
-        let slots = (0..<6).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-19" : "2026-10-20", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let cells = TimePollSelection.cells(slots)
-        #expect(TimePollFinalRange.spanning(cells[0], cells[2], cells: cells) == nil)
-        let separated = [cells[0], NativeTimePoll.Cell(slots: [.init(id: 10, date: "2026-10-19", row: "10", label: "10", start: Date(timeIntervalSince1970: 9000), end: Date(timeIntervalSince1970: 9900))])]
-        #expect(TimePollFinalRange.spanning(separated[0], separated[1], cells: separated) == nil)
-    }
-
-    @Test("Whole-day final time preserves midnight and an odd legacy boundary")
-    func finalTimeWholeDay() {
+    @Test("Short candidate days and midnight endpoints stay inside the available timetable")
+    func finalTimeBoundaries() throws {
         let slots = (0..<95).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let cells = TimePollSelection.cells(slots)
-        #expect(TimePollFinalRange.spanning(cells.first!, cells.last!, cells: cells)?.end == slots.last!.end)
-        let last = NativeTimePoll.Cell(slots: [.init(id: 95, date: "2026-10-19", row: "95", label: "23:45", start: slots.last!.end, end: Date(timeIntervalSince1970: 86400))])
-        #expect(TimePollFinalRange.spanning(cells[0], last, cells: cells + [last])?.end == Date(timeIntervalSince1970: 86400))
+        let initial = try #require(TimePollFinalRange.starting(at: TimePollSelection.cells(Array(slots.prefix(2)))[0], duration: 3600, slots: Array(slots.prefix(2))))
+        #expect(initial.duration == 1800)
+        #expect(TimePollFinalRange.validated(date: slots[0].date, start: slots[0].start, end: slots.last!.end, slots: slots)?.end == slots.last!.end)
+        let midnight = NativeTimePoll.Slot(id: 95, date: slots[0].date, row: "95", label: "23:45", start: slots.last!.end, end: Date(timeIntervalSince1970: 86400))
+        #expect(TimePollFinalRange.validated(date: midnight.date, start: slots[0].start, end: midnight.end, slots: slots + [midnight])?.end == midnight.end)
     }
 
     @Test("Invite links use the Sideseat domain and route into the native feature")

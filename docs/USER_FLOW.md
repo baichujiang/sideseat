@@ -92,6 +92,16 @@ snapshot is cleared; newer edits and failures remain. Existing saved responses,
 invitation versions, roster/capacity rules and Calendar consent stay intact.
 This supersedes Preview 136's autosave and mutation-blocking descriptions.
 
+## Final-time block — owner-approved interaction, 2026-10-21
+
+Choose final time → tap to place a block → optionally drag its start/end grips,
+move its middle, or edit date/start/end in the bottom controls → review invitation
+list → explicitly send invitations. A first tap uses the activity duration or one
+hour, limited by the remaining candidate window. Later blank taps move the block
+without changing its duration; included taps keep it. Day headers move the block
+to that day, preserving local start/end rather than selecting all candidate times.
+This mode never submits personal availability or sends an invitation itself.
+
 ## Formal invitation before availability — owner correction / Preview 135
 
 Plans → activity/place → timetable → choose final time → review invitation →

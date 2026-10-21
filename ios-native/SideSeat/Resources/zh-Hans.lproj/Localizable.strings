@@ -2857,9 +2857,7 @@
 
 "Friends have filled in. Choose the final time directly in the timetable." = "朋友已填写，直接在时间表里选最终时段。";
 
-"Tap cells to extend one continuous time range." = "点选时间格，延长一段连续时间。";
 
-"Tap cells to extend one continuous time range. To start over, clear the time or hold and drag. Choosing another day replaces the range." = "继续点选可延长连续时段；重新选择可点重选按钮或长按拖选。换一天会替换当前时段，点日期可选整天。";
 "Clear final time" = "重新选择时间";
 
 "Next: review invitation list" = "下一步：确认邀请名单";
@@ -2874,7 +2872,6 @@
 
 "Select final time" = "选择最终时间";
 
-"Select this day as the final time" = "选择当天全部时段作为最终时间";
 
 "Final time" = "最终时间";
 
@@ -3169,3 +3166,11 @@
 "Share personal recovery link" = "分享个人恢复链接";
 "Copy personal recovery link" = "复制个人恢复链接";
 "Recover old guest response" = "恢复旧游客填写";
+
+"Tap to place a time block. Drag its ends to resize, or its middle to move." = "点一下放入时段；拖动上下端点调整起止，拖动中间移动整段。";
+
+"Tap the timetable to place a time block." = "点一下时间表，放入一段时间。";
+
+"Move the selected time to this day" = "换到这一天，保留起止时间";
+
+"%d min" = "%d 分钟";
