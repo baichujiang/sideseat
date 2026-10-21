@@ -21,13 +21,18 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 177 is the current installed development build. Guests use independent
+- Preview 178 is the current installed development build. Final time uses one
+  movable/resizable block with direct date/start/end controls. Twenty-four unit
+  checks, the App-contact and App/Safari full journeys (8 + 7 API stages), and
+  final Chinese/German largest-text checks passed. Ordinary launch PID 5015 is
+  verified. Invitation and Calendar rules remain unchanged; see the 178 QA record.
+- Preview 177 guest identity remains included. Guests use independent
   private credentials and personal recovery links without registration; names and
   unsigned participant-ID cookies cannot claim records. Existing verified random
   credentials upgrade in place; organizers can reissue only unclaimed old records.
   Candidate and production each passed four Chromium/WebKit browser/data flows.
   Old-record recovery generation/copy passed Chinese and German largest-text tests
-  on the default iPhone 14 Plus. Ordinary launch PID 4343 was observed.
+  on the default iPhone 14 Plus. The 177 ordinary launch PID 4343 was observed.
   Preview 176 invitation header legends and Preview 173 saved-card changes are
   retained. Prior invitation-layout tests and the App plan journey retain their
   separately recorded scope; see `docs/DEPLOYED_STATE.md`. Ordinary

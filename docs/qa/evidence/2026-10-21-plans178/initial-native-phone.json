@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanBlock178 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792606517.627,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792606383.668,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed - 结束、11:00",
+      "targetName" : "PlanBlock178UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanBlock178/PlanBlock178UITests/PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar",
+      "testName" : "testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+    }
+  ],
+  "title" : "Test - PlanBlock178",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

@@ -43,7 +43,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
 
-当前 Preview **177**：游客免注册、同名独立、个人恢复链接；旧填写原位保留，有旧随机凭证自动接续，其他旧记录由发起人核实后提供恢复链接。候选/正式站 Chromium 与 WebKit 各四组闭环通过，默认 iPhone 14 Plus 中文及德文最大字号恢复入口通过；普通启动 PID 4343，普通 97 保留。网页和后端已上线，保留 176 图例及收藏间距改动。[交付与测试](./docs/releases/2026-10-21-preview177-guest-private-identity.md)。
+当前 Preview **178**：最终选时改为一个可拖动、伸缩的时间块，底部直接修改日期/起止；原邀请与日历规则保留。24 项原生单元、App 好友完整流程 207.619 秒/八阶段 API、App→Safari 完整流程 139.848 秒/七阶段 API 通过；最终中德最大字号 54.521 秒复验通过。默认 iPhone 14 Plus 已安装并普通启动 PID 5015，普通 97 保留，本轮无网页/后端发布。[交付、范围与截图](./docs/releases/2026-10-21-preview178-final-time-block.md)。
+
+此前 Preview **177**：游客免注册、同名独立、个人恢复链接；旧填写原位保留，有旧随机凭证自动接续，其他旧记录由发起人核实后提供恢复链接。候选/正式站 Chromium 与 WebKit 各四组闭环通过，默认 iPhone 14 Plus 中文及德文最大字号恢复入口通过；普通启动 PID 4343，普通 97 保留。网页和后端已上线，保留 176 图例及收藏间距改动。[交付与测试](./docs/releases/2026-10-21-preview177-guest-private-identity.md)。
 
 此前 Preview **176**：App/分享网页把「受邀时段」改为表头右侧的色块图例，高亮块内部留空。普通/深色最大字号六个真机场景、候选/正式网页各六项显示检查通过；默认 iPhone 14 Plus 已安装并普通启动 PID 4336，普通 97 保留。[交付与截图](./docs/releases/2026-10-21-preview176-invitation-legend.md)。本轮未重跑完整业务链。
 

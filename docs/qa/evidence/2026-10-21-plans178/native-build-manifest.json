@@ -1,0 +1,63 @@
+{
+  "sourceCommit": "496ae91c",
+  "baseSourceCommit": "eff9bb7f",
+  "previewBuild": 178,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "isolatedBuild": true,
+  "inputs": [
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePoll.swift",
+      "sha256": "80571df429a9aad7448c5883e917a303e1c9db7c486522215a49160da25bb8df"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+      "sha256": "570d59b7559da7082ad650d99e4547c4fbfb88f4dbf66b6f7a455fb5a7218e4f"
+    },
+    {
+      "path": "ios-native/SideSeat/Features/Chat/FinalTimeSelection.swift",
+      "sha256": "5c2d7e39cb9445651456dc5e9f1065c197ea8aa37e120d8b4a90e71b03f70e8c"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "4fa7917964cd361c56fbb46b6a7e5995535224a21c3a44fd66f4c6e957bd3cf4"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
+      "sha256": "e2ed67861be3378cd54f0d625853a688c100aa049fabafe8a904be947706b695"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings",
+      "sha256": "09a5b2da4ceda06e7772186aafc80c3bb1cc589da32fd65e39f6661c05b84406"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/de.lproj/Localizable.strings",
+      "sha256": "c86472802455bb3d2a1ce6aa3d6321575137684d8f8c1f3caf4a5613b2c126e3"
+    }
+  ],
+  "preservedNativeSwiftFiles": 159,
+  "binarySHA256": {
+    "SideSeat Preview": "df9ea6021ee613b4c5393a5e422554aeeb77d425d81367a68def2cb10bc9ac69",
+    "SideSeat Preview.debug.dylib": "9aa10aa1db0aa7cf52a914b68935ce8ea2687001cde7f68339fc06b968baa930"
+  },
+  "strictSignatureVerified": true,
+  "installed": true,
+  "normalLaunchPID": 5015,
+  "normalProcessMatched": true,
+  "qaRunnerRemoved": true,
+  "ordinaryAppBuild": 97,
+  "backendDeployment": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "backendUnchanged": true,
+  "unitTestsPassed": 24,
+  "nativeBusinessFlowSeconds": 207.619,
+  "nativeApiStages": 8,
+  "safariBusinessFlowSeconds": 139.848,
+  "safariApiStages": 7,
+  "finalLargestTextSeconds": 54.521,
+  "finalLargestTextLocales": [
+    "zh-Hans",
+    "de"
+  ],
+  "finalCaptionRefinement": "Accessibility-only short title reused after normal-text business journeys; normal-text action and all flow logic unchanged."
+}

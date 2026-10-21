@@ -1,0 +1,11 @@
+{
+  "deployment": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "aliases": [
+    "api.sideseat.de",
+    "www.sideseat.de",
+    "sideseat.de"
+  ],
+  "deployedThisStage": false,
+  "apiSchemaDependenciesUnchanged": true,
+  "verifiedByLiveFlows": true
+}

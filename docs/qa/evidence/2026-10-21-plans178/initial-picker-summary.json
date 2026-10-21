@@ -1,0 +1,57 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 2,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "PlanBlock178 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 2,
+  "finishTime" : 1792606764.284,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792606702.999,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertEqualWithAccuracy failed: (\"313.3333435058594\") is not equal to (\"316.3333333333333\") +/- (\"2.0\")",
+      "targetName" : "PlanBlock178UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testFinalTimeBlockInteractions()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanBlock178/PlanBlock178UITests/PlanFirstUsePhoneUITests/testFinalTimeBlockInteractions",
+      "testName" : "testFinalTimeBlockInteractions()"
+    },
+    {
+      "failureText" : "Failed to get matching snapshot: No matches found for Elements matching predicate '\"time-poll-final-start\" IN identifiers' from input {(\n    Button, identifier: 'time-poll-cancel-final', label: '返回计划',\n    Button, identifier: 'unified-plan-review-roster', label: '下一步：确认邀请名单', Disabled,\n    Button, identifier: 'plan-people-open', label: '0 人已填写',\n    Button, identifier: 'time-poll-day-2026-10-24', label: '周六, 10月 24',\n    Button, identifier: 'time-poll-day-2026-10-25', label: '周日, 10月 25',\n    Button, identifier: 'time-poll-cell-0', label: '2026-10-24, 09:00–09:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-48', label: '2026-10-25, 09:00–09:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-2', label: '2026-10-24, 09:30–10:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-50', label: '2026-10-25, 09:30–10:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-4', label: '2026-10-24, 10:00–10:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-52', label: '2026-10-25, 10:00–10:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-6', label: '2026-10-24, 10:30–11:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-54', label: '2026-10-25, 10:30–11:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-8', label: '2026-10-24, 11:00–11:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-56', label: '2026-10-25, 11:00–11:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-10', label: '2026-10-24, 11:30–12:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-58', label: '2026-10-25, 11:30–12:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-12', label: '2026-10-24, 12:00–12:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-60', label: '2026-10-25, 12:00–12:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-14', label: '2026-10-24, 12:30–13:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-62', label: '2026-10-25, 12:30–13:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-16', label: '2026-10-24, 13:00–13:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-64', label: '2026-10-25, 13:00–13:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-18', label: '2026-10-24, 13:30–14:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-66', label: '2026-10-25, 13:30–14:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-20', label: '2026-10-24, 14:00–14:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-68', label: '2026-10-25, 14:00–14:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-22', label: '2026-10-24, 14:30–15:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-70', label: '2026-10-25, 14:30–15:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-24', label: '2026-10-24, 15:00–15:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-72', label: '2026-10-25, 15:00–15:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-26', label: '2026-10-24, 15:30–16:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-74', label: '2026-10-25, 15:30–16:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-28', label: '2026-10-24, 16:00–16:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-76', label: '2026-10-25, 16:00–16:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-30', label: '2026-10-24, 16:30–17:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-78', label: '2026-10-25, 16:30–17:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-32', label: '2026-10-24, 17:00–17:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-80', label: '2026-10-25, 17:00–17:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-34', label: '2026-10-24, 17:30–18:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-82', label: '2026-10-25, 17:30–18:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-36', label: '2026-10-24, 18:00–18:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-84', label: '2026-10-25, 18:00–18:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-38', label: '2026-10-24, 18:30–19:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-86', label: '2026-10-25, 18:30–19:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-40', label: '2026-10-24, 19:00–19:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-88', label: '2026-10-25, 19:00–19:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-42', label: '2026-10-24, 19:30–20:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-90', label: '2026-10-25, 19:30–20:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-44', label: '2026-10-24, 20:00–20:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-92', label: '2026-10-25, 20:00–20:30, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-46', label: '2026-10-24, 20:30–21:00, 0', value: 选择最终时间,\n    Button, identifier: 'time-poll-cell-94', label: '2026-10-25, 20:30–21:00, 0', value: 选择最终时间\n)}",
+      "targetName" : "PlanBlock178UITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testFinalTimeBlockLargestText()",
+      "testIdentifierURL" : "test://com.apple.xcode/PlanBlock178/PlanBlock178UITests/PlanFirstUsePhoneUITests/testFinalTimeBlockLargestText",
+      "testName" : "testFinalTimeBlockLargestText()"
+    }
+  ],
+  "title" : "Test - PlanBlock178",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 2
+}

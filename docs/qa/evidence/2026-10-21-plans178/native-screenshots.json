@@ -1,0 +1,82 @@
+[
+  {
+    "path": "phone-final-block-largest-de.png",
+    "sha256": "b4153f082e70a7045db170a63a830ef13989f97c38ec56f0f13e3bef159b3f1c",
+    "test": "PlanFirstUsePhoneUITests/testFinalTimeBlockLargestText()"
+  },
+  {
+    "path": "phone-final-block-largest-zh-Hans.png",
+    "sha256": "f703c3eb8a0dd5bf63cd9f8beb59bc243f353b71c3e28353fad090751bdaa6d2",
+    "test": "PlanFirstUsePhoneUITests/testFinalTimeBlockLargestText()"
+  },
+  {
+    "path": "phone-contacts-calendar-result.png",
+    "sha256": "b4256fd0d0ad631dd3f723e9d7276b1f1d336c179a6e02be4b93e3bf386d3d6e",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-explicit-acceptance.png",
+    "sha256": "6c729f413d1c211a1556d3b5c6a5dda024d46852f0e869dec2522615b8c66ff6",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-invitation-one-continuous-window.png",
+    "sha256": "0a144e2c4349291ae3f400e7b9a85b0b6c6e34af15cc0b4e0a386f2ad03d280f",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-received-chat-card.png",
+    "sha256": "8ad89c8497cb3ea3ac70a1042c38876911239cb9b49a67eea6099d7e7bbbf70e",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-review-final-invitees.png",
+    "sha256": "108ad9d47c8bd14fa29aeeac1a06aca463474dbb94fb08c6207182db379cfa74",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-final-block-exact-time-controls.png",
+    "sha256": "8947b181277e6919b086034a9b21ac7d9c739142f5b3f0b5eced65f48ffea25a",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-final-block-drag-resize-move.png",
+    "sha256": "e1f96563bdc304964982c7f61d7fe7c5f7e2bbdcdb8a20c21b292fc846429229",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-final-block-before-drag.png",
+    "sha256": "f6e402ef2408ca6ff51415d3910d5a4a96dd2360dd43ec2186b00dabae123927",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-compact-responded-people.png",
+    "sha256": "57963a9073f1d9597d042ce4e502b29268fc2a1ebc9becff804702625f8c69ba",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-peer-inline-availability.png",
+    "sha256": "25505cde893d1d23a0f528d286aa8472ddb9d12da8d2a54236842ad39ab64d57",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-received-chat-card.png",
+    "sha256": "236e6f341c0f9b36d892d0c6a9c55e4af05914bc4ea72df84a96131c30eb7037",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-draft-kept-after-send.png",
+    "sha256": "fe8cff92de36163a2f6df966b57e97ebdee4f77f961a9b3716278a711044bcdd",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-contacts-select-and-send.png",
+    "sha256": "d821934e08dcda2e405a7585fd4c776997c2a2f068ea7ec2e54589838a0eff4b",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  },
+  {
+    "path": "phone-compact-empty-timetable.png",
+    "sha256": "920fd291841a825c8d3f61b2253e6f524ea7772f39de02a538e0a41fb583d68a",
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+  }
+]

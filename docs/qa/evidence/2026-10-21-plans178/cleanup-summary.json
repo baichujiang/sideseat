@@ -1,0 +1,8 @@
+{
+  "temporaryAccountsDeleted": 5,
+  "oldTokensRejected401": 5,
+  "planLinksRejected404": 4,
+  "physicalQaRunnerRemoved": true,
+  "privateStartupFilesRemoved": true,
+  "otherWorkPreserved": true
+}

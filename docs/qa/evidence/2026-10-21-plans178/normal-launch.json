@@ -1,0 +1,39 @@
+{
+  "launch": {
+    "deviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "launchOptions": {
+      "activatedWhenStarted": true,
+      "arguments": [],
+      "environmentVariables": {
+        "TERM": "dumb"
+      },
+      "platformSpecificOptions": {},
+      "startStopped": false,
+      "terminateExistingInstances": true,
+      "user": {
+        "active": true
+      }
+    },
+    "process": {
+      "auditToken": [
+        4294967295,
+        501,
+        501,
+        501,
+        501,
+        5015,
+        0,
+        12282
+      ],
+      "executable": "file:///private/var/containers/Bundle/Application/44779F7E-58A3-426F-8C4A-CABFF46DF438/SideSeat%20Preview.app/SideSeat%20Preview",
+      "processIdentifier": 5015
+    }
+  },
+  "matchedProcess": {
+    "executable": "file:///private/var/containers/Bundle/Application/44779F7E-58A3-426F-8C4A-CABFF46DF438/SideSeat%20Preview.app/SideSeat%20Preview",
+    "processIdentifier": 5015
+  },
+  "preview": 178,
+  "ordinary": 97,
+  "qaRunnerRemoved": true
+}
