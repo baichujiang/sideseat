@@ -116,10 +116,9 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
               {state.recoveryLink && !recoveryCopied ? <div><p className="mt-3 text-xs">{zh ? "若未自动复制，请选中下方链接手动复制。" : "If it was not copied automatically, select the link below to copy it."}</p><input className="mt-2 min-h-11 w-full rounded-lg border px-3 text-sm" readOnly aria-label={zh ? "个人恢复链接" : "Personal recovery link"} value={state.recoveryLink} onFocus={event => event.target.select()} /></div> : null}
             </details> : null}
 
-            {collecting && poll.activitySelection && !choosingName ? <details ref={choosingActivity ? (node) => { table.current = node; } : undefined} open={fixedTime && choosingActivity || undefined} className="scroll-mt-4 border-y py-1" data-testid="activity-panel">
-              <summary className="min-h-12 cursor-pointer py-3 text-sm font-medium">{choosingActivity ? (zh ? "活动建议" : "Activity ideas") : (zh ? "查看之前的活动建议" : "View previous activity ideas")} · {poll.activitySelection.ideaCount}<span className="ml-3 text-xs font-normal text-muted-foreground">{choosingActivity ? (zh ? "添加建议 / 表达兴趣" : "Suggest / mark interest") : (zh ? "已保留" : "Kept")}</span></summary>
-              <ActivityIdeas activity={poll.activitySelection} canEdit={!!poll.viewerId && !disabled && choosingActivity} busy={busy} zh={zh} onSuggest={state.suggestActivity} onInterest={state.setActivityInterest} />
-            </details> : null}
+            {collecting && poll.activitySelection && !choosingName ? <div ref={choosingActivity ? (node) => { table.current = node; } : undefined} className="scroll-mt-4">
+              <ActivityIdeas activity={poll.activitySelection} canEdit={!!poll.viewerId && !disabled && choosingActivity} busy={busy} zh={zh} initiallyExpanded={fixedTime && choosingActivity} onSuggest={state.suggestActivity} onInterest={state.setActivityInterest} />
+            </div> : null}
 
             {collecting && fixedTime && !choosingName && poll.chosenStart && poll.chosenEnd ? <InvitationTimetable start={poll.chosenStart} end={poll.chosenEnd} timeZone={poll.timeZone} zh={zh} isDraft /> : null}
             {collecting && !fixedTime && !choosingName ? <section ref={choosingActivity ? undefined : table} className="scroll-mt-4 bg-background py-3" data-testid="plan-collection-timetable">

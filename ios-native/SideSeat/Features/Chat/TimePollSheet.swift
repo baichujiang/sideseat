@@ -929,36 +929,38 @@ struct PlanActivityIdeasView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            let layout = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-            layout {
+            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
                 Button { expanded.toggle() } label: {
-                    HStack(spacing: SideSeatTheme.spaceSM) {
-                        Text(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count)).fontWeight(.medium)
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        Text(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count))
+                            .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.caption).accessibilityHidden(true)
-                    }.font(.subheadline).frame(minHeight: 44).contentShape(Rectangle())
+                    }.font(.subheadline.weight(.medium)).frame(minHeight: 44).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("plan-activity-open-ideas")
                     .accessibilityValue(expanded ? "Expanded" : "Collapsed")
-                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+                Spacer(minLength: 0)
+                if showsSuggestion {
+                    Button("Add suggestion", action: addSuggestion)
+                        .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+                        .disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120)
+                        .accessibilityIdentifier("plan-activity-add")
+                } else {
+                    Button { expanded = true; showsSuggestion = true; suggestionFocused = true } label: {
+                        Label("Suggest an activity", systemImage: "plus")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true).frame(minHeight: 44)
+                    }.disabled(!store.canMutate).accessibilityIdentifier("plan-activity-suggest")
+                }
             }
+            if showsSuggestion { suggestionForm }
             if expanded {
                 if ideas.isEmpty && !showsSuggestion {
                     Text("No ideas yet. Suggest something you'd enjoy doing together.")
                         .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                ForEach(ideas) { idea in
-                    Divider()
-                    ideaRow(idea)
-                }
-                if showsSuggestion {
-                    suggestionForm
-                } else {
-                    Button { showsSuggestion = true; suggestionFocused = true } label: {
-                        Label("Suggest an activity", systemImage: "plus").font(.subheadline).frame(minHeight: 44)
-                    }.disabled(!store.canMutate).accessibilityIdentifier("plan-activity-suggest")
-                }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: SideSeatTheme.spaceSM, alignment: .top), count: typeSize.isAccessibilitySize ? 1 : 2), alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    ForEach(ideas) { idea in ideaCard(idea) }
+                }.accessibilityIdentifier("plan-activity-board")
                 Text("Interest is not attendance. The organizer confirms the activity when reviewing invitations.")
                     .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("plan-activity-consent-note")
@@ -972,52 +974,52 @@ struct PlanActivityIdeasView: View {
     }
 
     private var suggestionForm: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            TextField("For example: an exhibition, dinner or badminton", text: $draftTitle)
-                .textFieldStyle(.roundedBorder).focused($suggestionFocused)
+        HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+            TextField("For example: an exhibition, dinner or badminton", text: $draftTitle, axis: .vertical)
+                .lineLimit(1...3).focused($suggestionFocused)
                 .submitLabel(.done).onSubmit { suggestionFocused = false }
+                .padding(SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.25)))
                 .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
-            HStack(spacing: SideSeatTheme.spaceLG) {
-            Button("Add suggestion") {
-                Task {
-                    await store.mutate("activities", body: SuggestPlanActivityRequest(title: draftTitle.trimmingCharacters(in: .whitespacesAndNewlines), location: ""), session: session)
-                    if store.error == nil { draftTitle = ""; showsSuggestion = false; suggestionFocused = false }
-                }
-            }.font(.subheadline.weight(.medium)).frame(minHeight: 44).accessibilityIdentifier("plan-activity-add")
-                .disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120)
-            Button("Cancel") { showsSuggestion = false; suggestionFocused = false; draftTitle = "" }.font(.subheadline).frame(minHeight: 44).disabled(store.acting)
-            }
+            Button { showsSuggestion = false; suggestionFocused = false; draftTitle = "" } label: {
+                Image(systemName: "xmark").font(.subheadline).frame(width: 44, height: 44)
+            }.buttonStyle(.plain).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
         }.disabled(store.acting)
     }
 
-    private func ideaRow(_ idea: NativePlanActivity.Idea) -> some View {
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-        return layout {
-            ideaIdentity(idea)
+    private func addSuggestion() {
+        suggestionFocused = false
+        Task {
+            await store.mutate("activities", body: SuggestPlanActivityRequest(title: draftTitle.trimmingCharacters(in: .whitespacesAndNewlines), location: ""), session: session)
+            if store.error == nil { draftTitle = ""; showsSuggestion = false; expanded = true }
+        }
+    }
+
+    private func ideaCard(_ idea: NativePlanActivity.Idea) -> some View {
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            Text(idea.title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(idea.title + ", " + String(format: AppLocalization.string("%@ suggested this"), idea.authorName))
+            if let location = idea.location, !location.isEmpty {
+                Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button {
                 Task { await store.mutate("activities/interest", method: .put, body: PlanActivityInterestRequest(ideaId: idea.id, interested: !idea.isInterested), session: session) }
             } label: {
-                Label(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count),
-                      systemImage: idea.isInterested ? "heart.fill" : "heart")
+                Label(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count), systemImage: idea.isInterested ? "heart.fill" : "heart")
                     .font(.caption.weight(.medium)).fixedSize(horizontal: false, vertical: true)
-                    .frame(minHeight: 44).contentShape(Rectangle())
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).contentShape(Rectangle())
                     .foregroundStyle(idea.isInterested ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondaryStrong)
             }.buttonStyle(.plain).disabled(!store.canMutate)
                 .accessibilityLabel(AppLocalization.string(idea.isInterested ? "Interest marked" : "I'm interested"))
                 .accessibilityIdentifier("plan-activity-interest-\(idea.id)")
                 .accessibilityValue(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count))
         }
-        .padding(.vertical, SideSeatTheme.spaceXS)
+        .padding(.horizontal, SideSeatTheme.spaceMD).padding(.top, SideSeatTheme.spaceMD)
+        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.18)))
         .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-idea-\(idea.id)")
-    }
-
-    private func ideaIdentity(_ idea: NativePlanActivity.Idea) -> some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            Text(idea.title).font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
-            if let location = idea.location, !location.isEmpty { Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
-        }.frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityLabel(idea.title + ", " + String(format: AppLocalization.string("%@ suggested this"), idea.authorName))
     }
 }

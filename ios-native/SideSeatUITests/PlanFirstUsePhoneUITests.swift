@@ -411,15 +411,50 @@ import XCTest
         nativeSignIn(peer, bundle: fixture.bundle); openChat()
         XCTAssertFalse(app.buttons["time-poll-submit"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        for activityTitle in [fixture.activityTitle, "一起逛展", "校园羽毛球", "周末火锅与散步"] {
+            app.buttons["plan-activity-suggest"].tap()
+            let idea = app.textFields["plan-activity-title"]
+            XCTAssertTrue(idea.waitForExistence(timeout: 10)); idea.tap(); idea.typeText(activityTitle)
+            let confirm = app.buttons["plan-activity-add"]
+            XCTAssertGreaterThan(confirm.frame.midX, app.frame.midX, "Confirm stays on the right of the header")
+            capture(app, "ideas179-top-composer")
+            confirm.tap()
+            XCTAssertTrue(idea.waitForNonExistence(timeout: 20))
+        }
+        let cards = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-idea-'"))
+        XCTAssertEqual(cards.count, 4)
+        let firstCard = cards.element(boundBy: 0), secondCard = cards.element(boundBy: 1)
+        XCTAssertEqual(firstCard.frame.minY, secondCard.frame.minY, accuracy: 2)
+        XCTAssertGreaterThan(secondCard.frame.minX, firstCard.frame.minX)
+        capture(app, "ideas179-two-column-board")
         app.buttons["plan-activity-suggest"].tap()
-        let idea = app.textFields["plan-activity-title"]
-        XCTAssertTrue(idea.waitForExistence(timeout: 10)); idea.tap(); idea.typeText(fixture.activityTitle + "\n")
-        app.buttons["plan-activity-add"].tap()
-        XCTAssertTrue(idea.waitForNonExistence(timeout: 20))
+        let draft = app.textFields["plan-activity-title"]
+        XCTAssertTrue(draft.waitForExistence(timeout: 10)); draft.tap(); draft.typeText("取消这条草稿")
+        XCTAssertLessThan(draft.frame.minY, firstCard.frame.minY)
+        app.buttons["plan-activity-cancel"].tap()
+        XCTAssertTrue(draft.waitForNonExistence(timeout: 10)); XCTAssertEqual(cards.count, 4)
+        let interest = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-interest-' ")).firstMatch
+        interest.tap(); activityWaitEnabled(interest)
+        capture(app, "ideas179-interest")
         nativePhase("fixed-suggested"); capture(app, "fixed-ideas-peer-suggestion")
+        nativeSignIn(peer, bundle: fixture.bundle, accessibility: true); openChat()
+        let largeCards = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-idea-'"))
+        let largeFirst = largeCards.element(boundBy: 0), largeSecond = largeCards.element(boundBy: 1)
+        XCTAssertTrue(largeSecond.waitForExistence(timeout: 15))
+        XCTAssertEqual(largeFirst.frame.minX, largeSecond.frame.minX, accuracy: 2)
+        XCTAssertGreaterThan(largeSecond.frame.minY, largeFirst.frame.minY)
+        capture(app, "ideas179-largest-single-column")
+        app.buttons["plan-activity-suggest"].tap()
+        let largeDraft = app.textFields["plan-activity-title"]
+        XCTAssertTrue(largeDraft.waitForExistence(timeout: 10)); largeDraft.tap(); largeDraft.typeText("大字号提议")
+        XCTAssertTrue(app.buttons["plan-activity-add"].isHittable)
+        XCTAssertTrue(app.buttons["plan-activity-cancel"].isHittable)
+        capture(app, "ideas179-largest-top-composer")
+        app.buttons["plan-activity-cancel"].tap()
+
         nativeSignIn(owner, bundle: fixture.bundle); openPlan()
         app.buttons["unified-plan-review-fixed"].tap()
-        let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-'")).firstMatch
+        let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-' AND label CONTAINS %@", fixture.activityTitle)).firstMatch
         XCTAssertTrue(choice.waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["unified-plan-send-invitations"].isEnabled)
         choice.tap()
