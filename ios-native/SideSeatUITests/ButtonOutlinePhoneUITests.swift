@@ -51,6 +51,38 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
         app.terminate()
     }
 
+    func testInvitationReviewBackControl() throws {
+        struct Fixture: Decodable {
+            struct Account: Decodable { let role: String; let accessToken: String }
+            let bundle: String; let finalBlockToken: String; let accounts: [Account]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the disposable final-time layout fixture.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        for (language, large) in [("zh-Hans", false), ("en", false), ("de", true)] {
+            let app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+                "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark",
+                "--ui-testing-deep-link=/time-polls/\(fixture.finalBlockToken)"]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+            app.launch()
+            let choose = app.buttons["unified-plan-invite-window"]
+            XCTAssertTrue(choose.waitForExistence(timeout: 25)); choose.tap()
+            let cell = app.buttons["time-poll-cell-0"]
+            XCTAssertTrue(cell.waitForExistence(timeout: 10)); cell.tap()
+            app.buttons["unified-plan-review-roster"].tap()
+            let back = app.buttons["unified-plan-back-to-timetable"]
+            XCTAssertTrue(back.waitForExistence(timeout: 10)); checkTarget(back, in: app)
+            capture(app, "outline182-\(language)-review-back")
+            back.tap()
+            XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 10))
+            XCTAssertTrue(app.buttons["unified-plan-review-roster"].isEnabled)
+            app.terminate()
+        }
+    }
+
     private func checkTarget(_ button: XCUIElement, in app: XCUIApplication) {
         XCTAssertTrue(button.isHittable)
         XCTAssertGreaterThanOrEqual(button.frame.width, 44)

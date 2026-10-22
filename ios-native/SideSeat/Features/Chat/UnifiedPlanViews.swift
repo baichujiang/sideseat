@@ -199,7 +199,16 @@ struct UnifiedPlanInviteView: View {
             .onChange(of: selected) { _, _ in
                 if let count = linkParticipantCount { linkParticipantCount = max(count, minimumLinkCount) }
             }
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Back to timetable") { dismiss() }.disabled(sending || store.acting) } }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: {
+                        Label("Back to timetable", systemImage: "chevron.left").labelStyle(.iconOnly)
+                    }
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, compactOutline: true))
+                    .accessibilityIdentifier("unified-plan-back-to-timetable")
+                    .disabled(sending || store.acting)
+                }
+            }
         }.tint(SideSeatTheme.utilityAction).interactiveDismissDisabled(sending || store.acting)
     }
 }
