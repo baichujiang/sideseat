@@ -15,8 +15,8 @@ struct FinalTimeControls: View {
                     }
                 } label: {
                     Label(timePollDateLabel(range.date).replacingOccurrences(of: "\n", with: " "), systemImage: "calendar")
-                        .font(.caption).frame(minHeight: 44)
-                }.accessibilityIdentifier("time-poll-final-date")
+                        .font(.caption)
+                }.buttonStyle(SSActionButtonStyle(size: .compact)).accessibilityIdentifier("time-poll-final-date")
                 Spacer(minLength: 4)
                 Text(String(format: AppLocalization.string("%d min"), Int(range.duration / 60)))
                     .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -59,9 +59,11 @@ struct FinalTimeControls: View {
                     Spacer(minLength: 4)
                     Image(systemName: "chevron.down").font(.caption2)
                 }
-            }.padding(8).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            }.dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .padding(8).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .background(SideSeatTheme.bg, in: RoundedRectangle(cornerRadius: 8))
-        }.accessibilityIdentifier("time-poll-final-" + (start ? "start" : "end"))
+        }.buttonStyle(SSPressButtonStyle()).ssActionOutline(cornerRadius: 8)
+            .accessibilityIdentifier("time-poll-final-" + (start ? "start" : "end"))
     }
 }
 
