@@ -3,6 +3,17 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Compact activity board — Preview 180
+
+Undecided activities use a compact two-column board in the App and share page.
+The header keeps the idea disclosure/count on the left and Suggest an activity
+on the right. Suggest opens an inline composer above the board; Confirm replaces
+the header action on the right, with a local cancel beside the input. Adding an
+idea keeps the board expanded. Native accessibility sizes and narrow web screens
+use one column. Interest remains independent of attendance. The existing owner
+invitation review still chooses the activity and invitees; no rules or records
+are migrated. Final delivery and test scope are in [deployed state](./DEPLOYED_STATE.md).
+
 ## Native compact participant row — Preview 164
 
 The native plan detail removes its nickname editor and participation card. Existing

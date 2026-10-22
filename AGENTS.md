@@ -21,7 +21,15 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 178 is the current installed development build. Final time uses one
+- Preview 180 is the current installed development build. Activity suggestions
+  use a compact two-column board, with Suggest/Confirm on the header right and
+  the composer above the board. Accessibility sizes use one column and concise
+  header labels. The final 194.030-second real-phone journey and seven API stages
+  passed; candidate/production Chromium and WebKit each passed the full journey.
+  Strict signature, installation and ordinary launch PID 5895 are verified.
+  Share UI is deployed as `dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D`; twelve disposable
+  accounts and eighteen links, runner and private launch files were cleaned.
+- Preview 178 final-time behavior remains included. Final time uses one
   movable/resizable block with direct date/start/end controls. Twenty-four unit
   checks, the App-contact and App/Safari full journeys (8 + 7 API stages), and
   final Chinese/German largest-text checks passed. Ordinary launch PID 5015 is

@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前 Preview 178；最终时间块、两条真实完整流程及最终中德最大字号已验收，默认手机普通启动核验；保留 177 游客身份、176 图例和 173 收藏间距，核验 2026-10-21，Europe/Berlin。
+**状态：** 当前 Preview 180；活动提议两列布告栏、标题行右侧新增/确认、顶部输入及最大字号单列已验收；最终真机完整流程/七阶段 API、候选与正式网页四组流程通过，核验 2026-10-23，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 178，最终时间块**：点一下放入活动时长/默认一小时，拖上下端点伸缩、拖中间移动；换日期保留时间，底部直接编辑日期/起止后复核邀请名单。24 项单元、App 好友 207.619 秒/八阶段 API、App→Safari 139.848 秒/七阶段 API 完整流程通过；辅助功能字号短文案精简后，最终包中德最大字号 54.521 秒复验通过，完整流程与该文案复验的范围分别记录。严格签名/实际安装/无测试参数普通启动 PID 5015 核验，普通 97 保留。五个测试账号、四个计划链接、Runner 与私密启动配置清理，本轮无网页/后端发布。[178 交付](./releases/2026-10-21-preview178-final-time-block.md)、[QA 和实际截图](./qa/2026-10-21-plans178.md)。
+当前 **Preview 180，活动提议布告栏**：多项提议两列紧凑显示，「＋提议活动」和编辑时的「确认」在标题行右侧，输入框在所有提议之前展开；大字号单列并缩短文案。最终真机完整流程 **194.030 秒/七阶段 API**，包含连续四项提议、取消、兴趣、深色最大字号、App 好友卡片、选活动/邀请、明确接受、正式发出和双方日历，均通过。候选/正式网页 Chromium/WebKit 四组完整流程通过，分享网页已发布同一已测试 Production 构建。默认手机严格签名、安装与无测试参数普通启动 PID 5895 核验，普通 97 保留。12 个专用账号、18 个计划链接、本轮 Runner 与私密配置清理；现有业务规则不变。[180 交付](./releases/2026-10-23-preview180-activity-board.md)、[QA 与截图](./qa/2026-10-23-activity-board.md)。
+
+此前 **Preview 178，最终时间块**：点一下放入活动时长/默认一小时，拖上下端点伸缩、拖中间移动；换日期保留时间，底部直接编辑日期/起止后复核邀请名单。24 项单元、App 好友 207.619 秒/八阶段 API、App→Safari 139.848 秒/七阶段 API 完整流程通过；辅助功能字号短文案精简后，最终包中德最大字号 54.521 秒复验通过，完整流程与该文案复验的范围分别记录。严格签名/实际安装/无测试参数普通启动 PID 5015 核验，普通 97 保留。五个测试账号、四个计划链接、Runner 与私密启动配置清理，本轮无网页/后端发布。[178 交付](./releases/2026-10-21-preview178-final-time-block.md)、[QA 和实际截图](./qa/2026-10-21-plans178.md)。
 
 此前 **Preview 177，游客私密身份**：无需注册登录，名字仅显示；首次参与生成独立凭证，个人恢复链接可在清除浏览器数据后恢复原填写。旧随机凭证自动升级，只有旧 ID/姓名的记录保留并由发起人核实后提供链接；领取后不允许发起人重置。候选/正式站各四组 Chromium/WebKit 数据闭环、14 项领域测试及默认手机中文/德文深色最大字号生成/复制入口通过（35.146 秒）。Preview 177 严格签名、安装及普通启动 PID 4343 核验，普通 97 保留；19 个专用测试计划和账号已回收。[177 交付](./releases/2026-10-21-preview177-guest-private-identity.md)、[QA 与截图](./qa/2026-10-21-guest-private-identity.md)、[身份合同](./GUEST_IDENTITY.md)。
 
@@ -76,13 +78,13 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生实现 `496ae91c` 已推送；保留游客身份、176 图例及其他工作；[178 构建来源](./qa/evidence/2026-10-21-plans178/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (178)` | 24 单元、两条完整流程、最终中德最大字号、严格签名与普通启动 PID 5015；[来源](./qa/evidence/2026-10-21-plans178/native-build-manifest.json)、[交付](./releases/2026-10-21-preview178-final-time-block.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；178 两条完整流程、15 阶段 API，最终大字号复验通过，测试数据及 Runner 清理；普通版 97 保留 |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 网页 `74a8be75`、最终原生 `94d33f43` 已推送；[180 来源](./qa/evidence/2026-10-22-plans179/final-native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (180)` | 最终完整流程 194.030 秒/七阶段 API，中文深色最大字号、严格签名、安装和普通启动 PID 5895；[交付](./releases/2026-10-23-preview180-activity-board.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；180 最终完整流程及最大字号通过，本轮数据/Runner 清理，普通 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v`，Ready | 游客独立凭证与恢复；基于 176 全部 1,382 项生产源码最小覆盖 13 项功能文件，1,374 项生产文件字节保留；最终上传 1,388 项源码全部 SHA1 一致，未执行数据库迁移。候选/正式站各四组完整流程通过；[来源核验](./qa/evidence/2026-10-21-guest-private-identity/final-candidate-source-verification.json) |
-| 生产源码 | 保留 176 及既有生产差异；仅叠加游客身份与恢复接口/网页 | 旧记录复用 credentialHash 区分迁移状态，无 Schema 或批量迁移；[身份合同](./GUEST_IDENTITY.md)、[最新生产基线](./qa/evidence/2026-10-21-guest-private-identity/production-source-baseline.json) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D`，Ready | 原生产 1,388 源码核验后仅覆盖两个活动 UI 文件，1,386 项字节保留；上传 1,389 项源码核对一致。候选/正式 Chromium/WebKit 四组完整流程通过；[来源](./qa/evidence/2026-10-22-plans179/source-verification.json) |
+| 生产源码 | 保留游客私密身份、受邀图例及既有生产差异；仅更新活动提议布局 | 无服务端/Schema/迁移改动；[最新比较](./qa/evidence/2026-10-22-plans179/source-verification.json)、[身份合同](./GUEST_IDENTITY.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 

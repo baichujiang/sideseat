@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "74a8be75e69de0a92f99c4d6f3106342a0f51d86",
+  "baseCommit": "58c46469",
+  "previewBuild": 179,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "nativeSwiftInputsVerified": 162,
+  "changedSwiftFiles": [
+    "ios-native/SideSeat/Features/Chat/TimePollSheet.swift"
+  ],
+  "isolatedBuild": true,
+  "binarySHA256": {
+    "SideSeat Preview": "86e787455ecec301cce5c4a24b5ba77ad05e91f49d169d216685b6b66fc8c094",
+    "SideSeat Preview.debug.dylib": "263187a89542c738271fc2b3083b22eeb00b15d9e7a85de294b7a1d5f1ac13b0"
+  },
+  "strictSignatureVerified": true,
+  "installed": true,
+  "ordinaryAppBuildBefore": 97,
+  "inputs": [
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+      "sha256": "5b8e3ef45ab0402666f29c79e36f7222e72aec8f910407eecafa9d0e12dea3f0"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "993563bc614d6bec0867715a1dbc2af00698fb9931d808a2868a89a2ff599403"
+    }
+  ]
+}

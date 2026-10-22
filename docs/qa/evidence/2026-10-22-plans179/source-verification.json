@@ -1,0 +1,19 @@
+{
+  "baseline": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "candidate": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D",
+  "sourceFiles": 1389,
+  "changed": [
+    "components/time-polls/activity-ideas.tsx",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "added": [
+    ".sideseat-activity-board179-source.json"
+  ],
+  "preserved": 1386,
+  "schemaChanged": false,
+  "uiSHA1": {
+    "components/time-polls/activity-ideas.tsx": "2b686613ab43bc1fd351518e3dbe51e81908fa3c",
+    "components/time-polls/shared-time-poll.tsx": "9305c8dcda727f27459c9f40c0f580ebd69a3fdc"
+  },
+  "sourceCommit": "74a8be75e69de0a92f99c4d6f3106342a0f51d86"
+}

@@ -1,0 +1,22 @@
+{
+  "verifiedAt": "2026-10-22T22:00:51.504Z",
+  "target": "production",
+  "ready": true,
+  "baseDeployment": "dpl_FxvJcb9Sh3WB3heBP28w5TNgXr9v",
+  "promotedDeployment": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D",
+  "url": "https://sideseat-pitj1fed2-baichus-projects.vercel.app",
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "id": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "id": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D"
+    },
+    {
+      "alias": "sideseat.de",
+      "id": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D"
+    }
+  ]
+}
