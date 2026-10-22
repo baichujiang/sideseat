@@ -21,7 +21,15 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 180 is the current installed development build. Activity suggestions
+- Preview 181 is the current installed development build. Activity input supports
+  local suggestion chips and hardware Tab completion; explicit Confirm still
+  submits. Final real-phone full flow (208.527 seconds / seven API stages), the
+  focused largest-text fix (27.042 seconds), and four final browser journeys passed.
+  Strict signature, install and ordinary launch PID 5991 are verified; ordinary
+  97 stays installed. Production is `dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR` (one UI
+  file over verified production). Fourteen disposable accounts, nineteen links,
+  runner, private launch files and candidate cookie were cleaned.
+- Preview 180 activity board behavior remains included. Activity suggestions
   use a compact two-column board, with Suggest/Confirm on the header right and
   the composer above the board. Accessibility sizes use one column and concise
   header labels. The final 194.030-second real-phone journey and seven API stages

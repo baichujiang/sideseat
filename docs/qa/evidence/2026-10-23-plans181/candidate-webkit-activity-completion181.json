@@ -1,0 +1,10 @@
+{
+  "passed": false,
+  "checks": [
+    "fixed time and activity ideas coexist with zero responses, invitations or calendars; early attendance and invitations are blocked",
+    "App contact receives a card and list entry without fake availability or acceptance"
+  ],
+  "browserErrors": [],
+  "failure": "expect(locator).toBeFocused() failed\n\nLocator:  getByTestId('activity-cancel')\nExpected: focused\nReceived: inactive\nTimeout:  5000ms\n\nCall log:\n  - Expect \"to.be.focused\" with timeout 5000ms\n  - waiting for getByTestId('activity-cancel')\n    9 × locator resolved to <button type=\"button\" aria-label=\"取消\" data-testid=\"activity-cancel\" class=\"inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg\">…</button>\n      - unexpected value \"inactive\"\n",
+  "at": "2026-10-22T22:17:42.073Z"
+}

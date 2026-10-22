@@ -43,7 +43,9 @@ Together / 同行   Plans / 计划   Calendar / 日历   Messages / 消息   Me 
 
 当前安装、生产部署、开关与实际入口见 [已部署功能清单](./docs/DEPLOYED_STATE.md)。
 
-当前 Preview **180**：活动提议改为两列紧凑布告栏，「＋提议活动／确认」位于活动待定行右侧，输入区在提议上方展开；大字号单列。最终默认手机完整流程 194.030 秒、七阶段 API 通过，候选与正式分享网页 Chromium/WebKit 四组流程通过。默认 iPhone 14 Plus 已安装并普通启动 PID 5895，普通 97 保留，分享网页已同步上线。[交付、测试与截图](./docs/releases/2026-10-23-preview180-activity-board.md)。
+当前 Preview **181**：活动提议可点推荐标签或按 Tab 快捷填入，仍由确认按钮提交；补全仅编辑本地草稿。最终真机完整流程 208.527 秒/七阶段 API、最大字号单独 27.042 秒与网页候选/正式双浏览器四组最终流程通过。默认 iPhone 14 Plus 已安装并普通启动 PID 5991，普通 97 保留，分享网页同步上线。[交付与截图](./docs/releases/2026-10-23-preview181-activity-completion.md)。
+
+此前 Preview **180**：活动提议改为两列紧凑布告栏，「＋提议活动／确认」位于活动待定行右侧，输入区在提议上方展开；大字号单列。最终默认手机完整流程 194.030 秒、七阶段 API 通过，候选与正式分享网页 Chromium/WebKit 四组流程通过。默认 iPhone 14 Plus 已安装并普通启动 PID 5895，普通 97 保留，分享网页已同步上线。[交付、测试与截图](./docs/releases/2026-10-23-preview180-activity-board.md)。
 
 此前 Preview **178**：最终选时改为一个可拖动、伸缩的时间块，底部直接修改日期/起止；原邀请与日历规则保留。24 项原生单元、App 好友完整流程 207.619 秒/八阶段 API、App→Safari 完整流程 139.848 秒/七阶段 API 通过；最终中德最大字号 54.521 秒复验通过。默认 iPhone 14 Plus 已安装并普通启动 PID 5015，普通 97 保留，本轮无网页/后端发布。[交付、范围与截图](./docs/releases/2026-10-21-preview178-final-time-block.md)。
 

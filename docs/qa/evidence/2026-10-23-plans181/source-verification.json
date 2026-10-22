@@ -1,0 +1,18 @@
+{
+  "baseDeployment": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D",
+  "candidate": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR",
+  "baselineSourceFiles": 1389,
+  "uploadedSourceFiles": 1390,
+  "changed": [
+    "components/time-polls/activity-ideas.tsx"
+  ],
+  "added": [
+    ".sideseat-activity-completion181-source.json"
+  ],
+  "preserved": 1388,
+  "schemaChanged": false,
+  "uiSHA1": {
+    "components/time-polls/activity-ideas.tsx": "a2c5753d23cb5eed3f1a4a7d21cd627874da7317"
+  },
+  "sourceCommit": "94c71f74248ea29d0e33e0a35e263dc7e94c15ed"
+}

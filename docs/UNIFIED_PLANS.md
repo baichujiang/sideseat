@@ -3,6 +3,16 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Local activity completion — Preview 181
+
+The composer offers three localized example activities as quick-fill chips. Tapping a
+chip fills that item; unmodified Tab fills the first matching local suggestion.
+Neither action submits or writes a response. Complete/unmatched input keeps normal Tab navigation,
+and web IME composition and modifier shortcuts are preserved. Explicit Confirm
+still creates the idea. Native accessibility sizes show the same chips above
+the input so they remain reachable with the keyboard open. Existing records,
+interest, activity choice, RSVP, publication and Calendar rules remain unchanged.
+
 ## Compact activity board — Preview 180
 
 Undecided activities use a compact two-column board in the App and share page.

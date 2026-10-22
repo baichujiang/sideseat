@@ -1,0 +1,36 @@
+{
+  "previewBuild": 181,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "isolatedBuild": true,
+  "nativeTrackedInputsVerified": 247,
+  "strictSignatureVerified": true,
+  "installed": true,
+  "binarySHA256": {
+    "SideSeat Preview": "45098c144ba9ab593e728a920f610b4e1d93b49da83795c03902a918556d9946",
+    "SideSeat Preview.debug.dylib": "13b7b8c5738587042dcb18b11a81899c0ea7d3b694c37d18c3bc3cfd6dde9536"
+  },
+  "inputs": [
+    {
+      "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+      "sha256": "3f3b14e4c2bcdec1de807375daa8230dcd4d2400e4a45fb788e87342a586ec22"
+    },
+    {
+      "path": "ios-native/Configuration/Preview.xcconfig",
+      "sha256": "8e9f7e7a9fabf0bba7f034f4048cee0f8afcdc60030580959ff1c5a783479904"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
+      "sha256": "3203ffe937a6f71fdf2ebb6c2f1732a4630d3523a17359c58f7bf73f4ace58b6"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/de.lproj/Localizable.strings",
+      "sha256": "a8cb183f483355a4434e5e80285009c6ee3d4f9cc86bff8271395cb701a76c43"
+    },
+    {
+      "path": "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings",
+      "sha256": "ad43f1a095b36f415b6decb7c2c8df2933e964d54382123a5642d51e4d95bcda"
+    }
+  ]
+}

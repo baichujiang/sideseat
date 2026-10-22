@@ -1,0 +1,22 @@
+{
+  "verifiedAt": "2026-10-22T22:23:07.957Z",
+  "deployment": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR",
+  "target": "production",
+  "ready": true,
+  "url": "https://sideseat-nbgci223n-baichus-projects.vercel.app",
+  "baseDeployment": "dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D",
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "id": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "id": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR"
+    },
+    {
+      "alias": "sideseat.de",
+      "id": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR"
+    }
+  ]
+}
