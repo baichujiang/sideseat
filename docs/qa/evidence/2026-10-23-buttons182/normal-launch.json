@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-10-22T23:04:43.773701+00:00",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "previewBuild": 182,
+  "processIdentifier": 6071,
+  "arguments": [],
+  "testEnvironmentAbsent": true,
+  "actualProcessMatched": true,
+  "ordinaryBuildPreserved": 97,
+  "runnerRemoved": true
+}

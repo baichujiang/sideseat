@@ -1,0 +1,17 @@
+{
+  "sourceCommit": "42de15fc227c756152688d7b8da81c1e52deaf6f",
+  "baseCommit": "6180887b",
+  "previewBuild": 182,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "isolatedBuild": true,
+  "nativeTrackedInputsVerified": 248,
+  "strictSignatureVerified": true,
+  "installed": true,
+  "binarySHA256": {
+    "SideSeat Preview": "49843f7bce9c6d940ec85cd9ef3b809970d903618ddc5d94c19d9ca3c62d49d3",
+    "SideSeat Preview.debug.dylib": "1c79e1cd36c4d81c5624cba7e6e1b61eea070576ad443e9fb0e511f1943fad11"
+  },
+  "webDeployment": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd"
+}

@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前 Preview 181；活动提议点选/Tab 本地补全、最终真机完整流程/七阶段 API、最大字号修复复验与候选/正式网页四组最终流程通过；默认手机普通启动核验，分享网页同步上线，2026-10-23，Europe/Berlin。
+**状态：** 当前 Preview 182；统一 App/分享网页操作按钮轮廓，五个主页面和表单/认证检查、两条完整真机流程/15 阶段 API、最终返回图标三语种复验及五组真实网页流程通过；默认手机普通启动核验，分享网页同步上线，2026-10-23，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview 181，活动提议快捷填入**：默认推荐可点选或按 Tab 补全，确认按钮仍独立提交；补全仅改本地草稿，不调用服务器或剪贴板。最终真机完整流程 **208.527 秒/七阶段 API**，含普通点选/Tab、四项提议、深色最大字号、App 卡片和邀请到日历；最大字号点击问题修复后单独 **27.042 秒**复验通过。网页候选/正式 Chromium、WebKit 四组最终完整流程通过，初轮失败与修复分别记录。默认手机严格签名、安装、普通启动 PID 5991 与实际进程核验；普通 97 保留。14 个专用账号、19 个计划链接、Runner 与私密配置清理。[181 交付](./releases/2026-10-23-preview181-activity-completion.md)、[QA 与截图](./qa/2026-10-23-activity-completion.md)。
+当前 **Preview 182，统一操作按钮轮廓**：独立小文字/图标操作补齐可见描边，共用主/次按钮和浅深色边框；主操作实心、危险操作红色，原流程保留。五个主页面/表单/认证检查通过；两条真实真机流程 **206.924 / 206.314 秒，7＋8 阶段 API** 通过。复查发现邀请复核页文字返回被导航栏压缩，最终改为返回图标，另经中英德含最大字号 **39.355 秒**复验；两类验证范围分开记录。网页五组真实流程通过，正式浅色 Chromium/深色 WebKit 核验轮廓、点击高度及 320px 布局。默认手机 248 原生输入、严格签名、安装和普通启动 PID 6071 核验，普通 97 保留；16 个专用账号、23 个链接、Runner 与私密配置清理。[182 交付](./releases/2026-10-23-preview182-button-outlines.md)、[QA 与截图](./qa/2026-10-23-button-outlines.md)。
+
+此前 **Preview 181，活动提议快捷填入**：默认推荐可点选或按 Tab 补全，确认按钮仍独立提交；补全仅改本地草稿，不调用服务器或剪贴板。最终真机完整流程 **208.527 秒/七阶段 API**，含普通点选/Tab、四项提议、深色最大字号、App 卡片和邀请到日历；最大字号点击问题修复后单独 **27.042 秒**复验通过。网页候选/正式 Chromium、WebKit 四组最终完整流程通过，初轮失败与修复分别记录。默认手机严格签名、安装、普通启动 PID 5991 与实际进程核验；普通 97 保留。14 个专用账号、19 个计划链接、Runner 与私密配置清理。[181 交付](./releases/2026-10-23-preview181-activity-completion.md)、[QA 与截图](./qa/2026-10-23-activity-completion.md)。
 
 此前 **Preview 180，活动提议布告栏**：多项提议两列紧凑显示，「＋提议活动」和编辑时的「确认」在标题行右侧，输入框在所有提议之前展开；大字号单列并缩短文案。最终真机完整流程 **194.030 秒/七阶段 API**，包含连续四项提议、取消、兴趣、深色最大字号、App 好友卡片、选活动/邀请、明确接受、正式发出和双方日历，均通过。候选/正式网页 Chromium/WebKit 四组完整流程通过，分享网页已发布同一已测试 Production 构建。默认手机严格签名、安装与无测试参数普通启动 PID 5895 核验，普通 97 保留。12 个专用账号、18 个计划链接、本轮 Runner 与私密配置清理；现有业务规则不变。[180 交付](./releases/2026-10-23-preview180-activity-board.md)、[QA 与截图](./qa/2026-10-23-activity-board.md)。
 
@@ -81,12 +83,12 @@
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 实现 `94c71f74` 已推送；[181 来源](./qa/evidence/2026-10-23-plans181/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (181)` | 最终完整流程 208.527 秒/七阶段 API、最大字号 27.042 秒，严格签名、安装和普通启动 PID 5991；[交付](./releases/2026-10-23-preview181-activity-completion.md) |
-| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；181 完整流程、点选/注入 Tab 和最大字号通过，本轮数据/Runner 清理，普通 97 保留 |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (182)` | 两条完整流程 206.924 / 206.314 秒、15 阶段 API，最后返回图标 39.355 秒独立复验；严格签名、安装和普通启动 PID 6071；[交付](./releases/2026-10-23-preview182-button-outlines.md) |
+| 默认真机测试设备 | iPhone 14 Plus / iOS 26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；182 主页面/表单/认证及真实流程通过，最终返回控件含德文最大字号复验；本轮数据/Runner 清理，普通 97 保留 |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR`，Ready | 原生产全部 1,389 源码核验后只改一个活动 UI 文件，1,388 项字节保留；上传 1,390 项核对一致。候选/正式双浏览器四组最终流程通过；[来源](./qa/evidence/2026-10-23-plans181/source-verification.json) |
-| 生产源码 | 保留活动布告栏、游客私密身份、受邀图例及既有生产差异；仅增加本地补全 | 无服务端/Schema/迁移改动；[最新比较](./qa/evidence/2026-10-23-plans181/source-verification.json)、[身份合同](./GUEST_IDENTITY.md) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd`，Ready | 原生产全部 1,390 源码核验后只改两个分享 UI 文件，1,388 项字节保留；新增来源标记，上传 1,391 项核对一致。候选三组/正式两组真实流程通过；[来源](./qa/evidence/2026-10-23-buttons182/source-verification.json) |
+| 生产源码 | 保留活动布告栏、本地补全、游客私密身份、受邀图例及既有生产差异；统一分享按钮轮廓 | 无服务端/Schema/迁移改动；[最新比较](./qa/evidence/2026-10-23-buttons182/source-verification.json)、[身份合同](./GUEST_IDENTITY.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 

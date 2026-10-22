@@ -1,0 +1,22 @@
+{
+  "verifiedAt": "2026-10-22T22:56:36.733Z",
+  "target": "production",
+  "ready": true,
+  "deployment": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd",
+  "baseline": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR",
+  "url": "https://sideseat-90girkczb-baichus-projects.vercel.app",
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "id": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "id": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd"
+    },
+    {
+      "alias": "sideseat.de",
+      "id": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd"
+    }
+  ]
+}

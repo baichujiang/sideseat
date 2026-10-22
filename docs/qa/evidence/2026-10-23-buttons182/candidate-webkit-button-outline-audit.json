@@ -1,0 +1,112 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 189.734375,
+    "right": 263.46875
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 271.46875,
+    "right": 374
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 196.640625,
+    "right": 276.40625
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 288.40625,
+    "right": 374
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 33,
+    "right": 170.140625
+  },
+  {
+    "id": "activity-toggle",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 136.3125
+  },
+  {
+    "id": "activity-suggest",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 322.1875,
+    "right": 374
+  },
+  {
+    "id": "activity-cancel",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 317,
+    "right": 361
+  },
+  {
+    "id": "activity-complete-逛展",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 84.6875,
+    "right": 152.53125
+  },
+  {
+    "id": "activity-complete-火锅",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 160.53125,
+    "right": 228.375
+  },
+  {
+    "id": "activity-complete-羽毛球",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 236.375,
+    "right": 316.140625
+  }
+]

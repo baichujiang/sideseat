@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "005db4e980fe938ab09ea8acd3029477a1c0ab09",
+  "baseCommit": "6180887b",
+  "previewBuild": 182,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "deviceModel": "iPhone 14 Plus",
+  "isolatedBuild": true,
+  "nativeTrackedInputsVerified": 248,
+  "strictSignatureVerified": true,
+  "installed": true,
+  "binarySHA256": {
+    "SideSeat Preview": "444ff3dcf604384d489ea0fbd228b68782188557c8ed4681f5ddf35b5526b13e",
+    "SideSeat Preview.debug.dylib": "392ec48b20527c593d086c97b16386044990a09a2917a8ec806ad44f6c5d6982"
+  },
+  "webDeployment": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd",
+  "fullFlowSourceCommit": "42de15fc227c756152688d7b8da81c1e52deaf6f",
+  "finalNativeChange": "Icon-only review return control; unchanged dismiss action, disabled rule and localized accessibility name.",
+  "ordinaryLaunchPID": 6071,
+  "ordinaryProcessMatched": true,
+  "ordinaryBuildPreserved": 97,
+  "focusedReviewFixPassed": true,
+  "focusedReviewFixSeconds": 39.355
+}

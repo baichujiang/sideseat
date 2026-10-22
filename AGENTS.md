@@ -21,7 +21,20 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 181 is the current installed development build. Activity input supports
+- Preview 182 is the current installed development build. Standalone actions use
+  shared visible outlines, including compact text/icon actions; primary fill,
+  destructive semantics and existing interaction rules remain. Five-tab/forms/auth
+  phone smoke passed in Chinese/light, English/dark and German/dark maximum text.
+  Two real phone journeys passed (206.924 / 206.314 seconds, 7 + 8 API stages).
+  A final icon-only review-return correction passed a separate 39.355-second
+  three-language phone check; do not describe earlier journeys as its rerun.
+  Strict signature, 248 native inputs, install and ordinary launch PID 6071 are
+  verified; ordinary 97 remains. Production is
+  `dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd` (two share-UI files over verified production).
+  Five real browser journeys passed, including final production light/dark.
+  Sixteen disposable accounts, twenty-three links, runner, private launch files
+  and candidate cookie were cleaned. See the 182 QA/release for exact scope.
+- Preview 181 activity completion remains included. Activity input supports
   local suggestion chips and hardware Tab completion; explicit Confirm still
   submits. Final real-phone full flow (208.527 seconds / seven API stages), the
   focused largest-text fix (27.042 seconds), and four final browser journeys passed.

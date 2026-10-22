@@ -1,0 +1,82 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 189.515625,
+    "right": 263.25
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 271.25,
+    "right": 374
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 196,
+    "right": 276
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 288,
+    "right": 374
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 33,
+    "right": 171
+  },
+  {
+    "id": "无法参加",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 131.328125
+  },
+  {
+    "id": "确认参加",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 143.328125,
+    "right": 374
+  },
+  {
+    "id": "暂不回复",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 374
+  }
+]

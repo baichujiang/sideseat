@@ -3,6 +3,20 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Outlined actions — Preview 182
+
+Standalone actions in the native App and share page use a visible 1pt/1px outline,
+including compact text and icon actions. Secondary actions use the common 14pt/px
+rounded shape; primary actions retain their stronger fill, destructive actions
+retain red, and selected/disabled states remain distinct. Native icon controls
+that already use a circle keep that shape. Borders adapt to light/dark appearance.
+Native standalone actions retain at least a 44pt target, including a 32pt visible
+outline inset inside the 44pt navigation-toolbar target to avoid system clipping.
+Web standalone actions have a minimum 44px height. Content cards, list rows and
+timetable cells keep their own interaction geometry and existing selection logic.
+The native shared style and outline helper cover existing components without
+introducing a new action state or changing planning, invitation or Calendar rules.
+
 ## Local activity completion — Preview 181
 
 The composer offers three localized example activities as quick-fill chips. Tapping a

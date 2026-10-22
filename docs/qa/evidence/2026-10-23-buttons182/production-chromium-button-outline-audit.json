@@ -1,0 +1,112 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 189.515625,
+    "right": 263.25
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 271.25,
+    "right": 374
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 196,
+    "right": 276
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 288,
+    "right": 374
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 33,
+    "right": 171
+  },
+  {
+    "id": "activity-toggle",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 136.765625
+  },
+  {
+    "id": "activity-suggest",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 322,
+    "right": 374
+  },
+  {
+    "id": "activity-cancel",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 317,
+    "right": 361
+  },
+  {
+    "id": "activity-complete-逛展",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 85,
+    "right": 153
+  },
+  {
+    "id": "activity-complete-火锅",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 161,
+    "right": 229
+  },
+  {
+    "id": "activity-complete-羽毛球",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(141, 150, 147)",
+    "radius": "14px",
+    "height": 44,
+    "left": 237,
+    "right": 317
+  }
+]

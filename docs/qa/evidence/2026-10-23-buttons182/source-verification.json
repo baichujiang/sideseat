@@ -1,0 +1,19 @@
+{
+  "baseline": "dpl_9WUXBm5orPvRbgpnvbJh8kczs5sR",
+  "candidate": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd",
+  "sourceFiles": 1391,
+  "changed": [
+    "components/time-polls/shared-time-poll.module.css",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "added": [
+    ".sideseat-action-outlines182-source.json"
+  ],
+  "preserved": 1388,
+  "schemaChanged": false,
+  "uiSHA1": {
+    "components/time-polls/shared-time-poll.module.css": "bf49541e178054dd38788ae89c8eaa2bd4d47742",
+    "components/time-polls/shared-time-poll.tsx": "c75dc295bfc34144f421f76943937d867c83a05a"
+  },
+  "sourceCommit": "42de15fc227c756152688d7b8da81c1e52deaf6f"
+}
