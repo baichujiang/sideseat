@@ -351,6 +351,29 @@ import XCTest
         let accounts: [NativeAccount]
     }
 
+    func testActivityCompletionLargestText() throws {
+        struct Fixture: Decodable { let bundle: String; let connectionID: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_FIXED_ACTIVITY156_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the disposable activity plan.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let peer = try XCTUnwrap(fixture.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(peer, bundle: fixture.bundle, accessibility: true)
+        app.tabBars.buttons["消息"].tap()
+        let row = app.buttons["inbox-row-\(fixture.connectionID)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-' ")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+        XCTAssertTrue(app.buttons["plan-activity-suggest"].waitForExistence(timeout: 20)); app.buttons["plan-activity-suggest"].tap()
+        let field = app.textFields["plan-activity-title"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10)); capture(app, "completion181-largest-before-tap")
+        let completion = app.buttons["plan-activity-complete-逛展"]
+        activityRevealNative(completion); completion.tap()
+        XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "逛展"), object: field)], timeout: 5), .completed)
+        capture(app, "completion181-largest-filled")
+        activityRevealNative(app.buttons["plan-activity-cancel"]); app.buttons["plan-activity-cancel"].tap()
+    }
+
     func testFixedTimeActivityIdeasInviteAndCalendar() throws {
         struct FixedFixture: Decodable {
             let title: String; let activityTitle: String; let bundle: String
@@ -411,6 +434,25 @@ import XCTest
         nativeSignIn(peer, bundle: fixture.bundle); openChat()
         XCTAssertFalse(app.buttons["time-poll-submit"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
+        app.buttons["plan-activity-suggest"].tap()
+        let quickField = app.textFields["plan-activity-title"]
+        XCTAssertTrue(quickField.waitForExistence(timeout: 10))
+        let completeHotpot = app.buttons["plan-activity-complete-火锅"]
+        XCTAssertTrue(completeHotpot.waitForExistence(timeout: 10)); capture(app, "completion181-options"); completeHotpot.tap()
+        XCTAssertEqual(quickField.value as? String, "火锅")
+        XCTAssertTrue(app.buttons["plan-activity-add"].isEnabled)
+        XCTAssertEqual(app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-idea-' ")).count, 0, "Completion only fills the draft")
+        capture(app, "completion181-tap-fill")
+        app.buttons["plan-activity-cancel"].tap()
+        app.buttons["plan-activity-suggest"].tap()
+        XCTAssertTrue(quickField.waitForExistence(timeout: 10)); quickField.tap(); quickField.typeText("羽")
+        XCTAssertTrue(app.buttons["plan-activity-complete-羽毛球"].exists)
+        XCTAssertFalse(app.buttons["plan-activity-complete-火锅"].exists)
+        quickField.typeKey(XCUIKeyboardKey.tab, modifierFlags: [])
+        XCTAssertEqual(quickField.value as? String, "羽毛球", "Hardware Tab fills the matching suggestion")
+        XCTAssertFalse(app.scrollViews["plan-activity-completions"].exists)
+        capture(app, "completion181-tab-fill")
+        app.buttons["plan-activity-cancel"].tap()
         for activityTitle in [fixture.activityTitle, "一起逛展", "校园羽毛球", "周末火锅与散步"] {
             app.buttons["plan-activity-suggest"].tap()
             let idea = app.textFields["plan-activity-title"]
@@ -446,7 +488,11 @@ import XCTest
         capture(app, "ideas179-largest-single-column")
         app.buttons["plan-activity-suggest"].tap()
         let largeDraft = app.textFields["plan-activity-title"]
-        XCTAssertTrue(largeDraft.waitForExistence(timeout: 10)); largeDraft.tap(); largeDraft.typeText("大字号提议")
+        XCTAssertTrue(largeDraft.waitForExistence(timeout: 10))
+        let largeCompletion = app.buttons["plan-activity-complete-逛展"]
+        activityRevealNative(largeCompletion); largeCompletion.tap()
+        XCTAssertEqual(largeDraft.value as? String, "逛展")
+        largeDraft.typeText("大字号提议")
         XCTAssertTrue(app.buttons["plan-activity-add"].isHittable)
         XCTAssertTrue(app.buttons["plan-activity-cancel"].isHittable)
         capture(app, "ideas179-largest-top-composer")

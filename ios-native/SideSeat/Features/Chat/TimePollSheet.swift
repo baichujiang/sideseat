@@ -926,6 +926,14 @@ struct PlanActivityIdeasView: View {
     @FocusState private var suggestionFocused: Bool
     private var activity: NativePlanActivity { poll.activitySelection! }
     private var ideas: [NativePlanActivity.Idea] { activity.ideas ?? [] }
+    private var completions: [String] {
+        let query = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        return [AppLocalization.string("Exhibition"), AppLocalization.string("Hotpot"), AppLocalization.string("Badminton")].filter {
+            let value = $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            return value.hasPrefix(query) && value != query
+        }
+    }
+
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
@@ -974,18 +982,45 @@ struct PlanActivityIdeasView: View {
     }
 
     private var suggestionForm: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
-            TextField("For example: an exhibition, dinner or badminton", text: $draftTitle, axis: .vertical)
-                .lineLimit(1...3).focused($suggestionFocused)
-                .submitLabel(.done).onSubmit { suggestionFocused = false }
-                .padding(SideSeatTheme.spaceMD)
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.25)))
-                .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
-            Button { showsSuggestion = false; suggestionFocused = false; draftTitle = "" } label: {
-                Image(systemName: "xmark").font(.subheadline).frame(width: 44, height: 44)
-            }.buttonStyle(.plain).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            if typeSize.isAccessibilitySize && !completions.isEmpty { completionRow }
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                TextField("For example: an exhibition, dinner or badminton", text: $draftTitle, axis: .vertical)
+                    .lineLimit(1...3).focused($suggestionFocused)
+                    .submitLabel(.done).onSubmit { suggestionFocused = false }
+                    .onKeyPress(.tab, phases: .down) { press in
+                        guard press.modifiers.isEmpty, let first = completions.first else { return .ignored }
+                        draftTitle = first
+                        return .handled
+                    }
+                    .padding(SideSeatTheme.spaceMD)
+                    .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.25)))
+                    .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
+                Button { showsSuggestion = false; suggestionFocused = false; draftTitle = "" } label: {
+                    Image(systemName: "xmark").font(.subheadline).frame(width: 44, height: 44)
+                }.buttonStyle(.plain).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
+            }
+            if !typeSize.isAccessibilitySize && !completions.isEmpty { completionRow }
         }.disabled(store.acting)
+    }
+
+    private var completionRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Text("Quick fill").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                ForEach(completions, id: \.self) { value in
+                    Button { draftTitle = value; suggestionFocused = true } label: {
+                        Label(value, systemImage: "arrow.up.left")
+                            .font(.caption.weight(.medium)).padding(.horizontal, SideSeatTheme.spaceMD).frame(minHeight: 44)
+                            .background(SideSeatTheme.surface, in: Capsule())
+                            .overlay(Capsule().strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.18)))
+                    }.buttonStyle(.plain)
+                        .accessibilityLabel(String(format: AppLocalization.string("Fill with %@"), value))
+                        .accessibilityIdentifier("plan-activity-complete-\(value)")
+                }
+            }
+        }.accessibilityIdentifier("plan-activity-completions")
     }
 
     private func addSuggestion() {
