@@ -47,10 +47,10 @@ struct CourseScreenshotImportView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(store.isImporting)
                         .accessibilityIdentifier("course-screenshot-import-cancel")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button(addButtonTitle) {
                         Task {

@@ -169,8 +169,8 @@ struct MeRootView: View {
                 MembershipView(store: membershipStore)
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") { showsMembership = false }
-                        }
+                            Button("Done", systemImage: "checkmark") { showsMembership = false }.ssToolbarAction()
+                        }.ssStandaloneAction()
                     }
             }
         }
@@ -452,8 +452,8 @@ private struct SystemAvatarPickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }.disabled(isSaving)
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(isSaving)
+                }.ssStandaloneAction()
             }
             .safeAreaInset(edge: .bottom) {
                 SSFlowActionDock(
@@ -708,12 +708,12 @@ private struct SocialPreferencesView: View {
             .navigationTitle("Social preferences")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction() }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { Task { await save() } }
+                    Button("Save", systemImage: "checkmark") { Task { await save() } }.ssToolbarAction()
                         .disabled(isSaving || topics.isEmpty || invalidWindowExists)
                         .accessibilityIdentifier("social-preferences-save")
-                }
+                }.ssStandaloneAction()
             }
             .overlay { if isLoading { SSLoadingState("Loading preferences") } }
             .task { await load() }

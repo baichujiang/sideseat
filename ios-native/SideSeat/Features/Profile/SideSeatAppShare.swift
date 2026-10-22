@@ -43,9 +43,9 @@ struct SideSeatAppSharePreview: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
                         .accessibilityIdentifier("sideseat-app-share-done")
-                }
+                }.ssStandaloneAction()
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSShareActionBar(

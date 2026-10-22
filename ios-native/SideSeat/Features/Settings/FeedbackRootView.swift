@@ -638,9 +638,9 @@ private struct FeedbackComposeSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isSubmitting)
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         focusedField = nil

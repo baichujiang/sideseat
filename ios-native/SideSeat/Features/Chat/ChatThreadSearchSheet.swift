@@ -68,9 +68,9 @@ struct ChatThreadSearchSheet: View {
                 placement: .navigationBarDrawer(displayMode: .always), prompt: "Search loaded messages")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
                         .accessibilityIdentifier("thread-search-done")
-                }
+                }.ssStandaloneAction()
             }
             .accessibilityIdentifier("thread-search-sheet")
         }

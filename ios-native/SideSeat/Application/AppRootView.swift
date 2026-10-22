@@ -395,23 +395,23 @@ struct CoordinationLanguageSelectionSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isSaving)
                         .accessibilityIdentifier("coordination-languages-cancel")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                             .accessibilityLabel(AppLocalization.string("Saving"))
                     } else {
-                        Button("Done") {
+                        Button("Done", systemImage: "checkmark") {
                             Task { await save() }
-                        }
+                        }.ssToolbarAction()
                         .disabled(selectedTags.isEmpty)
                         .ssConfirmationActionStyle()
                         .accessibilityIdentifier("coordination-languages-save")
                     }
-                }
+                }.ssStandaloneAction()
             }
         }
         .interactiveDismissDisabled(isSaving)
@@ -529,17 +529,17 @@ private struct CampusIdentitySetupSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") {
+                        Button("Save", systemImage: "checkmark") {
                             Task { await save() }
-                        }
+                        }.ssToolbarAction()
                     }
-                }
+                }.ssStandaloneAction()
             }
         }
         .accessibilityIdentifier("required-setup-campus")

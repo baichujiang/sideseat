@@ -286,7 +286,7 @@ struct ConversationPlansSheet: View {
                 }
             }
             .navigationTitle("Your plans together").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction() }.ssStandaloneAction() }
         }
         .ssFlowSheet(isSaving: false)
     }

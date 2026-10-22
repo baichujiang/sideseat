@@ -557,9 +557,9 @@ private struct CalendarEventCompanionPicker: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { dismiss() }
+                Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
                     .accessibilityIdentifier("event-companions-done")
-            }
+            }.ssStandaloneAction()
         }
         .accessibilityIdentifier("event-companion-picker")
     }
@@ -740,20 +740,20 @@ struct CalendarEventEditorView: View {
             .interactiveDismissDisabled(isSaving)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isSaving)
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Save", systemImage: "checkmark") {
                         commitTextInputAndPrepareSave()
-                    }
+                    }.ssToolbarAction()
                     .accessibilityIdentifier("event-save")
                     .disabled(isSaving)
                     .ssConfirmationActionStyle()
-                }
+                }.ssStandaloneAction()
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { focusedTextField = nil }
+                    Button("Done", systemImage: "checkmark") { focusedTextField = nil }.ssToolbarAction()
                         .accessibilityIdentifier("event-keyboard-done")
                 }
             }

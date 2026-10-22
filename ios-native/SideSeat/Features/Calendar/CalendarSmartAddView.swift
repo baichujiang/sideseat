@@ -95,8 +95,8 @@ struct CalendarSmartAddView: View {
                             .navigationBarTitleDisplayMode(.inline)
                             .toolbar {
                                 ToolbarItem(placement: .confirmationAction) {
-                                    Button("Done") { showsSourceImage = false }
-                                }
+                                    Button("Done", systemImage: "checkmark") { showsSourceImage = false }.ssToolbarAction()
+                                }.ssStandaloneAction()
                             }
                     }
                 }
@@ -866,8 +866,8 @@ private struct CalendarSmartDraftEditorView: View {
             .accessibilityIdentifier("smart-schedule-draft-editor")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Apply") { applyChanges() }
                         .ssConfirmationActionStyle()
@@ -875,7 +875,7 @@ private struct CalendarSmartDraftEditorView: View {
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { focusedField = nil }
+                    Button("Done", systemImage: "checkmark") { focusedField = nil }.ssToolbarAction()
                 }
             }
         }

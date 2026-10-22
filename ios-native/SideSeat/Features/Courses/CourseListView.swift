@@ -448,9 +448,9 @@ struct ArchivedCourseListView: View {
         .toolbar {
             if showsDoneButton {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
                         .accessibilityIdentifier("course-archived-done")
-                }
+                }.ssStandaloneAction()
             }
         }
         .task(id: query.trimmingCharacters(in: .whitespacesAndNewlines)) {
@@ -620,9 +620,9 @@ private struct CourseSemesterReviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .accessibilityIdentifier("course-review-cancel")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button(confirmTitle) {
                         Task {

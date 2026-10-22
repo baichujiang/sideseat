@@ -365,8 +365,8 @@ struct ScheduleShareComposeSheet: View {
             .toolbar {
                 if initialConnectionID != nil || route.kind == .editor {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { dismiss() }
-                    }
+                        Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
+                    }.ssStandaloneAction()
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -489,11 +489,11 @@ struct ScheduleShareComposeSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Cancel", systemImage: "xmark") {
                         cancelScheduleImageSave()
                         showShareDestinations = false
-                    }
-                }
+                    }.ssToolbarAction()
+                }.ssStandaloneAction()
             }
         }
         .presentationDetents([.medium, .large])

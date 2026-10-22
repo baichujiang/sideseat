@@ -181,7 +181,7 @@ struct PlanShareActions: View {
 
     var body: some View {
         Button { showsShare = true } label: {
-            Label("Share", systemImage: "square.and.arrow.up").labelStyle(.titleAndIcon)
+            Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
         }.buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("plan-share-open")
         .sheet(isPresented: $showsShare) {
             NavigationStack {
@@ -210,7 +210,7 @@ struct PlanShareActions: View {
                     }
                 }
                 .navigationTitle("Share plan").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsShare = false } } }
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { showsShare = false }.ssToolbarAction() }.ssStandaloneAction() }
                 .sheet(isPresented: $showsContacts) {
                     PlanContactInviteSheet(poll: store.poll ?? poll) {
                         sent = true
@@ -303,7 +303,7 @@ struct PlanContactInviteSheet: View {
                     .overlay(alignment: .top) { Divider() }
             }
             .navigationTitle("Invite contacts").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(sending) } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(sending) }.ssStandaloneAction() }
             .task { await contacts.load(using: session) }
         }.interactiveDismissDisabled(sending)
     }

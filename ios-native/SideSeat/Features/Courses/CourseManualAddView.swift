@@ -65,10 +65,10 @@ struct CourseManualAddView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(store.isSaving)
                         .accessibilityIdentifier("course-manual-cancel")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         focusedField = nil

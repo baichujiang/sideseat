@@ -199,9 +199,9 @@ struct ProfileAppearanceSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { if changed { showsDiscard = true } else { dismiss() } }
+                    Button("Cancel", systemImage: "xmark") { if changed { showsDiscard = true } else { dismiss() } }.ssToolbarAction()
                         .disabled(isSaving)
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task {

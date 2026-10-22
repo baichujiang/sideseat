@@ -104,8 +104,8 @@ struct PlanInformationEditor: View {
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Edit plan information").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { if hasChanges { showsDiscard = true } else { dismiss() } }.disabled(store.acting)
-            } }
+                Button("Cancel", systemImage: "xmark") { if hasChanges { showsDiscard = true } else { dismiss() } }.ssToolbarAction().disabled(store.acting)
+            }.ssStandaloneAction() }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 PlanActionButton(title: AppLocalization.string("Save changes"), symbol: "checkmark", kind: .commit,
                                  isLoading: store.acting, accessibilityID: "plan-edit-save") {
@@ -212,8 +212,8 @@ struct PlanPeopleView: View {
             }
             .navigationTitle("Participants and progress").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { dismiss() }.accessibilityIdentifier("plan-people-done")
-            } }
+                Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction().accessibilityIdentifier("plan-people-done")
+            }.ssStandaloneAction() }
             .accessibilityIdentifier("plan-people-list")
             .alert("Recover an old guest response", isPresented: Binding(get: { recoveryPersonID != nil }, set: { if !$0 { recoveryPersonID = nil } }), presenting: recoveryPersonID) { id in
                 Button("Generate personal recovery link") {
@@ -239,7 +239,7 @@ struct PlanPeopleView: View {
                         }
                     }.padding(SideSeatTheme.screenHorizontal)
                     }
-                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { recoveryShare = nil } } }
+                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { recoveryShare = nil }.ssToolbarAction() }.ssStandaloneAction() }
                 }.dynamicTypeSize(typeSize).accessibilityIdentifier("guest-recovery-share")
             }
         }

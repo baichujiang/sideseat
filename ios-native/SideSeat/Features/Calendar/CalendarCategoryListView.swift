@@ -55,8 +55,8 @@ struct CalendarCategoryListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         editor = CalendarCategoryEditorDestination(category: nil)
@@ -165,8 +165,8 @@ struct CalendarConnectionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
-                }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
             }
             .task { await connectionStore.load(using: session) }
             .refreshable { await connectionStore.load(using: session) }
@@ -1037,11 +1037,11 @@ private struct CalendarCategoryEditorView: View {
         .interactiveDismissDisabled(store.isMutating)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { Task { await save() } }
+                Button("Save", systemImage: "checkmark") { Task { await save() } }.ssToolbarAction()
                     .accessibilityIdentifier("calendar-save")
                     .disabled(store.isMutating || trimmedName.isEmpty)
                     .ssConfirmationActionStyle()
-            }
+            }.ssStandaloneAction()
         }
         .ssActionPrompt(
             isPresented: $showDeleteConfirmation,

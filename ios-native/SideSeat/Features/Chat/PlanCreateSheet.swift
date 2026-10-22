@@ -74,12 +74,12 @@ struct PlanCreateSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isCreating)
-                }
+                }.ssStandaloneAction()
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { focusedField = nil }
+                    Button("Done", systemImage: "checkmark") { focusedField = nil }.ssToolbarAction()
                         .accessibilityIdentifier("plan-editor-keyboard-done")
                 }
             }
@@ -114,13 +114,13 @@ struct PlanCreateSheet: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { showsRepeatTimePicker = false }
-                        }
+                            Button("Cancel", systemImage: "xmark") { showsRepeatTimePicker = false }.ssToolbarAction()
+                        }.ssStandaloneAction()
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("Done") { hasConfirmedTiming = true; showsRepeatTimePicker = false }
+                            Button("Done", systemImage: "checkmark") { hasConfirmedTiming = true; showsRepeatTimePicker = false }.ssToolbarAction()
                                 .disabled(start <= Date() || end.timeIntervalSince(start) < 30 * 60)
                                 .accessibilityIdentifier("plan-repeat-time-done")
-                        }
+                        }.ssStandaloneAction()
                     }
                 }
                 .ssFlowSheet(isSaving: false)

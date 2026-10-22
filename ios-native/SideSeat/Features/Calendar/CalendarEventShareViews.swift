@@ -71,8 +71,8 @@ struct CalendarEventShareSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", action: dismiss.callAsFunction)
-                }
+                    Button("Cancel", systemImage: "xmark", action: dismiss.callAsFunction).ssToolbarAction()
+                }.ssStandaloneAction()
             }
         }
         .sheet(item: $sharePayload) { payload in

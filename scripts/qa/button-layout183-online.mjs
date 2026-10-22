@@ -86,15 +86,15 @@ try {
       return elements.map(el => {
         const s = getComputedStyle(el), r = el.getBoundingClientRect();
         const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        const content = []; let node;
+        const content = [], textTops = new Set(); let node;
         while ((node = walker.nextNode())) {
           if (!node.textContent.trim()) continue;
           const range = document.createRange(); range.selectNodeContents(node);
-          for (const box of range.getClientRects()) content.push(box);
+          for (const box of range.getClientRects()) { content.push(box); textTops.add(Math.round(box.top)); }
         }
         for (const svg of el.querySelectorAll('svg')) content.push(svg.getBoundingClientRect());
         return { id: el.getAttribute('data-testid') || el.textContent?.trim() || el.getAttribute('aria-label'), border: s.borderTopWidth, style: s.borderTopStyle, color: s.borderTopColor, radius: s.borderTopLeftRadius, height: r.height, left: r.left, right: r.right,
-          contentHasInsets: content.every(box => box.left >= r.left + 3 && box.right <= r.right - 3 && box.top >= r.top + 3 && box.bottom <= r.bottom - 3) };
+          textRows: textTops.size, contentHasInsets: content.every(box => box.left >= r.left + 3 && box.right <= r.right - 3 && box.top >= r.top + 3 && box.bottom <= r.bottom - 3) };
       });
     });
     let auditRows = await audit();
@@ -160,6 +160,7 @@ try {
     const enlarged = await page.addStyleTag({ content: 'main button, main a[href^="sideseat:"] { font-size: 20px !important; }' });
     const largeRows = await audit();
     assert(largeRows.every(r => r.contentHasInsets && r.left >= -1 && r.right <= 321), JSON.stringify(largeRows));
+    assert(largeRows.filter(r => ['activity-toggle', 'activity-compose', 'activity-suggest'].includes(r.id)).every(r => r.textRows <= 1), 'Header actions keep complete single-line labels and wrap as whole controls');
     fs.writeFileSync(`${out}/${stage}-${engineName}-large-content-audit.json`, JSON.stringify(largeRows, null, 2));
     await page.screenshot({ path: `${out}/${stage}-${engineName}-narrow-large.png`, fullPage: true });
     await enlarged.evaluate(el => el.remove());

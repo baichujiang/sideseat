@@ -754,8 +754,8 @@ struct IntentionDetailsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }.accessibilityIdentifier("intention-details-done")
-                }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction().accessibilityIdentifier("intention-details-done")
+                }.ssStandaloneAction()
             }
         }
         .presentationDetents([.large])

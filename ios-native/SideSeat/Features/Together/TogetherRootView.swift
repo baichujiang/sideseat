@@ -460,8 +460,8 @@ private struct TogetherHomeView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { showsSectionPicker = false }
-                    }
+                        Button("Done", systemImage: "checkmark") { showsSectionPicker = false }.ssToolbarAction()
+                    }.ssStandaloneAction()
                 }
             }
             .accessibilityElement(children: .contain)
@@ -1409,8 +1409,8 @@ struct OpportunityMessageComposer: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }.disabled(isSending)
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(isSending)
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         isSending = true
@@ -1988,9 +1988,9 @@ private struct WeeklyIntentEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isSaving)
-                }
+                }.ssStandaloneAction()
                 if focusedInput != nil {
                     ToolbarItem(placement: .confirmationAction) {
                         Button(editorActionTitle) {
@@ -2355,17 +2355,17 @@ private struct WeeklyIntentTimePickerSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .accessibilityIdentifier("intent-time-picker-cancel")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button("Done", systemImage: "checkmark") {
                         onSave(timeWindows, preservedTimePreference)
                         dismiss()
-                    }
+                    }.ssToolbarAction()
                     .disabled(!hasValidTimeWindows)
                     .accessibilityIdentifier("intent-time-picker-done")
-                }
+                }.ssStandaloneAction()
             }
         }
         .environment(\.locale, AppLocalization.selectedLanguage.locale)
@@ -2543,8 +2543,8 @@ struct TogetherPeerPreview: View {
             }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Done") { dismiss() }.accessibilityIdentifier("together-profile-done")
-                    }
+                        Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction().accessibilityIdentifier("together-profile-done")
+                    }.ssStandaloneAction()
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
                             Button("Report intention", systemImage: "flag") { showsReport = true }

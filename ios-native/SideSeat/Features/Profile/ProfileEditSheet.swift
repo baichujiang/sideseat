@@ -215,10 +215,10 @@ struct ProfileEditSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { requestDismissal() }
+                        Button("Cancel", systemImage: "xmark") { requestDismissal() }.ssToolbarAction()
                             .disabled(isSubmitting)
                             .accessibilityIdentifier("profile-edit-close")
-                    }
+                    }.ssStandaloneAction()
                     ToolbarItem(placement: .confirmationAction) {
                         Button {
                             if hasChangedSchool {
@@ -261,7 +261,7 @@ struct ProfileEditSheet: View {
 
                         Spacer()
 
-                        Button("Done") { focusedInput = nil }
+                        Button("Done", systemImage: "checkmark") { focusedInput = nil }.ssToolbarAction()
                             .accessibilityIdentifier("profile-edit-input-done")
                     }
                 }

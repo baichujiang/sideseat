@@ -1351,8 +1351,8 @@ private struct HomeAgendaDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done", action: onDone)
-                }
+                    Button("Done", systemImage: "checkmark", action: onDone).ssToolbarAction()
+                }.ssStandaloneAction()
                 if canShare {
                     ToolbarItem(placement: .primaryAction) {
                         Button {

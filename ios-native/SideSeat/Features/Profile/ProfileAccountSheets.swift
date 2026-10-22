@@ -67,8 +67,8 @@ struct ProfileUsernameSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task { await save() }
@@ -174,10 +174,10 @@ struct ProfilePrivacySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
                         .disabled(isSubmitting)
                         .accessibilityIdentifier("profile-sheet-close")
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task { await save() }

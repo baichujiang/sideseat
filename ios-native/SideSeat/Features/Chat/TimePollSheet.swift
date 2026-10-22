@@ -24,8 +24,8 @@ struct TimePollSheet: View {
                     TimePollDetailView(token: openToken)
                         .toolbar {
                             ToolbarItem(placement: .confirmationAction) {
-                                Button("Done") { dismiss() }
-                            }
+                                Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
+                            }.ssStandaloneAction()
                         }
                 } else {
                     TimePollCreateView { poll in openToken = poll.token }
@@ -60,7 +60,7 @@ struct TimePollSheet: View {
         }
         .navigationTitle("Plan together")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction() }.ssStandaloneAction() }
         .navigationDestination(item: $openToken) { TimePollDetailView(token: $0) }
         .sheet(isPresented: $showsCreate, onDismiss: { Task { await load() } }) {
             NavigationStack {
@@ -206,7 +206,7 @@ struct TimePollCreateView: View {
         .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(chooseActivityTogether)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }.buttonStyle(SSActionButtonStyle(size: .toolbar)).disabled(creating)
+                Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(creating)
             }.ssStandaloneAction()
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -340,8 +340,9 @@ struct TimePollDetailView: View {
                             Button("Cancel plan", role: .destructive) { showsCancelPlan = true }.accessibilityIdentifier("unified-plan-cancel")
                         }
                         if poll.isOwner && ["COLLECTING", "CANCELLED", "EXPIRED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
-                    } label: { Image(systemName: "ellipsis") }.accessibilityIdentifier("time-poll-menu")
-                }
+                    } label: { Image(systemName: "ellipsis") }
+                    .buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("time-poll-menu")
+                }.ssStandaloneAction()
                 }
             }
         }

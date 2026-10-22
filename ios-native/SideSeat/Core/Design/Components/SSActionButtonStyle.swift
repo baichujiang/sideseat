@@ -17,7 +17,7 @@ struct SSActionButtonStyle: ButtonStyle {
         configuration.label
             .font(compact ? .callout.weight(.semibold) : .subheadline.weight(prominent ? .semibold : .medium))
             .multilineTextAlignment(.center)
-            .fixedSize(horizontal: size == .toolbar, vertical: true)
+            .fixedSize(horizontal: false, vertical: true)
             .dynamicTypeSize(...(compact || size == .icon ? DynamicTypeSize.xxxLarge : DynamicTypeSize.accessibility1))
             .foregroundStyle(destructive ? SideSeatTheme.statusDangerText : prominent && isEnabled ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
             .opacity(isEnabled ? 1 : 0.46)
@@ -35,6 +35,11 @@ struct SSActionButtonStyle: ButtonStyle {
 }
 
 extension View {
+    func ssToolbarAction() -> some View {
+        labelStyle(.iconOnly)
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
+    }
+
     /// Shared boundary for controls that already own their padding and fill.
     func ssActionOutline(cornerRadius: CGFloat = SideSeatTheme.controlRadius, destructive: Bool = false) -> some View {
         overlay {

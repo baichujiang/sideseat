@@ -2434,8 +2434,8 @@ private struct ChatLocationShareSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                    Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 SSPrimaryButton(
@@ -2699,9 +2699,9 @@ private struct ChatImagePreviewView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done", action: onClose)
+                    Button("Done", systemImage: "checkmark", action: onClose).ssToolbarAction()
                         .foregroundStyle(.white)
-                }
+                }.ssStandaloneAction()
             }
             .toolbarBackground(.hidden, for: .navigationBar)
         }

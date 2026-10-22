@@ -279,8 +279,8 @@ struct ConversationContextSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if canMakePlan {
@@ -377,8 +377,8 @@ struct ParticipantContextSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
+                    Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction()
+                }.ssStandaloneAction()
             }
         }
         .presentationDetents([.medium])
@@ -654,18 +654,18 @@ private struct DirectChatRemarkEditor: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
+                Button("Save", systemImage: "checkmark") {
                     Task {
                         let value = draft.trimmingCharacters(in: .whitespacesAndNewlines)
                         if await store.updateRemark(value.isEmpty ? nil : value, using: session) {
                             dismiss()
                         }
                     }
-                }
+                }.ssToolbarAction()
                 .disabled(store.isMutatingConnectionAction)
                 .ssConfirmationActionStyle()
                 .accessibilityIdentifier("direct-remark-save")
-            }
+            }.ssStandaloneAction()
         }
         .task {
             guard !hasPrepared else { return }
