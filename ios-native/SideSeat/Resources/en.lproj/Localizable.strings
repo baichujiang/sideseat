@@ -3174,3 +3174,6 @@
 "Move the selected time to this day" = "Move the selected time to this day";
 
 "%d min" = "%d min";
+
+"Activity undecided" = "Activity undecided";
+"Confirm suggestion" = "Confirm";

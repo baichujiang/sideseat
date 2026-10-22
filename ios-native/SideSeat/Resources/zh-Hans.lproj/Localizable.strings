@@ -3174,3 +3174,6 @@
 "Move the selected time to this day" = "换到这一天，保留起止时间";
 
 "%d min" = "%d 分钟";
+
+"Activity undecided" = "活动待定";
+"Confirm suggestion" = "确认";

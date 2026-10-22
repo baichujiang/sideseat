@@ -3173,3 +3173,6 @@
 "Move the selected time to this day" = "Die gewählte Zeit auf diesen Tag verschieben";
 
 "%d min" = "%d Min.";
+
+"Activity undecided" = "Aktivität offen";
+"Confirm suggestion" = "Bestätigen";

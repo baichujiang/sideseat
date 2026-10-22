@@ -932,15 +932,15 @@ struct PlanActivityIdeasView: View {
             HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceSM) {
                 Button { expanded.toggle() } label: {
                     HStack(spacing: SideSeatTheme.spaceXS) {
-                        Text(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count))
+                        Text(typeSize.isAccessibilitySize ? AppLocalization.string("Activity undecided") : String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count))
                             .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.caption).accessibilityHidden(true)
                     }.font(.subheadline.weight(.medium)).frame(minHeight: 44).contentShape(Rectangle())
                 }.buttonStyle(.plain).accessibilityIdentifier("plan-activity-open-ideas")
-                    .accessibilityValue(expanded ? "Expanded" : "Collapsed")
+                    .accessibilityValue(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count) + ", " + (expanded ? "Expanded" : "Collapsed"))
                 Spacer(minLength: 0)
                 if showsSuggestion {
-                    Button("Add suggestion", action: addSuggestion)
+                    Button("Confirm suggestion", action: addSuggestion)
                         .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
                         .disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120)
                         .accessibilityIdentifier("plan-activity-add")
