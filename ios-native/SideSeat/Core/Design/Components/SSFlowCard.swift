@@ -435,6 +435,7 @@ struct RecommendationOptionsMenu: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
         .accessibilityLabel("Recommendation options")
         .accessibilityIdentifier(identifier)
     }

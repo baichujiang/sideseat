@@ -205,7 +205,9 @@ struct TimePollCreateView: View {
         .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
         .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(chooseActivityTogether)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(creating) }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }.buttonStyle(SSActionButtonStyle(size: .toolbar)).disabled(creating)
+            }.ssStandaloneAction()
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" && !chooseActivityTogether ? "Create invitation link" : "Create a plan"),
@@ -324,12 +326,13 @@ struct TimePollDetailView: View {
         .toolbar {
             if pickingFinalTime {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { cancelFinalSelection() } label: { Label("Back to plan", systemImage: "chevron.left") }
+                    Button { cancelFinalSelection() } label: { Label("Back to plan", systemImage: "chevron.left").labelStyle(.iconOnly) }
+                        .buttonStyle(SSActionButtonStyle(size: .toolbar))
                         .accessibilityIdentifier("time-poll-cancel-final")
-                }
+                }.ssStandaloneAction()
             }
             if let poll = store.poll, !pickingFinalTime {
-                ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }
+                ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }.ssStandaloneAction()
                 if poll.isOwner {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -613,7 +616,7 @@ private struct TimePollGrid: View {
                         }
                         .disabled(undoSelection == nil || dragStart != nil)
                         .accessibilityLabel("Undo last change")
-                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                         .accessibilityIdentifier("time-poll-undo")
                     } else { Text("Time").font(.caption).lineLimit(1).minimumScaleFactor(0.7) }
                 }.frame(width: labelWidth, height: headerHeight)
@@ -944,21 +947,22 @@ struct PlanActivityIdeasView: View {
                         Text(typeSize.isAccessibilitySize ? AppLocalization.string("Activity undecided") : String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count))
                             .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.caption).accessibilityHidden(true)
-                    }.font(.subheadline.weight(.medium)).frame(minHeight: 44).contentShape(Rectangle())
-                }.buttonStyle(SSActionButtonStyle()).accessibilityIdentifier("plan-activity-open-ideas")
+                    }.font(.subheadline.weight(.medium))
+                }.buttonStyle(SSActionButtonStyle(size: .compact)).accessibilityIdentifier("plan-activity-open-ideas")
                     .accessibilityValue(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count) + ", " + (expanded ? "Expanded" : "Collapsed"))
                 Spacer(minLength: 0)
                 if showsSuggestion {
                     Button("Confirm suggestion", action: addSuggestion)
-                        .buttonStyle(SSActionButtonStyle(prominent: true))
-                        .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
+                        .buttonStyle(SSActionButtonStyle(prominent: true, size: .compact))
+                        .fixedSize(horizontal: false, vertical: true)
                         .disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120)
                         .accessibilityIdentifier("plan-activity-add")
                 } else {
                     Button { expanded = true; showsSuggestion = true; suggestionFocused = true } label: {
                         Label("Suggest an activity", systemImage: "plus")
-                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true).frame(minHeight: 44)
-                    }.disabled(!store.canMutate).accessibilityIdentifier("plan-activity-suggest")
+                            .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                    }.buttonStyle(SSActionButtonStyle(size: .compact))
+                        .disabled(!store.canMutate).accessibilityIdentifier("plan-activity-suggest")
                 }
             }
             if showsSuggestion { suggestionForm }
@@ -1001,7 +1005,7 @@ struct PlanActivityIdeasView: View {
                     .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
                 Button { showsSuggestion = false; suggestionFocused = false; draftTitle = "" } label: {
                     Image(systemName: "xmark").font(.subheadline).frame(width: 44, height: 44)
-                }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
+                }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon)).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
             }
             if !typeSize.isAccessibilitySize && !completions.isEmpty { completionRow }
         }.disabled(store.acting)
@@ -1047,14 +1051,14 @@ struct PlanActivityIdeasView: View {
             } label: {
                 Label(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count), systemImage: idea.isInterested ? "heart.fill" : "heart")
                     .font(.caption.weight(.medium)).fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).contentShape(Rectangle())
+                    .frame(maxWidth: .infinity, alignment: .center).contentShape(Rectangle())
                     .foregroundStyle(idea.isInterested ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondaryStrong)
-            }.buttonStyle(SSActionButtonStyle(horizontalPadding: 8)).disabled(!store.canMutate)
+            }.buttonStyle(SSActionButtonStyle(size: .compact)).disabled(!store.canMutate)
                 .accessibilityLabel(AppLocalization.string(idea.isInterested ? "Interest marked" : "I'm interested"))
                 .accessibilityIdentifier("plan-activity-interest-\(idea.id)")
                 .accessibilityValue(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count))
         }
-        .padding(.horizontal, SideSeatTheme.spaceMD).padding(.top, SideSeatTheme.spaceMD)
+        .padding(.horizontal, SideSeatTheme.spaceMD).padding(.top, SideSeatTheme.spaceMD).padding(.bottom, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.18)))
         .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-idea-\(idea.id)")

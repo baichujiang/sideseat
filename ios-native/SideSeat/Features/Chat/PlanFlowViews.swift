@@ -139,6 +139,7 @@ struct PlanActionLabel: View {
             }
         }
         .font(.subheadline.weight(kind == .commit ? .semibold : .medium))
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .multilineTextAlignment(.center)
         .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceSM)
         .frame(maxWidth: .infinity, minHeight: 48)
@@ -181,7 +182,7 @@ struct PlanShareActions: View {
     var body: some View {
         Button { showsShare = true } label: {
             Label("Share", systemImage: "square.and.arrow.up").labelStyle(.titleAndIcon)
-        }.accessibilityIdentifier("plan-share-open")
+        }.buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("plan-share-open")
         .sheet(isPresented: $showsShare) {
             NavigationStack {
                 List {

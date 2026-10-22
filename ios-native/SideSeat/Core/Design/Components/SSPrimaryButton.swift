@@ -32,6 +32,8 @@ struct SSPrimaryButton: View {
             }
             // Content-sized CTAs (empty states) must keep inset; full-width forms stay centered.
             .padding(.horizontal, SideSeatTheme.spaceXL)
+            .padding(.vertical, 12)
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
             .frame(maxWidth: .infinity)
             .frame(minHeight: height)
             .contentShape(Rectangle())

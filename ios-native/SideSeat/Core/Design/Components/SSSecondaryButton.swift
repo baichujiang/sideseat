@@ -23,6 +23,8 @@ struct SSSecondaryButton: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, SideSeatTheme.spaceMD)
+                .padding(.vertical, 10)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
                 .frame(maxWidth: expands ? .infinity : nil)
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())

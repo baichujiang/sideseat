@@ -108,11 +108,12 @@ struct ChatsRootView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { deepLinkRouter.handleAppRoute(.plans) } label: {
-                    Image(systemName: "calendar.badge.clock").frame(minWidth: 44, minHeight: 44)
+                    Image(systemName: "calendar.badge.clock")
                 }
+                .buttonStyle(SSActionButtonStyle(size: .toolbar))
                 .accessibilityLabel("Coordinate a time")
                 .accessibilityIdentifier("inbox-time-poll")
-            }
+            }.ssStandaloneAction()
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             InboxSearchHeader(text: $store.searchQuery)
@@ -177,7 +178,7 @@ struct ChatsRootView: View {
             .frame(width: max(96, min(greetingTileSize, 76) + 28))
             .contentShape(Rectangle())
         }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
         .accessibilityLabel(title)
         .accessibilityValue(String(count))
         .accessibilityIdentifier(identifier)

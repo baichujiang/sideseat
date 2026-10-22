@@ -552,7 +552,7 @@ struct CalendarConnectionView: View {
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
             .accessibilityLabel("Revoke")
             .accessibilityIdentifier("calendar-connection-revoke-\(connection.id)")
         }
@@ -850,7 +850,7 @@ private struct CalendarExportYearSheet: View {
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
         .foregroundStyle(isDisabled ? SideSeatTheme.textSecondary : SideSeatTheme.utilityAction)
         .disabled(isDisabled)
         .buttonRepeatBehavior(.enabled)

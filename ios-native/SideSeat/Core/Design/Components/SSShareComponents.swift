@@ -38,7 +38,7 @@ struct SSShareActionBar: View {
                         .font(.body.weight(.semibold))
                         .frame(width: 46, height: 46)
                 }
-                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                 .accessibilityLabel(didCopy ? "Copied" : "Copy caption")
                 .accessibilityIdentifier("\(accessibilityPrefix)-copy")
 

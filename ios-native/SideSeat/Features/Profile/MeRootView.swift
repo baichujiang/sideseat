@@ -312,7 +312,7 @@ private struct SchoolChangeResultBanner: View {
                     .frame(width: 28, height: 28)
                     .ssIconButtonHitTarget()
             }
-            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
             .accessibilityLabel("Dismiss")
             .accessibilityIdentifier("me-school-change-dismiss")
         }
@@ -512,6 +512,7 @@ private struct MeHeroCard: View {
                                 Circle().strokeBorder(SideSeatTheme.bg, lineWidth: 2)
                             }
                     }
+                    .buttonStyle(.plain)
                     .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
                     .disabled(isPreparingAvatar)

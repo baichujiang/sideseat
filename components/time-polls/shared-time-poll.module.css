@@ -8,7 +8,7 @@
   --muted-foreground: 25 5% 42%;
   --border: 20 6% 89%;
   --input: 20 6% 89%;
-  --action-border: #8d9693;
+  --action-border: #a3b0a8;
   --poll-selected: #14755c;
   --poll-on-selected: #fff;
   --poll-partial: #fff0c7;
@@ -38,7 +38,7 @@
     --muted-foreground: 24 6% 70%;
     --border: 12 6% 25%;
     --input: 12 6% 25%;
-    --action-border: #7f8c86;
+    --action-border: #6b7d73;
     --poll-selected: #3b9e80;
     --poll-on-selected: #051f17;
     --poll-partial: #4f3817;
@@ -76,10 +76,32 @@
 .page :where(button:not([data-testid^="time-poll-cell-"]):not([data-testid^="time-poll-day-"])),
 .page .actionLink {
   min-height: 44px;
+  height: auto;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1px solid var(--action-border);
   border-radius: 14px;
-  padding-inline: 12px;
+  padding: 9px 12px;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
   text-decoration: none;
 }
 .page :where(button:not([data-testid^="time-poll-cell-"]):not([data-testid^="time-poll-day-"])):active,
 .page .actionLink:active { opacity: 0.8; }
+
+.page :where(button) svg { flex-shrink: 0; }
+.page :where(button[data-testid="activity-cancel"]) { padding: 0; width: 44px; height: 44px; }
+.page :where(button[data-testid^="activity-interest-"]) { margin-bottom: 10px; margin-top: 8px; }
+.page [data-testid="activity-panel"] form > div:first-child { flex-wrap: wrap; padding-block: 6px; }
+.page :where(button[data-testid="activity-toggle"], button[data-testid="activity-compose"], button[data-testid="activity-suggest"]) {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.page :where(button[data-testid="activity-compose"], button[data-testid="activity-suggest"]) { margin-inline-start: auto; }

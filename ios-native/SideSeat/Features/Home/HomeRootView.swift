@@ -417,81 +417,28 @@ struct HomeRootView: View {
 
     private var calendarUtilityActions: some View {
         HStack(spacing: 8) {
-            Button {
-                performCalendarSelection { showsCalendarSearch = true }
-            } label: {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
+            Button { performCalendarSelection { showsCalendarSearch = true } } label: {
+                Image(systemName: "magnifyingglass").font(.system(size: 16, weight: .semibold))
                     .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
             }
-            .buttonStyle(CalendarHeaderActionButtonStyle())
-            .background {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(SideSeatTheme.fillTertiary)
-                    .frame(height: calendarHeaderControlVisualHeight)
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
+            .accessibilityLabel("Search events").accessibilityIdentifier("calendar-search")
+            Button { performCalendarSelection { sheet = .connections } } label: {
+                Image(systemName: "square.and.arrow.up").font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(SideSeatTheme.HubTint.privacySchedule).frame(width: 44, height: 44)
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .strokeBorder(SideSeatTheme.separator.opacity(0.22), lineWidth: 0.5)
-                    .frame(height: calendarHeaderControlVisualHeight)
-            }
-            .accessibilityLabel("Search events")
-            .accessibilityIdentifier("calendar-search")
-
-            Button {
-                performCalendarSelection {
-                    sheet = .connections
-                }
-            } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(SideSeatTheme.HubTint.privacySchedule)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(CalendarHeaderActionButtonStyle())
-            .background {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(SideSeatTheme.HubTint.privacySchedule.opacity(0.11))
-                    .frame(height: calendarHeaderControlVisualHeight)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .strokeBorder(
-                        SideSeatTheme.HubTint.privacySchedule.opacity(0.22),
-                        lineWidth: 0.5
-                    )
-                    .frame(height: calendarHeaderControlVisualHeight)
-            }
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
             .accessibilityLabel("Calendar connections")
             .accessibilityHint("Connect Apple Calendar or transfer an iCalendar file")
             .accessibilityIdentifier("calendar-connections")
-        }
-        .fixedSize(horizontal: true, vertical: false)
+        }.fixedSize(horizontal: true, vertical: false)
     }
 
     private var calendarCategoriesAction: some View {
-        Button {
-            performCalendarSelection { sheet = .calendars }
-        } label: {
-            calendarCategoriesLabel
-        }
-        .buttonStyle(CalendarHeaderActionButtonStyle())
-        .accessibilityLabel("Calendar categories")
-        .accessibilityIdentifier("manage-calendars")
-        .background {
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                .fill(SideSeatTheme.fillTertiary)
-                .frame(height: calendarHeaderControlVisualHeight)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                .strokeBorder(SideSeatTheme.separator.opacity(0.22), lineWidth: 0.5)
-                .frame(height: calendarHeaderControlVisualHeight)
-        }
-        .fixedSize(horizontal: true, vertical: false)
+        Button { performCalendarSelection { sheet = .calendars } } label: { calendarCategoriesLabel }
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
+            .accessibilityLabel("Calendar categories").accessibilityIdentifier("manage-calendars")
+            .fixedSize(horizontal: true, vertical: false)
     }
 
     @ViewBuilder
@@ -503,10 +450,6 @@ struct HomeRootView: View {
             )
             .frame(width: 44, height: 44)
             .contentShape(Rectangle())
-    }
-
-    private var calendarHeaderControlVisualHeight: CGFloat {
-        dynamicTypeSize.isAccessibilitySize ? 44 : 34
     }
 
     private var calendarCategoryIconColor: Color {
@@ -881,7 +824,7 @@ struct HomeRootView: View {
                             .frame(width: 32, height: 32)
                             .ssIconButtonHitTarget()
                     }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                     .foregroundStyle(SideSeatTheme.textSecondary)
                     .accessibilityLabel("Cancel")
                 }
@@ -1235,19 +1178,6 @@ struct HomeRootView: View {
             )
         }
         showCalendarNotice(message, systemImage: "checkmark.circle.fill")
-    }
-}
-
-private struct CalendarHeaderActionButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(
-                configuration.isPressed ? Color.primary.opacity(0.08) : Color.clear,
-                in: RoundedRectangle(cornerRadius: 7, style: .continuous)
-            )
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 

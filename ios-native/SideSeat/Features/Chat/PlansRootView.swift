@@ -115,10 +115,11 @@ struct PlansRootView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { router.navigate(to: .planHistory) } label: {
                         Label("Plan history", systemImage: "clock.arrow.circlepath")
-                            .labelStyle(.iconOnly).ssIconButtonHitTarget()
+                            .labelStyle(.iconOnly)
                     }
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
                     .accessibilityIdentifier("plans-history")
-                }
+                }.ssStandaloneAction()
             }
         }
         .sheet(isPresented: $showsPlanCreation, onDismiss: {
@@ -180,7 +181,7 @@ struct PlansRootView: View {
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }
-                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                .buttonStyle(SSPressButtonStyle()).ssActionOutline()
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                 .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }

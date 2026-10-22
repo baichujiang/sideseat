@@ -404,54 +404,23 @@ struct CalendarEventBlockLabel: View {
 /// Shared bottom-toolbar navigation action for all calendar modes.
 struct CalendarTodayButton: View {
     let action: () -> Void
-
     var body: some View {
-        Button(action: action) {
-            Text("Today")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .padding(.horizontal, 16)
-                .frame(minWidth: 64, minHeight: 36)
-                .background(CalendarChrome.todayControlFill, in: Capsule())
-                .overlay {
-                    Capsule().strokeBorder(SideSeatTheme.separator.opacity(0.32), lineWidth: 0.5)
-                }
-                .frame(minHeight: 44)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
-        .fixedSize(horizontal: true, vertical: false)
-        .accessibilityIdentifier("home-jump-today")
+        Button("Today", action: action)
+            .buttonStyle(SSActionButtonStyle(size: .compact))
+            .fixedSize(horizontal: true, vertical: false)
+            .accessibilityIdentifier("home-jump-today")
     }
 }
 
 /// Neutral utility icon beside the calendar mode selector.
 struct CalendarAddEventButton: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let isEnabled: Bool
     let action: () -> Void
-
     var body: some View {
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(SideSeatTheme.textPrimary)
-                .frame(width: 44, height: 44)
-                .background {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(SideSeatTheme.fillTertiary)
-                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 44 : 34)
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .strokeBorder(SideSeatTheme.separator.opacity(0.22), lineWidth: 0.5)
-                        .frame(height: dynamicTypeSize.isAccessibilitySize ? 44 : 34)
-                }
-                .contentShape(Rectangle())
+            Image(systemName: "plus").font(.system(size: 18, weight: .semibold)).frame(width: 44, height: 44)
         }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
-        .accessibilityLabel("Add event")
-        .accessibilityIdentifier("new-event")
-        .disabled(!isEnabled)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
+        .accessibilityLabel("Add event").accessibilityIdentifier("new-event").disabled(!isEnabled)
     }
 }

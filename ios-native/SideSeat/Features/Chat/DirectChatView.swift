@@ -844,7 +844,7 @@ struct DirectChatView: View {
                                 .foregroundStyle(SideSeatTheme.utilityAction)
                                 .frame(width: 44, height: 44)
                         }
-                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                         .accessibilityLabel(AppLocalization.string("Cancel reply"))
                         .accessibilityValue(AppLocalization.string("Replying to \(reply.sender.displayName)") + ": " + reply.previewText)
                         .accessibilityIdentifier("chat-reply-cancel")
@@ -863,7 +863,7 @@ struct DirectChatView: View {
                             .background(SideSeatTheme.fillSubtle, in: Circle())
                             .ssIconButtonHitTarget()
                     }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999, size: .icon))
                     .disabled(
                         store.conversation?.isSelfNotes == true
                             || store.isUnrepliedSendBlocked

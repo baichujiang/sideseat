@@ -196,8 +196,8 @@ enum SideSeatTheme {
     /// Standalone controls retain a visible boundary in both appearances.
     static let actionBorder = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.498, green: 0.549, blue: 0.525, alpha: 1)
-            : UIColor(red: 0.553, green: 0.588, blue: 0.576, alpha: 1)
+            ? UIColor(red: 0.42, green: 0.49, blue: 0.45, alpha: 1)
+            : UIColor(red: 0.64, green: 0.69, blue: 0.66, alpha: 1)
     })
 
     /// Product actions are quiet ink in Light and soft chalk in Dark. Rose stays an accent.

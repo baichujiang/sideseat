@@ -204,10 +204,10 @@ struct UnifiedPlanInviteView: View {
                     Button { dismiss() } label: {
                         Label("Back to timetable", systemImage: "chevron.left").labelStyle(.iconOnly)
                     }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, compactOutline: true))
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
                     .accessibilityIdentifier("unified-plan-back-to-timetable")
                     .disabled(sending || store.acting)
-                }
+                }.ssStandaloneAction()
             }
         }.tint(SideSeatTheme.utilityAction).interactiveDismissDisabled(sending || store.acting)
     }

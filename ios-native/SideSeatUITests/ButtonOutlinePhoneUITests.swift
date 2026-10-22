@@ -18,13 +18,13 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
             for index in [0, 1, 2, 3, 4] {
                 let tab = app.tabBars.buttons.element(boundBy: index)
                 XCTAssertTrue(tab.exists); tab.tap()
-                capture(app, "outline182-\(language)-tab-\(index)")
+                capture(app, "outline183-\(language)-tab-\(index)")
             }
             app.tabBars.buttons.element(boundBy: 1).tap()
             let create = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).firstMatch
             reveal(create, in: app); checkTarget(create, in: app); create.tap()
             XCTAssertTrue(app.textFields["time-poll-title"].waitForExistence(timeout: 8))
-            capture(app, "outline182-\(language)-plan-form")
+            capture(app, "outline183-\(language)-plan-form")
             cancel(in: app)
             app.tabBars.buttons.element(boundBy: 0).tap()
             let intents = app.buttons["together-tab-intentions"]
@@ -36,7 +36,7 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
             let add = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["together-add-intent", "together-add-first-intent"])).firstMatch
             reveal(add, in: app); checkTarget(add, in: app); add.tap()
             XCTAssertTrue(app.descendants(matching: .any)["intent-editor"].waitForExistence(timeout: 8))
-            capture(app, "outline182-\(language)-intention-form")
+            capture(app, "outline183-\(language)-intention-form")
             cancel(in: app)
             app.terminate()
         }
@@ -47,7 +47,7 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
         app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-language=zh-Hans", "--ui-testing-appearance=light"]
         app.launch()
         XCTAssertTrue(app.textFields["login-identifier"].waitForExistence(timeout: 15))
-        capture(app, "outline182-auth")
+        capture(app, "outline183-auth")
         app.terminate()
     }
 
@@ -75,7 +75,7 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
             app.buttons["unified-plan-review-roster"].tap()
             let back = app.buttons["unified-plan-back-to-timetable"]
             XCTAssertTrue(back.waitForExistence(timeout: 10)); checkTarget(back, in: app)
-            capture(app, "outline182-\(language)-review-back")
+            capture(app, "outline183-\(language)-review-back")
             back.tap()
             XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 10))
             XCTAssertTrue(app.buttons["unified-plan-review-roster"].isEnabled)
@@ -89,6 +89,13 @@ final class ButtonOutlinePhoneUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(button.frame.height, 44)
         XCTAssertGreaterThanOrEqual(button.frame.minX, app.frame.minX)
         XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX)
+        // SwiftUI's merged accessibility label repeats the button bounds, not glyph bounds.
+        for label in button.staticTexts.allElementsBoundByIndex where label.exists && label.frame != button.frame {
+            XCTAssertGreaterThanOrEqual(label.frame.minX, button.frame.minX + 4)
+            XCTAssertLessThanOrEqual(label.frame.maxX, button.frame.maxX - 4)
+            XCTAssertGreaterThanOrEqual(label.frame.minY, button.frame.minY + 3)
+            XCTAssertLessThanOrEqual(label.frame.maxY, button.frame.maxY - 3)
+        }
     }
     private func reveal(_ element: XCUIElement, in app: XCUIApplication) {
         XCTAssertTrue(element.waitForExistence(timeout: 10))
