@@ -345,7 +345,7 @@ struct CalendarEventFormFields: View {
             .frame(maxWidth: .infinity, minHeight: 44)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel("Calendar")
         .accessibilityValue(selectedCalendarCategoryName)
         .accessibilityIdentifier("event-calendar-picker")
@@ -664,7 +664,7 @@ struct CalendarEventEditorView: View {
                             .contentShape(Rectangle())
                             .frame(minHeight: 44)
                         }
-                        .buttonStyle(SSPressButtonStyle())
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                         .listRowInsets(EdgeInsets(top: 0, leading: SideSeatTheme.spaceLG,
                             bottom: 0, trailing: SideSeatTheme.spaceLG))
                         .accessibilityIdentifier("event-smart-fill")

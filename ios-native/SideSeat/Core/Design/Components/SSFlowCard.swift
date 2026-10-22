@@ -229,7 +229,7 @@ struct SSOpportunityInterestStatus: View {
                         .frame(minWidth: 44, minHeight: 44, alignment: .leading)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .disabled(isWorking)
                 .accessibilityIdentifier("\(accessibilityPrefix)-withdraw-\(id)")
             }
@@ -280,7 +280,7 @@ struct SSOpportunityDecisionButtons: View {
                     }
                     .accessibilityIdentifier("mutual-opportunity-interest-action-\(opportunityID)")
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .disabled(isSubmitting)
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(AppLocalization.string("Choose interest"))
@@ -401,7 +401,7 @@ struct SSFlowChoice: View {
             )
             .overlay {
                 RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .strokeBorder(isSelected ? SideSeatTheme.ControlSelection.border : .clear, lineWidth: 1)
+                    .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
             }
             .contentShape(Rectangle())
         }
@@ -467,7 +467,7 @@ struct SSIntentionActionRow<Contact: View>: View {
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 .overlay {
                     RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                        .strokeBorder(isBookmarked ? SideSeatTheme.ControlSelection.border : SideSeatTheme.separator, lineWidth: 1)
+                        .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
                 }
             }
             .buttonStyle(SSPressButtonStyle())
@@ -502,7 +502,7 @@ struct SSIntentionContactButton: View {
                     }
                 }
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
         .disabled(isDisabled)
         .accessibilityIdentifier(identifier)
     }
@@ -612,14 +612,14 @@ struct RecommendationContextView: View {
                     }
                     .frame(minHeight: 44, alignment: .leading).contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle())
                 .accessibilityValue(AppLocalization.string(isExpanded ? "Expanded" : "Collapsed"))
                 .accessibilityIdentifier(identifier)
                 if let onProfile {
                     if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
                     Button(profileTitle, action: onProfile)
                         .frame(minHeight: 44).fixedSize(horizontal: false, vertical: true)
-                        .buttonStyle(.plain).accessibilityIdentifier(profileIdentifier)
+                        .buttonStyle(SSActionButtonStyle()).accessibilityIdentifier(profileIdentifier)
                 }
             }
             .font(.subheadline.weight(.medium)).foregroundStyle(SideSeatTheme.utilityAction)

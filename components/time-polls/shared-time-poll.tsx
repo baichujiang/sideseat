@@ -64,11 +64,11 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
 
   return <main lang={zh ? "zh-CN" : "en"} className={styles.page + " min-h-dvh px-4 pt-4 sm:px-6 " + (editing || replying ? "pb-60" : "pb-12")}>
     <div className="mx-auto max-w-4xl lg:max-w-[1440px]">
-      <header className="mb-4 flex items-center justify-between gap-4">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <Link href="/ios" className="flex items-center gap-2 font-semibold"><Image src="/icons/app-icon.png" width={30} height={30} alt="" className="rounded-lg" />SideSeat</Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = POLL_LOCALE_COOKIE + "=" + (next ? "zh-CN" : "en") + "; Path=/time-polls; Max-Age=31536000; SameSite=Lax"; }}>{zh ? "English" : "中文"}</button>
-          {!recoveryPage ? <a href={"sideseat://time-polls/" + encodeURIComponent(token)} className="inline-flex min-h-11 items-center gap-1 text-sm">{zh ? "打开 App" : "Open app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a> : null}
+          {!recoveryPage ? <a href={"sideseat://time-polls/" + encodeURIComponent(token)} className={styles.actionLink + " inline-flex min-h-11 items-center gap-1 text-sm"}>{zh ? "打开 App" : "Open app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a> : null}
         </div>
       </header>
       {!poll ? <section className="rounded-2xl border bg-background p-6" aria-live="polite">

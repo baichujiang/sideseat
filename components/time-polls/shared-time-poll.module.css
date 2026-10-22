@@ -8,6 +8,7 @@
   --muted-foreground: 25 5% 42%;
   --border: 20 6% 89%;
   --input: 20 6% 89%;
+  --action-border: #8d9693;
   --poll-selected: #14755c;
   --poll-on-selected: #fff;
   --poll-partial: #fff0c7;
@@ -37,6 +38,7 @@
     --muted-foreground: 24 6% 70%;
     --border: 12 6% 25%;
     --input: 12 6% 25%;
+    --action-border: #7f8c86;
     --poll-selected: #3b9e80;
     --poll-on-selected: #051f17;
     --poll-partial: #4f3817;
@@ -69,3 +71,15 @@
   color: hsl(var(--foreground));
   box-shadow: inset 0 0 0 2px hsl(var(--foreground));
 }
+
+/* Standalone actions share chrome; timetable cells retain their grid geometry. */
+.page :where(button:not([data-testid^="time-poll-cell-"]):not([data-testid^="time-poll-day-"])),
+.page .actionLink {
+  min-height: 44px;
+  border: 1px solid var(--action-border);
+  border-radius: 14px;
+  padding-inline: 12px;
+  text-decoration: none;
+}
+.page :where(button:not([data-testid^="time-poll-cell-"]):not([data-testid^="time-poll-day-"])):active,
+.page .actionLink:active { opacity: 0.8; }

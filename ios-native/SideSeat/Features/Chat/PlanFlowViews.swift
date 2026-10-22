@@ -145,12 +145,7 @@ struct PlanActionLabel: View {
         .foregroundStyle(foreground)
         .background(kind == .commit ? (isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.Interaction.disabledFill) : Color.clear,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-        .overlay {
-            if kind == .edit {
-                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                    .strokeBorder(SideSeatTheme.separator, lineWidth: 1)
-            }
-        }
+        .ssActionOutline(destructive: kind == .decline)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore).accessibilityLabel(title)
     }

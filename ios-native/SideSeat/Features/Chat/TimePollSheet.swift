@@ -177,7 +177,7 @@ struct TimePollCreateView: View {
                             }.frame(maxWidth: .infinity, alignment: .leading)
                             Image(systemName: showsDateOptions ? "chevron.down" : "chevron.right").font(.caption.weight(.semibold)).accessibilityHidden(true)
                         }.padding(.vertical, SideSeatTheme.spaceXS).contentShape(Rectangle())
-                    }.buttonStyle(.plain).accessibilityIdentifier("plan-date-options")
+                    }.buttonStyle(SSActionButtonStyle()).accessibilityIdentifier("plan-date-options")
                         .accessibilityValue(showsDateOptions ? "Expanded" : "Collapsed")
                     if showsDateOptions {
                         MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
@@ -613,6 +613,7 @@ private struct TimePollGrid: View {
                         }
                         .disabled(undoSelection == nil || dragStart != nil)
                         .accessibilityLabel("Undo last change")
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                         .accessibilityIdentifier("time-poll-undo")
                     } else { Text("Time").font(.caption).lineLimit(1).minimumScaleFactor(0.7) }
                 }.frame(width: labelWidth, height: headerHeight)
@@ -944,11 +945,12 @@ struct PlanActivityIdeasView: View {
                             .fixedSize(horizontal: false, vertical: true)
                         Image(systemName: expanded ? "chevron.up" : "chevron.down").font(.caption).accessibilityHidden(true)
                     }.font(.subheadline.weight(.medium)).frame(minHeight: 44).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityIdentifier("plan-activity-open-ideas")
+                }.buttonStyle(SSActionButtonStyle()).accessibilityIdentifier("plan-activity-open-ideas")
                     .accessibilityValue(String(format: AppLocalization.string("Activity undecided · %d ideas"), ideas.count) + ", " + (expanded ? "Expanded" : "Collapsed"))
                 Spacer(minLength: 0)
                 if showsSuggestion {
                     Button("Confirm suggestion", action: addSuggestion)
+                        .buttonStyle(SSActionButtonStyle(prominent: true))
                         .font(.subheadline.weight(.semibold)).frame(minHeight: 44)
                         .disabled(!store.canMutate || draftTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draftTitle.count > 120)
                         .accessibilityIdentifier("plan-activity-add")
@@ -999,7 +1001,7 @@ struct PlanActivityIdeasView: View {
                     .accessibilityLabel("Activity idea").accessibilityIdentifier("plan-activity-title")
                 Button { showsSuggestion = false; suggestionFocused = false; draftTitle = "" } label: {
                     Image(systemName: "xmark").font(.subheadline).frame(width: 44, height: 44)
-                }.buttonStyle(.plain).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
+                }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).accessibilityLabel("Cancel").accessibilityIdentifier("plan-activity-cancel")
             }
             if !typeSize.isAccessibilitySize && !completions.isEmpty { completionRow }
         }.disabled(store.acting)
@@ -1014,7 +1016,7 @@ struct PlanActivityIdeasView: View {
                         Label(value, systemImage: "arrow.up.left")
                             .font(.caption.weight(.medium)).padding(.horizontal, SideSeatTheme.spaceMD).frame(minHeight: 44)
                             .background(SideSeatTheme.surface, in: Capsule())
-                            .overlay(Capsule().strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.18)))
+                            .overlay(Capsule().strokeBorder(SideSeatTheme.actionBorder))
                     }.buttonStyle(.plain)
                         .accessibilityLabel(String(format: AppLocalization.string("Fill with %@"), value))
                         .accessibilityIdentifier("plan-activity-complete-\(value)")
@@ -1047,7 +1049,7 @@ struct PlanActivityIdeasView: View {
                     .font(.caption.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).contentShape(Rectangle())
                     .foregroundStyle(idea.isInterested ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondaryStrong)
-            }.buttonStyle(.plain).disabled(!store.canMutate)
+            }.buttonStyle(SSActionButtonStyle(horizontalPadding: 8)).disabled(!store.canMutate)
                 .accessibilityLabel(AppLocalization.string(idea.isInterested ? "Interest marked" : "I'm interested"))
                 .accessibilityIdentifier("plan-activity-interest-\(idea.id)")
                 .accessibilityValue(String(format: AppLocalization.string("%d interested"), idea.interestedBy.count))

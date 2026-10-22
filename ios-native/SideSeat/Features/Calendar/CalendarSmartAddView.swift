@@ -166,7 +166,7 @@ struct CalendarSmartAddView: View {
                                 }
                         }
                 }
-                .buttonStyle(SSPressButtonStyle())
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .disabled(store.isSaving)
                 .accessibilityLabel("Cancel")
                 .accessibilityIdentifier("smart-schedule-cancel")
@@ -232,7 +232,7 @@ struct CalendarSmartAddView: View {
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                     .accessibilityIdentifier("smart-schedule-source-image")
                 }
                 if inputIsTooLong {
@@ -282,7 +282,7 @@ struct CalendarSmartAddView: View {
                 .contentShape(Rectangle())
                 .background(voiceRowBackground)
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .accessibilityLabel(voiceInput.isActive ? "Stop dictation" : "Dictate event")
             .accessibilityValue(voiceButtonTitle)
             .accessibilityIdentifier("smart-schedule-voice")
@@ -317,7 +317,7 @@ struct CalendarSmartAddView: View {
                 .padding(.horizontal, SideSeatTheme.spaceLG)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .disabled(isReadingImage || store.isParsing)
             .accessibilityIdentifier("smart-schedule-image")
 
@@ -744,7 +744,7 @@ private struct CalendarSmartDraftRow: View {
             .padding(.vertical, 4)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel(draft.title)
         .accessibilityHint("Edit event details")
         .accessibilityIdentifier("smart-schedule-draft-\(draft.id.uuidString)")

@@ -844,7 +844,7 @@ struct DirectChatView: View {
                                 .foregroundStyle(SideSeatTheme.utilityAction)
                                 .frame(width: 44, height: 44)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                         .accessibilityLabel(AppLocalization.string("Cancel reply"))
                         .accessibilityValue(AppLocalization.string("Replying to \(reply.sender.displayName)") + ": " + reply.previewText)
                         .accessibilityIdentifier("chat-reply-cancel")
@@ -863,7 +863,7 @@ struct DirectChatView: View {
                             .background(SideSeatTheme.fillSubtle, in: Circle())
                             .ssIconButtonHitTarget()
                     }
-                    .buttonStyle(SSPressButtonStyle())
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
                     .disabled(
                         store.conversation?.isSelfNotes == true
                             || store.isUnrepliedSendBlocked
@@ -928,7 +928,7 @@ struct DirectChatView: View {
             .disabled(store.isSending || store.isUnrepliedSendBlocked)
             .accessibilityIdentifier("chat-composer-schedule-share")
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .padding(.horizontal, 12)
         .padding(.top, 8)
         .accessibilityElement(children: .contain)
@@ -1223,7 +1223,7 @@ struct DirectChatView: View {
             .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).foregroundStyle(SideSeatTheme.utilityAction)
         .accessibilityLabel(AppLocalization.string("Back to latest messages"))
         .accessibilityValue(store.pendingRemoteCount > 0 ? AppLocalization.string("\(store.pendingRemoteCount) new messages") : "")
         .accessibilityIdentifier("chat-new-messages")

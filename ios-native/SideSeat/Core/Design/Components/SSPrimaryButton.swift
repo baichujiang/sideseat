@@ -3,7 +3,7 @@ import SwiftUI
 /// Primary CTA — brand gradient for Auth; adaptive ink/chalk for product actions.
 struct SSPrimaryButton: View {
     @Environment(\.isEnabled) private var isEnabled
-    enum Chrome {
+    enum Chrome: Equatable {
         /// Continuous rounded rect (`controlRadius`) — Auth forms.
         case rounded
         /// Capsule — Tutorial / compact toolbars.
@@ -52,6 +52,7 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(foreground)
             .background(background(isPressed: configuration.isPressed))
+            .ssActionOutline(cornerRadius: chrome == .capsule ? 999 : SideSeatTheme.controlRadius)
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
             .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
             .animation(

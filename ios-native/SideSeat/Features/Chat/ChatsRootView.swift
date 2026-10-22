@@ -177,7 +177,7 @@ struct ChatsRootView: View {
             .frame(width: max(96, min(greetingTileSize, 76) + 28))
             .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel(title)
         .accessibilityValue(String(count))
         .accessibilityIdentifier(identifier)

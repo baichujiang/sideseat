@@ -182,7 +182,7 @@ struct ForgotPasswordSheet: View {
                         .fontWeight(.medium)
                 }
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .foregroundStyle(
                 resendSecondsRemaining > 0 ? SideSeatTheme.textSecondary : SideSeatTheme.textPrimary
             )

@@ -116,7 +116,7 @@ struct ExploreIntentListView: View {
                                     .frame(width: 44, height: 44)
                                     .contentShape(Rectangle())
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                             .accessibilityLabel("Clear search")
                             .accessibilityIdentifier("explore-clear-search")
                         }
@@ -289,7 +289,7 @@ struct ExploreIntentListView: View {
             .background(isSelected ? SideSeatTheme.Together.navigationSelection : SideSeatTheme.fillTertiary,
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel(title)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("explore-filter-\(topic?.rawValue ?? "all")")
@@ -351,7 +351,7 @@ struct ExploreIntentCard: View {
                     .padding(.horizontal, SideSeatTheme.Together.cardPadding)
             } else if let onViewProfile {
                 Button(AppLocalization.string("Intention details"), action: onViewProfile)
-                    .buttonStyle(.plain).font(.subheadline.weight(.medium))
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 12)).font(.subheadline.weight(.medium))
                     .foregroundStyle(SideSeatTheme.utilityAction).frame(minHeight: 44)
                     .padding(.horizontal, SideSeatTheme.Together.cardPadding)
                     .disabled(isWorking).accessibilityIdentifier("explore-profile-\(intent.id)")

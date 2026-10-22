@@ -731,7 +731,7 @@ struct ProfileSheetHeader: View {
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(SideSeatTheme.surface))
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
             .disabled(isCloseDisabled)
             .accessibilityLabel(AppLocalization.string( "Cancel"))
             .accessibilityIdentifier(closeAccessibilityID)
@@ -873,7 +873,7 @@ private struct ProfileEditSemesterControl: View {
                 .frame(width: 44, height: 44)
                 .ssIconButtonHitTarget()
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .foregroundStyle(enabled ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondary.opacity(0.4))
         .disabled(!enabled)
         .accessibilityLabel(

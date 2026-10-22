@@ -152,7 +152,7 @@ struct PlanResponseSummary: View {
                     }
                 }
             }.frame(minHeight: 44).contentShape(Rectangle())
-        }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.textPrimary)
+        }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).foregroundStyle(SideSeatTheme.textPrimary)
             .accessibilityIdentifier("plan-people-open")
     }
 }

@@ -152,6 +152,7 @@ struct SideSeatApp: App {
     var body: some Scene {
         WindowGroup {
             AppRootView()
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 8, compactOutline: true))
                 .environment(container)
                 .environment(container.session)
                 .environment(container.clientConfiguration)

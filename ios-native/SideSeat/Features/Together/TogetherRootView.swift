@@ -487,7 +487,7 @@ private struct TogetherHomeView: View {
             .frame(maxWidth: .infinity, minHeight: 44)
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel(AppLocalization.string("Together sections"))
         .accessibilityValue(sectionTitle(selectedSection, at: now))
         .accessibilityHint(AppLocalization.string("Choose a section"))
@@ -518,7 +518,7 @@ private struct TogetherHomeView: View {
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .accessibilityLabel(sectionTitle(section, at: now))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("together-tab-\(section.rawValue)")
@@ -555,7 +555,7 @@ private struct TogetherHomeView: View {
             .contentShape(Rectangle())
             .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle())
         .accessibilityLabel(AppLocalization.string("Add an intention"))
         .accessibilityIdentifier("together-add-intent")
         .disabled(store.isCreating || store.isLoading)
@@ -687,7 +687,7 @@ private struct TogetherHomeView: View {
                     .frame(minHeight: 44)
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
                 .accessibilityIdentifier("weekly-intent-expired-history")
                 if showsExpiredIntentions {
                     ForEach(expired) { intent in
@@ -1166,7 +1166,7 @@ struct MutualOpportunityCard: View {
                                 .frame(minHeight: 44)
                                 .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 12)).foregroundStyle(SideSeatTheme.utilityAction)
                         .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
                     }
                     if opportunity.isExpired == true && opportunity.hasConversation {
@@ -1500,7 +1500,7 @@ private struct WeeklyIntentCard: View {
                             .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                         .disabled(preparingShare)
                         .accessibilityLabel(AppLocalization.string("Share intention"))
                         .accessibilityIdentifier("weekly-intent-share-\(intent.id)")
@@ -1512,7 +1512,7 @@ private struct WeeklyIntentCard: View {
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .accessibilityLabel(AppLocalization.string("Delete intention"))
                 .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
                 }
@@ -1598,7 +1598,7 @@ private struct WeeklyIntentCard: View {
                             .background(SideSeatTheme.fillTertiary, in: Capsule())
                             .contentShape(Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                     .accessibilityIdentifier("weekly-intent-repeat-\(intent.id)")
                 }
             } else {
@@ -1614,7 +1614,7 @@ private struct WeeklyIntentCard: View {
                                 .frame(minHeight: 44)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
                         .foregroundStyle(SideSeatTheme.utilityAction)
                         .disabled(isWorking)
                         .accessibilityIdentifier("weekly-intent-toggle-pause-\(intent.id)")
@@ -1649,7 +1649,7 @@ private struct WeeklyIntentCard: View {
                             .frame(minHeight: 44, alignment: .leading)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
                         .accessibilityValue(AppLocalization.string(showsAllTimes ? "Expanded" : "Collapsed"))
                         .accessibilityIdentifier("weekly-intent-times-toggle-\(intent.id)")
                     }
@@ -2143,7 +2143,7 @@ private struct WeeklyIntentEditorView: View {
                 .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .accessibilityIdentifier("intent-timing-choose")
             .listRowInsets(EdgeInsets(top: SideSeatTheme.spaceXS, leading: SideSeatTheme.spaceMD,
                                      bottom: SideSeatTheme.spaceXS, trailing: SideSeatTheme.spaceMD))

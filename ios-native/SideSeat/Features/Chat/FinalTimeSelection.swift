@@ -22,7 +22,7 @@ struct FinalTimeControls: View {
                     .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 Button { self.range = nil } label: {
                     Image(systemName: "xmark.circle").frame(width: 44, height: 44)
-                }.accessibilityLabel("Clear final time").accessibilityIdentifier("time-poll-reset-final")
+                }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).accessibilityLabel("Clear final time").accessibilityIdentifier("time-poll-reset-final")
             }
             HStack(spacing: SideSeatTheme.spaceSM) {
                 clockMenu(range, start: true)

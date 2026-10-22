@@ -419,7 +419,7 @@ struct CalendarTodayButton: View {
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
         .fixedSize(horizontal: true, vertical: false)
         .accessibilityIdentifier("home-jump-today")
     }
@@ -449,7 +449,7 @@ struct CalendarAddEventButton: View {
                 }
                 .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
         .accessibilityLabel("Add event")
         .accessibilityIdentifier("new-event")
         .disabled(!isEnabled)

@@ -180,7 +180,7 @@ struct PlansRootView: View {
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                 .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }

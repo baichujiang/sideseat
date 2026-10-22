@@ -38,7 +38,7 @@ struct SSShareActionBar: View {
                         .font(.body.weight(.semibold))
                         .frame(width: 46, height: 46)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .accessibilityLabel(didCopy ? "Copied" : "Copy caption")
                 .accessibilityIdentifier("\(accessibilityPrefix)-copy")
 
@@ -63,7 +63,7 @@ struct SSShareActionBar: View {
                         in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     )
                 }
-                .buttonStyle(SSPressButtonStyle())
+                .buttonStyle(SSPressButtonStyle()).ssActionOutline()
                 .disabled(isPreparing)
                 .accessibilityIdentifier("\(accessibilityPrefix)-system")
             }

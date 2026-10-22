@@ -1968,7 +1968,7 @@ struct ChatUnreadJumpButton: View {
                 .padding(.vertical, 8)
                 .background(.ultraThinMaterial, in: Capsule())
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999))
         .accessibilityIdentifier("chat-unread-jump")
         .accessibilityLabel(AppLocalization.string( "\(count) earlier new messages"))
     }

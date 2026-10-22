@@ -306,7 +306,7 @@ struct HomeRootView: View {
                     Text("Offline")
                 }
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .accessibilityIdentifier("home-sync-status")
             .accessibilityHint("Reconnect and update the calendar")
         } else if store.issue != nil || store.subscriptionIssue != nil {
@@ -318,7 +318,7 @@ struct HomeRootView: View {
                     Text(store.schedule == nil ? "Couldn't load" : "Saved calendar")
                 }
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .accessibilityIdentifier("home-sync-status")
             .accessibilityHint("Try updating the calendar again")
         }
@@ -881,7 +881,7 @@ struct HomeRootView: View {
                             .frame(width: 32, height: 32)
                             .ssIconButtonHitTarget()
                     }
-                    .buttonStyle(SSPressButtonStyle())
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                     .foregroundStyle(SideSeatTheme.textSecondary)
                     .accessibilityLabel("Cancel")
                 }
@@ -1017,7 +1017,7 @@ struct HomeRootView: View {
                 .padding(.horizontal, SideSeatTheme.spaceSM)
                 .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle())
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
         .foregroundStyle(SideSeatTheme.textPrimary)
         .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         .accessibilityIdentifier(accessibilityID)

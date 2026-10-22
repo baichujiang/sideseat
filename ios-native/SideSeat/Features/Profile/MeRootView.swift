@@ -296,7 +296,7 @@ private struct SchoolChangeResultBanner: View {
                 if summary.archivedCourseCount > 0 {
                     Button("View archived courses", action: onViewArchive)
                         .font(.footnote.weight(.semibold))
-                        .buttonStyle(SSPressButtonStyle())
+                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .padding(.top, 2)
                         .accessibilityIdentifier("me-school-change-view-archive")
@@ -312,7 +312,7 @@ private struct SchoolChangeResultBanner: View {
                     .frame(width: 28, height: 28)
                     .ssIconButtonHitTarget()
             }
-            .buttonStyle(SSPressButtonStyle())
+            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
             .accessibilityLabel("Dismiss")
             .accessibilityIdentifier("me-school-change-dismiss")
         }

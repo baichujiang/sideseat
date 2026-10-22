@@ -367,7 +367,7 @@ struct FeedbackRootView: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    .buttonStyle(SSPressButtonStyle())
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                     .accessibilityIdentifier("feedback-row-\(post.id)")
                 }
                 .listStyle(.plain)

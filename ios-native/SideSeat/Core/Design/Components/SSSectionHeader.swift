@@ -41,7 +41,7 @@ struct SSProductSectionHeader: View {
                     .foregroundStyle(SideSeatTheme.utilityAction)
                     .frame(minWidth: 44, minHeight: 44)
                     .contentShape(Rectangle())
-                    .buttonStyle(.plain)
+                    .buttonStyle(SSActionButtonStyle())
                     .ssAccessibilityIdentifier(actionAccessibilityID)
             }
         }

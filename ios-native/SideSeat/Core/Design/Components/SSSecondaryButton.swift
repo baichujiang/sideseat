@@ -22,7 +22,7 @@ struct SSSecondaryButton: View {
                 .font(.subheadline.weight(fontWeight))
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, kind == .softFill ? SideSeatTheme.spaceLG : 0)
+                .padding(.horizontal, SideSeatTheme.spaceMD)
                 .frame(maxWidth: expands ? .infinity : nil)
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())
@@ -33,6 +33,7 @@ struct SSSecondaryButton: View {
 }
 
 private struct SSSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let kind: SSSecondaryButton.Kind
 
@@ -40,18 +41,21 @@ private struct SSSecondaryButtonStyle: ButtonStyle {
         switch kind {
         case .plainText:
             configuration.label
+                .opacity(isEnabled ? 1 : 0.46)
                 .foregroundStyle(SideSeatTheme.textPrimary)
+                .ssActionOutline()
                 .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
         case .softFill:
             configuration.label
+                .opacity(isEnabled ? 1 : 0.46)
                 .foregroundStyle(SideSeatTheme.textPrimary)
                 .background(
-                    Capsule(style: .continuous)
+                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                         .fill(Color.primary.opacity(configuration.isPressed ? 0.1 : 0.06))
                 )
                 .overlay {
-                    Capsule(style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                        .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
                 }
                 .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
                 .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)

@@ -72,7 +72,7 @@ struct SSSecureField: View {
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
-                .buttonStyle(SSPressButtonStyle())
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
                 .accessibilityLabel(
                     isVisible
                         ? AppLocalization.string( "Hide password")
