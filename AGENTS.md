@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 182 is the current installed development build. Standalone actions use
+- Preview 183 is the current installed development build. Actions fit their
+  content with separate regular/compact/icon/toolbar metrics and real inset;
+  standard Cancel/Done/Save toolbar actions use localized accessible icon labels
+  and no duplicate iOS 26 background. Calendar controls and custom-sized surfaces
+  no longer stack button chrome. Two phone journeys passed (204.847 / 203.428
+  seconds, 7 + 8 API stages) on the shared sizing implementation. Final navigation
+  UI passed three phone checks (91.408 / 37.831 / 4.064 seconds); the last compact
+  final-time control correction separately passed normal/maximum-text checks
+  (26.880 / 44.636 seconds). Keep those artifact scopes distinct.
+  Strict signature, 248 inputs, install and ordinary launch PID 6158 verified;
+  ordinary 97 remains. Production `dpl_3QAxBxySh4RLrQYf849ozaqdmZEz` changes
+  only one share CSS over verified production. Six browser journeys passed;
+  four final runs assert text/SVG insets and intact narrow/large short labels.
+  Sixteen disposable accounts, twenty-seven links, runner and private files were
+  cleaned. Passing functional tests alone is not visual acceptance: inspect the
+  actual text, border, padding and toolbar screenshots before calling it complete.
+- Preview 182 outlined actions remain included. Standalone actions use
   shared visible outlines, including compact text/icon actions; primary fill,
   destructive semantics and existing interaction rules remain. Five-tab/forms/auth
   phone smoke passed in Chinese/light, English/dark and German/dark maximum text.

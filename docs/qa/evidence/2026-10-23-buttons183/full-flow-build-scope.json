@@ -1,0 +1,7 @@
+{
+  "sourceCommit": "991a483e",
+  "previewBuild": 183,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "installedBeforeToolbarIconCorrection": true,
+  "finalNativeDifference": "Standard toolbar titles become icon-only actions with existing localized accessible names; no action closure or business rule changes."
+}

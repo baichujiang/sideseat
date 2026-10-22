@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "6b60879e1382f3beca7b9be3d9057edfe682870a",
+  "previewBuild": 183,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "nativeTrackedInputsVerified": 248,
+  "isolatedBuild": true,
+  "binarySHA256": {
+    "SideSeat Preview": "bb7538665c555865730b58c23c8354903c759824dece91d1dd1ba8ef682e5b6c",
+    "SideSeat Preview.debug.dylib": "400c76c6eb5094564d1594eca4abe76b5e9ff0ea155bf46f8edad9b212fa5d11"
+  },
+  "webDeployment": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz",
+  "strictSignatureVerified": true,
+  "fullFlowSourceCommit": "991a483e",
+  "finalUISourceCommit": "44faa463",
+  "fullFlowSeconds": [
+    204.847,
+    203.428
+  ],
+  "fullFlowAPIStages": [
+    7,
+    8
+  ],
+  "finalUISeconds": [
+    91.408,
+    37.831,
+    4.064
+  ],
+  "installed": true,
+  "ordinaryLaunchPID": 6158,
+  "ordinaryProcessMatched": true,
+  "ordinaryBuildPreserved": 97,
+  "finalControlsSeconds": [
+    26.88,
+    44.636
+  ],
+  "finalControlsPassed": true
+}

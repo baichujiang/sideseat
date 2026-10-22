@@ -3,16 +3,26 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
-## Outlined actions — Preview 182
+## Outlined actions and fitting — Preview 183
 
 Standalone actions in the native App and share page use a visible 1pt/1px outline,
 including compact text and icon actions. Secondary actions use the common 14pt/px
 rounded shape; primary actions retain their stronger fill, destructive actions
 retain red, and selected/disabled states remain distinct. Native icon controls
 that already use a circle keep that shape. Borders adapt to light/dark appearance.
-Native standalone actions retain at least a 44pt target, including a 32pt visible
-outline inset inside the 44pt navigation-toolbar target to avoid system clipping.
-Web standalone actions have a minimum 44px height. Content cards, list rows and
+Native standalone actions retain at least a 44pt target. Regular actions include
+vertical content padding; compact actions use a 36pt minimum visible surface with
+a 10pt radius. Icon actions have a 44pt square surface. Navigation actions use
+compact icon labels for standard Cancel/Done/Save, keep their localized accessible
+names, and hide the redundant iOS 26 toolbar background. Padding belongs inside
+the outline; never inset a border through the label or stack two control frames.
+Button labels scale through standard sizes; compact/navigation labels stop at
+xxxLarge and regular action labels at accessibility1, while page body text keeps
+the user's full text-size setting. Existing content-sized selectors keep their
+own geometry and use only the shared border/press treatment.
+Web standalone actions have a minimum 44px height, content-based height, explicit
+vertical padding and centered labels/icons. Narrow/large-text activity headers
+wrap whole controls, preserving complete one-line short labels. Content cards, list rows and
 timetable cells keep their own interaction geometry and existing selection logic.
 The native shared style and outline helper cover existing components without
 introducing a new action state or changing planning, invitation or Calendar rules.

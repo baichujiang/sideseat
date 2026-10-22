@@ -1,0 +1,123 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 16,
+    "right": 110.1875,
+    "contentHasInsets": true
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 118.1875,
+    "right": 247.765625,
+    "contentHasInsets": true
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 16,
+    "right": 121.484375,
+    "contentHasInsets": true
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 133.484375,
+    "right": 258.609375,
+    "contentHasInsets": true
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 33,
+    "right": 217.609375,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-toggle",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 76,
+    "left": 16,
+    "right": 169.765625,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-compose",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 76,
+    "left": 177.765625,
+    "right": 304,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-interest-cmvk65o0w001ekz206hlnz8qd",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 29,
+    "right": 291,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-interest-cmvk65og0001kkz20n45he5lv",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 29,
+    "right": 291,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-interest-cmvk65pm300024bcsn6530nyi",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 29,
+    "right": 291,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-interest-cmvk65qcm00054bcsn5ct8izl",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 48,
+    "left": 29,
+    "right": 291,
+    "contentHasInsets": true
+  }
+]

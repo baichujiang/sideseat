@@ -1,0 +1,90 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 187.515625,
+    "right": 261.25,
+    "contentHasInsets": true
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 269.25,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 194,
+    "right": 276,
+    "contentHasInsets": true
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 288,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 33,
+    "right": 171,
+    "contentHasInsets": true
+  },
+  {
+    "id": "无法参加",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 131.328125,
+    "contentHasInsets": true
+  },
+  {
+    "id": "确认参加",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 143.328125,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "暂不回复",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(163, 176, 168)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 374,
+    "contentHasInsets": true
+  }
+]

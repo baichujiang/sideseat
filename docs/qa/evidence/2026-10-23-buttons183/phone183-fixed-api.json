@@ -1,0 +1,104 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "fixed-created",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-22T23:30:05.849Z"
+    },
+    {
+      "phase": "fixed-delivered",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-22T23:30:15.111Z"
+    },
+    {
+      "phase": "fixed-suggested",
+      "actualPhase": "COLLECTING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-22T23:31:13.212Z"
+    },
+    {
+      "phase": "fixed-invited",
+      "actualPhase": "INVITING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-22T23:31:58.804Z"
+    },
+    {
+      "phase": "fixed-accepted",
+      "actualPhase": "INVITING",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-22T23:32:20.063Z"
+    },
+    {
+      "phase": "fixed-published",
+      "actualPhase": "CONFIRMED",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-22T23:32:41.182Z"
+    },
+    {
+      "phase": "fixed-calendar",
+      "actualPhase": "CONFIRMED",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-22T23:33:03.624Z"
+    }
+  ],
+  "failure": null
+}

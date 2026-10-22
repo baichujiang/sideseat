@@ -1,0 +1,14 @@
+{
+  "baseline": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd",
+  "candidate": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz",
+  "sourceFiles": 1392,
+  "changed": [
+    "components/time-polls/shared-time-poll.module.css"
+  ],
+  "added": [
+    ".sideseat-action-layout183-source.json"
+  ],
+  "preserved": 1390,
+  "schemaChanged": false,
+  "sourceCommit": "991a483e"
+}

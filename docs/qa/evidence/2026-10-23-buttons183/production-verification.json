@@ -1,0 +1,22 @@
+{
+  "deployment": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz",
+  "baseline": "dpl_F6DMSv9jgcpZEmPoSNsQZk98rMJd",
+  "url": "https://sideseat-2kt2l5kwr-baichus-projects.vercel.app",
+  "target": "production",
+  "ready": true,
+  "aliases": [
+    {
+      "alias": "api.sideseat.de",
+      "id": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "id": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz"
+    },
+    {
+      "alias": "sideseat.de",
+      "id": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz"
+    }
+  ],
+  "verifiedAt": "2026-10-22T23:34:43.206Z"
+}

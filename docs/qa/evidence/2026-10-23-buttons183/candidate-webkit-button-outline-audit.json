@@ -1,0 +1,123 @@
+[
+  {
+    "id": "English",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 187.734375,
+    "right": 261.46875,
+    "contentHasInsets": true
+  },
+  {
+    "id": "打开 App",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 269.46875,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "改名字",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 194.640625,
+    "right": 276.40625,
+    "contentHasInsets": true
+  },
+  {
+    "id": "其他人填写",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 288.40625,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "guest-recovery-copy",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 33,
+    "right": 170.140625,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-toggle",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 16,
+    "right": 138.3125,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-suggest",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 322.1875,
+    "right": 374,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-cancel",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 317,
+    "right": 361,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-complete-逛展",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 84.6875,
+    "right": 154.53125,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-complete-火锅",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 162.53125,
+    "right": 232.375,
+    "contentHasInsets": true
+  },
+  {
+    "id": "activity-complete-羽毛球",
+    "border": "1px",
+    "style": "solid",
+    "color": "rgb(107, 125, 115)",
+    "radius": "14px",
+    "height": 44,
+    "left": 240.375,
+    "right": 322.140625,
+    "contentHasInsets": true
+  }
+]
