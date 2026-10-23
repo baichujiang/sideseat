@@ -21,7 +21,7 @@ a capsule shape. Icon actions have a 44pt circular surface. Navigation actions u
 compact icon labels for standard Cancel/Done/Save, keep their localized accessible
 names, and hide the redundant iOS 26 toolbar background. Padding belongs inside
 the outline; never inset a border through the label or stack two control frames.
-Button labels scale through standard sizes; compact/navigation labels stop at
+Button labels scale through standard sizes; compact/navigation/section labels stop at
 xxxLarge and regular action labels at accessibility1, while page body text keeps
 the user's full text-size setting. Existing content-sized selectors keep their
 own geometry and use only the shared border/press treatment.

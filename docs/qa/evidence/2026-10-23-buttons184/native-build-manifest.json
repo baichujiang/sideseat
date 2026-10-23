@@ -1,0 +1,32 @@
+{
+  "previewBuild": 184,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "isolatedBuild": true,
+  "binarySHA256": {
+    "SideSeat Preview": "32c3f05292e80a232a6926607b14f15c9b421d19bef6d74b9b4014d40c7ff3fd",
+    "SideSeat Preview.debug.dylib": "476fa7bd00c7ef3a4fe50e981df07d0a5e0824d03405de2e9798398b978e2cfe"
+  },
+  "webDeployment": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz",
+  "webDeploymentChanged": false,
+  "strictSignatureVerified": true,
+  "sourceCommit": "2579936911d7f4208b8661a3e6042e309bffe36b",
+  "installed": true,
+  "ordinaryLaunchPID": 6256,
+  "ordinaryProcessMatched": true,
+  "ordinaryBuildPreserved": 97,
+  "uiPassedSeconds": [
+    92.57,
+    3.998,
+    29.926,
+    25.556
+  ],
+  "flowPartialSeconds": 200.257,
+  "flowAPIStagesBeforeLoginLimit": 6,
+  "publishContinuationSeconds": 40.303,
+  "finalRealCalendarSeconds": 24.792,
+  "completeFlowVerifiedInSegments": true,
+  "flowAPIStages": 8
+}

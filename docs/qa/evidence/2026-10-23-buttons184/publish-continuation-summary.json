@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "OutlinedActions182 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792715665.46,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792715621.769,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "OutlinedActions182UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PublishContinuation184UITests/testPublishAcceptedPlanAndFindParticipantCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/OutlinedActions182/OutlinedActions182UITests/PublishContinuation184UITests/testPublishAcceptedPlanAndFindParticipantCalendar",
+      "testName" : "testPublishAcceptedPlanAndFindParticipantCalendar()"
+    }
+  ],
+  "title" : "Test - OutlinedActions182",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

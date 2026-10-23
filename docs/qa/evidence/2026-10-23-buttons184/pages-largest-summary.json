@@ -1,0 +1,61 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 2,
+      "passedTests" : 3,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "OutlinedActions182 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 2,
+  "finishTime" : 1792715088.402,
+  "passedTests" : 3,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792714923.759,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertGreaterThanOrEqual failed: (\"43.99999999999997\") is less than (\"44.0\")",
+      "targetName" : "OutlinedActions182UITests",
+      "testIdentifier" : 4,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testCompactResponseAvatarsOpenAllPeople()",
+      "testIdentifierURL" : "test://com.apple.xcode/OutlinedActions182/OutlinedActions182UITests/PlanFirstUsePhoneUITests/testCompactResponseAvatarsOpenAllPeople",
+      "testName" : "testCompactResponseAvatarsOpenAllPeople()"
+    },
+    {
+      "failureText" : "XCTAssertGreaterThanOrEqual failed: (\"43.99999999999997\") is less than (\"44.0\")",
+      "targetName" : "OutlinedActions182UITests",
+      "testIdentifier" : 5,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar()",
+      "testIdentifierURL" : "test://com.apple.xcode/OutlinedActions182/OutlinedActions182UITests/PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar",
+      "testName" : "testNativeContactCardCreateFillInviteConfirmAndCalendar()"
+    }
+  ],
+  "title" : "Test - OutlinedActions182",
+  "topInsights" : [
+    {
+      "category" : "Common Failures",
+      "impact" : "100% of failures",
+      "text" : "2 runs of 2 tests failed with XCTAssertGreaterThanOrEqual failed: (\"43.99999999999997\") is less than (\"44.0\")"
+    }
+  ],
+  "totalTestCount" : 5
+}

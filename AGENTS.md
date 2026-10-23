@@ -21,7 +21,20 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 183 is the current installed development build. Actions fit their
+- Preview 184 is the current installed development build. Response counts are
+  plain information outside the avatar action; keep 0/2/8-person separation and
+  the full people list. Section pickers use one boundary and a filled selection;
+  compact actions are soft capsules, icon actions circular, primary actions solid.
+  Section labels stop at xxxLarge to keep the picker compact. Four phone UI checks
+  passed (92.570 / 3.998 / 29.926 / 25.556 seconds). The same real plan completed all
+  eight API stages in segments: the main run hit login throttling after acceptance;
+  publication and the final real participant Calendar check (24.792 seconds) were
+  continued. Do not claim a single uninterrupted full run. Strict signature,
+  248 App inputs plus 18 configuration/script inputs, install and ordinary launch
+  PID 6256 verified; ordinary 97 remains. No web/backend release in this stage.
+  Two disposable accounts, four links, runner and private launch data were cleaned.
+  See the 184 QA/release for failed harness attempts and actual screenshots.
+- Preview 183 was the previous development build. Actions fit their
   content with separate regular/compact/icon/toolbar metrics and real inset;
   standard Cancel/Done/Save toolbar actions use localized accessible icon labels
   and no duplicate iOS 26 background. Calendar controls and custom-sized surfaces
