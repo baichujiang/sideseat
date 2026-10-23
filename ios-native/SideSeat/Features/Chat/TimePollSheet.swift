@@ -138,29 +138,32 @@ struct TimePollCreateView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                informationFields
-                if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
-                if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
-            }.padding(SideSeatTheme.spaceMD)
-        }.scrollDismissesKeyboard(.interactively).background(SideSeatTheme.bg)
-            .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
-            .disabled(creating)
-            .toolbar { ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(creating)
-            }.ssStandaloneAction() }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                if !titleFocused && !locationFocused {
-                    PlanActionButton(title: AppLocalization.string("Share for availability"),
-                                     symbol: "square.and.arrow.up", kind: .commit,
-                                     isLoading: creating, accessibilityID: "time-poll-create-confirm") { Task { await create() } }
-                        .disabled(!canCreate)
-                        .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-                        .overlay(alignment: .top) { Divider() }
-                }
+        Form {
+            informationFields
+            if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
+            if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
+        }
+        .scrollContentBackground(.hidden)
+        .contentMargins(.top, SideSeatTheme.spaceLG, for: .scrollContent)
+        .listSectionSpacing(SideSeatTheme.spaceXL)
+        .scrollDismissesKeyboard(.interactively)
+        .background(SideSeatTheme.bgGrouped)
+        .textFieldStyle(.plain).dynamicTypeSize(...DynamicTypeSize.accessibility1)
+        .accessibilityIdentifier("plan-create-information")
+        .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
+        .disabled(creating)
+        .toolbar { ToolbarItem(placement: .cancellationAction) {
+            Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(creating)
+        }.ssStandaloneAction() }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !titleFocused && !locationFocused {
+                SSFlowActionDock(title: AppLocalization.string("Share for availability"), detail: "",
+                                 isLoading: creating, isEnabled: canCreate,
+                                 accessibilityID: "time-poll-create-confirm") { Task { await create() } }
             }
-            .onChange(of: "\(title)|\(location)|\(dates)|\(startMinute)|\(endMinute)|\(chooseActivityTogether)") { _, _ in createKey = UUID().uuidString }
+        }
+        .ssFlowSheet(isSaving: creating)
+        .onChange(of: "\(title)|\(location)|\(dates)|\(startMinute)|\(endMinute)|\(chooseActivityTogether)") { _, _ in createKey = UUID().uuidString }
     }
 
     private func hourPicker(_ label: LocalizedStringKey, selection: Binding<Int>, minutes: ClosedRange<Int>, id: String) -> some View {
@@ -177,11 +180,11 @@ struct TimePollCreateView: View {
             .accessibilityLabel(label).accessibilityValue(clock(selection.wrappedValue)).accessibilityIdentifier(id)
     }
 
-    private var informationFields: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+    @ViewBuilder private var informationFields: some View {
+        Section {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 TextField("Activity name", text: $title, prompt: Text("Activity name").foregroundStyle(SideSeatTheme.placeholderText), axis: .vertical)
-                    .font(.title.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
+                    .font(SideSeatTheme.Text.title).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
                     .focused($titleFocused).submitLabel(.done).onSubmit { titleFocused = false }
                     .onChange(of: title) { _, value in
                         guard value.contains(where: \.isNewline) else { return }
@@ -189,7 +192,7 @@ struct TimePollCreateView: View {
                         titleFocused = false
                     }
                     .accessibilityLabel("Activity name").accessibilityIdentifier("time-poll-title")
-                    .frame(minHeight: 52)
+                    .frame(minHeight: 44)
                 Divider()
                 HStack(spacing: SideSeatTheme.spaceSM) {
                     Image(systemName: "mappin.and.ellipse").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary).accessibilityHidden(true)
@@ -198,10 +201,11 @@ struct TimePollCreateView: View {
                         .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
                         .accessibilityLabel("Location (optional)").accessibilityIdentifier("unified-plan-location")
                 }.font(.subheadline).frame(minHeight: 44)
-            }.padding(SideSeatTheme.spaceLG)
-                .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+            }.padding(.vertical, SideSeatTheme.spaceXS)
                 .accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-identity")
+        }.listRowBackground(SideSeatTheme.surface)
 
+        Section {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 Button {
                     titleFocused = false; locationFocused = false; showsDateOptions.toggle()
@@ -211,12 +215,13 @@ struct TimePollCreateView: View {
                         PlanAdaptiveRow {
                             Text("Candidate dates").foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         } trailing: {
-                            Text(candidateDateSummary).fontWeight(.semibold).foregroundStyle(SideSeatTheme.textPrimary)
+                            Text(candidateDateSummary).fontWeight(.medium).foregroundStyle(SideSeatTheme.textPrimary)
                         }
                         Image(systemName: showsDateOptions ? "chevron.up" : "chevron.down")
                             .font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
-                    }.font(.subheadline).frame(minHeight: 44).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityIdentifier("plan-date-options")
+                    }.frame(maxWidth: .infinity, minHeight: 44).contentShape(Rectangle())
+                }.buttonStyle(SSActionButtonStyle())
+                    .accessibilityIdentifier("plan-date-options")
                     .accessibilityValue(AppLocalization.string(showsDateOptions ? "Expanded" : "Collapsed"))
                 if showsDateOptions {
                     MultiDatePicker("Choose dates", selection: Binding(get: { dates }, set: {
@@ -233,7 +238,7 @@ struct TimePollCreateView: View {
                 Divider()
                 HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
                     Image(systemName: "clock").font(.system(size: 18)).frame(width: 20, height: 44).foregroundStyle(.secondary)
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    VStack(alignment: .leading, spacing: typeSize.isAccessibilitySize ? SideSeatTheme.spaceMD : SideSeatTheme.spaceXS) {
                         PlanAdaptiveRow {
                             Text("Daily time range").foregroundStyle(SideSeatTheme.textSecondaryStrong)
                         } trailing: {
@@ -248,32 +253,24 @@ struct TimePollCreateView: View {
                             .accessibilityIdentifier("plan-create-timezone")
                     }
                 }.font(.subheadline).accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-hours")
-            }.padding(SideSeatTheme.spaceMD)
-                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .ssActionOutline()
+                Divider()
+                Button {
+                    chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
+                } label: {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
+                            .font(.system(size: 20)).frame(width: 20, height: 22)
+                        Text("Friends can suggest activities").fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }.font(.subheadline).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                    .accessibilityIdentifier("plan-start-together")
+                    .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
+                    .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
+            }.padding(.vertical, SideSeatTheme.spaceXS)
                 .accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-schedule")
-
-            Button {
-                chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
-            } label: {
-                HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
-                    Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
-                        .font(.system(size: 20)).frame(width: 20, height: 22)
-                    Text("Friends can suggest activities").fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                }.font(.subheadline).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceXS)
-                    .contentShape(Rectangle())
-            }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
-                .background(chooseActivityTogether ? SideSeatTheme.fillTertiary : SideSeatTheme.surface,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .ssActionOutline()
-                .accessibilityIdentifier("plan-start-together")
-                .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
-                .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
-        }.textFieldStyle(.plain).dynamicTypeSize(...DynamicTypeSize.accessibility1)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("plan-create-information")
+        }.listRowBackground(SideSeatTheme.surface)
     }
     private var validationMessage: String? {
         if title.count > 120 { return AppLocalization.string("Keep the plan title within 120 characters.") }

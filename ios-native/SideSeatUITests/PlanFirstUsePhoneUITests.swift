@@ -862,7 +862,7 @@ import XCTest
         let defaultLabel = defaultDay.label
         let clear = app.buttons["time-poll-dates-clear"]
         for _ in 0..<5 where !clear.isHittable || clear.frame.maxY > app.buttons["time-poll-create-confirm"].frame.minY {
-            app.scrollViews.firstMatch.swipeUp()
+            (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeUp()
         }
         clear.tap(); XCTAssertFalse(clear.isEnabled)
         XCTAssertEqual(datePicker.buttons.matching(NSPredicate(format: "isSelected == true")).count, 0)
@@ -967,16 +967,16 @@ import XCTest
             let title = app.descendants(matching: .any)["time-poll-title"].firstMatch
             XCTAssertTrue(title.waitForExistence(timeout: 10))
             let size = large ? "largest" : "regular"
-            let information = app.otherElements["plan-create-information"]
-            let identity = app.otherElements["plan-create-identity"]
-            let schedule = app.otherElements["plan-create-schedule"]
+            let information = app.descendants(matching: .any)["plan-create-information"].firstMatch
+            let identity = app.descendants(matching: .any)["plan-create-identity"].firstMatch
+            let schedule = app.descendants(matching: .any)["plan-create-schedule"].firstMatch
             let timeZone = app.descendants(matching: .any)["plan-create-timezone"].firstMatch
             let location = app.textFields["unified-plan-location"]
             let dates = app.buttons["plan-date-options"]
-            let hours = app.otherElements["plan-create-hours"]
+            let hours = app.descendants(matching: .any)["plan-create-hours"].firstMatch
             let ideas = app.buttons["plan-start-together"]
             for region in [information, identity, schedule, timeZone] { XCTAssertTrue(region.exists) }
-            XCTAssertGreaterThanOrEqual(identity.frame.height, 128)
+            XCTAssertLessThanOrEqual(identity.frame.height, large ? 350 : 200)
             XCTAssertGreaterThanOrEqual(dates.frame.height, 43.5); XCTAssertGreaterThanOrEqual(ideas.frame.height, 43.5)
             XCTAssertLessThan(title.frame.maxY, location.frame.minY + 1)
             XCTAssertLessThanOrEqual(identity.frame.maxY, schedule.frame.minY + 1)
@@ -986,13 +986,18 @@ import XCTest
             }
             XCTAssertGreaterThanOrEqual(timeZone.frame.minY, hours.frame.minY - 1)
             XCTAssertLessThanOrEqual(timeZone.frame.maxY, hours.frame.maxY + 1)
-            XCTAssertLessThanOrEqual(schedule.frame.maxY, ideas.frame.minY + 1)
+            XCTAssertLessThanOrEqual(hours.frame.maxY, ideas.frame.minY + 1)
+            XCTAssertLessThanOrEqual(ideas.frame.maxY, schedule.frame.maxY + 1)
             for element in [title, location, identity, schedule, dates, hours, timeZone, ideas] {
                 XCTAssertGreaterThanOrEqual(element.frame.minX, information.frame.minX - 0.5)
                 XCTAssertLessThanOrEqual(element.frame.maxX, information.frame.maxX + 0.5)
             }
-            XCTAssertGreaterThanOrEqual(title.frame.minX - identity.frame.minX, 10)
-            XCTAssertLessThanOrEqual(information.frame.height, large ? 600 : 380)
+            for element in [dates, hours, timeZone, ideas] {
+                XCTAssertGreaterThanOrEqual(element.frame.minX, schedule.frame.minX - 0.5)
+                XCTAssertLessThanOrEqual(element.frame.maxX, schedule.frame.maxX + 0.5)
+            }
+            XCTAssertGreaterThanOrEqual(title.frame.minY, identity.frame.minY - 0.5)
+            XCTAssertLessThanOrEqual(location.frame.maxY, identity.frame.maxY + 0.5)
             XCTAssertFalse(app.descendants(matching: .any)["time-poll-grid"].exists)
             XCTAssertFalse(app.descendants(matching: .any)["plan-create-timetable-heading"].exists)
             XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 0)
@@ -1016,7 +1021,7 @@ import XCTest
             capture(app, "compact-create-filled-\(size)-\(language)")
             XCTAssertTrue(next.isEnabled); XCTAssertGreaterThanOrEqual(next.frame.height, 44)
             for _ in 0..<6 where !ideas.isHittable || ideas.frame.maxY > next.frame.minY - 8 {
-                app.scrollViews.firstMatch.swipeUp()
+                (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeUp()
             }
             XCTAssertTrue(ideas.isHittable)
             XCTAssertLessThanOrEqual(ideas.frame.maxY, next.frame.minY - 8)
@@ -1067,7 +1072,7 @@ import XCTest
             for _ in 0..<5 {
                 let dockTop = summary.exists ? summary.frame.minY : next.frame.minY
                 if clear.isHittable && clear.frame.maxY < dockTop - 12 { break }
-                app.scrollViews.firstMatch.swipeUp()
+                (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeUp()
             }
             XCTAssertTrue(clear.isHittable); XCTAssertTrue(clear.isEnabled)
             XCTAssertEqual(clear.frame.midX, app.frame.midX, accuracy: 1)
@@ -1078,19 +1083,25 @@ import XCTest
             clear.tap()
             XCTAssertFalse(clear.isEnabled)
             XCTAssertEqual(picker.buttons.matching(NSPredicate(format: "isSelected == true")).count, 0)
-            XCTAssertEqual(app.descendants(matching: .any)["time-poll-title"].firstMatch.value as? String, "Date selection regression")
-            XCTAssertEqual(app.textFields["unified-plan-location"].value as? String, "Library")
             XCTAssertFalse(next.isEnabled)
             capture(app, "candidate-date-cleared-\(language)")
             toggleCandidateDates()
             XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 0)
             XCTAssertFalse(next.isEnabled)
+            let title = app.descendants(matching: .any)["time-poll-title"].firstMatch
+            let location = app.textFields["unified-plan-location"]
+            for _ in 0..<8 where !title.exists || !title.isHittable || !location.exists || !location.isHittable {
+                (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeDown()
+            }
+            XCTAssertTrue(title.exists && title.isHittable); XCTAssertTrue(location.exists && location.isHittable)
+            XCTAssertEqual(title.value as? String, "Date selection regression")
+            XCTAssertEqual(location.value as? String, "Library")
             capture(app, "candidate-date-empty-\(language)")
             toggleCandidateDates()
             picker.buttons[label].tap()
             XCTAssertTrue(clear.isEnabled)
             toggleCandidateDates()
-            app.scrollViews.firstMatch.swipeUp()
+            (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeUp()
             XCTAssertFalse(app.descendants(matching: .any)["time-poll-grid"].exists)
             toggleCandidateDates()
             XCTAssertEqual(picker.buttons.matching(NSPredicate(format: "isSelected == true")).count, 1)
@@ -1136,7 +1147,7 @@ import XCTest
         let expanded = picker.exists
         for _ in 0..<8 {
             if button.isHittable && button.frame.minY >= app.navigationBars.firstMatch.frame.maxY + 4 { break }
-            app.scrollViews.firstMatch.swipeDown()
+            (app.scrollViews.firstMatch.exists ? app.scrollViews.firstMatch : app.collectionViews.firstMatch).swipeDown()
         }
         XCTAssertTrue(button.isHittable)
         XCTAssertGreaterThanOrEqual(button.frame.minY, app.navigationBars.firstMatch.frame.maxY + 4)
@@ -1191,7 +1202,7 @@ import XCTest
         let datePicker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
         XCTAssertTrue(datePicker.waitForExistence(timeout: 5))
         XCTAssertGreaterThanOrEqual(datePicker.frame.minY, options.frame.maxY - 1)
-        XCTAssertLessThanOrEqual(datePicker.frame.maxY, app.otherElements["plan-create-hours"].frame.minY + 1,
+        XCTAssertLessThanOrEqual(datePicker.frame.maxY, app.descendants(matching: .any)["plan-create-hours"].firstMatch.frame.minY + 1,
                                  "The expanded calendar stays with candidate dates, before daily hours")
         XCTAssertEqual(title.value as? String, "周末一起复习"); XCTAssertEqual(location.value as? String, "图书馆二楼")
         capture(app, "candidate-expanded-dates")
@@ -1202,7 +1213,7 @@ import XCTest
         func chooseClock(_ value: String, control: XCUIElement) {
             XCTAssertGreaterThanOrEqual(control.frame.height, 43.5)
             control.tap()
-            let menu = app.collectionViews.firstMatch, option = app.buttons[value]
+            let menu = app.collectionViews.containing(.button, identifier: value).firstMatch, option = app.buttons[value]
             XCTAssertTrue(menu.waitForExistence(timeout: 5))
             XCTAssertTrue(option.waitForExistence(timeout: 5))
             XCTAssertTrue(menu.isHittable)

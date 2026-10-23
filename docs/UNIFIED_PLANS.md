@@ -3,6 +3,16 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native creation uses the shared editor — Preview 196
+
+Owner amendment 2026-10-24: use the same native Form/Section, grouped canvas,
+surface rows, text title token, SSFlowActionDock and ssFlowSheet as the current
+intention editor. Keep two sections: activity/location and candidate dates/hours
+with optional ideas as its final row. Remove the separate gray title plate and
+card action outlines; retain outlined date/hour/Clear controls. Accessibility
+hour/zone spacing increases locally; all create/share/date/invitation rules stay.
+No new editor entry or workflow step is added.
+
 ## Native creation form hierarchy — Preview 195
 
 Owner amendment 2026-10-24: separate activity/location, candidate date/hour

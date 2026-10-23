@@ -9,6 +9,15 @@ replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
 
+## Shared native editor presentation — Preview 196
+
+Creation now uses the current intention editor's native Form/Section, bgGrouped,
+surface rows, Text.title and SSFlowActionDock/ssFlowSheet. Activity/location form
+one group; candidate dates, inline calendar, hours/zone and ideas form the other.
+Remove the custom gray title surface, separate idea card and content outlines.
+Real date/hour/Clear actions keep their existing outline. Input, validation,
+creation payload and the existing sharing/invitation/Calendar flow remain intact.
+
 ## Current creation form layout — Preview 195
 
 Activity/location use a quiet identity surface; date/hour settings share one
