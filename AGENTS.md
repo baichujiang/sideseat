@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 195 is the current installed development build. Native creation separates
+- Preview 196 is the current installed development build. Creation reuses the
+  current intention editor's Form/Section, grouped canvas/surfaces, Text.title,
+  SSFlowActionDock and ssFlowSheet. Keep activity/location and dates/hours/ideas
+  in two native groups; remove gray title plate and content action outlines.
+  Existing input/date/create/share/invitation/Calendar rules remain. Accessibility
+  hour/zone gap is locally 12pt after a real first-run spacing failure (37.348s).
+  Source a1e350b7 is pushed. Final same-product four creation combinations passed
+  108.185s, visible hour validation 49.788s, date clear/rapid/retention 108.845s,
+  uninterrupted phone journey 328.834s/eight API stages with exact unique Calendars.
+  Mixed date run failed 88.746s on an offscreen Form input query; test now scrolls
+  back before strict value checks. Do not count the mixed suite as all passed.
+  Earlier scrolling-menu reset/manual impact and German detail maximum-text blank
+  remain unresolved and were not rerun here. Native 196, strict signature and
+  248 App/18 config-script/shared inputs, private Local match, install and normal
+  launch PID 7665 verified; ordinary 97 stays. Two accounts/one link, runner/private
+  files cleaned; no new App reports. No backend/web release or unit/domain/browser
+  repeat; api/www rechecked Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. See 196 QA/release.
+- Preview 195 was the previous development build. Native creation separates
   activity/location, candidate date/hour settings and optional activity ideas;
   name wraps visually and Return normalizes newlines/dismisses input. Expand the
   calendar directly under dates; retain centered Clear and move zone under hours.

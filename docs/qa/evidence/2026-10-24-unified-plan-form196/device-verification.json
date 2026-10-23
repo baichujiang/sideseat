@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-23T23:02:37.487665+00:00",
+  "device": "iPhone 14 Plus / iPhone (4)",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 196,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 7665,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "launchEnvironmentKeys": [
+    "TERM"
+  ],
+  "runnerRemoved": true,
+  "fixtureRemoved": true,
+  "privateXctestrunRemoved": true,
+  "privateDeviceJSONRemoved": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "crashScanBaseline": "2026-10-23T22:41:42.663013+00:00",
+  "newCrashOrResourceReports": 0,
+  "accountsRemoved": 2,
+  "tokens401": 2,
+  "links404": 1,
+  "at": "2026-10-23T23:01:53.316Z"
+}
