@@ -922,23 +922,51 @@ import XCTest
         try XCTSkipIf(raw == nil, "Requires disposable owner.")
         let f = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
         let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
-        for language in ["zh-Hans", "de"] {
+        for (language, large, appearance) in [("zh-Hans", false, "light"), ("zh-Hans", true, "light"), ("de", false, "dark"), ("de", true, "dark")] {
             app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
-            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(appearance)"]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
             let tab = language == "de" ? "Pläne" : "计划"
             XCTAssertTrue(app.tabBars.buttons[tab].waitForExistence(timeout: 20)); app.tabBars.buttons[tab].tap()
             let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
             XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
             let title = app.textFields["time-poll-title"]
-            XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("周末一起复习\n")
+            XCTAssertTrue(title.waitForExistence(timeout: 10))
+            let size = large ? "largest" : "regular"
+            let information = app.otherElements["plan-create-information"]
+            let location = app.textFields["unified-plan-location"]
+            let dates = app.buttons["plan-date-options"]
+            let ideas = app.buttons["plan-start-together"]
+            XCTAssertGreaterThanOrEqual(dates.frame.height, 43.5); XCTAssertGreaterThanOrEqual(ideas.frame.height, 43.5)
+            XCTAssertLessThan(title.frame.maxY, location.frame.minY + 1)
+            XCTAssertLessThanOrEqual(location.frame.maxY, dates.frame.minY + 1)
+            XCTAssertLessThanOrEqual(dates.frame.maxY, ideas.frame.minY + 1)
+            XCTAssertGreaterThanOrEqual(title.frame.minX - information.frame.minX, 10)
+            if !large {
+                XCTAssertLessThanOrEqual(information.frame.height, 210)
+                XCTAssertLessThanOrEqual(ideas.frame.maxY, app.otherElements["plan-create-timetable-heading"].frame.minY)
+            } else { XCTAssertLessThanOrEqual(information.frame.height, 340) }
+            capture(app, "compact-create-empty-\(size)-\(language)")
+            title.tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.buttons["time-poll-create-confirm"].exists)
+            let name = language == "de" ? "Gemeinsam in der Bibliothek lernen und danach essen" : "周末一起在图书馆复习然后聚餐"
+            title.typeText(name)
+            XCTAssertLessThan(title.frame.maxY, app.keyboards.firstMatch.frame.minY)
+            capture(app, "compact-create-title-keyboard-\(size)-\(language)")
+            title.typeText("\n")
+            location.tap(); location.typeText(language == "de" ? "Bibliothek im zweiten Stock\n" : "图书馆二楼靠窗的位置\n")
+            XCTAssertEqual(title.value as? String, name)
+            capture(app, "compact-create-filled-\(size)-\(language)")
             let next = app.buttons["time-poll-create-confirm"]
             XCTAssertFalse(next.isEnabled)
             let scroll = app.scrollViews.firstMatch
             let first = app.buttons["time-poll-cell-0"]
             let second = app.buttons["time-poll-cell-2"]
             let top = app.navigationBars.firstMatch.frame.maxY + 12
-            for _ in 0..<8 where !first.isHittable || first.frame.minY < top || second.frame.maxY > next.frame.minY - 20 {
+            for _ in 0..<8 {
+                if first.isHittable && first.frame.minY >= top && second.frame.maxY <= next.frame.minY - 20 { break }
                 if first.frame.minY < top { scroll.swipeDown() } else { scroll.swipeUp() }
             }
             capture(app, "unified-create-largest-before-selection-\(language)")
@@ -956,6 +984,36 @@ import XCTest
             capture(app, "unified-create-both-drafts-largest-\(language)")
             app.terminate()
         }
+    }
+
+    func testCompactCreationDateOptionsRetainInputsAndTime() throws {
+        struct ContactFixture: Decodable { let bundle: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable owner.")
+        let f = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        nativeSignIn(owner, bundle: f.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"], location = app.textFields["unified-plan-location"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("周末一起复习\n")
+        location.tap(); location.typeText("图书馆二楼\n")
+        app.buttons["time-poll-cell-0"].tap()
+        let options = app.buttons["plan-date-options"]
+        options.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-dates"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(title.value as? String, "周末一起复习"); XCTAssertEqual(location.value as? String, "图书馆二楼")
+        capture(app, "compact-create-expanded-dates")
+        options.tap(); XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+        assertFinalClock("09:00", "09:30")
+        app.buttons["plan-collect-availability"].tap(); options.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-from"].firstMatch.exists)
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-until"].firstMatch.exists)
+        capture(app, "compact-create-expanded-collection-hours")
+        options.tap(); app.buttons["time-poll-cell-4"].tap()
+        app.buttons["plan-collect-availability"].tap(); assertFinalClock("09:00", "09:30")
+        app.terminate()
     }
 
     func testNativeContactCardDarkAccessibilityAfterFullFlow() throws {

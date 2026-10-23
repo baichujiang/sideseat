@@ -3,6 +3,22 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Compact creation information — Preview 188
+
+Activity name, optional location, candidate dates and the optional friends' idea
+checkbox share one outlined information group with aligned rows and dividers.
+The activity name is the primary editable field. Date summaries omit the year
+only when both endpoints fall in the current local year; the same existing date
+and collection-hour controls expand below the group. The default candidate dates
+remain tomorrow through the following six dates.
+
+Creation combines the timetable heading, selection legend and undo action above
+the existing grid; accessibility text may stack these items. Information fields
+scale through accessibility1, with fixed-size decorative icons, while the rest
+of the page keeps its existing text rules. Name/location focus hides the creation
+dock until the keyboard is dismissed, without submitting or discarding input.
+No date, suggestion, draft, invitation, publication or Calendar rule is changed.
+
 ## One timetable from creation to invitation — Preview 187
 
 The native creation page opens directly with activity/location and the shared
