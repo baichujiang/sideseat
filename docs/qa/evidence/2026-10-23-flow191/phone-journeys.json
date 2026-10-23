@@ -1,0 +1,20 @@
+[
+  {
+    "stage": "direct191",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat191-direct191.xcresult"
+  },
+  {
+    "stage": "collection191",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat191-collection191.xcresult"
+  },
+  {
+    "stage": "ideas191",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat191-ideas191.xcresult"
+  }
+]

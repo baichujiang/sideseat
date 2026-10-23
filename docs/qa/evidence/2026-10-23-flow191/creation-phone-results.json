@@ -1,0 +1,34 @@
+[
+  {
+    "resultBundle": "/tmp/sideseat191-creation-controls.xcresult",
+    "scope": "Final product binary; dates superseded by visible-toggle test harness repair",
+    "tests": [
+      {
+        "name": "testCandidateDateSelectionDoesNotCrash()",
+        "result": "Failed",
+        "durationInSeconds": 69.01435101032257
+      },
+      {
+        "name": "testCompactCreationDateOptionsRetainInputsAndTime()",
+        "result": "Passed",
+        "durationInSeconds": 43.44654107093811
+      },
+      {
+        "name": "testUnifiedCreationLargestText()",
+        "result": "Passed",
+        "durationInSeconds": 82.43270099163055
+      }
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-dates-visible.xcresult",
+    "scope": "Same final product; repaired visibility helper",
+    "tests": [
+      {
+        "name": "testCandidateDateSelectionDoesNotCrash()",
+        "result": "Passed",
+        "seconds": 104.827
+      }
+    ]
+  }
+]

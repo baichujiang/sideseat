@@ -1,0 +1,61 @@
+[
+  {
+    "resultBundle": "/tmp/sideseat191-creation1.xcresult",
+    "accepted": false,
+    "findings": [
+      "Read-only preview exposed an accessibility activation action; removed that action from non-editable cells.",
+      "Rapid UIKit multi-taps do not guarantee every tap is received; regression now checks foreground survival, individual toggle behavior and recoverability.",
+      "Menu choices must be scrolled into view."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-creation-final.xcresult",
+    "accepted": false,
+    "findings": [
+      "Functional largest-text check passed, but actual German screenshot showed wrapped clock values.",
+      "Menu option lookup needed to wait for the previously selected value."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-creation-accepted.xcresult",
+    "accepted": false,
+    "findings": [
+      "Date and hours passed; largest-text run interrupted to correct wrapped clock values. Test-controller shutdown is not counted as an app crash or acceptance."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-creation-verdict.xcresult",
+    "accepted": false,
+    "findings": [
+      "Overlapping test-controller attempt terminated before acceptance."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-creation-complete.xcresult",
+    "accepted": false,
+    "findings": [
+      "Date and hours passed; native Picker accessibility target was 34.333pt despite outer frame. Replaced it with the shared outlined Menu/Picker helper for a real 44pt target."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-creation-controls.xcresult",
+    "accepted": false,
+    "scope": "Final product binary; accept only the two passing individual tests in creation-phone-results.json.",
+    "findings": [
+      "Hours passed in 43.447s; Chinese/German normal/maximum text passed in 82.433s. Actual screenshots inspected.",
+      "Date test tapped an offscreen candidate-date row behind the navigation bar. Repaired test scrolling and checked actual calendar expansion state. No product change."
+    ]
+  },
+  {
+    "resultBundle": "/tmp/sideseat191-dates-visible.xcresult",
+    "accepted": true,
+    "scope": "Same final product binary, visible-toggle helper repair only.",
+    "tests": [
+      {
+        "name": "testCandidateDateSelectionDoesNotCrash",
+        "passed": true,
+        "seconds": 104.827
+      }
+    ]
+  }
+]

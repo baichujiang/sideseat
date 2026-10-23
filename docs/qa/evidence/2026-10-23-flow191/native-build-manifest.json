@@ -1,0 +1,55 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "binarySHA256": {
+    "SideSeat Preview": "781e77a39e8bdba35697eb20f485429a84a2e6a1144cfe6eaad9d2e12de08604",
+    "SideSeat Preview.debug.dylib": "6c1bf5dd491ac4abfef856542d5d91bfbbd80c3c0e999492b68e065fd0aaacc3"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 191,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "isolatedBuild": true,
+  "backendRelease": false,
+  "webRelease": false,
+  "strictSignatureVerified": true,
+  "nativeUnitTestsPassed": 29,
+  "domainTestsPassed": 16,
+  "buildLog": "/tmp/sideseat191-native-controls-build.log",
+  "installLog": "/tmp/sideseat191-controls-install.log",
+  "sourceCommit": "a06f08f6db125753858f139f6521225c0b3985ea",
+  "pid": 7351,
+  "processMatched": true,
+  "installedApplicationMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "runnerAbsent": true,
+  "ordinaryBuild": 97,
+  "installed": true,
+  "productionDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "phoneFlows": [
+    {
+      "name": "zero-response-final",
+      "passed": true,
+      "seconds": 142.227,
+      "apiChecks": 6
+    },
+    {
+      "name": "availability-cross-day",
+      "passed": true,
+      "seconds": 319.696,
+      "apiChecks": 8
+    },
+    {
+      "name": "activity-ideas",
+      "passed": true,
+      "seconds": 245.149,
+      "apiChecks": 7
+    }
+  ],
+  "presentationTestsPassed": 7,
+  "presentationTestsSkipped": 1,
+  "testMaintenanceCommit": "14f12835bf16740705ca5b2ca523edda964d42df"
+}

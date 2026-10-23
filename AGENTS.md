@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 190 is the current installed development build. One compact outlined
+- Preview 191 is the current installed development build. Creation configures
+  one candidate timetable and opens sharing; remove the final/collection switch,
+  creation selections, automatic owner submission and duplicate collection action.
+  Reuse COLLECT and the existing detail/share/invitation/Calendar rules, including
+  zero-response final selection and activity suggestions. Daily hours are visible
+  in the compact information group; read-only cells expose no activation action.
+  Final normal/maximum Chinese/German layout, hours and date regressions passed in
+  82.433 / 43.447 / 104.827 seconds. Same-product phone journeys passed in
+  142.227 / 319.696 / 245.149 seconds with 6 + 8 + 7 API stages and exact unique
+  Calendars. Native 29/domain 16 checks passed. Seven retained presentation checks
+  passed; one separate disposable-account helper test skipped, not counted as run.
+  Source a06f08f6 and obsolete-test cleanup 14f12835 are pushed. Strict signature,
+  248 App/18 configuration+project inputs/shared resource, install and ordinary
+  launch PID 7351 verified; ordinary 97 stays. Six accounts/three links, runner
+  and private files cleaned. No new crash/resource report or backend/web release;
+  api/www rechecked Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. See 191 QA/release
+  for intermediate visual/AX issues and exact acceptance scopes.
+- Preview 190 was the previous development build. One compact outlined
   Clear dates action is centered below the expanded calendar; one tap clears all
   candidate days and related time selections through the existing rebuild,
   retaining name/location. Empty selection disables Clear/Next; reselect normally.

@@ -1,0 +1,13 @@
+{
+  "accountsRemoved": 6,
+  "tokens401": 6,
+  "links404": 3,
+  "runnerAbsent": true,
+  "privateFixtureRemoved": true,
+  "privateXctestrunRemoved": true,
+  "temporarySharedSchemeRemoved": true,
+  "ordinaryBuildPreserved": 97,
+  "privateDeviceInventoriesRemoved": true,
+  "rawLocalLogsRestricted": true,
+  "rawResultBundlesRestricted": true
+}
