@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 196 is the current installed development build. Creation reuses the
+- Preview 197 is the current installed development build. Native plan sharing
+  uses a compact summary, SSManagementRow App-friends destination and outlined
+  web-share/copy utilities; regular side by side, accessibility stacked/scrollable.
+  Keep contact permissions, URL payloads and invitation/Calendar rules unchanged.
+  Forward dynamicTypeSize from the title share opener; first run failed 53.084s
+  without it. Second run failed 99.662s because maximum German Copy needed scrolling;
+  only test viewport handling changed, keeping strict whole-control boundaries.
+  Final four language/size combinations passed 167.055s; uninterrupted phone
+  journey passed 373.351s/eight API stages, six owner/participant phase share
+  permission checks and exact unique Calendars. Source 0cc265c5 is pushed.
+  Strict signature, 248 App/18 config-script/shared inputs, private Local match,
+  install and normal launch PID 7721 verified; ordinary 97 stays. Two accounts/two
+  links, Runner/private files cleaned; no new App reports. No backend/web release
+  or unit/domain/browser repeat; api/www Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7.
+  Largest-text acceptance is share-sheet only. Earlier menu-reset/manual-impact
+  and German detail-grid blank issues remain unresolved and were not rerun.
+  See 197 QA/release for actual scopes and inspected top/bottom images.
+- Preview 196 was the previous development build. Creation reuses the
   current intention editor's Form/Section, grouped canvas/surfaces, Text.title,
   SSFlowActionDock and ssFlowSheet. Keep activity/location and dates/hours/ideas
   in two native groups; remove gray title plate and content action outlines.
