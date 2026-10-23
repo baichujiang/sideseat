@@ -1,0 +1,17 @@
+[
+  {
+    "artifact": "/tmp/sideseat190-clear-layout1.xcresult",
+    "functionalResult": "passed",
+    "seconds": 128.207,
+    "visualAcceptance": false,
+    "reason": "The maximum-text screenshot did not show the clear button above the bottom summary; the test compared only the Next button. The final snapshot test scrolls until Clear is fully above the summary, without product code changes."
+  },
+  {
+    "artifact": "/tmp/sideseat190-clear-layout-final.xcresult",
+    "result": "passed",
+    "seconds": 129.287,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Final same 190 product binary; full button above dock in normal/maximum text, clear and reselect regression."
+  }
+]

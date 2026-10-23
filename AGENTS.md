@@ -21,7 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 189 is the current installed development build. Candidate date defaults
+- Preview 190 is the current installed development build. One compact outlined
+  Clear dates action is centered below the expanded calendar; one tap clears all
+  candidate days and related time selections through the existing rebuild,
+  retaining name/location. Empty selection disables Clear/Next; reselect normally.
+  Product logic adds five view lines, no new state or request. Final normal/maximum
+  text visual and clear/reselect regression passed in 129.287 seconds. The full
+  clear-defaults/reselect-one-day App-contact invitation-to-Calendar phone journey
+  passed in 141.232 seconds with six API checks and unique exact Calendars. Source
+  01073277 is pushed. Strict signature, 248 App/18 configuration+project inputs and
+  shared resource, install and ordinary launch PID 7207 verified; ordinary 97 stays.
+  Four accounts/one link, runner and private files cleaned. No new crash/resource
+  report, backend/web release or repeat unit/domain execution. api/www rechecked
+  Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. See 190 QA/release for the first screenshot
+  gap and final visible-button check; functional assertions alone were insufficient.
+- Preview 189 was the previous development build. Candidate date defaults
   and MultiDatePicker edits share one calendar/day identity; duplicate day keys
   cannot generate duplicate slot starts. Date editing unmounts the grid, and full
   day slots/cell clock formatting are reused. Final/availability drafts still map
