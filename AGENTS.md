@@ -21,7 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 191 is the current installed development build. Creation configures
+- Preview 192 is the current installed development build. The shared detail
+  heading puts the activity title and outlined share icon together, with status
+  and location below; long text stacks naturally. Reuse the existing share sheet,
+  inline editing and invitation/Calendar rules; remove the duplicate toolbar share
+  and redundant role text. Chinese/German normal/maximum-text phone checks passed
+  in 70.832 seconds, including share-sheet open/close and editing/cancel. The same
+  product's uninterrupted phone journey passed in 145.690 seconds with six API
+  stages and exact unique Calendars. Source d34ace39 is pushed. Strict signature,
+  248 App/18 configuration+project inputs/shared resource, installation and ordinary
+  launch PID 7394 verified; ordinary 97 stays. Two accounts/two links, runner and
+  private files cleaned. No new crash/resource report or backend/web release;
+  api/www rechecked Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. No repeat domain,
+  unit, activity/cross-day or browser execution; maximum text retains natural
+  scrolling and the existing fixed footer. See 192 QA/release for actual scopes.
+- Preview 191 was the previous development build. Creation configures
   one candidate timetable and opens sharing; remove the final/collection switch,
   creation selections, automatic owner submission and duplicate collection action.
   Reuse COLLECT and the existing detail/share/invitation/Calendar rules, including

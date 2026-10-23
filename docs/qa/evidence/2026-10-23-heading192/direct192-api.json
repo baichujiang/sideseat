@@ -1,0 +1,138 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "direct-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T19:19:31.610Z"
+    },
+    {
+      "phase": "direct-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T19:19:49.192Z"
+    },
+    {
+      "phase": "direct-formal-invitation",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T19:19:54.790Z"
+    },
+    {
+      "phase": "direct-peer-accepted",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T19:20:14.714Z"
+    },
+    {
+      "phase": "direct-published",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T19:20:33.657Z"
+    },
+    {
+      "phase": "direct-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 87fc7194",
+      "location": "",
+      "candidateDates": [
+        "2026-10-24"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T19:20:57.221Z"
+    }
+  ],
+  "failure": null
+}

@@ -1,0 +1,14 @@
+{
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 192,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "pid": 7394,
+  "processMatched": true,
+  "installedApplicationMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "runnerAbsent": true,
+  "ordinaryBuild": 97
+}
