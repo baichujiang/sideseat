@@ -3182,3 +3182,13 @@
 "Hotpot" = "火锅";
 "Quick fill" = "快捷填入";
 "Fill with %@" = "填入%@";
+
+"Tap or drag to select the final time." = "点选或拖选最终时段。";
+
+"Keep one continuous period. Fill the gap or deselect extra times." = "请选择一段连续时间，补齐空档或取消多余时段。";
+
+"Tap or hold and drag to select or deselect." = "点选或长按拖动，可选择和取消。";
+
+"Availability not collected" = "未征集空闲";
+
+"Availability was not collected for this entire time" = "部分时段未征集空闲";

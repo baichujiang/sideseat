@@ -62,58 +62,61 @@ struct TimePollTests {
         #expect(repeated.contains { $0.label == "02:30 +01:00" })
     }
 
-    @Test("Placing and moving a time block preserves duration, including at the day edge")
-    func finalTimePlacement() throws {
-        let slots = (0..<16).map { id in NativeTimePoll.Slot(id: id, date: "2030-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let cells = TimePollSelection.cells(slots)
-        let initial = try #require(TimePollFinalRange.starting(at: cells[2], duration: 3600, slots: slots))
-        #expect(initial.start == slots[4].start)
-        #expect(initial.end == slots[7].end)
-        #expect(initial.duration == 3600)
-        let moved = try #require(TimePollFinalRange.placing(date: initial.date, start: slots[15].start, duration: initial.duration, slots: slots))
-        #expect(moved.start == slots[12].start)
-        #expect(moved.end == slots[15].end)
-        #expect(moved.duration == initial.duration)
-        let late = try #require(TimePollFinalRange.starting(at: cells.last!, duration: 3600, slots: slots))
-        #expect(late.start == cells.last!.slots[0].start)
-        #expect(late.duration == 1800)
-        #expect(slots.map(\.id) == Array(0..<16))
+    @Test("Final cells toggle without replacing earlier choices and gaps remain editable")
+    func finalTimeToggles() throws {
+        let poll = try collectingPoll(), cells = TimePollSelection.cells(poll.finalTimeSlots)
+        let first = cells.first { $0.id == 0 }!, second = cells.first { $0.id == 2 }!, third = cells.first { $0.id == 4 }!
+        let one = TimePollSelection.toggle(first, original: [])
+        #expect(TimePollFinalRange.selected(one, slots: poll.finalTimeSlots)?.duration == 1800)
+        let gap = TimePollSelection.toggle(third, original: one)
+        #expect(gap.isSuperset(of: one))
+        #expect(TimePollFinalRange.selected(gap, slots: poll.finalTimeSlots) == nil)
+        let filled = TimePollSelection.toggle(second, original: gap)
+        #expect(TimePollFinalRange.selected(filled, slots: poll.finalTimeSlots)?.duration == 5400)
+        #expect(TimePollSelection.toggle(third, original: filled) == one.union(second.slotIds))
+        #expect(poll.mySlotIds.isEmpty)
     }
 
-    @Test("Both endpoints can shrink or extend independently on quarter-hour boundaries")
-    func finalTimeEndpoints() throws {
-        let slots = (0..<12).map { id in NativeTimePoll.Slot(id: id, date: "2030-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let short = try #require(TimePollFinalRange.validated(date: slots[0].date, start: slots[1].start, end: slots[2].end, slots: slots))
-        #expect(short.duration == 1800)
-        let extended = try #require(TimePollFinalRange.validated(date: short.date, start: short.start, end: slots[5].end, slots: slots))
-        #expect(extended.start == short.start)
-        #expect(extended.duration == 4500)
-        #expect(TimePollFinalRange.validated(date: short.date, start: short.end, end: short.start, slots: slots) == nil)
-        #expect(TimePollFinalRange.validated(date: short.date, start: short.start, end: extended.end, slots: slots.filter { $0.id != 3 }) == nil)
+    @Test("Final context retains old response IDs and marks uncollected hours separately")
+    func finalTimeContext() throws {
+        let poll = try collectingPoll(), expanded = poll.finalTimeSlots
+        #expect(expanded.count == 96)
+        for slot in poll.slots { #expect(expanded.first { $0.start == slot.start }?.id == slot.id) }
+        #expect(expanded.filter { $0.id < 0 }.count == 84)
+        #expect(Set(expanded.map(\.id)).count == expanded.count)
+        #expect(TimePollFinalRange.selected([], slots: expanded) == nil)
     }
 
-    @Test("Changing day retains local start time and duration across daylight saving")
-    func finalTimeDate() throws {
-        let formatter = ISO8601DateFormatter()
-        let days = [("2026-10-24", "2026-10-24T07:00:00Z"), ("2026-10-25", "2026-10-25T08:00:00Z")]
-        let slots = days.enumerated().flatMap { index, item in
-            (0..<16).map { id in NativeTimePoll.Slot(id: index * 16 + id, date: item.0, row: String(id), label: String(id), start: formatter.date(from: item.1)!.addingTimeInterval(Double(id * 900)), end: formatter.date(from: item.1)!.addingTimeInterval(Double((id + 1) * 900))) }
-        }
-        let initial = try #require(TimePollFinalRange.starting(at: TimePollSelection.cells(slots)[0], duration: 3600, slots: slots))
-        let moved = try #require(initial.onDay("2026-10-25", timeZone: "Europe/Berlin", slots: slots))
-        #expect(moved.start == formatter.date(from: "2026-10-25T08:00:00Z"))
-        #expect(moved.duration == 3600)
-        #expect(TimePollFinalRange.validated(date: initial.date, start: initial.start, end: moved.end, slots: slots) == nil)
+    @Test("Cross-midnight painting follows elapsed time in both directions and can erase")
+    func finalTimeAcrossDays() throws {
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["dates"] = ["2030-10-16", "2030-10-17"]
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let poll = try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object))
+        let slots = poll.finalTimeSlots, cells = TimePollSelection.cells(slots)
+        let from = cells.first { $0.date == "2030-10-16" && $0.label == "22:00" }!
+        let to = cells.first { $0.date == "2030-10-17" && $0.label == "01:30" }!
+        let ids = TimePollSelection.interval(cells: cells, from: from, to: to, original: [], selecting: true)
+        let range = try #require(TimePollFinalRange.selected(ids, slots: slots))
+        #expect(ids.count == 16 && range.duration == 4 * 3600)
+        #expect(TimePollSelection.interval(cells: cells, from: to, to: from, original: [], selecting: true) == ids)
+        #expect(TimePollSelection.interval(cells: cells, from: to, to: from, original: ids, selecting: false).isEmpty)
+        #expect(TimePollFinalRange.validated(start: range.start, end: range.end, slots: poll.slots) == nil)
     }
 
-    @Test("Short candidate days and midnight endpoints stay inside the available timetable")
-    func finalTimeBoundaries() throws {
-        let slots = (0..<95).map { id in NativeTimePoll.Slot(id: id, date: "2026-10-19", row: String(id), label: String(id), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
-        let initial = try #require(TimePollFinalRange.starting(at: TimePollSelection.cells(Array(slots.prefix(2)))[0], duration: 3600, slots: Array(slots.prefix(2))))
-        #expect(initial.duration == 1800)
-        #expect(TimePollFinalRange.validated(date: slots[0].date, start: slots[0].start, end: slots.last!.end, slots: slots)?.end == slots.last!.end)
-        let midnight = NativeTimePoll.Slot(id: 95, date: slots[0].date, row: "95", label: "23:45", start: slots.last!.end, end: Date(timeIntervalSince1970: 86400))
-        #expect(TimePollFinalRange.validated(date: midnight.date, start: slots[0].start, end: midnight.end, slots: slots + [midnight])?.end == midnight.end)
+    @Test("Whole-day generation preserves real DST boundaries without merging repeated hours")
+    func finalTimeDaylightSaving() throws {
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        object["dates"] = ["2026-10-24", "2026-10-25"]
+        let fall = try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object)).finalTimeSlots
+        #expect(fall.count == 196)
+        #expect(fall.filter { $0.date == "2026-10-25" && $0.label.hasPrefix("02:00") }.count == 2)
+        #expect(TimePollFinalRange.selected(Set(fall.map(\.id)), slots: fall)?.duration == 176400.0)
+        object["dates"] = ["2026-03-29"]
+        let spring = try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object)).finalTimeSlots
+        #expect(spring.count == 92)
+        #expect(TimePollFinalRange.selected(Set(spring.map(\.id)), slots: spring)?.duration == 82800.0)
     }
 
     @Test("Invite links use the Sideseat domain and route into the native feature")

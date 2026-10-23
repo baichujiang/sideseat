@@ -288,45 +288,51 @@ struct TimePollInvitationRow: Identifiable, Sendable {
     }
 }
 
-/// One continuous, candidate-backed invitation window; never an availability response.
+/// A single continuous invitation interval, independent of availability responses.
 struct TimePollFinalRange: Equatable, Sendable {
-    let date: String
     let start: Date
     let end: Date
     var duration: TimeInterval { end.timeIntervalSince(start) }
 
-    func contains(_ cell: NativeTimePoll.Cell) -> Bool {
-        cell.date == date && cell.slots[0].start >= start && cell.end <= end
+    static func selected(_ ids: Set<Int>, slots: [NativeTimePoll.Slot]) -> Self? {
+        let included = slots.filter { ids.contains($0.id) }.sorted { $0.start < $1.start }
+        guard included.count == ids.count, let first = included.first, let last = included.last else { return nil }
+        return validated(start: first.start, end: last.end, slots: included)
     }
 
-    static func validated(date: String, start: Date, end: Date, slots: [NativeTimePoll.Slot]) -> Self? {
-        let included = slots.filter { $0.date == date && $0.start >= start && $0.end <= end }.sorted { $0.start < $1.start }
+    static func validated(start: Date, end: Date, slots: [NativeTimePoll.Slot]) -> Self? {
+        let included = slots.filter { $0.start >= start && $0.end <= end }.sorted { $0.start < $1.start }
         guard start < end, included.first?.start == start, included.last?.end == end,
-              zip(included, included.dropFirst()).allSatisfy({ pair in pair.0.end == pair.1.start }) else { return nil }
-        return .init(date: date, start: start, end: end)
+              zip(included, included.dropFirst()).allSatisfy({ $0.0.end == $0.1.start }) else { return nil }
+        return .init(start: start, end: end)
     }
+}
 
-    /// Keep the duration when moving; clamp the whole block at the day's edges.
-    static func placing(date: String, start: Date, duration: TimeInterval, slots: [NativeTimePoll.Slot]) -> Self? {
-        let day = slots.filter { $0.date == date }.sorted { $0.start < $1.start }
-        guard let first = day.first, let last = day.last, duration <= last.end.timeIntervalSince(first.start) else { return nil }
-        let from = min(max(start, first.start), last.end.addingTimeInterval(-duration))
-        return validated(date: date, start: from, end: from.addingTimeInterval(duration), slots: slots)
-    }
-
-    static func starting(at cell: NativeTimePoll.Cell, duration: TimeInterval, slots: [NativeTimePoll.Slot]) -> Self? {
-        let day = slots.filter { $0.date == cell.date }
-        guard let last = day.last else { return nil }
-        return placing(date: cell.date, start: cell.slots[0].start,
-                       duration: min(duration, last.end.timeIntervalSince(cell.slots[0].start)), slots: slots)
-    }
-
-    func onDay(_ date: String, timeZone: String, slots: [NativeTimePoll.Slot]) -> Self? {
-        guard let first = slots.first(where: { $0.date == date }) else { return nil }
+extension NativeTimePoll {
+    /// Display-only quarters cover whole candidate dates. Existing response IDs stay intact;
+    /// negative IDs mark hours whose availability was never collected and are never submitted.
+    var finalTimeSlots: [Slot] {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: timeZone) ?? .current
-        guard let from = calendar.date(bySettingHour: calendar.component(.hour, from: start), minute: calendar.component(.minute, from: start), second: 0, of: first.start) else { return nil }
-        return Self.placing(date: date, start: from, duration: duration, slots: slots)
+        let parser = DateFormatter(); parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.timeZone = calendar.timeZone; parser.dateFormat = "yyyy-MM-dd"
+        let clock = timePollClockFormatter(timeZone)
+        let offset = DateFormatter(); offset.timeZone = calendar.timeZone; offset.dateFormat = "XXX"
+        let existing = Dictionary(uniqueKeysWithValues: slots.map { ($0.start, $0.id) })
+        var result: [Slot] = []
+        for date in dates.sorted() {
+            guard var cursor = parser.date(from: date), let end = calendar.date(byAdding: .day, value: 1, to: cursor) else { continue }
+            var occurrences: [String: Int] = [:]
+            while cursor < end {
+                let label = clock.string(from: cursor), ordinal = occurrences[label, default: 0]
+                occurrences[label] = ordinal + 1
+                let next = cursor.addingTimeInterval(900)
+                result.append(.init(id: existing[cursor] ?? -(result.count + 1), date: date,
+                    row: "\(label)-\(ordinal)", label: label + (ordinal > 0 ? " " + offset.string(from: cursor) : ""), start: cursor, end: next))
+                cursor = next
+            }
+        }
+        return result
     }
 }
 
@@ -350,6 +356,14 @@ enum TimePollSelection {
     static func toggle(_ cell: NativeTimePoll.Cell, original: Set<Int>) -> Set<Int> {
         cell.slotIds.isSubset(of: original) ? original.subtracting(cell.slotIds) : original.union(cell.slotIds)
     }
+    /// Across midnight, paint actual elapsed time rather than a rectangle spanning both days.
+    static func interval(cells: [NativeTimePoll.Cell], from: NativeTimePoll.Cell, to: NativeTimePoll.Cell,
+                         original: Set<Int>, selecting: Bool) -> Set<Int> {
+        let start = min(from.slots[0].start, to.slots[0].start), end = max(from.end, to.end)
+        let ids = Set(cells.filter { $0.slots[0].start >= start && $0.end <= end }.flatMap(\.slotIds))
+        return selecting ? original.union(ids) : original.subtracting(ids)
+    }
+
     /// Paint a rectangle once; revisiting cells during a drag does not toggle them.
     static func rectangle(cells: [NativeTimePoll.Cell], dates: [String], rows: [String], from: (Int, Int), to: (Int, Int), original: Set<Int>, selecting: Bool) -> Set<Int> {
         let columns = min(from.0, to.0)...max(from.0, to.0)

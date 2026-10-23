@@ -3182,3 +3182,13 @@
 "Hotpot" = "Hotpot";
 "Quick fill" = "Quick fill";
 "Fill with %@" = "Fill with %@";
+
+"Tap or drag to select the final time." = "Tap or drag to select the final time.";
+
+"Keep one continuous period. Fill the gap or deselect extra times." = "Keep one continuous period. Fill the gap or deselect extra times.";
+
+"Tap or hold and drag to select or deselect." = "Tap or hold and drag to select or deselect.";
+
+"Availability not collected" = "Availability not collected";
+
+"Availability was not collected for this entire time" = "Availability was not collected for this entire time";

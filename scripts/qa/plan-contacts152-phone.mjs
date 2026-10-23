@@ -127,7 +127,9 @@ if (mode === 'prepare') {
       if (index >= 1 && index < 3) assert.equal(theirs.didRespond, false);
       if (formal) {
         assert.equal(p.invitationVersion, 1); assert.equal(p.invitations.filter(i => i.status === 'ACCEPTED').length, index >= 5 ? 2 : 1);
-        assert.equal(new Date(p.chosenEnd) - new Date(p.chosenStart), 3600000);
+        assert.equal(new Date(p.chosenEnd) - new Date(p.chosenStart), 7200000);
+        const localDay = new Intl.DateTimeFormat('en-CA', { timeZone: p.timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
+        assert.notEqual(localDay.format(new Date(p.chosenStart)), localDay.format(new Date(p.chosenEnd)), 'Final invitation crosses local midnight.');
       }
       const day = (p.chosenStart || p.slots[0].start).slice(0, 10);
       const calendars = await Promise.all([owner, peer].map(async a => (await call(`/api/v1/home/schedule?windowStart=${day}T00:00:00Z&windowEnd=${day}T23:59:59Z`, a)).studyEntries.filter(e => e.timePollToken === f.pollToken)));

@@ -3,6 +3,30 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Final time uses timetable cells — Preview 185
+
+The organizer taps a cell to select it and taps it again to deselect it. Holding
+and dragging paints or erases cells, using the same touch surface, undo and day
+selection as personal availability. Final selection is amber with square checks;
+personal availability stays green with circular checks. Leaving and returning
+preserves the final-time draft without submitting availability or invitations.
+
+The final-time grid covers the complete candidate dates, including midnight.
+Dates remain visible while scrolling hours; hours remain visible in each cell.
+Across dates, a drag follows chronological time rather than a multi-day rectangle.
+Unsurveyed hours show a dash and are never counted as available or persisted as
+availability. Invitation review explicitly identifies uncollected availability.
+The final interval may cross midnight or span consecutive candidate dates. There
+must still be one continuous interval: disconnected selections remain editable,
+with an inline gap message and disabled review, rather than silently clearing or
+filling cells. The summary shows both endpoint dates and the actual elapsed time.
+
+Reviewing the roster, explicitly sending invitations, individual accept/decline,
+organizer publication, consent versions and unique Calendar entries retain their
+existing rules. Whole-date server validation is shared by old and new clients;
+the original response slot IDs, records and candidate-hour availability are intact.
+No schema migration or alternate invitation engine is introduced.
+
 ## Action hierarchy and fitting — Preview 184
 
 Standalone actions in the native App and share page use a visible 1pt/1px outline,
@@ -13,8 +37,8 @@ section pickers use one group boundary and a solid selected segment, without
 framing every unselected option. The response count is plain information outside
 the avatar button; only the right-side avatar group opens the complete people list.
 The empty state retains the people icon action, and more than three responses use
-three avatars plus +N. Borders adapt to light/dark appearance. Share web remains
-the Preview 183 deployment and retains its existing rounded secondary buttons.
+three avatars plus +N. Borders adapt to light/dark appearance. Share web retains
+its Preview 183 rounded secondary buttons; the 185 backend adds cross-day validation.
 Native standalone actions retain at least a 44pt target. Regular actions include
 vertical content padding; compact actions use a 36pt minimum visible surface with
 a capsule shape. Icon actions have a 44pt circular surface. Navigation actions use
@@ -110,7 +134,7 @@ the editor explains this. Later nickname changes retain the existing dedicated
 endpoint. Cancelling a changed information/nickname form offers discard/keep.
 
 The timetable remains directly editable. Organizer final-time selection has a
-distinct navigation title, movable time block with resize grips and return action; review/back retains
+distinct navigation title, amber selectable cells and return action; review/back retains
 the draft range and roster. Sharing lives in one toolbar entry with accepted App
 contacts, web sharing and copy; it does not submit availability. The people view
 distinguishes submitted availability from invitation replies. Publication,

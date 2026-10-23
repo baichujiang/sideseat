@@ -744,7 +744,8 @@ import XCTest
 
         nativeSignIn(owner, bundle: fixture.bundle); openListCard()
         app.buttons["unified-plan-invite-window"].tap()
-        verifyFinalTimeBlockInteractions()
+        verifyFinalTimeCellInteractions()
+        selectCrossDayFinalTime()
         let review = app.buttons["unified-plan-review-roster"]
         XCTAssertTrue(review.isEnabled); review.tap()
         let invitation = app.buttons["unified-plan-send-invitations"]
@@ -755,9 +756,9 @@ import XCTest
 
         nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
         XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "plan-invitation-legend").count, 1)
+        XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "plan-invitation-legend").count, 2)
         XCTAssertFalse(app.descendants(matching: .any)["plan-invitation-window-label"].exists)
-        capture(app, "invitation-one-continuous-window")
+        capture(app, "invitation-continuous-across-midnight")
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
@@ -1250,7 +1251,7 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-view-calendar"].isEnabled)
     }
 
-    func testFinalTimeBlockInteractions() throws {
+    func testFinalTimeCellInteractions() throws {
         struct BlockFixture: Decodable { let bundle: String; let finalBlockToken: String; let accounts: [NativeAccount] }
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
         try XCTSkipIf(raw == nil, "Requires the disposable picker fixture.")
@@ -1266,122 +1267,105 @@ import XCTest
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 25))
         for id in ["time-poll-cell-0", "time-poll-cell-2"] where !app.buttons[id].isSelected { app.buttons[id].tap() }
         app.buttons["unified-plan-invite-window"].tap()
-        verifyFinalTimeBlockInteractions()
+        verifyFinalTimeCellInteractions()
     }
 
-    func testFinalTimeBlockLargestText() throws {
+    func testFinalTimeCellLargestText() throws {
         struct BlockFixture: Decodable { let bundle: String; let finalBlockToken: String; let accounts: [NativeAccount] }
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
-        try XCTSkipIf(raw == nil, "Requires the completed disposable contact flow.")
-        let fixture = try JSONDecoder().decode(BlockFixture.self, from: Data(raw!.utf8))
-        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
-        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        try XCTSkipIf(raw == nil, "Requires the disposable picker fixture.")
+        let f = try JSONDecoder().decode(BlockFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
         for language in ["zh-Hans", "de"] {
-            app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
             app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
                 "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark",
-                "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(fixture.finalBlockToken)"]
-            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
-            app.launch()
-            XCTAssertTrue(app.buttons["unified-plan-invite-window"].waitForExistence(timeout: 25))
-            app.buttons["unified-plan-invite-window"].tap()
-            let first = app.buttons["time-poll-cell-0"]
-            for _ in 0..<14 {
-                let top = app.navigationBars.firstMatch.frame.maxY + 12
-                let bottom = app.staticTexts["time-poll-final-heading"].frame.minY - 12
-                if first.frame.minY >= top && first.frame.maxY <= bottom { break }
-                let from = (top + bottom) / 2
-                let overflow = first.frame.minY < top ? first.frame.minY - top : first.frame.maxY - bottom
-                let delta = min(120, max(24, abs(overflow))) * (overflow < 0 ? 1 : -1)
-                let origin = app.coordinate(withNormalizedOffset: .zero)
-                origin.withOffset(CGVector(dx: 30, dy: from)).press(forDuration: 0.05,
-                    thenDragTo: origin.withOffset(CGVector(dx: 30, dy: from + delta)))
-            }
-            first.tap()
-            assertFinalClock("09:00", "10:00")
-            for key in ["time-poll-final-date", "time-poll-final-start", "time-poll-final-end", "unified-plan-review-roster"] {
-                XCTAssertTrue(app.buttons[key].isHittable); XCTAssertGreaterThanOrEqual(app.buttons[key].frame.height, 44)
-            }
-            app.buttons["time-poll-final-start"].tap(); app.buttons["time-poll-final-start-09:15"].tap()
-            app.buttons["time-poll-final-end"].tap(); app.buttons["time-poll-final-end-10:15"].tap()
-            assertFinalClock("09:15", "10:15")
-            let block = app.descendants(matching: .any)["time-poll-final-block"]
-            for _ in 0..<12 {
-                let top = app.navigationBars.firstMatch.frame.maxY + 12
-                let bottom = app.buttons["time-poll-final-date"].frame.minY - 12
-                if block.frame.minY >= top && block.frame.maxY <= bottom { break }
-                let origin = app.coordinate(withNormalizedOffset: .zero)
-                let from = (top + bottom) / 2
-                let offset: CGFloat = block.frame.minY < top ? 90 : -90
-                origin.withOffset(CGVector(dx: 30, dy: from)).press(forDuration: 0.05,
-                    thenDragTo: origin.withOffset(CGVector(dx: 30, dy: from + offset)))
-            }
-            XCTAssertGreaterThan(block.frame.minY, app.navigationBars.firstMatch.frame.maxY)
-            XCTAssertLessThan(block.frame.maxY, app.buttons["time-poll-final-date"].frame.minY)
-            capture(app, "final-block-largest-\(language)")
-            app.buttons["time-poll-cancel-final"].tap()
-            XCTAssertTrue(app.buttons["unified-plan-invite-window"].waitForExistence(timeout: 10))
+                "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            let choose = app.buttons["unified-plan-invite-window"]
+            XCTAssertTrue(choose.waitForExistence(timeout: 25)); choose.tap()
+            let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
+            XCTAssertTrue(first.waitForExistence(timeout: 10)); first.tap(); second.tap()
+            let review = app.buttons["unified-plan-review-roster"]
+            XCTAssertTrue(review.isEnabled)
+            XCTAssertTrue(app.staticTexts["time-poll-final-summary"].exists)
+            XCTAssertLessThan(app.staticTexts["time-poll-final-summary"].frame.maxY, review.frame.minY)
+            XCTAssertGreaterThanOrEqual(review.frame.height, 43.99)
+            capture(app, "final-cells-largest-\(language)")
+            app.terminate()
         }
     }
 
-    private func verifyFinalTimeBlockInteractions() {
+    private func verifyFinalTimeCellInteractions() {
         let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"], third = app.buttons["time-poll-cell-4"]
         let review = app.buttons["unified-plan-review-roster"]
         XCTAssertFalse(review.isEnabled)
-        first.tap()
-        assertFinalClock("09:00", "10:00")
-        XCTAssertTrue(first.isSelected && second.isSelected)
+        first.tap(); assertFinalClock("09:00", "09:30")
         second.tap(); assertFinalClock("09:00", "10:00")
-        third.tap(); assertFinalClock("10:00", "11:00")
-        XCTAssertFalse(first.isSelected || second.isSelected)
-        let block = app.descendants(matching: .any)["time-poll-final-block"]
-        XCTAssertTrue(block.exists)
-        let rowHeight = third.frame.height
-        let box = CGRect(x: third.frame.minX + 3, y: third.frame.minY, width: third.frame.width - 6, height: rowHeight * 2)
-        XCTAssertEqual(block.frame.midX, box.midX, accuracy: 8)
-        XCTAssertEqual(block.frame.midY, box.midY, accuracy: 8)
-        func drag(_ from: CGPoint, _ to: CGPoint) {
-            let origin = app.coordinate(withNormalizedOffset: .zero)
-            origin.withOffset(CGVector(dx: from.x, dy: from.y)).press(forDuration: 0.05,
-                thenDragTo: origin.withOffset(CGVector(dx: to.x, dy: to.y)))
-        }
-        capture(app, "final-block-before-drag")
-        drag(CGPoint(x: box.minX + 16, y: box.maxY - 6), CGPoint(x: box.minX + 16, y: box.maxY - 6 + rowHeight))
-        assertFinalClock("10:00", "11:30")
-        drag(CGPoint(x: box.maxX - 16, y: box.minY + 6), CGPoint(x: box.maxX - 16, y: box.minY + 6 + rowHeight / 2))
-        assertFinalClock("10:15", "11:30")
-        let middle = CGPoint(x: box.midX, y: box.minY + rowHeight * 1.75)
-        drag(middle, CGPoint(x: middle.x, y: middle.y + rowHeight))
-        assertFinalClock("10:45", "12:00")
-        capture(app, "final-block-drag-resize-move")
-        let days = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).allElementsBoundByIndex
-        XCTAssertGreaterThan(days.count, 1)
-        days[1].tap(); assertFinalClock("10:45", "12:00")
-        XCTAssertFalse(first.isSelected)
-        days[0].tap(); assertFinalClock("10:45", "12:00")
-        app.buttons["time-poll-final-start"].tap(); app.buttons["time-poll-final-start-09:00"].tap()
-        app.buttons["time-poll-final-end"].tap(); app.buttons["time-poll-final-end-10:00"].tap()
-        assertFinalClock("09:00", "10:00")
-        capture(app, "final-block-exact-time-controls")
-        app.buttons["time-poll-reset-final"].tap(); XCTAssertFalse(review.isEnabled)
-        first.tap(); assertFinalClock("09:00", "10:00")
+        second.tap(); assertFinalClock("09:00", "09:30"); XCTAssertTrue(first.isSelected)
+        third.tap()
+        XCTAssertTrue(first.isSelected && third.isSelected)
+        XCTAssertFalse(review.isEnabled); XCTAssertTrue(app.staticTexts["time-poll-final-gap"].exists)
+        second.tap(); assertFinalClock("09:00", "10:30")
+        app.buttons["time-poll-undo"].tap(); XCTAssertFalse(review.isEnabled)
+        third.tap(); assertFinalClock("09:00", "09:30")
+        first.tap(); XCTAssertFalse(review.isEnabled)
+        first.press(forDuration: 0.5, thenDragTo: second)
+        XCTAssertTrue(first.isSelected && second.isSelected); assertFinalClock("09:00", "10:00")
+        capture(app, "final-cells-tap-cancel-drag-undo")
+        first.press(forDuration: 0.5, thenDragTo: second)
+        XCTAssertFalse(first.isSelected || second.isSelected); XCTAssertFalse(review.isEnabled)
+        first.tap(); second.tap()
         app.buttons["time-poll-cancel-final"].tap()
-        XCTAssertTrue(first.isSelected && second.isSelected, "Choosing a final time must not change saved availability")
+        XCTAssertTrue(first.isSelected && second.isSelected, "Final-time editing keeps submitted availability intact")
         app.buttons["unified-plan-invite-window"].tap()
-        XCTAssertTrue(review.isEnabled, "Leaving the picker preserves its local draft")
+        XCTAssertTrue(review.isEnabled, "The final-time draft survives leaving and returning")
         assertFinalClock("09:00", "10:00")
     }
 
     private func assertFinalClock(_ start: String, _ end: String, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(app.buttons["time-poll-final-start"].label.contains(start), app.buttons["time-poll-final-start"].label, file: file, line: line)
-        XCTAssertTrue(app.buttons["time-poll-final-end"].label.contains(end), app.buttons["time-poll-final-end"].label, file: file, line: line)
+        let summary = app.staticTexts["time-poll-final-summary"]
+        XCTAssertTrue(summary.label.contains(start), summary.label, file: file, line: line)
+        XCTAssertTrue(summary.label.contains(end), summary.label, file: file, line: line)
+    }
+
+    private func selectCrossDayFinalTime() {
+        app.buttons["time-poll-reset-final"].tap()
+        let dates = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).allElementsBoundByIndex
+            .map { $0.identifier.replacingOccurrences(of: "time-poll-day-", with: "") }.sorted()
+        XCTAssertGreaterThanOrEqual(dates.count, 2)
+        let viewport = app.scrollViews["time-poll-final-scroll"]
+        XCTAssertTrue(viewport.exists)
+        func cell(_ date: String, _ time: String) -> XCUIElement {
+            app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", date, time)).firstMatch
+        }
+        func reveal(_ element: XCUIElement) {
+            XCTAssertTrue(element.exists)
+            for _ in 0..<24 {
+                if element.isHittable && viewport.frame.contains(CGPoint(x: element.frame.midX, y: element.frame.midY)) { break }
+                if element.frame.minY < viewport.frame.minY { viewport.swipeDown() } else { viewport.swipeUp() }
+            }
+            XCTAssertTrue(element.isHittable)
+        }
+        let night = cell(dates[0], "23:00–23:30"), midnight = cell(dates[0], "23:30–00:00")
+        reveal(night); night.press(forDuration: 0.5, thenDragTo: midnight)
+        XCTAssertTrue(night.isSelected && midnight.isSelected)
+        capture(app, "final-cross-day-evening")
+        let morning = cell(dates[1], "00:00–00:30"), end = cell(dates[1], "00:30–01:00")
+        reveal(morning); morning.press(forDuration: 0.5, thenDragTo: end)
+        XCTAssertTrue(morning.isSelected && end.isSelected)
+        assertFinalClock("23:00", "01:00")
+        end.tap(); assertFinalClock("23:00", "00:30")
+        end.tap(); assertFinalClock("23:00", "01:00")
+        XCTAssertTrue(app.buttons["unified-plan-review-roster"].isEnabled)
+        capture(app, "final-cross-day-morning-and-summary")
     }
 
     private func reviewFinalHour(mark: (String) -> Void = { _ in }) {
         let choose = app.buttons["unified-plan-invite-window"]
         XCTAssertTrue(choose.waitForExistence(timeout: 15)); choose.tap()
         let review = app.buttons["unified-plan-review-roster"]
-        app.buttons["time-poll-cell-0"].tap(); assertFinalClock("09:00", "10:00")
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap(); assertFinalClock("09:00", "10:00")
         mark("owner-final-picked"); capture(app, "final-01-time-block")
         review.tap()
         let send = app.buttons["unified-plan-send-invitations"]

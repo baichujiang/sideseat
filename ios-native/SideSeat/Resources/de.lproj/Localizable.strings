@@ -3181,3 +3181,13 @@
 "Hotpot" = "Hotpot";
 "Quick fill" = "Schnell ausfüllen";
 "Fill with %@" = "%@ einfügen";
+
+"Tap or drag to select the final time." = "Endgültige Zeit antippen oder ziehen.";
+
+"Keep one continuous period. Fill the gap or deselect extra times." = "Einen zusammenhängenden Zeitraum wählen. Lücken füllen oder zusätzliche Zeiten abwählen.";
+
+"Tap or hold and drag to select or deselect." = "Antippen oder gedrückt ziehen zum Aus- und Abwählen.";
+
+"Availability not collected" = "Verfügbarkeit nicht erfasst";
+
+"Availability was not collected for this entire time" = "Verfügbarkeit nicht für den gesamten Zeitraum erfasst";

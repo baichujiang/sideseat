@@ -70,10 +70,10 @@ struct UnifiedPlanInviteView: View {
     }
 
     private var rangeIds: Set<Int> {
-        Set(poll.slots.filter { $0.date == range.date && $0.start >= range.start && $0.end <= range.end }.map(\.id))
+        Set(poll.slots.filter { $0.start >= range.start && $0.end <= range.end }.map(\.id))
     }
     private func available(_ person: NativeTimePoll.Participant) -> Bool {
-        !rangeIds.isEmpty && rangeIds.isSubset(of: Set(person.slotIds))
+        TimePollFinalRange.validated(start: range.start, end: range.end, slots: poll.slots) != nil && rangeIds.isSubset(of: Set(person.slotIds))
     }
 
     var body: some View {
@@ -140,7 +140,7 @@ struct UnifiedPlanInviteView: View {
                                     }
                                 } trailing: {
                                     if !poll.hasFixedTime {
-                                        Text(person.didRespond == false ? "Has not filled availability yet" : available(person) ? "Available for the full activity" : "Not available for the full activity")
+                                        Text(person.didRespond == false ? "Has not filled availability yet" : TimePollFinalRange.validated(start: range.start, end: range.end, slots: poll.slots) == nil ? "Availability was not collected for this entire time" : available(person) ? "Available for the full activity" : "Not available for the full activity")
                                             .font(.caption).foregroundStyle(.secondary)
                                     }
                                 }
