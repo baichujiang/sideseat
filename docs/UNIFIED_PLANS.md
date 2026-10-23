@@ -3,6 +3,21 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Information-only native creation — Preview 194
+
+Owner amendment 2026-10-23: the first page contains activity/location, candidate
+dates, daily voting hours and the existing optional activity-ideas checkbox.
+Remove the read-only timetable preview. After creating the same COLLECT plan and
+opening the existing share panel, its detail timetable is directly editable.
+There is no additional step or new mode. Keep date/hour validation, idempotent
+creation, manual availability submission, final-time selection and invitation /
+Calendar rules. Existing records and browser surfaces are unchanged here.
+
+Remove creation-only timetable state, slot generation/rebuild observers and the
+unused grid preview options; serialize the existing unique sorted date keys and
+calendar time zone directly into the original request. No new state or request.
+This supersedes the creation preview described below.
+
 ## Native timetable without Undo — Preview 193
 
 Owner amendment 2026-10-23: remove the persistent one-step Undo action from both

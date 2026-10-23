@@ -101,7 +101,6 @@ struct TimePollCreateView: View {
     @State private var title = ""
     @State private var location = ""
     @State private var dates: Set<DateComponents>
-    @State private var table: TimePollTimetable
     @State private var startMinute = 9 * 60
     @State private var endMinute = 17 * 60
     @State private var chooseActivityTogether = false
@@ -121,15 +120,12 @@ struct TimePollCreateView: View {
         let dates = Set((1...7).compactMap { calendar.date(byAdding: .day, value: $0, to: Date()) }
             .map { calendar.dateComponents([.calendar, .era, .year, .month, .day], from: $0) })
         _dates = State(initialValue: dates)
-        _table = State(initialValue: Self.timetable(dates: dates, from: 540, until: 1020))
     }
 
-    private static func timetable(dates: Set<DateComponents>, from: Int, until: Int) -> TimePollTimetable {
+    private var candidateDateKeys: [String] {
         let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
-        let keys = Array(Set(dates.compactMap { Calendar.current.date(from: $0) }.map { formatter.string(from: $0) })).sorted()
-        return .init(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from,
-                     slots: TimePollTimetable.slots(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from, endMinute: until))
+        formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = calendar.timeZone; formatter.dateFormat = "yyyy-MM-dd"
+        return Array(Set(dates.compactMap { calendar.date(from: $0) }.map { formatter.string(from: $0) })).sorted()
     }
     private var candidateDateSummary: String {
         let values = dates.compactMap { Calendar.current.date(from: $0) }.sorted()
@@ -156,14 +152,7 @@ struct TimePollCreateView: View {
                         .accessibilityIdentifier("time-poll-dates-clear")
                         .frame(maxWidth: .infinity)
                 }
-                if !showsDateOptions {
-                    TimePollGrid(table: table, selected: .constant([]), editable: false,
-                                 pickingFinalTime: false, finalSelected: .constant([]),
-                                 showsResponses: false, bounded: true,
-                                 heading: "Voting timetable") {}
-                        .padding(.horizontal, -SideSeatTheme.spaceMD)
-                }
-                Text(table.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Text(calendar.timeZone.identifier).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
                 if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
             }.padding(SideSeatTheme.spaceMD)
@@ -183,14 +172,7 @@ struct TimePollCreateView: View {
                         .overlay(alignment: .top) { Divider() }
                 }
             }
-            .onChange(of: dates) { _, _ in rebuildTimetable() }
-            .onChange(of: startMinute) { _, _ in rebuildTimetable() }
-            .onChange(of: endMinute) { _, _ in rebuildTimetable() }
             .onChange(of: "\(title)|\(location)|\(dates)|\(startMinute)|\(endMinute)|\(chooseActivityTogether)") { _, _ in createKey = UUID().uuidString }
-    }
-
-    private func rebuildTimetable() {
-        table = Self.timetable(dates: dates, from: startMinute, until: endMinute)
     }
 
     private func hourPicker(_ label: LocalizedStringKey, selection: Binding<Int>, minutes: ClosedRange<Int>, id: String) -> some View {
@@ -288,7 +270,7 @@ struct TimePollCreateView: View {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                 "/api/v1/time-polls", method: .post,
-                body: CreateTimePollRequest(title: title, timeZone: table.timeZone, dates: table.dates,
+                body: CreateTimePollRequest(title: title, timeZone: calendar.timeZone.identifier, dates: candidateDateKeys,
                     startMinute: startMinute, endMinute: endMinute, location: location, planningMode: "COLLECT",
                     chooseActivityTogether: chooseActivityTogether ? true : nil), idempotencyKey: createKey)
             if let userID = session.currentUser?.id {
@@ -619,9 +601,6 @@ private struct TimePollGrid: View {
     let editable: Bool
     let pickingFinalTime: Bool
     @Binding var finalSelected: Set<Int>
-    var showsResponses = true
-    var bounded = false
-    var heading: LocalizedStringKey? = nil
     var chooseNoFreeTime: (() -> Void)? = nil
     let onSave: () -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -632,7 +611,7 @@ private struct TimePollGrid: View {
     private var selection: Set<Int> { pickingFinalTime ? finalSelected : selected }
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
-    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? (pickingFinalTime || bounded ? 72 : 128) : 48 }
+    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? (pickingFinalTime ? 72 : 128) : 48 }
     private var viewportHeight: CGFloat { typeSize.isAccessibilitySize ? 320 : 352 }
     private var gridSlots: [NativeTimePoll.Slot] { pickingFinalTime ? table.finalTimeSlots : table.slots }
 
@@ -641,20 +620,7 @@ private struct TimePollGrid: View {
         let rows = table.dates.map { date in cells.filter { $0.date == date } }.max(by: { $0.count < $1.count })?.map(\.row) ?? []
         let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
         VStack(spacing: SideSeatTheme.spaceSM) {
-            if let heading {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: SideSeatTheme.spaceSM) {
-                        Text(heading).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
-                        if pickingFinalTime && !typeSize.isAccessibilitySize { finalLegendLabels.font(.caption) }
-                    }
-                    if pickingFinalTime && typeSize.isAccessibilitySize { finalLegendLabels.font(.caption) }
-                    Text(editable || pickingFinalTime ? "Tap or hold and drag to select or deselect." : "Friends mark their availability here. Choose the final time after sharing.")
-                        .font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                }.dynamicTypeSize(...DynamicTypeSize.xxxLarge).padding(.horizontal, SideSeatTheme.spaceMD)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("plan-create-timetable-heading")
-            } else if pickingFinalTime {
+            if pickingFinalTime {
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: SideSeatTheme.spaceMD) { finalLegendLabels }.fixedSize(horizontal: true, vertical: false)
                     VStack(alignment: .leading, spacing: 4) { finalLegendLabels }
@@ -663,13 +629,13 @@ private struct TimePollGrid: View {
                     .accessibilityIdentifier("time-poll-final-legend")
             }
             GeometryReader { geometry in
-                if pickingFinalTime || bounded {
+                if pickingFinalTime {
                     finalTimetable(cells: cells, rows: rows, lookup: lookup, width: geometry.size.width)
                 } else {
                     timetable(cells: cells, rows: rows, lookup: lookup, width: geometry.size.width)
                 }
             }
-            .frame(height: headerHeight + (pickingFinalTime || bounded ? viewportHeight - (heading == nil ? 0 : 48) : cellHeight * CGFloat(rows.count)))
+            .frame(height: headerHeight + (pickingFinalTime ? viewportHeight : cellHeight * CGFloat(rows.count)))
             .accessibilityElement(children: .contain).accessibilityIdentifier("time-poll-grid")
             if editable, let chooseNoFreeTime {
                 HStack {
@@ -686,21 +652,19 @@ private struct TimePollGrid: View {
 
     private var finalLegendLabels: some View {
         Group {
-            if showsResponses || !selected.isEmpty { Label("My availability", systemImage: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill) }
+            Label("My availability", systemImage: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill)
             Label("Final time", systemImage: "checkmark.square.fill").foregroundStyle(SideSeatTheme.statusWarningText)
-            if showsResponses { Label("Availability not collected", systemImage: "minus").foregroundStyle(SideSeatTheme.textSecondaryStrong) }
+            Label("Availability not collected", systemImage: "minus").foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.fixedSize(horizontal: false, vertical: true)
     }
 
     private func finalTimetable(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], width: CGFloat) -> some View {
         let cellWidth = typeSize.isAccessibilitySize ? max(280, width) : max(96, width / CGFloat(max(1, min(4, table.dates.count))))
         return VStack(spacing: 4) {
-            if heading == nil {
-                HStack {
-                    Text("Tap or hold and drag to select or deselect.").font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }.dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(height: 44).padding(.horizontal, SideSeatTheme.spaceSM)
-            }
+            HStack {
+                Text("Tap or hold and drag to select or deselect.").font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }.dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(height: 44).padding(.horizontal, SideSeatTheme.spaceSM)
             ScrollView(.horizontal) {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) { ForEach(table.dates, id: \.self) { dayButton($0, cells: cells, width: cellWidth) } }
@@ -786,13 +750,13 @@ private struct TimePollGrid: View {
             Rectangle().strokeBorder(final ? SideSeatTheme.statusWarningText : editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator,
                 lineWidth: final || editable && (active || partial) ? 2 : 0.5)
             VStack(spacing: 1) {
-                if pickingFinalTime || bounded { Text(cell.label).font(.caption2.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
+                if pickingFinalTime { Text(cell.label).font(.caption2.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
                 HStack(spacing: 5) {
                     if editable && (active || partial) || pickingFinalTime && (mine || partlyMine) {
                         Image(systemName: pickingFinalTime ? (mine ? "checkmark.circle.fill" : "minus.circle.fill") : active ? "checkmark.circle.fill" : "minus.circle.fill")
                             .foregroundStyle(!editable || active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
                     }
-                    if showsResponses { Text(known ? "\(count)" : "—").monospacedDigit().foregroundStyle(SideSeatTheme.textPrimary) }
+                    Text(known ? "\(count)" : "—").monospacedDigit().foregroundStyle(SideSeatTheme.textPrimary)
                     if final { Image(systemName: active ? "checkmark.square.fill" : "minus.square.fill").foregroundStyle(SideSeatTheme.statusWarningText) }
                 }.font(.caption.weight(.semibold))
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)

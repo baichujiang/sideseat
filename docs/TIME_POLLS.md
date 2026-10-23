@@ -9,6 +9,16 @@ replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
 
+## Current native creation presentation — Preview 194
+
+Creation has no timetable preview: retain activity/location, candidate dates,
+daily hours, time zone and the optional friends' ideas checkbox. Create the same
+COLLECT plan and open sharing; availability cells first appear in plan details,
+where participants select and explicitly submit. Remove creation-only timetable
+state/slot calculations and dead preview grid options. Preserve existing date,
+hour, title and location validation, idempotency, invitation and Calendar rules.
+No backend or browser change is required.
+
 ## Current native grid interaction — Preview 193
 
 Both editable native grids omit the one-step Undo button and snapshot state.
