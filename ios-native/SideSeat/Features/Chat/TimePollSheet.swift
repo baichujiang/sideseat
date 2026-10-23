@@ -115,12 +115,15 @@ struct TimePollCreateView: View {
     @State private var createKey = UUID().uuidString
     @FocusState private var titleFocused: Bool
     @FocusState private var locationFocused: Bool
+    private let calendar: Calendar
     let onCreate: (NativeTimePoll) -> Void
 
     init(onCreate: @escaping (NativeTimePoll) -> Void) {
         self.onCreate = onCreate
-        let dates = Set((1...7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: Date()) }
-            .map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
+        var calendar = Calendar.current; calendar.locale = AppLocalization.selectedLanguage.locale
+        self.calendar = calendar
+        let dates = Set((1...7).compactMap { calendar.date(byAdding: .day, value: $0, to: Date()) }
+            .map { calendar.dateComponents([.calendar, .era, .year, .month, .day], from: $0) })
         _dates = State(initialValue: dates)
         _table = State(initialValue: Self.timetable(dates: dates, from: 540, until: 1020))
     }
@@ -128,7 +131,7 @@ struct TimePollCreateView: View {
     private static func timetable(dates: Set<DateComponents>, from: Int, until: Int) -> TimePollTimetable {
         let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
-        let keys = dates.compactMap { Calendar.current.date(from: $0) }.map { formatter.string(from: $0) }.sorted()
+        let keys = Array(Set(dates.compactMap { Calendar.current.date(from: $0) }.map { formatter.string(from: $0) })).sorted()
         return .init(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from,
                      slots: TimePollTimetable.slots(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from, endMinute: until))
     }
@@ -147,7 +150,10 @@ struct TimePollCreateView: View {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 informationFields
                 if showsDateOptions {
-                    MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
+                    MultiDatePicker("Choose dates", selection: Binding(get: { dates }, set: {
+                        dates = TimePollTimetable.normalizedDates($0, calendar: calendar)
+                    }), in: calendar.startOfDay(for: Date())...)
+                        .environment(\.calendar, calendar)
                         .accessibilityIdentifier("time-poll-dates")
                     if collectingAvailability {
                         Picker("From", selection: $startMinute) {
@@ -158,11 +164,13 @@ struct TimePollCreateView: View {
                         }.accessibilityIdentifier("time-poll-until")
                     }
                 }
-                TimePollGrid(table: table, selected: $availability, editable: collectingAvailability,
-                             pickingFinalTime: !collectingAvailability, finalSelected: $finalSelected,
-                             showsResponses: false, bounded: true,
-                             heading: collectingAvailability ? "My availability" : "Choose final time") {}
-                    .padding(.horizontal, -SideSeatTheme.spaceMD)
+                if !showsDateOptions {
+                    TimePollGrid(table: table, selected: $availability, editable: collectingAvailability,
+                                 pickingFinalTime: !collectingAvailability, finalSelected: $finalSelected,
+                                 showsResponses: false, bounded: true,
+                                 heading: collectingAvailability ? "My availability" : "Choose final time") {}
+                        .padding(.horizontal, -SideSeatTheme.spaceMD)
+                }
                 Text(table.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
                 if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
@@ -193,14 +201,18 @@ struct TimePollCreateView: View {
                         .overlay(alignment: .top) { Divider() }
                 }
             }
-            .onChange(of: "\(dates)|\(startMinute)|\(endMinute)") { _, _ in
-                let finalStarts = Set(table.finalTimeSlots.filter { finalSelected.contains($0.id) }.map(\.start))
-                let availableStarts = Set(table.slots.filter { availability.contains($0.id) }.map(\.start))
-                table = Self.timetable(dates: dates, from: startMinute, until: endMinute)
-                finalSelected = Set(table.finalTimeSlots.filter { finalStarts.contains($0.start) }.map(\.id))
-                availability = Set(table.slots.filter { availableStarts.contains($0.start) }.map(\.id))
-            }
+            .onChange(of: dates) { _, _ in rebuildTimetable() }
+            .onChange(of: startMinute) { _, _ in rebuildTimetable() }
+            .onChange(of: endMinute) { _, _ in rebuildTimetable() }
             .onChange(of: "\(title)|\(location)|\(dates)|\(startMinute)|\(endMinute)|\(chooseActivityTogether)|\(availability.sorted())|\(finalSelected.sorted())") { _, _ in createKey = UUID().uuidString }
+    }
+
+    private func rebuildTimetable() {
+        let finalStarts = Set(table.finalTimeSlots.filter { finalSelected.contains($0.id) }.map(\.start))
+        let availableStarts = Set(table.slots.filter { availability.contains($0.id) }.map(\.start))
+        table = Self.timetable(dates: dates, from: startMinute, until: endMinute)
+        finalSelected = Set(table.finalTimeSlots.filter { finalStarts.contains($0.start) }.map(\.id))
+        availability = Set(table.slots.filter { availableStarts.contains($0.start) }.map(\.id))
     }
 
     private var informationFields: some View {
@@ -758,12 +770,13 @@ private struct TimePollGrid: View {
 
     private func cellGrid(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], cellWidth: CGFloat) -> some View {
         let participantSelections = table.responses
+        let clock = timePollClockFormatter(table.timeZone)
         return VStack(spacing: 0) {
             ForEach(rows, id: \.self) { row in
                 HStack(spacing: 0) {
                     ForEach(table.dates, id: \.self) { date in
                         if let cell = lookup["\(date)|\(row)"] {
-                            cellView(cell, participantSelections: participantSelections, width: cellWidth)
+                            cellView(cell, participantSelections: participantSelections, width: cellWidth, clock: clock)
                         } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
                     }
                 }.id(row)
@@ -780,7 +793,7 @@ private struct TimePollGrid: View {
         }
     }
 
-    private func cellView(_ cell: NativeTimePoll.Cell, participantSelections: [Set<Int>], width: CGFloat) -> some View {
+    private func cellView(_ cell: NativeTimePoll.Cell, participantSelections: [Set<Int>], width: CGFloat, clock: DateFormatter) -> some View {
         let known = cell.slotIds.allSatisfy { $0 >= 0 }
         let count = cell.availableCount(in: participantSelections)
         let draft = preview ?? selection
@@ -806,7 +819,7 @@ private struct TimePollGrid: View {
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }.frame(width: width, height: cellHeight)
             .accessibilityElement()
-            .accessibilityLabel("\(cell.date), \(cell.label)–\(timePollClockFormatter(table.timeZone).string(from: cell.end)), " + (known ? "\(count)" : AppLocalization.string("Availability not collected")))
+            .accessibilityLabel("\(cell.date), \(cell.label)–\(clock.string(from: cell.end)), " + (known ? "\(count)" : AppLocalization.string("Availability not collected")))
             .accessibilityValue(AppLocalization.string(pickingFinalTime ? (active ? "Final time selected" : partial ? "Some times selected" : "Select final time") : editable ? (active ? "Available" : partial ? "Some times selected" : "Unavailable") : ""))
             .accessibilityIdentifier("time-poll-cell-\(cell.id)")
             .accessibilityAddTraits(editable || pickingFinalTime ? .isButton : [])

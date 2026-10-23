@@ -840,6 +840,12 @@ import XCTest
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(f.title + "\n")
+        app.buttons["plan-date-options"].tap()
+        let datePicker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
+        let defaultDay = try XCTUnwrap(datePicker.buttons.allElementsBoundByIndex.first { $0.isSelected })
+        defaultDay.tap(); XCTAssertFalse(defaultDay.isSelected)
+        defaultDay.tap(); XCTAssertTrue(defaultDay.isSelected)
+        app.buttons["plan-date-options"].tap()
         XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
         let next = app.buttons["time-poll-create-confirm"]
         XCTAssertFalse(next.isEnabled)
@@ -984,6 +990,126 @@ import XCTest
             capture(app, "unified-create-both-drafts-largest-\(language)")
             app.terminate()
         }
+    }
+
+    func testCandidateDateSelectionDoesNotCrash() throws {
+        for (language, large) in [("zh-Hans", false), ("de", true)] {
+            let picker = try openCandidateDateEditor(language: language, large: large)
+            let first = try XCTUnwrap(picker.buttons.allElementsBoundByIndex.first { $0.isSelected })
+            let label = first.label
+            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
+            let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
+            formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
+            let removedDay = "time-poll-day-" + formatter.string(from: tomorrow)
+            first.tap(); XCTAssertFalse(first.isSelected)
+            app.buttons["plan-date-options"].tap()
+            XCTAssertTrue(app.buttons[removedDay].waitForNonExistence(timeout: 5))
+            assertFinalClock("09:00", "10:00")
+            XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
+            app.buttons["plan-collect-availability"].tap()
+            XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
+            app.buttons["plan-collect-availability"].tap()
+            app.buttons["plan-date-options"].tap()
+            let sameDay = picker.buttons[label]
+            XCTAssertFalse(sameDay.isSelected); sameDay.tap(); XCTAssertTrue(sameDay.isSelected)
+            // Batch taps reach UIKit rapidly instead of waiting for quiescence after every touch.
+            for _ in 0..<4 {
+                sameDay.tap(withNumberOfTaps: 6, numberOfTouches: 1)
+                XCTAssertTrue(sameDay.isSelected)
+                XCTAssertEqual(app.state, .runningForeground)
+            }
+            capture(app, "candidate-date-rapid-\(language)")
+            app.buttons["plan-date-options"].tap()
+            XCTAssertTrue(app.buttons[removedDay].exists)
+            XCTAssertTrue(app.buttons["time-poll-cell-32"].isSelected)
+            assertFinalClock("09:00", "10:00")
+            capture(app, "candidate-date-restored-drafts-\(language)")
+            app.buttons["plan-date-options"].tap()
+            for month in 0..<2 {
+                let selectedLabels = picker.buttons.matching(NSPredicate(format: "isSelected == true")).allElementsBoundByIndex.map(\.label)
+                for label in selectedLabels { picker.buttons[label].tap() }
+                if selectedLabels.count == 7 { break }
+                if month == 0 {
+                    picker.buttons.matching(NSPredicate(format: "label IN %@", ["下个月", "Next month", "Nächster Monat"])).firstMatch.tap()
+                }
+            }
+            app.buttons["plan-date-options"].tap()
+            XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 0)
+            XCTAssertFalse(app.buttons["time-poll-create-confirm"].isEnabled)
+            capture(app, "candidate-date-empty-\(language)")
+            app.terminate()
+        }
+    }
+
+    func testCandidateDateLimitAndLargeTimetable() throws {
+        let picker = try openCandidateDateEditor()
+        let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: Date())!
+        let month = Calendar.current.component(.month, from: nextMonth)
+        picker.buttons["下个月"].tap()
+        func day(_ number: Int) -> XCUIElement {
+            picker.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "\(month)月\(number)日")).firstMatch
+        }
+        for number in 1...24 {
+            let button = day(number)
+            XCTAssertTrue(button.waitForExistence(timeout: 5), "Expected month \(month), day \(number)")
+            // The test phone's floating AssistiveTouch control covers some right-column centers.
+            button.coordinate(withNormalizedOffset: CGVector(dx: 0.08, dy: 0.08)).tap()
+            XCTAssertTrue(button.isSelected)
+        }
+        let next = app.buttons["time-poll-create-confirm"]
+        XCTAssertTrue(next.isEnabled)
+        day(25).tap(); XCTAssertFalse(next.isEnabled)
+        day(25).tap(); XCTAssertTrue(next.isEnabled)
+        capture(app, "candidate-dates-limit-31")
+        app.buttons["plan-date-options"].tap()
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 31)
+        assertFinalClock("09:00", "10:00")
+        XCTAssertEqual(app.state, .runningForeground)
+        capture(app, "candidate-dates-31-day-timetable")
+        app.terminate()
+    }
+
+    private func openCandidateDateEditor(language: String = "zh-Hans", large: Bool = false) throws -> XCUIElement {
+        struct ContactFixture: Decodable { let bundle: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable owner.")
+        let f = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
+        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(large ? "dark" : "light")"]
+        if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+        let tab = language == "de" ? "Pläne" : "计划"
+        XCTAssertTrue(app.tabBars.buttons[tab].waitForExistence(timeout: 20)); app.tabBars.buttons[tab].tap()
+        let create = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).firstMatch
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Date selection regression\n")
+        let next = app.buttons["time-poll-create-confirm"]
+        let secondDay = app.buttons["time-poll-day-" + {
+            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
+            return f.string(from: Calendar.current.date(byAdding: .day, value: 2, to: Date())!)
+        }()]
+        if large {
+            // The widest-text table scrolls one date at a time.
+            app.scrollViews.firstMatch.swipeUp()
+            app.scrollViews["time-poll-grid"].swipeLeft()
+        }
+        let first = app.buttons["time-poll-cell-32"], second = app.buttons["time-poll-cell-34"]
+        for _ in 0..<8 {
+            if first.isHittable && second.frame.maxY < next.frame.minY { break }
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        XCTAssertTrue(secondDay.exists); first.tap(); second.tap(); assertFinalClock("09:00", "10:00")
+        app.buttons["plan-collect-availability"].tap(); app.buttons["time-poll-cell-36"].tap()
+        app.buttons["plan-collect-availability"].tap()
+        let options = app.buttons["plan-date-options"]
+        for _ in 0..<10 where !options.isHittable { app.scrollViews.firstMatch.swipeDown() }
+        options.tap()
+        let picker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        capture(app, "candidate-dates-start-\(language)")
+        return picker
     }
 
     func testCompactCreationDateOptionsRetainInputsAndTime() throws {

@@ -4,6 +4,32 @@ import Testing
 
 @Suite("Native time polls")
 struct TimePollTests {
+    @Test("Picker and default components share one day identity and can be removed")
+    func candidateDateIdentity() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "zh-Hans"); calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
+        calendar.firstWeekday = 1; calendar.minimumDaysInFirstWeek = 5
+        let date = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 24)))
+        let oldDefault = calendar.dateComponents([.era, .year, .month, .day], from: date)
+        let picker = calendar.dateComponents([.calendar, .era, .year, .month, .day], from: date)
+        #expect(Set([oldDefault, picker]).count == 2, "The two representations caused the reported duplicate-key crash")
+        let normalized = TimePollTimetable.normalizedDates([oldDefault, picker], calendar: calendar)
+        #expect(normalized == [picker])
+        #expect(normalized.subtracting([picker]).isEmpty, "The first tap must really remove a default date")
+    }
+
+    @Test("Duplicate candidate day keys build one unique timeline including DST")
+    func duplicateCandidateDays() {
+        let dates = ["2026-10-25", "2026-10-24", "2026-10-25"]
+        let slots = TimePollTimetable.slots(dates: dates, timeZone: "Europe/Berlin", startMinute: 540, endMinute: 1020)
+        #expect(slots.count == 64 && Set(slots.map(\.start)).count == slots.count)
+        let table = TimePollTimetable(dates: dates, timeZone: "Europe/Berlin", startMinute: 540, slots: slots)
+        #expect(table.dates == ["2026-10-24", "2026-10-25"])
+        #expect(table.finalTimeSlots.count == 196)
+        #expect(Set(table.finalTimeSlots.map(\.start)).count == 196)
+        #expect(Set(table.finalTimeSlots.map(\.id)).count == 196)
+    }
+
     @Test("Creation and server tables preserve the same availability IDs")
     func creationTimetable() {
         let dates = ["2026-10-24", "2026-10-25"]

@@ -315,13 +315,26 @@ struct TimePollTimetable: Sendable {
     let slots: [NativeTimePoll.Slot]
     var responses: [Set<Int>] = []
 
-    var finalTimeSlots: [NativeTimePoll.Slot] {
-        let fullDay = Self.slots(dates: dates, timeZone: timeZone, startMinute: 0, endMinute: 1440)
+    let finalTimeSlots: [NativeTimePoll.Slot]
+
+    init(dates: [String], timeZone: String, startMinute: Int, slots: [NativeTimePoll.Slot], responses: [Set<Int>] = []) {
+        self.dates = Array(Set(dates)).sorted(); self.timeZone = timeZone; self.startMinute = startMinute
+        self.slots = slots; self.responses = responses
+        let fullDay = Self.slots(dates: self.dates, timeZone: timeZone, startMinute: 0, endMinute: 1440)
         let existing = Dictionary(uniqueKeysWithValues: slots.map { ($0.start, $0.id) })
-        return fullDay.enumerated().map { index, slot in
+        finalTimeSlots = fullDay.enumerated().map { index, slot in
             .init(id: existing[slot.start] ?? -(index + 1), date: slot.date, row: slot.row,
                   label: slot.label, start: slot.start, end: slot.end)
         }
+    }
+
+    /// Defaults and UIKit edits must represent a calendar day with the same components.
+    static func normalizedDates(_ dates: Set<DateComponents>, calendar: Calendar) -> Set<DateComponents> {
+        Set(dates.compactMap { value in
+            var day = DateComponents(era: value.era, year: value.year, month: value.month, day: value.day)
+            day.isLeapMonth = value.isLeapMonth
+            return calendar.date(from: day).map { calendar.dateComponents([.calendar, .era, .year, .month, .day], from: $0) }
+        })
     }
 
     /// Both creation and server-backed tables use the same real quarter-hour timeline.
@@ -333,7 +346,7 @@ struct TimePollTimetable: Sendable {
         let clock = timePollClockFormatter(timeZone)
         let offset = DateFormatter(); offset.timeZone = calendar.timeZone; offset.dateFormat = "XXX"
         var result: [NativeTimePoll.Slot] = []
-        for date in dates.sorted() {
+        for date in Set(dates).sorted() {
             guard let midnight = parser.date(from: date),
                   var cursor = calendar.date(bySettingHour: startMinute / 60, minute: startMinute % 60, second: 0, of: midnight),
                   let end = endMinute == 1440 ? calendar.date(byAdding: .day, value: 1, to: midnight)

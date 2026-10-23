@@ -119,6 +119,7 @@ if (mode === 'prepare') {
       assert.equal(p.phase, published ? 'CONFIRMED' : formal ? 'INVITING' : 'COLLECTING');
       assert.equal(p.title, ideas && formal ? f.activityTitle : f.title);
       assert.equal(p.planningMode, 'COLLECT');
+      assert.equal(new Set(p.dates).size, p.dates.length, 'Candidate dates must remain unique after native picker edits.');
       assert.equal(p.invitationVersion ?? 0, formal ? 1 : 0);
       if (ideas) { assert.equal(p.location, '校园'); assert.equal(p.activitySelection.isOpen, !formal); }
       assert.equal(p.summary.participantCount, direct ? 0 : index >= 3 ? 2 : index >= 2 ? 1 : 0);
@@ -144,7 +145,7 @@ if (mode === 'prepare') {
         assert.equal(Date.parse(rows[0].startISO), Date.parse(p.chosenStart));
         assert.equal(Date.parse(rows[0].endISO), Date.parse(p.chosenEnd));
       }
-      return { phase, actualPhase: p.phase, title: p.title, location: p.location, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
+      return { phase, actualPhase: p.phase, title: p.title, location: p.location, candidateDates: p.dates, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
         chosenStart: p.chosenStart, chosenEnd: p.chosenEnd, invitationVersion: p.invitationVersion ?? 0,
         cardCount: messages.length, accepted: p.invitations.filter(i => i.status === 'ACCEPTED').length, calendars: calendars.map(items => items.length), at: new Date().toISOString() };
     }

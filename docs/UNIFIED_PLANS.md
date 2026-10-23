@@ -3,6 +3,22 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Candidate date identity and editing — Preview 189
+
+Default dates and MultiDatePicker edits use the same calendar, locale and day
+components, including the calendar field. Picker changes normalize equivalent
+representations to one day; candidate keys and generated timelines remain unique.
+Removing a default day works on the first tap, and adding it again cannot create
+duplicate slot starts. Existing availability and final-time drafts remap by their
+actual instants when candidate dates change.
+
+While the existing date controls are expanded, the grid is unmounted; collapsing
+the same date row restores the timetable. The model and validation still update
+with each date edit. Full-day slots are built once per timetable, and cell clock
+formatting reuses one formatter per grid pass. No debounce, autosave, extra
+confirmation step, server request or change to invitation/Calendar rules is added.
+Zero-date and 31-date validation retain their existing behavior.
+
 ## Compact creation information — Preview 188
 
 Activity name, optional location, candidate dates and the optional friends' idea
