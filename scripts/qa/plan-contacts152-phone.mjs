@@ -116,6 +116,7 @@ if (mode === 'prepare') {
       const [p, theirs, list, history] = await Promise.all([call(route, owner), call(route, peer), call('/api/v1/time-polls', peer), call(`/api/v1/connections/${f.connectionID}/messages`, peer)]);
       const index = phases.indexOf(phase), formal = index >= 4, published = index >= 6;
       assert.equal(p.phase, published ? 'CONFIRMED' : formal ? 'INVITING' : 'COLLECTING');
+      assert.equal(p.title, f.title);
       assert.equal(p.summary.participantCount, index >= 3 ? 2 : index >= 2 ? 1 : 0);
       assert.deepEqual(p.mySlotIds, index >= 2 ? [0, 1, 2, 3] : []);
       assert.deepEqual(theirs.mySlotIds, index >= 3 ? [0, 1, 2, 3] : []);
@@ -134,7 +135,7 @@ if (mode === 'prepare') {
       const day = (p.chosenStart || p.slots[0].start).slice(0, 10);
       const calendars = await Promise.all([owner, peer].map(async a => (await call(`/api/v1/home/schedule?windowStart=${day}T00:00:00Z&windowEnd=${day}T23:59:59Z`, a)).studyEntries.filter(e => e.timePollToken === f.pollToken)));
       assert(calendars.every(items => items.length === (published ? 1 : 0)));
-      return { phase, actualPhase: p.phase, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
+      return { phase, actualPhase: p.phase, title: p.title, location: p.location, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
         cardCount: messages.length, accepted: p.invitations.filter(i => i.status === 'ACCEPTED').length, calendars: calendars.map(items => items.length), at: new Date().toISOString() };
     }
     try {

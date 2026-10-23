@@ -687,9 +687,16 @@ import XCTest
         let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
         let title = app.textFields["time-poll-title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + " draft\n")
         app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+        app.staticTexts["time-poll-detail-title"].tap()
+        let initialNameEditor = app.textFields["plan-edit-title"].exists ? app.textFields["plan-edit-title"] : app.textViews["plan-edit-title"]
+        XCTAssertTrue(initialNameEditor.waitForExistence(timeout: 10))
+        replace(initialNameEditor, with: fixture.title)
+        app.buttons["plan-edit-save"].tap()
+        XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
         XCTAssertFalse(app.buttons["time-poll-edit-name"].exists)
         XCTAssertFalse(app.staticTexts["大家的时间表"].exists)
         XCTAssertFalse(app.staticTexts["点选我的空闲，提交后大家可见。"].exists)
@@ -701,6 +708,24 @@ import XCTest
         nativePhase("contacts-created")
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        XCTAssertFalse(app.buttons["plan-edit-information"].exists)
+        app.staticTexts["time-poll-detail-title"].tap()
+        let nameEditor = app.textFields["plan-edit-title"].exists ? app.textFields["plan-edit-title"] : app.textViews["plan-edit-title"]
+        XCTAssertTrue(nameEditor.waitForExistence(timeout: 10))
+        replace(nameEditor, with: fixture.title + " changed")
+        app.buttons["plan-edit-cancel"].tap()
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        app.descendants(matching: .any)["plan-detail-location"].tap()
+        let locationEditor = app.textFields["plan-edit-location"]
+        XCTAssertTrue(locationEditor.waitForExistence(timeout: 10))
+        replace(locationEditor, with: "图书馆二楼")
+        capture(app, "inline-information-editing")
+        app.buttons["plan-edit-save"].tap()
+        XCTAssertTrue(locationEditor.waitForNonExistence(timeout: 20))
+        XCTAssertTrue(app.descendants(matching: .any)["plan-detail-location"].label.contains("图书馆二楼"))
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected && app.buttons["time-poll-cell-2"].isSelected)
+        XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
+        capture(app, "inline-information-saved-draft-preserved")
         app.buttons["plan-share-open"].tap()
         app.buttons["plan-invite-contacts"].tap()
         let contact = app.buttons["plan-contact-\(fixture.peerID)"]
@@ -1268,6 +1293,38 @@ import XCTest
         for id in ["time-poll-cell-0", "time-poll-cell-2"] where !app.buttons[id].isSelected { app.buttons[id].tap() }
         app.buttons["unified-plan-invite-window"].tap()
         verifyFinalTimeCellInteractions()
+    }
+
+    func testInlineInformationLargestText() throws {
+        struct Fixture: Decodable { let bundle: String; let finalBlockToken: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires a disposable inline information fixture.")
+        let f = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        for language in ["zh-Hans", "de"] {
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+                "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark",
+                "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            let heading = app.staticTexts["time-poll-detail-title"]
+            XCTAssertTrue(heading.waitForExistence(timeout: 25)); let original = heading.label
+            XCTAssertFalse(app.buttons["plan-edit-information"].exists)
+            XCTAssertFalse(app.textFields["plan-edit-location"].exists)
+            capture(app, "inline-information-largest-display-\(language)")
+            app.descendants(matching: .any)["plan-detail-location"].tap()
+            let location = app.textFields["plan-edit-location"]
+            XCTAssertTrue(location.waitForExistence(timeout: 10)); location.typeText("Library level 2")
+            let save = app.buttons["plan-edit-save"]
+            for _ in 0..<5 where !save.isHittable { app.scrollViews["time-poll-detail-scroll"].swipeUp() }
+            XCTAssertTrue(save.isHittable); XCTAssertGreaterThanOrEqual(save.frame.height, 43.99)
+            capture(app, "inline-information-largest-editing-\(language)")
+            app.buttons["plan-edit-cancel"].tap()
+            XCTAssertTrue(heading.waitForExistence(timeout: 10)); XCTAssertEqual(heading.label, original)
+            XCTAssertFalse(app.buttons["plan-edit-save"].exists)
+            app.terminate()
+        }
     }
 
     func testFinalTimeCellLargestText() throws {

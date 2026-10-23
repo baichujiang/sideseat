@@ -35,95 +35,69 @@ struct PlanAdaptiveRow<Leading: View, Trailing: View>: View {
     }
 }
 
-private struct PlanEditorField: View {
-    @Environment(\.dynamicTypeSize) private var typeSize
-    let title: LocalizedStringKey
-    @Binding var text: String
-    let accessibilityID: String
-
-    var body: some View {
-        let stacked = typeSize.isAccessibilitySize
-        let layout = stacked
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceMD))
-        layout {
-            Text(title).foregroundStyle(.secondary).fixedSize(horizontal: !stacked, vertical: true)
-            TextField("", text: $text).submitLabel(.done)
-                .multilineTextAlignment(stacked ? .leading : .trailing)
-                .frame(maxWidth: .infinity)
-                .accessibilityLabel(Text(title)).accessibilityIdentifier(accessibilityID)
-        }.frame(minHeight: 44)
-            .listRowInsets(EdgeInsets(top: stacked ? 8 : 0, leading: 20, bottom: stacked ? 8 : 0, trailing: 20))
-    }
-}
-
-struct PlanInformationEditor: View {
+/// Edit the visible values in place; no separate information sheet or edit entry.
+struct PlanInlineInformation: View {
     @Environment(SessionStore.self) private var session
-    @Environment(\.dismiss) private var dismiss
     let poll: NativeTimePoll
-    @Bindable var store: TimePollStore
-    @State private var title: String
-    @State private var location: String
-    @State private var showsDiscard = false
-    @State private var attemptedSave = false
-
-    init(poll: NativeTimePoll, store: TimePollStore) {
-        self.poll = poll; self.store = store
-        _title = State(initialValue: poll.title)
-        _location = State(initialValue: poll.location ?? "")
-    }
+    let store: TimePollStore
+    let editable: Bool
+    @Binding var editing: Bool
+    @State private var title = ""
+    @State private var location = ""
+    @FocusState private var focus: Field?
+    private enum Field: Hashable { case title, location }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedLocation: String { location.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var hasChanges: Bool { trimmedTitle != poll.title || trimmedLocation != (poll.location ?? "") }
-    private var candidateDates: String {
-        let parser = DateFormatter()
-        parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = TimeZone(secondsFromGMT: 0); parser.dateFormat = "yyyy-MM-dd"
-        let output = DateFormatter()
-        output.locale = AppLocalization.selectedLanguage.locale; output.timeZone = parser.timeZone
-        output.setLocalizedDateFormatFromTemplate("MMMd")
-        return poll.dates.map { key in parser.date(from: key).map { output.string(from: $0) } ?? key }.joined(separator: " · ")
-    }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    PlanEditorField(title: "Activity name", text: $title, accessibilityID: "plan-edit-title")
-                    PlanEditorField(title: "Location (optional)", text: $location, accessibilityID: "plan-edit-location")
-                    LabeledContent("Candidate dates") {
-                        Text(candidateDates)
-                            .multilineTextAlignment(.trailing).fixedSize(horizontal: false, vertical: true)
-                    }
-                    LabeledContent("Time zone", value: poll.timeZone)
-                } footer: {
-                    Text("Choose the final time on the timetable. Editing these details keeps everyone's availability.")
+        if editing && editable {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                TextField("Activity name", text: $title, axis: .vertical)
+                    .font(.title2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
+                    .focused($focus, equals: .title).submitLabel(.next)
+                    .accessibilityIdentifier("plan-edit-title")
+                    .onSubmit { focus = .location }
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: "mappin.and.ellipse").foregroundStyle(.secondary)
+                    TextField("Location (optional)", text: $location)
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .focused($focus, equals: .location).submitLabel(.done)
+                        .accessibilityIdentifier("plan-edit-location")
+                        .onSubmit { save() }
+                }.font(.subheadline).frame(minHeight: 44)
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Button("Cancel", systemImage: "xmark") { focus = nil; editing = false }
+                        .buttonStyle(SSActionButtonStyle(size: .compact))
+                        .accessibilityIdentifier("plan-edit-cancel")
+                    Spacer(minLength: 0)
+                    Button("Save", systemImage: "checkmark") { save() }
+                        .buttonStyle(SSActionButtonStyle(prominent: true, size: .compact))
+                        .disabled(!hasChanges || trimmedTitle.isEmpty || title.count > 120 || location.count > 200 || !store.canMutate)
+                        .accessibilityIdentifier("plan-edit-save")
                 }
-                if attemptedSave, let error = store.error { Text(error).foregroundStyle(SideSeatTheme.danger) }
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Edit plan information").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", systemImage: "xmark") { if hasChanges { showsDiscard = true } else { dismiss() } }.ssToolbarAction().disabled(store.acting)
-            }.ssStandaloneAction() }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                PlanActionButton(title: AppLocalization.string("Save changes"), symbol: "checkmark", kind: .commit,
-                                 isLoading: store.acting, accessibilityID: "plan-edit-save") {
-                    attemptedSave = true
-                    Task {
-                        await store.mutate("details", method: .patch,
-                            body: UpdateTimePollDetailsRequest(title: trimmedTitle, location: trimmedLocation), session: session)
-                        if store.error == nil { dismiss() }
-                    }
-                }.disabled(!hasChanges || trimmedTitle.isEmpty || title.count > 120 || location.count > 200)
-                    .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-                    .overlay(alignment: .top) { Divider() }
-            }
-            .confirmationDialog("Discard changes?", isPresented: $showsDiscard, titleVisibility: .visible) {
-                Button("Discard changes", role: .destructive) { dismiss() }
-                Button("Keep editing", role: .cancel) { }
-            }
-        }.interactiveDismissDisabled(hasChanges || store.acting)
+            }.textFieldStyle(.plain)
+        } else {
+            PlanDetailHeading(poll: poll,
+                editTitle: editable ? { begin(.title) } : nil,
+                editLocation: editable ? { begin(.location) } : nil)
+        }
+    }
+
+    private func begin(_ field: Field) {
+        title = poll.title; location = poll.location ?? ""
+        editing = true; focus = field
+    }
+
+    private func save() {
+        guard hasChanges, !trimmedTitle.isEmpty, title.count <= 120, location.count <= 200, store.canMutate else { return }
+        focus = nil
+        Task {
+            await store.mutate("details", method: .patch,
+                body: UpdateTimePollDetailsRequest(title: trimmedTitle, location: trimmedLocation), session: session)
+            if store.error == nil { editing = false }
+        }
     }
 }
 

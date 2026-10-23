@@ -3,6 +3,22 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Edit the visible plan information in place — Preview 186
+
+Before confirming an activity or issuing an invitation, the organizer taps the
+activity name or location directly in the detail heading to edit those values.
+An empty location uses the existing optional-location placeholder. Inputs stay
+in the heading, with explicit Save / Cancel only while editing; no separate Edit
+entry or information sheet. Named accessibility Edit actions remain available.
+Saving changes only metadata through the existing details endpoint; cancelling
+restores the displayed server values. Personal availability drafts stay intact.
+
+While editing, the availability/final-time dock and sharing menu are hidden so
+they cannot cover the editor actions or compete with Save. They return after Save
+or Cancel. Time remains directly selectable on the existing timetable. Candidate
+dates, time zone, permissions, chosen activities, invitations and Calendar rules
+are unchanged. Participants and confirmed plans retain read-only information.
+
 ## Final time uses timetable cells — Preview 185
 
 The organizer taps a cell to select it and taps it again to deselect it. Holding

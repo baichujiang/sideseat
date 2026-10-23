@@ -48,10 +48,11 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-share-open"].isHittable)
         var first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
         reveal(second); first.tap(); second.tap()
-        reveal(app.buttons["plan-edit-information"], down: true); app.buttons["plan-edit-information"].tap()
-        let title = app.textFields["plan-edit-title"]
+        XCTAssertFalse(app.buttons["plan-edit-information"].exists)
+        reveal(app.staticTexts["time-poll-detail-title"], down: true); app.staticTexts["time-poll-detail-title"].tap()
+        let title = app.textFields["plan-edit-title"].exists ? app.textFields["plan-edit-title"] : app.textViews["plan-edit-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); replace(title, fixture.editedTitle)
-        replace(app.textFields["plan-edit-location"], "图书馆二楼\n")
+        replace(app.textFields["plan-edit-location"], "图书馆二楼")
         capture("information-editor")
         app.buttons["plan-edit-save"].tap()
         XCTAssertTrue(title.waitForNonExistence(timeout: 20))
@@ -156,10 +157,11 @@ import XCTest
         reveal(app.buttons["plan-activity-add"]); XCTAssertTrue(app.buttons["plan-activity-add"].isHittable)
         capture("inline-ideas-dark-largest-text")
         app.buttons["取消"].tap()
-        reveal(app.buttons["plan-edit-information"], down: true); app.buttons["plan-edit-information"].tap()
+        XCTAssertFalse(app.buttons["plan-edit-information"].exists)
+        reveal(app.staticTexts["time-poll-detail-title"], down: true); app.staticTexts["time-poll-detail-title"].tap()
         XCTAssertTrue(app.buttons["plan-edit-save"].isHittable)
         XCTAssertLessThanOrEqual(app.buttons["plan-edit-save"].frame.maxY, app.frame.maxY)
-        capture("information-dark-largest-text"); app.navigationBars.buttons["取消"].tap()
+        capture("information-dark-largest-text"); app.buttons["plan-edit-cancel"].tap()
         app.buttons["plan-share-open"].tap()
         let copy = app.buttons["plan-copy-link"]
         reveal(copy); XCTAssertTrue(copy.isHittable); capture("share-dark-largest-text")

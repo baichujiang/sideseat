@@ -376,14 +376,16 @@ struct SharedPlanChatCard: View {
 struct PlanDetailHeading: View {
     let poll: NativeTimePoll
     var statusIdentifier = "plan-display-status"
-    var edit: (() -> Void)? = nil
+    var editTitle: (() -> Void)? = nil
+    var editLocation: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
             PlanAdaptiveRow {
-                Text(poll.title).font(.title2.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("time-poll-detail-title")
+                if let editTitle {
+                    title.onTapGesture(perform: editTitle)
+                        .accessibilityAction(named: Text("Edit"), editTitle)
+                } else { title }
             } trailing: {
                 PlanStatusBadge(status: poll.presentation(at: Date()).status,
                     needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
@@ -396,21 +398,32 @@ struct PlanDetailHeading: View {
                     HStack(spacing: SideSeatTheme.spaceSM) { metadata }
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) { metadata }
                 }
-                Spacer(minLength: 0)
-                if let edit {
-                    Button(action: edit) { Label("Edit", systemImage: "pencil").font(.caption).frame(minHeight: 44) }
-                        .accessibilityLabel("Edit plan information").accessibilityIdentifier("plan-edit-information")
-                }
             }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var title: some View {
+        Text(poll.title).font(.title2.weight(.semibold))
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minHeight: editTitle == nil ? 0 : 44, alignment: .leading)
+            .contentShape(Rectangle())
+            .accessibilityIdentifier("time-poll-detail-title")
+    }
+
     @ViewBuilder private var metadata: some View {
         Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
-        if let location = poll.location, !location.isEmpty {
-            Label(location, systemImage: "mappin.and.ellipse")
-                .fixedSize(horizontal: false, vertical: true)
+        if let editLocation {
+            location.onTapGesture(perform: editLocation)
+                .accessibilityAction(named: Text("Edit"), editLocation)
+        } else if let value = poll.location, !value.isEmpty {
+            Label(value, systemImage: "mappin.and.ellipse").fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private var location: some View {
+        Label(poll.location?.isEmpty == false ? poll.location! : AppLocalization.string("Location (optional)"), systemImage: "mappin.and.ellipse")
+            .fixedSize(horizontal: false, vertical: true).frame(minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle()).accessibilityIdentifier("plan-detail-location")
     }
 }
 

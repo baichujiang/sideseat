@@ -277,7 +277,7 @@ struct TimePollDetailView: View {
     @State private var deleting = false
     @State private var showsInvite = false
     @State private var showsPeople = false
-    @State private var showsInformation = false
+    @State private var editingInformation = false
     @State private var activityDraftTitle = ""
     @State private var pickingFinalTime = false
     @State private var finalSelected = Set<Int>()
@@ -324,7 +324,7 @@ struct TimePollDetailView: View {
         .navigationTitle(pickingFinalTime ? "Choose final time" : "Plan together").navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(pickingFinalTime)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let poll = store.poll, poll.planningPhase == "COLLECTING" || choosingAgain {
+            if let poll = store.poll, !editingInformation, poll.planningPhase == "COLLECTING" || choosingAgain {
                 collectionFooter(poll)
             }
         }
@@ -336,7 +336,7 @@ struct TimePollDetailView: View {
                         .accessibilityIdentifier("time-poll-cancel-final")
                 }.ssStandaloneAction()
             }
-            if let poll = store.poll, !pickingFinalTime {
+            if let poll = store.poll, !pickingFinalTime, !editingInformation {
                 ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }.ssStandaloneAction()
                 if poll.isOwner {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -370,9 +370,6 @@ struct TimePollDetailView: View {
             if let poll = store.poll {
                 PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
             }
-        }
-        .sheet(isPresented: $showsInformation) {
-            if let poll = store.poll { PlanInformationEditor(poll: poll, store: store).dynamicTypeSize(typeSize) }
         }
         .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false; pickingFinalTime = false; finalSelected = [] }
         .task {
@@ -421,7 +418,9 @@ struct TimePollDetailView: View {
 
     private func collectionHeader(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            PlanDetailHeading(poll: poll, edit: !pickingFinalTime && poll.isOwner && poll.activitySelection?.selectedIdeaId == nil ? { showsInformation = true } : nil)
+            PlanInlineInformation(poll: poll, store: store,
+                editable: !pickingFinalTime && poll.planningPhase == "COLLECTING" && poll.isOwner && poll.activitySelection?.selectedIdeaId == nil,
+                editing: $editingInformation)
                 .disabled(!store.canMutate)
             if pickingFinalTime {
                 Label("Choose the invitation time. Your availability stays unchanged.", systemImage: "calendar.badge.clock")
