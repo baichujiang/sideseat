@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
 import { v1Error } from "@/lib/api/v1/http";
-import { buildPollSlots, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, updateTimePollDetailsSchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
+import { buildPollSlots, isPollInvitationWindow, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, updateTimePollDetailsSchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
 import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
 import { schedulePollInvitationNotification, schedulePublishedPollNotification } from "@/lib/time-polls/notifications";
@@ -174,8 +174,7 @@ export async function sendPollInvitations(token: string, userId: string, input: 
     if (poll.planningMode === "FIXED") {
       if (start.getTime() !== poll.chosenStart?.getTime() || end.getTime() !== poll.chosenEnd?.getTime()) throw new TimePollError(422, "Keep the time already set for this plan.");
     } else {
-      const range = (poll.slots as unknown as PollSlot[]).filter((s) => s.start >= start.toISOString() && s.end <= end.toISOString());
-      if (!range.length || range[0].start !== start.toISOString() || range.at(-1)!.end !== end.toISOString() || range.some((s, i) => i > 0 && range[i - 1].end !== s.start)) throw new TimePollError(422, "Choose a complete activity window from this poll.");
+      if (!isPollInvitationWindow(poll.dates, poll.timeZone, start, end)) throw new TimePollError(422, "Choose one continuous time within this plan's dates.");
     }
     const ids = new Set(input.attendeeIds);
     const responders = new Set(poll.responses.map(identity));

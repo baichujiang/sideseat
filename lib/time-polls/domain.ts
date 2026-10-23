@@ -59,7 +59,7 @@ export const respondPollInvitationSchema = z.object({
 }).strict();
 export const cancelPollPlanSchema = z.object({ version: z.number().int().min(1) }).strict();
 
-export function buildPollSlots(input: z.infer<typeof createTimePollSchema>): PollSlot[] {
+export function buildPollSlots(input: Pick<z.infer<typeof createTimePollSchema>, "dates" | "timeZone" | "startMinute" | "endMinute">): PollSlot[] {
   const slots: PollSlot[] = [];
   const clock = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
   for (const date of [...new Set(input.dates)].sort()) {
@@ -77,6 +77,18 @@ export function buildPollSlots(input: z.infer<typeof createTimePollSchema>): Pol
 }
 
 /** Consecutive cells merge only when the same people can attend the whole window. */
+// Final invitations may include hours not surveyed for availability. They must still
+// be quarter-aligned and continuous across the plan's actual candidate dates.
+export function isPollInvitationWindow(dates: string[], timeZone: string, start: Date, end: Date): boolean {
+  if (!(end > start) || start.getTime() % 900_000 !== 0 || end.getTime() % 900_000 !== 0) return false;
+  const first = formatInTimeZone(start, timeZone, "yyyy-MM-dd");
+  const last = formatInTimeZone(new Date(end.getTime() - 1), timeZone, "yyyy-MM-dd");
+  const range = buildPollSlots({ dates: dates.filter(date => date >= first && date <= last), timeZone, startMinute: 0, endMinute: 1440 })
+    .filter(slot => slot.start >= start.toISOString() && slot.end <= end.toISOString());
+  return range.length > 0 && range[0].start === start.toISOString() && range.at(-1)!.end === end.toISOString()
+    && range.every((slot, index) => index === 0 || range[index - 1].end === slot.start);
+}
+
 export function summarizePoll(slots: PollSlot[], participants: PollParticipant[], durationMinutes?: number | null, expectedCount?: number | null) {
   const selections = participants.map((person) => new Set(person.slotIds));
   const attendance = slots.map((slot) => participants.filter((_, index) => selections[index].has(slot.id)).map((person) => person.id).sort());

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildPollSlots, createTimePollSchema, summarizePoll, sendPollInvitationsSchema } from "../../lib/time-polls/domain";
+import { buildPollSlots, isPollInvitationWindow, createTimePollSchema, summarizePoll, sendPollInvitationsSchema } from "../../lib/time-polls/domain";
 
 const input = createTimePollSchema.parse({ title: "Dinner", timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 1020 });
 const slots = buildPollSlots(input);
@@ -56,4 +56,21 @@ test("an invitation link needs no availability respondents; closed rosters keep 
   assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 1 }).success, false);
   assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 21 }).success, false);
   assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, attendeeIds: ["existing-response"] }).success, true);
+});
+
+
+test("final time crosses midnight without changing surveyed availability slots", () => {
+  const dates = ["2026-10-24", "2026-10-25"];
+  const original = buildPollSlots({ ...input, dates });
+  assert.equal(isPollInvitationWindow(dates, input.timeZone, new Date("2026-10-24T20:00:00Z"), new Date("2026-10-25T03:00:00Z")), true);
+  assert.deepEqual(buildPollSlots({ ...input, dates }), original);
+  assert.equal(isPollInvitationWindow(dates, input.timeZone, new Date("2026-10-24T20:07:00Z"), new Date("2026-10-25T03:00:00Z")), false);
+  assert.equal(isPollInvitationWindow([dates[0]], input.timeZone, new Date("2026-10-24T20:00:00Z"), new Date("2026-10-25T03:00:00Z")), false);
+});
+
+test("final time accepts exact midnight, consecutive days and real DST durations", () => {
+  assert.equal(isPollInvitationWindow(["2026-10-24"], "Europe/Berlin", new Date("2026-10-24T20:00:00Z"), new Date("2026-10-24T22:00:00Z")), true);
+  assert.equal(isPollInvitationWindow(["2026-10-24", "2026-10-25", "2026-10-26"], "Europe/Berlin", new Date("2026-10-24T20:00:00Z"), new Date("2026-10-26T09:00:00Z")), true);
+  assert.equal(isPollInvitationWindow(["2026-10-24", "2026-10-26"], "Europe/Berlin", new Date("2026-10-24T20:00:00Z"), new Date("2026-10-26T09:00:00Z")), false);
+  assert.equal(isPollInvitationWindow(["2026-03-28", "2026-03-29"], "Europe/Berlin", new Date("2026-03-28T22:00:00Z"), new Date("2026-03-29T01:30:00Z")), true);
 });
