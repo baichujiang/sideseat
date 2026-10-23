@@ -1,0 +1,24 @@
+✔ half-hour cells keep every persisted quarter ID and legacy boundary (2.834792ms)
+✔ a full-day grid is half as tall and repeated DST times remain separate (4.934209ms)
+✔ five people share an hour; removing one response recommends the four-person hour (0.912417ms)
+✔ a person with no available time still counts as a participant (0.081875ms)
+✔ equal attendance with different people is not merged into a false whole window (0.0835ms)
+✔ DST repeated hour has distinct cells and actual UTC intervals (0.564583ms)
+✔ recommendations cover the entire activity duration and keep unfilled invitees visible (0.314917ms)
+✔ an invitation link needs no availability respondents; closed rosters keep their existing contract (1.138ms)
+✔ final time crosses midnight without changing surveyed availability slots (8.657ms)
+✔ final time accepts exact midnight, consecutive days and real DST durations (7.206041ms)
+✔ invitation timetable focuses the actual final time, including fixed hours outside the collection grid (15.627792ms)
+✔ legacy quarter-hour edges highlight only the invited part of the boundary cells (0.583167ms)
+✔ midnight dates and repeated DST labels retain their actual order (1.676667ms)
+✔ unconfirmed invitations expire at the start; confirmed and cancelled facts stay intact (0.468833ms)
+✔ collection expires only after the last configured window, respecting zone, DST and midnight (1.271417ms)
+✔ fixed-time activity collection expires at its chosen start (0.081625ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 328.023917

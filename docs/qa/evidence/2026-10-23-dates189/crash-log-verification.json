@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-23T16:36:32.871780+00:00",
+  "newFatalCrashReports": 0,
+  "newResourceReports": [
+    "SideSeat Preview.cpu_resource-2026-10-23-183259.ips"
+  ],
+  "resourceReport": {
+    "build": 189,
+    "event": "cpu usage",
+    "bugType": 202,
+    "actionTaken": "none",
+    "cpuSeconds": 90,
+    "elapsedSeconds": 121,
+    "averagePercent": 75,
+    "heaviestStackIncludes": [
+      "XCTAutomationSupport",
+      "AXRuntime"
+    ],
+    "scope": "Collection full-flow automated timetable interactions and accessibility snapshots; not date-picker regression",
+    "phoneJourneyCompleted": true
+  },
+  "dateRegressionHadNewCrashReports": false
+}

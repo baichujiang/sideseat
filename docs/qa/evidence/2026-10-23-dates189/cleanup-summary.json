@@ -1,0 +1,11 @@
+{
+  "accountsRemoved": 4,
+  "tokens401": 4,
+  "links404": 2,
+  "runnerAbsent": true,
+  "privateFixtureAbsent": true,
+  "privateXctestrunRemoved": true,
+  "temporarySharedSchemeRemoved": true,
+  "diagnosticDateMetadataClearedAndReadBack": true,
+  "ordinaryBuild": 97
+}

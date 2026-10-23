@@ -1,0 +1,47 @@
+[
+  {
+    "artifact": "/tmp/sideseat189-reproduction.xcresult",
+    "result": "passed but insufficient reproduction",
+    "seconds": 49.456,
+    "reason": "Eight distinct single taps did not verify removal of default dates; not counted as acceptance."
+  },
+  {
+    "artifact": "/tmp/sideseat189-reproduction2.xcresult",
+    "result": "crash reproduced on 188 plus temporary date diagnostics",
+    "seconds": 31.797,
+    "reason": "First default day tapped off and on produced duplicate day components and the same duplicate-key crash."
+  },
+  {
+    "artifact": "/tmp/sideseat189-date-regression.xcresult",
+    "result": "harness failure",
+    "seconds": 25.626,
+    "reason": "Creation button variant chosen before asynchronous plan list finished loading; query now accepts either variant."
+  },
+  {
+    "artifact": "/tmp/sideseat189-date-regression2.xcresult",
+    "result": "harness failure after normal-size core regression passed",
+    "seconds": 65.343,
+    "reason": "Maximum-text helper queried an overridden horizontal scroll identifier; now uses the actual time-poll-grid identifier."
+  },
+  {
+    "artifact": "/tmp/sideseat189-dates-final.xcresult",
+    "result": "mixed harness failures; not overall acceptance",
+    "reason": "Month transition needed existence wait; clearing dates used stale AX button indexes. Existing expand/collapse/input-retention test passed separately in 33.940 seconds."
+  },
+  {
+    "artifact": "/tmp/sideseat189-dates-final2.xcresult",
+    "result": "harness failure",
+    "reason": "System AssistiveTouch covered November 14 center; date-limit test now taps inside the exposed corner. Clearing uses selected-date labels and skips unnecessary month transitions."
+  },
+  {
+    "artifact": "/tmp/sideseat189-dates-final3.xcresult",
+    "result": "passed on final 189 binary",
+    "tests": 2,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": [
+      102.807,
+      116.438
+    ]
+  }
+]

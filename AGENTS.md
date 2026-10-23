@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 188 is the current installed development build. Plan creation groups
+- Preview 189 is the current installed development build. Candidate date defaults
+  and MultiDatePicker edits share one calendar/day identity; duplicate day keys
+  cannot generate duplicate slot starts. Date editing unmounts the grid, and full
+  day slots/cell clock formatting are reused. Final/availability drafts still map
+  by actual instants; existing invitation and Calendar rules remain. The real
+  188 crash was read and reproduced with two taps; the earlier expand/collapse
+  check had missed date editing. Final 189 date-limit/normal+maximum-text rapid
+  regression passed in 102.807 / 116.438 seconds. Direct/collection full phone
+  journeys passed in 181.942 / 324.016 seconds with 6 + 8 API checks and exact
+  unique Calendars. Native 29/domain 16 checks passed. Source c439e254 is pushed.
+  Strict signature, 248 App/18 configuration+project inputs/shared resource,
+  installation and ordinary launch PID 7149 verified; ordinary 97 stays. Four
+  accounts/two links, runner and private files cleaned; date diagnostic cleared.
+  No new fatal crash log; automated timetable AX reads emitted a non-terminating
+  CPU resource diagnostic, recorded separately in QA. No backend/web release;
+  api/www still resolve to Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. See 189 QA/release.
+- Preview 188 was the previous development build. Plan creation groups
   activity name, location, candidate dates and the optional idea checkbox into
   aligned outlined rows; compact dates keep years when needed. Its timetable
   heading combines legend and undo; focused inputs hide the creation dock.

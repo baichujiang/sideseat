@@ -1,0 +1,14 @@
+[
+  {
+    "stage": "direct189",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat189-direct189.xcresult"
+  },
+  {
+    "stage": "collection189",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat189-collection189.xcresult"
+  }
+]

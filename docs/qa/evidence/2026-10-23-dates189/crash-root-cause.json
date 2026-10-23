@@ -1,0 +1,58 @@
+{
+  "captureTime": "2026-10-23 17:40:06.9417 +0200",
+  "bundleInfo": {
+    "CFBundleShortVersionString": "1.0.0",
+    "CFBundleVersion": "188",
+    "CFBundleIdentifier": "app.sideseat.mobile.preview"
+  },
+  "exception": {
+    "codes": "0x0000000000000001, 0x000000018c7b0878",
+    "rawCodes": [
+      1,
+      6651840632
+    ],
+    "type": "EXC_BREAKPOINT",
+    "signal": "SIGTRAP"
+  },
+  "termination": {
+    "namespace": "SIGNAL",
+    "indicator": "Trace/BPT trap: 5",
+    "byPid": 7027
+  },
+  "faultingThread": 0,
+  "triggeredStack": [
+    "_assertionFailure(_:_:file:line:flags:)",
+    "specialized _NativeDictionary.merge<A>(_:isUnique:uniquingKeysWith:)",
+    "Dictionary.init<A>(uniqueKeysWithValues:)",
+    "TimePollTimetable.finalTimeSlots.getter",
+    "closure #4 in TimePollCreateView.body.getter",
+    "_ValueActionModifier2.sendAction(old:)"
+  ],
+  "phoneReproduction": {
+    "test": "testCandidateDateSelectionDoesNotCrash",
+    "source": "188 plus temporary date metadata diagnostics only",
+    "result": "Two taps on the first default date reproduce the crash",
+    "seconds": 31.797
+  },
+  "dateComponents": {
+    "old": [
+      "era: 1 year: 2026 month: 10 day: 24 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 25 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 26 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 27 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 28 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 29 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 30 isLeapMonth: false "
+    ],
+    "new": [
+      "calendar: gregorian (gregorian) locale: zh-Hans time zone: Europe/Berlin firstWeekday: 1 minDaysInFirstWeek: 5 era: 1 year: 2026 month: 10 day: 24 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 24 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 25 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 26 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 27 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 28 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 29 isLeapMonth: false ",
+      "era: 1 year: 2026 month: 10 day: 30 isLeapMonth: false "
+    ]
+  }
+}
