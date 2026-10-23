@@ -1,0 +1,21 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "project": "Generated in isolated build directory from the byte-verified active project.yml; generated pbxproj is not byte-identical to checked-in project.",
+  "binarySHA256": {
+    "SideSeat Preview": "fd64d82d932f2132d916955bb7199c47456fae756a2904013afb9dd3275fa954",
+    "SideSeat Preview.debug.dylib": "f8fb88249bcda5246011474f6384df7e6c78534303354c709e8441420b34e552"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 193,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "strictSignatureVerified": true,
+  "isolatedBuild": true,
+  "backendRelease": false,
+  "webRelease": false,
+  "packageResolution": "Reused configured SourcePackages cache with automatic package resolution disabled.",
+  "sourceCommit": "8e713058d57da7ffc53ba91c8d8f2d594f628522"
+}

@@ -1,0 +1,160 @@
+{
+  "attempts": [
+    {
+      "attempt": "phone",
+      "resultBundle": "/tmp/sideseat193-phone.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 26.586
+        },
+        {
+          "method": "testNativeContactCardCreateFillInviteConfirmAndCalendar",
+          "outcome": "passed",
+          "seconds": 333.754
+        }
+      ],
+      "scope": "Initial narrowed guidance row; functional max text and full collection flow passed; maximum-text visual gap observed; superseded product.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "visible",
+      "resultBundle": "/tmp/sideseat193-visible.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 37.135
+        }
+      ],
+      "scope": "Visible frame bounds and toggle checks; visual gap remained.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "settled",
+      "resultBundle": "/tmp/sideseat193-settled.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 40.739
+        }
+      ],
+      "scope": "One-second settling wait did not fix display; wait removed.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "transparent",
+      "resultBundle": "/tmp/sideseat193-transparent.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 39.518
+        }
+      ],
+      "scope": "Transparent native touch-view experiment did not fix display; reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "viewport",
+      "resultBundle": "/tmp/sideseat193-viewport.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "failed",
+          "seconds": 15.02
+        }
+      ],
+      "scope": "Explicit nested scroll frame experiment; harness rejected negative floating-point epsilon on minX; product experiment reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "bounds",
+      "resultBundle": "/tmp/sideseat193-bounds.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 44.638
+        }
+      ],
+      "scope": "Corrected bounds tolerance; display gap remained; explicit frame reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "minimal",
+      "resultBundle": "/tmp/sideseat193-minimal.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 44.051
+        }
+      ],
+      "scope": "Original nested scroll layout with only Undo removal; screenshot still showed occasional blank cells.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "single-scroll",
+      "resultBundle": "/tmp/sideseat193-single-scroll.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 42.201
+        }
+      ],
+      "scope": "Single two-axis scroll experiment did not fix display; reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "heading-cap",
+      "resultBundle": "/tmp/sideseat193-heading-cap.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 43.667
+        }
+      ],
+      "scope": "Header typography cap did not fix display; reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "clip",
+      "resultBundle": "/tmp/sideseat193-clip.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 44.687
+        }
+      ],
+      "scope": "Disabling inner clipping drew a previous time row over the day header and did not resolve blank content; reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "composite",
+      "resultBundle": "/tmp/sideseat193-composite.xcresult",
+      "testCases": [
+        {
+          "method": "testFinalTimeCellLargestText",
+          "outcome": "passed",
+          "seconds": 44.468
+        }
+      ],
+      "scope": "Compositing group did not fix display; reverted.",
+      "finalAcceptance": false
+    },
+    {
+      "attempt": "final-phone-interrupted",
+      "resultBundle": "/tmp/sideseat193-final-phone.xcresult",
+      "testCases": [],
+      "scope": "Final minimal binary: test stalled while waiting for system animation completion after focusing the inline title input (60-second waits at85/145s). Session interrupted rather than counted as passing. Final-phone-run records phone73/observer-15. Reopened test session progressed through title editing; interrupted empty draft deleted and public404 verified separately.",
+      "finalAcceptance": false
+    }
+  ],
+  "note": "Functional success is distinct from screenshot acceptance. All experimental product changes were reverted; final acceptance is recorded separately. A local Python TLS trust-store failure occurred before QA session refresh; the existing Node fetch path refreshed sessions successfully. The first cleanup guard correctly rejected an exact-title lookup with zero results because the interrupted plan still had the draft suffix; no deletion occurred. The later exact draft-title, collecting/zero-response/version0 guard deleted only that disposable plan."
+}

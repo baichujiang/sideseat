@@ -1,0 +1,15 @@
+{
+  "normalAvailabilityNoUndo": true,
+  "normalFinalNoUndo": true,
+  "crossDayDraft": true,
+  "largestTextFunctionalAssertionsPassed": true,
+  "largestTextVisualAcceptance": false,
+  "unresolved": "German maximum-accessibility-text whole-screen screenshot shows day label but blank time cells despite hittable within-window selected cells. Chinese final screenshot renders. Earlier runs varied. No cause proven; product experiments reverted. Reopen asserts draft retention, but its top-of-page screenshot is not proof of grid visibility.",
+  "inspectedFinalScreenshots": [
+    "availability-normal-no-undo.png",
+    "final-normal-no-undo.png",
+    "final-cross-day-no-undo.png",
+    "final-largest-zh.png",
+    "final-largest-de-visual-gap.png"
+  ]
+}

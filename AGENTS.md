@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 192 is the current installed development build. The shared detail
+- Preview 193 is the current installed development build. Native availability
+  and final-time grids omit one-step Undo and its snapshot state, retaining tap,
+  deselect, hold-paint/erase, day selection, manual submit/drafts and existing
+  invitation/Calendar rules. Preserve the original scroll layout and hint row.
+  Final same-binary uninterrupted phone journey passed in 328.056 seconds with
+  eight API stages and exact unique Calendars; ordinary-size images inspected.
+  Chinese/German maximum-text functional checks passed in 58.775 seconds, but
+  German time cells still appear blank in the whole-screen image: maximum-text
+  visual acceptance is NOT passed. Cause remains unproven; all attempted display
+  refactors were reverted. See 193 QA before describing that issue as fixed.
+  Source 8e713058 is pushed. Strict signature, 248 App/18 config-script inputs and
+  shared resource, install and normal launch PID 7499 verified; generated project
+  comes from the active project.yml. Ordinary 97 stays. Four accounts/five links,
+  runner and private files cleaned; no new App crash/resource report. No backend,
+  web, model/domain or browser rerun/release. See 193 QA/release for scope and the
+  interrupted animation-wait test before the successful final run.
+- Preview 192 was the previous development build. The shared detail
   heading puts the activity title and outlined share icon together, with status
   and location below; long text stacks naturally. Reuse the existing share sheet,
   inline editing and invitation/Calendar rules; remove the duplicate toolbar share
