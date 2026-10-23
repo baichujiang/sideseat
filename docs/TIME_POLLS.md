@@ -9,6 +9,15 @@ replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
 
+## Current creation form layout — Preview 195
+
+Activity/location use a quiet identity surface; date/hour settings share one
+outlined region, with time zone under the hours. The existing optional activity
+ideas checkbox is separate. Calendar expansion follows its trigger directly,
+with the original centered Clear dates action. Activity names wrap visually;
+Return normalizes embedded newlines to spaces and dismisses input. Preserve the
+same request, dates, hour validation and all invitation/Calendar behavior.
+
 ## Current native creation presentation — Preview 194
 
 Creation has no timetable preview: retain activity/location, candidate dates,

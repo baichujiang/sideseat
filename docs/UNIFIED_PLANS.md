@@ -3,6 +3,17 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native creation form hierarchy — Preview 195
+
+Owner amendment 2026-10-24: separate activity/location, candidate date/hour
+settings and the optional activity-ideas checkbox visually without adding a step.
+Use a multiline activity field for visual wrapping while Return retains the
+single-line title value and dismisses input. Expand the existing calendar directly
+under its date row; keep Clear dates centered beneath it and time zone inside the
+hour settings. Reuse existing adaptive rows, hour menus and outlined controls.
+Date normalization, validation, COLLECT creation, sharing and invitation/Calendar
+rules remain unchanged. This is a native presentation change only.
+
 ## Information-only native creation — Preview 194
 
 Owner amendment 2026-10-23: the first page contains activity/location, candidate

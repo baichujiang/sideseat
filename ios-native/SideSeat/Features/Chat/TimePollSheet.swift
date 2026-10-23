@@ -98,6 +98,7 @@ struct TimePollSheet: View {
 struct TimePollCreateView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var title = ""
     @State private var location = ""
     @State private var dates: Set<DateComponents>
@@ -140,19 +141,6 @@ struct TimePollCreateView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 informationFields
-                if showsDateOptions {
-                    MultiDatePicker("Choose dates", selection: Binding(get: { dates }, set: {
-                        dates = TimePollTimetable.normalizedDates($0, calendar: calendar)
-                    }), in: calendar.startOfDay(for: Date())...)
-                        .environment(\.calendar, calendar)
-                        .accessibilityIdentifier("time-poll-dates")
-                    Button("Clear dates") { dates.removeAll() }
-                        .buttonStyle(SSActionButtonStyle(size: .compact))
-                        .disabled(dates.isEmpty)
-                        .accessibilityIdentifier("time-poll-dates-clear")
-                        .frame(maxWidth: .infinity)
-                }
-                Text(calendar.timeZone.identifier).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
                 if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
             }.padding(SideSeatTheme.spaceMD)
@@ -190,66 +178,100 @@ struct TimePollCreateView: View {
     }
 
     private var informationFields: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            TextField("Activity name", text: $title, prompt: Text("Activity name").foregroundStyle(SideSeatTheme.placeholderText))
-                .font(.title2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
-                .focused($titleFocused).submitLabel(.done).onSubmit { titleFocused = false }
-                .accessibilityLabel("Activity name").accessibilityIdentifier("time-poll-title")
-                .frame(minHeight: 52)
-            Divider()
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: "mappin.and.ellipse").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary).accessibilityHidden(true)
-                TextField("Location (optional)", text: $location, prompt: Text("Location (optional)").foregroundStyle(SideSeatTheme.placeholderText))
-                    .foregroundStyle(SideSeatTheme.textPrimary)
-                    .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
-                    .accessibilityLabel("Location (optional)").accessibilityIdentifier("unified-plan-location")
-            }.font(.subheadline).frame(minHeight: 44)
-            Divider()
-            Button {
-                titleFocused = false; locationFocused = false; showsDateOptions.toggle()
-            } label: {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Image(systemName: "calendar").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary)
-                    PlanAdaptiveRow {
-                        Text("Candidate dates").foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                    } trailing: {
-                        Text(candidateDateSummary).foregroundStyle(SideSeatTheme.textPrimary)
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                TextField("Activity name", text: $title, prompt: Text("Activity name").foregroundStyle(SideSeatTheme.placeholderText), axis: .vertical)
+                    .font(.title.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
+                    .focused($titleFocused).submitLabel(.done).onSubmit { titleFocused = false }
+                    .onChange(of: title) { _, value in
+                        guard value.contains(where: \.isNewline) else { return }
+                        title = value.split(whereSeparator: \.isNewline).joined(separator: " ")
+                        titleFocused = false
                     }
-                    Image(systemName: showsDateOptions ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
-                }.font(.subheadline).padding(.vertical, 6).frame(minHeight: 44).contentShape(Rectangle())
-            }.buttonStyle(.plain).accessibilityIdentifier("plan-date-options")
-                .accessibilityValue(AppLocalization.string(showsDateOptions ? "Expanded" : "Collapsed"))
-            Divider()
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Image(systemName: "clock").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary)
-                PlanAdaptiveRow {
-                    Text("Daily time range").foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                } trailing: {
-                    HStack(spacing: 4) {
-                        hourPicker("From", selection: $startMinute, minutes: 0...1410, id: "time-poll-from")
-                        Text("–").foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        hourPicker("Until", selection: $endMinute, minutes: 30...1440, id: "time-poll-until")
-                    }.fixedSize(horizontal: true, vertical: false)
+                    .accessibilityLabel("Activity name").accessibilityIdentifier("time-poll-title")
+                    .frame(minHeight: 52)
+                Divider()
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: "mappin.and.ellipse").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary).accessibilityHidden(true)
+                    TextField("Location (optional)", text: $location, prompt: Text("Location (optional)").foregroundStyle(SideSeatTheme.placeholderText))
+                        .foregroundStyle(SideSeatTheme.textPrimary)
+                        .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
+                        .accessibilityLabel("Location (optional)").accessibilityIdentifier("unified-plan-location")
+                }.font(.subheadline).frame(minHeight: 44)
+            }.padding(SideSeatTheme.spaceLG)
+                .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-identity")
+
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                Button {
+                    titleFocused = false; locationFocused = false; showsDateOptions.toggle()
+                } label: {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        Image(systemName: "calendar").font(.system(size: 18)).frame(width: 20).foregroundStyle(.secondary)
+                        PlanAdaptiveRow {
+                            Text("Candidate dates").foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        } trailing: {
+                            Text(candidateDateSummary).fontWeight(.semibold).foregroundStyle(SideSeatTheme.textPrimary)
+                        }
+                        Image(systemName: showsDateOptions ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                    }.font(.subheadline).frame(minHeight: 44).contentShape(Rectangle())
+                }.buttonStyle(.plain).accessibilityIdentifier("plan-date-options")
+                    .accessibilityValue(AppLocalization.string(showsDateOptions ? "Expanded" : "Collapsed"))
+                if showsDateOptions {
+                    MultiDatePicker("Choose dates", selection: Binding(get: { dates }, set: {
+                        dates = TimePollTimetable.normalizedDates($0, calendar: calendar)
+                    }), in: calendar.startOfDay(for: Date())...)
+                        .environment(\.calendar, calendar).environment(\.dynamicTypeSize, typeSize)
+                        .accessibilityIdentifier("time-poll-dates")
+                    Button("Clear dates") { dates.removeAll() }
+                        .buttonStyle(SSActionButtonStyle(size: .compact))
+                        .disabled(dates.isEmpty)
+                        .accessibilityIdentifier("time-poll-dates-clear")
+                        .frame(maxWidth: .infinity)
                 }
-            }.font(.subheadline).frame(minHeight: 44).accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-hours")
-            Divider()
+                Divider()
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: "clock").font(.system(size: 18)).frame(width: 20, height: 44).foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        PlanAdaptiveRow {
+                            Text("Daily time range").foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        } trailing: {
+                            HStack(spacing: 4) {
+                                hourPicker("From", selection: $startMinute, minutes: 0...1410, id: "time-poll-from")
+                                Text("–").foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                hourPicker("Until", selection: $endMinute, minutes: 30...1440, id: "time-poll-until")
+                            }.fixedSize(horizontal: true, vertical: false)
+                        }.frame(minHeight: 44)
+                        Text(calendar.timeZone.identifier).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                            .accessibilityIdentifier("plan-create-timezone")
+                    }
+                }.font(.subheadline).accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-hours")
+            }.padding(SideSeatTheme.spaceMD)
+                .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .ssActionOutline()
+                .accessibilityElement(children: .contain).accessibilityIdentifier("plan-create-schedule")
+
             Button {
                 chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
             } label: {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square").font(.system(size: 18)).frame(width: 20)
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                    Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
+                        .font(.system(size: 20)).frame(width: 20, height: 22)
                     Text("Friends can suggest activities").fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
-                }.font(.subheadline).frame(minHeight: 44).padding(.vertical, 2).contentShape(Rectangle())
+                }.font(.subheadline).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceXS)
+                    .contentShape(Rectangle())
             }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
+                .background(chooseActivityTogether ? SideSeatTheme.fillTertiary : SideSeatTheme.surface,
+                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .ssActionOutline()
                 .accessibilityIdentifier("plan-start-together")
                 .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
                 .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
         }.textFieldStyle(.plain).dynamicTypeSize(...DynamicTypeSize.accessibility1)
-            .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, 4)
-            .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-            .ssActionOutline()
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("plan-create-information")
     }
