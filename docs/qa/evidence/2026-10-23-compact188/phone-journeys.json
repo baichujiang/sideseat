@@ -1,0 +1,32 @@
+[
+  {
+    "stage": "direct188",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat188-direct188.xcresult",
+    "accepted": true
+  },
+  {
+    "stage": "collection188",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat188-collection188.xcresult",
+    "accepted": true
+  },
+  {
+    "stage": "ideas188",
+    "phoneExit": 0,
+    "apiObserverExit": -15,
+    "result": "/tmp/sideseat188-ideas188.xcresult",
+    "accepted": false,
+    "skippedTests": 1,
+    "reason": "Missing activity fixture environment key; superseded by ideas188-final."
+  },
+  {
+    "stage": "ideas188-final",
+    "phoneExit": 0,
+    "apiObserverExit": 0,
+    "result": "/tmp/sideseat188-ideas188-final.xcresult",
+    "accepted": true
+  }
+]

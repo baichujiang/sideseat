@@ -1,0 +1,42 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 0,
+      "passedTests" : 0,
+      "skippedTests" : 1,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Compact188 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 0,
+  "finishTime" : 1792768025.016,
+  "passedTests" : 0,
+  "result" : "Skipped",
+  "skippedTests" : 1,
+  "startTime" : 1792768021.106,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+
+  ],
+  "title" : "Test - Compact188",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

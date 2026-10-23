@@ -1,0 +1,120 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "direct-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T14:59:04.974Z"
+    },
+    {
+      "phase": "direct-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T14:59:49.108Z"
+    },
+    {
+      "phase": "direct-formal-invitation",
+      "actualPhase": "INVITING",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T14:59:56.573Z"
+    },
+    {
+      "phase": "direct-peer-accepted",
+      "actualPhase": "INVITING",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T15:00:17.851Z"
+    },
+    {
+      "phase": "direct-published",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T15:00:37.467Z"
+    },
+    {
+      "phase": "direct-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan de41250c",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T15:01:01.121Z"
+    }
+  ],
+  "failure": null
+}

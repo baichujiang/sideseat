@@ -1,0 +1,33 @@
+[
+  {
+    "attempt": "Initial grouped form",
+    "result": "Failed UI lookup",
+    "cause": "A plain VStack accessibility identifier propagated to its children and replaced field/action identifiers.",
+    "fix": "Explicit contain accessibility groups preserve individually addressable controls."
+  },
+  {
+    "attempt": "Second layout run",
+    "result": "Failed harness assertion",
+    "cause": "A 44pt frame was reported as 43.99999999999997.",
+    "fix": "Use a half-point tolerance for the target-size assertion."
+  },
+  {
+    "attempt": "Third layout run",
+    "result": "Functional assertions passed, visual acceptance rejected",
+    "elapsedTestSessionSeconds": 258.896,
+    "cause": "Largest accessibility fonts also enlarged SF symbols beyond the fixed 20pt icon column; the form dominated the initial viewport.",
+    "fix": "Use 18pt field icons, 11pt disclosure arrows, and bound compact information typography at accessibility1. Explicitly use the existing readable placeholder color; add a maximum group-height check."
+  },
+  {
+    "attempt": "Initial native unit build",
+    "result": "Build setup failed",
+    "cause": "The active generated Xcode project was stale and omitted already existing shared action-style sources.",
+    "fix": "Run the tests using the current-source isolated generated project; preserve the active checkout and unrelated edits."
+  },
+  {
+    "attempt": "Initial activity full-flow dispatch",
+    "result": "Skipped; not counted as execution or acceptance",
+    "cause": "The legacy-named active activity test reads SIDESEAT_FIXED_ACTIVITY156_JSON; the first dispatch supplied only the contacts fixture key.",
+    "fix": "Supply the same disposable contacts fixture under the required activity key and rerun as ideas188-final without changing product code."
+  }
+]

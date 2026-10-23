@@ -1,0 +1,51 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "binarySHA256": {
+    "SideSeat Preview": "367a33c0b9d0fa9126062bf2c0091d06556ab6c098d151c5f0ad4bcada02505b",
+    "SideSeat Preview.debug.dylib": "cf624c4eb647045cc5b636284f2f11c5548cc7e8fbcffb203c876227ef109fd8"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 188,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "isolatedBuild": true,
+  "backendRelease": false,
+  "webRelease": false,
+  "configurationCountIncludesProjectSpec": true,
+  "pid": 7027,
+  "processMatched": true,
+  "installedApplicationMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "runnerAbsent": true,
+  "ordinaryBuild": 97,
+  "sourceCommit": "8e3929accd258a6bf1ef43e8e2db29011a4125b1",
+  "strictSignatureVerified": true,
+  "installed": true,
+  "nativeUnitTestsPassed": 27,
+  "domainTestsPassed": 16,
+  "phoneFlows": [
+    {
+      "name": "direct",
+      "passed": true,
+      "seconds": 179.715,
+      "apiChecks": 6
+    },
+    {
+      "name": "collection",
+      "passed": true,
+      "seconds": 336.617,
+      "apiChecks": 8
+    },
+    {
+      "name": "activity",
+      "passed": true,
+      "seconds": 267.545,
+      "apiChecks": 7
+    }
+  ],
+  "productionDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7"
+}

@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 187 is the current installed development build. Creation opens the
+- Preview 188 is the current installed development build. Plan creation groups
+  activity name, location, candidate dates and the optional idea checkbox into
+  aligned outlined rows; compact dates keep years when needed. Its timetable
+  heading combines legend and undo; focused inputs hide the creation dock.
+  Fixed-size icons and information text through accessibility1 keep maximum-text
+  rows intact. Existing defaults, drafts, invitation and Calendar rules remain.
+  Final same-binary direct/collection/activity phone journeys passed in
+  179.715 / 336.617 / 267.545 seconds with 6 + 8 + 7 API checks and exact unique
+  Calendars. Ordinary/maximum Chinese/German layout passed in 185.321 seconds;
+  date expansion and input/selection retention passed in 36.029 seconds.
+  Native 27/domain 16 checks passed. Source 8e3929ac is pushed. Strict signature,
+  248 App/18 configuration+project inputs and shared Calendar JSON, install and
+  ordinary launch PID 7027 verified; ordinary 97 stays. Six accounts/three links,
+  runner and private launch files cleaned. No backend/web release; api/www
+  still resolve to Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. See the 188 QA/release;
+  the earlier skipped activity dispatch is recorded and not counted as execution.
+- Preview 187 was the previous development build. Creation opens the
   shared timetable directly; remove the standalone fixed-time date/duration/count
   branch. Amber final time leads to roster review and explicit invitation; the
   secondary green availability path retains both drafts and existing rules.
