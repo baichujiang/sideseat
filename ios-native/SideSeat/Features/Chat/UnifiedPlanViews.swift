@@ -2,14 +2,13 @@ import SwiftUI
 
 struct ExpiredTimePollView: View {
     let poll: NativeTimePoll
+    let store: TimePollStore
     let backToPlans: () -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                Text(poll.title).font(.title2.weight(.semibold)).accessibilityIdentifier("time-poll-detail-title")
-                Label("Expired", systemImage: "clock.badge.exclamationmark")
-                    .font(.headline).accessibilityIdentifier("unified-plan-phase")
+                PlanDetailHeading(poll: poll, store: store, statusIdentifier: "unified-plan-phase")
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
                     Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
                 }
@@ -246,7 +245,7 @@ struct UnifiedPlanConfirmationView: View {
         ScrollViewReader { reader in
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                PlanDetailHeading(poll: poll, statusIdentifier: "unified-plan-phase")
+                PlanDetailHeading(poll: poll, store: store, statusIdentifier: "unified-plan-phase")
                     .id("plan-detail-start")
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
                     InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone)

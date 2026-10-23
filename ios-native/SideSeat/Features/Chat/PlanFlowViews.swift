@@ -177,7 +177,7 @@ struct PlanShareActions: View {
     var body: some View {
         Button { showsShare = true } label: {
             Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
-        }.buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("plan-share-open")
+        }.buttonStyle(SSActionButtonStyle(size: .icon)).accessibilityIdentifier("plan-share-open")
             .sheet(isPresented: $showsShare) { PlanShareSheet(poll: poll, store: store) }
     }
 }
@@ -383,29 +383,26 @@ struct SharedPlanChatCard: View {
 /// A flat identity header keeps the timetable as the dominant detail surface.
 struct PlanDetailHeading: View {
     let poll: NativeTimePoll
+    let store: TimePollStore
+    var showsSharing = true
     var statusIdentifier = "plan-display-status"
     var editTitle: (() -> Void)? = nil
     var editLocation: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            PlanAdaptiveRow {
-                if let editTitle {
-                    title.onTapGesture(perform: editTitle)
-                        .accessibilityAction(named: Text("Edit"), editTitle)
-                } else { title }
-            } trailing: {
-                PlanStatusBadge(status: poll.presentation(at: Date()).status,
-                    needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
-                    titleOverride: poll.planningPhase == "INVITING" ? AppLocalization.string(poll.isOwner
-                        ? "Ready to send final plan" : poll.allInvitations.contains { $0.isMe && $0.status == "ACCEPTED" }
-                        ? "Waiting for the organizer to send" : "Your confirmation needed") : nil)
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                Group {
+                    if let editTitle {
+                        title.onTapGesture(perform: editTitle)
+                            .accessibilityAction(named: Text("Edit"), editTitle)
+                    } else { title }
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                if showsSharing { PlanShareActions(poll: poll, store: store).fixedSize() }
             }
-            HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: SideSeatTheme.spaceSM) { metadata }
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) { metadata }
-                }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: SideSeatTheme.spaceSM) { status.fixedSize(); metadata.fixedSize() }
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) { status; metadata }
             }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -418,13 +415,21 @@ struct PlanDetailHeading: View {
             .accessibilityIdentifier("time-poll-detail-title")
     }
 
+    private var status: some View {
+        PlanStatusBadge(status: poll.presentation(at: Date()).status,
+            needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
+            titleOverride: poll.planningPhase == "INVITING" ? AppLocalization.string(poll.isOwner
+                ? "Ready to send final plan" : poll.allInvitations.contains { $0.isMe && $0.status == "ACCEPTED" }
+                ? "Waiting for the organizer to send" : "Your confirmation needed") : nil)
+    }
+
     @ViewBuilder private var metadata: some View {
-        Text(LocalizedStringKey(poll.isOwner ? "Organized by you" : "Shared plan"))
         if let editLocation {
             location.onTapGesture(perform: editLocation)
                 .accessibilityAction(named: Text("Edit"), editLocation)
         } else if let value = poll.location, !value.isEmpty {
             Label(value, systemImage: "mappin.and.ellipse").fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("plan-detail-location")
         }
     }
 

@@ -1662,24 +1662,40 @@ import XCTest
         let f = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
         let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
         addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
-        for language in ["zh-Hans", "de"] {
+        for (language, large) in [("zh-Hans", false), ("zh-Hans", true), ("de", false), ("de", true)] {
             app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
             app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
-                "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark",
-                "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
+                "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(large ? "dark" : "light")",
+                "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
             let heading = app.staticTexts["time-poll-detail-title"]
             XCTAssertTrue(heading.waitForExistence(timeout: 25)); let original = heading.label
             XCTAssertFalse(app.buttons["plan-edit-information"].exists)
             XCTAssertFalse(app.textFields["plan-edit-location"].exists)
-            capture(app, "inline-information-largest-display-\(language)")
+            let share = app.buttons["plan-share-open"]
+            let status = app.descendants(matching: .any)["plan-display-status"].firstMatch
+            let place = app.descendants(matching: .any)["plan-detail-location"].firstMatch
+            XCTAssertEqual(app.buttons.matching(identifier: "plan-share-open").count, 1)
+            XCTAssertFalse(app.navigationBars.buttons["plan-share-open"].exists)
+            XCTAssertTrue(share.isHittable)
+            XCTAssertGreaterThanOrEqual(share.frame.width, 43.99); XCTAssertGreaterThanOrEqual(share.frame.height, 43.99)
+            XCTAssertGreaterThanOrEqual(share.frame.minX, heading.frame.maxX + 4)
+            XCTAssertGreaterThanOrEqual(status.frame.minY, max(heading.frame.maxY, share.frame.maxY))
+            XCTAssertGreaterThanOrEqual(place.frame.minY, max(heading.frame.maxY, share.frame.maxY))
+            capture(app, "detail-heading-\(large ? "largest" : "normal")-\(language)")
+            share.tap()
+            XCTAssertTrue(app.buttons["plan-copy-link"].waitForExistence(timeout: 10))
+            app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["完成", "Done", "Fertig"])).firstMatch.tap()
+            XCTAssertTrue(heading.waitForExistence(timeout: 10))
             app.descendants(matching: .any)["plan-detail-location"].tap()
             let location = app.textFields["plan-edit-location"]
             XCTAssertTrue(location.waitForExistence(timeout: 10)); location.typeText("Library level 2")
+            XCTAssertFalse(app.buttons["plan-share-open"].exists)
             let save = app.buttons["plan-edit-save"]
             for _ in 0..<5 where !save.isHittable { app.scrollViews["time-poll-detail-scroll"].swipeUp() }
             XCTAssertTrue(save.isHittable); XCTAssertGreaterThanOrEqual(save.frame.height, 43.99)
-            capture(app, "inline-information-largest-editing-\(language)")
+            capture(app, "detail-heading-editing-\(large ? "largest" : "normal")-\(language)")
             app.buttons["plan-edit-cancel"].tap()
             XCTAssertTrue(heading.waitForExistence(timeout: 10)); XCTAssertEqual(heading.label, original)
             XCTAssertFalse(app.buttons["plan-edit-save"].exists)

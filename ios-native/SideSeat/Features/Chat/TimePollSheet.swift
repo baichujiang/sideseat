@@ -336,7 +336,7 @@ struct TimePollDetailView: View {
         VStack(spacing: SideSeatTheme.spaceMD) {
             if let poll = store.poll {
                 if poll.planningPhase(at: now) == "EXPIRED" {
-                    ExpiredTimePollView(poll: poll) { dismiss() }
+                    ExpiredTimePollView(poll: poll, store: store) { dismiss() }
                 } else if poll.planningPhase == "COLLECTING" || choosingAgain {
                 collectionSurface(poll)
                 if let error = store.error {
@@ -375,7 +375,6 @@ struct TimePollDetailView: View {
                 }.ssStandaloneAction()
             }
             if let poll = store.poll, !editingInformation && !editingActivity {
-                ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }.ssStandaloneAction()
                 if poll.isOwner && !pickingFinalTime {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -470,7 +469,7 @@ struct TimePollDetailView: View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             PlanInlineInformation(poll: poll, store: store,
                 editable: poll.planningPhase == "COLLECTING" && poll.isOwner && poll.activitySelection?.selectedIdeaId == nil,
-                editing: $editingInformation)
+                showsSharing: !editingActivity, editing: $editingInformation)
                 .disabled(!store.canMutate)
             if pickingFinalTime {
                 Label("Choose the invitation time. Your availability stays unchanged.", systemImage: "calendar.badge.clock")

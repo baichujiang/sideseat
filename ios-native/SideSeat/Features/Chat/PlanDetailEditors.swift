@@ -41,6 +41,7 @@ struct PlanInlineInformation: View {
     let poll: NativeTimePoll
     let store: TimePollStore
     let editable: Bool
+    var showsSharing = true
     @Binding var editing: Bool
     @State private var title = ""
     @State private var location = ""
@@ -79,7 +80,7 @@ struct PlanInlineInformation: View {
                 }
             }.textFieldStyle(.plain)
         } else {
-            PlanDetailHeading(poll: poll,
+            PlanDetailHeading(poll: poll, store: store, showsSharing: showsSharing,
                 editTitle: editable ? { begin(.title) } : nil,
                 editLocation: editable ? { begin(.location) } : nil)
         }
