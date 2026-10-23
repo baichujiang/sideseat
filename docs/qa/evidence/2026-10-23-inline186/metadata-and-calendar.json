@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "title": "Contact plan c02ab1b4",
+  "location": "图书馆二楼",
+  "calendars": [
+    {
+      "role": "owner",
+      "count": 1,
+      "title": "Contact plan c02ab1b4",
+      "location": "图书馆二楼",
+      "start": "2026-10-24T21:00:00.000Z",
+      "end": "2026-10-24T23:00:00.000Z"
+    },
+    {
+      "role": "participant",
+      "count": 1,
+      "title": "Contact plan c02ab1b4",
+      "location": "图书馆二楼",
+      "start": "2026-10-24T21:00:00.000Z",
+      "end": "2026-10-24T23:00:00.000Z"
+    }
+  ]
+}

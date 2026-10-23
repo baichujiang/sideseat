@@ -21,7 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 185 is the current installed development build. Final time reuses
+- Preview 186 is the current installed development build. Tap the activity name
+  or location directly in the heading; inputs and explicit Save/Cancel stay in
+  place. The redundant Edit button and information sheet were removed. Editing
+  hides the availability dock and sharing menu so they cannot cover input actions.
+  Availability drafts and existing metadata permissions/invitation rules remain.
+  The real App-contact flow passed in 321.127 seconds with eight API stages and
+  exact metadata/time in both unique Calendar entries. The last contrast/short
+  Save label correction separately passed Chinese/German maximum text in 23.948
+  seconds; do not claim the earlier full flow used that final binary. Source
+  50b47ca5 is pushed. Strict signature, 248 App/18 configuration inputs and shared
+  Calendar JSON, install and ordinary launch PID 6754 verified; ordinary 97 stays.
+  Two accounts, two links, runner and private launch data cleaned. No backend/web
+  release; production dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7 was rechecked Ready.
+  See the 186 QA/release for visual acceptance and actual verification scopes.
+- Preview 185 was the previous development build. Final time reuses
   timetable tap/toggle/hold-drag/erase/undo with amber square checks, leaving
   personal availability green. Whole candidate dates support cross-midnight
   intervals; unknown availability is a dash and never counted as free. Keep one

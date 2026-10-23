@@ -1,0 +1,9 @@
+{
+  "phoneFixtureAbsent": true,
+  "privateSchemeAndXctestrunRemoved": true,
+  "runnerUninstalled": true,
+  "removedFileNames": [
+    "Inline186.xcscheme",
+    "Inline186_iphoneos26.5-arm64.xctestrun"
+  ]
+}
