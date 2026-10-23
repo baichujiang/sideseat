@@ -432,6 +432,7 @@ private struct TogetherHomeView: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Together"))
         .accessibilityIdentifier("together-segmented-control")
+        .ssActionOutline(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS)
         .sheet(isPresented: $showsSectionPicker) {
             NavigationStack {
                 List(TogetherSection.allCases) { section in
@@ -475,6 +476,7 @@ private struct TogetherHomeView: View {
         Button { showsSectionPicker = true } label: {
             HStack(spacing: SideSeatTheme.spaceSM) {
                 Text(selectedSection.compactTitle)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .font(.body.weight(.semibold))
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
@@ -487,7 +489,7 @@ private struct TogetherHomeView: View {
             .frame(maxWidth: .infinity, minHeight: 44)
             .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(AppLocalization.string("Together sections"))
         .accessibilityValue(sectionTitle(selectedSection, at: now))
         .accessibilityHint(AppLocalization.string("Choose a section"))
@@ -510,15 +512,15 @@ private struct TogetherHomeView: View {
                     }
                 }
             }
-            .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.Together.ink)
+            .foregroundStyle(isSelected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.Together.ink)
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceXS)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(isSelected ? SideSeatTheme.Together.navigationSelection : Color.clear,
+            .background(isSelected ? SideSeatTheme.ProductAction.fill : Color.clear,
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         }
-        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(sectionTitle(section, at: now))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("together-tab-\(section.rawValue)")

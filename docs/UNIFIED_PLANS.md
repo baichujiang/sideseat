@@ -3,16 +3,21 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
-## Outlined actions and fitting — Preview 183
+## Action hierarchy and fitting — Preview 184
 
 Standalone actions in the native App and share page use a visible 1pt/1px outline,
-including compact text and icon actions. Secondary actions use the common 14pt/px
-rounded shape; primary actions retain their stronger fill, destructive actions
-retain red, and selected/disabled states remain distinct. Native icon controls
-that already use a circle keep that shape. Borders adapt to light/dark appearance.
+including compact text and icon actions. Native primary actions use a solid fill,
+regular secondary actions a soft rounded surface, compact actions a capsule, and
+icon actions a circular surface. Destructive actions retain red. Plans/Together
+section pickers use one group boundary and a solid selected segment, without
+framing every unselected option. The response count is plain information outside
+the avatar button; only the right-side avatar group opens the complete people list.
+The empty state retains the people icon action, and more than three responses use
+three avatars plus +N. Borders adapt to light/dark appearance. Share web remains
+the Preview 183 deployment and retains its existing rounded secondary buttons.
 Native standalone actions retain at least a 44pt target. Regular actions include
 vertical content padding; compact actions use a 36pt minimum visible surface with
-a 10pt radius. Icon actions have a 44pt square surface. Navigation actions use
+a capsule shape. Icon actions have a 44pt circular surface. Navigation actions use
 compact icon labels for standard Cancel/Done/Save, keep their localized accessible
 names, and hide the redundant iOS 26 toolbar background. Padding belongs inside
 the outline; never inset a border through the label or stack two control frames.

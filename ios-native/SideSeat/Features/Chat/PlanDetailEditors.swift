@@ -130,30 +130,47 @@ struct PlanInformationEditor: View {
 struct PlanResponseSummary: View {
     let poll: NativeTimePoll
     let openPeople: () -> Void
+    private var countLabel: String {
+        String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)
+    }
 
     var body: some View {
-        Button(action: openPeople) {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Text(String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount))
-                    .font(.subheadline.weight(.medium))
-                    .accessibilityIdentifier("time-poll-response-count")
-                Spacer(minLength: 0)
-                HStack(spacing: -6) {
-                    ForEach(poll.participants.prefix(3)) { person in
-                        PlanParticipantAvatar(name: person.displayName)
-                            .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
+        HStack(spacing: SideSeatTheme.spaceMD) {
+            Text(countLabel)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .accessibilityIdentifier("time-poll-response-count")
+            Spacer(minLength: 0)
+            Button(action: openPeople) {
+                HStack(spacing: 6) {
+                    if poll.participants.isEmpty {
+                        Image(systemName: "person.2").font(.system(size: 16, weight: .medium))
                     }
-                    if poll.summary.participantCount > 3 {
-                        Text("+\(poll.summary.participantCount - 3)").font(.system(size: 12, weight: .medium))
-                            .frame(width: 30, height: 30)
-                            .background(SideSeatTheme.fillTertiary, in: Circle())
-                            .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
-                            .accessibilityIdentifier("plan-response-overflow")
+                    HStack(spacing: -6) {
+                        ForEach(poll.participants.prefix(3)) { person in
+                            PlanParticipantAvatar(name: person.displayName)
+                                .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
+                        }
+                        if poll.summary.participantCount > 3 {
+                            Text("+\(poll.summary.participantCount - 3)").font(.system(size: 12, weight: .medium))
+                                .frame(width: 30, height: 30)
+                                .background(SideSeatTheme.fillTertiary, in: Circle())
+                                .overlay(Circle().stroke(SideSeatTheme.bg, lineWidth: 2))
+                                .accessibilityIdentifier("plan-response-overflow")
+                        }
                     }
+                    Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold))
+                        .accessibilityHidden(true)
                 }
-            }.frame(minHeight: 44).contentShape(Rectangle())
-        }.buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).foregroundStyle(SideSeatTheme.textPrimary)
+            }
+            .buttonStyle(SSActionButtonStyle(size: .compact))
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(countLabel + (poll.summary.participantCount > 3 ? ", +\(poll.summary.participantCount - 3)" : ""))
             .accessibilityIdentifier("plan-people-open")
+        }.frame(minHeight: 44)
     }
 }
 

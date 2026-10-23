@@ -13,7 +13,12 @@ struct SSActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let destructive = configuration.role == .destructive
         let compact = size == .compact || size == .toolbar
-        let shape = RoundedRectangle(cornerRadius: compact ? 10 : cornerRadius, style: .continuous)
+        let radius: CGFloat = size == .compact || size == .icon ? 999 : size == .toolbar ? 12 : cornerRadius
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        let fill = prominent && isEnabled ? SideSeatTheme.ProductAction.fill
+            : destructive ? SideSeatTheme.statusDangerText.opacity(0.08) : SideSeatTheme.fillTertiary
+        let border = destructive ? SideSeatTheme.statusDangerText
+            : prominent && isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.actionBorder.opacity(0.8)
         configuration.label
             .font(compact ? .callout.weight(.semibold) : .subheadline.weight(prominent ? .semibold : .medium))
             .multilineTextAlignment(.center)
@@ -24,8 +29,8 @@ struct SSActionButtonStyle: ButtonStyle {
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, size == .icon ? 0 : compact ? 6 : 8)
             .frame(minWidth: size == .icon ? 44 : compact ? 32 : 44, minHeight: compact ? 36 : 44)
-            .background(prominent && isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.surface, in: shape)
-            .overlay(shape.strokeBorder(destructive ? SideSeatTheme.statusDangerText : SideSeatTheme.actionBorder, lineWidth: 1))
+            .background(fill, in: shape)
+            .overlay(shape.strokeBorder(border, lineWidth: 1))
             .frame(minWidth: 44, minHeight: 44)
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)

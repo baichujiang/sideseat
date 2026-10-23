@@ -170,18 +170,19 @@ struct PlansRootView: View {
                 let isSelected = section == selectedSection
                 Button { selectedSection = section } label: {
                     Text(section.title)
+                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
                         .fontWeight(isSelected ? .semibold : .medium)
                         .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(isSelected ? SideSeatTheme.utilityAction : SideSeatTheme.Together.ink)
+                        .foregroundStyle(isSelected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.Together.ink)
                         .padding(.horizontal, SideSeatTheme.spaceSM)
                         .padding(.vertical, SideSeatTheme.spaceXS)
                         .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(isSelected ? SideSeatTheme.Together.navigationSelection : Color.clear,
+                        .background(isSelected ? SideSeatTheme.ProductAction.fill : Color.clear,
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }
-                .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+                .buttonStyle(SSPressButtonStyle())
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                 .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }
@@ -189,6 +190,7 @@ struct PlansRootView: View {
         .padding(SideSeatTheme.spaceXS)
         .background(SideSeatTheme.Together.decisionWell,
             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS))
+        .ssActionOutline(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Plans"))
         .accessibilityIdentifier("plans-segmented-control")

@@ -587,6 +587,16 @@ import XCTest
         }
     }
 
+    private func verifyResponseCountSeparatedFromAction(_ expected: String) {
+        let count = app.staticTexts["time-poll-response-count"]
+        let people = app.buttons["plan-people-open"]
+        XCTAssertTrue(count.exists)
+        XCTAssertEqual(count.label, expected)
+        XCTAssertGreaterThanOrEqual(people.frame.minX - count.frame.maxX, 8,
+            "Response count is information outside the avatar button, with visible separation.")
+        XCTAssertGreaterThanOrEqual(people.frame.height, 44 - 0.01)
+    }
+
     private func compactResponseAvatars(accessibility: Bool) throws {
         struct CompactFixture: Decodable {
             let compactToken: String
@@ -617,6 +627,7 @@ import XCTest
         }
         XCTAssertLessThan(people.frame.maxY, app.staticTexts["time-poll-save-state"].frame.minY)
         XCTAssertTrue(people.label.contains("8 人已填写")); XCTAssertTrue(people.label.contains("+5"))
+        verifyResponseCountSeparatedFromAction("8 人已填写")
         XCTAssertFalse(app.buttons["time-poll-edit-name"].exists)
         XCTAssertFalse(app.staticTexts["大家的时间表"].exists)
         XCTAssertFalse(app.staticTexts["点选我的空闲，提交后大家可见。"].exists)
@@ -685,6 +696,7 @@ import XCTest
         let people = app.buttons["plan-people-open"]
         XCTAssertTrue(people.isHittable)
         XCTAssertTrue(people.label.contains("0 人已填写"))
+        verifyResponseCountSeparatedFromAction("0 人已填写")
         capture(app, "compact-empty-timetable")
         nativePhase("contacts-created")
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
@@ -722,7 +734,9 @@ import XCTest
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         nativeWaitSaved(); nativePhase("contacts-peer-submitted")
         capture(app, "contacts-peer-inline-availability")
-        XCTAssertTrue(people.isHittable); XCTAssertTrue(people.label.contains("2 人已填写")); people.tap()
+        XCTAssertTrue(people.isHittable); XCTAssertTrue(people.label.contains("2 人已填写"))
+        verifyResponseCountSeparatedFromAction("2 人已填写")
+        people.tap()
         XCTAssertTrue(app.descendants(matching: .any)["plan-people-list"].waitForExistence(timeout: 10))
         capture(app, "compact-responded-people")
         app.buttons["plan-people-done"].tap()
