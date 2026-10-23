@@ -1,0 +1,13 @@
+{
+  "phoneFixtureAbsent": true,
+  "candidateCookieAbsent": true,
+  "privateSchemeAndXctestrunRemoved": true,
+  "runnerUninstalled": true,
+  "removedFileNames": [
+    "sideseat185-candidate-cookies.txt",
+    "sideseat185-candidate-headers.txt",
+    "sideseat185-candidate-headers2.txt",
+    "CrossDay185.xcscheme",
+    "CrossDay185_iphoneos26.5-arm64.xctestrun"
+  ]
+}

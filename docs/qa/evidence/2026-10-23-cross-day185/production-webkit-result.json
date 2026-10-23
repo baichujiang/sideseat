@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "guest fills and explicitly submits availability; original quarter IDs and owner response stay intact",
+    "one exact continuous cross-midnight invitation works outside surveyed hours, without changing availability or creating a calendar",
+    "web highlights both dates; explicit acceptance preserves the wait-for-organizer rule",
+    "organizer publication creates one exact cross-day calendar entry; publication retries never duplicate it",
+    "ordinary same-day clients and publication before others respond retain existing behavior"
+  ],
+  "cleanup": {
+    "accounts": 1,
+    "tokens401": 1,
+    "links404": 2,
+    "errors": []
+  },
+  "failure": null
+}

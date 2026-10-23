@@ -1,0 +1,15 @@
+{
+  "baseline": "dpl_3QAxBxySh4RLrQYf849ozaqdmZEz",
+  "candidate": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "sourceFiles": 1393,
+  "changed": [
+    "lib/api/v1/time-poll-service.ts",
+    "lib/time-polls/domain.ts"
+  ],
+  "added": [
+    ".sideseat-cross-day185-source.json"
+  ],
+  "preserved": 1390,
+  "schemaChanged": false,
+  "sourceCommit": "cc12cc34"
+}

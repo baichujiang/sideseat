@@ -1,0 +1,29 @@
+{
+  "previewBuild": 185,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "ordinaryLaunchPID": 6692,
+  "ordinaryProcessMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "ordinaryBuildPreserved": 97,
+  "runnerAbsent": true,
+  "sourceCommit": "50d8fb512f351cc802b960301e48e29bd07c6540",
+  "backendSourceCommit": "cc12cc34",
+  "productionDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "isolatedBuild": true,
+  "strictSignatureVerified": true,
+  "installed": true,
+  "binarySHA256": {
+    "SideSeat Preview": "c6cfc252b7e4caf13001655fc4aa4f6315fe30f7bebb70c03a90dd9638c9bca6",
+    "SideSeat Preview.debug.dylib": "666061fe88e5b9f41d000db6cec043ac7206ab547bd909f49b81bfca135b9f74"
+  },
+  "unitTestsPassed": 24,
+  "fullPhoneFlowSeconds": 292.305,
+  "phoneAPIStagesPassed": 8,
+  "finalLegendOnlyLayoutSeconds": 18.442,
+  "fullFlowBeforeLegendOnlyCorrection": true,
+  "sharedCalendarPolicyResourceVerified": 1
+}

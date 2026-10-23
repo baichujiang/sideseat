@@ -1,0 +1,11 @@
+{
+  "previewBuild": 185,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "ordinaryLaunchPID": 6692,
+  "ordinaryProcessMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "ordinaryBuildPreserved": 97,
+  "runnerAbsent": true
+}

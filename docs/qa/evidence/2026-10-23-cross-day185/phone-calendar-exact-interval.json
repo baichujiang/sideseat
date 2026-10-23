@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "timeZone": "Europe/Berlin",
+  "chosenStart": "2026-10-24T21:00:00.000Z",
+  "chosenEnd": "2026-10-24T23:00:00.000Z",
+  "durationHours": 2,
+  "calendars": [
+    {
+      "role": "owner",
+      "count": 1,
+      "start": "2026-10-24T21:00:00.000Z",
+      "end": "2026-10-24T23:00:00.000Z"
+    },
+    {
+      "role": "participant",
+      "count": 1,
+      "start": "2026-10-24T21:00:00.000Z",
+      "end": "2026-10-24T23:00:00.000Z"
+    }
+  ]
+}

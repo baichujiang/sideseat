@@ -21,7 +21,25 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 184 is the current installed development build. Response counts are
+- Preview 185 is the current installed development build. Final time reuses
+  timetable tap/toggle/hold-drag/erase/undo with amber square checks, leaving
+  personal availability green. Whole candidate dates support cross-midnight
+  intervals; unknown availability is a dash and never counted as free. Keep one
+  continuous interval; disconnected drafts stay editable with review disabled.
+  Old movable/resizable block and separate clock/date controls were removed.
+  Native 24 tests, backend 11 tests and candidate/production Chromium/WebKit flows
+  passed. One uninterrupted real App-contact journey passed in 292.305 seconds
+  with eight API phases and both exact two-hour Calendar entries. The final
+  legend-only correction separately passed Chinese/German largest-text UI in
+  18.442 seconds; do not claim the earlier full flow used that final binary.
+  Source 50d8fb51 and backend cc12cc34 are pushed. Production is
+  dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7: only two backend files and a source marker
+  over 1392 verified production inputs, no migrations. Strict signature, 248 App
+  inputs plus 18 configuration/script inputs and shared Calendar JSON, install
+  and ordinary launch PID 6692 verified; ordinary 97 remains. Six disposable
+  accounts, ten links, runner, private launch data and candidate cookie cleaned.
+  See the 185 QA/release for the exact verification scopes and inspected images.
+- Preview 184 was the previous development build. Response counts are
   plain information outside the avatar action; keep 0/2/8-person separation and
   the full people list. Section pickers use one boundary and a filled selection;
   compact actions are soft capsules, icon actions circular, primary actions solid.
@@ -79,7 +97,7 @@
   Strict signature, installation and ordinary launch PID 5895 are verified.
   Share UI is deployed as `dpl_Gsjh8qTdCVimd1FYZnCpKCkht48D`; twelve disposable
   accounts and eighteen links, runner and private launch files were cleaned.
-- Preview 178 final-time behavior remains included. Final time uses one
+- Preview 178 was the former final-time design, superseded by 185. It used one
   movable/resizable block with direct date/start/end controls. Twenty-four unit
   checks, the App-contact and App/Safari full journeys (8 + 7 API stages), and
   final Chinese/German largest-text checks passed. Ordinary launch PID 5015 is
