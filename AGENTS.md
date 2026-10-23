@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 194 is the current installed development build. Creation omits the
+- Preview 195 is the current installed development build. Native creation separates
+  activity/location, candidate date/hour settings and optional activity ideas;
+  name wraps visually and Return normalizes newlines/dismisses input. Expand the
+  calendar directly under dates; retain centered Clear and move zone under hours.
+  Reuse existing components and preserve validation/create/share/invitation rules.
+  Source 982bf4e6 is pushed. Final product phone journey passed 329.095 seconds /
+  eight API stages; creation four language/text combinations 109.288 seconds and
+  date clear/rapid regression 101.995 seconds passed. Visible, unscrolled hourly
+  validation/retention passed 47.798 seconds. The mixed run's scrolling hour case
+  failed 41.666 seconds: video proves the menu reset before touch, cause/manual
+  impact unproven. Do NOT call that issue fixed or count unscrolled checks as
+  scrolling acceptance. German detail maximum-text blank also remains unresolved.
+  Strict signature, 248 App/18 config-script/shared input checks, install and normal
+  launch PID 7614 verified; ordinary 97 stays. Two accounts/one link, runner and
+  private files cleaned; no new App reports. No backend/web release or repeated
+  unit/domain/browser test; api/www rechecked Ready dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7.
+  See 195 QA/release for actual results, images and remaining menu observation.
+- Preview 194 was the previous development build. Creation omits the
   read-only timetable; keep activity/location, candidate dates, daily voting hours,
   time zone and optional activity ideas. The original create/share path opens an
   editable detail timetable. Remove creation table state, rebuild observers and

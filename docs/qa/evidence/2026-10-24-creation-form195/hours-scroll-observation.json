@@ -1,0 +1,14 @@
+{
+  "target": "07:00",
+  "actual": "01:30",
+  "beforeTouch": {
+    "seconds38_3": "06:00\u201312:00 viewport; 07:00 near touch target",
+    "seconds39_2": "00:30\u201306:00 viewport; 01:30 now at target",
+    "touchSynthesisSeconds": 39.59
+  },
+  "observation": "Menu scroll position reset before touch synthesis.",
+  "causeProven": false,
+  "manualUserImpactProven": false,
+  "resolved": false,
+  "scope": "This is not counted as a passed scrolling-menu test."
+}
