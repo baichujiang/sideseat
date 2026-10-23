@@ -687,6 +687,20 @@ import XCTest
             XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
             XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
         }
+        func verifySharePermissions(role: String, phase: String) {
+            let open = app.buttons["plan-share-open"]
+            XCTAssertTrue(open.waitForExistence(timeout: 10))
+            for _ in 0..<8 where !open.isHittable { app.scrollViews.firstMatch.swipeDown() }
+            XCTAssertTrue(open.isHittable); open.tap()
+            let copy = app.buttons["plan-copy-link"], system = app.buttons["plan-share-primary"]
+            XCTAssertTrue(copy.waitForExistence(timeout: 10)); XCTAssertTrue(system.exists)
+            XCTAssertEqual(app.buttons["plan-invite-contacts"].exists, role == "owner")
+            XCTAssertTrue(copy.isHittable && system.isHittable)
+            capture(app, "share-permissions-\(role)-\(phase)")
+            print("PLAN_SHARE_PERMISSION \(role) \(phase)")
+            app.navigationBars["分享计划"].buttons["完成"].tap()
+            XCTAssertTrue(copy.waitForNonExistence(timeout: 5))
+        }
 
         nativeSignIn(owner, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
@@ -748,6 +762,7 @@ import XCTest
         XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected && app.buttons["time-poll-cell-2"].isSelected)
         XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
         capture(app, "inline-information-saved-draft-preserved")
+        verifySharePermissions(role: "owner", phase: "COLLECTING")
         app.buttons["plan-share-open"].tap()
         app.buttons["plan-invite-contacts"].tap()
         let contact = app.buttons["plan-contact-\(fixture.peerID)"]
@@ -777,7 +792,7 @@ import XCTest
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch.waitForExistence(timeout: 20))
         openChatCard()
         XCTAssertFalse(app.buttons["time-poll-cell-0"].isSelected)
-        XCTAssertFalse(app.buttons["plan-invite-contacts"].exists)
+        verifySharePermissions(role: "participant", phase: "COLLECTING")
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         nativeWaitSaved(); nativePhase("contacts-peer-submitted")
         capture(app, "contacts-peer-inline-availability")
@@ -800,8 +815,10 @@ import XCTest
         capture(app, "contacts-review-final-invitees"); invitation.tap()
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
         nativePhase("contacts-formal-invitation")
+        verifySharePermissions(role: "owner", phase: "INVITING")
 
         nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
+        verifySharePermissions(role: "participant", phase: "INVITING")
         XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "plan-invitation-legend").count, 2)
         XCTAssertFalse(app.descendants(matching: .any)["plan-invitation-window-label"].exists)
@@ -816,12 +833,14 @@ import XCTest
         let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
         XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        verifySharePermissions(role: "owner", phase: "CONFIRMED")
         nativePhase("contacts-published")
 
         nativeSignIn(peer, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
         let confirmed = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
         XCTAssertTrue(confirmed.waitForExistence(timeout: 20)); confirmed.tap()
+        verifySharePermissions(role: "participant", phase: "CONFIRMED")
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20)); app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
         app.buttons["calendar-search"].tap()
@@ -1721,6 +1740,110 @@ import XCTest
         for id in ["time-poll-cell-0", "time-poll-cell-2"] where !app.buttons[id].isSelected { app.buttons[id].tap() }
         app.buttons["unified-plan-invite-window"].tap()
         verifyFinalTimeCellInteractions()
+    }
+
+    func testPlanShareSheetLayoutAndActions() throws {
+        struct Fixture: Decodable { let bundle: String; let finalBlockToken: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the disposable collecting layout plan.")
+        let f = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        for (language, large) in [("zh-Hans", false), ("zh-Hans", true), ("de", false), ("de", true)] {
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+                "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=\(large ? "dark" : "light")",
+                "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            let open = app.buttons["plan-share-open"]
+            XCTAssertTrue(open.waitForExistence(timeout: 25)); XCTAssertTrue(open.isHittable); open.tap()
+            let contacts = app.buttons["plan-invite-contacts"]
+            let copy = app.buttons["plan-copy-link"], system = app.buttons["plan-share-primary"]
+            XCTAssertTrue(copy.waitForExistence(timeout: 10))
+            let summary = app.descendants(matching: .any)["plan-share-summary"].firstMatch
+            XCTAssertTrue(summary.exists)
+            let shareTitle = language == "de" ? "Plan teilen" : "分享计划"
+            let shareNavigation = app.navigationBars[shareTitle]
+            let scroll = app.scrollViews.containing(.any, identifier: "plan-share-summary").firstMatch
+            XCTAssertTrue(scroll.exists)
+            func revealShareAction(_ action: XCUIElement) {
+                func viewport() -> CGRect {
+                    let bounds = scroll.frame.intersection(app.frame)
+                    let top = max(bounds.minY, shareNavigation.frame.maxY) + 4
+                    let bottom = min(bounds.maxY, app.frame.maxY - 12)
+                    return CGRect(x: bounds.minX, y: top, width: bounds.width, height: max(0, bottom - top))
+                }
+                for _ in 0..<8 {
+                    if action.isHittable && viewport().contains(action.frame) { break }
+                    if action.frame.minY < viewport().minY { scroll.swipeDown() }
+                    else { scroll.swipeUp() }
+                }
+                XCTAssertTrue(action.exists && action.isHittable)
+                XCTAssertTrue(viewport().contains(action.frame), "The entire action must be inside the visible share area")
+                XCTAssertGreaterThanOrEqual(action.frame.minY, shareNavigation.frame.maxY + 4)
+                XCTAssertLessThanOrEqual(action.frame.maxY, app.frame.maxY - 12)
+            }
+            if large { capture(app, "share-sheet-largest-top-\(language)") }
+            XCTAssertLessThanOrEqual(summary.frame.maxY, contacts.frame.minY + 0.5)
+            for action in [contacts, copy, system] {
+                revealShareAction(action)
+                XCTAssertTrue(action.exists && action.isHittable)
+                XCTAssertGreaterThanOrEqual(action.frame.width, 43.99)
+                XCTAssertGreaterThanOrEqual(action.frame.height, 43.99)
+                XCTAssertGreaterThanOrEqual(action.frame.minX, app.frame.minX - 0.5)
+                XCTAssertLessThanOrEqual(action.frame.maxX, app.frame.maxX + 0.5)
+                XCTAssertLessThanOrEqual(action.frame.maxY, app.frame.maxY - 12)
+                for text in action.staticTexts.allElementsBoundByIndex where text.frame != action.frame {
+                    XCTAssertGreaterThanOrEqual(text.frame.minX, action.frame.minX + 3)
+                    XCTAssertLessThanOrEqual(text.frame.maxX, action.frame.maxX - 3)
+                    XCTAssertGreaterThanOrEqual(text.frame.minY, action.frame.minY + 2)
+                    XCTAssertLessThanOrEqual(text.frame.maxY, action.frame.maxY - 2)
+                }
+            }
+            XCTAssertFalse(contacts.frame.intersects(copy.frame))
+            XCTAssertFalse(contacts.frame.intersects(system.frame))
+            XCTAssertFalse(copy.frame.intersects(system.frame))
+            XCTAssertLessThanOrEqual(contacts.frame.maxY, min(copy.frame.minY, system.frame.minY) + 0.5)
+            if large {
+                XCTAssertTrue(copy.frame.maxY <= system.frame.minY + 0.5 || system.frame.maxY <= copy.frame.minY + 0.5)
+                XCTAssertEqual(copy.frame.minX, system.frame.minX, accuracy: 1)
+                XCTAssertEqual(copy.frame.maxX, system.frame.maxX, accuracy: 1)
+            } else {
+                XCTAssertEqual(copy.frame.midY, system.frame.midY, accuracy: 2)
+            }
+            let size = large ? "largest" : "regular"
+            capture(app, "share-sheet-layout-\(size)-\(language)")
+            revealShareAction(copy)
+            if large { capture(app, "share-sheet-largest-bottom-\(language)") }
+            copy.tap()
+            XCTAssertTrue(copy.label.contains(language == "de" ? "Link kopiert" : "链接已复制"))
+            capture(app, "share-sheet-copied-\(size)-\(language)")
+            if language == "zh-Hans" && !large {
+                revealShareAction(system)
+                system.tap()
+                let copyLabels = NSPredicate(format: "label IN %@", ["Copy", "拷贝", "复制", "Kopieren"])
+                let cell = app.cells.matching(copyLabels).firstMatch
+                let systemCopy = cell.waitForExistence(timeout: 3) ? cell : app.buttons.matching(copyLabels).firstMatch
+                XCTAssertTrue(systemCopy.waitForExistence(timeout: 10))
+                capture(app, "share-sheet-system-activity")
+                systemCopy.tap()
+                XCTAssertTrue(systemCopy.waitForNonExistence(timeout: 10))
+                XCTAssertTrue(contacts.isHittable && copy.isHittable)
+            }
+            revealShareAction(contacts)
+            contacts.tap()
+            let send = app.buttons["plan-contact-send"]
+            XCTAssertTrue(send.waitForExistence(timeout: 15)); XCTAssertFalse(send.isEnabled)
+            capture(app, "share-sheet-contacts-\(size)-\(language)")
+            let cancel = language == "de" ? "Abbrechen" : "取消"
+            app.navigationBars.buttons.matching(NSPredicate(format: "label == %@", cancel)).firstMatch.tap()
+            XCTAssertTrue(send.waitForNonExistence(timeout: 10)); revealShareAction(copy)
+            let done = language == "de" ? "Fertig" : "完成"
+            app.navigationBars[shareTitle].buttons[done].tap()
+            XCTAssertTrue(copy.waitForNonExistence(timeout: 5)); XCTAssertTrue(open.isHittable)
+            app.terminate()
+        }
     }
 
     func testInlineInformationLargestText() throws {

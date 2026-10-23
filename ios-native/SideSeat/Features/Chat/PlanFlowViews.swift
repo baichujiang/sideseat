@@ -170,6 +170,7 @@ struct PlanActionButton: View {
 }
 
 struct PlanShareActions: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
     let store: TimePollStore
     @State private var showsShare = false
@@ -178,7 +179,7 @@ struct PlanShareActions: View {
         Button { showsShare = true } label: {
             Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
         }.buttonStyle(SSActionButtonStyle(size: .icon)).accessibilityIdentifier("plan-share-open")
-            .sheet(isPresented: $showsShare) { PlanShareSheet(poll: poll, store: store) }
+            .sheet(isPresented: $showsShare) { PlanShareSheet(poll: poll, store: store).dynamicTypeSize(typeSize) }
     }
 }
 
@@ -194,30 +195,58 @@ struct PlanShareSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Text(poll.title).font(.headline)
-                    if let start = poll.chosenStart, let end = poll.chosenEnd {
-                        Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
-                            .font(.subheadline).foregroundStyle(.secondary)
+            ScrollView {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXL) {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        Text(poll.title).font(.title3.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let start = poll.chosenStart, let end = poll.chosenEnd {
+                            Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
+                                .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
-                }
-                Section {
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("plan-share-summary")
+
                     if poll.isOwner && ["COLLECTING", "INVITING", "CONFIRMED"].contains(poll.planningPhase) {
-                        Button { showsContacts = true } label: {
-                            Label(sent ? "Sent · invite more" : "Invite App contacts", systemImage: "person.crop.circle.badge.plus")
-                        }.accessibilityIdentifier("plan-invite-contacts")
+                        SSManagementRow(
+                            title: AppLocalization.string(sent ? "Sent · invite more" : "App friends"),
+                            subtitle: AppLocalization.string("Choose contacts and send a plan card."),
+                            systemImage: "person.crop.circle.badge.plus", showDivider: false,
+                            accessibilityID: "plan-invite-contacts"
+                        ) { showsContacts = true }
+                        .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .ssActionOutline()
                     }
-                    ShareLink(item: poll.shareUrl) {
-                        Label("Share web link", systemImage: "square.and.arrow.up")
-                    }.accessibilityIdentifier("plan-share-primary")
-                    Button {
-                        UIPasteboard.general.url = poll.shareUrl; copied = true
-                    } label: {
-                        Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
-                    }.accessibilityIdentifier("plan-copy-link")
+
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        Text("For friends without the App")
+                            .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .fixedSize(horizontal: false, vertical: true)
+                        let layout = typeSize.isAccessibilitySize
+                            ? AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+                            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceSM))
+                        layout {
+                            ShareLink(item: poll.shareUrl) {
+                                shareLabel("Share web link", symbol: "square.and.arrow.up")
+                            }.accessibilityIdentifier("plan-share-primary")
+                            Button {
+                                UIPasteboard.general.url = poll.shareUrl; copied = true
+                            } label: {
+                                shareLabel(copied ? "Link copied" : "Copy link", symbol: copied ? "checkmark" : "doc.on.doc")
+                            }
+                            .accessibilityLabel(Text(copied ? "Link copied" : "Copy link"))
+                            .accessibilityIdentifier("plan-copy-link")
+                        }
+                        .buttonStyle(SSActionButtonStyle())
+                    }
                 }
+                .padding(SideSeatTheme.spaceLG)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .background(SideSeatTheme.bgGrouped)
             .navigationTitle("Share plan").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction() }.ssStandaloneAction() }
             .sheet(isPresented: $showsContacts) {
@@ -228,7 +257,24 @@ struct PlanShareSheet: View {
                     NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
                 }.dynamicTypeSize(typeSize)
             }
-        }.presentationDetents([.medium, .large]).dynamicTypeSize(typeSize)
+        }
+        .presentationDetents(typeSize.isAccessibilitySize ? [.large] : [.medium, .large])
+        .presentationDragIndicator(.visible)
+        .presentationBackground(SideSeatTheme.bgGrouped)
+        .presentationCornerRadius(SideSeatTheme.cardRadius)
+        .dynamicTypeSize(typeSize)
+    }
+
+    private func shareLabel(_ title: String, symbol: String) -> some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(VStackLayout(spacing: SideSeatTheme.spaceSM))
+        return layout {
+            Image(systemName: symbol).font(.title3).accessibilityHidden(true)
+            Text(LocalizedStringKey(title))
+        }
+        .frame(maxWidth: .infinity, minHeight: 52)
+        .accessibilityElement(children: .combine)
     }
 }
 
