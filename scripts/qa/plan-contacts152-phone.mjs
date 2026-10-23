@@ -20,7 +20,7 @@ async function login(a) {
 if (mode === 'prepare') {
   await assert.rejects(fs.access(privatePath), 'Clean the earlier disposable fixture before preparing another.');
   const suffix = randomBytes(4).toString('hex');
-  const f = { title: `Contact plan ${suffix}`, bundle: 'app.sideseat.mobile.preview', accounts: [] };
+  const f = { title: `Contact plan ${suffix}`, bundle: 'app.sideseat.mobile.preview', activityTitle: '一起打桌游 ' + suffix, accounts: [] };
   const persist = () => fs.writeFile(privatePath, JSON.stringify(f), { mode: 0o600 }); await persist();
   for (const [role, name] of [['owner', 'Ming'], ['participant', 'Lin']]) {
     const a = { role, identifier: `pqa_p152_${role === 'owner' ? 'o' : 'p'}_${suffix}`, password: randomBytes(22).toString('base64url') };
@@ -103,9 +103,10 @@ if (mode === 'prepare') {
     await fs.writeFile(`${out}/${label}-layout-data.json`, JSON.stringify({ submitted: 8, ownerSubmitted: false,
       phase: p.phase, invitationVersion: p.invitationVersion, at: new Date().toISOString() }, null, 2));
     console.log('Prepared eight submitted guest responses for the separate presentation check.');
-  } else if (mode === 'observe') {
+  } else if (mode === 'observe' || mode === 'observe-direct' || mode === 'observe-ideas') {
+    const ideas = mode === 'observe-ideas', direct = mode !== 'observe';
     assert(logPath);
-    const phases = ['contacts-created', 'contacts-delivered', 'contacts-owner-submitted', 'contacts-peer-submitted', 'contacts-formal-invitation', 'contacts-peer-accepted', 'contacts-published', 'contacts-calendar-verified'];
+    const phases = ideas ? ['fixed-created', 'fixed-delivered', 'fixed-suggested', 'fixed-invited', 'fixed-accepted', 'fixed-published', 'fixed-calendar'] : direct ? ['direct-created', 'direct-delivered', 'direct-formal-invitation', 'direct-peer-accepted', 'direct-published', 'direct-calendar-verified'] : ['contacts-created', 'contacts-delivered', 'contacts-owner-submitted', 'contacts-peer-submitted', 'contacts-formal-invitation', 'contacts-peer-accepted', 'contacts-published', 'contacts-calendar-verified'];
     const checks = [], seen = new Set(); let failure;
     async function verify(phase) {
       if (!f.pollToken) {
@@ -114,35 +115,44 @@ if (mode === 'prepare') {
       }
       const route = `/api/v1/time-polls/${f.pollToken}`;
       const [p, theirs, list, history] = await Promise.all([call(route, owner), call(route, peer), call('/api/v1/time-polls', peer), call(`/api/v1/connections/${f.connectionID}/messages`, peer)]);
-      const index = phases.indexOf(phase), formal = index >= 4, published = index >= 6;
+      const index = phases.indexOf(phase), formal = index >= (ideas ? 3 : direct ? 2 : 4), published = index >= (ideas ? 5 : direct ? 4 : 6);
       assert.equal(p.phase, published ? 'CONFIRMED' : formal ? 'INVITING' : 'COLLECTING');
-      assert.equal(p.title, f.title);
-      assert.equal(p.summary.participantCount, index >= 3 ? 2 : index >= 2 ? 1 : 0);
-      assert.deepEqual(p.mySlotIds, index >= 2 ? [0, 1, 2, 3] : []);
-      assert.deepEqual(theirs.mySlotIds, index >= 3 ? [0, 1, 2, 3] : []);
+      assert.equal(p.title, ideas && formal ? f.activityTitle : f.title);
+      assert.equal(p.planningMode, 'COLLECT');
+      assert.equal(p.invitationVersion ?? 0, formal ? 1 : 0);
+      if (ideas) { assert.equal(p.location, '校园'); assert.equal(p.activitySelection.isOpen, !formal); }
+      assert.equal(p.summary.participantCount, direct ? 0 : index >= 3 ? 2 : index >= 2 ? 1 : 0);
+      assert.deepEqual(p.mySlotIds, !direct && index >= 2 ? [0, 1, 2, 3] : []);
+      assert.deepEqual(theirs.mySlotIds, !direct && index >= 3 ? [0, 1, 2, 3] : []);
       const item = list.polls.find(x => x.token === f.pollToken);
       if (index === 0) assert.equal(item, undefined);
-      else { assert(item); assert.equal(item.didRespond, index >= 3); }
+      else { assert(item); assert.equal(item.didRespond, !direct && index >= 3); }
       const messages = history.messages.filter(m => m.body?.includes('/time-polls/' + f.pollToken));
       assert.equal(messages.length, index === 0 ? 0 : 1);
       if (index >= 1 && index < 3) assert.equal(theirs.didRespond, false);
       if (formal) {
-        assert.equal(p.invitationVersion, 1); assert.equal(p.invitations.filter(i => i.status === 'ACCEPTED').length, index >= 5 ? 2 : 1);
-        assert.equal(new Date(p.chosenEnd) - new Date(p.chosenStart), 7200000);
+        assert.equal(p.invitationVersion, 1); assert.equal(p.invitations.filter(i => i.status === 'ACCEPTED').length, index >= (ideas ? 4 : direct ? 3 : 5) ? 2 : 1);
+        assert.equal(new Date(p.chosenEnd) - new Date(p.chosenStart), direct ? 3600000 : 7200000);
         const localDay = new Intl.DateTimeFormat('en-CA', { timeZone: p.timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
-        assert.notEqual(localDay.format(new Date(p.chosenStart)), localDay.format(new Date(p.chosenEnd)), 'Final invitation crosses local midnight.');
+        if (!direct) assert.notEqual(localDay.format(new Date(p.chosenStart)), localDay.format(new Date(p.chosenEnd)), 'Final invitation crosses local midnight.');
       }
       const day = (p.chosenStart || p.slots[0].start).slice(0, 10);
       const calendars = await Promise.all([owner, peer].map(async a => (await call(`/api/v1/home/schedule?windowStart=${day}T00:00:00Z&windowEnd=${day}T23:59:59Z`, a)).studyEntries.filter(e => e.timePollToken === f.pollToken)));
       assert(calendars.every(items => items.length === (published ? 1 : 0)));
+      if (published) for (const rows of calendars) {
+        assert.equal(rows[0].title, p.title); assert.equal(rows[0].location ?? '', p.location ?? '');
+        assert.equal(Date.parse(rows[0].startISO), Date.parse(p.chosenStart));
+        assert.equal(Date.parse(rows[0].endISO), Date.parse(p.chosenEnd));
+      }
       return { phase, actualPhase: p.phase, title: p.title, location: p.location, responses: p.summary.participantCount, ownerSlots: p.mySlotIds, peerSlots: theirs.mySlotIds,
+        chosenStart: p.chosenStart, chosenEnd: p.chosenEnd, invitationVersion: p.invitationVersion ?? 0,
         cardCount: messages.length, accepted: p.invitations.filter(i => i.status === 'ACCEPTED').length, calendars: calendars.map(items => items.length), at: new Date().toISOString() };
     }
     try {
       const deadline = Date.now() + 12 * 60_000;
       while (checks.length < phases.length && Date.now() < deadline) {
         const log = await fs.readFile(logPath, 'utf8').catch(() => '');
-        for (const match of log.matchAll(/NATIVE_PARTICIPANT_PHASE (contacts-[a-z-]+)/g)) {
+        for (const match of log.matchAll(/NATIVE_PARTICIPANT_PHASE ((?:contacts|direct|fixed)-[a-z-]+)/g)) {
           const phase = match[1]; if (!phases.includes(phase) || seen.has(phase)) continue;
           checks.push(await verify(phase)); seen.add(phase);
           await fs.writeFile(`${out}/${label}-api.json`, JSON.stringify({ passed: false, checks }, null, 2));
@@ -151,7 +161,7 @@ if (mode === 'prepare') {
         if (log.includes('** TEST EXECUTE FAILED **') || log.includes('** TEST FAILED **')) throw new Error('Phone test failed; partial API checks retained.');
         await new Promise(resolve => setTimeout(resolve, 200));
       }
-      assert.equal(checks.length, phases.length, 'All eight phone stages must be observed.');
+      assert.equal(checks.length, phases.length, 'All phone stages must be observed.');
     } catch (cause) { failure = cause; }
     await fs.writeFile(`${out}/${label}-api.json`, JSON.stringify({ passed: !failure, checks, failure: failure?.message ?? null }, null, 2));
     if (failure) throw failure;

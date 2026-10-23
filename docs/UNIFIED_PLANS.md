@@ -3,6 +3,43 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## One timetable from creation to invitation — Preview 187
+
+The native creation page opens directly with activity/location and the shared
+editable timetable. Amber cells choose the final invitation interval; duration
+comes from those cells. There is no native “Time already set” branch, separate
+start/date picker, duration picker or required group-size step. A secondary
+“Collect availability first” switches the same table to green personal availability;
+switching back preserves both local selections. Any unsubmitted green selection
+also passes into the existing per-account durable availability draft when the plan
+is created through the final-time path; it is never submitted implicitly. Dates are compact and expandable.
+Changing candidate dates or collection hours preserves selections by their actual
+start instants rather than silently shifting their IDs. Returning to either table
+mode scrolls to its own selected time, or the default collection start.
+
+Next creates an ordinary COLLECTING plan and opens the existing invitation review.
+No one needs to submit availability first. The review can add existing App contacts
+through the existing card-delivery picker, select invitees, or retain the existing
+link-capacity choice. Sending remains explicit. Back returns to the same timetable;
+final-time drafts persist locally per account and token and are invalidated by a
+new invitation version. Selecting a cell makes no HTTP request, submits no personal
+availability and does not send an invitation.
+
+Collecting availability creates the same COLLECTING plan and opens the existing
+share panel; any selected personal availability is submitted only by that explicit
+share action. Later final-time selection uses the same grid and invitation review.
+Friends' activity suggestions remain an independent optional checkbox. If enabled,
+the initial action shares for suggestions while preserving the owner's local final
+time. The activity board stays visible; an activity must be chosen in review before
+formal invitations can be sent. No extra two-choice start page is introduced.
+
+Creation and detail use one timetable model, touch surface, range validator and
+summary. The share sheet and App-contact picker are also reused. Existing FIXED
+records, their APIs and legacy constraints remain supported, but the native create
+page does not create new FIXED records. The older FIXED UI descriptions below are
+historical contracts for retained records. No schema, endpoint, web, RSVP, owner
+publication, capacity, expiry or Calendar rule changes in this stage.
+
 ## Edit the visible plan information in place — Preview 186
 
 Before confirming an activity or issuing an invitation, the organizer taps the

@@ -374,7 +374,7 @@ import XCTest
         activityRevealNative(app.buttons["plan-activity-cancel"]); app.buttons["plan-activity-cancel"].tap()
     }
 
-    func testFixedTimeActivityIdeasInviteAndCalendar() throws {
+    func testTimetableActivityIdeasInviteAndCalendar() throws {
         struct FixedFixture: Decodable {
             let title: String; let activityTitle: String; let bundle: String
             let connectionID: String; let peerID: String; let accounts: [NativeAccount]
@@ -408,20 +408,21 @@ import XCTest
         let location = app.textFields["unified-plan-location"]
         location.tap(); location.typeText("校园\n")
         app.buttons["plan-start-together"].tap()
-        let fixed = app.buttons["plan-mode-fixed"]
-        XCTAssertTrue(fixed.isHittable); fixed.tap()
-        XCTAssertTrue(app.datePickers["unified-plan-fixed-start"].waitForExistence(timeout: 10))
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        assertFinalClock("09:00", "10:00")
         XCTAssertTrue(app.buttons["plan-start-together"].isSelected)
         XCTAssertEqual(title.value as? String, fixture.title)
         XCTAssertEqual(location.value as? String, "校园")
         capture(app, "fixed-ideas-create-both-options")
         app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
+        app.navigationBars.buttons["完成"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
         XCTAssertFalse(app.buttons["time-poll-submit"].exists)
-        XCTAssertFalse(app.buttons["time-poll-cell-0"].exists)
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
         XCTAssertTrue(app.buttons["plan-activity-suggest"].exists)
-        XCTAssertFalse(app.buttons["unified-plan-review-fixed"].isEnabled)
+        XCTAssertFalse(app.buttons["unified-plan-review-roster"].isEnabled)
         nativePhase("fixed-created"); capture(app, "fixed-ideas-awaiting-activity")
         app.buttons["plan-share-open"].tap()
         app.buttons["plan-invite-contacts"].tap()
@@ -432,7 +433,6 @@ import XCTest
         app.navigationBars.buttons["完成"].tap()
         nativePhase("fixed-delivered")
         nativeSignIn(peer, bundle: fixture.bundle); openChat()
-        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
         app.buttons["plan-activity-suggest"].tap()
         let quickField = app.textFields["plan-activity-title"]
@@ -481,6 +481,7 @@ import XCTest
         nativePhase("fixed-suggested"); capture(app, "fixed-ideas-peer-suggestion")
         nativeSignIn(peer, bundle: fixture.bundle, accessibility: true); openChat()
         let largeCards = app.otherElements.matching(NSPredicate(format: "identifier BEGINSWITH 'plan-activity-idea-'"))
+        if !largeCards.firstMatch.exists { app.buttons["plan-activity-open-ideas"].tap() }
         let largeFirst = largeCards.element(boundBy: 0), largeSecond = largeCards.element(boundBy: 1)
         XCTAssertTrue(largeSecond.waitForExistence(timeout: 15))
         XCTAssertEqual(largeFirst.frame.minX, largeSecond.frame.minX, accuracy: 2)
@@ -499,13 +500,13 @@ import XCTest
         app.buttons["plan-activity-cancel"].tap()
 
         nativeSignIn(owner, bundle: fixture.bundle); openPlan()
-        app.buttons["unified-plan-review-fixed"].tap()
+        app.buttons["unified-plan-review-roster"].tap()
         let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-' AND label CONTAINS %@", fixture.activityTitle)).firstMatch
         XCTAssertTrue(choice.waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["unified-plan-send-invitations"].isEnabled)
         choice.tap()
         XCTAssertTrue(app.staticTexts["校园"].exists)
-        XCTAssertFalse(app.buttons["unified-plan-adjust-time"].exists)
+        XCTAssertTrue(app.buttons["unified-plan-adjust-time"].exists)
         capture(app, "fixed-ideas-review-before-inviting")
         app.buttons["unified-plan-send-invitations"].tap()
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
@@ -688,7 +689,10 @@ import XCTest
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + " draft\n")
+        app.buttons["plan-collect-availability"].tap()
         app.buttons["time-poll-create-confirm"].tap()
+        XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
+        app.navigationBars.buttons["完成"].tap()
         XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
         app.staticTexts["time-poll-detail-title"].tap()
         let initialNameEditor = app.textFields["plan-edit-title"].exists ? app.textFields["plan-edit-title"] : app.textViews["plan-edit-title"]
@@ -808,6 +812,146 @@ import XCTest
         let result = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", fixture.title)).firstMatch
         XCTAssertTrue(result.waitForExistence(timeout: 20))
         nativePhase("contacts-calendar-verified"); capture(app, "contacts-calendar-result")
+    }
+
+
+    func testDirectTimetableCreateInviteConfirmAndCalendar() throws {
+        struct ContactFixture: Decodable {
+            let title: String; let bundle: String; let connectionID: String; let peerID: String; let accounts: [NativeAccount]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable accepted App contacts.")
+        let f = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        let peer = try XCTUnwrap(f.accounts.first { $0.role == "participant" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        func openOwner() {
+            app.tabBars.buttons["计划"].tap()
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", f.title)).firstMatch
+            XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+        }
+        nativeSignIn(owner, bundle: f.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+        let title = app.textFields["time-poll-title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(f.title + "\n")
+        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        let next = app.buttons["time-poll-create-confirm"]
+        XCTAssertFalse(next.isEnabled)
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        assertFinalClock("09:00", "10:00")
+        app.buttons["plan-start-together"].tap(); app.buttons["plan-start-together"].tap()
+        app.buttons["plan-collect-availability"].tap()
+        app.buttons["time-poll-cell-4"].tap()
+        app.buttons["plan-collect-availability"].tap()
+        assertFinalClock("09:00", "10:00")
+        capture(app, "unified-create-direct-timetable"); next.tap()
+        let send = app.buttons["unified-plan-send-invitations"]
+        XCTAssertTrue(send.waitForExistence(timeout: 20))
+        app.buttons["unified-plan-adjust-time"].tap()
+        assertFinalClock("09:00", "10:00")
+        app.buttons["time-poll-cancel-final"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].isSelected)
+        app.buttons["unified-plan-invite-window"].tap()
+        assertFinalClock("09:00", "10:00")
+        // A saved local final draft survives leaving the page and opening the plan again.
+        nativeSignIn(owner, bundle: f.bundle); openOwner()
+        XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 20))
+        assertFinalClock("09:00", "10:00")
+        nativePhase("direct-created")
+        app.buttons["unified-plan-review-roster"].tap()
+        let contacts = app.buttons["unified-plan-add-contacts"]
+        XCTAssertTrue(contacts.waitForExistence(timeout: 10)); contacts.tap()
+        let contact = app.buttons["plan-contact-\(f.peerID)"]
+        XCTAssertTrue(contact.waitForExistence(timeout: 15)); contact.tap()
+        app.buttons["plan-contact-send"].tap()
+        XCTAssertTrue(contacts.waitForExistence(timeout: 20))
+        let person = try XCTUnwrap(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-invite-person-' ")).allElementsBoundByIndex.first { $0.isEnabled })
+        XCTAssertEqual(person.value as? String, "已选择")
+        let linkOff = app.buttons["unified-plan-link-off"]
+        for _ in 0..<6 where !linkOff.isHittable || linkOff.frame.maxY > send.frame.minY - 12 {
+            app.swipeUp()
+        }
+        XCTAssertTrue(linkOff.isHittable); XCTAssertLessThan(linkOff.frame.maxY, send.frame.minY)
+        capture(app, "unified-direct-before-link-choice"); linkOff.tap()
+        XCTAssertTrue(send.waitForExistence(timeout: 10))
+        nativePhase("direct-delivered"); capture(app, "unified-direct-roster")
+        XCTAssertTrue(send.isEnabled); send.tap()
+        XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
+        nativePhase("direct-formal-invitation")
+        nativeSignIn(peer, bundle: f.bundle)
+        app.tabBars.buttons["消息"].tap()
+        let row = app.buttons["inbox-row-\(f.connectionID)"]
+        XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
+        let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 20)); card.tap()
+        let accept = app.buttons["unified-plan-accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 20))
+        capture(app, "unified-direct-invitation"); accept.tap()
+        XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
+        nativePhase("direct-peer-accepted")
+        nativeSignIn(owner, bundle: f.bundle); openOwner()
+        app.buttons["unified-plan-publish"].tap()
+        let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
+        XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
+        XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        nativePhase("direct-published")
+        nativeSignIn(peer, bundle: f.bundle)
+        app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
+        let confirmed = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", f.title)).firstMatch
+        XCTAssertTrue(confirmed.waitForExistence(timeout: 20)); confirmed.tap()
+        let calendar = app.buttons["plan-view-calendar"]
+        XCTAssertTrue(calendar.waitForExistence(timeout: 20)); calendar.tap()
+        XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
+        app.buttons["calendar-search"].tap()
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 10)); search.tap(); search.typeText(f.title)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'calendar-search-result-' AND label CONTAINS %@", f.title)).firstMatch.waitForExistence(timeout: 20))
+        nativePhase("direct-calendar-verified"); capture(app, "unified-direct-calendar")
+    }
+
+    func testUnifiedCreationLargestText() throws {
+        struct ContactFixture: Decodable { let bundle: String; let accounts: [NativeAccount] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires disposable owner.")
+        let f = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(f.accounts.first { $0.role == "owner" })
+        for language in ["zh-Hans", "de"] {
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: f.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"]
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            let tab = language == "de" ? "Pläne" : "计划"
+            XCTAssertTrue(app.tabBars.buttons[tab].waitForExistence(timeout: 20)); app.tabBars.buttons[tab].tap()
+            let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
+            XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
+            let title = app.textFields["time-poll-title"]
+            XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("周末一起复习\n")
+            let next = app.buttons["time-poll-create-confirm"]
+            XCTAssertFalse(next.isEnabled)
+            let scroll = app.scrollViews.firstMatch
+            let first = app.buttons["time-poll-cell-0"]
+            let second = app.buttons["time-poll-cell-2"]
+            let top = app.navigationBars.firstMatch.frame.maxY + 12
+            for _ in 0..<8 where !first.isHittable || first.frame.minY < top || second.frame.maxY > next.frame.minY - 20 {
+                if first.frame.minY < top { scroll.swipeDown() } else { scroll.swipeUp() }
+            }
+            capture(app, "unified-create-largest-before-selection-\(language)")
+            XCTAssertTrue(first.isHittable); XCTAssertLessThan(second.frame.maxY, next.frame.minY)
+            first.tap(); second.tap()
+            capture(app, "unified-create-largest-after-selection-\(language)")
+            XCTAssertTrue(first.isSelected && second.isSelected)
+            XCTAssertTrue(next.isEnabled); XCTAssertGreaterThanOrEqual(next.frame.height, 44)
+            capture(app, "unified-create-largest-\(language)")
+            app.buttons["plan-collect-availability"].tap()
+            app.buttons["time-poll-cell-4"].tap()
+            capture(app, "unified-create-collect-largest-\(language)")
+            app.buttons["plan-collect-availability"].tap()
+            XCTAssertTrue(next.isEnabled); assertFinalClock("09:00", "10:00")
+            capture(app, "unified-create-both-drafts-largest-\(language)")
+            app.terminate()
+        }
     }
 
     func testNativeContactCardDarkAccessibilityAfterFullFlow() throws {
@@ -1340,7 +1484,9 @@ import XCTest
                 "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
             let choose = app.buttons["unified-plan-invite-window"]
-            XCTAssertTrue(choose.waitForExistence(timeout: 25)); choose.tap()
+            if choose.waitForExistence(timeout: 2) { choose.tap() }
+            XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 20))
+            if app.buttons["time-poll-reset-final"].exists { app.buttons["time-poll-reset-final"].tap() }
             let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"]
             XCTAssertTrue(first.waitForExistence(timeout: 10)); first.tap(); second.tap()
             let review = app.buttons["unified-plan-review-roster"]

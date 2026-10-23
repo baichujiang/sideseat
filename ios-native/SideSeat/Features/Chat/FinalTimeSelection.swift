@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct FinalTimeControls: View {
-    let poll: NativeTimePoll
+    let slots: [NativeTimePoll.Slot]
+    let timeZone: String
     @Binding var selection: Set<Int>
 
     var body: some View {
-        let slots = poll.finalTimeSlots
         let range = TimePollFinalRange.selected(selection, slots: slots)
         HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
             VStack(alignment: .leading, spacing: 4) {
                 if let range {
-                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: poll.timeZone))
+                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: timeZone))
                         .font(.subheadline.weight(.semibold))
                         .accessibilityIdentifier("time-poll-final-summary")
                     Text(Duration.seconds(range.duration).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated).locale(AppLocalization.selectedLanguage.locale)))

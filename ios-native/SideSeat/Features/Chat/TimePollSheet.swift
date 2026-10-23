@@ -98,90 +98,79 @@ struct TimePollSheet: View {
 struct TimePollCreateView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.locale) private var locale
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var title = ""
-    @State private var dates: Set<DateComponents> = Set((1...7).compactMap {
-        Calendar.current.date(byAdding: .day, value: $0, to: Date())
-    }.map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
+    @State private var location = ""
+    @State private var dates: Set<DateComponents>
+    @State private var table: TimePollTimetable
     @State private var startMinute = 9 * 60
     @State private var endMinute = 17 * 60
-    @State private var planningMode = "COLLECT"
+    @State private var collectingAvailability = false
     @State private var chooseActivityTogether = false
     @State private var showsDateOptions = false
-    @FocusState private var titleFocused: Bool
-    @FocusState private var locationFocused: Bool
-    @State private var location = ""
-    @State private var durationMinutes = 60
-    @State private var expectedCount = 5
-    @State private var fixedStart = Date(timeIntervalSince1970: ceil(Date().addingTimeInterval(3600).timeIntervalSince1970 / 900) * 900)
+    @State private var availability = Set<Int>()
+    @State private var finalSelected = Set<Int>()
     @State private var creating = false
     @State private var error: String?
     @State private var createKey = UUID().uuidString
+    @FocusState private var titleFocused: Bool
+    @FocusState private var locationFocused: Bool
     let onCreate: (NativeTimePoll) -> Void
 
+    init(onCreate: @escaping (NativeTimePoll) -> Void) {
+        self.onCreate = onCreate
+        let dates = Set((1...7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: Date()) }
+            .map { Calendar.current.dateComponents([.era, .year, .month, .day], from: $0) })
+        _dates = State(initialValue: dates)
+        _table = State(initialValue: Self.timetable(dates: dates, from: 540, until: 1020))
+    }
+
+    private static func timetable(dates: Set<DateComponents>, from: Int, until: Int) -> TimePollTimetable {
+        let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
+        let keys = dates.compactMap { Calendar.current.date(from: $0) }.map { formatter.string(from: $0) }.sorted()
+        return .init(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from,
+                     slots: TimePollTimetable.slots(dates: keys, timeZone: TimeZone.current.identifier, startMinute: from, endMinute: until))
+    }
+    private var finalRange: TimePollFinalRange? { TimePollFinalRange.selected(finalSelected, slots: table.finalTimeSlots) }
+    private var candidateDateSummary: String {
+        let values = dates.compactMap { Calendar.current.date(from: $0) }.sorted()
+        guard let first = values.first, let last = values.last else { return AppLocalization.string("Choose at least one date.") }
+        let formatter = DateIntervalFormatter(); formatter.locale = AppLocalization.selectedLanguage.locale
+        formatter.dateStyle = .medium; formatter.timeStyle = .none
+        return formatter.string(from: first, to: last)
+    }
+
     var body: some View {
-        Form {
-            Section("Activity") {
+        ScrollView {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
                 TextField(chooseActivityTogether ? "For example: what shall we do this weekend?" : "For example: Friday dinner", text: $title)
-                    .font(.title3.weight(.medium)).focused($titleFocused)
-                    .submitLabel(.done).onSubmit { titleFocused = false }
+                    .font(.title2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary)
+                    .focused($titleFocused).submitLabel(.done).onSubmit { titleFocused = false }
                     .accessibilityIdentifier("time-poll-title")
-                TextField("Location (optional)", text: $location)
-                    .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
-                    .accessibilityIdentifier("unified-plan-location")
+                HStack {
+                    Image(systemName: "mappin.and.ellipse").foregroundStyle(.secondary)
+                    TextField("Location (optional)", text: $location).foregroundStyle(SideSeatTheme.textPrimary)
+                        .focused($locationFocused).submitLabel(.done).onSubmit { locationFocused = false }
+                        .accessibilityIdentifier("unified-plan-location")
+                }.frame(minHeight: 44)
                 Button {
                     chooseActivityTogether.toggle(); titleFocused = false; locationFocused = false
                 } label: {
-                    HStack(spacing: SideSeatTheme.spaceSM) {
-                        Image(systemName: chooseActivityTogether ? "checkmark.square.fill" : "square")
-                            .font(.title3).accessibilityHidden(true)
-                        Text("Friends can suggest activities").font(.subheadline)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
-                    }.frame(minHeight: 44).contentShape(Rectangle())
+                    Label("Friends can suggest activities", systemImage: chooseActivityTogether ? "checkmark.square.fill" : "square")
+                        .font(.subheadline).frame(minHeight: 44)
                 }.buttonStyle(.plain).foregroundStyle(SideSeatTheme.utilityAction)
                     .accessibilityIdentifier("plan-start-together")
-                    .accessibilityLabel("Friends can suggest activities")
                     .accessibilityValue(AppLocalization.string(chooseActivityTogether ? "Selected" : "Not selected"))
                     .accessibilityAddTraits(chooseActivityTogether ? .isSelected : [])
-            }
-            Section {
-                if planningMode == "FIXED" {
-                    PlanAdaptiveRow {
-                        Text("Starts")
-                    } trailing: {
-                        DatePicker("Starts", selection: $fixedStart, in: Date()...).labelsHidden()
-                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                            .accessibilityIdentifier("unified-plan-fixed-start")
-                    }
-                    Picker("Activity duration", selection: $durationMinutes) {
-                        ForEach([30, 45, 60, 90, 120, 180, 240], id: \.self) {
-                            Text(String(format: AppLocalization.string("%d minutes"), $0)).tag($0)
-                        }
-                    }.accessibilityIdentifier("unified-plan-duration")
-                    Stepper(String(format: AppLocalization.string("%d participants including you"), expectedCount), value: $expectedCount, in: 2...20)
-                        .accessibilityIdentifier("unified-plan-participant-count")
-                    Button("Find a time together instead") { planningMode = "COLLECT"; titleFocused = false }
-                        .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-mode-collect")
-                } else {
-                    Button {
-                        titleFocused = false; locationFocused = false; showsDateOptions.toggle()
-                    } label: {
-                        HStack(spacing: SideSeatTheme.spaceMD) {
-                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                                Label("Dates to find a time", systemImage: "calendar")
-                                Text(candidateDateSummary).font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                Text(clock(startMinute) + "–" + clock(endMinute))
-                                    .font(.caption.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            }.frame(maxWidth: .infinity, alignment: .leading)
-                            Image(systemName: showsDateOptions ? "chevron.down" : "chevron.right").font(.caption.weight(.semibold)).accessibilityHidden(true)
-                        }.padding(.vertical, SideSeatTheme.spaceXS).contentShape(Rectangle())
-                    }.buttonStyle(SSActionButtonStyle()).accessibilityIdentifier("plan-date-options")
-                        .accessibilityValue(showsDateOptions ? "Expanded" : "Collapsed")
-                    if showsDateOptions {
-                        MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
-                            .accessibilityIdentifier("time-poll-dates")
+                Button {
+                    titleFocused = false; locationFocused = false; showsDateOptions.toggle()
+                } label: { Label(candidateDateSummary, systemImage: "calendar") }
+                    .buttonStyle(SSActionButtonStyle(size: .compact)).accessibilityIdentifier("plan-date-options")
+                if showsDateOptions {
+                    MultiDatePicker("Choose dates", selection: $dates, in: Calendar.current.startOfDay(for: Date())...)
+                        .accessibilityIdentifier("time-poll-dates")
+                    if collectingAvailability {
                         Picker("From", selection: $startMinute) {
                             ForEach(Array(stride(from: 0, to: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
                         }.accessibilityIdentifier("time-poll-from")
@@ -189,79 +178,83 @@ struct TimePollCreateView: View {
                             ForEach(Array(stride(from: 30, through: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
                         }.accessibilityIdentifier("time-poll-until")
                     }
-                        Button("Time already set?") { planningMode = "FIXED"; titleFocused = false }
-                            .font(.subheadline).frame(minHeight: 44).accessibilityIdentifier("plan-mode-fixed")
                 }
-            } header: { Text("When") } footer: {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    Text(LocalizedStringKey(planningMode == "FIXED" ? (chooseActivityTogether ? "Time is set. Choose the activity together before sending a formal invitation." : "Collect replies first, then send the final plan whenever you are ready.") : "Everyone can fill free time on the same timetable."))
-                    Text(String(format: AppLocalization.string("All times in %@"), TimeZone.current.identifier))
-                }
-            }
-            if let message = validationMessage { Section { Text(message).font(.footnote).foregroundStyle(SideSeatTheme.danger) } }
-            if let error { Section { Text(error).foregroundStyle(SideSeatTheme.danger) } }
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
-        .onChange(of: "\(title)|\(location)|\(durationMinutes)|\(expectedCount)|\(planningMode)|\(chooseActivityTogether)|\(fixedStart)|\(dates)|\(startMinute)|\(endMinute)") { _, _ in createKey = UUID().uuidString }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
+                Text(collectingAvailability ? "My availability" : "Choose final time").font(.subheadline.weight(.semibold))
+                TimePollGrid(table: table, selected: $availability, editable: collectingAvailability,
+                             pickingFinalTime: !collectingAvailability, finalSelected: $finalSelected,
+                             showsResponses: false, bounded: true) {}
+                    .padding(.horizontal, -SideSeatTheme.spaceMD)
+                Text(table.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                if let message = validationMessage { Text(message).font(.caption).foregroundStyle(SideSeatTheme.danger) }
+                if let error { Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger) }
+            }.padding(SideSeatTheme.spaceMD)
+        }.scrollDismissesKeyboard(.interactively).background(SideSeatTheme.bg)
+            .navigationTitle("Start a plan").navigationBarTitleDisplayMode(.inline)
+            .disabled(creating)
+            .toolbar { ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction().disabled(creating)
-            }.ssStandaloneAction()
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            PlanActionButton(title: AppLocalization.string(planningMode == "FIXED" && !chooseActivityTogether ? "Create invitation link" : "Create a plan"),
-                             symbol: "plus", kind: .commit, isLoading: creating,
-                             accessibilityID: "time-poll-create-confirm") {
-                titleFocused = false; locationFocused = false; Task { await create() }
-            }.disabled(!canCreate)
-                .padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
-                .overlay(alignment: .top) { Divider() }
-        }
+            }.ssStandaloneAction() }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    if !collectingAvailability {
+                        FinalTimeControls(slots: table.finalTimeSlots, timeZone: table.timeZone, selection: $finalSelected)
+                    }
+                    PlanActionButton(title: AppLocalization.string(collectingAvailability ? "Share for availability" : chooseActivityTogether ? "Share for activity ideas" : typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"),
+                                     symbol: collectingAvailability || chooseActivityTogether ? "square.and.arrow.up" : "person.2", kind: .commit,
+                                     isLoading: creating, accessibilityID: "time-poll-create-confirm") { Task { await create() } }
+                        .disabled(!canCreate)
+                    Button(collectingAvailability ? "Choose final time" : "Collect availability first") {
+                        collectingAvailability.toggle(); titleFocused = false; locationFocused = false
+                    }.font(.caption).frame(maxWidth: .infinity, minHeight: 44)
+                        .buttonStyle(SSActionButtonStyle(size: .compact))
+                        .accessibilityIdentifier("plan-collect-availability")
+                        .disabled(creating)
+                }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
+                    .overlay(alignment: .top) { Divider() }
+            }
+            .onChange(of: "\(dates)|\(startMinute)|\(endMinute)") { _, _ in
+                let finalStarts = Set(table.finalTimeSlots.filter { finalSelected.contains($0.id) }.map(\.start))
+                let availableStarts = Set(table.slots.filter { availability.contains($0.id) }.map(\.start))
+                table = Self.timetable(dates: dates, from: startMinute, until: endMinute)
+                finalSelected = Set(table.finalTimeSlots.filter { finalStarts.contains($0.start) }.map(\.id))
+                availability = Set(table.slots.filter { availableStarts.contains($0.start) }.map(\.id))
+            }
+            .onChange(of: "\(title)|\(location)|\(dates)|\(startMinute)|\(endMinute)|\(chooseActivityTogether)|\(availability.sorted())|\(finalSelected.sorted())") { _, _ in createKey = UUID().uuidString }
     }
-
-    private var candidateDateSummary: String {
-        let days = dates.compactMap { Calendar.current.date(from: $0) }.sorted()
-        guard let first = days.first, let last = days.last else { return AppLocalization.string("Choose at least one date.") }
-        let formatter = DateIntervalFormatter()
-        formatter.locale = locale; formatter.dateStyle = .medium; formatter.timeStyle = .none
-        let range = formatter.string(from: first, to: last)
-        return String(format: AppLocalization.string("%@ · %d candidate days"), range, days.count)
-    }
-
     private var validationMessage: String? {
         if title.count > 120 { return AppLocalization.string("Keep the plan title within 120 characters.") }
         if location.count > 200 { return AppLocalization.string("Keep the location within 200 characters.") }
-        if planningMode == "FIXED" { return fixedStart <= Date() ? AppLocalization.string("Choose a future start time.") : nil }
         if dates.isEmpty { return AppLocalization.string("Choose at least one date.") }
         if dates.count > 31 { return AppLocalization.string("Choose up to 31 dates.") }
         if endMinute <= startMinute { return AppLocalization.string("End time must be after start time.") }
-        if let last = dates.compactMap({ Calendar.current.date(from: $0) }).max(),
-           Calendar.current.date(byAdding: .minute, value: endMinute, to: last).map({ $0 <= Date() }) == true {
-            return AppLocalization.string("These hours have already passed. Choose a later time or date.")
-        }
+        if !collectingAvailability, let finalRange, finalRange.start <= Date() { return AppLocalization.string("Choose a future start time.") }
         return nil
     }
     private var canCreate: Bool {
-        !creating && !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && title.count <= 120 &&
-        validationMessage == nil
+        !creating && !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && validationMessage == nil
+            && (collectingAvailability || finalRange != nil)
     }
-
     private func create() async {
-        creating = true; defer { creating = false }
-        let chosenDates = planningMode == "FIXED" ? Set([Calendar.current.dateComponents([.era, .year, .month, .day], from: fixedStart)]) : dates
-        let keys = chosenDates.compactMap { Calendar.current.date(from: $0) }.map { date in
-            let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian)
-            formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
-            return formatter.string(from: date)
-        }.sorted()
+        guard canCreate else { return }
+        titleFocused = false; locationFocused = false; creating = true; defer { creating = false }
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized(
                 "/api/v1/time-polls", method: .post,
-                body: CreateTimePollRequest(title: title, timeZone: TimeZone.current.identifier, dates: keys, startMinute: startMinute, endMinute: endMinute, location: location, durationMinutes: planningMode == "FIXED" ? durationMinutes : nil, expectedCount: chooseActivityTogether && planningMode != "FIXED" ? nil : expectedCount, planningMode: planningMode, fixedStart: planningMode == "FIXED" ? ISO8601DateFormatter().string(from: fixedStart) : nil, chooseActivityTogether: chooseActivityTogether ? true : nil),
-                idempotencyKey: createKey
-            )
-            onCreate(response.data)
+                body: CreateTimePollRequest(title: title, timeZone: table.timeZone, dates: table.dates,
+                    startMinute: startMinute, endMinute: endMinute, location: location, planningMode: "COLLECT",
+                    chooseActivityTogether: chooseActivityTogether ? true : nil), idempotencyKey: createKey)
+            let store = TimePollStore(token: response.data.token, poll: response.data)
+            if !availability.isEmpty { store.setAvailabilityDraft(availability, session: session) }
+            if collectingAvailability && !availability.isEmpty {
+                await store.submit(session: session)
+                if let issue = store.error { error = issue; return }
+            }
+            if let userID = session.currentUser?.id {
+                TimePollFinalDraft(selected: finalSelected, choosingFinal: !collectingAvailability,
+                    invitationVersion: 0, next: collectingAvailability || chooseActivityTogether ? .share : .review)
+                    .save(userID: userID, token: response.data.token)
+            }
+            onCreate(store.poll ?? response.data)
         } catch { self.error = error.localizedDescription }
     }
 }
@@ -277,6 +270,9 @@ struct TimePollDetailView: View {
     @State private var deleting = false
     @State private var showsInvite = false
     @State private var showsPeople = false
+    @State private var showsSharing = false
+    @State private var restoredFinalDraft = false
+    @State private var preparedInvitation = false
     @State private var editingInformation = false
     @State private var activityDraftTitle = ""
     @State private var pickingFinalTime = false
@@ -336,9 +332,9 @@ struct TimePollDetailView: View {
                         .accessibilityIdentifier("time-poll-cancel-final")
                 }.ssStandaloneAction()
             }
-            if let poll = store.poll, !pickingFinalTime, !editingInformation {
+            if let poll = store.poll, !editingInformation {
                 ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }.ssStandaloneAction()
-                if poll.isOwner {
+                if poll.isOwner && !pickingFinalTime {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         if poll.isOwner && ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
@@ -371,9 +367,21 @@ struct TimePollDetailView: View {
                 PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
             }
         }
-        .onChange(of: store.poll?.invitationVersion) { _, _ in choosingAgain = false; pickingFinalTime = false; finalSelected = [] }
+        .sheet(isPresented: $showsSharing) {
+            if let poll = store.poll { PlanShareSheet(poll: poll, store: store).dynamicTypeSize(typeSize) }
+        }
+        .onChange(of: finalSelected) { _, _ in persistFinalDraft() }
+        .onChange(of: pickingFinalTime) { _, _ in persistFinalDraft() }
+        .onChange(of: store.poll?.invitationVersion) { previous, _ in
+            guard previous != nil else { return }
+            choosingAgain = false; pickingFinalTime = false; finalSelected = []; preparedInvitation = false
+            if let userID = session.currentUser?.id {
+                UserDefaults.standard.removeObject(forKey: TimePollFinalDraft.key(userID: userID, token: store.token))
+            }
+        }
         .task {
             await store.load(session: session)
+            restoreFinalDraft()
             while !Task.isCancelled {
                 do { try await Task.sleep(for: .seconds(10)) } catch { return }
                 if scenePhase == .active { await store.load(session: session) }
@@ -402,7 +410,7 @@ struct TimePollDetailView: View {
                     } else {
                         PlanResponseSummary(poll: poll) { showsPeople = true }
                             .padding(.horizontal, SideSeatTheme.spaceMD)
-                        TimePollGrid(poll: poll, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalSelected: $finalSelected,
+                        TimePollGrid(table: poll.timetable, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalSelected: $finalSelected,
                             chooseNoFreeTime: !poll.didRespond && store.selected.isEmpty ? { store.chooseNoFreeTime() } : nil) {}
                             .disabled(store.acting).allowsHitTesting(!store.acting)
                             .id("plan-timetable")
@@ -419,7 +427,7 @@ struct TimePollDetailView: View {
     private func collectionHeader(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             PlanInlineInformation(poll: poll, store: store,
-                editable: !pickingFinalTime && poll.planningPhase == "COLLECTING" && poll.isOwner && poll.activitySelection?.selectedIdeaId == nil,
+                editable: poll.planningPhase == "COLLECTING" && poll.isOwner && poll.activitySelection?.selectedIdeaId == nil,
                 editing: $editingInformation)
                 .disabled(!store.canMutate)
             if pickingFinalTime {
@@ -427,10 +435,9 @@ struct TimePollDetailView: View {
                     .font(.subheadline).foregroundStyle(SideSeatTheme.statusWarningText)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("plan-final-time-context")
-            } else {
-                if poll.activitySelection?.isOpen == true {
-                    PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle)
-                }
+            }
+            if poll.activitySelection?.isOpen == true {
+                PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle)
             }
             Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
@@ -440,10 +447,18 @@ struct TimePollDetailView: View {
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
-                FinalTimeControls(poll: poll, selection: $finalSelected)
+                FinalTimeControls(slots: poll.finalTimeSlots, timeZone: poll.timeZone, selection: $finalSelected)
                 PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"), symbol: "person.2", kind: .commit,
                                 accessibilityID: "unified-plan-review-roster") { showsInvite = true }
-                    .disabled(finalRange == nil || !store.canMutate)
+                    .disabled(finalRange == nil || !store.canMutate || poll.activitySelection?.isOpen == true && (poll.activitySelection?.ideas ?? []).isEmpty)
+                if poll.activitySelection?.isOpen == true {
+                    Button("Share for activity ideas") { showsSharing = true }
+                        .buttonStyle(SSActionButtonStyle(size: .compact)).frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("plan-share-activity-ideas")
+                }
+                Button("Collect availability first") { cancelFinalSelection() }
+                    .buttonStyle(SSActionButtonStyle(size: .compact)).frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("plan-collect-availability")
             } else {
                 if editsTimetable(poll) {
                     saveStatus(poll)
@@ -482,15 +497,36 @@ struct TimePollDetailView: View {
     }
 
     private func beginFinalSelection(_ poll: NativeTimePoll) {
-        if finalSelected.isEmpty {
+        if !preparedInvitation {
+            preparedInvitation = true
             invitationRoster = Set(poll.invitationCandidates.map(\.id))
             invitationActivityID = poll.activitySelection?.selectedIdeaId
             invitationLinkCount = poll.hasFixedTime ? poll.expectedCount : poll.invitationCandidates.contains(where: { !$0.isMe }) ? nil : 2
-            if let start = poll.chosenStart, let end = poll.chosenEnd {
+            if finalSelected.isEmpty, let start = poll.chosenStart, let end = poll.chosenEnd {
                 finalSelected = Set(poll.finalTimeSlots.filter { $0.start >= start && $0.end <= end }.map(\.id))
             }
         }
         if poll.hasFixedTime { showsInvite = true } else { pickingFinalTime = true }
+    }
+
+    private func restoreFinalDraft() {
+        guard !restoredFinalDraft, let poll = store.poll, let userID = session.currentUser?.id else { return }
+        restoredFinalDraft = true
+        guard poll.isOwner, poll.planningPhase == "COLLECTING",
+              var draft = TimePollFinalDraft.load(userID: userID, token: store.token),
+              draft.invitationVersion == (poll.invitationVersion ?? 0) else { return }
+        finalSelected = draft.selected.intersection(Set(poll.finalTimeSlots.map(\.id)))
+        if draft.choosingFinal { beginFinalSelection(poll) }
+        let next = draft.next; draft.next = nil; draft.save(userID: userID, token: store.token)
+        if next == .review, finalRange != nil { showsInvite = true }
+        if next == .share { showsSharing = true }
+    }
+
+    private func persistFinalDraft() {
+        guard restoredFinalDraft, let poll = store.poll, poll.isOwner,
+              poll.planningPhase == "COLLECTING", let userID = session.currentUser?.id else { return }
+        TimePollFinalDraft(selected: finalSelected, choosingFinal: pickingFinalTime,
+            invitationVersion: poll.invitationVersion ?? 0).save(userID: userID, token: store.token)
     }
 
     private func cancelFinalSelection() {
@@ -540,11 +576,13 @@ struct TimePollDetailView: View {
 }
 
 private struct TimePollGrid: View {
-    let poll: NativeTimePoll
+    let table: TimePollTimetable
     @Binding var selected: Set<Int>
     let editable: Bool
     let pickingFinalTime: Bool
     @Binding var finalSelected: Set<Int>
+    var showsResponses = true
+    var bounded = false
     var chooseNoFreeTime: (() -> Void)? = nil
     let onSave: () -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -556,13 +594,13 @@ private struct TimePollGrid: View {
     private var selection: Set<Int> { pickingFinalTime ? finalSelected : selected }
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
-    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? 128 : 48 }
+    private var headerHeight: CGFloat { typeSize.isAccessibilitySize ? (pickingFinalTime || bounded ? 72 : 128) : 48 }
     private var viewportHeight: CGFloat { typeSize.isAccessibilitySize ? 320 : 352 }
-    private var gridSlots: [NativeTimePoll.Slot] { pickingFinalTime ? poll.finalTimeSlots : poll.slots }
+    private var gridSlots: [NativeTimePoll.Slot] { pickingFinalTime ? table.finalTimeSlots : table.slots }
 
     var body: some View {
         let cells = TimePollSelection.cells(gridSlots)
-        let rows = poll.dates.map { date in cells.filter { $0.date == date } }.max(by: { $0.count < $1.count })?.map(\.row) ?? []
+        let rows = table.dates.map { date in cells.filter { $0.date == date } }.max(by: { $0.count < $1.count })?.map(\.row) ?? []
         let lookup = Dictionary(uniqueKeysWithValues: cells.map { ("\($0.date)|\($0.row)", $0) })
         VStack(spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
@@ -574,13 +612,13 @@ private struct TimePollGrid: View {
                     .accessibilityIdentifier("time-poll-final-legend")
             }
             GeometryReader { geometry in
-                if pickingFinalTime {
+                if pickingFinalTime || bounded {
                     finalTimetable(cells: cells, rows: rows, lookup: lookup, width: geometry.size.width)
                 } else {
                     timetable(cells: cells, rows: rows, lookup: lookup, width: geometry.size.width)
                 }
             }
-            .frame(height: headerHeight + (pickingFinalTime ? viewportHeight : cellHeight * CGFloat(rows.count)))
+            .frame(height: headerHeight + (pickingFinalTime || bounded ? viewportHeight : cellHeight * CGFloat(rows.count)))
             .accessibilityElement(children: .contain).accessibilityIdentifier("time-poll-grid")
             if editable, let chooseNoFreeTime {
                 HStack {
@@ -597,14 +635,14 @@ private struct TimePollGrid: View {
 
     private var finalLegendLabels: some View {
         Group {
-            Label("My availability", systemImage: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill)
+            if showsResponses || !selected.isEmpty { Label("My availability", systemImage: "checkmark.circle.fill").foregroundStyle(SideSeatTheme.Availability.selectedFill) }
             Label("Final time", systemImage: "checkmark.square.fill").foregroundStyle(SideSeatTheme.statusWarningText)
-            Label("Availability not collected", systemImage: "minus").foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            if showsResponses { Label("Availability not collected", systemImage: "minus").foregroundStyle(SideSeatTheme.textSecondaryStrong) }
         }.fixedSize(horizontal: false, vertical: true)
     }
 
     private func finalTimetable(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], width: CGFloat) -> some View {
-        let cellWidth = typeSize.isAccessibilitySize ? max(280, width) : max(96, width / CGFloat(max(1, min(4, poll.dates.count))))
+        let cellWidth = typeSize.isAccessibilitySize ? max(280, width) : max(96, width / CGFloat(max(1, min(4, table.dates.count))))
         return VStack(spacing: 4) {
             HStack {
                 undoButton
@@ -613,15 +651,16 @@ private struct TimePollGrid: View {
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(height: 44).padding(.horizontal, SideSeatTheme.spaceSM)
             ScrollView(.horizontal) {
                 VStack(spacing: 0) {
-                    HStack(spacing: 0) { ForEach(poll.dates, id: \.self) { dayButton($0, cells: cells, width: cellWidth) } }
+                    HStack(spacing: 0) { ForEach(table.dates, id: \.self) { dayButton($0, cells: cells, width: cellWidth) } }
                     ScrollViewReader { reader in
                         ScrollView(.vertical) {
                             cellGrid(cells: cells, rows: rows, lookup: lookup, cellWidth: cellWidth)
-                        }.frame(width: cellWidth * CGFloat(poll.dates.count), height: viewportHeight - 48)
+                        }.frame(width: cellWidth * CGFloat(table.dates.count), height: viewportHeight - 48)
                             .accessibilityIdentifier("time-poll-final-scroll")
-                            .onAppear {
-                                let initial = cells.first { !$0.slotIds.isDisjoint(with: finalSelected) }
-                                    ?? cells.first { $0.label == String(format: "%02d:%02d", poll.startMinute / 60, poll.startMinute % 60) }
+                            .task(id: pickingFinalTime) {
+                                await Task.yield()
+                                let initial = cells.first { !$0.slotIds.isDisjoint(with: selection) }
+                                    ?? cells.first { $0.label == String(format: "%02d:%02d", table.startMinute / 60, table.startMinute % 60) }
                                 if let row = initial?.row { reader.scrollTo(row, anchor: .top) }
                             }
                     }
@@ -631,13 +670,13 @@ private struct TimePollGrid: View {
     }
 
     private func timetable(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], width: CGFloat) -> some View {
-        let cellWidth = typeSize.isAccessibilitySize ? max(280, width - labelWidth) : max(88, (width - labelWidth) / CGFloat(max(1, min(4, poll.dates.count))))
+        let cellWidth = typeSize.isAccessibilitySize ? max(280, width - labelWidth) : max(88, (width - labelWidth) / CGFloat(max(1, min(4, table.dates.count))))
         return HStack(alignment: .top, spacing: 0) {
             VStack(spacing: 0) {
                 Group { if editable { undoButton } else { Text("Time").font(.caption) } }
                     .frame(width: labelWidth, height: headerHeight)
                 ForEach(rows, id: \.self) { row in
-                    Text(poll.slots.first { $0.row == row }?.label ?? "")
+                    Text(table.slots.first { $0.row == row }?.label ?? "")
                         .font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
                         .frame(width: labelWidth, height: cellHeight)
                 }
@@ -645,7 +684,7 @@ private struct TimePollGrid: View {
             ScrollView(.horizontal) {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        ForEach(poll.dates, id: \.self) { date in
+                        ForEach(table.dates, id: \.self) { date in
                             if editable { dayButton(date, cells: cells, width: cellWidth) }
                             else { Text(timePollDateLabel(date)).font(.caption.weight(.semibold)).lineLimit(2).minimumScaleFactor(0.75).frame(width: cellWidth, height: headerHeight) }
                         }
@@ -668,11 +707,11 @@ private struct TimePollGrid: View {
     }
 
     private func cellGrid(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], cellWidth: CGFloat) -> some View {
-        let participantSelections = poll.submittedTimetableSelections
+        let participantSelections = table.responses
         return VStack(spacing: 0) {
             ForEach(rows, id: \.self) { row in
                 HStack(spacing: 0) {
-                    ForEach(poll.dates, id: \.self) { date in
+                    ForEach(table.dates, id: \.self) { date in
                         if let cell = lookup["\(date)|\(row)"] {
                             cellView(cell, participantSelections: participantSelections, width: cellWidth)
                         } else { Color.clear.frame(width: cellWidth, height: cellHeight) }
@@ -683,7 +722,7 @@ private struct TimePollGrid: View {
         .overlay(alignment: .topLeading) {
             if editable || pickingFinalTime {
                 TimePollTouchSurface(onTap: { point in
-                    if let p = position(point, rows: rows, cellWidth: cellWidth), let cell = lookup["\(poll.dates[p.0])|\(rows[p.1])"] { apply(TimePollSelection.toggle(cell, original: selection)) }
+                    if let p = position(point, rows: rows, cellWidth: cellWidth), let cell = lookup["\(table.dates[p.0])|\(rows[p.1])"] { apply(TimePollSelection.toggle(cell, original: selection)) }
                 }, onRange: { state, point in
                     updateRange(state, point: point, cells: cells, rows: rows, cellWidth: cellWidth, lookup: lookup)
                 }).accessibilityHidden(true)
@@ -705,19 +744,19 @@ private struct TimePollGrid: View {
             Rectangle().strokeBorder(final ? SideSeatTheme.statusWarningText : editable && active ? SideSeatTheme.Availability.selectedFill : editable && partial ? SideSeatTheme.Availability.onPartial : SideSeatTheme.separator,
                 lineWidth: final || editable && (active || partial) ? 2 : 0.5)
             VStack(spacing: 1) {
-                if pickingFinalTime { Text(cell.label).font(.caption2.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
+                if pickingFinalTime || bounded { Text(cell.label).font(.caption2.monospacedDigit()).foregroundStyle(SideSeatTheme.textSecondaryStrong) }
                 HStack(spacing: 5) {
                     if editable && (active || partial) || pickingFinalTime && (mine || partlyMine) {
                         Image(systemName: pickingFinalTime ? (mine ? "checkmark.circle.fill" : "minus.circle.fill") : active ? "checkmark.circle.fill" : "minus.circle.fill")
                             .foregroundStyle(!editable || active ? SideSeatTheme.Availability.selectedFill : SideSeatTheme.Availability.onPartial)
                     }
-                    Text(known ? "\(count)" : "—").monospacedDigit().foregroundStyle(SideSeatTheme.textPrimary)
+                    if showsResponses { Text(known ? "\(count)" : "—").monospacedDigit().foregroundStyle(SideSeatTheme.textPrimary) }
                     if final { Image(systemName: active ? "checkmark.square.fill" : "minus.square.fill").foregroundStyle(SideSeatTheme.statusWarningText) }
                 }.font(.caption.weight(.semibold))
             }.dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }.frame(width: width, height: cellHeight)
             .accessibilityElement()
-            .accessibilityLabel("\(cell.date), \(cell.label)–\(timePollClockFormatter(poll.timeZone).string(from: cell.end)), " + (known ? "\(count)" : AppLocalization.string("Availability not collected")))
+            .accessibilityLabel("\(cell.date), \(cell.label)–\(timePollClockFormatter(table.timeZone).string(from: cell.end)), " + (known ? "\(count)" : AppLocalization.string("Availability not collected")))
             .accessibilityValue(AppLocalization.string(pickingFinalTime ? (active ? "Final time selected" : partial ? "Some times selected" : "Select final time") : editable ? (active ? "Available" : partial ? "Some times selected" : "Unavailable") : ""))
             .accessibilityIdentifier("time-poll-cell-\(cell.id)")
             .accessibilityAddTraits(editable || pickingFinalTime ? .isButton : [])
@@ -755,17 +794,17 @@ private struct TimePollGrid: View {
     private func updateRange(_ state: UIGestureRecognizer.State, point: CGPoint, cells: [NativeTimePoll.Cell], rows: [String], cellWidth: CGFloat, lookup: [String: NativeTimePoll.Cell]) {
         switch state {
         case .began:
-            guard let p = position(point, rows: rows, cellWidth: cellWidth), let cell = lookup["\(poll.dates[p.0])|\(rows[p.1])"] else { return }
+            guard let p = position(point, rows: rows, cellWidth: cellWidth), let cell = lookup["\(table.dates[p.0])|\(rows[p.1])"] else { return }
             dragStart = p; original = selection; selecting = !cell.slotIds.isSubset(of: original)
             preview = TimePollSelection.toggle(cell, original: original)
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         case .changed:
             guard let from = dragStart, let to = position(point, rows: rows, cellWidth: cellWidth, clamped: true) else { return }
             if pickingFinalTime {
-                guard let first = lookup["\(poll.dates[from.0])|\(rows[from.1])"], let last = lookup["\(poll.dates[to.0])|\(rows[to.1])"] else { return }
+                guard let first = lookup["\(table.dates[from.0])|\(rows[from.1])"], let last = lookup["\(table.dates[to.0])|\(rows[to.1])"] else { return }
                 preview = TimePollSelection.interval(cells: cells, from: first, to: last, original: original, selecting: selecting)
             } else {
-                preview = TimePollSelection.rectangle(cells: cells, dates: poll.dates, rows: rows, from: from, to: to, original: original, selecting: selecting)
+                preview = TimePollSelection.rectangle(cells: cells, dates: table.dates, rows: rows, from: from, to: to, original: original, selecting: selecting)
             }
         case .ended:
             if let preview { apply(preview) }; clearPreview()
@@ -776,10 +815,10 @@ private struct TimePollGrid: View {
 
     private func clearPreview() { preview = nil; dragStart = nil }
     private func position(_ point: CGPoint, rows: [String], cellWidth: CGFloat, clamped: Bool = false) -> (Int, Int)? {
-        guard !poll.dates.isEmpty, !rows.isEmpty else { return nil }
+        guard !table.dates.isEmpty, !rows.isEmpty else { return nil }
         let column = Int(floor(point.x / cellWidth)), row = Int(floor(point.y / cellHeight))
-        if clamped { return (min(max(0, column), poll.dates.count - 1), min(max(0, row), rows.count - 1)) }
-        guard column >= 0, row >= 0, column < poll.dates.count, row < rows.count else { return nil }
+        if clamped { return (min(max(0, column), table.dates.count - 1), min(max(0, row), rows.count - 1)) }
+        guard column >= 0, row >= 0, column < table.dates.count, row < rows.count else { return nil }
         return (column, row)
     }
 }

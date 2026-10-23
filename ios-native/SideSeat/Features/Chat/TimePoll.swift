@@ -308,31 +308,72 @@ struct TimePollFinalRange: Equatable, Sendable {
     }
 }
 
-extension NativeTimePoll {
-    /// Display-only quarters cover whole candidate dates. Existing response IDs stay intact;
-    /// negative IDs mark hours whose availability was never collected and are never submitted.
-    var finalTimeSlots: [Slot] {
+struct TimePollTimetable: Sendable {
+    let dates: [String]
+    let timeZone: String
+    let startMinute: Int
+    let slots: [NativeTimePoll.Slot]
+    var responses: [Set<Int>] = []
+
+    var finalTimeSlots: [NativeTimePoll.Slot] {
+        let fullDay = Self.slots(dates: dates, timeZone: timeZone, startMinute: 0, endMinute: 1440)
+        let existing = Dictionary(uniqueKeysWithValues: slots.map { ($0.start, $0.id) })
+        return fullDay.enumerated().map { index, slot in
+            .init(id: existing[slot.start] ?? -(index + 1), date: slot.date, row: slot.row,
+                  label: slot.label, start: slot.start, end: slot.end)
+        }
+    }
+
+    /// Both creation and server-backed tables use the same real quarter-hour timeline.
+    static func slots(dates: [String], timeZone: String, startMinute: Int, endMinute: Int) -> [NativeTimePoll.Slot] {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: timeZone) ?? .current
         let parser = DateFormatter(); parser.locale = Locale(identifier: "en_US_POSIX")
         parser.timeZone = calendar.timeZone; parser.dateFormat = "yyyy-MM-dd"
         let clock = timePollClockFormatter(timeZone)
         let offset = DateFormatter(); offset.timeZone = calendar.timeZone; offset.dateFormat = "XXX"
-        let existing = Dictionary(uniqueKeysWithValues: slots.map { ($0.start, $0.id) })
-        var result: [Slot] = []
+        var result: [NativeTimePoll.Slot] = []
         for date in dates.sorted() {
-            guard var cursor = parser.date(from: date), let end = calendar.date(byAdding: .day, value: 1, to: cursor) else { continue }
+            guard let midnight = parser.date(from: date),
+                  var cursor = calendar.date(bySettingHour: startMinute / 60, minute: startMinute % 60, second: 0, of: midnight),
+                  let end = endMinute == 1440 ? calendar.date(byAdding: .day, value: 1, to: midnight)
+                    : calendar.date(bySettingHour: endMinute / 60, minute: endMinute % 60, second: 0, of: midnight) else { continue }
             var occurrences: [String: Int] = [:]
             while cursor < end {
                 let label = clock.string(from: cursor), ordinal = occurrences[label, default: 0]
                 occurrences[label] = ordinal + 1
                 let next = cursor.addingTimeInterval(900)
-                result.append(.init(id: existing[cursor] ?? -(result.count + 1), date: date,
-                    row: "\(label)-\(ordinal)", label: label + (ordinal > 0 ? " " + offset.string(from: cursor) : ""), start: cursor, end: next))
+                result.append(.init(id: result.count, date: date, row: "\(label)-\(ordinal)",
+                    label: label + (ordinal > 0 ? " " + offset.string(from: cursor) : ""), start: cursor, end: next))
                 cursor = next
             }
         }
         return result
+    }
+}
+
+extension NativeTimePoll {
+    var timetable: TimePollTimetable {
+        .init(dates: dates, timeZone: timeZone, startMinute: startMinute, slots: slots, responses: submittedTimetableSelections)
+    }
+    var finalTimeSlots: [Slot] { timetable.finalTimeSlots }
+}
+
+/// Local final-time edits never submit availability or create an invitation.
+struct TimePollFinalDraft: Codable {
+    enum Next: String, Codable { case review, share }
+    var selected: Set<Int>
+    var choosingFinal: Bool
+    var invitationVersion: Int
+    var next: Next? = nil
+
+    static func key(userID: String, token: String) -> String { "plan.final-time-draft.v1.\(userID).\(token)" }
+    static func load(userID: String, token: String, defaults: UserDefaults = .standard) -> Self? {
+        guard let data = defaults.data(forKey: key(userID: userID, token: token)) else { return nil }
+        return try? JSONDecoder().decode(Self.self, from: data)
+    }
+    func save(userID: String, token: String, defaults: UserDefaults = .standard) {
+        if let data = try? JSONEncoder().encode(self) { defaults.set(data, forKey: Self.key(userID: userID, token: token)) }
     }
 }
 

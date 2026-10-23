@@ -83,6 +83,11 @@ final class TimePollStore {
         if let poll { accept(poll) }
     }
 
+    func setAvailabilityDraft(_ selection: Set<Int>, session: SessionStore) {
+        bindDraft(session: session)
+        selected = selection
+    }
+
     func load(session: SessionStore) async {
         bindDraft(session: session)
         guard !saving && !acting else { return }

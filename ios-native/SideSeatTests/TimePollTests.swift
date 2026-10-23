@@ -4,6 +4,35 @@ import Testing
 
 @Suite("Native time polls")
 struct TimePollTests {
+    @Test("Creation and server tables preserve the same availability IDs")
+    func creationTimetable() {
+        let dates = ["2026-10-24", "2026-10-25"]
+        let slots = TimePollTimetable.slots(dates: dates, timeZone: "Europe/Berlin", startMinute: 540, endMinute: 1020)
+        #expect(slots.count == 64)
+        #expect(slots.map(\.id) == Array(0..<64))
+        #expect(slots[0].label == "09:00" && slots[32].label == "09:00")
+        let table = TimePollTimetable(dates: dates, timeZone: "Europe/Berlin", startMinute: 540, slots: slots)
+        #expect(table.finalTimeSlots.count == 196, "DST fall-back day keeps all elapsed quarters")
+        #expect(table.finalTimeSlots.filter { $0.id >= 0 }.map(\.id) == Array(0..<64))
+        #expect(table.finalTimeSlots.first { $0.id == 32 }?.start == slots[32].start)
+    }
+
+    @Test("Final draft is private to the account and plan and consumes its navigation intent")
+    func finalDraftPersistence() throws {
+        let name = "plan-draft-test-" + UUID().uuidString
+        let defaults = try #require(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        TimePollFinalDraft(selected: [-95, -96, 0, 1], choosingFinal: true, invitationVersion: 0, next: .review)
+            .save(userID: "owner", token: "plan", defaults: defaults)
+        var draft = try #require(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults))
+        #expect(draft.selected == [-95, -96, 0, 1] && draft.choosingFinal && draft.next == .review)
+        #expect(TimePollFinalDraft.load(userID: "peer", token: "plan", defaults: defaults) == nil)
+        #expect(TimePollFinalDraft.load(userID: "owner", token: "other", defaults: defaults) == nil)
+        draft.next = nil; draft.save(userID: "owner", token: "plan", defaults: defaults)
+        #expect(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults)?.next == nil)
+        #expect(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults)?.selected == draft.selected)
+    }
+
     @Test("Paint and erase a rectangle without toggling revisited cells")
     func rectangles() {
         let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-16" : "2026-10-17", row: String(id % 4), label: String(id % 4), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
@@ -300,6 +329,24 @@ struct TimePollTests {
             await after.load(session: session)
             #expect(after.saved && !after.restoredDraft && !after.hasChanges)
         }
+    }
+
+    @Test("Creation hands its unsubmitted availability to the existing durable draft")
+    @MainActor
+    func creationAvailabilityDraft() async throws {
+        let name = "creation-availability-" + UUID().uuidString
+        let defaults = try #require(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        let transport = PollSaveTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport), credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let created = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: defaults)
+        created.setAvailabilityDraft([2, 3], session: session)
+        let reopened = TimePollStore(token: "poll", draftDefaults: defaults)
+        await reopened.load(session: session)
+        #expect(reopened.selected == [2, 3] && reopened.restoredDraft && reopened.hasChanges)
+        #expect(reopened.poll?.didRespond == false)
+        #expect(await transport.writes.isEmpty)
     }
 
     @Test("Organizer invitation does not submit or discard an availability draft")

@@ -3192,3 +3192,9 @@
 "Availability not collected" = "未征集空闲";
 
 "Availability was not collected for this entire time" = "部分时段未征集空闲";
+
+"Collect availability first" = "时间还没定？先收集空闲";
+
+"Share for availability" = "发给朋友填写";
+
+"Share for activity ideas" = "发给朋友提议活动";

@@ -43,6 +43,7 @@ struct UnifiedPlanInviteView: View {
     @Binding var activityID: String?
     @Binding var linkParticipantCount: Int?
     @State private var sending = false
+    @State private var showsContacts = false
 
     init(poll: NativeTimePoll, store: TimePollStore, range: TimePollFinalRange, selected: Binding<Set<String>>, activityID: Binding<String?>, linkParticipantCount: Binding<Int?>) {
         self.poll = poll; self.store = store; self.range = range
@@ -154,6 +155,8 @@ struct UnifiedPlanInviteView: View {
                         .font(.footnote).foregroundStyle(.secondary)
                 } }
                 Section {
+                    Button("Invite App contacts", systemImage: "person.crop.circle.badge.plus") { showsContacts = true }
+                        .accessibilityIdentifier("unified-plan-add-contacts")
                     if linkParticipantCount != nil {
                         Stepper(value: Binding(get: { linkParticipantCount ?? minimumLinkCount }, set: { linkParticipantCount = $0 }), in: minimumLinkCount...20) {
                             Text(String(format: AppLocalization.string("Plan for %d people, including you"), linkParticipantCount ?? minimumLinkCount))
@@ -194,6 +197,14 @@ struct UnifiedPlanInviteView: View {
                     .disabled(sending || !store.canMutate || (needsActivityChoice && chosenActivity == nil)
                               || (linkParticipantCount == nil && selectedFriends == 0))
                 }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface).overlay(alignment: .top) { Divider() }
+            }
+            .sheet(isPresented: $showsContacts) {
+                PlanContactInviteSheet(poll: store.poll ?? poll) {
+                    let previous = Set(poll.invitationCandidates.map(\.id))
+                    await store.load(session: session)
+                    let added = Set((store.poll?.invitationCandidates ?? []).map(\.id)).subtracting(previous)
+                    selected.formUnion(added)
+                }
             }
             .navigationTitle("Review plan invitation").navigationBarTitleDisplayMode(.inline)
             .onChange(of: selected) { _, _ in

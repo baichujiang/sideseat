@@ -170,57 +170,65 @@ struct PlanActionButton: View {
 }
 
 struct PlanShareActions: View {
-    @Environment(SessionStore.self) private var session
-    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
-    @Bindable var store: TimePollStore
-    @State private var copied = false
+    let store: TimePollStore
     @State private var showsShare = false
-    @State private var showsContacts = false
-    @State private var sent = false
 
     var body: some View {
         Button { showsShare = true } label: {
             Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
         }.buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("plan-share-open")
-        .sheet(isPresented: $showsShare) {
-            NavigationStack {
-                List {
-                    Section {
-                        Text(poll.title).font(.headline)
-                        if let start = poll.chosenStart, let end = poll.chosenEnd {
-                            Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
-                                .font(.subheadline).foregroundStyle(.secondary)
-                        }
-                    }
-                    Section {
-                        if poll.isOwner && ["COLLECTING", "INVITING", "CONFIRMED"].contains(poll.planningPhase) {
-                            Button { showsContacts = true } label: {
-                                Label(sent ? "Sent · invite more" : "Invite App contacts", systemImage: "person.crop.circle.badge.plus")
-                            }.accessibilityIdentifier("plan-invite-contacts")
-                        }
-                        ShareLink(item: poll.shareUrl) {
-                            Label("Share web link", systemImage: "square.and.arrow.up")
-                        }.accessibilityIdentifier("plan-share-primary")
-                        Button {
-                            UIPasteboard.general.url = poll.shareUrl; copied = true
-                        } label: {
-                            Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
-                        }.accessibilityIdentifier("plan-copy-link")
+            .sheet(isPresented: $showsShare) { PlanShareSheet(poll: poll, store: store) }
+    }
+}
+
+struct PlanShareSheet: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var typeSize
+    let poll: NativeTimePoll
+    let store: TimePollStore
+    @State private var copied = false
+    @State private var showsContacts = false
+    @State private var sent = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text(poll.title).font(.headline)
+                    if let start = poll.chosenStart, let end = poll.chosenEnd {
+                        Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
+                            .font(.subheadline).foregroundStyle(.secondary)
                     }
                 }
-                .navigationTitle("Share plan").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { showsShare = false }.ssToolbarAction() }.ssStandaloneAction() }
-                .sheet(isPresented: $showsContacts) {
-                    PlanContactInviteSheet(poll: store.poll ?? poll) {
-                        sent = true
-                        await store.load(session: session)
-                        NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
-                        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
-                    }.dynamicTypeSize(typeSize)
+                Section {
+                    if poll.isOwner && ["COLLECTING", "INVITING", "CONFIRMED"].contains(poll.planningPhase) {
+                        Button { showsContacts = true } label: {
+                            Label(sent ? "Sent · invite more" : "Invite App contacts", systemImage: "person.crop.circle.badge.plus")
+                        }.accessibilityIdentifier("plan-invite-contacts")
+                    }
+                    ShareLink(item: poll.shareUrl) {
+                        Label("Share web link", systemImage: "square.and.arrow.up")
+                    }.accessibilityIdentifier("plan-share-primary")
+                    Button {
+                        UIPasteboard.general.url = poll.shareUrl; copied = true
+                    } label: {
+                        Label(copied ? "Link copied" : "Copy link", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    }.accessibilityIdentifier("plan-copy-link")
                 }
-            }.presentationDetents([.medium, .large]).dynamicTypeSize(typeSize)
-        }
+            }
+            .navigationTitle("Share plan").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction() }.ssStandaloneAction() }
+            .sheet(isPresented: $showsContacts) {
+                PlanContactInviteSheet(poll: store.poll ?? poll) {
+                    sent = true
+                    await store.load(session: session)
+                    NotificationCenter.default.post(name: .sideSeatPlansNeedsRefresh, object: nil)
+                    NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
+                }.dynamicTypeSize(typeSize)
+            }
+        }.presentationDetents([.medium, .large]).dynamicTypeSize(typeSize)
     }
 }
 
