@@ -437,6 +437,7 @@ import XCTest
         app.buttons["plan-activity-suggest"].tap()
         let quickField = app.textFields["plan-activity-title"]
         XCTAssertTrue(quickField.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
         let completeHotpot = app.buttons["plan-activity-complete-火锅"]
         XCTAssertTrue(completeHotpot.waitForExistence(timeout: 10)); capture(app, "completion181-options"); completeHotpot.tap()
         XCTAssertEqual(quickField.value as? String, "火锅")
@@ -490,14 +491,17 @@ import XCTest
         app.buttons["plan-activity-suggest"].tap()
         let largeDraft = app.textFields["plan-activity-title"]
         XCTAssertTrue(largeDraft.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
         let largeCompletion = app.buttons["plan-activity-complete-逛展"]
         activityRevealNative(largeCompletion); largeCompletion.tap()
         XCTAssertEqual(largeDraft.value as? String, "逛展")
         largeDraft.typeText("大字号提议")
         XCTAssertTrue(app.buttons["plan-activity-add"].isHittable)
         XCTAssertTrue(app.buttons["plan-activity-cancel"].isHittable)
+        if app.keyboards.firstMatch.exists { XCTAssertLessThanOrEqual(largeDraft.frame.maxY, app.keyboards.firstMatch.frame.minY) }
         capture(app, "ideas179-largest-top-composer")
         app.buttons["plan-activity-cancel"].tap()
+        XCTAssertTrue(app.buttons["time-poll-submit"].waitForExistence(timeout: 10))
 
         nativeSignIn(owner, bundle: fixture.bundle); openPlan()
         app.buttons["unified-plan-review-roster"].tap()

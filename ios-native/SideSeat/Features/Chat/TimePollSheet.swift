@@ -274,6 +274,7 @@ struct TimePollDetailView: View {
     @State private var restoredFinalDraft = false
     @State private var preparedInvitation = false
     @State private var editingInformation = false
+    @State private var editingActivity = false
     @State private var activityDraftTitle = ""
     @State private var pickingFinalTime = false
     @State private var finalSelected = Set<Int>()
@@ -320,7 +321,7 @@ struct TimePollDetailView: View {
         .navigationTitle(pickingFinalTime ? "Choose final time" : "Plan together").navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(pickingFinalTime)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let poll = store.poll, !editingInformation, poll.planningPhase == "COLLECTING" || choosingAgain {
+            if let poll = store.poll, !editingInformation && !editingActivity, poll.planningPhase == "COLLECTING" || choosingAgain {
                 collectionFooter(poll)
             }
         }
@@ -332,7 +333,7 @@ struct TimePollDetailView: View {
                         .accessibilityIdentifier("time-poll-cancel-final")
                 }.ssStandaloneAction()
             }
-            if let poll = store.poll, !editingInformation {
+            if let poll = store.poll, !editingInformation && !editingActivity {
                 ToolbarItem(placement: .topBarTrailing) { PlanShareActions(poll: poll, store: store) }.ssStandaloneAction()
                 if poll.isOwner && !pickingFinalTime {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -437,7 +438,7 @@ struct TimePollDetailView: View {
                     .accessibilityIdentifier("plan-final-time-context")
             }
             if poll.activitySelection?.isOpen == true {
-                PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle)
+                PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle, showsSuggestion: $editingActivity)
             }
             Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
@@ -891,8 +892,8 @@ struct PlanActivityIdeasView: View {
     let poll: NativeTimePoll
     @Bindable var store: TimePollStore
     @State private var expanded = false
-    @State private var showsSuggestion = false
     @Binding var draftTitle: String
+    @Binding var showsSuggestion: Bool
     @FocusState private var suggestionFocused: Bool
     private var activity: NativePlanActivity { poll.activitySelection! }
     private var ideas: [NativePlanActivity.Idea] { activity.ideas ?? [] }
@@ -951,6 +952,7 @@ struct PlanActivityIdeasView: View {
             if poll.hasFixedTime { expanded = true }
             if !draftTitle.isEmpty { expanded = true; showsSuggestion = true }
         }
+        .onDisappear { showsSuggestion = false }
     }
 
     private var suggestionForm: some View {

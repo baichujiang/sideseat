@@ -31,7 +31,9 @@ share action. Later final-time selection uses the same grid and invitation revie
 Friends' activity suggestions remain an independent optional checkbox. If enabled,
 the initial action shares for suggestions while preserving the owner's local final
 time. The activity board stays visible; an activity must be chosen in review before
-formal invitations can be sent. No extra two-choice start page is introduced.
+formal invitations can be sent. While the activity composer is open, the timetable
+dock and sharing toolbar are hidden so they cannot cover its input; Confirm or
+Cancel restores them. No extra two-choice start page is introduced.
 
 Creation and detail use one timetable model, touch surface, range validator and
 summary. The share sheet and App-contact picker are also reused. Existing FIXED
