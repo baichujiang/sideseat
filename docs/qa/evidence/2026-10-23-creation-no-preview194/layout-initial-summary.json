@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 1,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Flow194 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792790650.921,
+  "passedTests" : 1,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792790537.021,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "Flow194UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testCompactCreationDateOptionsRetainInputsAndTime()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow194/Flow194UITests/PlanFirstUsePhoneUITests/testCompactCreationDateOptionsRetainInputsAndTime",
+      "testName" : "testCompactCreationDateOptionsRetainInputsAndTime()"
+    }
+  ],
+  "title" : "Test - Flow194",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 2
+}

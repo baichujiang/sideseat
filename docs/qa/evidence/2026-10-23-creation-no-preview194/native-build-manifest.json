@@ -1,0 +1,21 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "project": "Generated in isolated directory from byte-verified active project.yml.",
+  "binarySHA256": {
+    "SideSeat Preview": "da06b44486449370d1930825263065548e47b5f2df150aea0a6570ac2aa6b8c6",
+    "SideSeat Preview.debug.dylib": "de3ecc3d01d9aec782b2ec8b09231122ef643e9f3470147c4e56609783ffa0ec"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 194,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "strictSignatureVerified": true,
+  "backendRelease": false,
+  "webRelease": false,
+  "fullFlowUITestSourceSHA256": "c21bb367f6fa945fbe0c06bc251b72c2e1ade859b6af19e4751aef52bbf66a04",
+  "hoursRetryUITestSourceSHA256": "c8b98637aaf66976ff7fb810d5c391a7f290feb3de1b2ea36b07910bef7d7f0f",
+  "productUnchangedDuringTestHarnessRepairs": true,
+  "sourceCommit": "d3a6c066c0bdc20b6fede9ab85c43d83f4ccde49"
+}

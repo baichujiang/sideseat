@@ -21,7 +21,22 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 193 is the current installed development build. Native availability
+- Preview 194 is the current installed development build. Creation omits the
+  read-only timetable; keep activity/location, candidate dates, daily voting hours,
+  time zone and optional activity ideas. The original create/share path opens an
+  editable detail timetable. Remove creation table state, rebuild observers and
+  dead preview options; retain validation/idempotency and invitation/Calendar rules.
+  Final same-product phone flow passed in 328.239 seconds/eight API stages; four
+  creation language/text-size combinations passed in 69.351 seconds. Hours/date
+  preservation passed in 57.505 seconds after fixing two test-only menu mis-taps;
+  no product change or hidden failed-run claim. Source d3a6c066 is pushed.
+  Strict signature, 248 App/18 config-script inputs/shared resource, installation
+  and normal launch PID 7556 verified; ordinary 97 stays. Two accounts/one link,
+  runner/private files cleaned; no new App reports. api/www rechecked Ready
+  dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7; no backend/web/model/domain/browser release/run.
+  Maximum-text acceptance here is creation only. The 193 German detail grid blank
+  issue remains unresolved; do not describe it as fixed. See 194 QA/release.
+- Preview 193 was the previous development build. Native availability
   and final-time grids omit one-step Undo and its snapshot state, retaining tap,
   deselect, hold-paint/erase, day selection, manual submit/drafts and existing
   invitation/Calendar rules. Preserve the original scroll layout and hint row.

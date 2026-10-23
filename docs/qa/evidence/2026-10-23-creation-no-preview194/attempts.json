@@ -1,0 +1,32 @@
+{
+  "appUnchanged": true,
+  "fullFlow": {
+    "seconds": 328.239,
+    "passed": true,
+    "apiStages": 8
+  },
+  "initialLayoutRun": [
+    {
+      "test": "testCompactCreationDateOptionsRetainInputsAndTime",
+      "seconds": 40.632,
+      "passed": false,
+      "failure": "Element.tap targeted off-screen18:00 and selected03:00; validation correctly kept create disabled."
+    },
+    {
+      "test": "testUnifiedCreationLargestText",
+      "seconds": 69.351,
+      "passed": true,
+      "scope": "Chinese/German normal and maximum text, keyboard, no grid, date/hour controls."
+    }
+  ],
+  "hoursElementTapRetry": {
+    "seconds": 41.486,
+    "passed": false,
+    "failure": "07:00 was visibly on screen but XCTest element.tap selected01:30. Added value assertions caught it."
+  },
+  "hoursCoordinateRetry": {
+    "seconds": 57.505,
+    "passed": true,
+    "repair": "Use the visible option frame center as a screen coordinate; verify08:00,07:00,18:00 exactly; invalid end blocks creation, valid end enables it; dates expansion retains inputs/hours."
+  }
+}
