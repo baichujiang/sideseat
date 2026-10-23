@@ -38,7 +38,7 @@ import XCTest
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
         XCTAssertFalse(app.buttons["plan-change-method"].exists)
         let create = app.buttons["time-poll-create-confirm"]
-        XCTAssertEqual(create.label, "发起计划"); XCTAssertFalse(create.isEnabled)
+        XCTAssertEqual(create.label, "发给朋友填写"); XCTAssertFalse(create.isEnabled)
         let title = app.textFields["time-poll-title"]
         title.tap(); title.typeText("周末聚餐\n")
         XCTAssertTrue(create.isEnabled); XCTAssertTrue(create.isHittable)
@@ -77,8 +77,8 @@ import XCTest
         reveal(shortcut); XCTAssertGreaterThanOrEqual(shortcut.frame.height, 44)
         XCTAssertFalse(shortcut.isSelected); shortcut.tap(); XCTAssertTrue(shortcut.isSelected)
         XCTAssertFalse(app.buttons["plan-create-next"].exists)
-        XCTAssertTrue(app.buttons["plan-mode-fixed"].exists)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
+        XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发给朋友填写")
         XCTAssertTrue(app.navigationBars["发起计划"].exists)
         XCTAssertFalse(app.buttons["plan-start-known-activity"].exists)
         capture("activity-ideas-checkbox-checked")
@@ -86,62 +86,9 @@ import XCTest
         XCTAssertEqual(title.value as? String, "周末一起出去")
         XCTAssertEqual(location.value as? String, "校园")
         XCTAssertEqual(dates.label, dateSummary)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
+        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发给朋友填写")
         capture("activity-ideas-checkbox-unchecked")
         cancel().tap(); assertHittable(app.buttons["plans-create-primary"])
-    }
-
-    func testSuggestionsAndFixedTimeKeepBothOptionsAndInputs() {
-        app.tabBars.buttons["计划"].tap(); openCreation()
-        let title = app.textFields["time-poll-title"]
-        title.tap(); title.typeText("周六做点什么\n")
-        let location = app.textFields["unified-plan-location"]
-        location.tap(); location.typeText("校园\n")
-        let option = app.buttons["plan-start-together"]
-        reveal(option); option.tap(); XCTAssertTrue(option.isSelected)
-        let fixed = app.buttons["plan-mode-fixed"]
-        reveal(fixed); fixed.tap()
-        let time = app.datePickers["unified-plan-fixed-start"]
-        XCTAssertTrue(time.waitForExistence(timeout: 10))
-        let timeValue = time.value as? String
-        reveal(option); XCTAssertTrue(option.isSelected)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "发起计划")
-        option.tap(); XCTAssertFalse(option.isSelected)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "生成邀请链接")
-        option.tap(); XCTAssertTrue(option.isSelected)
-        XCTAssertEqual(time.value as? String, timeValue)
-        XCTAssertEqual(title.value as? String, "周六做点什么")
-        XCTAssertEqual(location.value as? String, "校园")
-        capture("fixed-time-with-activity-ideas")
-        let collect = app.buttons["plan-mode-collect"]
-        reveal(collect); collect.tap()
-        reveal(option); XCTAssertTrue(option.isSelected)
-        reveal(fixed); fixed.tap()
-        XCTAssertEqual(time.value as? String, timeValue)
-        XCTAssertEqual(title.value as? String, "周六做点什么")
-        capture("fixed-time-options-restored")
-    }
-
-    func testFixedTimeShortcutEditsInPlaceAndKeepsInputs() {
-        app.tabBars.buttons["计划"].tap(); openCreation()
-        let title = app.textFields["time-poll-title"]
-        title.tap(); title.typeText("已定时间的聚餐\n")
-        let fixed = app.buttons["plan-mode-fixed"]
-        reveal(fixed); fixed.tap()
-        XCTAssertTrue(app.datePickers["unified-plan-fixed-start"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.steppers["unified-plan-participant-count"].exists)
-        XCTAssertEqual(app.buttons["time-poll-create-confirm"].label, "生成邀请链接")
-        XCTAssertFalse(app.buttons["plan-create-next"].exists)
-        capture("secondary-fixed-time")
-        let collect = app.buttons["plan-mode-collect"]
-        reveal(collect); collect.tap()
-        XCTAssertEqual(title.value as? String, "已定时间的聚餐")
-        XCTAssertTrue(app.buttons["plan-date-options"].exists)
-        capture("return-to-default-form")
-        let bar = app.navigationBars.firstMatch
-        bar.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
-            .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.9)))
-        assertHittable(homeCreate)
     }
 
     func testChineseDarkLargeTextKeepsInputsDatesAndCreateReachable() {
@@ -159,20 +106,8 @@ import XCTest
         XCTAssertLessThanOrEqual(create.frame.maxX, app.frame.maxX + 1)
         let suggestionOption = app.buttons["plan-start-together"]
         reveal(suggestionOption); suggestionOption.tap(); XCTAssertTrue(suggestionOption.isSelected)
-        XCTAssertEqual(create.label, "发起计划")
+        XCTAssertEqual(create.label, "发给朋友填写")
         capture("single-form-dark-large")
-        let fixed = app.buttons["plan-mode-fixed"]
-        reveal(fixed); fixed.tap()
-        reveal(suggestionOption, towardTop: true); XCTAssertTrue(suggestionOption.isSelected)
-        XCTAssertEqual(create.label, "发起计划"); XCTAssertTrue(create.isHittable)
-        capture("fixed-ideas-dark-large")
-        let fixedTime = app.datePickers["unified-plan-fixed-start"]
-        reveal(fixedTime)
-        XCTAssertGreaterThanOrEqual(fixedTime.frame.minX, 0)
-        XCTAssertLessThanOrEqual(fixedTime.frame.maxX, app.frame.maxX)
-        capture("fixed-time-picker-dark-large")
-        let collect = app.buttons["plan-mode-collect"]
-        reveal(collect); collect.tap()
         let options = app.buttons["plan-date-options"]
         reveal(options, towardTop: true); options.tap()
         let dates = app.descendants(matching: .any)["time-poll-dates"].firstMatch
@@ -202,8 +137,10 @@ import XCTest
             if suggestions { option.tap(); XCTAssertTrue(option.isSelected) }
             XCTAssertEqual(titleField.value as? String, title)
             let create = app.buttons["time-poll-create-confirm"]
-            XCTAssertEqual(create.label, "发起计划"); capture(suggestions ? "live-checkbox-checked" : "live-checkbox-unchecked")
+            XCTAssertEqual(create.label, "发给朋友填写"); capture(suggestions ? "live-checkbox-checked" : "live-checkbox-unchecked")
             create.tap()
+            XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 25))
+            app.navigationBars.buttons["完成"].tap()
             XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 25))
             XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, title)
             XCTAssertEqual(app.buttons["plan-activity-open-ideas"].exists, suggestions)
