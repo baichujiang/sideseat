@@ -177,6 +177,17 @@ See [Shared native plan presentation](./PLAN_PRESENTATION.md).
 
 ## Unified manual plans — owner-approved 2026-10-15
 
+**Current creation amendment — 2026-10-23 / Preview 191:** enter the activity
+and optional location, set candidate dates and daily voting hours, and share
+the candidate timetable. Creation shows a read-only preview and one Share for
+availability action; there is no final-time selection or mode switch at this
+stage. Once created, the organizer and friends fill the same detail timetable
+and explicitly submit their availability. The organizer then chooses the final
+interval, reviews invitees and sends invitations, even if nobody has voted yet.
+Individual responses and organizer publication to Calendar retain their existing
+rules. Activity suggestions remain optional in this same path. This supersedes
+the earlier creation-stage final/collection branches described below.
+
 **Preview 115 — a clear starting point:** Plans leads with **Start an activity**
 and **Open a friend's invitation**. The same prominent creation action remains
 visible above active plans. A first-plan account sees three concrete steps:

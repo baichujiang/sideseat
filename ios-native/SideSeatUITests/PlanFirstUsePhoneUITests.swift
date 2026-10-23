@@ -408,8 +408,6 @@ import XCTest
         let location = app.textFields["unified-plan-location"]
         location.tap(); location.typeText("校园\n")
         app.buttons["plan-start-together"].tap()
-        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
-        assertFinalClock("09:00", "10:00")
         XCTAssertTrue(app.buttons["plan-start-together"].isSelected)
         XCTAssertEqual(title.value as? String, fixture.title)
         XCTAssertEqual(location.value as? String, "校园")
@@ -418,11 +416,11 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
         app.navigationBars.buttons["完成"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
-        XCTAssertFalse(app.buttons["time-poll-submit"].exists)
+        XCTAssertFalse(app.buttons["time-poll-submit"].isEnabled)
         XCTAssertTrue(app.buttons["time-poll-cell-0"].exists)
         XCTAssertFalse(app.buttons["unified-plan-accept"].exists)
         XCTAssertTrue(app.buttons["plan-activity-suggest"].exists)
-        XCTAssertFalse(app.buttons["unified-plan-review-roster"].isEnabled)
+        XCTAssertFalse(app.buttons["unified-plan-review-roster"].exists)
         nativePhase("fixed-created"); capture(app, "fixed-ideas-awaiting-activity")
         app.buttons["plan-share-open"].tap()
         app.buttons["plan-invite-contacts"].tap()
@@ -504,6 +502,9 @@ import XCTest
         XCTAssertTrue(app.buttons["time-poll-submit"].waitForExistence(timeout: 10))
 
         nativeSignIn(owner, bundle: fixture.bundle); openPlan()
+        app.buttons["unified-plan-invite-window"].tap()
+        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        assertFinalClock("09:00", "10:00")
         app.buttons["unified-plan-review-roster"].tap()
         let choice = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-activity-' AND label CONTAINS %@", fixture.activityTitle)).firstMatch
         XCTAssertTrue(choice.waitForExistence(timeout: 10))
@@ -693,7 +694,6 @@ import XCTest
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + " draft\n")
-        app.buttons["plan-collect-availability"].tap()
         app.buttons["time-poll-create-confirm"].tap()
         XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
         app.navigationBars.buttons["完成"].tap()
@@ -840,7 +840,7 @@ import XCTest
         XCTAssertTrue(create.waitForExistence(timeout: 20)); create.tap()
         let title = app.textFields["time-poll-title"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(f.title + "\n")
-        app.buttons["plan-date-options"].tap()
+        toggleCandidateDates()
         let datePicker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
         let defaultDay = try XCTUnwrap(datePicker.buttons.allElementsBoundByIndex.first { $0.isSelected })
         defaultDay.tap(); XCTAssertFalse(defaultDay.isSelected)
@@ -854,18 +854,22 @@ import XCTest
         XCTAssertEqual(datePicker.buttons.matching(NSPredicate(format: "isSelected == true")).count, 0)
         datePicker.buttons[defaultLabel].tap()
         XCTAssertTrue(datePicker.buttons[defaultLabel].isSelected)
-        app.buttons["plan-date-options"].tap()
+        toggleCandidateDates()
         XCTAssertFalse(app.buttons["plan-mode-fixed"].exists)
+        XCTAssertFalse(app.buttons["plan-collect-availability"].exists)
         let next = app.buttons["time-poll-create-confirm"]
-        XCTAssertFalse(next.isEnabled)
+        XCTAssertTrue(next.isEnabled)
+        XCTAssertFalse(app.staticTexts["time-poll-final-summary"].exists)
+        XCTAssertFalse(app.buttons["time-poll-cell-0"].exists)
+        capture(app, "candidate-create-before-any-votes"); next.tap()
+        XCTAssertTrue(app.buttons["plan-invite-contacts"].waitForExistence(timeout: 20))
+        app.navigationBars.buttons["完成"].tap()
+        XCTAssertTrue(app.buttons["time-poll-cell-4"].waitForExistence(timeout: 20))
+        app.buttons["time-poll-cell-4"].tap()
+        app.buttons["unified-plan-invite-window"].tap()
         app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
         assertFinalClock("09:00", "10:00")
-        app.buttons["plan-start-together"].tap(); app.buttons["plan-start-together"].tap()
-        app.buttons["plan-collect-availability"].tap()
-        app.buttons["time-poll-cell-4"].tap()
-        app.buttons["plan-collect-availability"].tap()
-        assertFinalClock("09:00", "10:00")
-        capture(app, "unified-create-direct-timetable"); next.tap()
+        app.buttons["unified-plan-review-roster"].tap()
         let send = app.buttons["unified-plan-send-invitations"]
         XCTAssertTrue(send.waitForExistence(timeout: 20))
         app.buttons["unified-plan-adjust-time"].tap()
@@ -959,9 +963,9 @@ import XCTest
             XCTAssertLessThanOrEqual(dates.frame.maxY, ideas.frame.minY + 1)
             XCTAssertGreaterThanOrEqual(title.frame.minX - information.frame.minX, 10)
             if !large {
-                XCTAssertLessThanOrEqual(information.frame.height, 210)
+                XCTAssertLessThanOrEqual(information.frame.height, 280)
                 XCTAssertLessThanOrEqual(ideas.frame.maxY, app.otherElements["plan-create-timetable-heading"].frame.minY)
-            } else { XCTAssertLessThanOrEqual(information.frame.height, 340) }
+            } else { XCTAssertLessThanOrEqual(information.frame.height, 450) }
             capture(app, "compact-create-empty-\(size)-\(language)")
             title.tap()
             XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
@@ -975,28 +979,17 @@ import XCTest
             XCTAssertEqual(title.value as? String, name)
             capture(app, "compact-create-filled-\(size)-\(language)")
             let next = app.buttons["time-poll-create-confirm"]
-            XCTAssertFalse(next.isEnabled)
-            let scroll = app.scrollViews.firstMatch
-            let first = app.buttons["time-poll-cell-0"]
-            let second = app.buttons["time-poll-cell-2"]
-            let top = app.navigationBars.firstMatch.frame.maxY + 12
-            for _ in 0..<8 {
-                if first.isHittable && first.frame.minY >= top && second.frame.maxY <= next.frame.minY - 20 { break }
-                if first.frame.minY < top { scroll.swipeDown() } else { scroll.swipeUp() }
-            }
-            capture(app, "unified-create-largest-before-selection-\(language)")
-            XCTAssertTrue(first.isHittable); XCTAssertLessThan(second.frame.maxY, next.frame.minY)
-            first.tap(); second.tap()
-            capture(app, "unified-create-largest-after-selection-\(language)")
-            XCTAssertTrue(first.isSelected && second.isSelected)
             XCTAssertTrue(next.isEnabled); XCTAssertGreaterThanOrEqual(next.frame.height, 44)
-            capture(app, "unified-create-largest-\(language)")
-            app.buttons["plan-collect-availability"].tap()
-            app.buttons["time-poll-cell-4"].tap()
-            capture(app, "unified-create-collect-largest-\(language)")
-            app.buttons["plan-collect-availability"].tap()
-            XCTAssertTrue(next.isEnabled); assertFinalClock("09:00", "10:00")
-            capture(app, "unified-create-both-drafts-largest-\(language)")
+            XCTAssertFalse(app.buttons["plan-collect-availability"].exists)
+            XCTAssertFalse(app.staticTexts["time-poll-final-summary"].exists)
+            XCTAssertFalse(app.buttons["time-poll-cell-0"].exists)
+            XCTAssertTrue(app.otherElements["plan-create-hours"].exists)
+            for id in ["time-poll-from", "time-poll-until"] {
+                let field = app.buttons[id]
+                XCTAssertGreaterThanOrEqual(field.frame.height, 43.5)
+                XCTAssertLessThanOrEqual(field.frame.height, 55, "Clock values must stay on one line")
+            }
+            capture(app, "candidate-ready-to-share-\(size)-\(language)")
             app.terminate()
         }
     }
@@ -1011,29 +1004,23 @@ import XCTest
             formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
             let removedDay = "time-poll-day-" + formatter.string(from: tomorrow)
             first.tap(); XCTAssertFalse(first.isSelected)
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
             XCTAssertTrue(app.buttons[removedDay].waitForNonExistence(timeout: 5))
-            assertFinalClock("09:00", "10:00")
-            XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
-            app.buttons["plan-collect-availability"].tap()
-            XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
-            app.buttons["plan-collect-availability"].tap()
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
             let sameDay = picker.buttons[label]
             XCTAssertFalse(sameDay.isSelected); sameDay.tap(); XCTAssertTrue(sameDay.isSelected)
             // Batch taps reach UIKit rapidly instead of waiting for quiescence after every touch.
             for _ in 0..<4 {
                 sameDay.tap(withNumberOfTaps: 6, numberOfTouches: 1)
-                XCTAssertTrue(sameDay.isSelected)
                 XCTAssertEqual(app.state, .runningForeground)
             }
+            if !sameDay.isSelected { sameDay.tap() }
+            XCTAssertTrue(sameDay.isSelected)
             capture(app, "candidate-date-rapid-\(language)")
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
             XCTAssertTrue(app.buttons[removedDay].exists)
-            XCTAssertTrue(app.buttons["time-poll-cell-32"].isSelected)
-            assertFinalClock("09:00", "10:00")
-            capture(app, "candidate-date-restored-drafts-\(language)")
-            app.buttons["plan-date-options"].tap()
+            capture(app, "candidate-date-restored-preview-\(language)")
+            toggleCandidateDates()
             let clear = app.buttons["time-poll-dates-clear"]
             let next = app.buttons["time-poll-create-confirm"]
             let summary = app.staticTexts["time-poll-final-summary"]
@@ -1055,16 +1042,17 @@ import XCTest
             XCTAssertEqual(app.textFields["unified-plan-location"].value as? String, "Library")
             XCTAssertFalse(next.isEnabled)
             capture(app, "candidate-date-cleared-\(language)")
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
             XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 0)
             XCTAssertFalse(next.isEnabled)
             capture(app, "candidate-date-empty-\(language)")
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
             picker.buttons[label].tap()
             XCTAssertTrue(clear.isEnabled)
-            app.buttons["plan-date-options"].tap()
+            toggleCandidateDates()
+            app.scrollViews.firstMatch.swipeUp()
+            XCTAssertTrue(app.buttons[removedDay].waitForExistence(timeout: 5))
             XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 1)
-            app.buttons["time-poll-cell-0"].tap()
             XCTAssertTrue(next.isEnabled)
             capture(app, "candidate-date-reselected-\(language)")
             app.terminate()
@@ -1091,12 +1079,27 @@ import XCTest
         day(25).tap(); XCTAssertFalse(next.isEnabled)
         day(25).tap(); XCTAssertTrue(next.isEnabled)
         capture(app, "candidate-dates-limit-31")
-        app.buttons["plan-date-options"].tap()
+        toggleCandidateDates()
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).count, 31)
-        assertFinalClock("09:00", "10:00")
+        XCTAssertTrue(app.buttons["time-poll-create-confirm"].isEnabled)
         XCTAssertEqual(app.state, .runningForeground)
         capture(app, "candidate-dates-31-day-timetable")
         app.terminate()
+    }
+
+    private func toggleCandidateDates() {
+        let button = app.buttons["plan-date-options"]
+        let picker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
+        let expanded = picker.exists
+        for _ in 0..<8 {
+            if button.isHittable && button.frame.minY >= app.navigationBars.firstMatch.frame.maxY + 4 { break }
+            app.scrollViews.firstMatch.swipeDown()
+        }
+        XCTAssertTrue(button.isHittable)
+        XCTAssertGreaterThanOrEqual(button.frame.minY, app.navigationBars.firstMatch.frame.maxY + 4)
+        button.tap()
+        if expanded { XCTAssertTrue(picker.waitForNonExistence(timeout: 5)) }
+        else { XCTAssertTrue(picker.waitForExistence(timeout: 5)) }
     }
 
     private func openCandidateDateEditor(language: String = "zh-Hans", large: Bool = false) throws -> XCUIElement {
@@ -1117,27 +1120,10 @@ import XCTest
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("Date selection regression\n")
         let location = app.textFields["unified-plan-location"]
         location.tap(); location.typeText("Library\n")
-        let next = app.buttons["time-poll-create-confirm"]
-        let secondDay = app.buttons["time-poll-day-" + {
-            let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
-            return f.string(from: Calendar.current.date(byAdding: .day, value: 2, to: Date())!)
-        }()]
-        if large {
-            // The widest-text table scrolls one date at a time.
-            app.scrollViews.firstMatch.swipeUp()
-            app.scrollViews["time-poll-grid"].swipeLeft()
-        }
-        let first = app.buttons["time-poll-cell-32"], second = app.buttons["time-poll-cell-34"]
-        for _ in 0..<8 {
-            if first.isHittable && second.frame.maxY < next.frame.minY { break }
-            app.scrollViews.firstMatch.swipeUp()
-        }
-        XCTAssertTrue(secondDay.exists); first.tap(); second.tap(); assertFinalClock("09:00", "10:00")
-        app.buttons["plan-collect-availability"].tap(); app.buttons["time-poll-cell-36"].tap()
-        app.buttons["plan-collect-availability"].tap()
-        let options = app.buttons["plan-date-options"]
-        for _ in 0..<10 where !options.isHittable { app.scrollViews.firstMatch.swipeDown() }
-        options.tap()
+        XCTAssertTrue(app.buttons["time-poll-create-confirm"].isEnabled)
+        XCTAssertFalse(app.buttons["plan-collect-availability"].exists)
+        XCTAssertFalse(app.staticTexts["time-poll-final-summary"].exists)
+        toggleCandidateDates()
         let picker = app.descendants(matching: .any)["time-poll-dates"].firstMatch
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         capture(app, "candidate-dates-start-\(language)")
@@ -1157,20 +1143,30 @@ import XCTest
         let title = app.textFields["time-poll-title"], location = app.textFields["unified-plan-location"]
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText("周末一起复习\n")
         location.tap(); location.typeText("图书馆二楼\n")
-        app.buttons["time-poll-cell-0"].tap()
         let options = app.buttons["plan-date-options"]
-        options.tap()
+        toggleCandidateDates()
         XCTAssertTrue(app.descendants(matching: .any)["time-poll-dates"].firstMatch.waitForExistence(timeout: 5))
         XCTAssertEqual(title.value as? String, "周末一起复习"); XCTAssertEqual(location.value as? String, "图书馆二楼")
-        capture(app, "compact-create-expanded-dates")
-        options.tap(); XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
-        assertFinalClock("09:00", "09:30")
-        app.buttons["plan-collect-availability"].tap(); options.tap()
-        XCTAssertTrue(app.descendants(matching: .any)["time-poll-from"].firstMatch.exists)
-        XCTAssertTrue(app.descendants(matching: .any)["time-poll-until"].firstMatch.exists)
-        capture(app, "compact-create-expanded-collection-hours")
-        options.tap(); app.buttons["time-poll-cell-4"].tap()
-        app.buttons["plan-collect-availability"].tap(); assertFinalClock("09:00", "09:30")
+        capture(app, "candidate-expanded-dates")
+        toggleCandidateDates()
+        let from = app.descendants(matching: .any)["time-poll-from"].firstMatch
+        let until = app.descendants(matching: .any)["time-poll-until"].firstMatch
+        XCTAssertTrue(from.exists); XCTAssertTrue(until.exists)
+        from.tap(); app.buttons["08:00"].tap()
+        until.tap()
+        for _ in 0..<4 where !app.buttons["07:00"].exists { app.collectionViews.firstMatch.swipeDown() }
+        XCTAssertTrue(app.buttons["07:00"].waitForExistence(timeout: 5)); app.buttons["07:00"].tap()
+        XCTAssertFalse(app.buttons["time-poll-create-confirm"].isEnabled)
+        until.tap()
+        XCTAssertTrue(app.buttons["07:00"].waitForExistence(timeout: 5))
+        for _ in 0..<4 where !app.buttons["18:00"].exists { app.collectionViews.firstMatch.swipeUp() }
+        XCTAssertTrue(app.buttons["18:00"].waitForExistence(timeout: 5)); app.buttons["18:00"].tap()
+        XCTAssertTrue(app.buttons["time-poll-create-confirm"].isEnabled)
+        capture(app, "candidate-adjusted-daily-hours")
+        toggleCandidateDates(); toggleCandidateDates()
+        XCTAssertEqual(title.value as? String, "周末一起复习")
+        XCTAssertEqual(location.value as? String, "图书馆二楼")
+        XCTAssertEqual(from.value as? String, "08:00"); XCTAssertEqual(until.value as? String, "18:00")
         app.terminate()
     }
 

@@ -121,6 +121,10 @@ if (mode === 'prepare') {
       assert.equal(p.planningMode, 'COLLECT');
       assert.equal(new Set(p.dates).size, p.dates.length, 'Candidate dates must remain unique after native picker edits.');
       assert.equal(p.invitationVersion ?? 0, formal ? 1 : 0);
+      if (!formal) {
+        assert.equal(p.chosenStart, null); assert.equal(p.chosenEnd, null);
+        assert.equal(p.invitations.length, 0, 'A candidate timetable must not send invitations before explicit final-time review.');
+      }
       if (ideas) { assert.equal(p.location, '校园'); assert.equal(p.activitySelection.isOpen, !formal); }
       assert.equal(p.summary.participantCount, direct ? 0 : index >= 3 ? 2 : index >= 2 ? 1 : 0);
       assert.deepEqual(p.mySlotIds, !direct && index >= 2 ? [0, 1, 2, 3] : []);

@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-23
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -37,6 +37,17 @@ choose a concrete time directly. Both routes use one shared plan and the same
 invitation, confirmation and cancellation lifecycle. Native SwiftUI and Sideseat's
 API/database retain 30-minute paint/erase over existing quarter-hour storage, explicit submission and attendance
 heatmap mechanism; provider pages, advertisements and storage are excluded.
+
+**2026-10-23 owner-approved collection-first entry:** new native plans publish a
+candidate timetable before anyone chooses the final time. Activity, candidate
+calendar dates and daily voting hours lead directly to sharing; the creation grid
+is a read-only preview. The organizer and friends then explicitly fill their own
+availability on the canonical detail timetable. Final-time selection and roster
+review happen there, remain available with no votes, and lead to the existing
+invitation, individual response, organizer publication and Calendar lifecycle.
+There is one creation flow, without a final/collection mode switch. Optional
+activity proposals remain in that same flow. Existing records and consent rules
+are unchanged; see the Preview 191 unified planning contract.
 
 **2026-10-20 owner-approved manual submission amendment:** App and share-web
 selection changes are private local drafts, with one explicit Submit my availability

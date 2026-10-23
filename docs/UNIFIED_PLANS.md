@@ -3,6 +3,31 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## One collection-first entry — Preview 191
+
+Owner amendment 2026-10-23: new plans start by publishing a valid candidate
+timetable. Enter activity/location, choose candidate dates and daily voting hours,
+then Share for availability. Creation previews these hours read-only; it does not
+select a final interval or submit anyone's availability. Its only primary action
+opens the existing share panel. Remove creation's final/availability mode flag,
+both selection sets, automatic availability submission and review handoff.
+
+After sharing, all participants, including the organizer, fill and explicitly
+submit their own availability on the existing detail timetable. The organizer
+uses Choose final time on that same timetable, reviews the roster, and sends a
+formal invitation. This remains available with zero votes. Existing accept,
+decline/ignore, invitation versions, cross-day selection, owner publication and
+unique Calendar rules remain. Final selection returns through the existing back
+arrow; remove the redundant Collect availability first footer action.
+
+Activity suggestions remain an independent checkbox. They use the same initial
+share action; a proposed activity must still be chosen before invitations.
+App contacts and browser guests keep the existing collection and RSVP surfaces.
+Creation continues to send one ordinary COLLECT request with dates and daily
+hours, then uses the existing share handoff; no endpoint, schema, guest identity
+or legacy FIXED-record change. This supersedes the creation branches described
+in Previews 187–190 below; existing final/availability drafts in details remain.
+
 ## Clear candidate dates — Preview 190
 
 The expanded calendar has one compact outlined “Clear dates” button centered

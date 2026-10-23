@@ -9,6 +9,19 @@ replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
 
+## Current creation — Preview 191
+
+New native plans enter one collection-first flow: activity/location, candidate
+dates and daily voting hours, a read-only timetable preview, then Share for
+availability. Creation neither submits availability nor chooses a final interval.
+The existing share panel opens immediately. The organizer and friends explicitly
+submit availability in details; final selection and invitation review happen on
+that same timetable and remain available with zero responses. Remove the former
+creation mode switch and the redundant final-selection footer return action;
+retain the navigation back arrow. Optional activity proposals, guest participation,
+existing records and RSVP/publication/Calendar rules remain. Older descriptions
+below are superseded by the current [unified contract](./UNIFIED_PLANS.md).
+
 ## Invitation timetable — Preview 123
 
 App and public-share invitation details now show a read-only timetable focused on
