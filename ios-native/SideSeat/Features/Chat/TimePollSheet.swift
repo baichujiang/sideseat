@@ -155,6 +155,11 @@ struct TimePollCreateView: View {
                     }), in: calendar.startOfDay(for: Date())...)
                         .environment(\.calendar, calendar)
                         .accessibilityIdentifier("time-poll-dates")
+                    Button("Clear dates") { dates.removeAll() }
+                        .buttonStyle(SSActionButtonStyle(size: .compact))
+                        .disabled(dates.isEmpty)
+                        .accessibilityIdentifier("time-poll-dates-clear")
+                        .frame(maxWidth: .infinity)
                     if collectingAvailability {
                         Picker("From", selection: $startMinute) {
                             ForEach(Array(stride(from: 0, to: 1440, by: 30)), id: \.self) { Text(clock($0)).tag($0) }

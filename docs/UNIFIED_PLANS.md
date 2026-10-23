@@ -3,6 +3,16 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Clear candidate dates — Preview 190
+
+The expanded calendar has one compact outlined “Clear dates” button centered
+directly below it, before any collection-hour controls. It clears the candidate
+date set in one tap, reusing the existing timetable rebuild to clear both related
+time selections. Activity name and location remain. With no selected date, this
+button and the existing next action are disabled; selecting new dates restores
+the button and the ordinary timetable flow. There is no confirmation dialog,
+server request or new state/validation path.
+
 ## Candidate date identity and editing — Preview 189
 
 Default dates and MultiDatePicker edits use the same calendar, locale and day
