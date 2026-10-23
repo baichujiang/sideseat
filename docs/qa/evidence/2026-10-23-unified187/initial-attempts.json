@@ -1,0 +1,39 @@
+{
+  "attempts": [
+    {
+      "run": "direct1",
+      "result": "failed harness",
+      "reason": "The first toolbar button returns to availability, not to the Plans tab. Corrected reopen verification to relaunch and open the saved plan.",
+      "productFinding": "Mode switch kept the selection but scrolled to midnight; fixed the shared table task to scroll to the active draft."
+    },
+    {
+      "run": "direct2",
+      "result": "failed harness",
+      "reason": "Roster participant IDs differ from user IDs; select the enabled roster row."
+    },
+    {
+      "run": "direct3",
+      "result": "failed harness",
+      "reason": "The selected accessibility value is localized to Chinese; corrected the assertion to 已选择."
+    },
+    {
+      "run": "direct4",
+      "result": "failed harness",
+      "reason": "The link-roster control was covered by the fixed action area; XCTest tapped Send while trying to reveal it. The final test explicitly scrolls the control above Send and verifies the server remains COLLECTING. Its observer also started before fixture replacement completed; subsequent runs await prepare first."
+    }
+  ],
+  "productFix": "The final legend also labels the optional local green availability draft when returning to amber final-time mode.",
+  "activityAttempt": {
+    "result": "failed harness after three successful API stages",
+    "reason": "The old FIXED creation test expected the idea board to remain expanded. The unified COLLECT plan preserves its existing collapsed disclosure; the final continuous rerun opens it explicitly."
+  },
+  "layoutAttempts": [
+    "First run expected the German reopen to start in availability despite the newly persistent final draft, and trusted nested isHittable without checking the fixed footer. Corrected the test to restore/clear draft and compare visible frames.",
+    "Functional second run passed; image inspection found excess maximum-text day-header height. Reduced only the bounded/final maximum-text header from 128 to 72 points. Final two-case rerun passed."
+  ],
+  "lastVisualFinding": {
+    "functionalRunPassedSeconds": 258.01,
+    "finding": "Activity composition still showed the large availability dock over the input padding. The test could tap Confirm, but the screenshot did not pass visual acceptance.",
+    "fix": "Lift composer visibility into the detail parent; hide its timetable dock and sharing toolbar while composing, restore on Confirm/Cancel, reset on disappearance. Add a real keyboard-frame assertion and repeat the entire activity journey."
+  }
+}

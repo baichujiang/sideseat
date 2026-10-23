@@ -1,0 +1,16 @@
+{
+  "id": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "state": "READY",
+  "target": "production",
+  "project": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "url": "sideseat-gjtfma7wp-baichus-projects.vercel.app",
+  "aliases": [
+    "sideseat.de",
+    "www.sideseat.de",
+    "sideseat-baichus-projects.vercel.app",
+    "api.sideseat.de",
+    "sideseat.vercel.app"
+  ],
+  "releasedThisStage": false,
+  "checkedAt": "2026-10-23T13:21:13.517Z"
+}

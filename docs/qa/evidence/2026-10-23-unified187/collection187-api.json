@@ -1,0 +1,189 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "contacts-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 62d45d6f",
+      "location": null,
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:04:16.731Z"
+    },
+    {
+      "phase": "contacts-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:04:47.515Z"
+    },
+    {
+      "phase": "contacts-owner-submitted",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:04:59.571Z"
+    },
+    {
+      "phase": "contacts-peer-submitted",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:05:26.716Z"
+    },
+    {
+      "phase": "contacts-formal-invitation",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:07:53.104Z"
+    },
+    {
+      "phase": "contacts-peer-accepted",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:08:17.637Z"
+    },
+    {
+      "phase": "contacts-published",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T13:08:37.888Z"
+    },
+    {
+      "phase": "contacts-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 62d45d6f",
+      "location": "图书馆二楼",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T13:09:00.936Z"
+    }
+  ],
+  "failure": null
+}

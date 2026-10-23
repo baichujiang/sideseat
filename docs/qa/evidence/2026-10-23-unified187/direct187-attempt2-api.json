@@ -1,0 +1,22 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "direct-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan cf405efd",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T12:40:34.803Z"
+    }
+  ],
+  "failure": "Phone test failed; partial API checks retained."
+}

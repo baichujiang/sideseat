@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 186 is the current installed development build. Tap the activity name
+- Preview 187 is the current installed development build. Creation opens the
+  shared timetable directly; remove the standalone fixed-time date/duration/count
+  branch. Amber final time leads to roster review and explicit invitation; the
+  secondary green availability path retains both drafts and existing rules.
+  Preserve unsubmitted creation availability in the existing per-account store.
+  Activity composition hides its timetable dock and share toolbar until Confirm
+  or Cancel, and maximum-text bounded/final day headers use 72pt.
+  Direct/collection/final-activity real phone journeys passed in 176.251 / 323.090 /
+  267.994 seconds with 6 + 8 + 7 API stages and exact unique Calendars. The first
+  two precede only the corresponding display corrections; final activity reran
+  on the installed binary. Native 27/domain 16 checks and Chinese/German maximum
+  text 98.919 / 23.454 seconds passed; see QA for actual artifact scopes.
+  Sources b6d88e07 and 84935662 are pushed. Strict signature, 248 App/18 config
+  inputs and shared Calendar JSON, install and ordinary launch PID 6899 verified;
+  ordinary 97 stays. 18 accounts/11 links, runner and private launch files
+  cleaned. No backend/web release; production dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7
+  and api/www aliases were rechecked Ready. See the 187 release and QA.
+- Preview 186 was the previous development build. Tap the activity name
   or location directly in the heading; inputs and explicit Save/Cancel stay in
   place. The redundant Edit button and information sheet were removed. Editing
   hides the availability dock and sharing menu so they cannot cover input actions.

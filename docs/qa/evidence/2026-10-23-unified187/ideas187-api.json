@@ -1,0 +1,139 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "fixed-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:19:37.441Z"
+    },
+    {
+      "phase": "fixed-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:19:55.546Z"
+    },
+    {
+      "phase": "fixed-suggested",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:21:07.166Z"
+    },
+    {
+      "phase": "fixed-invited",
+      "actualPhase": "INVITING",
+      "title": "一起打桌游 d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:22:05.877Z"
+    },
+    {
+      "phase": "fixed-accepted",
+      "actualPhase": "INVITING",
+      "title": "一起打桌游 d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:22:27.230Z"
+    },
+    {
+      "phase": "fixed-published",
+      "actualPhase": "CONFIRMED",
+      "title": "一起打桌游 d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T13:22:47.924Z"
+    },
+    {
+      "phase": "fixed-calendar",
+      "actualPhase": "CONFIRMED",
+      "title": "一起打桌游 d34d01b9",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": "2026-10-24T07:00:00.000Z",
+      "chosenEnd": "2026-10-24T08:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T13:23:09.698Z"
+    }
+  ],
+  "failure": null
+}

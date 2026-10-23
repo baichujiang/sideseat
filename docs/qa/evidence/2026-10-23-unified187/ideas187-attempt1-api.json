@@ -1,0 +1,63 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "fixed-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 12263328",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:14:38.136Z"
+    },
+    {
+      "phase": "fixed-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 12263328",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:14:56.612Z"
+    },
+    {
+      "phase": "fixed-suggested",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 12263328",
+      "location": "校园",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T13:16:08.450Z"
+    }
+  ],
+  "failure": "Phone test failed; partial API checks retained."
+}

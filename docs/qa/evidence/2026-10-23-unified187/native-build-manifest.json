@@ -1,0 +1,54 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "binarySHA256": {
+    "SideSeat Preview": "34acb7a04c1fa00f9252e94ba294895f9b87b0ab8e7a2336507dc07104837e6d",
+    "SideSeat Preview.debug.dylib": "0f62fb97425d9ea6fbd5738bb633b54f4353c8a06b8241568965c41ba1c87ed4"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "version": "1.0.0",
+  "build": 187,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "pid": 6899,
+  "processMatched": true,
+  "installedApplicationMatched": true,
+  "arguments": [],
+  "qaEnvironmentPresent": false,
+  "runnerAbsent": true,
+  "ordinaryBuild": 97,
+  "sourceCommit": "84935662449f1ed133cec40be93bd07965572e6b",
+  "strictSignatureVerified": true,
+  "installed": true,
+  "isolatedBuild": true,
+  "productionDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "webDeploymentChanged": false,
+  "nativeUnitTestsPassed": 27,
+  "domainTestsPassed": 16,
+  "phoneFlows": [
+    {
+      "name": "direct",
+      "seconds": 176.251,
+      "apiStages": 6,
+      "scope": "Before maximum-text-only day-header and activity-composer-only corrections; the ordinary non-activity path is unchanged."
+    },
+    {
+      "name": "collection",
+      "seconds": 323.09,
+      "apiStages": 8,
+      "scope": "Before activity-composer-only correction; ordinary non-activity path unchanged."
+    },
+    {
+      "name": "activity-final",
+      "seconds": 267.994,
+      "apiStages": 7,
+      "scope": "Final installed binary, including maximum-text composer above the keyboard, dock hidden/restored."
+    }
+  ],
+  "maximumTextChecks": [
+    23.454,
+    98.919
+  ],
+  "maximumTextScope": "Final day-header geometry; before activity-composer-only change. No activity editor is opened by these checks."
+}

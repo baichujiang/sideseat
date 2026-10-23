@@ -1,0 +1,102 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "direct-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T12:53:00.073Z"
+    },
+    {
+      "phase": "direct-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T12:53:42.969Z"
+    },
+    {
+      "phase": "direct-formal-invitation",
+      "actualPhase": "INVITING",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T12:53:50.607Z"
+    },
+    {
+      "phase": "direct-peer-accepted",
+      "actualPhase": "INVITING",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-23T12:54:11.051Z"
+    },
+    {
+      "phase": "direct-published",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T12:54:29.485Z"
+    },
+    {
+      "phase": "direct-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan d3f55da7",
+      "location": "",
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-23T12:54:52.219Z"
+    }
+  ],
+  "failure": null
+}
