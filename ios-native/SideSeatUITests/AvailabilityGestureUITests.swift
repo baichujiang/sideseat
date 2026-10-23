@@ -208,7 +208,7 @@ import XCTest
         capture("horizontal-scroll-no-edit")
     }
 
-    func testDeliberateRangeTapEraseAndUndoPersist() {
+    func testDeliberateRangeTapEraseAndReopenPersist() {
         openEmptyPoll()
         let first = app.buttons["time-poll-cell-0"], last = app.buttons["time-poll-cell-2"]
         XCTAssertFalse(app.buttons["time-poll-cell-1"].exists)
@@ -219,11 +219,11 @@ import XCTest
         capture("one-hour-selected")
         last.tap()
         assertSaved([0, 1])
-        app.buttons["time-poll-undo"].tap()
+        last.tap()
         assertSaved([0, 1, 2, 3])
         first.press(forDuration: 0.6, thenDragTo: last)
         assertSaved([])
-        app.buttons["time-poll-undo"].tap()
+        first.press(forDuration: 0.6, thenDragTo: last)
         assertSaved([0, 1, 2, 3])
         app.terminate()
         launch()
@@ -232,7 +232,7 @@ import XCTest
         capture("reopened-saved-selection")
     }
 
-    func testDayHeaderSelectsClearsUndoesAndPersists() throws {
+    func testDayHeaderSelectsClearsAndPersists() throws {
         struct Fixture: Decodable { let token: String; let firstDate: String; let secondSlotId: Int }
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_DAY_QA_FIXTURE_JSON"]
         try XCTSkipIf(raw == nil, "Requires a fresh day-selection poll.")
@@ -252,7 +252,7 @@ import XCTest
         day.tap(); assertSaved([0, 1, 2, 3]); XCTAssertTrue(day.isSelected)
         day.tap(); assertSaved([])
         XCTAssertFalse(day.isSelected); XCTAssertTrue(other.isSelected)
-        app.buttons["time-poll-undo"].tap(); assertSaved([0, 1, 2, 3])
+        day.tap(); assertSaved([0, 1, 2, 3])
         XCTAssertTrue(day.isSelected); XCTAssertTrue(other.isSelected)
         app.buttons["Group results"].tap()
         XCTAssertFalse(day.exists, "Results must not offer availability edits")
@@ -272,7 +272,7 @@ import XCTest
         capture("day-dark-chinese")
     }
 
-    func testLegacyPartialHalfHourFillsAndUndoesWithoutRounding() throws {
+    func testLegacyPartialHalfHourFillsAndPersistsWithoutRounding() throws {
         let raw = ProcessInfo.processInfo.environment["SIDESEAT_AVAILABILITY_HALF_HOUR_QA_POLL"]
         pollToken = try XCTUnwrap(raw)
         launch(); openPlan()
@@ -283,12 +283,10 @@ import XCTest
         XCTAssertFalse(app.buttons["time-poll-cell-1"].exists)
         capture("legacy-partial-half-hour")
         first.tap(); assertSaved([0, 1])
-        app.buttons["time-poll-undo"].tap(); assertSaved([0])
-        XCTAssertTrue(first.label.contains("Some times selected"))
         app.terminate(); launch(); openPlan()
-        XCTAssertTrue(first.label.contains("Some times selected"))
-        XCTAssertFalse(first.isSelected)
-        capture("legacy-partial-reopened")
+        XCTAssertFalse(first.label.contains("Some times selected"))
+        XCTAssertTrue(first.isSelected)
+        capture("legacy-filled-half-hour-reopened")
     }
 
     private func revealPlan(_ card: XCUIElement) {

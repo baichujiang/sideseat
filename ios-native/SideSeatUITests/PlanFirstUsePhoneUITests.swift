@@ -714,7 +714,17 @@ import XCTest
         verifyResponseCountSeparatedFromAction("0 人已填写")
         capture(app, "compact-empty-timetable")
         nativePhase("contacts-created")
-        app.buttons["time-poll-cell-0"].tap(); app.buttons["time-poll-cell-2"].tap()
+        let firstTime = app.buttons["time-poll-cell-0"], secondTime = app.buttons["time-poll-cell-2"]
+        XCTAssertFalse(app.buttons["time-poll-undo"].exists)
+        firstTime.press(forDuration: 0.6, thenDragTo: secondTime)
+        XCTAssertTrue(firstTime.isSelected && secondTime.isSelected)
+        secondTime.tap(); XCTAssertFalse(secondTime.isSelected); XCTAssertTrue(firstTime.isSelected)
+        secondTime.tap(); XCTAssertTrue(secondTime.isSelected)
+        firstTime.press(forDuration: 0.6, thenDragTo: secondTime)
+        XCTAssertFalse(firstTime.isSelected || secondTime.isSelected)
+        firstTime.press(forDuration: 0.6, thenDragTo: secondTime)
+        XCTAssertTrue(firstTime.isSelected && secondTime.isSelected)
+        capture(app, "availability-tap-cancel-drag-erase-no-undo")
         XCTAssertEqual(app.staticTexts["time-poll-save-state"].label, "未提交")
         XCTAssertFalse(app.buttons["plan-edit-information"].exists)
         app.staticTexts["time-poll-detail-title"].tap()
@@ -1416,7 +1426,7 @@ import XCTest
         wait(first, labelContains: ", 2")
         let day = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'time-poll-day-'")).firstMatch
         day.tap(); XCTAssertTrue(app.buttons["time-poll-cell-4"].isSelected)
-        app.buttons["time-poll-undo"].tap(); nativeWaitSaved()
+        day.tap(); first.tap(); second.tap(); nativeWaitSaved()
         XCTAssertFalse(app.buttons["time-poll-cell-4"].isSelected)
         XCTAssertTrue(first.isSelected); XCTAssertTrue(second.isSelected)
         let grid = app.descendants(matching: .any)["time-poll-grid"].firstMatch
@@ -1715,6 +1725,10 @@ import XCTest
                 "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=dark",
                 "--ui-testing-dynamic-type-accessibility", "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            XCTAssertTrue(app.buttons["time-poll-cell-0"].waitForExistence(timeout: 20))
+            if app.buttons["time-poll-cancel-final"].exists { app.buttons["time-poll-cancel-final"].tap() }
+            XCTAssertFalse(app.buttons["time-poll-undo"].exists)
+            capture(app, "availability-no-undo-largest-\(language)")
             let choose = app.buttons["unified-plan-invite-window"]
             if choose.waitForExistence(timeout: 2) { choose.tap() }
             XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 20))
@@ -1723,10 +1737,42 @@ import XCTest
             XCTAssertTrue(first.waitForExistence(timeout: 10)); first.tap(); second.tap()
             let review = app.buttons["unified-plan-review-roster"]
             XCTAssertTrue(review.isEnabled)
+            XCTAssertFalse(app.buttons["time-poll-undo"].exists)
             XCTAssertTrue(app.staticTexts["time-poll-final-summary"].exists)
             XCTAssertLessThan(app.staticTexts["time-poll-final-summary"].frame.maxY, review.frame.minY)
             XCTAssertGreaterThanOrEqual(review.frame.height, 43.99)
-            capture(app, "final-cells-largest-\(language)")
+            let viewport = app.scrollViews["time-poll-final-scroll"]
+            let summary = app.staticTexts["time-poll-final-summary"]
+            let top = app.navigationBars.firstMatch.frame.maxY + 4
+            for _ in 0..<8 {
+                if first.frame.minY >= top && second.frame.maxY <= summary.frame.minY - 8 { break }
+                let origin = app.coordinate(withNormalizedOffset: .zero)
+                let startY = min(summary.frame.minY - 24, max(top + 24, viewport.frame.minY - 24))
+                let amount: CGFloat = second.frame.maxY > summary.frame.minY - 8 ? -140 : 140
+                origin.withOffset(CGVector(dx: 20, dy: startY)).press(forDuration: 0.1,
+                    thenDragTo: origin.withOffset(CGVector(dx: 20, dy: startY + amount)))
+            }
+            print("FINAL_GRID193 \(language) first=\(first.frame) second=\(second.frame) viewport=\(viewport.frame) dock=\(summary.frame)")
+            XCTAssertTrue(first.isHittable && second.isHittable)
+            XCTAssertGreaterThanOrEqual(first.frame.minX, app.frame.minX - 0.5)
+            XCTAssertLessThanOrEqual(first.frame.maxX, app.frame.maxX + 0.5)
+            XCTAssertGreaterThanOrEqual(second.frame.minX, app.frame.minX - 0.5)
+            XCTAssertLessThanOrEqual(second.frame.maxX, app.frame.maxX + 0.5)
+            XCTAssertGreaterThanOrEqual(first.frame.minY, top)
+            XCTAssertLessThanOrEqual(second.frame.maxY, summary.frame.minY - 8)
+            XCTAssertTrue(viewport.frame.contains(CGPoint(x: first.frame.midX, y: first.frame.midY)))
+            XCTAssertTrue(viewport.frame.contains(CGPoint(x: second.frame.midX, y: second.frame.midY)))
+            first.tap(); XCTAssertFalse(first.isSelected); first.tap(); XCTAssertTrue(first.isSelected)
+            assertFinalClock("09:00", "10:00")
+            capture(app, "final-cells-largest-visible-\(language)")
+            let screen = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            screen.name = "physical-screen-final-no-undo-\(language)"; screen.lifetime = .keepAlways; add(screen)
+            app.terminate(); app.launch()
+            XCTAssertTrue(app.buttons["unified-plan-review-roster"].waitForExistence(timeout: 20))
+            XCTAssertTrue(first.waitForExistence(timeout: 10)); XCTAssertTrue(first.isSelected && second.isSelected)
+            XCTAssertFalse(app.buttons["time-poll-undo"].exists)
+            assertFinalClock("09:00", "10:00")
+            capture(app, "final-cells-largest-reopened-\(language)")
             app.terminate()
         }
     }
@@ -1735,6 +1781,7 @@ import XCTest
         let first = app.buttons["time-poll-cell-0"], second = app.buttons["time-poll-cell-2"], third = app.buttons["time-poll-cell-4"]
         let review = app.buttons["unified-plan-review-roster"]
         XCTAssertFalse(review.isEnabled)
+        XCTAssertFalse(app.buttons["time-poll-undo"].exists)
         first.tap(); assertFinalClock("09:00", "09:30")
         second.tap(); assertFinalClock("09:00", "10:00")
         second.tap(); assertFinalClock("09:00", "09:30"); XCTAssertTrue(first.isSelected)
@@ -1742,12 +1789,12 @@ import XCTest
         XCTAssertTrue(first.isSelected && third.isSelected)
         XCTAssertFalse(review.isEnabled); XCTAssertTrue(app.staticTexts["time-poll-final-gap"].exists)
         second.tap(); assertFinalClock("09:00", "10:30")
-        app.buttons["time-poll-undo"].tap(); XCTAssertFalse(review.isEnabled)
+        second.tap(); XCTAssertFalse(review.isEnabled)
         third.tap(); assertFinalClock("09:00", "09:30")
         first.tap(); XCTAssertFalse(review.isEnabled)
         first.press(forDuration: 0.5, thenDragTo: second)
         XCTAssertTrue(first.isSelected && second.isSelected); assertFinalClock("09:00", "10:00")
-        capture(app, "final-cells-tap-cancel-drag-undo")
+        capture(app, "final-cells-tap-cancel-drag-erase")
         first.press(forDuration: 0.5, thenDragTo: second)
         XCTAssertFalse(first.isSelected || second.isSelected); XCTAssertFalse(review.isEnabled)
         first.tap(); second.tap()

@@ -105,28 +105,30 @@ import XCTest
         capture("expired-collection-chinese-dark")
     }
 
-    func testAvailabilityAutosaveUndoDoneAndReopen() throws {
+    func testAvailabilityToggleSubmitAndReopen() throws {
         let poll = try create(title: "Availability round trip \(UUID().uuidString.prefix(6))")
         let token = try XCTUnwrap(poll["token"] as? String)
         let date = try XCTUnwrap((poll["dates"] as? [String])?.first)
         launch(auth: fixture.owner, path: "/time-polls/\(token)")
         let cell = app.buttons["time-poll-cell-0"]
         XCTAssertTrue(cell.waitForExistence(timeout: 15)); cell.tap()
+        app.buttons["time-poll-submit"].tap()
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])
         app.buttons["time-poll-day-\(date)"].tap()
-        let undo = app.buttons["time-poll-undo"]
-        XCTAssertTrue(undo.waitForExistence(timeout: 10)); undo.tap()
+        app.buttons["time-poll-day-\(date)"].tap(); cell.tap()
+        XCTAssertFalse(app.buttons["time-poll-undo"].exists)
+        XCTAssertFalse(app.buttons["time-poll-submit"].isEnabled)
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].exists)
+        XCTAssertTrue(app.buttons["time-poll-cell-0"].exists)
         XCTAssertFalse(app.buttons["plan-edit-availability"].exists)
         XCTAssertEqual(try get(token)["phase"] as? String, "COLLECTING")
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])
-        capture("availability-done-after-undo")
+        capture("availability-saved-after-toggle")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         let card = app.buttons["plans-coordinated-\(token)"]
         XCTAssertTrue(card.waitForExistence(timeout: 10)); card.tap()
-        XCTAssertTrue(app.staticTexts["time-poll-result-heading"].waitForExistence(timeout: 15))
+        XCTAssertTrue(cell.waitForExistence(timeout: 15))
         XCTAssertTrue(app.buttons["time-poll-cell-0"].isSelected)
         XCTAssertTrue(app.staticTexts["time-poll-saved"].waitForExistence(timeout: 10))
         XCTAssertEqual(try get(token)["mySlotIds"] as? [Int], [0, 1])

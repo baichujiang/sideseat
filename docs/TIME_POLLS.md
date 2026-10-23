@@ -9,6 +9,15 @@ replaces provider name/password login in the app. The owner also approved a
 poll-scoped browser guest on 2026-10-15; see Guest participation below.
 
 
+## Current native grid interaction — Preview 193
+
+Both editable native grids omit the one-step Undo button and snapshot state.
+Tap again to deselect; hold and drag to paint or erase, and tap a day header to
+select or clear that day. Existing draft/submission and final-interval rules are
+unchanged. Availability uses the normal Time corner label; final-time guidance
+stays in its existing text row; scroll layout and viewport dimensions remain. Older native
+Undo descriptions below are historical; browser interaction is unchanged here.
+
 ## Current creation — Preview 191
 
 New native plans enter one collection-first flow: activity/location, candidate

@@ -3,6 +3,17 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Native timetable without Undo — Preview 193
+
+Owner amendment 2026-10-23: remove the persistent one-step Undo action from both
+native availability and final-time grids. Remove its transient snapshot state and
+button rendering, retaining tap/toggle, hold-paint/erase, day selection, drafts,
+explicit submission and invitation/Calendar rules. Availability's time-header
+corner displays Time; final-time gesture guidance stays in the existing row
+above the grid. Preserve the existing scroll layout and viewport dimensions. Clear candidate dates and Clear final time
+remain distinct existing actions. This supersedes native Undo descriptions below;
+the browser implementation is unchanged in this stage.
+
 ## One collection-first entry — Preview 191
 
 Owner amendment 2026-10-23: new plans start by publishing a valid candidate

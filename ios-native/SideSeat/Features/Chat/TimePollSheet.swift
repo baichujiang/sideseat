@@ -629,7 +629,6 @@ private struct TimePollGrid: View {
     @State private var original = Set<Int>()
     @State private var preview: Set<Int>?
     @State private var selecting = true
-    @State private var undoSelection: Set<Int>?
     private var selection: Set<Int> { pickingFinalTime ? finalSelected : selected }
     private var cellHeight: CGFloat { typeSize.isAccessibilitySize ? 64 : 44 }
     private var labelWidth: CGFloat { typeSize.isAccessibilitySize ? 120 : 60 }
@@ -648,7 +647,6 @@ private struct TimePollGrid: View {
                         Text(heading).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 0)
                         if pickingFinalTime && !typeSize.isAccessibilitySize { finalLegendLabels.font(.caption) }
-                        if editable || pickingFinalTime { undoButton }
                     }
                     if pickingFinalTime && typeSize.isAccessibilitySize { finalLegendLabels.font(.caption) }
                     Text(editable || pickingFinalTime ? "Tap or hold and drag to select or deselect." : "Friends mark their availability here. Choose the final time after sharing.")
@@ -681,8 +679,8 @@ private struct TimePollGrid: View {
                 }.padding(.horizontal, SideSeatTheme.spaceMD)
             }
         }
-        .onChange(of: editable) { _, _ in clearPreview(); undoSelection = nil }
-        .onChange(of: pickingFinalTime) { _, _ in clearPreview(); undoSelection = nil }
+        .onChange(of: editable) { _, _ in clearPreview() }
+        .onChange(of: pickingFinalTime) { _, _ in clearPreview() }
         .onDisappear { clearPreview() }
     }
 
@@ -699,9 +697,8 @@ private struct TimePollGrid: View {
         return VStack(spacing: 4) {
             if heading == nil {
                 HStack {
-                    undoButton
-                    Spacer(minLength: 0)
                     Text("Tap or hold and drag to select or deselect.").font(.caption2).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }.dynamicTypeSize(...DynamicTypeSize.xxxLarge).frame(height: 44).padding(.horizontal, SideSeatTheme.spaceSM)
             }
             ScrollView(.horizontal) {
@@ -728,8 +725,7 @@ private struct TimePollGrid: View {
         let cellWidth = typeSize.isAccessibilitySize ? max(280, width - labelWidth) : max(88, (width - labelWidth) / CGFloat(max(1, min(4, table.dates.count))))
         return HStack(alignment: .top, spacing: 0) {
             VStack(spacing: 0) {
-                Group { if editable { undoButton } else { Text("Time").font(.caption) } }
-                    .frame(width: labelWidth, height: headerHeight)
+                Text("Time").font(.caption).frame(width: labelWidth, height: headerHeight)
                 ForEach(rows, id: \.self) { row in
                     Text(table.slots.first { $0.row == row }?.label ?? "")
                         .font(.caption2.monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
@@ -748,17 +744,6 @@ private struct TimePollGrid: View {
                 }
             }.frame(width: max(0, width - labelWidth), height: headerHeight + cellHeight * CGFloat(rows.count))
         }
-    }
-
-    private var undoButton: some View {
-        Button {
-            guard let undoSelection else { return }
-            apply(undoSelection); self.undoSelection = nil
-        } label: { Image(systemName: "arrow.uturn.backward").frame(minWidth: 44, minHeight: 44) }
-            .disabled(undoSelection == nil || dragStart != nil)
-            .accessibilityLabel("Undo last change")
-            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
-            .accessibilityIdentifier("time-poll-undo")
     }
 
     private func cellGrid(cells: [NativeTimePoll.Cell], rows: [String], lookup: [String: NativeTimePoll.Cell], cellWidth: CGFloat) -> some View {
@@ -846,7 +831,6 @@ private struct TimePollGrid: View {
 
     private func apply(_ value: Set<Int>) {
         guard value != selection else { return }
-        undoSelection = selection
         if pickingFinalTime { finalSelected = value } else { selected = value; onSave() }
     }
 
