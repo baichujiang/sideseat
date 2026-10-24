@@ -1,0 +1,20 @@
+{
+  "build": 208,
+  "pid": 8500,
+  "type": "cpu usage",
+  "start": "2026-10-24T16:12:39.274+02:00",
+  "end": "2026-10-24T16:14:21.339+02:00",
+  "CPUSeconds": 90,
+  "durationSeconds": 102.07,
+  "averageCPUPercent": 88,
+  "systemAction": "none",
+  "matchesCoordinateAndAccessibilityWindows": true,
+  "sameAppPIDFinishedUITest": true,
+  "rawReportKeptPrivate": true,
+  "stackContextPresent": {
+    "XCTAutomationSupport": true,
+    "AXRuntime": true,
+    "UIAccessibility": true
+  },
+  "notAProductPerformanceOptimizationClaim": true
+}

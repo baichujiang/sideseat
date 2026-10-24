@@ -32,8 +32,15 @@
   Initial font budget/selector/Day failures and root-only maximum/intermediate
   passes retain scope; not substituted for final App. Phone208 normalPID8498,
   267/Local/signature/binary verified,97 preserved;Runner/stage private cleaned,
-  no new App reports/real writes/backend/web release. Repair5 and final supplement
-  pending; two disposable QA accounts retained only for task final acceptance.
+  no new App reports/real writes/backend/web release in the typography stage.
+  Repair5 performance investigation now complete, test/evidencedc5fe0b6 pushed:
+  same208 seven-day plan, four isolated35s Time Profiler records,300.997s UItest
+  passed. Idle sampleweight≈1.94/1.98%; coordinate/AX load84.26/96.23% is95.127/
+  99.485% inclusive in XCTest/AX snapshot stacks. No product algorithm change or
+  pure-manual optimization claim. One real CPU resource report88%/102.07s occurred
+  precisely in coordinate/AX windows,actionnone; not zero reports. Same App PID
+  finished, normal208 restoredPID8510,97 preserved,Runner/private cleaned.
+  Final profile/full-flow supplements pending; QA accounts retained for cleanup.
   See208 release/sequential QA.
 - Preview 207 was the previous development build. Sequential repair3
   consumes horizontal first/last section boundary drags using existing clamps;

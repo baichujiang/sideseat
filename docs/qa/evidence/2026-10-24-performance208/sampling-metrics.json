@@ -67,5 +67,9 @@
       "recordingStartUTC": "2026-10-24T14:13:32.579000+00:00",
       "recordingEndUTC": "2026-10-24T14:14:08.528000+00:00"
     }
-  ]
+  ],
+  "testAndEvidenceCommit": "dc5fe0b6d404c113f944269ae56a0f11de573870",
+  "testAndEvidencePushed": true,
+  "appSourceCommit": "ee243bf2968fe7e36e95df014e8f622e3f02c9ae",
+  "productAlgorithmChanged": false
 }
