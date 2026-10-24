@@ -1,0 +1,1918 @@
+{
+  "stage": "candidate",
+  "engine": "chromium",
+  "passed": true,
+  "checks": [
+    "390px light, 320px/20px dark and desktop: anonymous → joined → explicit submit → reopen retain complete date/status/timezone metadata and guest identity",
+    "Both final dates stay highlighted; guest UI ignore/accept/decline are distinct and acceptance alone creates no owner Calendar entry",
+    "Owner publishes with pending/declined guests; statuses remain distinct and repeat publication creates one exact cross-day owner Calendar entry (guests have no account calendars)",
+    "Activity-undecided preserves its distinct state and activity controls; FIXED/INVITING/CONFIRMED never acquire collection metadata"
+  ],
+  "layouts": [
+    {
+      "variant": "mobile-light",
+      "phase": "anonymous",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": null
+    },
+    {
+      "variant": "mobile-light",
+      "phase": "joined",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": {
+        "x": 0,
+        "y": 673,
+        "width": 390,
+        "height": 171,
+        "right": 390,
+        "bottom": 844,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "mobile-light",
+      "phase": "submitted",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": {
+        "x": 0,
+        "y": 729,
+        "width": 390,
+        "height": 115,
+        "right": 390,
+        "bottom": 844,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "mobile-light",
+      "phase": "reopened",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": {
+        "x": 0,
+        "y": 729,
+        "width": 390,
+        "height": 115,
+        "right": 390,
+        "bottom": 844,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "anonymous",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 184.75,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 184.75,
+          "right": 197.515625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 197.515625,
+          "right": 293.703125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": null
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "joined",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 184.75,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 184.75,
+          "right": 197.515625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 197.515625,
+          "right": 293.703125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": {
+        "x": 0,
+        "y": 465,
+        "width": 320,
+        "height": 275,
+        "right": 320,
+        "bottom": 740,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "submitted",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 184.75,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 184.75,
+          "right": 197.515625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 197.515625,
+          "right": 293.703125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": {
+        "x": 0,
+        "y": 524.5,
+        "width": 320,
+        "height": 215.5,
+        "right": 320,
+        "bottom": 740,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "reopened",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 184.75,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 184.75,
+          "right": 197.515625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 197.515625,
+          "right": 293.703125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": {
+        "x": 0,
+        "y": 524.5,
+        "width": 320,
+        "height": 215.5,
+        "right": 320,
+        "bottom": 740,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "anonymous",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 156.796875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 156.796875,
+          "right": 167.015625,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 167.015625,
+          "right": 243.96875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": null
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "joined",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 156.796875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 156.796875,
+          "right": 167.015625,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 167.015625,
+          "right": 243.96875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": {
+        "x": 0,
+        "y": 899,
+        "width": 1440,
+        "height": 101,
+        "right": 1440,
+        "bottom": 1000,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "submitted",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 156.796875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 156.796875,
+          "right": 167.015625,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 167.015625,
+          "right": 243.96875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": {
+        "x": 0,
+        "y": 905,
+        "width": 1440,
+        "height": 95,
+        "right": 1440,
+        "bottom": 1000,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "reopened",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 156.796875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 156.796875,
+          "right": 167.015625,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 167.015625,
+          "right": 243.96875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": {
+        "x": 0,
+        "y": 905,
+        "width": 1440,
+        "height": 95,
+        "right": 1440,
+        "bottom": 1000,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "mobile-light",
+      "phase": "activity-anonymous",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": null
+    },
+    {
+      "variant": "mobile-light",
+      "phase": "activity-joined",
+      "date": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 250
+      },
+      "status": {
+        "x": 16,
+        "y": 254,
+        "width": 358,
+        "height": 20,
+        "right": 374,
+        "bottom": 274
+      },
+      "title": {
+        "x": 16,
+        "y": 100,
+        "width": 358,
+        "height": 66,
+        "right": 374,
+        "bottom": 166
+      },
+      "container": {
+        "x": 16,
+        "y": 230,
+        "width": 358,
+        "height": 44,
+        "right": 374,
+        "bottom": 274
+      },
+      "textLines": [
+        {
+          "x": 29,
+          "right": 77,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 77,
+          "right": 87.21875,
+          "y": 256,
+          "bottom": 271
+        },
+        {
+          "x": 87.21875,
+          "right": 164.171875,
+          "y": 256,
+          "bottom": 271
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 40,
+          "right": 282.828125,
+          "y": 231,
+          "bottom": 248
+        }
+      ],
+      "dateText": "候选日期：10月31日周六 – 11月1日周日",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 16,
+        "y": 261.5,
+        "width": 5,
+        "height": 5,
+        "right": 21,
+        "bottom": 266.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 390,
+      "documentWidth": 390,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "footer": {
+        "x": 0,
+        "y": 673,
+        "width": 390,
+        "height": 171,
+        "right": 390,
+        "bottom": 844,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "activity-anonymous",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 179.375,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 179.375,
+          "right": 192.140625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 192.140625,
+          "right": 288.328125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": null
+    },
+    {
+      "variant": "narrow-large-dark",
+      "phase": "activity-joined",
+      "date": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 50,
+        "right": 300,
+        "bottom": 380.25
+      },
+      "status": {
+        "x": 20,
+        "y": 385.25,
+        "width": 280,
+        "height": 25,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "title": {
+        "x": 20,
+        "y": 76.5,
+        "width": 280,
+        "height": 123.75,
+        "right": 300,
+        "bottom": 200.25
+      },
+      "container": {
+        "x": 20,
+        "y": 330.25,
+        "width": 280,
+        "height": 80,
+        "right": 300,
+        "bottom": 410.25
+      },
+      "textLines": [
+        {
+          "x": 35,
+          "right": 179.375,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 179.375,
+          "right": 192.140625,
+          "y": 388.25,
+          "bottom": 407.25
+        },
+        {
+          "x": 192.140625,
+          "right": 288.328125,
+          "y": 388.25,
+          "bottom": 407.25
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 50,
+          "right": 271.015625,
+          "y": 332.25,
+          "bottom": 353.25
+        },
+        {
+          "x": 50,
+          "right": 132.0625,
+          "y": 357.25,
+          "bottom": 378.25
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(183, 178, 174)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 15,
+      "dateFontSize": 17.5,
+      "interactive": false,
+      "dot": {
+        "x": 20,
+        "y": 392.75,
+        "width": 5,
+        "height": 5,
+        "right": 25,
+        "bottom": 397.75
+      },
+      "dotColor": "rgb(183, 178, 174)",
+      "rootFontSize": "20px",
+      "scheme": "dark",
+      "viewport": 320,
+      "documentWidth": 320,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 320,
+        "bottom": 740
+      },
+      "footer": {
+        "x": 0,
+        "y": 490,
+        "width": 320,
+        "height": 250,
+        "right": 320,
+        "bottom": 740,
+        "position": "fixed"
+      }
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "activity-anonymous",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 152.5,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 152.5,
+          "right": 162.71875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 162.71875,
+          "right": 239.671875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": null
+    },
+    {
+      "variant": "desktop-light",
+      "phase": "activity-joined",
+      "date": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 200
+      },
+      "status": {
+        "x": 24,
+        "y": 204,
+        "width": 1392,
+        "height": 20,
+        "right": 1416,
+        "bottom": 224
+      },
+      "title": {
+        "x": 24,
+        "y": 100,
+        "width": 1392,
+        "height": 36,
+        "right": 1416,
+        "bottom": 136
+      },
+      "container": {
+        "x": 24,
+        "y": 180,
+        "width": 1392,
+        "height": 44,
+        "right": 1416,
+        "bottom": 224
+      },
+      "textLines": [
+        {
+          "x": 37,
+          "right": 152.5,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 152.5,
+          "right": 162.71875,
+          "y": 206,
+          "bottom": 221
+        },
+        {
+          "x": 162.71875,
+          "right": 239.671875,
+          "y": 206,
+          "bottom": 221
+        }
+      ],
+      "dateTextLines": [
+        {
+          "x": 48,
+          "right": 294.390625,
+          "y": 181,
+          "bottom": 198
+        }
+      ],
+      "dateText": "Possible days: Sat 31 Oct – Sun 1 Nov",
+      "color": "rgb(112, 106, 102)",
+      "background": "rgba(0, 0, 0, 0)",
+      "border": [
+        "0px",
+        "0px",
+        "0px",
+        "0px"
+      ],
+      "radius": "0px",
+      "shadow": "none",
+      "fontSize": 12,
+      "dateFontSize": 14,
+      "interactive": false,
+      "dot": {
+        "x": 24,
+        "y": 211.5,
+        "width": 5,
+        "height": 5,
+        "right": 29,
+        "bottom": 216.5
+      },
+      "dotColor": "rgb(112, 106, 102)",
+      "rootFontSize": "16px",
+      "scheme": "light",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "visibleViewport": {
+        "x": 0,
+        "y": 0,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "footer": {
+        "x": 0,
+        "y": 899,
+        "width": 1440,
+        "height": 101,
+        "right": 1440,
+        "bottom": 1000,
+        "position": "fixed"
+      }
+    }
+  ],
+  "browserErrors": [],
+  "cleanup": {
+    "accounts": 1,
+    "tokens401": 1,
+    "links404": 3,
+    "errors": []
+  },
+  "failure": null,
+  "at": "2026-10-24T18:36:13.357Z"
+}

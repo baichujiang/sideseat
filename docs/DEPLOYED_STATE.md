@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前Preview211；计划状态移至时间表日期信息下方，专项与完整原生流程通过并完成清理。无本轮后端／网页发布。2026-10-24，Europe/Berlin。
+**状态：** 原生Preview211；分享网页已统一日期下收集状态，候选及正式双浏览器流程通过并清理。2026-10-24，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview211，计划状态归入时间表**：「收集空闲」改为日期信息下方的灰点灰字，与完整时区同排；标题只保留活动名／分享，地点独立。复用现有组件与本地状态，无新状态／请求／依赖，原邀请及日历规则保持。源码 `d017759d` 已推送。同包普通／真实系统最大字号四组合154.962秒、完整好友到双方日历368.720秒／8阶段API通过，19张专项及25张流程实图复核。默认手机211普通启动PID8696，267／Local／严格签名／二进制一致，普通97保留；2专用账号及3链接401／404清理，Runner／私密配置移除。新增App报告0份，明细见设备证据；无本轮后端或网页发布。[交付](./releases/2026-10-24-preview211-collection-status-metadata.md)、[验收](./qa/2026-10-24-plan-status-metadata.md)。
+分享网页现已与 App211 统一：活动名、独立地点、候选日期，以及日期下方灰点灰字「收集空闲 · 时区」。活动待定仍显示「选择活动」，原邀请／日历规则保持。产品源码 `55ac4667` 已推送；生产 `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz` READY，同一候选原样提升，api／www／根域名一致。1393项生产基线逐SHA1验证，只覆盖1个TSX并新增来源标记，1392项保持、上传1394项全部匹配；无迁移或后端规则改动。候选 Chromium／WebKit 32.032／32.653秒、正式31.519／31.826秒完整流程通过，三种布局及72次状态几何检查通过。窄屏已补真实视口验收；6个专用账号、18条链接401／404清理。原生仍为Preview211。[网页交付](./releases/2026-10-24-share-status-metadata.md)、[网页验收](./qa/2026-10-24-share-status-metadata.md)。
+
+原生当前 **Preview211，计划状态归入时间表**：「收集空闲」改为日期信息下方的灰点灰字，与完整时区同排；标题只保留活动名／分享，地点独立。复用现有组件与本地状态，无新状态／请求／依赖，原邀请及日历规则保持。源码 `d017759d` 已推送。同包普通／真实系统最大字号四组合154.962秒、完整好友到双方日历368.720秒／8阶段API通过，19张专项及25张流程实图复核。默认手机211普通启动PID8696，267／Local／严格签名／二进制一致，普通97保留；2专用账号及3链接401／404清理，Runner／私密配置移除。新增App报告0份，明细见设备证据；该原生阶段无后端或网页发布。[交付](./releases/2026-10-24-preview211-collection-status-metadata.md)、[验收](./qa/2026-10-24-plan-status-metadata.md)。
 
 此前 **Preview210，先填写再提交并分享**：创建后直接进入可填写的时间表，不自动弹分享；发起人首次「提交并分享」成功后才打开分享，失败／新草稿不弹。顶部可提前分享，后续保存修改与参与者提交保持原行为；首页未填写优先打开时间表。最简实现无新状态／接口／依赖，旧分享草稿兼容、邀请及日历规则保持。源码 `6f8866ae` 已推送。44项相关单元通过；同包真机失败18.195秒／普通及真实最大102.643秒／完整好友到双方日历366.562秒、8阶段API通过，19张专项及最终流程实图逐张复核。默认手机210普通启动PID8662，267／Local／严格签名／二进制一致，普通97保留；2专用账号及4链接401／404清理，Runner／私密配置移除。新增App报告1份，明细见设备／诊断证据；无本轮后端或网页发布。[交付](./releases/2026-10-24-preview210-submit-and-share.md)、[QA](./qa/2026-10-24-submit-share.md)。
 
@@ -144,13 +146,13 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `d017759d` 已推送，后端保持既有生产；[211来源](./qa/evidence/2026-10-24-status211/native-build-manifest.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 网页 `55ac4667`、原生 `d017759d` 均已推送；[网页来源](./qa/evidence/2026-10-24-web-status-metadata/source-verification.json)／[211来源](./qa/evidence/2026-10-24-status211/native-build-manifest.json) |
 | 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (211)` | 状态布局专项及完整链通过，严格签名／安装／普通启动PID8696；[交付](./releases/2026-10-24-preview211-collection-status-metadata.md) |
 | 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；211通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-status211/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
-| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`，Ready | 原生产 1392 源码核验，只改两个后端文件、加来源标记；1390 项保留。候选/正式四次浏览器流程通过；[来源](./qa/evidence/2026-10-23-cross-day185/source-verification.json) |
-| 生产源码 | 保留分享 UI、活动、身份、受邀图例和原生产差异；最终邀请支持完整候选日的连续跨天时间 | 无 Schema/迁移改动；[最新比较](./qa/evidence/2026-10-23-cross-day185/source-verification.json)、[身份合同](./GUEST_IDENTITY.md) |
+| 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz`，READY | 1393基线逐项核验，仅1TSX＋来源标记；1392项保持、上传1394全匹配，无迁移。候选／正式双引擎流程及metadata视觉通过；[网页交付](./releases/2026-10-24-share-status-metadata.md) |
+| 生产源码 | 保留分享 UI、活动、身份、受邀图例和原生产差异；最终邀请支持完整候选日的连续跨天时间 | 无 Schema/迁移改动；[最新网页比较](./qa/evidence/2026-10-24-web-status-metadata/source-verification.json)、[此前跨天比较](./qa/evidence/2026-10-23-cross-day185/source-verification.json)、[身份合同](./GUEST_IDENTITY.md) |
 
 144 三类摘要复用同行卡片容器、色带和活动插画，整卡提供完整读屏标签；状态、时间、参与者和原操作入口保持简洁。标准样例高度约 134 / 116 / 127pt，长标题约 152pt；8 项界面与完整流程通过。4 个临时账号、5 个计划/链接清理，普通版 97 保留，QA runner 移除；本轮没有网页/API/Schema 发布，也没有重跑分享网页流程。下方保留此前版本证据。
 

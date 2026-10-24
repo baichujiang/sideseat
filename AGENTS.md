@@ -21,6 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
+- The current production share page is dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz,
+  source 55ac46672a925e39df3fcba981fb380539d1d93c pushed. Candidate dates now
+  precede grey dot/caption Collecting availability plus full timezone; location
+  is independent. Activity ideas retain distinct wording, all other branches and
+  guest/draft/submission/invitation/Calendar rules stay. One TSX, no new state,
+  request, component or CSS; independent minimal review passed. Exact1393 live
+  source hashes verified, one file+marker over1392 preserved; uploaded1394 match.
+  Production skip-domain used both migration-skip and activity-hook-none; same
+  tested build promoted, api/www/root READY verified. Final candidate32.032/
+  32.653s and live31.519/31.826s Chromium/WebKit flows passed,72 layout checks.
+  Narrow viewport supplement passed;84 actual captures reviewed, pixel-identical
+  captures reuse exact-image review. Existing narrow invitation-label tightness
+  is outside this metadata change; no whole-site maximum-font visual claim.
+  Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
+  No native rebuild; installed Preview211 retained. See web release/QA records.
 - Preview211 is the current installed development build. Source d017759dcf70276a8636fa5519d7842df2350256 pushed.
   Collecting detail uses a grey dot/caption below candidate dates with full time
   zone; title/share and location stay separate. Reuse existing presentation key

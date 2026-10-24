@@ -1,0 +1,27 @@
+{
+  "scope": "Shared collecting page metadata and its unchanged participant flow, not whole-site accessibility acceptance",
+  "result": "passed for requested layout",
+  "candidateFinalImages": 60,
+  "initialCandidateOriginalsViewed": 60,
+  "changedCandidateOriginalsFreshlyViewed": 18,
+  "candidateFinalByteIdenticalImagesReusingReview": 42,
+  "productionFinalImages": 60,
+  "productionByteIdenticalToAcceptedCandidate": 54,
+  "productionChangedOriginalsFreshlyViewed": 6,
+  "distinctOriginalsOpenedByReviewers": 84,
+  "retainedFinalOriginals": 16,
+  "retainedInitialLimitationOriginals": 1,
+  "privateFullOriginalsRetainedLocally": 120,
+  "pixelReuseRule": "Actual visual review reused only when full PNG bytes match; every changed final PNG was freshly opened with view_image.",
+  "observations": [
+    "Grey5px dot and caption below candidate dates, full timezone, independent title/location confirmed.",
+    "Narrow320px with20px root font and dark scheme uses actual viewport captures; complete dates/status/text lines lie above fixed save bar.",
+    "Activity-undecided wording and FIXED/INVITING/CONFIRMED presentation remain distinct."
+  ],
+  "limits": [
+    "Narrow long pages require scrolling; viewport images do not claim unscrolled first-screen visibility of the full page.",
+    "Other fullPage captures can place fixed footers over body text; internally scrolling invitation tables do not show both days simultaneously in every narrow capture.",
+    "Existing320px/20px invitation footer label can sit tight/slightly outside its narrow left outline. That unchanged INVITING style is outside this metadata change; no claim it is repaired.",
+    "Guest tests have no account Calendar; exact owner Calendar and retry uniqueness are verified by API, not inferred from images."
+  ]
+}

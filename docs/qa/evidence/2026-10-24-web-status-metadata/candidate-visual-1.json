@@ -1,0 +1,44 @@
+{
+  "scope": "Candidate public web, actual original PNG inspection; no source, browser or device operations",
+  "actualViewed": 20,
+  "viewMethod": "Each manifest PNG opened individually with view_image(detail=original)",
+  "images": [
+    "candidate-chromium-desktop-light-activity-joined.png",
+    "candidate-chromium-desktop-light-fixed-activity.png",
+    "candidate-chromium-desktop-light-reopened.png",
+    "candidate-chromium-mobile-light-activity-anonymous.png",
+    "candidate-chromium-mobile-light-cross-day-invitation.png",
+    "candidate-chromium-mobile-light-published.png",
+    "candidate-chromium-mobile-light-submitted.png",
+    "candidate-chromium-narrow-large-dark-anonymous.png",
+    "candidate-chromium-narrow-large-dark-joined.png",
+    "candidate-chromium-narrow-large-dark-reply.png",
+    "candidate-webkit-desktop-light-activity-joined.png",
+    "candidate-webkit-desktop-light-fixed-activity.png",
+    "candidate-webkit-desktop-light-reopened.png",
+    "candidate-webkit-mobile-light-activity-anonymous.png",
+    "candidate-webkit-mobile-light-cross-day-invitation.png",
+    "candidate-webkit-mobile-light-published.png",
+    "candidate-webkit-mobile-light-submitted.png",
+    "candidate-webkit-narrow-large-dark-anonymous.png",
+    "candidate-webkit-narrow-large-dark-joined.png",
+    "candidate-webkit-narrow-large-dark-reply.png"
+  ],
+  "findings": [
+    "Chromium and WebKit desktop activity/reopened views show the activity title, complete long location, candidate date range and a separate smaller grey dot/status/full Europe/Berlin caption. No status capsule or action outline is visible.",
+    "390px Chinese submitted views show 收集空闲 · Europe/Berlin below the date. Activity-anonymous views correctly show 选择活动 · Europe/Berlin instead. Long title/location wrap within the page width.",
+    "320px/20px dark anonymous views show the complete title, wrapped location/date and complete grey Collecting availability · Europe/Berlin line without horizontal clipping.",
+    "390px invitation views show both dates with separate 23:00–24:00 and 00:00–01:00 highlighted spans, final-time legend and distinct ignore/accept/decline actions. No collection caption remains.",
+    "390px published views show Plan confirmed/计划已确定, accepted/final-sent messaging, 2/4 confirmed and separate pending versus declined roster states.",
+    "320px dark reply views clearly show Reply later and Reply to invitation while the invitation remains pending. The first date/highlight is visible; the second date begins below the internal timetable viewport.",
+    "Desktop FIXED activity views retain explicit cross-day fixed time, complete timezone, Activity undecided/Suggest an activity and a read-only highlighted timetable, without collection metadata."
+  ],
+  "limitations": [
+    "Both narrow-large-dark-joined full-page captures contain the fixed bottom submission bar over the initial viewport region that includes the metadata status. These two images do not independently demonstrate that joined-state status is visibly readable after scrolling. This is not enough evidence to classify an inaccessible or clipped product element; a targeted scrolled viewport capture is recommended before declaring full narrow-state visual acceptance.",
+    "The narrow reply images do not expose the second day highlight inside the independently scrollable invitation timetable. Both day highlights are visibly confirmed in the 390px and desktop images.",
+    "This partition contains no standalone desktop decline-action screenshot; the published mobile roster visibly distinguishes pending and declined. API semantics, exact calendar endpoints, uniqueness, cleanup and actual action completion are separate automated evidence, not inferred solely from PNGs.",
+    "Reviewed only these 20 candidate images, not production, phone UI or other partitions. Full-page screenshots show fixed bars over one viewport position; simultaneous visibility of every page element is not claimed."
+  ],
+  "blockingProductDefectObserved": false,
+  "visualEvidenceFollowUp": "Capture narrow joined/submitted metadata in a scrolled viewport above the fixed save bar before full visual acceptance."
+}

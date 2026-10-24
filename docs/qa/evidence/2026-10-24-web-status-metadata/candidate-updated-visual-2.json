@@ -1,0 +1,64 @@
+{
+  "review": "Updated frozen-candidate viewport evidence: independent visual review part 2",
+  "actualImagesOpened": 6,
+  "method": "Each of the six supplied original PNGs was opened individually with view_image.",
+  "engineCounts": {
+    "chromium": 3,
+    "webkit": 3
+  },
+  "result": "No visual blocker observed in the supplied updated captures.",
+  "verifiedVisible": [
+    "Candidate date and the grey-dot collection status with complete Europe/Berlin are fully visible in all four narrow dark viewport captures.",
+    "In the reopened/submitted narrow captures, the complete date/status/time-zone metadata sits above the fixed submitted-status footer.",
+    "The two mobile light invitation captures preserve the full cross-day time summary, both highlighted day segments, and existing reply controls."
+  ],
+  "limits": [
+    "Narrow viewport captures are scrolled to reveal the metadata; top navigation is partly outside the frame. This does not establish an unscrolled first-screen layout.",
+    "Mobile invitation captures are full-page images with fixed reply controls over the content at the capture position. Portions of body or roster are covered in the capture; all content is not claimed to be simultaneously visible.",
+    "Review is limited to six supplied changed captures. No browser interaction, phone operation, deployment, repository changes, independent API verification, or Calendar integrity check was performed."
+  ],
+  "images": [
+    {
+      "image": "candidate-chromium-mobile-light-cross-day-invitation.png",
+      "originalOpenedIndividually": true,
+      "engine": "chromium",
+      "result": "no visual blocker observed",
+      "observation": "Mobile light invitation: title, location, complete Europe/Berlin, cross-day time summary, both highlighted day segments, and reply controls are readable. Existing invitation presentation remains distinct."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-anonymous.png",
+      "originalOpenedIndividually": true,
+      "engine": "chromium",
+      "result": "no visual blocker observed",
+      "observation": "Narrow 320 px / 20 px dark anonymous viewport: complete title and wrapped location, both candidate-date lines, grey status dot, Collecting availability, and complete Europe/Berlin are visible. Top navigation is partly outside the scrolled viewport."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-reopened.png",
+      "originalOpenedIndividually": true,
+      "engine": "chromium",
+      "result": "no visual blocker observed",
+      "observation": "Narrow 320 px / 20 px dark reopened viewport: both date lines and complete grey status/time-zone caption are visibly above the fixed submitted-status footer; title and location wrap without collision."
+    },
+    {
+      "image": "candidate-webkit-mobile-light-cross-day-invitation.png",
+      "originalOpenedIndividually": true,
+      "engine": "webkit",
+      "result": "no visual blocker observed",
+      "observation": "Mobile light invitation: complete cross-day time summary, both highlighted day segments, complete Europe/Berlin, and reply controls are readable. Fixed controls overlap a portion of the full-page roster capture."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-anonymous.png",
+      "originalOpenedIndividually": true,
+      "engine": "webkit",
+      "result": "no visual blocker observed",
+      "observation": "Narrow 320 px / 20 px dark anonymous viewport: both date lines and complete grey status/time-zone caption are readable within the visible viewport; long title and location wrap. Top navigation is partly outside the scrolled viewport."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-submitted.png",
+      "originalOpenedIndividually": true,
+      "engine": "webkit",
+      "result": "no visual blocker observed",
+      "observation": "Narrow 320 px / 20 px dark submitted viewport: both date lines and complete Collecting availability / Europe/Berlin caption are fully visible above the fixed submitted-status footer."
+    }
+  ]
+}

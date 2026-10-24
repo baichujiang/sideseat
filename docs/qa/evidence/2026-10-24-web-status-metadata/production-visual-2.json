@@ -1,0 +1,29 @@
+{
+  "review": "Production shared-plan status metadata: independent fresh visual review part 2",
+  "actualImagesOpened": 2,
+  "method": "Both supplied original PNGs were opened separately using view_image.",
+  "result": "No visual blocker observed in the changed metadata or supplied invitation header.",
+  "images": [
+    {
+      "image": "production-chromium-narrow-large-dark-reopened.png",
+      "engine": "chromium",
+      "layout": "narrow 320 px / 20 px dark viewport",
+      "state": "reopened collection",
+      "originalOpenedIndividually": true,
+      "observation": "The mixed-language title and German location wrap without collision. Both candidate-date lines and the grey-dot Collecting availability caption with complete Europe/Berlin are fully visible above the fixed submitted-status footer."
+    },
+    {
+      "image": "production-webkit-narrow-large-dark-cross-day-invitation.png",
+      "engine": "webkit",
+      "layout": "narrow 320 px / 20 px dark full-page capture",
+      "state": "cross-day invitation",
+      "originalOpenedIndividually": true,
+      "observation": "Existing invitation presentation remains distinct: complete separate Europe/Berlin time zone, full cross-day time summary, invited-time legend, highlighted time block, confirmation count, response list, and reply controls are visible. No collecting caption is introduced."
+    }
+  ],
+  "limits": [
+    "The collection viewport was scrolled to reveal metadata; the top navigation is partially outside the frame. This is not proof that all information fits on the unscrolled first screen.",
+    "The invitation full-page capture includes a fixed reply bar over some body text at the capture position; its internal timetable is bounded and does not show every cross-day segment simultaneously. The full endpoint remains readable in the time summary.",
+    "This is visual review of two supplied changed production images only. Browser interaction, deployment state, cleanup, API and Calendar integrity were not independently exercised by this review."
+  ]
+}

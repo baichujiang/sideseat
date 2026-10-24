@@ -1,0 +1,29 @@
+{
+  "sourceCommit": "55ac46672a925e39df3fcba981fb380539d1d93c",
+  "productFilesChanged": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "independentMinimalReview": "passed",
+  "newProductState": false,
+  "newRequests": false,
+  "newComponents": false,
+  "newCSS": false,
+  "preserved": [
+    "FIXED date/location/time-zone branch",
+    "INVITING/CONFIRMED/CANCELLED/EXPIRED headings",
+    "Choosing activity semantics",
+    "Guest identity/recovery",
+    "Local drafts and explicit submission",
+    "Invitation versions and reply/publication/Calendar rules"
+  ],
+  "staticChecks": [
+    "Targeted source ESLint passed",
+    "New browser script node --check passed",
+    "New browser script targeted ESLint passed",
+    "git diff --check passed"
+  ],
+  "testSourceSHA256": "3d7e4bca99ab2792844399387e7f76ff02896a87fd19b7c9fd974adc57c27661",
+  "nativePreviewChanged": false,
+  "nativePreviewBuildRetained": 211,
+  "testOnlyRepair": "Narrow metadata uses real viewport screenshots and strict complete-date/status/text-line visibility above the fixed save bar; existing functional/style/44px checks retained."
+}

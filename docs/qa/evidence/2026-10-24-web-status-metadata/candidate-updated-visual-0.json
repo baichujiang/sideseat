@@ -1,0 +1,31 @@
+{
+  "stage": "same frozen candidate, updated visual captures, part 0",
+  "method": "All six assigned actual PNGs opened individually with view_image at original detail.",
+  "actual_updated_image_count": 6,
+  "metadata_result": "PASS for new metadata in the visible assigned scope.",
+  "observations": [
+    "Both narrow large-text dark anonymous activity-choice viewport images show the complete candidate date range and gray dot followed by Choosing an activity and full Europe/Berlin time zone.",
+    "The Chromium narrow submitted and WebKit narrow joined viewport images show the complete candidate dates and gray collection caption with full time zone, all above the fixed footer with visible separation.",
+    "Long title and location wrap within the narrow viewport; no intrinsic header clipping, header collision or visible horizontal page clipping appears in these updated images.",
+    "Desktop and narrow cross-day invitation captures retain the original final-date header and final-time invitation semantics."
+  ],
+  "existing_out_of_scope_observation": {
+    "file": "candidate-chromium-narrow-large-dark-cross-day-invitation.png",
+    "description": "In the full-page narrow invitation capture, I cannot attend text extends slightly past the narrow left button outline and the confirmation label sits close to its outline. Text remains on the page. This belongs to the unchanged invitation button layout, not the modified metadata.",
+    "action": "Reported to parent; no product edit or blanket full-page large-text button acceptance claimed."
+  },
+  "limitations": [
+    "This six-image assignment does not include the updated activity-joined captures; review of those belongs to another part.",
+    "Scrolled viewport captures intentionally crop portions of the top site toolbar and lower content. They verify metadata visibility, not simultaneous whole-page first-screen visibility.",
+    "The invitation full-page capture still contains the fixed footer in the exported long document; body content behind that captured footer position is not independently visible.",
+    "Quantitative geometry, computed color and interactions are separate parent suite evidence. Reviewer operated no browser or device and changed no repository source."
+  ],
+  "files_actually_viewed_original": [
+    "candidate-chromium-desktop-light-cross-day-invitation.png",
+    "candidate-chromium-narrow-large-dark-activity-anonymous.png",
+    "candidate-chromium-narrow-large-dark-cross-day-invitation.png",
+    "candidate-chromium-narrow-large-dark-submitted.png",
+    "candidate-webkit-narrow-large-dark-activity-anonymous.png",
+    "candidate-webkit-narrow-large-dark-joined.png"
+  ]
+}

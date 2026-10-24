@@ -43,6 +43,20 @@ The Preview-numbered sections below describe dated changes; newer amendments
 supersede older descriptions. They are not additional current entry paths or
 fresh acceptance claims.
 
+## Share page collection metadata — 2026-10-24
+
+The shared browser page uses title, independent location, candidate date range,
+then a small grey dot and regular grey Collecting availability caption with the
+actual time zone. Activity ideas keep Choosing an activity instead. These are
+passive metadata, without capsule fill, outline or an action. Existing name,
+recovery, next-step text, response count and timetable remain in place.
+
+Only COLLECTING without a fixed interval uses this layout. FIXED and invitation,
+confirmed or closed information retain their original date/location/time-zone
+branch. No workflow, submission, identity, invitation-version or Calendar rule
+changes. Browser acceptance and source preservation are recorded in the
+[web QA](./qa/2026-10-24-share-status-metadata.md).
+
 ## Collection stage metadata — Preview 211
 
 The native editable COLLECT detail keeps title/share and editable location in

@@ -1,0 +1,14 @@
+[
+  {
+    "stage": "candidate",
+    "engine": "chromium",
+    "exitCode": 0,
+    "seconds": 32.032
+  },
+  {
+    "stage": "candidate",
+    "engine": "webkit",
+    "exitCode": 0,
+    "seconds": 32.653
+  }
+]

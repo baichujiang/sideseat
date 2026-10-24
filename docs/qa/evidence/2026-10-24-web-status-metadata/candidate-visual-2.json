@@ -1,0 +1,204 @@
+{
+  "review": "Candidate shared-plan status metadata: independent visual review part 2",
+  "actualImagesOpened": 20,
+  "engineCounts": {
+    "chromium": 10,
+    "webkit": 10
+  },
+  "method": "Each supplied original PNG was opened individually using view_image.",
+  "scope": [
+    "Desktop light",
+    "Mobile light",
+    "Narrow 320 px with 20 px text in dark mode",
+    "Collection, activity choice, fixed activity, invitation, and published views"
+  ],
+  "conclusion": "No visual blocker found in the changed collection metadata. The status and complete Europe/Berlin remain below possible dates; title and location wrap without collision in the supplied images. Existing fixed-time and invitation/published presentation remains distinct.",
+  "limits": [
+    "Visual review covers only the 20 supplied candidate captures, not every page, locale, system font size, or device.",
+    "Full-page captures include viewport-fixed action or submitted-status bars over the content at the capture position; they do not prove all content is simultaneously visible.",
+    "Some narrow invitation timetable captures show a bounded internally scrollable view; the full cross-day endpoint is readable in the summary, but every timetable segment is not simultaneously visible.",
+    "No browser interaction, deployment, phone operation, repository edit, or independent API/Calendar integrity verification was performed for this review."
+  ],
+  "images": [
+    {
+      "image": "candidate-chromium-desktop-light-anonymous.png",
+      "engine": "chromium",
+      "layout": "desktop-light",
+      "state": "anonymous",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Title, location, possible days, and the grey Collecting availability caption with complete Europe/Berlin are readable. Name entry is visible."
+    },
+    {
+      "image": "candidate-chromium-desktop-light-joined.png",
+      "engine": "chromium",
+      "layout": "desktop-light",
+      "state": "joined",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Title and collection metadata are readable; timetable, response sidebar, recovery section, and manual submit state are visible."
+    },
+    {
+      "image": "candidate-chromium-desktop-light-reply.png",
+      "engine": "chromium",
+      "layout": "desktop-light",
+      "state": "reply",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing invitation header, full cross-day time text, separate time zone, two highlighted day segments, response states, and confirm control are visible; no collecting caption."
+    },
+    {
+      "image": "candidate-chromium-mobile-light-activity-joined.png",
+      "engine": "chromium",
+      "layout": "mobile-light",
+      "state": "activity-joined",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Long title and location wrap; the date is followed by the grey 选择活动 caption and complete Europe/Berlin. Existing manual submission and activity-choice instructions remain visible."
+    },
+    {
+      "image": "candidate-chromium-mobile-light-fixed-activity.png",
+      "engine": "chromium",
+      "layout": "mobile-light",
+      "state": "fixed-activity",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing fixed-time header, separate complete time zone, 时间已定 explanation, activity proposal section, and two cross-day highlighted segments are readable; no collecting caption."
+    },
+    {
+      "image": "candidate-chromium-mobile-light-reopened.png",
+      "engine": "chromium",
+      "layout": "mobile-light",
+      "state": "reopened",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Collection metadata and complete time zone remain readable. Submitted availability state and selected timetable cells are visible."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-activity-anonymous.png",
+      "engine": "chromium",
+      "layout": "narrow-large-dark",
+      "state": "activity-anonymous",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "At the 320 px / 20 px dark setting, the long mixed title and German location wrap. Choosing an activity and complete Europe/Berlin remain readable below possible days."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-cross-day-invitation.png",
+      "engine": "chromium",
+      "layout": "narrow-large-dark",
+      "state": "cross-day-invitation",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing invitation header and complete cross-day time summary wrap legibly; complete time zone and confirm/reply controls are visible. The internal timetable is not fully expanded in this capture."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-published.png",
+      "engine": "chromium",
+      "layout": "narrow-large-dark",
+      "state": "published",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Plan confirmed and the full cross-day time summary are readable; old invitation information and pending/declined distinctions remain visible. Complete time zone is preserved."
+    },
+    {
+      "image": "candidate-chromium-narrow-large-dark-submitted.png",
+      "engine": "chromium",
+      "layout": "narrow-large-dark",
+      "state": "submitted",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Collection caption and complete Europe/Berlin are readable below possible days; submitted state, selected cells, and response list are visible."
+    },
+    {
+      "image": "candidate-webkit-desktop-light-anonymous.png",
+      "engine": "webkit",
+      "layout": "desktop-light",
+      "state": "anonymous",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Title, location, possible days, and the grey Collecting availability caption with complete Europe/Berlin are readable. Name entry is visible."
+    },
+    {
+      "image": "candidate-webkit-desktop-light-joined.png",
+      "engine": "webkit",
+      "layout": "desktop-light",
+      "state": "joined",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Title and collection metadata are readable; timetable, response sidebar, recovery section, and manual submit state are visible."
+    },
+    {
+      "image": "candidate-webkit-desktop-light-reply.png",
+      "engine": "webkit",
+      "layout": "desktop-light",
+      "state": "reply",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing invitation header, full cross-day time text, separate time zone, two highlighted day segments, response states, and confirm control are visible; no collecting caption."
+    },
+    {
+      "image": "candidate-webkit-mobile-light-activity-joined.png",
+      "engine": "webkit",
+      "layout": "mobile-light",
+      "state": "activity-joined",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Long title and location wrap; the date is followed by the grey 选择活动 caption and complete Europe/Berlin. Existing manual submission and activity-choice instructions remain visible."
+    },
+    {
+      "image": "candidate-webkit-mobile-light-fixed-activity.png",
+      "engine": "webkit",
+      "layout": "mobile-light",
+      "state": "fixed-activity",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing fixed-time header, separate complete time zone, 时间已定 explanation, activity proposal section, and two cross-day highlighted segments are readable; no collecting caption."
+    },
+    {
+      "image": "candidate-webkit-mobile-light-reopened.png",
+      "engine": "webkit",
+      "layout": "mobile-light",
+      "state": "reopened",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Collection metadata and complete time zone remain readable. Submitted availability state and selected timetable cells are visible."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-activity-anonymous.png",
+      "engine": "webkit",
+      "layout": "narrow-large-dark",
+      "state": "activity-anonymous",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "At the 320 px / 20 px dark setting, the long mixed title and German location wrap. Choosing an activity and complete Europe/Berlin remain readable below possible days."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-cross-day-invitation.png",
+      "engine": "webkit",
+      "layout": "narrow-large-dark",
+      "state": "cross-day-invitation",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Existing invitation header and complete cross-day time summary wrap legibly; complete time zone and confirm/reply controls are visible. The internal timetable is not fully expanded in this capture."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-published.png",
+      "engine": "webkit",
+      "layout": "narrow-large-dark",
+      "state": "published",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Plan confirmed and the full cross-day time summary are readable; old invitation information and pending/declined distinctions remain visible. Complete time zone is preserved."
+    },
+    {
+      "image": "candidate-webkit-narrow-large-dark-submitted.png",
+      "engine": "webkit",
+      "layout": "narrow-large-dark",
+      "state": "submitted",
+      "originalOpenedIndividually": true,
+      "result": "no metadata visual blocker observed",
+      "observation": "Collection caption and complete Europe/Berlin are readable below possible days; submitted state, selected cells, and response list are visible."
+    }
+  ]
+}

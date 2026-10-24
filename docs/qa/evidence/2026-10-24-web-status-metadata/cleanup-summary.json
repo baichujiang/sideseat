@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-24T18:42:56.914460+00:00",
+  "finalBrowserRuns": 4,
+  "initialFunctionalBrowserRuns": 2,
+  "allCleanupVerified": true,
+  "accountsRemoved": 6,
+  "tokens401": 6,
+  "links404": 18,
+  "realUserDataModified": false,
+  "nativePreviewUnchanged": 211,
+  "privateFixturesRemoved": true,
+  "candidateAccessCookieAndHeadersRemoved": true
+}

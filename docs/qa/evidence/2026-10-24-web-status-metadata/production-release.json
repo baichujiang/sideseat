@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "55ac46672a925e39df3fcba981fb380539d1d93c",
+  "baselineDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "deployment": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+  "url": "https://sideseat-h53hjv5cf-baichus-projects.vercel.app",
+  "target": "production",
+  "readyState": "READY",
+  "sameTestedBuildPromoted": true,
+  "aliases": [
+    {
+      "host": "api.sideseat.de",
+      "id": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+      "readyState": "READY"
+    },
+    {
+      "host": "www.sideseat.de",
+      "id": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+      "readyState": "READY"
+    },
+    {
+      "host": "sideseat.de",
+      "id": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+      "readyState": "READY"
+    }
+  ],
+  "buildOverrides": {
+    "SKIP_DATABASE_MIGRATIONS": "1",
+    "SIDESEAT_ACTIVITY_RELEASE": "none"
+  },
+  "databaseMigrationRun": false,
+  "businessRuleChanges": false,
+  "protectionChanged": false,
+  "nativePreviewRetained": 211,
+  "finalAliasRecheckAt": "2026-10-24T18:47:32.998509+00:00",
+  "finalAliasRecheckPassed": true
+}

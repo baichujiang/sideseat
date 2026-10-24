@@ -1,0 +1,18 @@
+{
+  "scope": "CLI scope argument was forwarded to curl; candidate cookie missing. Browser scripts exited before fixtures or network actions; not product acceptance.",
+  "attempts": [
+    {
+      "stage": "candidate",
+      "engine": "chromium",
+      "exitCode": 1,
+      "seconds": 0.528
+    },
+    {
+      "stage": "candidate",
+      "engine": "webkit",
+      "exitCode": 1,
+      "seconds": 0.526
+    }
+  ],
+  "productSourceChanged": false
+}

@@ -1,0 +1,8 @@
+{
+  "initialCandidateFunctionalPass": true,
+  "actualOriginalPNGs": 60,
+  "scope": "Initial fullPage screenshots can place the fixed footer over metadata on narrow/large joined pages. Supplement real viewport checks; do not infer product clipping from those captures.",
+  "productChanged": false,
+  "testRepair": "Narrow metadata scrolls into the real available viewport, asserts complete date/status above fixed footer, and captures viewport. Existing checks retained.",
+  "candidateDeployment": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz"
+}

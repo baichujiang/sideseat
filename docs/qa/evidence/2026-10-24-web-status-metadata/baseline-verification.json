@@ -1,0 +1,10 @@
+{
+  "baselineDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "sourceFiles": 1393,
+  "allSourceSHA1Verified": true,
+  "missing": 0,
+  "mismatched": 0,
+  "activeTargetFilesMatchProductionBeforeChange": true,
+  "scope": "Exact live production source baseline; overlay only requested shared page layout and provenance marker",
+  "checkedAt": "2026-10-24T18:20:48.890799+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "actualViewed": 6,
+  "method": "Each listed updated actual PNG individually opened with view_image(detail=original)",
+  "images": [
+    "candidate-chromium-mobile-light-anonymous.png",
+    "candidate-chromium-narrow-large-dark-activity-joined.png",
+    "candidate-chromium-narrow-large-dark-joined.png",
+    "candidate-webkit-desktop-light-cross-day-invitation.png",
+    "candidate-webkit-narrow-large-dark-activity-joined.png",
+    "candidate-webkit-narrow-large-dark-reopened.png"
+  ],
+  "findings": [
+    "Chromium 390px anonymous COLLECT: title and full long location wrap cleanly; complete candidate dates precede small grey 收集空闲 · Europe/Berlin caption without a capsule.",
+    "Chromium 320px/20px dark joined COLLECT: full two-line candidate date and complete Collecting availability · Europe/Berlin caption are visibly above the actual fixed submission footer, with clear separation. The former joined-state screenshot evidence gap is closed for this engine.",
+    "Chromium and WebKit 320px/20px dark activity-joined: full dates and Choosing an activity · Europe/Berlin remain above the footer; distinct activity state and complete timezone are readable without clipping or overlap.",
+    "WebKit 320px/20px dark reopened submitted: full dates and Collecting availability · Europe/Berlin are visible above the footer. Availability submitted remains visible in the footer. The restored submitted-state metadata evidence gap is closed for this image.",
+    "WebKit desktop invitation: collection metadata is absent; both 23:00–24:00 and 00:00–01:00 blocks, their date labels/legends and distinct confirm/decline/reply-later actions are visibly clear."
+  ],
+  "issues": [],
+  "conclusion": "All six updated images pass the reviewed metadata/layout scope; no visible metadata/footer overlap or truncation remains in these captures.",
+  "limitations": [
+    "The narrow images are intentionally scrolled viewport captures: top navigation and later page content are not simultaneously visible; the metadata itself is completely visible.",
+    "This review covers these six updated candidate images only. Other updated partitions and byte-identical reused originals are separately reviewed/verified by the parent and collaborators.",
+    "Calendar endpoint accuracy, uniqueness, reply persistence and cleanup are established by separate automated checks, not inferred from these PNGs."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "baselineDeployment": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+  "sourceCommit": "55ac46672a925e39df3fcba981fb380539d1d93c",
+  "sourcePushed": true,
+  "changed": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "sourceSHA256": "6e326ce49f2f7d495ce216271c3851e8f19765c23434a6ce2b627fc2e17f6ac5",
+  "preservedBaselineFiles": 1392,
+  "schemaChanged": false,
+  "businessRulesChanged": false,
+  "createdAt": "2026-10-24T18:23:20.529628+00:00",
+  "uploadFileCountExpected": 1394,
+  "candidateSourceVerified": true,
+  "candidateDeployment": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+  "candidateURL": "sideseat-h53hjv5cf-baichus-projects.vercel.app",
+  "actualUploadedFiles": 1394,
+  "allUploadedSHA1MatchExpected": true
+}

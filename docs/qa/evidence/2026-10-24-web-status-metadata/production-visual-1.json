@@ -1,0 +1,20 @@
+{
+  "actualViewed": 2,
+  "method": "Each production PNG individually opened with view_image(detail=original)",
+  "images": [
+    "production-chromium-narrow-large-dark-cross-day-invitation.png",
+    "production-webkit-mobile-light-cross-day-invitation.png"
+  ],
+  "findings": [
+    "Production Chromium 320px/20px dark invitation: title and long location wrap within width; explicit Sat 31 Oct 23:00 to Sun 1 Nov 01:00 and full Europe/Berlin timezone are readable. The collection caption is correctly absent during invitation.",
+    "The narrow invitation shows the first-day highlighted interval and distinct decline/confirm/reply-later controls. Labels are tightly packed in the original narrow reply bar, but the action words remain readable. This review does not claim a redesign or improved padding of that unchanged invitation layout.",
+    "Production WebKit 390px light invitation: complete title/location/timezone, both dates, 23:00–24:00 and 00:00–01:00 highlighted spans, legends, 1/4 confirmation progress and three reply actions are readable; no collection metadata incorrectly remains."
+  ],
+  "issuesForChangedMetadata": [],
+  "limitations": [
+    "These two changed production images are INVITING, so neither directly shows the COLLECT grey-dot caption. The parent separately verifies 54 production images are byte-identical to reviewed candidate originals; this two-image review does not re-claim fresh inspection of those images.",
+    "The narrow invitation has an independently scrollable timetable and fixed reply bar; this full-page capture does not expose the complete second-day highlight at once. The 390px image visibly exposes both days.",
+    "Fixed bars appear over one viewport position in full-page captures. Continuous scroll reachability, exact calendar endpoints/uniqueness, response persistence and cleanup rely on separate browser/API evidence."
+  ],
+  "conclusion": "Both fresh production images pass the reviewed invitation/header scope; no regression of the changed collection metadata is observed."
+}

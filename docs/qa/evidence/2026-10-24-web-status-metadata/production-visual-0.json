@@ -1,0 +1,22 @@
+{
+  "stage": "production web status metadata, part 0 changed captures",
+  "method": "Every assigned actual PNG individually opened using view_image at original detail. Read-only; no browser, device or source operations.",
+  "actual_image_count": 2,
+  "result": "PASS for visible production header and preserved invitation state in these two captures.",
+  "observations": [
+    "Chromium mobile Chinese cross-day invitation retains full activity title, independent date and location content, and full Europe/Berlin time zone without new header truncation.",
+    "WebKit desktop English cross-day invitation retains readable title, cross-day date/time, location, full time zone and explicit final-time confirmation stage.",
+    "Both images retain the original invitation layout, two-day highlighted timetable and visible participation actions. The invitation header correctly does not display the collection-only gray status caption.",
+    "The mobile Chinese action labels and desktop English labels fit in their visible buttons in this assigned pair."
+  ],
+  "limitations": [
+    "Neither assigned image is a collection-phase capture. Production collection-caption evidence relies on the separately reviewed byte-identical candidate images and the parent hash audit.",
+    "Neither assigned image is the previous 320px large-English invitation-button case. That previously observed outline tightness remains an unchanged INVITING layout observation, not a new metadata failure and not retested here.",
+    "The full-page mobile image retains a fixed footer over body content at its captured viewport position. This review does not claim simultaneous full-page visibility or verify scroll reachability.",
+    "API, state transitions, cleanup and quantitative layout assertions are separate parent test evidence."
+  ],
+  "files_actually_viewed_original": [
+    "production-chromium-mobile-light-cross-day-invitation.png",
+    "production-webkit-desktop-light-cross-day-invitation.png"
+  ]
+}

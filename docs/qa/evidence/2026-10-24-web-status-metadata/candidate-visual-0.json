@@ -1,0 +1,52 @@
+{
+  "stage": "candidate web status metadata",
+  "method": "Each of the twenty actual PNGs was opened separately with view_image at original detail; no contact sheet substitution.",
+  "actual_image_count": 20,
+  "browser_scope": {
+    "chromium": 10,
+    "webkit": 10
+  },
+  "layout_scope": [
+    "desktop light",
+    "mobile light",
+    "narrow 320px large-text dark as identified by the capture suite"
+  ],
+  "visible_findings": [
+    "Both engines show the normal collection header as activity title, independent location, candidate dates, then a small gray dot and ordinary gray collection caption with complete Europe/Berlin time zone.",
+    "Chinese mobile anonymous and joined captures clearly show the complete new collection caption without a status pill, state icon or status button.",
+    "Both narrow large-text dark reopened captures show the full Collecting availability caption and complete time zone. Long activity title, location and date range wrap within the screenshot width without visible horizontal clipping.",
+    "Desktop anonymous activity-choice captures show Choosing an activity with the complete time zone rather than incorrectly saying availability collection.",
+    "Both fixed-time/activity captures retain the original final-window/location/time-zone arrangement and activity-undecided content, without the new collection caption.",
+    "Cross-day invitation and published captures retain the original final-window header, date-separated highlighted invitation timetable, confirmation progress and explicit response semantics.",
+    "No new intrinsic header truncation or header/control collision was observed in portions actually visible."
+  ],
+  "capture_limitations": [
+    "Several full-page screenshots retain the fixed bottom action bar in the middle of the exported long image, obscuring the body content behind its captured viewport position. They cannot establish that every body row is simultaneously unobstructed.",
+    "In both narrow-large-dark-activity-joined captures, the new activity-choice status line is behind this fixed bar. Its exact large-text mobile appearance is not visually established by these two images. A scrolled metadata viewport screenshot from each engine would close this evidence gap without an assumed product change.",
+    "Narrow reopened collection captures do visibly establish full collection caption/time zone despite the separate activity-choice capture gap.",
+    "This is static visual inspection. Quantitative scroll-width, computed color, dot geometry, interactions, API outcomes and cleanup are separate suite evidence; no browser or device was operated by this reviewer."
+  ],
+  "visual_disposition": "Visible header changes and preserved states look correct. Additional activity-choice metadata viewport evidence is recommended before claiming that specific narrow-large-dark state is visually accepted.",
+  "files_actually_viewed_original": [
+    "candidate-chromium-desktop-light-activity-anonymous.png",
+    "candidate-chromium-desktop-light-cross-day-invitation.png",
+    "candidate-chromium-desktop-light-published.png",
+    "candidate-chromium-desktop-light-submitted.png",
+    "candidate-chromium-mobile-light-anonymous.png",
+    "candidate-chromium-mobile-light-joined.png",
+    "candidate-chromium-mobile-light-reply.png",
+    "candidate-chromium-narrow-large-dark-activity-joined.png",
+    "candidate-chromium-narrow-large-dark-fixed-activity.png",
+    "candidate-chromium-narrow-large-dark-reopened.png",
+    "candidate-webkit-desktop-light-activity-anonymous.png",
+    "candidate-webkit-desktop-light-cross-day-invitation.png",
+    "candidate-webkit-desktop-light-published.png",
+    "candidate-webkit-desktop-light-submitted.png",
+    "candidate-webkit-mobile-light-anonymous.png",
+    "candidate-webkit-mobile-light-joined.png",
+    "candidate-webkit-mobile-light-reply.png",
+    "candidate-webkit-narrow-large-dark-activity-joined.png",
+    "candidate-webkit-narrow-large-dark-fixed-activity.png",
+    "candidate-webkit-narrow-large-dark-reopened.png"
+  ]
+}
