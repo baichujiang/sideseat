@@ -57,6 +57,22 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Card actions and content — Preview 217
+
+Native plan overview cards omit synthesized right-side photos, category art and
+fallback symbols. The existing title-derived card tint and actual people remain.
+The title/status/location can use the complete information column. Task footers
+keep progress at the leading edge and the action at the trailing bottom edge;
+only the count/action retain intrinsic width, leaving the existing spacer free
+to expand. The existing vertical fallback handles insufficient width and large
+text without adding a row when the horizontal footer fits.
+
+The entire card remains its original single button, with the same route and full
+AX description. Dates, phases, counts, activity suggestions, invitation and
+Calendar contracts stay unchanged. Unused cover rendering and its render-only
+flag were removed; no new state, request, data field, component or dependency.
+See [217 QA](./qa/2026-10-25-card-actions.md).
+
 ## Candidate date hierarchy — Preview 216
 
 Candidate-only overview cards now use a small localized month (and year when

@@ -395,8 +395,7 @@ struct PlansRootView: View {
                 context: plan.isOwner == true ? AppLocalization.string("Organized by you")
                     : plan.organizer.map { String(format: AppLocalization.string(phase == "INVITING" ? "%@ invited you" : "%@ is organizing"), $0.displayName) }
                         ?? AppLocalization.string("Shared plan"),
-                progress: progress, people: (plan.isOwner == true ? [] : plan.organizer.map { [$0] } ?? []) + (plan.peoplePreview ?? []),
-                isChoosingActivity: plan.activitySelection?.isOpen == true)
+                progress: progress, people: (plan.isOwner == true ? [] : plan.organizer.map { [$0] } ?? []) + (plan.peoplePreview ?? []))
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityIdentifier("plans-coordinated-\(plan.token)")
@@ -675,7 +674,6 @@ private struct PlanOverviewLabel: View {
     var progress: String? = nil
     var waitingFor: String? = nil
     var people: [NativeTimePollList.Person] = []
-    var isChoosingActivity = false
 
     private var timing: PlanOverviewTiming {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
@@ -710,31 +708,24 @@ private struct PlanOverviewLabel: View {
 
     private var information: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                    activityTitle(style == .waiting ? .subheadline : .headline)
-                    status
-                    if let location, !location.isEmpty {
-                        Text(location).font(.caption).foregroundStyle(secondary)
-                            .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                if !typeSize.isAccessibilitySize {
-                    PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity,
-                                    size: style == .waiting ? 36 : 40)
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                activityTitle(style == .waiting ? .subheadline : .headline)
+                status
+                if let location, !location.isEmpty {
+                    Text(location).font(.caption).foregroundStyle(secondary)
+                        .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             if style == .task {
                 ViewThatFits(in: .horizontal) {
                     if !typeSize.isAccessibilitySize {
                         HStack(spacing: SideSeatTheme.spaceSM) {
-                            peopleSummary
+                            peopleSummary.fixedSize(horizontal: true, vertical: false)
                             Spacer(minLength: 0)
-                            action
+                            action.fixedSize(horizontal: true, vertical: false)
                         }
-                        .fixedSize(horizontal: true, vertical: false)
                     }
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                         peopleSummary
