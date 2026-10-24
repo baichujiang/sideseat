@@ -21,7 +21,26 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 201 is the current installed development build. Shared button styles
+- Preview 202 is the current installed development build. Chat title/More hide
+  the native shared plate; More is an unframed ellipsis, composer Plan loses gray
+  circle; context/info rows and unread/latest lose redundant action fill while
+  single parent/floating surfaces remain. Remove the decorative context Divider
+  observed as a vertical information-row line. Title/More minimum44pt; other
+  targets, IDs, navigation, drafts and business rules stay. No new abstraction.
+  Source ed0788a0 is pushed. Final SAME-PACKAGE full two-case suite passed
+  244.413s four language/theme/text chat-entry combinations and draft retention /
+  22.649s unread/real-history-scroll/latest return, zero failed/skipped. 19 actual
+  final images viewed, 10 saved. Initial test frame/size/search-close repairs,
+  old pre-separator package results and three destination-service timeouts retain
+  their own scopes. Mac CoreDevice restart/read-only availability check recovered.
+  Installed202/normal PID7963, strict source267/Local/signature/binary verified;
+  ordinary97 retained, Runner/private files cleaned, no accounts/plans created or
+  deleted and no new App reports. No backend/web release, authenticated sending,
+  full invitation API journey/unit/domain/browser repeat. Largest German body
+  fragments words and draft screenshots show only a segment; functional draft
+  retention is not full-text simultaneous visibility. Existing Calendar/detail/
+  menu/dock/CPU/extra-left-swipe observations remain. See202 QA/release for scopes.
+- Preview 201 was the previous development build. Shared button styles
   remove decorative outlines; root utilities use softFill:false, preserving 44pt,
   role colors, typography and feedback while explicit secondary controls own fills.
   Primary/text/shortcut/calendar tools lose redundant strokes; meaningful field,

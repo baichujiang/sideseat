@@ -25,5 +25,7 @@
   "finalUITestSourceSHA256": "c4daa7a197167a2aad98a8dfef8873a1793fe54bc6de6d203c4815ee58c05de1",
   "finalVisualCleanup": "Remove unused decorative Divider overlay observed as a vertical line in the participant information context row.",
   "all267FinalInputsReverified": true,
-  "testSourceUnchangedAfterFinalBuild": true
+  "testSourceUnchangedAfterFinalBuild": true,
+  "sourceCommit": "ed0788a0a25621f42b8c7f5dfa65c1b3cc6be6bb",
+  "sourcePushed": true
 }
