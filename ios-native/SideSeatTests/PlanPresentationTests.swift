@@ -131,6 +131,37 @@ struct PlanPresentationTests {
         #expect(display.clockText?.contains("2027") == true)
         #expect(display.clockText?.contains("23:30") == true)
         #expect(display.clockText?.contains("01:30") == true)
+        #expect(display.datePart(start, template: "MMMd") == "31 Dec")
+        #expect(display.datePart(end, template: "MMMd") == "1 Jan")
+        #expect(display.datePart(start, template: "jmm") == "23:30")
+        #expect(display.datePart(end, template: "jmm") == "01:30")
+        #expect(display.dayContext(start) == "Thu")
+        #expect(display.dayContext(end) == "2027 Fri")
+    }
+
+    @Test("A same-day interval keeps one date and both complete endpoint clocks")
+    func overviewSameDayEndpoints() throws {
+        let start = try #require(ISO8601DateFormatter().date(from: "2026-10-28T17:00:00Z"))
+        let end = start.addingTimeInterval(5400)
+        let display = PlanOverviewTiming(start: start, end: end, timeZone: "Europe/Berlin", now: start,
+                                         locale: Locale(identifier: "en_GB"))
+        #expect(!display.crossesDay)
+        #expect(display.datePart(start, template: "MMMd") == "28 Oct")
+        #expect(display.dayContext(start) == "Wed")
+        #expect(display.clockText == "18:00 – 19:30")
+    }
+
+    @Test("Candidate dates remain undecided rather than inventing an interval")
+    func overviewCandidateDates() throws {
+        let display = PlanOverviewTiming(start: nil, end: nil,
+            candidateDates: ["2027-01-01", "2026-12-31"], timeZone: "Europe/Berlin", now: now,
+            locale: Locale(identifier: "en_GB"))
+        #expect(display.start == nil && display.end == nil && display.clockText == nil)
+        #expect(!display.crossesDay)
+        #expect(display.dateText.contains("31 Dec") && display.dateText.contains("1 Jan"))
+        #expect(display.candidateDays.count == 2)
+        #expect(display.datePart(try #require(display.candidateDays.first), template: "yMMMd") == "31 Dec 2026")
+        #expect(display.datePart(try #require(display.candidateDays.last), template: "yMMMd") == "1 Jan 2027")
     }
 
     @Test("Only a different viewer zone needs an explicit overview zone; DST offsets remain visible")

@@ -254,15 +254,22 @@ struct PlanOverviewTiming {
     func dayNumber(_ date: Date) -> String {
         calendar.component(.day, from: date).formatted(.number.locale(locale))
     }
-    private func dateLabel(_ date: Date, weekday: Bool = true) -> String {
+    func dayContext(_ date: Date) -> String {
+        let year = calendar.component(.year, from: date) != calendar.component(.year, from: now)
+        return datePart(date, template: (year ? "y" : "") + "EEE")
+    }
+    func dateLabel(_ date: Date, weekday: Bool = true) -> String {
         let year = calendar.component(.year, from: date) != calendar.component(.year, from: now)
         return datePart(date, template: (year ? "y" : "") + "MMMd" + (weekday ? "EEE" : ""))
     }
-    var dateText: String {
-        if let start { return dateLabel(start) }
+    var candidateDays: [Date] {
         let parser = DateFormatter()
         parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = zone; parser.dateFormat = "yyyy-MM-dd"
-        let dates = candidateDates.compactMap { parser.date(from: $0) }.sorted()
+        return candidateDates.compactMap { parser.date(from: $0) }.sorted()
+    }
+    var dateText: String {
+        if let start { return dateLabel(start) }
+        let dates = candidateDays
         guard let first = dates.first, let last = dates.last else { return AppLocalization.string("No time selected yet") }
         if first == last { return dateLabel(first) }
         return String(format: AppLocalization.string("%d dates · %@"), dates.count,

@@ -57,6 +57,17 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Readable schedule endpoints — Preview 215
+
+Native overview dates use a prominent month/day, with weekday and any required
+start year beneath. Same-day intervals keep both clocks together when they fit;
+otherwise each complete clock gets a row. Cross-day intervals explicitly group
+the start date/time and the arrow-linked end date/time, retaining the end year.
+The regular leading column is 112pt; xxLarge and larger text stack schedule above
+activity information. Full accessibility descriptions and existing time-zone,
+submission, invitation and Calendar rules stay unchanged. Candidate dates remain
+undecided, with count and complete first/last dates on separate rows. See the [215 QA](./qa/2026-10-25-plan-schedule.md).
+
 ## Unified native card schedule — Preview 214
 
 Actionable, waiting and confirmed overview cards share the same leading date/time

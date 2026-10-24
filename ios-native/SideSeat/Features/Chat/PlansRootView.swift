@@ -681,6 +681,7 @@ private struct PlanOverviewLabel: View {
         .init(start: start, end: end, candidateDates: candidateDates, timeZone: timeZone,
               now: now, locale: AppLocalization.selectedLanguage.locale)
     }
+    private var stackedSchedule: Bool { typeSize >= .xxLarge }
     private var secondary: Color { SideSeatTheme.textSecondaryStrong }
     private var topic: NativeWeeklyIntentTopic { PlanHomeArtwork.activityTopic(for: title) ?? .explore }
     private var displayDate: String? { start != nil || !candidateDates.isEmpty ? timing.dateText : nil }
@@ -689,12 +690,12 @@ private struct PlanOverviewLabel: View {
     var body: some View {
         SSFlowCard(contentPadding: style == .waiting ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD,
                    contentSpacing: 0, activityTopic: topic) {
-            let layout = typeSize.isAccessibilitySize
+            let layout = stackedSchedule
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
                 : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
             layout {
                 schedule
-                    .frame(width: typeSize.isAccessibilitySize ? nil : 92, alignment: .leading)
+                    .frame(width: stackedSchedule ? nil : 112, alignment: .leading)
                 information
             }
         }
@@ -802,15 +803,60 @@ private struct PlanOverviewLabel: View {
 
     private var schedule: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            if let displayDate {
-                Text(displayDate).font(.footnote.weight(.semibold))
+            if let start {
+                Text(timing.datePart(start, template: "MMMd"))
+                    .font(.title3.weight(.bold))
                     .fixedSize(horizontal: false, vertical: true)
+                Text(timing.dayContext(start)).font(.caption2).foregroundStyle(secondary)
+                if let end {
+                    if timing.crossesDay {
+                        clock(start)
+                        HStack(alignment: .top, spacing: SideSeatTheme.spaceXS) {
+                            Image(systemName: "arrow.down").font(.caption2)
+                                .foregroundStyle(secondary).accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(timing.dateLabel(end, weekday: false))
+                                    .font(.caption.weight(.semibold)).foregroundStyle(secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                clock(end)
+                            }
+                        }
+                    } else {
+                        ViewThatFits(in: .horizontal) {
+                            Text(displayTime).font(.footnote.weight(.semibold)).monospacedDigit()
+                                .fixedSize()
+                            VStack(alignment: .leading, spacing: 2) {
+                                clock(start)
+                                Text("– " + timing.datePart(end, template: "jmm"))
+                                    .font(.footnote.weight(.semibold)).monospacedDigit()
+                            }
+                        }
+                    }
+                } else {
+                    Text(displayTime).font(.caption).foregroundStyle(secondary)
+                }
+            } else {
+                let dates = timing.candidateDays
+                if let first = dates.first, let last = dates.last, first != last {
+                    Text(String(format: AppLocalization.string("%d dates"), dates.count))
+                        .font(.caption2).foregroundStyle(secondary)
+                    Text(timing.dateLabel(first, weekday: false)).font(.footnote.weight(.semibold))
+                    Text("– " + timing.dateLabel(last, weekday: false))
+                        .font(.caption.weight(.semibold)).foregroundStyle(secondary)
+                } else if let displayDate {
+                    Text(displayDate).font(.footnote.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Text(displayTime).font(.caption).foregroundStyle(secondary)
             }
-            Text(displayTime)
-                .font(.caption).foregroundStyle(secondary).monospacedDigit()
-                .fixedSize(horizontal: false, vertical: true)
             zone
         }
+    }
+
+    private func clock(_ date: Date) -> some View {
+        Text(timing.datePart(date, template: "jmm"))
+            .font(.footnote.weight(.semibold)).monospacedDigit()
+            .fixedSize(horizontal: false, vertical: true)
     }
     @ViewBuilder private var zone: some View {
         if let name = timing.zoneText {

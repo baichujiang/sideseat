@@ -20,7 +20,7 @@ import XCTest
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
-        app.tabBars.buttons[language == "de" ? "Pläne" : "计划"].tap()
+        app.tabBars.buttons[language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"].tap()
     }
 
     override func tearDown() { app?.terminate() }
@@ -180,8 +180,8 @@ import XCTest
         let history = app.buttons["plans-history"]
         XCTAssertTrue(heading.waitForExistence(timeout: 10))
         XCTAssertTrue(create.isHittable && history.isHittable)
-        XCTAssertTrue(heading.label.contains(language == "de" ? "Pläne" : "计划"))
-        XCTAssertEqual(create.label, language == "de" ? "Plan starten" : "发起计划")
+        XCTAssertTrue(heading.label.contains(language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"))
+        XCTAssertEqual(create.label, language == "de" ? "Plan starten" : language == "en" ? "Start a plan" : "发起计划")
         let createPredicate = NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])
         XCTAssertEqual(nav.buttons.matching(createPredicate).count, 0,
                        "Creation belongs to the independent bottom action area")
@@ -331,49 +331,12 @@ import XCTest
         continueAfterFailure = false
         launch(accessibility: true, layout: true, language: "de",
                contentSizeCategory: "UICTContentSizeCategoryAccessibilityXXXL")
-        func showComplete(_ card: XCUIElement, section: String, name: String) {
-            XCTAssertTrue(card.waitForExistence(timeout: 10))
-            var offset: CGFloat = 0, part = 1
-            for _ in 0..<20 {
-                let viewport = homeListViewport(section: section).insetBy(dx: 0, dy: 8)
-                let frame = card.frame
-                XCTAssertGreaterThanOrEqual(frame.width + 0.001, 44)
-                XCTAssertGreaterThanOrEqual(frame.height + 0.001, 44)
-                let segment = frame.height <= viewport.height * 0.6 ? frame
-                    : CGRect(x: frame.minX, y: frame.minY + offset, width: frame.width,
-                             height: min(viewport.height * 0.6, frame.height - offset))
-                print("PLAN_HOME_SEGMENT card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
-                if viewport.insetBy(dx: -0.501, dy: -0.501).contains(segment) {
-                    XCTAssertTrue(card.isHittable)
-                    assertHomeTarget(homeCreate)
-                    print("PLAN_HOME_READABLE card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
-                    capture(part == 1 && segment == frame ? name : name + "-part-\(part)")
-                    if offset + segment.height >= frame.height - 0.501 { return }
-                    // Adjacent actual screenshots overlap by 24pt, so no content is skipped.
-                    offset += segment.height - 24
-                    part += 1
-                    continue
-                }
-                let delta = segment.minY < viewport.minY ? segment.minY - viewport.minY
-                    : segment.maxY - viewport.maxY
-                let distance = min(max(abs(delta), 64), viewport.height * 0.6)
-                let startY = delta > 0 ? viewport.maxY - 16 : viewport.minY + 16
-                let endY = startY + (delta > 0 ? -distance : distance)
-                let origin = app.coordinate(withNormalizedOffset: .zero)
-                origin.withOffset(CGVector(dx: 12, dy: startY))
-                    .press(forDuration: 0.08,
-                        thenDragTo: origin.withOffset(CGVector(dx: 12, dy: endY)),
-                        withVelocity: .slow, thenHoldForDuration: 0.2)
-            }
-            capture(name + "-unreachable")
-            XCTFail("Every part of the representative card must be readable above the creation action")
-        }
         assertHomeSection("waitingResponse", language: "de")
-        showComplete(app.buttons["plans-row-ui-plan-1"], section: "waitingResponse", name: "home-redesign-max-complete-task")
-        showComplete(app.buttons["plans-row-ui-plan-outgoing"], section: "waitingResponse", name: "home-redesign-max-complete-waiting")
+        showCompleteHomeCard(app.buttons["plans-row-ui-plan-1"], section: "waitingResponse", name: "home-redesign-max-complete-task")
+        showCompleteHomeCard(app.buttons["plans-row-ui-plan-outgoing"], section: "waitingResponse", name: "home-redesign-max-complete-waiting")
         app.buttons["plans-tab-upcoming"].tap()
         assertHomeSection("upcoming", language: "de")
-        showComplete(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming", name: "home-redesign-max-complete-confirmed")
+        showCompleteHomeCard(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming", name: "home-redesign-max-complete-confirmed")
     }
 
     func testHomeRedesignLiveCandidateDatesRemainExplicitlyUndecided() throws {
@@ -394,7 +357,7 @@ import XCTest
             if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
             app.launch()
-            let tab = app.tabBars.buttons[language == "de" ? "Pläne" : "计划"]
+            let tab = app.tabBars.buttons[language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"]
             XCTAssertTrue(tab.waitForExistence(timeout: 20)); tab.tap()
             let card = app.buttons["plans-coordinated-\(fixture.finalBlockToken)"]
             XCTAssertTrue(card.waitForExistence(timeout: 20))
@@ -412,6 +375,112 @@ import XCTest
             app.navigationBars.firstMatch.buttons.firstMatch.tap()
             assertHomeSection("waitingResponse", language: language)
         }
+    }
+
+    /// Read-only real API cards; fixture preparation and server-state checks are separate.
+    func testHomeScheduleEndpointsAcrossLanguagesAndTextSizes() throws {
+        struct Account: Decodable { let role: String; let accessToken: String }
+        struct Interval: Decodable { let name: String; let token: String; let start: String; let end: String }
+        struct Fixture: Decodable {
+            let bundle: String; let finalBlockToken: String; let accounts: [Account]; let invitationCases: [Interval]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires fresh same-day, cross-day, cross-year and candidate cards.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        XCTAssertEqual(Set(fixture.invitationCases.map(\.name)), ["same-day", "cross-day", "cross-year"])
+        let parser = ISO8601DateFormatter()
+        func instant(_ value: String) throws -> Date {
+            parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let value = parser.date(from: value) { return value }
+            parser.formatOptions = [.withInternetDateTime]
+            return try XCTUnwrap(parser.date(from: value))
+        }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Europe/Berlin"))
+        continueAfterFailure = false
+        for (language, category, tag) in [
+            ("zh-Hans", "UICTContentSizeCategoryL", "zh-Hans-normal-light"),
+            ("zh-Hans", "UICTContentSizeCategoryXL", "zh-Hans-xLarge-light"),
+            ("en", "UICTContentSizeCategoryL", "en-normal-light"),
+            ("de", "UICTContentSizeCategoryAccessibilityXXXL", "de-system-largest-dark")
+        ] {
+            let large = category == "UICTContentSizeCategoryAccessibilityXXXL"
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
+                "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(large ? "dark" : "light")", "-UIPreferredContentSizeCategoryName",
+                category]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+            app.launch()
+            let tab = app.tabBars.buttons[language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"]
+            XCTAssertTrue(tab.waitForExistence(timeout: 20)); tab.tap()
+            assertHomeSection("waitingResponse", language: language)
+            let format = DateFormatter()
+            format.locale = Locale(identifier: language); format.timeZone = calendar.timeZone
+            func text(_ date: Date, template: String) -> String {
+                format.setLocalizedDateFormatFromTemplate(template)
+                return format.string(from: date)
+            }
+            for interval in fixture.invitationCases {
+                let card = app.buttons["plans-coordinated-\(interval.token)"]
+                XCTAssertTrue(card.waitForExistence(timeout: 20))
+                let start = try instant(interval.start), end = try instant(interval.end)
+                let prefix = calendar.component(.year, from: start) == calendar.component(.year, from: Date()) ? "" : "y"
+                XCTAssertTrue(card.label.contains(text(start, template: prefix + "MMMdEEE")))
+                for clock in [start, end] { XCTAssertTrue(card.label.contains(text(clock, template: "jmm")), card.label) }
+                if !calendar.isDate(start, inSameDayAs: end) {
+                    let endPrefix = calendar.component(.year, from: end) == calendar.component(.year, from: Date()) ? "" : "y"
+                    XCTAssertTrue(card.label.contains(text(end, template: endPrefix + "MMMd")), card.label)
+                }
+                showCompleteHomeCard(card, section: "waitingResponse", name: "schedule-\(interval.name)-\(tag)")
+            }
+            let candidate = app.buttons["plans-coordinated-\(fixture.finalBlockToken)"]
+            XCTAssertTrue(candidate.waitForExistence(timeout: 20))
+            XCTAssertTrue(candidate.label.contains(language == "de" ? "Zeit noch offen" : language == "en" ? "Time to be decided" : "时间待定"))
+            XCTAssertTrue(candidate.label.contains(language == "de" ? "2 Tage ·" : language == "en" ? "2 dates ·" : "2 天可选 ·"))
+            XCTAssertNil(candidate.label.range(of: #"\b(?:[01]?\d|2[0-3]):[0-5]\d\b"#, options: .regularExpression))
+            showCompleteHomeCard(candidate, section: "waitingResponse", name: "schedule-candidate-\(tag)")
+        }
+    }
+
+    private func showCompleteHomeCard(_ card: XCUIElement, section: String, name: String) {
+        XCTAssertTrue(card.waitForExistence(timeout: 10))
+        var offset: CGFloat = 0, part = 1
+        for _ in 0..<20 {
+            let viewport = homeListViewport(section: section).insetBy(dx: 0, dy: 8)
+            let frame = card.frame
+            XCTAssertGreaterThanOrEqual(frame.width + 0.001, 44)
+            XCTAssertGreaterThanOrEqual(frame.height + 0.001, 44)
+            let segment = frame.height <= viewport.height * 0.6 ? frame
+                : CGRect(x: frame.minX, y: frame.minY + offset, width: frame.width,
+                         height: min(viewport.height * 0.6, frame.height - offset))
+            print("PLAN_HOME_SEGMENT card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
+            if viewport.insetBy(dx: -0.501, dy: -0.501).contains(segment) {
+                XCTAssertTrue(card.isHittable)
+                assertHomeTarget(homeCreate)
+                print("PLAN_HOME_READABLE card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
+                capture(part == 1 && segment == frame ? name : name + "-part-\(part)")
+                if offset + segment.height >= frame.height - 0.501 { return }
+                // Adjacent actual screenshots overlap by 24pt, so no content is skipped.
+                offset += segment.height - 24
+                part += 1
+                continue
+            }
+            let delta = segment.minY < viewport.minY ? segment.minY - viewport.minY
+                : segment.maxY - viewport.maxY
+            let distance = min(max(abs(delta), 64), viewport.height * 0.6)
+            let startY = delta > 0 ? viewport.maxY - 16 : viewport.minY + 16
+            let endY = startY + (delta > 0 ? -distance : distance)
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: 12, dy: startY))
+                .press(forDuration: 0.08,
+                    thenDragTo: origin.withOffset(CGVector(dx: 12, dy: endY)),
+                    withVelocity: .slow, thenHoldForDuration: 0.2)
+        }
+        capture(name + "-unreachable")
+        XCTFail("Every part of the representative card must be readable above the creation action")
     }
 
     private func assertKnownCardTime(_ card: XCUIElement, dayOffset: Int, hourOffset: Int,
@@ -434,7 +503,7 @@ import XCTest
     private func assertHomeSection(_ section: String, language: String) {
         XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].firstMatch.waitForNonExistence(timeout: 5))
         XCTAssertFalse(app.descendants(matching: .any)["plans-history-root"].firstMatch.exists)
-        XCTAssertTrue(app.tabBars.buttons[language == "de" ? "Pläne" : "计划"].isSelected)
+        XCTAssertTrue(app.tabBars.buttons[language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"].isSelected)
         let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
         XCTAssertEqual(picker.buttons.count, 2)
         XCTAssertEqual(picker.buttons.allElementsBoundByIndex.filter(\.isSelected).count, 1)
