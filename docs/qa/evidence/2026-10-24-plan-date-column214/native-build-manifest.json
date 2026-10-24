@@ -1,0 +1,24 @@
+{
+  "build": 214,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "45c6f764d816a420c5e0f7cfc66552f4459c636e5a9a47d7e4a567edb858ee2b",
+    "SideSeat Preview.debug.dylib": "af0058d372a52f5861c7d84ad28aa3a6b7ee214ebbd0d9a904160d7bfdb65db8"
+  },
+  "productFrozenDuringTestOnlyRepairs": true,
+  "testSourceSHA256": "2bfc3d004814dbd0b8a93d444dbaaf3e9939e730d8c5fc7d5bf6ed205788af5f",
+  "backendReleased": false,
+  "webReleased": false,
+  "sourceCommit": "0dcad2188b963914bdafdf4e98788976f9ec0a10",
+  "sourcePushed": true,
+  "all267InputsMatchCommittedSource": true,
+  "finalProductFrozenDuringAcceptance": true,
+  "testSourcesAtDeliverySHA256": {
+    "PlanStatePresentationUITests.swift": "2bfc3d004814dbd0b8a93d444dbaaf3e9939e730d8c5fc7d5bf6ed205788af5f",
+    "PlanFirstUsePhoneUITests.swift": "5d07f032c83af3fc82a1742c27c1c14dd0f6ef52a6710b6aa12e75994b89c3e9"
+  },
+  "executionSourceScope": "Complete/home FirstUse source matches delivery. Matrix/candidate executed method/helper callgraph unchanged; only independent maximum screenshot helper later repaired. Final max runner built and run from delivery source. Exact earlier-file reconstruction verified; see test-source-provenance.json."
+}

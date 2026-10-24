@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-24T22:05:49.828743+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 214,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8926,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Two disposable real API accounts and two disposable plans; separate controlled offline legacy navigation fixture.",
+  "deviceIdentityVerifiedBeforeInstall": true,
+  "accountsRemoved": 2,
+  "tokens401": 2,
+  "links404": 2,
+  "privateFixtureRemoved": true,
+  "privateLaunchConfigurationRemoved": true,
+  "generatedRunnerProjectRemoved": true
+}

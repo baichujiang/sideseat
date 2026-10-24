@@ -1,0 +1,968 @@
+{
+  "build": 214,
+  "captureIndex": {
+    "complete": [
+      {
+        "name": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_79538982-6C29-4209-947C-7C99E94EE123.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/41D155EE-91D1-4BA8-A4CB-43A8DC6256BC.png",
+        "index": 0,
+        "sha256": "975a8bdd1841f1342ae9990d51b9dce647577c4ec5d1f52ce5a0809e20f3dd82"
+      },
+      {
+        "name": "phone-first-plan-compact-empty-timetable_0_4EF47E07-6A20-4F8D-A3B4-A5F1275A1BA0.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/E59D67CA-8C44-4056-B9AF-5DB61EE6E82C.png",
+        "index": 1,
+        "sha256": "f68493cccc075664d9c72efbe7671450fcd60f30b498da94db4edb1ffb2131bc"
+      },
+      {
+        "name": "phone-first-plan-compact-responded-people_0_710A8AE5-F3EF-4906-85A9-32CB98067828.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/D917BB80-D506-4ED9-9383-129B232BA83C.png",
+        "index": 2,
+        "sha256": "671fcffa422313ac82d8e92503d57d8349aec9b45f1ea82ab88f9d9aea330d1d"
+      },
+      {
+        "name": "phone-first-plan-contacts-calendar-result_0_93780EDF-A6A1-41D6-A85E-55E284B07773.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/8FCA4E8B-4E18-4AA5-A274-28CC3DFAB81D.png",
+        "index": 3,
+        "sha256": "82f08a1fff265e4411f28b02eace96de12e0d8125770656ba807f21d02f7f587",
+        "retainedFile": "calendar-result.png"
+      },
+      {
+        "name": "phone-first-plan-contacts-explicit-acceptance_0_5A584077-0708-426A-BAC0-5BFBC115175A.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/C4FF8488-2B54-43AE-99AD-8AC76E7B90DB.png",
+        "index": 4,
+        "sha256": "b4c05abd07c053726870137fb01249de28d0b6c480ea3bbf5dd5832c2b340798"
+      },
+      {
+        "name": "phone-first-plan-contacts-owner-submitted-and-share-open_0_880106AE-A7C6-4AA8-A917-9A00751AF12F.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/07219440-5562-4D57-87C0-87DC041BF8F5.png",
+        "index": 5,
+        "sha256": "f0c0b8b04c2b912e9c6adc7b93859efe52b59f7bd7eaa3079710bb894c3f139e"
+      },
+      {
+        "name": "phone-first-plan-contacts-peer-inline-availability_0_BF09E7DA-4C6C-4A1B-B630-1CEFF274E1F2.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/9DC59E2A-7353-4D44-90B9-CBE35AE7C076.png",
+        "index": 6,
+        "sha256": "2c5424df62198fb7e5da8e7186f8839429767a62a0a36a161d861e69a0c7fc95"
+      },
+      {
+        "name": "phone-first-plan-contacts-received-chat-card_0_0A7EA274-775B-4AB9-8BD0-136BE13E5C15.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/3050C99B-C75D-4055-966E-BAFCF3171D14.png",
+        "index": 7,
+        "sha256": "fb94bf08b2aee75ae05c4774f4a40a38709b2656bae614611a0731e8f2939d37"
+      },
+      {
+        "name": "phone-first-plan-contacts-received-chat-card_0_7324A781-66D7-4BE3-93E3-74B63934B541.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/2E6680AD-606F-4BBE-A7E1-17F04369E320.png",
+        "index": 8,
+        "sha256": "d1d99cc07ac7eec6dd5f5f8e1d20020cca91316775a9c9bdeb26fedeb75040f1"
+      },
+      {
+        "name": "phone-first-plan-contacts-review-final-invitees_0_3AF65500-E226-4DA8-BC98-C4A373246A08.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/B7054F33-7F30-47E6-8D10-5BE20361531C.png",
+        "index": 9,
+        "sha256": "3757189f8eddc7c8f1b278664b58fdeffd9e7012129cdf00c38453e4f5475f86",
+        "retainedFile": "formal-invitation-review.png"
+      },
+      {
+        "name": "phone-first-plan-contacts-select-and-send_0_9B33B170-4847-4898-977D-496B6CFA6B24.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/B1B78DD3-4F85-4AF6-9010-D5787CBB369B.png",
+        "index": 10,
+        "sha256": "30c77bc2ec44fbe2b956512053e66ed206f5b4f5e65d6660fde79651e0ecf669"
+      },
+      {
+        "name": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_74CD83E3-5E74-40D0-9982-F8BF29993808.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/B267B99E-2ACA-48CE-9849-F87D71A02A81.png",
+        "index": 11,
+        "sha256": "88223807109834de640b6606ce23651d73bb0cf01f6fc2d16aadc10751223efe"
+      },
+      {
+        "name": "phone-first-plan-creation-information-without-timetable_0_B8438591-FE72-407E-803E-C4A6E3170B86.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/DDE16FDA-E772-4FCD-8BF9-D78D23EF6461.png",
+        "index": 12,
+        "sha256": "d1f96c62bac8b789ee97223091262762b9272316b8e2000d6de5fc5982464821"
+      },
+      {
+        "name": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_C77AF875-2DF0-4F8E-B620-E2C3B3FF009C.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/92EB3BF7-7C92-4244-8C0A-CDB6A97894C0.png",
+        "index": 13,
+        "sha256": "ecf5fd752b72965b50ddd82b1549516f5de395503b96b54d1455f5e684c46065"
+      },
+      {
+        "name": "phone-first-plan-final-cross-day-evening_0_3DED6EE2-884D-4CE9-92A4-1C7C1FFB6BD5.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/2240A8EB-8CA9-473C-905E-8CC6ED272FF0.png",
+        "index": 14,
+        "sha256": "e7c017127855868eff30d8b050984aeaabb9b4788b4fd25becfb884694a17b1b"
+      },
+      {
+        "name": "phone-first-plan-final-cross-day-morning-and-summary_0_8FE11757-EE17-4DA0-A156-A9457E883F3D.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/A551F6C5-E17F-47CE-863F-4D2D10E31BF8.png",
+        "index": 15,
+        "sha256": "9302ff17918466e942d1788f56224edcf9fcff4ab5c8514d3412186726a7464d"
+      },
+      {
+        "name": "phone-first-plan-inline-information-editing_0_6C08CA91-0D2D-4252-8BA8-E7173F5791BF.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/236F2D1F-1CD2-4855-9C42-3B85AE4AB878.png",
+        "index": 16,
+        "sha256": "84cef3f1cad55d7b2e8ea0f3036c1dc2d6eb5744c8e11894c2374c72c7e15cd3"
+      },
+      {
+        "name": "phone-first-plan-inline-information-saved-draft-preserved_0_0FEFF396-2D40-4774-8BA8-DCECC51C9CEE.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/1674EAC7-F1D8-4666-AF20-75E86F766F9F.png",
+        "index": 17,
+        "sha256": "63d4abb9b97e4db8090718d93520dd9fa0ce0ef93e37e8fa7dd6e2c8d6d54eb2"
+      },
+      {
+        "name": "phone-first-plan-invitation-continuous-across-midnight_0_A393472D-143B-4F0D-B935-A3AA920F4E0C.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/6D7438F3-1919-4CC4-B27E-C0BDD0C95A11.png",
+        "index": 18,
+        "sha256": "5ad2f98bfa8f0aaf562067eb00d6718fd5490cf85aee3aa76f807a16d37359e3",
+        "retainedFile": "invited-cross-day.png"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_A7D8EBA9-E5C8-482E-B305-8AE5C76459F1.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/B8D8E498-5EBC-4756-8B81-67533392DDBC.png",
+        "index": 19,
+        "sha256": "cc140de9702b77a4058d42ec1be961934d9dfd5ab3a99008c45c5d39f4045235"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-owner-CONFIRMED_0_A60AFED7-38D5-44EC-B1E4-4811BCCB77EF.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/6E044D5E-B56D-4F69-ADB8-1CEF6AB33200.png",
+        "index": 20,
+        "sha256": "0550e5ac933973fb175883d602529f539ecf3eb5b824b71e5e35f7533fa01b12"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-owner-INVITING_0_84291695-EF54-49B5-B3A4-86E477849E9B.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/2DA2BE9A-BB7F-4DEA-A227-8ED5D8395981.png",
+        "index": 21,
+        "sha256": "7a7d29d28dc97263a7f146efb23f4278f72b12e9fa205d47c7d1d292980c3ca0"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-participant-COLLECTING_0_CE6787E6-D17F-4A5C-ACB6-A9D1423B070E.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/B3217845-364C-4915-B25A-1949A2BAB685.png",
+        "index": 22,
+        "sha256": "1e750817cf066e9a41516432e0153e8ffa807857792f2477ee31c0b196d0b1f3"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-participant-CONFIRMED_0_00897F9F-705F-4357-8DA7-65ECF4F3A7F0.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/C0EF5F38-BE05-491E-9A6F-9BB3E0806AD9.png",
+        "index": 23,
+        "sha256": "1d23c33e09834d34a2a7e2b38585cd0bea448f0a40525ed05d9a2704fa83e1b5"
+      },
+      {
+        "name": "phone-first-plan-share-permissions-participant-INVITING_0_6167FAC5-0F78-493B-BB14-4F471B14AF0B.png",
+        "path": "/tmp/sideseat214-private/complete-attachments/1C906B4D-2778-4A82-9107-1BA51E62DB97.png",
+        "index": 24,
+        "sha256": "faee8762d6884d759f3b2da34265dde46410c5d0f751e5ca9e76258cd6c10ec2"
+      }
+    ],
+    "focused-matrix": [
+      {
+        "name": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_CF83C874-BFA0-4012-BCC9-F202644CBC98.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/3862CFB6-671C-440E-8975-27362F5C3F34.png",
+        "index": 0,
+        "sha256": "a1306ccc83df7d44795aa8a1cd73c18a998fe4d92590966843503c5858347124"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_244A6C33-797F-43A4-AFCE-87359072E007.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/91C93EC1-DA47-43CF-BEC1-C5EAE6CAEF22.png",
+        "index": 1,
+        "sha256": "d66eb17b3acc089f82107ad31525fa4c53778afb4f75bb1a235f01f23ac9a23c",
+        "retainedFile": "home-normal-confirmed-offline.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_A9BBD42E-E00B-4BE1-8FC1-88FF32EA45EE.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/FFE3C48B-4F9C-44A2-A243-DEDD6CD3B1E3.png",
+        "index": 2,
+        "sha256": "ce43f38d06dfaef264e242f3712780fcff8b354fb1e75b55beedc5257e96d459"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_6CC94FF5-1C02-4B20-9D15-409E52E2558B.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/D2DF3CB6-1CDC-4C91-821D-89E9CB5D5F63.png",
+        "index": 3,
+        "sha256": "9ed944cb20c10f355f88ddc00f9927c21013c1ea3052d7336dfbab6e2ca6a0f2"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_2206B6CA-89E8-4C4D-A953-AF176EE211DA.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/92AA4773-26AB-4DA1-B919-2F8424F8F7F2.png",
+        "index": 4,
+        "sha256": "acb31dc73e5a8176a549a6c810146b373d8a9995d1f70544575430e7396cbdac"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_A7BF6765-08A8-4F63-80B1-9D152377E0A5.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/5B35E9B3-4DC1-4FD4-B56D-85622EAFBB45.png",
+        "index": 5,
+        "sha256": "5d3827d3d47e0b439cf10481f8537ef87fff14bea2c3863e193ad7d4e35c12e2"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_1800B8DC-C906-432B-B4CF-AA1B76816778.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/76B26ED4-BD91-4E61-81E1-A76B929A9EB1.png",
+        "index": 6,
+        "sha256": "0965caace5e9aad2369acfb148cb39574915e29085acccb8fda2d1dc442736a1"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_DA68CFDD-1DA9-44B3-AA28-7FF428482218.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/CEF2E315-3B16-472C-B38F-B31BFD07EB5B.png",
+        "index": 7,
+        "sha256": "33def57da37090f3ec3aab0efec4781bafac68bb6439b8896223f0b9ae91d661"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_A0CC2B9C-B8A0-4E3D-AF06-980A55008910.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/3A8D6C1E-C12A-438D-BA7A-DEB7E3EA5A2D.png",
+        "index": 8,
+        "sha256": "59afa9d353a1a47e23ccdada5d725aa8eafedb08dc1670993f8c85c94ae104c1",
+        "retainedFile": "home-normal-waiting-offline.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-offline-filled-de-system-largest-dark_0_D722059B-B794-4F76-B329-BDED932672F3.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/C5149AEF-4679-45B8-A19F-2DD000BF12C8.png",
+        "index": 9,
+        "sha256": "dfce7f6d7d23705d61e6ecf3efc88fd03bac2956e87b5e1fbcb9991020399a69"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_A4026162-C874-401E-B52E-29A286381A57.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/E2CAEA59-4D13-4E1A-A559-F7510A05E666.png",
+        "index": 10,
+        "sha256": "c88dfe9aa50ded5b392f4ff6e8c14a4be91bf783cb3edbaa3bb0cabaacb2d626",
+        "retainedFile": "home-normal-planning-offline.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-original-invitation-de-system-largest-dark_0_AEA75093-56FF-4EA8-9B7E-E1F9B4CF4ACA.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/24861021-E492-470C-A996-82B46C6C2227.png",
+        "index": 11,
+        "sha256": "b08f2c309e0305112968dc2aa51fdb7497c836b0d77770ff65f86cc88920efc7"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-original-invitation-zh-Hans-normal-light_0_2AAFA1CE-C551-4A2F-93C3-0E8E30F2D6BD.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/C167DEBA-B9B8-4B64-8DDA-9BAD53DCE266.png",
+        "index": 12,
+        "sha256": "ddb1f0de9e0ba30d983758ae6c4b0f73cc09139ce53cf4fcd68748239c5032d7"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-vertical-waiting-first-de-system-largest-dark_0_957EAF09-DE39-4A4C-8177-23BE878966D6.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/48762073-CA47-48D0-819B-596C22D090F8.png",
+        "index": 13,
+        "sha256": "85537e814c48d243703522b3b814b80225059a78ca14e023174d62db2a884123"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-vertical-waiting-last-de-system-largest-dark_0_260D7D7D-F9D3-4984-AD75-9A357620334A.png",
+        "path": "/tmp/sideseat214-private/focused-matrix-attachments/23018C1B-91AD-4612-A36B-F621D42F0F29.png",
+        "index": 14,
+        "sha256": "dbfbb1dc52680070ec8b1f3fcfb4a2e36aab13d763d093d87d4887887e2b713a"
+      }
+    ],
+    "home-live": [
+      {
+        "name": "phone-first-plan-plans-home-entry-live-confirmed_0_9418F8C5-3207-4A95-92D0-9F6640C9F1AE.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/8097C61C-15B5-447F-B6C7-F715136F921C.png",
+        "index": 0,
+        "sha256": "95050722dc5060f5e9bdc0dc81fe32425fd5c9cbac776d53b96e4f0f7985fa69",
+        "retainedFile": "home-live-confirmed.png"
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-create-cancel_0_976095C6-FD0D-4A16-A2E3-B88329A7D8FB.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/3E82ADDF-DE74-4FC9-A7BC-4B5F3FE16681.png",
+        "index": 1,
+        "sha256": "dbe2641563373df28efd4c07a8839275c525d94b96043d61fdb72aa16379e933"
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-create_0_D9261CC0-700D-4E50-AEC8-09CDE22ED515.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/6DFCDD80-AD91-4220-A094-01A0B086918C.png",
+        "index": 2,
+        "sha256": "1156a381e18285c4631aac8ec8fd3c5900633095cff4be78126100c70a50e266"
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-planning_0_B5CEB878-2D87-4E3C-B867-64073D428EA0.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/9EF964AE-0E6C-4605-B56E-2C6F24B49611.png",
+        "index": 3,
+        "sha256": "f8ba21f68f46667c17cfa8a93cc0c1db7de105c38f2e936a6a8a1e0d8c04cd81",
+        "retainedFile": "home-live-planning.png"
+      }
+    ],
+    "live-candidates": [
+      {
+        "name": "shared-plan-117-home-redesign-live-candidate-original-detail-de-system-largest-dark_0_C28BAE61-47A5-4648-B8E5-EAECF31BD7F1.png",
+        "path": "/tmp/sideseat214-private/live-candidates-attachments/76631146-5D33-4822-8E56-A679A83A69AA.png",
+        "index": 0,
+        "sha256": "687d60edbbfb9974d829e604a9ac22138d0bd4ce71c0f5088baa1acf11bc9c3b"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-live-candidate-original-detail-zh-Hans-normal-light_0_2DB69684-6B8B-44E1-9CCE-D0B401BFB0F6.png",
+        "path": "/tmp/sideseat214-private/live-candidates-attachments/33CAAF54-382A-4EC0-8DD7-CB08EBFBCC03.png",
+        "index": 1,
+        "sha256": "a672702374a55cfd30c32bc712bf4d21a3a51148b59db9684b8256cf1488ba85"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-live-candidate-undecided-de-system-largest-dark_0_B73D3C7C-C6FA-40E9-8D82-798CF287644C.png",
+        "path": "/tmp/sideseat214-private/live-candidates-attachments/DE94EA21-F8A5-4CCF-812A-19877C577FBA.png",
+        "index": 2,
+        "sha256": "fa5643f0f7f67b9ddca0155971337ba3efec025a5236fc8c594891040bb0bfe5",
+        "retainedFile": "candidate-max-visible.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-live-candidate-undecided-zh-Hans-normal-light_0_0B05FE38-8216-4BE8-9F64-ECA76D9F230E.png",
+        "path": "/tmp/sideseat214-private/live-candidates-attachments/8044C115-3710-43C0-ABD9-9BC411446F68.png",
+        "index": 3,
+        "sha256": "5251975e41bde1fbdca7426405ab30a214891f4bc0612ba8b3d8023063ab9456",
+        "retainedFile": "candidate-normal.png"
+      }
+    ],
+    "focused-max-complete": [
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-confirmed-part-1_0_B7DE2BEF-1FE8-4274-B550-4F1BB1B3F8CC.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/3D7A8B46-A375-4B76-B937-ABFF688746E2.png",
+        "index": 0,
+        "sha256": "140d5913f6511f930e68e8a69aa2fa67ef75b74568e32de596ea28092ccb79c4",
+        "retainedFile": "home-max-confirmed-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-confirmed-part-2_0_886BADD4-BF99-4C2C-8E75-ED06931ED20D.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/CA810FD6-B6C8-4598-ABA2-C000E85867F8.png",
+        "index": 1,
+        "sha256": "140d5913f6511f930e68e8a69aa2fa67ef75b74568e32de596ea28092ccb79c4",
+        "retainedFile": "home-max-confirmed-part-2.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-task-part-1_0_C6152240-0C34-43F7-9A07-169AE9EEFEB8.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/8D64E417-CD45-4AB7-9EAE-080C1C37E048.png",
+        "index": 2,
+        "sha256": "1d633f6e02f7e765438c1e72705bc03b3330e16bb6073c4d4290ef2edac05bb9",
+        "retainedFile": "home-max-task-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-task-part-2_0_65535C8C-A9A7-43EE-8162-CD192C70B36F.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/382284CB-9660-4F03-82B5-4193FC3E8450.png",
+        "index": 3,
+        "sha256": "3d9cfdaf798ca8455ba8f6561f4d3d90c812b2e26078fc7394e765c1ec2a6b15",
+        "retainedFile": "home-max-task-part-2.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-waiting-part-1_0_729F199D-3898-4BC1-A5DB-3C150644CE40.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/BBBD9E9E-E7C5-49ED-A2DD-FE50EF2E8F26.png",
+        "index": 4,
+        "sha256": "8a656b6f5c30448d44e1ce191bb52b921ee7090eef4998c522977410fdd622cd",
+        "retainedFile": "home-max-waiting-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-max-complete-waiting-part-2_0_9FB7A386-36FC-44E6-8592-4999D5F9DB21.png",
+        "path": "/tmp/sideseat214-private/focused-max-complete-attachments/086D8B26-1D5F-43DA-8357-80A0E52CFE18.png",
+        "index": 5,
+        "sha256": "fe68a7679a8196fd212fd43b87fb65ca7acd923bd14f18b8356a9265a08042b1",
+        "retainedFile": "home-max-waiting-part-2.png"
+      }
+    ]
+  },
+  "reviews": {
+    "complete-review-a": {
+      "build": 214,
+      "scope": "Current Preview214 new complete-flow capture index0–8; nine separate view_image(detail=original) calls; no Preview213 images reused.",
+      "reviewer": "plan_home_minimal_review",
+      "reviewedCount": 9,
+      "overall": "pass within recorded visible scope",
+      "repositoryOrDeviceModified": false,
+      "images": [
+        {
+          "name": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_79538982-6C29-4209-947C-7C99E94EE123.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/41D155EE-91D1-4BA8-A4CB-43A8DC6256BC.png",
+          "index": 0,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "名称周末一起吃饭9cb0c658、地点可选、候选10月25–31日、灰点收集空闲及Europe/Berlin、0人已填写完整；09:00/09:30两格勾选边框与未提交1天1小时、提交并分享/选择最终时间可读。",
+          "visibleLimit": "只见四日期列及09:00–14:00视口；AssistiveTouch覆盖右侧12:00–12:30局部格。截图不证明拖选历史或服务器写入。"
+        },
+        {
+          "name": "phone-first-plan-compact-empty-timetable_0_4EF47E07-6A20-4F8D-A3B4-A5F1275A1BA0.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/E59D67CA-8C44-4056-B9AF-5DB61EE6E82C.png",
+          "index": 1,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "创建后空时间表的信息区与日期/状态完整；空格人数0、未提交0天0小时、禁用提交并分享及独立选择最终时间完整。",
+          "visibleLimit": "这是创建后详情而非创建表单；只覆盖四列09:00–14:00，系统浮层局部覆盖右侧时间格，不外推全表。"
+        },
+        {
+          "name": "phone-first-plan-compact-responded-people_0_710A8AE5-F3EF-4906-85A9-32CB98067828.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/D917BB80-D506-4ED9-9383-129B232BA83C.png",
+          "index": 2,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "参与者与进度标题/完成动作完整，计划名及2人已填写、Ming9cb0和Lin9cb0你、各自已提交空闲及填写不代表确认参加说明完整。",
+          "visibleLimit": "仅两个参与者的本次名单；系统浮层在空白区，不外推更多人或大字号名单。"
+        },
+        {
+          "name": "phone-first-plan-contacts-calendar-result_0_93780EDF-A6A1-41D6-A85E-55E284B07773.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/8FCA4E8B-4E18-4AA5-A274-28CC3DFAB81D.png",
+          "index": 3,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "日历搜索完整显示输入名称、一个结果、2026年10月25日23:00和图书馆二楼；清除、关闭和结果箭头清晰，键盘不挡结果。",
+          "visibleLimit": "搜索截图没有结束时间及另一账户结果；精确结束、双方唯一性仅由本轮API和原生断言证明。系统浮层在键盘底部。"
+        },
+        {
+          "name": "phone-first-plan-contacts-explicit-acceptance_0_5A584077-0708-426A-BAC0-5BFBC115175A.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/C4FF8488-2B54-43AE-99AD-8AC76E7B90DB.png",
+          "index": 4,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "接受后状态为待发起人正式发出，地点完整；周日10月25日23:00–24:00和周一10月26日00:00–01:00的连续受邀高亮/图例完整，2/2已确认、已接受及我无法参加可读。",
+          "visibleLimit": "AssistiveTouch覆盖谁会参加右侧部分，不能称该入口整块无遮挡；单图不证明接受请求写入。"
+        },
+        {
+          "name": "phone-first-plan-contacts-owner-submitted-and-share-open_0_880106AE-A7C6-4AA8-A917-9A00751AF12F.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/07219440-5562-4D57-87C0-87DC041BF8F5.png",
+          "index": 5,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "提交后分享面板标题与活动名、App好友/选择联系人发送计划卡片、分享网页链接/复制链接、完成动作完整；背景1人已填写及所选格人数1可见。",
+          "visibleLimit": "弹层预期遮住详情下半部，不能验全背景；AssistiveTouch在App好友行右下缘附近，未覆盖主要文案。"
+        },
+        {
+          "name": "phone-first-plan-contacts-peer-inline-availability_0_BF09E7DA-4C6C-4A1B-B630-1CEFF274E1F2.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/9DC59E2A-7353-4D44-90B9-CBE35AE7C076.png",
+          "index": 6,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "参与者不可编辑的活动名/地点、日期/收集状态/时区、2人已填写与头像完整；所选09:00和09:30格人数2；底栏已提交空闲1天1小时、等待发起人邀请可读。",
+          "visibleLimit": "只见四列09:00–14:30视口，AssistiveTouch覆盖右侧12:30局部；可见状态不独立证明持久化。"
+        },
+        {
+          "name": "phone-first-plan-contacts-received-chat-card_0_0A7EA274-775B-4AB9-8BD0-136BE13E5C15.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/3050C99B-C75D-4055-966E-BAFCF3171D14.png",
+          "index": 7,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "收到聊天计划卡片标题周末一起吃饭9cb0c658、待你选空闲、填写我的空闲动作完整，卡片内边距正常；聊天抬头与底部消息输入完整。",
+          "visibleLimit": "本次普通字号短标题聊天卡片的可见布局；未改聊天页，仅记录回归范围，不包含候选日期明细。"
+        },
+        {
+          "name": "phone-first-plan-contacts-received-chat-card_0_7324A781-66D7-4BE3-93E3-74B63934B541.png",
+          "path": "/tmp/sideseat214-private/complete-attachments/2E6680AD-606F-4BBE-A7E1-17F04369E320.png",
+          "index": 8,
+          "result": "pass",
+          "actualOriginalViewed": true,
+          "observed": "正式邀请聊天卡片完整显示2026年10月25日23:00–2026年10月26日01:00并自然两行换行，标题、待你确认和查看邀请动作完整。",
+          "visibleLimit": "本次普通字号卡片；不能替代正式邀请详情/接受持久化/双方日历断言。系统浮层在空白区。"
+        }
+      ]
+    },
+    "complete-review-b": {
+      "build": "Preview214",
+      "run": "365.633-second new native complete flow; parent reports eight API phases passed",
+      "method": "Eight new PNG originals each opened through its own view_image(detail: original) call; no Preview213 images reused.",
+      "actualImageCount": 8,
+      "result": "当前8张真实可见区域未发现新增文字/动作裁切或排版重叠。",
+      "limits": [
+        "仅index9–16中文普通字号范围。",
+        "图片证明可见状态、显示时段及布局，不替代动作序列、送达、精确持久化、日历或唯一性API证据。",
+        "系统AssistiveTouch及键盘/滚动视口限制逐张记录。",
+        "不称完整链所有页面均已视觉验收。"
+      ],
+      "images": [
+        {
+          "index": 9,
+          "name": "phone-first-plan-contacts-review-final-invitees_0_3AF65500-E226-4DA8-BC98-C4A373246A08.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "核对邀请",
+          "visible": "活动名和地点完整分开显示；最终时段明确为2026/10/25 23:00至2026/10/26 01:00，Europe/Berlin完整。两位受邀者勾选、含自己的2人数摘要及发出邀请按钮完整。",
+          "visibleLimit": "下方邀请朋友区延续至固定底栏后，本图只证明当前核对状态；系统AssistiveTouch覆盖人员卡片右下分隔线附近，不是应用排版重叠。"
+        },
+        {
+          "index": 10,
+          "name": "phone-first-plan-contacts-select-and-send_0_9B33B170-4847-4898-977D-496B6CFA6B24.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "选择App联系人",
+          "visible": "一位联系人勾选、头像、活动标题及说明完整；发送给1位联系人按钮与搜索栏各自清楚，未重叠。",
+          "visibleLimit": "这是发送前界面，单张图不能证明实际送达。"
+        },
+        {
+          "index": 11,
+          "name": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_74CD83E3-5E74-40D0-9982-F8BF29993808.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "发送后保留已提交空闲",
+          "visible": "标题/地点及原位铅笔、分享入口、日期与收集状态/完整时区清楚。周日09:00和09:30绿选边框、勾选及人数1均可见；已提交空闲/已选1天1小时与选择最终时间按钮完整。",
+          "visibleLimit": "仅前四日及当前纵向视口可见；AssistiveTouch遮到右侧未选格子部分。持久化和送达需独立API证据。"
+        },
+        {
+          "index": 12,
+          "name": "phone-first-plan-creation-information-without-timetable_0_B8438591-FE72-407E-803E-C4A6E3170B86.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "创建信息且无时间表",
+          "visible": "填入的活动名含draft尾字、可选地点、10月25日至31日、09:00–17:00、Europe/Berlin、朋友提议选项和下一步填写空闲按钮均完整，无时间表预览。",
+          "visibleLimit": "普通中文、无键盘的单个表单视口，不证明日期菜单交互或创建提交结果。"
+        },
+        {
+          "index": 13,
+          "name": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_C77AF875-2DF0-4F8E-B620-E2C3B3FF009C.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "早间最终选时结果",
+          "visible": "09:00及09:30格显示时间、人数2、原空闲标识和最终选择琥珀边框/勾选；底栏10月25日09:00–10:00、1小时、清除和下一步确认邀请名单按钮完整。",
+          "visibleLimit": "静态图仅显示结果，不凭文件名推断点选/取消/拖选/擦除动作本身通过。系统浮层遮到右侧未选格子。"
+        },
+        {
+          "index": 14,
+          "name": "phone-first-plan-final-cross-day-evening_0_3DED6EE2-884D-4CE9-92A4-1C7C1FFB6BD5.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "跨天晚间中间状态",
+          "visible": "周日23:00及23:30琥珀边框/勾选/时间清楚，底栏10月25日至26日23:00–00:00及1小时完整，清除和下一步操作完整。",
+          "visibleLimit": "该中间帧尚未包括次日00:00–01:00，不称最终两小时；次日早间不在当前视口。浮层遮右侧未选格子。"
+        },
+        {
+          "index": 15,
+          "name": "phone-first-plan-final-cross-day-morning-and-summary_0_8FE11757-EE17-4DA0-A156-A9457E883F3D.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "跨天早间与最终摘要",
+          "visible": "周一00:00及00:30琥珀格时间/勾选/完整边框清楚，两日表头有选择标识；底栏完整显示10月25日至26日23:00–01:00、2小时及清除/下一步确认邀请名单。原收集状态、人数2、时区和图例均可读。",
+          "visibleLimit": "前日晚间时格不在本帧，另由本轮index14显示。周日重复小时02:00 +01:00标签可见；浮层遮到右侧未选格子，不扩大为全日期/全时段视觉验收。"
+        },
+        {
+          "index": 16,
+          "name": "phone-first-plan-inline-information-editing_0_6C08CA91-0D2D-4252-8BA8-E7173F5791BF.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "原位信息编辑",
+          "visible": "活动名称/地点可选固定标签、完整字段及caret清楚；取消与保存按钮全形及文字都在实际键盘/预测栏上方。下方日期/收集状态/完整时区、0人及早间草稿绿选格可见。",
+          "visibleLimit": "键盘覆盖下方时格是当前编辑视口限制；本图为普通中文，不作最大字号或保存成功证据。草稿已选格显示人数0，不能据此称已提交。"
+        }
+      ]
+    },
+    "complete-review-c": {
+      "build": "Preview 214",
+      "sourceIndex": "complete-image-index.json",
+      "actualOriginalImagesViewed": 8,
+      "indices": [
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "method": "Each original PNG was opened individually with view_image detail=original; no Preview213 image was reused.",
+      "reviews": [
+        {
+          "index": 17,
+          "visible": "共同计划标题、图书馆二楼地点及编辑铅笔完整；10月25日–31日、灰点收集空闲和Europe/Berlin完整。0人已填写；周日09:00及09:30两格绿色边框与勾选清晰，底栏未提交、已选1天·1小时、提交并分享、选择最终时间均完整。",
+          "finding": "所见字段和主要操作无产品重叠或截断。",
+          "limit": "仅显示上午至14:00的部分时间表；AssistiveTouch覆盖右侧一列约12点附近，属于系统浮层。"
+        },
+        {
+          "index": 18,
+          "visible": "待你确认状态与地点完整；周日10月25日23:00–24:00和周一10月26日00:00–01:00两张受邀时间表均实际可见，连续绿色高亮和边框覆盖各两格。1/2人已确认、发起人可随时正式发出的说明、确认参加和我无法参加均完整。",
+          "finding": "跨午夜日期、起止时间和受邀标记清晰，无产品控件重叠。",
+          "limit": "AssistiveTouch局部遮住谁会参加入口文字；此图没有Calendar。"
+        },
+        {
+          "index": 19,
+          "visible": "owner在未填写的收集空闲阶段打开分享计划。弹层标题、计划名、完成勾选、App好友及联系人说明、分享网页链接、复制链接完整；背景候选日期、完整时区和0人已填写可读。",
+          "finding": "分享弹层层级与三种入口清晰，文字无截断。",
+          "limit": "弹层按预期覆盖下半时间表；AssistiveTouch贴近App好友行右下区域，不能由静态图证明点击结果。"
+        },
+        {
+          "index": 20,
+          "visible": "owner背景已确认状态及地点可见；分享弹层的计划名和2026年10月25日23:00–2026年10月26日01:00完整一行可读。App好友、分享网页链接、复制链接及完成勾选完整。",
+          "finding": "正式时段摘要和分享操作无产品截断或重叠。",
+          "limit": "次日网格被正常弹层遮住；AssistiveTouch覆盖App好友右侧箭头附近。未显示Calendar。"
+        },
+        {
+          "index": 21,
+          "visible": "owner背景待你正式发出状态及地点完整；分享弹层完整显示相同跨午夜最终时段、计划名、App好友、网页分享和复制链接。",
+          "finding": "INVITING中的发起人状态与分享内容可读，没有把状态误显示为已确认。",
+          "limit": "下半邀请表和回应内容被正常分享弹层遮住；AssistiveTouch位于App好友右端。"
+        },
+        {
+          "index": 22,
+          "visible": "participant收集空闲页背景标题和地点无编辑铅笔；1人已填写、M头像、灰点收集空闲及Europe/Berlin完整。09:00/09:30已有1人填写的绿色格可见。分享弹层只显示给没有App的朋友的网页分享和复制链接，没有App好友行。",
+          "finding": "只读字段、人数及分享权限差异在实际画面可辨，所见文字无产品截断。",
+          "limit": "弹层遮住其余时间表；AssistiveTouch覆盖复制链接区域最右空白，文字仍可读。"
+        },
+        {
+          "index": 23,
+          "visible": "participant背景已确认和地点完整；分享弹层计划名、完整跨午夜时段摘要、网页分享、复制链接及完成勾选完整；没有App好友行。",
+          "finding": "确认后的只读分享画面和时段摘要清晰，无产品文字重叠。",
+          "limit": "被弹层覆盖的次日网格与Calendar不在本图验收范围；系统浮球在复制区域右边。"
+        },
+        {
+          "index": 24,
+          "visible": "participant背景待你确认状态及地点完整；分享弹层计划名、2026年10月25日23:00–2026年10月26日01:00摘要和两个网页链接操作完整；没有App好友行。",
+          "finding": "邀请待确认的状态与已确认状态区分清楚，分享弹层所见内容无产品截断。",
+          "limit": "邀请回应按钮被弹层按预期遮住，此图不单独证明接受/拒绝行为；系统浮球在复制区域右边。"
+        }
+      ],
+      "summary": "8张214实际原图已逐张查看。所见时间、状态、字段和主要操作未发现产品造成的截断或重叠；系统AssistiveTouch遮挡已逐图列明。",
+      "scopeLimits": [
+        "仅本批普通中文画面，不是最大字号或首页日期左栏验收。",
+        "本批没有Calendar终点画面，不能从截图推断精确日历写入或唯一性。",
+        "静态截图只证明可见布局；实际点击、保存、邀请、发布和API状态由独立测试证据证明。"
+      ]
+    },
+    "focused-review-a": {
+      "build": "Preview214",
+      "captureSet": "New focused-matrix images",
+      "method": "Eight separate original-detail view_image calls for indices 0–7, using these new PNGs only.",
+      "actualImageCount": 8,
+      "result": "No new intrinsic collision/clipping seen in reviewed visible areas; maximum confirmed/history full-card scope remains incomplete in these captures.",
+      "limits": [
+        "Do not infer a pass for the maximum-card test currently under investigation by the parent.",
+        "Maximum confirmed images 0/5 show only the upper card; unchanged maximum history image 4 cuts off lower metadata/actions at the viewport/tabbar.",
+        "Red network error/retry is the expected controlled offline coordination fixture; none of these list captures is a clean API home.",
+        "AssistiveTouch and modal/scroll viewport limits are individually recorded.",
+        "No repo/device/source operations performed."
+      ],
+      "images": [
+        {
+          "index": 0,
+          "name": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_CF83C874-BFA0-4012-BCC9-F202644CBC98.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Confirmed home, German maximum/dark",
+          "visible": "Date and full 18:00–19:30 are followed vertically by the activity title and confirmed status. Decorative artwork is hidden. Root heading, history icon, tabs, complete create capsule and all five bottom-tab labels/icons are readable. Create and bottom tabs do not intersect.",
+          "visibleLimit": "Confirmed-card location/people/chevron continue below the list viewport and are not proved by this frame. AssistiveTouch covers the right title end. A red network error/retry is present from the expected controlled offline fixture."
+        },
+        {
+          "index": 1,
+          "name": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_244A6C33-797F-43A4-AFCE-87359072E007.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Confirmed home, Chinese normal/light",
+          "visible": "Complete new card is readable: left October 26 weekday/date with 18:00–19:30, right full title, confirmed status, location, avatar/name, small artwork and chevron. No date/time overlap with activity information. Complete create capsule and tabbar have a visible gap.",
+          "visibleLimit": "One ordinary confirmed card only. Red error/retry is the expected controlled offline endpoint, so this is not a clean API home."
+        },
+        {
+          "index": 2,
+          "name": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_A9BBD42E-E00B-4BE1-8FC1-88FF32EA45EE.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Creation modal, German maximum/dark",
+          "visible": "Complete close/title, activity and optional-location placeholders, candidate dates, daily 09:00–17:00, Europe/Berlin, naturally wrapped friend-suggestion checkbox and disabled continuation label are readable. No visible collisions.",
+          "visibleLimit": "Keyboard-hidden blank unchanged creation form only; not entered-text, date-menu, submission or whole-App maximum-font acceptance. AssistiveTouch is at the lower right outside text."
+        },
+        {
+          "index": 3,
+          "name": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_6CC94FF5-1C02-4B20-9D15-409E52E2558B.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Creation modal, Chinese normal/light",
+          "visible": "The modal heading/close, activity/location placeholders, candidate-date row, daily time choices, timezone, suggestion checkbox and full disabled continuation button are readable with distinct spacing.",
+          "visibleLimit": "Unchanged blank creation form with keyboard hidden; no input/menu/submit outcome inferred."
+        },
+        {
+          "index": 4,
+          "name": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_2206B6CA-89E8-4C4D-A953-AF176EE211DA.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "History, German maximum/dark",
+          "visible": "History heading/back, ended badge, activity title, October 24/year and full 21:56–22:56 interval are readable. Bottom tab labels and icons are intact.",
+          "visibleLimit": "Unchanged history card exceeds this viewport. Europe/Berlin is partly under the tab region and lower location/actions are not fully visible. No complete maximum-history-card acceptance. Red network error is the offline fixture; AssistiveTouch is separate."
+        },
+        {
+          "index": 5,
+          "name": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_A7BF6765-08A8-4F63-80B1-9D152377E0A5.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Return to confirmed home, German maximum/dark",
+          "visible": "Root header and selected confirmed section return. Visible card date, complete 18:00–19:30, title and confirmed status are readable in vertical layout. Create capsule and bottom tabbar remain visually separate.",
+          "visibleLimit": "The lower card remains below the list viewport; no full-card scrolling/reachability conclusion from this still. AssistiveTouch crosses the title end. Expected offline error/retry remains visible."
+        },
+        {
+          "index": 6,
+          "name": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_1800B8DC-C906-432B-B4CF-AA1B76816778.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "Return to confirmed home, Chinese normal/light",
+          "visible": "Entire ordinary confirmed card retains separate left date/time and right title/status/location/avatar/artwork/chevron. Complete lower-right create button does not meet the bottom tabs.",
+          "visibleLimit": "Visual return state for this card only. Red network error/retry is controlled offline fixture evidence, not clean live API evidence."
+        },
+        {
+          "index": 7,
+          "name": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_DA68CFDD-1DA9-44B3-AA28-7FF428482218.png",
+          "actualOriginalViewed": true,
+          "result": "pass-visible-scope",
+          "scope": "History, Chinese normal/light",
+          "visible": "Entire visible history card is readable: ended status, title, October 24 date, 21:55–22:55, timezone, location, avatar/name, feedback, both outcome controls and repeat text. No text/control overlap with tabbar.",
+          "visibleLimit": "Unmodified history fixture card only. Red network error is expected offline coordination failure; the screenshot does not prove actions were executed."
+        }
+      ]
+    },
+    "focused-review-b": {
+      "build": "Preview 214",
+      "actualOriginalImagesViewed": 7,
+      "indices": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "method": "Each NEW214 original PNG was opened separately with view_image detail=original. No older images were reused.",
+      "fixtureScope": "Controlled legacy/offline layout and navigation fixture. The red network failure and Retry are expected because coordinated-plan requests intentionally use the offline endpoint; this is not clean live API home evidence.",
+      "reviews": [
+        {
+          "index": 8,
+          "visible": "普通中文首页两分栏，筹划中选中；两个需要处理卡完整展示统一日期左栏10月25日周日和13:00–14:00。标题、状态、地点、Mina及查看邀请清晰。横向等待rail当前卡为期中复习小组，日期左栏和12:00–13:00完整。右下发起计划与tabbar分开。",
+          "finding": "所见普通卡及底部操作无产品重叠或文字截断。相邻卡仅露出一部分，是横向rail正常预览。",
+          "limits": "AssistiveTouch遮住右侧预览卡的一部分日期和时段；没有已确定卡。"
+        },
+        {
+          "index": 9,
+          "visible": "德文真实最大字号深色首页，Pläne及两分栏完整，In Planung选中。离线错误和重试占多行；Deine nächsten Schritte标题自然分三行，计数2可见。首卡只露出So.25.Okt.及13:00–14:00，底部Plan starten完整，tabbar完整。",
+          "finding": "可见日期和真实时段清晰，未把既有私聊计划误标为时间待定。",
+          "limits": "此时卡标题、地点和卡操作在下方滚动范围，不能据本图宣称整卡完整。最大字号离线错误消耗首屏空间；不是clean home。"
+        },
+        {
+          "index": 10,
+          "visible": "普通中文首页，两个需要处理卡日期左栏均10月25日周日13:00–14:00；第一标题Library study完整，第二长中文标题两行完整。等待rail第一张Coffee after class显示10月25日周日12:00–13:00、Campus café、邀请人和chevron。发起计划完整位于tabbar上方。",
+          "finding": "普通卡字段、实际时段、头像和主要操作均清晰，没有非预期重叠。",
+          "limits": "右侧相邻横卡只露部分是rail设计；系统浮球遮其边缘。离线错误属于夹具限定范围。"
+        },
+        {
+          "index": 11,
+          "visible": "进入既有私聊页面，顶栏米娜、测试用户名、返回及更多完整；上下文Passt dir dieser Termin?换两行。原消息计划卡只显示状态、图书馆自习和部分日期/开始时间；消息输入和Neueste入口可见。",
+          "finding": "原聊天状态Zusage ausstehend在最大字号胶囊中出现词内断行，实际显示ausstehe/nd；本图不能作为整个聊天最大字号视觉通过。",
+          "limits": "该聊天卡属于保留的既有兼容页面，不是此次统一日期左栏的新首页卡。最终结束时间和确认/改时间/拒绝按钮均不在当前截图范围。系统浮球在右侧。"
+        },
+        {
+          "index": 12,
+          "visible": "普通中文既有私聊计划卡完整：等待大家确认、图书馆自习、2026年10月25日周日22:54–23:54、Europe/Berlin、中心图书馆、带上笔记及确认参加/提议新时间/我无法参加完整。上方上下文和底部消息输入清晰。",
+          "finding": "普通字号原详情卡字段与操作无产品裁切或重叠。",
+          "limits": "离线列表和聊天使用各自旧fixture，画面中的聊天时段不能替代首页13:00–14:00的种子验证；不能据此推断真实API数据一致性。"
+        },
+        {
+          "index": 13,
+          "visible": "德文最大字号纵向滚动中，前一需要处理卡的Central Library、Mina hat dich eingeladen及Einladung ansehen完整。Warten auf andere计数4可读；下一等待卡只露出日期及部分时段。固定Plan starten与tabbar完整。",
+          "finding": "真实垂直排列及前卡尾部操作可见，所见文字没有非预期覆盖。",
+          "limits": "上方卡的标题和日期在当前viewport上边外；当前等待卡标题、状态和尾部不在本图，不是完整等待卡验收。"
+        },
+        {
+          "index": 14,
+          "visible": "德文最大字号纵向列表中，上卡的Wartet auf die Zusage von Mina、Campus café及Du hast Mina eingeladen完整。下一卡日期So.25.Okt.、12:00–13:00和周五一起吃饭完整，下一状态只显示一部分。固定Plan starten和tabbar完整。",
+          "finding": "相邻卡垂直排列，日期与真实时段可读；文字未在卡宽内溢出。",
+          "limits": "当前卡尾部位于滚动viewport下方；上卡标题位于viewport上方。因此这张图不能证明单张长卡已连续完整读到所有部分。系统浮球覆盖右侧空白附近。"
+        }
+      ],
+      "summary": "本批7张原图已实看。普通首页的日期左栏、实际时段和入口清楚；最大字号画面证明滚动与纵排的局部可见范围，完整长卡仍需独立分段截图补证。",
+      "outstandingVisualLimits": [
+        "第11张旧聊天最大字号状态有实际词内断行，已记录，不能宣称全App最大视觉验收通过。",
+        "本批不含已确定首页卡或真实候选未定计划；不能从这些离线私聊种子推出对应语义/布局已验。",
+        "只读图片审查，不对正在处理的maximum专项失败归因或修改测试。"
+      ]
+    },
+    "home-live-review": [
+      {
+        "name": "phone-first-plan-plans-home-entry-live-confirmed_0_9418F8C5-3207-4A95-92D0-9F6640C9F1AE.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/8097C61C-15B5-447F-B6C7-F715136F921C.png",
+        "index": 0,
+        "reviewedOriginal": true,
+        "result": "pass-visible-scope",
+        "note": "Clean real confirmed card: start date/weekday and cross-day 23:00–next-day01:00 on left; title, grey-dot confirmed, owner avatar/context, small illustration and chevron on right; no clipping or collision visible. Shared-list location absent by original data contract.",
+        "limits": "Chinese normal light only; screenshot alone does not prove persisted exact dates/Calendar uniqueness; API/UI assertions provide that evidence. System AssistiveTouch visible outside card content."
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-create-cancel_0_976095C6-FD0D-4A16-A2E3-B88329A7D8FB.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/3E82ADDF-DE74-4FC9-A7BC-4B5F3FE16681.png",
+        "index": 1,
+        "reviewedOriginal": true,
+        "result": "pass-visible-scope",
+        "note": "Creation cancel returns to identical confirmed card; fixed create separated from native tabbar.",
+        "limits": "Chinese normal light only; screenshot alone does not prove persisted exact dates/Calendar uniqueness; API/UI assertions provide that evidence. System AssistiveTouch visible outside card content."
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-create_0_D9261CC0-700D-4E50-AEC8-09CDE22ED515.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/6DFCDD80-AD91-4220-A094-01A0B086918C.png",
+        "index": 2,
+        "reviewedOriginal": true,
+        "result": "pass-visible-scope",
+        "note": "Original creation sheet: activity, optional location, candidate dates,09–17, timezone, activity-ideas checkbox and next action visible; no timetable preview.",
+        "limits": "Chinese normal light only; screenshot alone does not prove persisted exact dates/Calendar uniqueness; API/UI assertions provide that evidence. System AssistiveTouch visible outside card content."
+      },
+      {
+        "name": "phone-first-plan-plans-home-entry-live-planning_0_B5CEB878-2D87-4E3C-B867-64073D428EA0.png",
+        "path": "/tmp/sideseat214-private/home-live-attachments/9EF964AE-0E6C-4605-B56E-2C6F24B49611.png",
+        "index": 3,
+        "reviewedOriginal": true,
+        "result": "pass-visible-scope",
+        "note": "Clean real planning empty state with fixed heading/tabs and one trailing bottom create action; no offline error banner.",
+        "limits": "Chinese normal light only; screenshot alone does not prove persisted exact dates/Calendar uniqueness; API/UI assertions provide that evidence. System AssistiveTouch visible outside card content."
+      }
+    ],
+    "live-candidates-review": {
+      "build": "Preview214",
+      "captureSet": "Four NEW live candidate captures, parent-reported candidate test 51.902 seconds",
+      "actualImageCount": 4,
+      "method": "Each of four original PNGs opened with its own original-detail view_image call. No prior image reuse.",
+      "result": "Candidate count/date versus undecided-time semantics are visually clear; no new intrinsic layout collision found in the reviewed visible scope.",
+      "limits": [
+        "Maximum-size home and detail frames are limited viewports, not whole-card/page unclipped acceptance.",
+        "Detail destination images demonstrate the visible common-plan detail surface; route action execution is parent test evidence.",
+        "Parent separately verifies zero participants, empty availability slots and invitation version zero through API; visual zero-response counts do not replace those checks.",
+        "No visible network-error banner in these live images; they are distinct from the controlled offline matrix.",
+        "AssistiveTouch and fixed-footer/grid viewport limits are recorded per image.",
+        "No repository or device changes performed."
+      ],
+      "images": [
+        {
+          "index": 0,
+          "name": "shared-plan-117-home-redesign-live-candidate-original-detail-de-system-largest-dark_0_C28BAE61-47A5-4648-B8E5-EAECF31BD7F1.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "Original detail, German system maximum/dark",
+          "visible": "The common-plan detail header, full activity title, share/edit affordances and long location are readable with natural wrapping. The visible footer states not submitted and 0 days/0 hours, shows disabled submit-and-share and a complete final-time selection action.",
+          "visibleLimit": "Candidate-date row begins below the location and is partly at the fixed-footer boundary; the timetable and full date/status/response metadata are not shown in this maximum-font viewport. This proves a visible detail destination, not a completely unclipped maximum-size detail page. AssistiveTouch is at the right near the divider."
+        },
+        {
+          "index": 1,
+          "name": "shared-plan-117-home-redesign-live-candidate-original-detail-zh-Hans-normal-light_0_2DB69684-6B8B-44E1-9CCE-D0B401BFB0F6.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "Original detail, Chinese normal/light",
+          "visible": "The full activity name and long location wrap clearly. Candidate dates are October 27–28; the timetable shows exactly Tuesday October 27 and Wednesday October 28. Collecting status, Europe/Berlin, zero responses and visible zero-count cells are readable. Footer says not submitted, 0 days/0 hours, with disabled submit-and-share and complete final-time action.",
+          "visibleLimit": "Only the displayed morning-to-early-afternoon grid viewport is visually checked; lower rows are outside it. AssistiveTouch covers part of the right grid. Zero participants, empty server slots and zero invitation version are separate parent API evidence, not inferred from these counts alone."
+        },
+        {
+          "index": 2,
+          "name": "shared-plan-117-home-redesign-live-candidate-undecided-de-system-largest-dark_0_B73D3C7C-C6FA-40E9-8D82-798CF287644C.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "Undecided candidate card, German system maximum/dark",
+          "visible": "The top card explicitly says 2 Tage · 27. Okt.–28. Okt. and Zeit noch offen. This distinguishes two candidate dates from a final event interval. Activity title wraps below; decorative art is hidden. Root tabs, complete create capsule and five-tab bar are readable and separate. No network-error banner is visible.",
+          "visibleLimit": "This is a limited first viewport: the lower card status/progress/CTA are not visible. Do not call the entire maximum-size card unclipped or fully visible. AssistiveTouch overlaps the card right area without covering the shown candidate count/time-undecided text."
+        },
+        {
+          "index": 3,
+          "name": "shared-plan-117-home-redesign-live-candidate-undecided-zh-Hans-normal-light_0_0B05FE38-8216-4BE8-9F64-ECA76D9F230E.png",
+          "result": "pass-visible-scope",
+          "actualOriginalViewed": true,
+          "scope": "Undecided candidate card, Chinese normal/light",
+          "visible": "The entire visible home card is readable. Left side explicitly states 2 天可选 · 10月27日–10月28日 and 时间待定. Right side shows full two-line activity title, small coffee artwork, 待你选空闲, 0人已填写 and complete 打开时间表 CTA. No fabricated final clock is shown. Create capsule and tabs have a visible gap; no network-error banner is visible.",
+          "visibleLimit": "This is a two-date ordinary-font card, not a general noncontiguous-date visual test. Home card does not display a location field, whereas detail does. Screenshot alone cannot establish backend immutability or execution of the card tap."
+        }
+      ]
+    },
+    "max-complete-review": {
+      "build": "Preview 214",
+      "actualOriginalImagesViewed": 6,
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "method": "All six indexed originals were opened individually, in index order, with view_image detail=original. No prior capture was reused. Read-only byte comparison additionally confirms that indices0/1 are byte-identical.",
+      "scope": "German actual system AccessibilityXXXL, dark appearance, existing controlled legacy/offline home fixture. This is scroll-readable card layout evidence, not a claim that every card fits one frame or a clean live API home.",
+      "perImage": [
+        {
+          "index": 0,
+          "card": "confirmed",
+          "visible": "Bestätigt分栏选中。完整卡片可见：Di.27.Okt.、18:00–19:30、Dinner in town、Bestätigt、Maxvorstadt、Mina头像及名字。卡片底边在固定Plan starten上方，底部tabbar完整。",
+          "finding": "日期、时段、标题、状态、地点、人员均完整，无产品截字或重叠。",
+          "limit": "离线错误的最后一行及重试仍在上方；AssistiveTouch在地点右侧空白，没有挡住所列文字。"
+        },
+        {
+          "index": 1,
+          "card": "confirmed",
+          "visible": "与index0同一完整卡片画面。完整日期/18:00–19:30/名称/确认状态/地点/Mina，以及固定发起按钮和tabbar均可读。",
+          "finding": "整卡已经完整可见，未发现产品裁切。",
+          "limit": "该PNG与index0字节相同，因此不能声称该对之间发生了视觉滚动；它们共同证明当前位置本已完整可读。"
+        },
+        {
+          "index": 2,
+          "card": "task",
+          "visible": "In Planung选中。需要处理卡的Mo.26.Okt.、14:00–15:00、Library study、Bitte bestätigen及Central Library完整；Mina hat dich首行可见，人员说明后半与任务入口在本图下方。固定Plan starten及tabbar完整。",
+          "finding": "本段日期/时段/标题/状态/地点完整，未见横向溢出或产品控件重叠。",
+          "limit": "人员第二行和Einladung ansehen需要看index3，不能单图宣称整卡完整。"
+        },
+        {
+          "index": 3,
+          "card": "task",
+          "visible": "同一任务卡向下滚动。14:00–15:00、Library study、Bitte bestätigen、Central Library、Mina hat dich eingeladen头像说明以及两行Einladung ansehen入口和卡片底边可见。",
+          "finding": "与index2存在大量实际可见重叠，补齐人员说明及任务入口；卡底位于固定发起区域上方。",
+          "limit": "日期上半在viewport顶外，但已由index2完整显示。系统AssistiveTouch部分覆盖Einladung ansehen按钮右端及末尾文字区域；入口文字仍可辨，不能声称按钮每个像素均无遮挡。该遮挡不是产品布局重叠。"
+        },
+        {
+          "index": 4,
+          "card": "waiting",
+          "visible": "等待他人区域的Mo.26.Okt.、13:00–14:00、Coffee after/class自然换行标题以及Wartet auf die Zusage von Mina完整。Campus café只露上半，人员说明仍在下方。固定发起按钮和tabbar完整。",
+          "finding": "日期、实际时段、名称和完整等待状态可读，没有单词被卡宽截断。",
+          "limit": "地点后半与人员说明需index5；上方前卡入口残部是滚动viewport边界裁切，不是本张等待卡内容丢失。"
+        },
+        {
+          "index": 5,
+          "card": "waiting",
+          "visible": "同一等待卡全部内容和底边在当前viewport可见：Mo.26.Okt.、13:00–14:00、Coffee after class、Wartet auf die Zusage von Mina、Campus café、Mina头像和Du hast Mina eingeladen完整。",
+          "finding": "补齐地点、人员与卡尾；与index4实际重叠，未发现产品截字、溢出或底栏压住卡片。",
+          "limit": "最大字号等待卡为纵排整卡入口，无独立任务CTA；本图不证明点击后的页面行为。系统浮球位于右侧空白，不挡所列文字。"
+        }
+      ],
+      "perPair": [
+        {
+          "indices": [
+            0,
+            1
+          ],
+          "card": "confirmed",
+          "coverage": {
+            "dateAndInterval": true,
+            "name": true,
+            "state": true,
+            "location": true,
+            "people": true
+          },
+          "finding": "代表性已确定卡在截图位置已整卡完整，两个原PNG完全相同，不误称滚动。"
+        },
+        {
+          "indices": [
+            2,
+            3
+          ],
+          "card": "task",
+          "coverage": {
+            "dateAndInterval": true,
+            "name": true,
+            "state": true,
+            "location": true,
+            "people": true,
+            "taskCTAInViewport": true
+          },
+          "finding": "两张真实滚动前后截图覆盖同一任务卡的完整字段与尾部入口，文字自然换行；固定发起按钮始终完整。",
+          "systemOverlayLimit": "CTA右端部分受AssistiveTouch覆盖，无法将“产品完整可达”扩大为“所有像素无系统遮挡”。"
+        },
+        {
+          "indices": [
+            4,
+            5
+          ],
+          "card": "waiting",
+          "coverage": {
+            "dateAndInterval": true,
+            "name": true,
+            "state": true,
+            "location": true,
+            "people": true
+          },
+          "finding": "两段覆盖等待卡全内容，第二张已整卡完整。最大字号保持纵排，没有横rail挤压或词内截断。"
+        }
+      ],
+      "summary": "六张实际原图和三对覆盖已核验；所见三种首页卡的字段可通过对应截图完整读取，未发现产品造成的文本裁切或相互重叠。任务CTA右端仍有系统浮球遮挡限制，已单列。",
+      "limits": [
+        "仅代表性既有已定时段私聊fixture，不证明共同计划候选未定或真实API状态。",
+        "没有把所有长卡均首屏完整当作验收条件；任务卡明确依靠连续滚动图补全。",
+        "静态截图不单独证明44pt或点击成功；这些属于独立几何断言/运行证据。",
+        "没有复验未改旧聊天最大字号状态词内断行；不作全App最大字号视觉通过结论。"
+      ]
+    }
+  },
+  "scope": "All54 captures viewed as originals; offline legacy fixture, clean real home, live candidate and complete flow kept distinct. Maximum task/waiting cards covered via scrolling/overlapping segments; confirmed pair byte-identical, already fully visible. System AssistiveTouch over task action trailing end recorded, no claim of all pixels unobscured.",
+  "actualAcceptedOriginalCaptureCount": 54,
+  "uniquePixelSHA256Count": 53
+}

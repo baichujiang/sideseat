@@ -35,8 +35,23 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is213 below. See web release/QA records.
-- Preview213 is the current installed development build, source 595c3ba5210ecca6ac7e89b54645cc4934e5a5a5 pushed.
+  No native rebuild in that web stage; current native build is214 below. See web release/QA records.
+- Preview214 is the current installed development build, source 0dcad2188b963914bdafdf4e98788976f9ec0a10 pushed.
+  All three Plans overview styles share a leading date/time and trailing activity
+  information/artwork; accessibility stacks. Candidate-only cards show existing
+  Time to be decided; real pending intervals, cross-day dates/year/timezone stay.
+  Private card190→160lines, outside/formatter byte-identical, no new state/request
+  or rules; independent minimal review passed. Same frozen App final five cases
+  passed178.954/60.612/365.633/19.004/51.902s, full eight API phases.54 actual
+  captures reviewed(53 unique pixels); max task/waiting continuous segments,
+  confirmed pair already fully visible/byte-identical. Two initial screenshot
+  positioning failures retain scope; only test helper repaired, strict viewport/
+  44pt retained. Offline/real home/candidate scopes separate; no whole-App max
+  or manual-performance claim. Normal214 PID8926,267/Local/signature/binary match
+  commit,ordinary97 retained;2QA accounts401/2links404,Runner/private removed,
+  new App reports0. No backend/web/Schema release or unchanged unit/domain/browser
+  repeat. See214 QA/release; prior213 below is historical.
+- Preview213 was the previous installed development build, source 595c3ba5210ecca6ac7e89b54645cc4934e5a5a5 pushed.
   Plans uses local underline tabs, a trailing create capsule above native tabbar
   through safeAreaInset, and three compact card layouts with existing small
   artwork/people. Same state, six data/route functions and creation sheet/handoff;

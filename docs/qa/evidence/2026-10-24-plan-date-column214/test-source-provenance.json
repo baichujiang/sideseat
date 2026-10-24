@@ -1,0 +1,37 @@
+{
+  "build": 214,
+  "maximumHelperOnlyRepairVerifiedByReconstructingExactEarlierSource": true,
+  "currentPlanStateTestSHA256": "2bfc3d004814dbd0b8a93d444dbaaf3e9939e730d8c5fc7d5bf6ed205788af5f",
+  "runs": {
+    "complete": {
+      "executedTarget": "PlanFirstUsePhoneUITests.swift",
+      "sourceSHA256AtRun": "5d07f032c83af3fc82a1742c27c1c14dd0f6ef52a6710b6aa12e75994b89c3e9",
+      "finalTargetFileMatches": true,
+      "onlyLaterChangeIfAny": null
+    },
+    "focused-matrix": {
+      "executedTarget": "PlanStatePresentationUITests.swift",
+      "sourceSHA256AtRun": "602bec2dff20a9b5c9b0f50c3e1b548f1a9c0d5c96b54092e3909160f16dc8ab",
+      "finalTargetFileMatches": false,
+      "onlyLaterChangeIfAny": "Independent max screenshot helper only; executed method/helper callgraph unchanged"
+    },
+    "home-live": {
+      "executedTarget": "PlanFirstUsePhoneUITests.swift",
+      "sourceSHA256AtRun": "5d07f032c83af3fc82a1742c27c1c14dd0f6ef52a6710b6aa12e75994b89c3e9",
+      "finalTargetFileMatches": true,
+      "onlyLaterChangeIfAny": null
+    },
+    "live-candidates": {
+      "executedTarget": "PlanStatePresentationUITests.swift",
+      "sourceSHA256AtRun": "602bec2dff20a9b5c9b0f50c3e1b548f1a9c0d5c96b54092e3909160f16dc8ab",
+      "finalTargetFileMatches": false,
+      "onlyLaterChangeIfAny": "Independent max screenshot helper only; executed method/helper callgraph unchanged"
+    },
+    "focused-max-complete": {
+      "executedTarget": "PlanStatePresentationUITests.swift",
+      "sourceSHA256AtRun": "2bfc3d004814dbd0b8a93d444dbaaf3e9939e730d8c5fc7d5bf6ed205788af5f",
+      "finalTargetFileMatches": true,
+      "onlyLaterChangeIfAny": null
+    }
+  }
+}

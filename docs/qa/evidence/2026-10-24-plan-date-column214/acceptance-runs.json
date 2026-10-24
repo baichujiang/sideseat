@@ -1,0 +1,84 @@
+{
+  "build": 214,
+  "device": "iPhone14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "finalAcceptedRuns": [
+    {
+      "run": "complete",
+      "test": "Flow214UITests.PlanFirstUsePhoneUITests testNativeContactCardCreateFillInviteConfirmAndCalendar",
+      "durationSeconds": 365.633,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "actualOriginalPNGCount": 25
+    },
+    {
+      "run": "focused-matrix",
+      "test": "Flow214UITests.PlanStatePresentationUITests testHomeRedesignPopulatedNavigationAndWaitingAcrossTextSizes",
+      "durationSeconds": 178.954,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "actualOriginalPNGCount": 15
+    },
+    {
+      "run": "focused-max-complete",
+      "test": "Flow214UITests.PlanStatePresentationUITests testHomeRedesignMaximumCardsRemainFullyReachable",
+      "durationSeconds": 60.612,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "actualOriginalPNGCount": 6
+    },
+    {
+      "run": "home-live",
+      "test": "Flow214UITests.PlanFirstUsePhoneUITests testPlanHomeEntryAfterFullFlow",
+      "durationSeconds": 19.004,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "actualOriginalPNGCount": 4
+    },
+    {
+      "run": "live-candidates",
+      "test": "Flow214UITests.PlanStatePresentationUITests testHomeRedesignLiveCandidateDatesRemainExplicitlyUndecided",
+      "durationSeconds": 51.902,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "actualOriginalPNGCount": 4
+    }
+  ],
+  "finalAcceptedTests": 5,
+  "apiStages": 8,
+  "actualAcceptedOriginalPNGCount": 54,
+  "maximumCardSegmentGeometry": [
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-1 frame=(20.0, 347.3333333333333, 388.0, 545.0) segment=(20.0, 347.3333333333333, 388.0, 332.2) viewport=(0.0, 170.0, 428.0, 553.6666666666666) part=1",
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-1 frame=(20.0, 134.66666666666669, 388.0, 545.0) segment=(20.0, 442.8666666666667, 388.0, 236.8) viewport=(0.0, 170.0, 428.0, 553.6666666666666) part=2",
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-outgoing frame=(20.0, 347.33333333333326, 388.0, 520.6666666666667) segment=(20.0, 347.33333333333326, 388.0, 332.1999999999999) viewport=(0.0, 170.0, 428.0, 553.6666666666665) part=1",
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-outgoing frame=(20.0, 159.0, 388.0, 520.6666666666667) segment=(20.0, 467.1999999999999, 388.0, 212.46666666666687) viewport=(0.0, 170.0, 428.0, 553.6666666666666) part=2",
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-accepted frame=(20.0, 347.3333333333333, 388.0, 373.3333333333333) segment=(20.0, 347.3333333333333, 388.0, 332.2) viewport=(0.0, 170.0, 428.0, 553.6666666666666) part=1",
+    "PLAN_HOME_READABLE card=plans-row-ui-plan-accepted frame=(20.0, 347.3333333333333, 388.0, 373.3333333333333) segment=(20.0, 655.5333333333333, 388.0, 65.13333333333333) viewport=(0.0, 170.0, 428.0, 553.6666666666666) part=2"
+  ],
+  "initialTestOnlyFailures": [
+    {
+      "run": "focused-max-complete-initial",
+      "durationSeconds": 57.095,
+      "reason": "Near-full-height card retained a16pt alignment window and repeated10pt correction drags did not move the native scroll view."
+    },
+    {
+      "run": "focused-max-complete-second",
+      "durationSeconds": 46.471,
+      "reason": "0.6H segment height was applied only to cards taller thanH;545pt task within553.667pt viewport still bypassed segmentation.64pt correction overshot its narrow whole-card window."
+    }
+  ],
+  "testOnlyRepair": "Use0.6H threshold and segments,24pt continuous overlap,minimum64pt scroll correction. Strict viewport containment and44pt controls remain. Product binary unchanged. Final three pairs cover complete card-relative range.",
+  "matrixScope": "zh-Hans normal light; de actual system AccessibilityXXXL dark, two combinations rather than full language/theme Cartesian matrix. Original navigation/offline legacy cards and clean real home/candidate scopes separate.",
+  "notRepeated": [
+    "unchanged loading/empty-store213case",
+    "unchanged unit/domain/browser suites",
+    "whole-App maximum-text visual acceptance",
+    "pure manual performance acceptance"
+  ],
+  "knownOutOfScopeObservation": "Original compatible chat card German pending status wraps inside a word; this native root card change does not alter chat card typography."
+}

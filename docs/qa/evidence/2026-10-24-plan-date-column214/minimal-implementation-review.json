@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-24T21:51:38.423219+00:00",
+  "baseCommit": "e4b5ed41ab77e52b516cf1e3ec4fc7326fc35848",
+  "independentReview": "passed, no material findings",
+  "rootOutsidePrivateCardByteIdentical": true,
+  "originalFormatterByteIdentical": true,
+  "newStateRequestRuleDependency": false,
+  "knownPendingIntervalsRetained": true,
+  "unknownTimeUsesExistingThreeLanguageKey": true,
+  "cardSourceSHA256": "054d012850735ee8432100f21cff40792a98567ca018c689a1d0c3044be61fc4",
+  "nativeScope": "Same 92pt leading schedule and trailing information for all three styles, accessibility vertical; existing activity artwork only",
+  "cardImplementationLines": [
+    190,
+    160
+  ]
+}
