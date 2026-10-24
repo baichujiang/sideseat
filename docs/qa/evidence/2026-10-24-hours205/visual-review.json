@@ -1,0 +1,38 @@
+{
+  "actualImagesViewed": 24,
+  "normalChinese": 12,
+  "largestGerman": 12,
+  "images": [
+    "hour-menu-far-end-selected-de-largest-dark.png",
+    "hour-menu-far-end-selected-zh-Hans-normal-light.png",
+    "hour-menu-retained-draft-de-largest-dark.png",
+    "hour-menu-retained-draft-zh-Hans-normal-light.png",
+    "hour-menu-scrolled-time-poll-from-0300-de-largest-dark.png",
+    "hour-menu-scrolled-time-poll-from-0300-zh-Hans-normal-light.png",
+    "hour-menu-scrolled-time-poll-from-0700-de-largest-dark.png",
+    "hour-menu-scrolled-time-poll-from-0700-zh-Hans-normal-light.png",
+    "hour-menu-scrolled-time-poll-until-0200-de-largest-dark.png",
+    "hour-menu-scrolled-time-poll-until-0200-zh-Hans-normal-light.png",
+    "hour-menu-scrolled-time-poll-until-0400-de-largest-dark.png",
+    "hour-menu-scrolled-time-poll-until-0400-zh-Hans-normal-light.png",
+    "hour-menu-scrolled-time-poll-until-2400-de-largest-dark.png",
+    "hour-menu-scrolled-time-poll-until-2400-zh-Hans-normal-light.png",
+    "hour-menu-stationary-time-poll-from-0300-de-largest-dark.png",
+    "hour-menu-stationary-time-poll-from-0300-zh-Hans-normal-light.png",
+    "hour-menu-stationary-time-poll-from-0700-de-largest-dark.png",
+    "hour-menu-stationary-time-poll-from-0700-zh-Hans-normal-light.png",
+    "hour-menu-stationary-time-poll-until-0200-de-largest-dark.png",
+    "hour-menu-stationary-time-poll-until-0200-zh-Hans-normal-light.png",
+    "hour-menu-stationary-time-poll-until-0400-de-largest-dark.png",
+    "hour-menu-stationary-time-poll-until-0400-zh-Hans-normal-light.png",
+    "hour-menu-stationary-time-poll-until-2400-de-largest-dark.png",
+    "hour-menu-stationary-time-poll-until-2400-zh-Hans-normal-light.png"
+  ],
+  "verdict": "PASS for creation hour controls, stationary menus and retained inputs. No whole-App claim.",
+  "notes": [
+    "Five before/after3s menu pairs per combination kept identical row positions.",
+    "Largest native24:00 menu row is readable but close to the rounded bottom edge; no generous-padding claim.",
+    "Range03:00–04:00/title/location/date/zone and primary action remain complete.",
+    "System AssistiveTouch overlay unchanged."
+  ]
+}

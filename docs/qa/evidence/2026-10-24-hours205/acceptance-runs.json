@@ -1,0 +1,36 @@
+{
+  "baseline204": {
+    "passed": true,
+    "durationSeconds": 34.602,
+    "scope": "Single07:00 real-scroll/3s stationarity. Intermittent old reset not reproduced in this run."
+  },
+  "earlierAttempts": [
+    {
+      "durationSeconds": 17.265,
+      "result": "failed",
+      "scope": "Test used obsolete create entry ID; menu not exercised."
+    },
+    {
+      "durationSeconds": 44.904,
+      "result": "failed",
+      "scope": "Test popup lookup depended on virtualized24:00 row;07:00 passed."
+    },
+    {
+      "durationSeconds": 211.651,
+      "result": "failed",
+      "scope": "Both combinations completed all time selections; test dismissal atwindowcenter/top hit00:30 in largest menu."
+    }
+  ],
+  "final": {
+    "durationSeconds": 230.727,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "combinations": [
+      "zh-Hans normal light",
+      "de accessibility largest dark"
+    ],
+    "scope": "07/24 real scroll, five selections each with3s no correction and stable coordinates, exact values, invalid/valid range, backdrop dismissal and date/input retention."
+  },
+  "productUnchangedDuringTestOnlyRepairs": true
+}

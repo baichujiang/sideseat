@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-24T11:34:17.688687+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 205,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8303,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "realAccountOrPlanWrites": 0,
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "privateJSONAndXctestrunRemoved": true,
+  "generatedRunnerSchemeRemoved": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700"
+}

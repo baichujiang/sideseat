@@ -168,9 +168,15 @@ struct TimePollCreateView: View {
 
     private func hourPicker(_ label: LocalizedStringKey, selection: Binding<Int>, minutes: ClosedRange<Int>, id: String) -> some View {
         Menu {
-            Picker(label, selection: selection) {
-                ForEach(Array(stride(from: minutes.lowerBound, through: minutes.upperBound, by: 30)), id: \.self) { Text(clock($0)).tag($0) }
-            }.pickerStyle(.inline)
+            ForEach(Array(stride(from: minutes.lowerBound, through: minutes.upperBound, by: 30)), id: \.self) { minute in
+                Button { selection.wrappedValue = minute } label: {
+                    if selection.wrappedValue == minute {
+                        Label(clock(minute), systemImage: "checkmark")
+                    } else {
+                        Text(clock(minute))
+                    }
+                }
+            }
         } label: {
             HStack(spacing: 4) {
                 Text(clock(selection.wrappedValue)).monospacedDigit()
