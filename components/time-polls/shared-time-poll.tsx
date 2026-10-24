@@ -78,11 +78,19 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
         <section className="mb-4 border-b pb-5" aria-label={zh ? "计划信息" : "Plan details"}>
           <p className="mb-2 text-xs font-medium text-muted-foreground">{choosingActivity ? (zh ? "朋友想和你一起决定做什么" : "A friend wants to choose an activity with you") : collecting ? (zh ? "朋友想和你找个合适的时间" : "A friend wants to find a time with you") : (zh ? "朋友发来的活动安排" : "An activity shared by a friend")}</p>
           <h1 className="break-words text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">{poll.title}</h1>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-            <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span>{(!collecting || fixedTime) && poll.chosenStart && poll.chosenEnd ? formatWindow(poll.chosenStart, poll.chosenEnd) : (zh ? "候选日期：" : "Possible days: ") + pollDate(poll.dates[0], zh) + (poll.dates.length > 1 ? " – " + pollDate(poll.dates.at(-1)!, zh) : "")}</span></p>
-            {poll.location ? <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span className="break-words">{poll.location}</span></p> : null}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">{zh ? "时区：" : "Time zone: "}{poll.timeZone}</p>
+          {collecting && !fixedTime ? <>
+            {poll.location ? <p className="mt-3 flex items-start gap-2 text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span className="min-w-0 break-words">{poll.location}</span></p> : null}
+            <div className="mt-3" data-testid="plan-collection-metadata">
+              <p className="flex items-start gap-2 text-sm" data-testid="time-poll-date-range"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span className="min-w-0 break-words">{(zh ? "候选日期：" : "Possible days: ") + pollDate(poll.dates[0], zh) + (poll.dates.length > 1 ? " – " + pollDate(poll.dates.at(-1)!, zh) : "")}</span></p>
+              <p className="mt-1 flex items-start gap-2 text-xs leading-5 text-muted-foreground" data-testid="plan-display-status"><span className="mt-[7.5px] h-[5px] w-[5px] shrink-0 rounded-full bg-current" aria-hidden /><span className="min-w-0 break-words">{choosingActivity ? (zh ? "选择活动" : "Choosing an activity") : (zh ? "收集空闲" : "Collecting availability")} · {poll.timeZone}</span></p>
+            </div>
+          </> : <>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <p className="flex items-start gap-2"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span>{(!collecting || fixedTime) && poll.chosenStart && poll.chosenEnd ? formatWindow(poll.chosenStart, poll.chosenEnd) : (zh ? "候选日期：" : "Possible days: ") + pollDate(poll.dates[0], zh) + (poll.dates.length > 1 ? " – " + pollDate(poll.dates.at(-1)!, zh) : "")}</span></p>
+              {poll.location ? <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden /><span className="break-words">{poll.location}</span></p> : null}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{zh ? "时区：" : "Time zone: "}{poll.timeZone}</p>
+          </>}
         </section>
 
         {!closed ? <p className="mb-5 text-sm leading-6 text-muted-foreground" role="status" data-testid="plan-next-step">{currentTask}</p> : null}
