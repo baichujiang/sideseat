@@ -1,0 +1,16 @@
+[
+  {
+    "alias": "api.sideseat.de",
+    "id": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+    "state": "READY",
+    "url": "sideseat-gjtfma7wp-baichus-projects.vercel.app",
+    "checkedAt": "2026-10-23T23:33:00.444Z"
+  },
+  {
+    "alias": "www.sideseat.de",
+    "id": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+    "state": "READY",
+    "url": "sideseat-gjtfma7wp-baichus-projects.vercel.app",
+    "checkedAt": "2026-10-23T23:33:00.446Z"
+  }
+]

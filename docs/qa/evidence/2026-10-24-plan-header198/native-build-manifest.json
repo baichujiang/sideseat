@@ -1,0 +1,25 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused isolated generated project; every tracked input refreshed from active checkout; project.yml byte-identical.",
+  "privateLocalConfigurationMatched": true,
+  "binarySHA256": {
+    "SideSeat Preview": "2f87155e791f2f096a6f90af48783ba4cad26d8d875741a0a7793fb235895035",
+    "SideSeat Preview.debug.dylib": "807c492951f9c3606596aad609451605cfb412081f2df3b921ca47a4496ef0a1"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "build": 198,
+  "version": "1.0.0",
+  "strictSignatureVerified": true,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "backendRelease": false,
+  "webRelease": false,
+  "fullFlowAndInitialUITestSourceSHA256": "bcfc13379b8c8ada41c74e0257e948e01c35e62df7db1ae3732fac0d55e5d009",
+  "productUnchangedDuringViewportTestRepair": true,
+  "viewportOnlyHeadingUITestSourceSHA256": "ab30382a023ea5327c2da02870a0c5833eb1069c1b653812249d0b6650b63735",
+  "gestureHeadingUITestSourceSHA256": "ff6bf3bc93f2aebc98a425296c794139eded7f6f9c074d185f9a6098e410aff1",
+  "finalHeadingUITestSourceSHA256": "31d9ffc3f52694b0d5ef1cca0b256c6c7fc4cd28a2275f8695543196c2aad8f7",
+  "sourceCommit": "806ec019bec5550402450ff28b850c69575c815b"
+}

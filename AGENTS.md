@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 197 is the current installed development build. Native plan sharing
+- Preview 198 is the current installed development build. Shared plan headings
+  keep title/share, status/location and adaptive date-zone/response-avatar tiers.
+  Titles align at 20pt; remove duplicate top padding on confirmation/expiry;
+  preserve tap targets, activity order, scroll anchors and invitation/Calendar rules.
+  Reuse existing components. Source 806ec019 is pushed. Final long-content
+  Chinese/German regular/largest checks passed 371.018s; eight-person regular/
+  largest passed 25.053/28.667s. Uninterrupted phone journey passed 370.177s/eight
+  API stages and six role/phase share checks, with exact unique Calendars.
+  Failed 32.933/143.356/135.934s runs corrected test viewport, gesture placement
+  and AssistiveTouch interception only; product stayed unchanged. Preserve scopes.
+  Strict signature, 248 App/18 config-script/shared inputs, private Local and
+  binary match, install and normal launch PID 7781 verified; ordinary 97 stays.
+  Two accounts/three links, Runner/private files cleaned; no new App reports.
+  No backend/web release or unit/domain/browser repeat; api/www Ready
+  dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7. Largest-text acceptance is heading/entry only;
+  long text scrolls. Existing tall German dock, detail-grid blank and menu reset
+  issues remain unresolved; expiry business was not rerun. See 198 QA/release.
+- Preview 197 was the previous development build. Native plan sharing
   uses a compact summary, SSManagementRow App-friends destination and outlined
   web-share/copy utilities; regular side by side, accessibility stacked/scrollable.
   Keep contact permissions, URL payloads and invitation/Calendar rules unchanged.

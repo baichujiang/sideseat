@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 0,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Flow198 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792799538.916,
+  "passedTests" : 0,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792799391.071,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed - The entire element must be visible above the fixed controls; id=plan-detail-location element=(20.0, 445.3333333333333, 385.0, 259.00000000000006) scroll=(0.0, 109.0, 428.0, 817.0) nav=(0.0, 47.0, 428.0, 54.0) visible=(0.0, 109.0, 428.0, 574.1666666666666)",
+      "targetName" : "Flow198UITests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "PlanFirstUsePhoneUITests/testInlineInformationLargestText()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow198/Flow198UITests/PlanFirstUsePhoneUITests/testInlineInformationLargestText",
+      "testName" : "testInlineInformationLargestText()"
+    }
+  ],
+  "title" : "Test - Flow198",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 1
+}

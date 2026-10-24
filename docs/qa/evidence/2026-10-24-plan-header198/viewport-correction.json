@@ -1,0 +1,29 @@
+{
+  "titleFrame": [
+    20.0,
+    109.0,
+    193.0,
+    54.333333333333314
+  ],
+  "scrollFrame": [
+    0.0,
+    109.0,
+    428.0,
+    817.0
+  ],
+  "navigationFrame": [
+    0.0,
+    47.0,
+    428.0,
+    54.0
+  ],
+  "actualVisibleFrame": [
+    0.0,
+    109.0,
+    428.0,
+    690.3333333333334
+  ],
+  "oldComputedTop": 113.0,
+  "correctVisibleTop": 109.0,
+  "productUnchanged": true
+}
