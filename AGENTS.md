@@ -21,7 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 207 is the current installed development build. Sequential repair3
+- Preview 208 is the current installed development build. Sequential repair4
+  caps fixed Calendar date/hour metadata atxLarge, Day hit area44pt, and makes
+  SSFlowCardHeader vertical only at accessibility sizes. Normal card layout,
+  full date AX, events/selection/routes/rules stay; no new state/request/component.
+  Sourceee243bf2 pushed. Final same-package system-maximum two cases42.296/41.022s
+  passed,0failed/skipped:14 date OCR,Day44, pure two-digit hour OCR excludingnow
+  badge, complete source-title words, true sheet recipient63.333pt, Propose cancel
+  and own-intention actions.7 final actual originals reviewed,7final+5before saved.
+  Initial font budget/selector/Day failures and root-only maximum/intermediate
+  passes retain scope; not substituted for final App. Phone208 normalPID8498,
+  267/Local/signature/binary verified,97 preserved;Runner/stage private cleaned,
+  no new App reports/real writes/backend/web release. Repair5 and final supplement
+  pending; two disposable QA accounts retained only for task final acceptance.
+  See208 release/sequential QA.
+- Preview 207 was the previous development build. Sequential repair3
   consumes horizontal first/last section boundary drags using existing clamps;
   the same1.5 direction threshold,20pt edge/exclusions/VoiceOver/vertical scrolling,
   valid paging, routing and state stay. No new state/request/component. Source

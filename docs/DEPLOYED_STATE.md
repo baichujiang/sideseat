@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前Preview207；顺序第1–3项通过，原PNG已纠正旧空白误判。第4–5项及最终补验继续，无后端／网页发布。2026-10-24，Europe/Berlin。
+**状态：** 当前Preview208；顺序第1–4项通过，原PNG已纠正旧空白误判。第5项及最终补验继续，无后端／网页发布。2026-10-24，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview207，分栏边界手势**：仅移除越界方向pan拒绝，让原夹取消费边界拖动；方向阈值／屏边／输入滑轨排除／路由／状态保持，无新状态请求。源码 `f1b12449` 已推送。206真实基线67.753秒失败；207普通／最大字号和Shared三专项 **131.483／123.623／94.022秒分次通过**，27张最终实图核对、6张最终＋1张真实失败图保存。测试大卡可见交集修正和Shared保留范围单独记录，不称一次套件全过。手机207普通启动 **PID8448**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密文件清理，无新增App报告或真实写入／后端网页发布。第4–5项及最终补验继续。[207交付](./releases/2026-10-24-preview207-section-boundaries.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
+当前 **Preview208，日期／刻度与卡头可读**：固定日历日期／小时局部xLarge上限，Day补44pt命中区，活动卡头辅助字号纵排；普通布局、完整AX日期、事件／路由／规则保持，无新状态请求。源码 `ee243bf2` 已推送。最终同包同次 **42.296／41.022秒，2通过、0失败／跳过**：14日期实际OCR、Day44、双位小时完整、源标题完整词、真实最大字收件标题63.333pt、提出计划取消和意愿卡操作不重叠。7最终原图逐张核对，7最终＋5before保留，前包／测试失败范围明确。手机208普通启动 **PID8498**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密清理，无新增App报告／真实写入／后端网页发布。第5项及最终补验继续。[208交付](./releases/2026-10-24-preview208-readable-calendar-headings.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
+
+此前 **Preview207，分栏边界手势**：仅移除越界方向pan拒绝，让原夹取消费边界拖动；方向阈值／屏边／输入滑轨排除／路由／状态保持，无新状态请求。源码 `f1b12449` 已推送。206真实基线67.753秒失败；207普通／最大字号和Shared三专项 **131.483／123.623／94.022秒分次通过**，27张最终实图核对、6张最终＋1张真实失败图保存。测试大卡可见交集修正和Shared保留范围单独记录，不称一次套件全过。手机207普通启动 **PID8448**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密文件清理，无新增App报告或真实写入／后端网页发布。第4–5项及最终补验继续。[207交付](./releases/2026-10-24-preview207-section-boundaries.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
 
 此前 **Preview206，紧凑计划底栏**：大字号空闲状态／时长纵排，最终选时同日日期仅一次，完整AX日期和所有规则保持。源码 `aa816c08` 已推送。最简同包 **53.286／446.529秒，2通过、0失败／跳过**，四组合14次真实像素检查、27张最终图核对。193／205／206原PNG实际完整，旧空白观察经原像素纠正；触摸／逐行／透明实验已撤销，网格与205逐字一致。9项格式样例另计。手机206普通启动 **PID8417**、普通97保留；267／Local／签名／二进制一致，Runner／本阶段私密文件清理，无新增App报告。两QA账号／布局计划仅留后续本任务验收，未修改真实用户资料或发布后端／网页。第3–5项与最终补验未完成。[206交付](./releases/2026-10-24-preview206-compact-plan-footers.md)、[顺序QA与更正](./qa/2026-10-24-sequential-reliability-fixes.md)。
 
@@ -132,9 +134,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `f1b12449`已推送，后端保持既有生产；[207来源](./qa/evidence/2026-10-24-navigation207/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (207)` | 导航专项通过，严格签名／安装／普通启动PID8448；[交付](./releases/2026-10-24-preview207-section-boundaries.md) |
-| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；207导航专项通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-navigation207/device-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `ee243bf2`已推送，后端保持既有生产；[208来源](./qa/evidence/2026-10-24-typography208/native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (208)` | 排版专项通过，严格签名／安装／普通启动PID8498；[交付](./releases/2026-10-24-preview208-readable-calendar-headings.md) |
+| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；208排版专项通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-typography208/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`，Ready | 原生产 1392 源码核验，只改两个后端文件、加来源标记；1390 项保留。候选/正式四次浏览器流程通过；[来源](./qa/evidence/2026-10-23-cross-day185/source-verification.json) |
