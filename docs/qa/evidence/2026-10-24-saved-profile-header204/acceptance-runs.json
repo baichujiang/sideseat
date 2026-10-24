@@ -1,0 +1,26 @@
+{
+  "initialAttempt": {
+    "result": "Failed",
+    "durationSeconds": 23.688,
+    "failure": "Test queried an absent card container ID, overridden by the existing together-bookmarks parent ID. Profile button and44pt header existed in captured AX.",
+    "productChangedAfterward": false
+  },
+  "repair": "Test only scopes the unique profile ID to the active bookmarks scroll view; all placement,size and route checks retained.",
+  "finalAttempt": {
+    "result": "Passed",
+    "durationSeconds": 209.294,
+    "totalTestCount": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "combinations": [
+      "zh-Hans/light/normal",
+      "zh-Hans/dark/normal",
+      "de/light/accessibility-largest",
+      "de/dark/accessibility-largest"
+    ],
+    "profileVisits": 8,
+    "realBackendMutations": 0,
+    "productSameAsInitialAttempt": true
+  }
+}

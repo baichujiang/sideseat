@@ -1,0 +1,43 @@
+{
+  "actualFinalImagesViewed": [
+    "fixture-saved-profile-actions-de-dark-largest.png",
+    "fixture-saved-profile-actions-de-light-largest.png",
+    "fixture-saved-profile-actions-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-actions-zh-Hans-light-normal.png",
+    "fixture-saved-profile-details-avatar-de-dark-largest.png",
+    "fixture-saved-profile-details-avatar-de-light-largest.png",
+    "fixture-saved-profile-details-avatar-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-details-avatar-zh-Hans-light-normal.png",
+    "fixture-saved-profile-details-name-de-dark-largest.png",
+    "fixture-saved-profile-details-name-de-light-largest.png",
+    "fixture-saved-profile-details-name-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-details-name-zh-Hans-light-normal.png",
+    "fixture-saved-profile-header-de-dark-largest.png",
+    "fixture-saved-profile-header-de-light-largest.png",
+    "fixture-saved-profile-header-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-header-zh-Hans-light-normal.png",
+    "fixture-saved-profile-returned-de-dark-largest.png",
+    "fixture-saved-profile-returned-de-light-largest.png",
+    "fixture-saved-profile-returned-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-returned-zh-Hans-light-normal.png"
+  ],
+  "actualImageCount": 20,
+  "representativeImagesPreserved": [
+    "fixture-saved-profile-header-zh-Hans-light-normal.png",
+    "fixture-saved-profile-header-zh-Hans-dark-normal.png",
+    "fixture-saved-profile-header-de-light-largest.png",
+    "fixture-saved-profile-header-de-dark-largest.png",
+    "fixture-saved-profile-actions-de-light-largest.png",
+    "fixture-saved-profile-actions-de-dark-largest.png",
+    "fixture-saved-profile-details-avatar-zh-Hans-light-normal.png",
+    "fixture-saved-profile-details-name-de-dark-largest.png"
+  ],
+  "verdict": "PASS for saved-card header placement/normal and largest text in light and dark, and existing private fallback open/return. No whole-App visual claim.",
+  "review": "Normal avatar/name/badge align on one row with trailing chevron. Largest identity wraps existing badge below name without overlap. Standalone profile line is removed, actions are intact and reachable after scrolling.",
+  "scopeLimits": [
+    "Largest card requires scrolling; no entire-card first-screen claim.",
+    "Existing private fallback sheet appears at ordinary visual text size in these captures. Route only, not maximum-text sheet acceptance.",
+    "Fixture has no public user ID; existing public-profile branch is source-reviewed, not network-flow tested.",
+    "System AssistiveTouch overlay and existing private-detail native safety menu are unchanged."
+  ]
+}

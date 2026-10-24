@@ -1,0 +1,10 @@
+{
+  "recordedServerTime": "2026-10-24T02:46:09.606Z",
+  "features": {
+    "v2WeeklyIntent": true,
+    "v2MutualOpportunity": true,
+    "v2ExploreIntents": true
+  },
+  "scope": "Public configuration only; per-account feature assignment is separate and fixtures do not establish every account eligibility.",
+  "maintenanceMode": false
+}

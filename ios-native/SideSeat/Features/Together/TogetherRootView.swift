@@ -1187,7 +1187,7 @@ struct MutualOpportunityCard: View {
                             facts: recommendationFacts,
                             profileTitle: AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"),
                             profileIdentifier: "mutual-opportunity-profile-\(opportunity.id)", onProfile: onViewProfile)
-                    } else if let onViewProfile {
+                    } else if !compact, let onViewProfile {
                         Button(action: onViewProfile) {
                             Text(AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"))
                                 .font(.subheadline.weight(.medium))
@@ -1227,6 +1227,33 @@ struct MutualOpportunityCard: View {
 
     private var peerRow: some View {
         HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
+            if compact, let onViewProfile {
+                Button(action: onViewProfile) {
+                    HStack(spacing: SideSeatTheme.spaceSM) {
+                        peerIdentity
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .accessibilityHint(AppLocalization.string(opportunity.peer.userId == nil ? "Intention details" : "View profile"))
+                .accessibilityIdentifier("mutual-opportunity-profile-\(opportunity.id)")
+            } else {
+                peerIdentity
+            }
+            if let onDismiss, !opportunity.hasConversation, !opportunity.isUnavailable, opportunity.isBookmarked != true {
+                RecommendationOptionsMenu(identifier: "mutual-opportunity-menu-\(opportunity.id)", onDismiss: onDismiss)
+                    .disabled(isWorking)
+            }
+        }
+    }
+
+    private var peerIdentity: some View {
+        HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
             InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 36)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
@@ -1251,10 +1278,6 @@ struct MutualOpportunityCard: View {
 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let onDismiss, !opportunity.hasConversation, !opportunity.isUnavailable, opportunity.isBookmarked != true {
-                RecommendationOptionsMenu(identifier: "mutual-opportunity-menu-\(opportunity.id)", onDismiss: onDismiss)
-                    .disabled(isWorking)
-            }
         }
     }
 

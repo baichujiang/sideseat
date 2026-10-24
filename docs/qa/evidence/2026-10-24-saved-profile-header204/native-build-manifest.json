@@ -1,0 +1,23 @@
+{
+  "build": 204,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused generated project after refreshing all267 tracked inputs from the active checkout. No new App Swift files.",
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "b20a8f35f8ac9d3197d605a0886b0fc9296a6e2657cc48dce859070ca9f56792",
+    "SideSeat Preview.debug.dylib": "2cfbb575c6f11a2643d785dc62b9bb99590d9ca8979a921a74b30cfafe1e1861"
+  },
+  "baselinePhoneBuild": 203,
+  "productFrozenDuringAcceptance": true,
+  "backendRelease": false,
+  "webRelease": false,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "finalUITestSourceSHA256": "249b093eed1d5719b0b6e96f9fa219e06c5a8eee449338661f21deae7be7c556",
+  "testOnlyRepair": "Initial23.688s run could not find the saved card container because existing together-bookmarks ID overrides it in AX. Scope uniqueness to the active bookmarks scroll view; preserve peer containment,44pt and real avatar/name route checks. App unchanged.",
+  "all267InputsReverified": true
+}
