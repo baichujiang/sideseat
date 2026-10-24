@@ -1,0 +1,71 @@
+{
+  "appBuild": 208,
+  "udid": "00008110-001A69110CC1401E",
+  "fixture": "Disposable7-date09\u201321Europe/Berlin collecting plan; no responses/invitations",
+  "nativeTest": {
+    "durationSeconds": 300.997,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "calibratedRealPaintAndErase": true,
+    "coordinateCycles": 4,
+    "accessibilityPropertyReads": 80,
+    "bothCellFramesStable": true,
+    "endedEmptyLocalSelection": true
+  },
+  "method": {
+    "instrument": "Time Profiler",
+    "targetSamplePeriodMicroseconds": 1000,
+    "recordWaitingThreads": false,
+    "percentage": "Sum of Running sample weights / full trace duration; statistical estimate of one-core CPU, not a hardware counter",
+    "idle": "No test AX requests; existing1s expiry gate and10s read refresh remain",
+    "coordinates": "Cached coordinate XCTest injections and idle resolution remain; not pure manual interaction",
+    "inclusiveStackCategories": "Must not sum overlapping stack categories"
+  },
+  "windows": [
+    {
+      "phase": "availability-idle",
+      "uiWindowSeconds": 65.00433397293091,
+      "recordingSeconds": 36.428722,
+      "sampleRows": 708,
+      "runningSampleWeightSeconds": 0.708,
+      "sampleWeightPerRecordingPercent": 1.9435213785430079,
+      "recordingWhollyInsideUIWindow": true,
+      "recordingStartUTC": "2026-10-24T14:09:46.513000+00:00",
+      "recordingEndUTC": "2026-10-24T14:10:22.941000+00:00"
+    },
+    {
+      "phase": "final-idle",
+      "uiWindowSeconds": 65.00430488586426,
+      "recordingSeconds": 36.052789,
+      "sampleRows": 715,
+      "runningSampleWeightSeconds": 0.715,
+      "sampleWeightPerRecordingPercent": 1.9832030193281303,
+      "recordingWhollyInsideUIWindow": true,
+      "recordingStartUTC": "2026-10-24T14:11:16.481000+00:00",
+      "recordingEndUTC": "2026-10-24T14:11:52.534000+00:00"
+    },
+    {
+      "phase": "coordinate-interaction",
+      "uiWindowSeconds": 66.93944597244263,
+      "recordingSeconds": 35.949675,
+      "sampleRows": 30292,
+      "runningSampleWeightSeconds": 30.292,
+      "sampleWeightPerRecordingPercent": 84.26223602855937,
+      "recordingWhollyInsideUIWindow": true,
+      "recordingStartUTC": "2026-10-24T14:12:21.605000+00:00",
+      "recordingEndUTC": "2026-10-24T14:12:57.554000+00:00"
+    },
+    {
+      "phase": "accessibility-query",
+      "uiWindowSeconds": 66.42298126220703,
+      "recordingSeconds": 35.948782,
+      "sampleRows": 34595,
+      "runningSampleWeightSeconds": 34.595,
+      "sampleWeightPerRecordingPercent": 96.23413666699473,
+      "recordingWhollyInsideUIWindow": true,
+      "recordingStartUTC": "2026-10-24T14:13:32.579000+00:00",
+      "recordingEndUTC": "2026-10-24T14:14:08.528000+00:00"
+    }
+  ]
+}

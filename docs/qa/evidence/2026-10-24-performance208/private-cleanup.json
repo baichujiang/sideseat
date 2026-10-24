@@ -1,0 +1,18 @@
+{
+  "removedStagePrivateArtifacts": [
+    "sideseat-perf-processes.private.json",
+    "sideseat-perf-reports-after.private.json",
+    "sideseat-perf-launch.private.json",
+    "sideseat-perf-uninstall.private.json",
+    "sideseat-perf-reports-before.private.json",
+    "sideseat-perf-apps.private.json",
+    "sideseat209-runner.private.xctestrun",
+    "trace/recording-runs.private.json",
+    "trace/processes.private.json",
+    "generated Flow209 scheme"
+  ],
+  "rawTraceAndXMLKeptPrivate": true,
+  "traceParentMode": "0700",
+  "rawLogMode": "0600",
+  "actualQACredentialsRetainedOnlyForTaskFinalAcceptance": true
+}

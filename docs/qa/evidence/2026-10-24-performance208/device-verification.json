@@ -1,0 +1,19 @@
+{
+  "appBuild": 208,
+  "ordinary97Preserved": true,
+  "normalLaunchPID": 8510,
+  "liveExecutableMatches": true,
+  "launchArguments": [],
+  "same208FinalBinary": true,
+  "strictSignatureVerified": true,
+  "runnerRemoved": true,
+  "newAppReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-24-161425.ips",
+      "lastModDate": "2026-10-24T14:14:25.000Z"
+    }
+  ],
+  "realUserWrites": 0,
+  "disposableTestPlanCreated": 1,
+  "sharedQAFixtureRetainedForTaskFinalAcceptance": true
+}

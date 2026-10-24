@@ -1,0 +1,45 @@
+{
+  "method": "Resolved all XML id/ref including frame/binary/backtrace. Inclusive categories overlap; percentages here are shares of sample weight, not elapsed CPU percentage.",
+  "availabilityIdle": {
+    "totalMilliseconds": 708,
+    "AXorXCTestUnionMilliseconds": 4,
+    "knownTimePollMilliseconds": 177,
+    "dateFormatterMilliseconds": 26,
+    "missingStackMillisecondsIncluded": 1
+  },
+  "finalIdle": {
+    "totalMilliseconds": 715,
+    "AXorXCTestUnionMilliseconds": 1,
+    "knownTimePollMilliseconds": 174,
+    "dateFormatterMilliseconds": 22
+  },
+  "coordinateInteraction": {
+    "totalMilliseconds": 30292,
+    "AXorXCTestUnionMilliseconds": 28816,
+    "AXorXCTestUnionPercent": 95.127,
+    "knownTimePollMilliseconds": 557,
+    "dateFormatterMilliseconds": 109,
+    "appLeafMilliseconds": 40,
+    "gridCellViewInclusiveMilliseconds": 336,
+    "timetableInitInclusiveMilliseconds": 61,
+    "snapshotMethodInclusiveMilliseconds": 28324,
+    "unknownLeafPercent": 37.271,
+    "unknownAppFramePercent": 0.032
+  },
+  "accessibilityQuery": {
+    "totalMilliseconds": 34595,
+    "AXorXCTestUnionMilliseconds": 34417,
+    "AXorXCTestUnionPercent": 99.485,
+    "knownTimePollMilliseconds": 71,
+    "dateFormatterMilliseconds": 13,
+    "appLeafMilliseconds": 8
+  },
+  "dominantContext": [
+    "XCTElementSnapshotRequest.accessibilitySnapshotOrError",
+    "userTestingSnapshotForElement",
+    "AXRuntime",
+    "UIAccessibility",
+    "SwiftUI accessibility tree"
+  ],
+  "conclusion": "High automation load is dominated by accessibility snapshots; no evidence supports a product algorithm change. No claim of measured pure-manual interaction or performance optimization."
+}
