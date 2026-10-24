@@ -1,0 +1,66 @@
+{
+  "scope": "Current local-fixture chat presentation and entry navigation only; not an authenticated API invitation/calendar journey.",
+  "productPackages": [
+    {
+      "name": "before-separator-cleanup",
+      "runs": [
+        {
+          "sequence": 1,
+          "mainSeconds": 25.567,
+          "main": "Failed: context accessibility frame includes navigation; corrected visible-row tap",
+          "unreadSeconds": 19.844,
+          "unread": "Failed: latest control is correctly absent while all unread messages fit; test must scroll history first"
+        },
+        {
+          "sequence": 2,
+          "mainSeconds": 20.736,
+          "main": "Failed: native floating sheet projects logical44pt to42.355pt; measured width-based coordinate conversion",
+          "unreadSeconds": 22.219,
+          "unread": "Passed"
+        },
+        {
+          "sequence": 3,
+          "mainSeconds": 51.18,
+          "main": "Failed: search system Close replaces custom Done while search is active; test selector corrected",
+          "unread": "Not run"
+        },
+        {
+          "sequence": 4,
+          "mainSeconds": 53.543,
+          "main": "Failed: Close ends active search before sheet Done; test follows both actual actions",
+          "unreadSeconds": 22.666,
+          "unread": "Passed"
+        }
+      ]
+    },
+    {
+      "name": "final-separator-cleanup",
+      "changes": "Remove actual redundant vertical decorative Divider; rebuild and install same Preview202 version; separate binary recorded.",
+      "initialAttempts": [
+        {
+          "status": "Not executed",
+          "reason": "Xcode destination timeout: observing system notifications failed; three attempts, including Mac-side CoreDevice service restart. Device booted, wired, developer mode enabled and DDI available."
+        }
+      ],
+      "finalAcceptance": {
+        "status": "Passed",
+        "passedTests": 2,
+        "failedTests": 0,
+        "skippedTests": 0,
+        "tests": [
+          {
+            "name": "testLocalChatEntriesAcrossAppearanceAndTextSizes()",
+            "durationInSeconds": 244.41329300403595,
+            "result": "Passed"
+          },
+          {
+            "name": "testLocalUnreadAndLatestMessageButtons()",
+            "durationInSeconds": 22.649410009384155,
+            "result": "Passed"
+          }
+        ],
+        "recovery": "CoreDevice and xcdevice read-only check confirmed availability; same final product then executed both cases uninterrupted."
+      }
+    }
+  ]
+}

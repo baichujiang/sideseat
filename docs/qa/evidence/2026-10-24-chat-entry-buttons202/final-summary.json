@@ -1,0 +1,22 @@
+{
+  "title": "Test - Flow202",
+  "result": "Passed",
+  "passedTests": 2,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "startTime": 1792807424.901,
+  "finishTime": 1792807695.683,
+  "totalTestCount": 2,
+  "tests": [
+    {
+      "name": "testLocalChatEntriesAcrossAppearanceAndTextSizes()",
+      "durationInSeconds": 244.41329300403595,
+      "result": "Passed"
+    },
+    {
+      "name": "testLocalUnreadAndLatestMessageButtons()",
+      "durationInSeconds": 22.649410009384155,
+      "result": "Passed"
+    }
+  ]
+}

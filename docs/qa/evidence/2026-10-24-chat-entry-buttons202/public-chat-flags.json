@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-24T01:39:47.586821+00:00",
+  "endpoint": "https://api.sideseat.de/api/v1/client-config",
+  "selectedFeatures": {
+    "nativeAuthentication": true
+  },
+  "maintenanceMode": false,
+  "scope": "Public feature configuration read only; does not prove an authenticated chat conversation or sending."
+}

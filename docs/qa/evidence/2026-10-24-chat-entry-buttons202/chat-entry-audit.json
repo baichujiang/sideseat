@@ -1,0 +1,19 @@
+{
+  "scope": "Current reachable direct-chat UI only; no exposure or redesign of the retained attachment tray or legacy data contracts.",
+  "removed": [
+    "Native shared toolbar backgrounds on title/profile and More; More uses ellipsis without a surrounding SF circle",
+    "Composer Plan icon redundant local gray circle",
+    "Extra regular-action soft fill around the bar-owned ConversationContextBar",
+    "Extra soft fill inside the native participant List row",
+    "Second soft fill around the Latest and Unread jump controls, which retain one readable floating surface",
+    "Decorative Divider overlay on ConversationContextBar, observed as a vertical line in the native information row"
+  ],
+  "retained": [
+    "Message bubbles, input fill and content/card/menu boundaries",
+    "Send and cancel-reply semantic circle SF glyphs",
+    "Map/location material surfaces needed over map content",
+    "Existing current-plan and history plain controls; no changes necessary",
+    "Legacy attachment tray remains unreachable and unchanged"
+  ],
+  "implementation": "Reuse ssStandaloneAction and SSActionButtonStyle(softFill:false); no new product component, state, request or dependency. More and title retain minimum44pt targets; keep IDs, navigation, drafts and all invitation/calendar rules."
+}

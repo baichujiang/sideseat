@@ -86,6 +86,13 @@ timetable cell grid, avatar or badge separation stroke still has a specific purp
 Message shortcuts keep their icon tiles and labels without an outer button box.
 Navigation rows keep their destination arrow, while decline actions use red text.
 Remove redundant call-site outlines instead of wrapping already styled labels again.
+Chat context bars and native information rows use `softFill: false` because their
+parent already owns the surface. Unread/latest jump controls keep one floating
+material/fill without a second action background. Chat title and More toolbar
+items hide the iOS shared background; More uses a plain ellipsis and both retain
+44pt targets. Composer Plan is an unframed icon, while semantic Send/Cancel-reply
+glyphs and editable-input boundaries remain.
+
 
 ### Public invitation visual continuity — 2026-10-04
 

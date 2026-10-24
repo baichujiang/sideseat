@@ -1,0 +1,29 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused isolated generated project after refreshing all tracked inputs from the active checkout; every input byte-identical. No new App Swift files.",
+  "privateLocalConfigurationMatched": true,
+  "binarySHA256": {
+    "SideSeat Preview": "a5d5c449f776e77ecd1695a479ad8e810dcf4534ede9db4d2b26184e571adeb1",
+    "SideSeat Preview.debug.dylib": "3dcfc5a93c7d3b636ff3ad98cae0773c96c87779fd40359f18e3c7fb5e02e70e"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "build": 202,
+  "strictSignatureVerified": true,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "backendRelease": false,
+  "webRelease": false,
+  "initialUITestSourceSHA256": "0efb337dd133c6312c259b018990315c4b75c7968be506a2130d66365d69e143",
+  "repairedUITestSourceSHA256": "01571e308ae34770915ce5b5df112aa7464b7a4d7049c7dcf9db935ffaaf7eed",
+  "productUnchangedDuringTestRepair": "Product remained frozen for the first four test-only selector/geometry repairs. A real decorative vertical separator observed in screenshots was then removed; final product rebuilt and requires fresh acceptance.",
+  "preSeparatorCleanupBinarySHA256": {
+    "SideSeat Preview": "7e2e48877d9b54d124bd5522b3d572eb724744d76aa7e041870334cac13576e8",
+    "SideSeat Preview.debug.dylib": "f3d719b31e61eabc2a705f795cfc73e72f5eab9e2aa124640c4951bbe90e91c1"
+  },
+  "finalUITestSourceSHA256": "c4daa7a197167a2aad98a8dfef8873a1793fe54bc6de6d203c4815ee58c05de1",
+  "finalVisualCleanup": "Remove unused decorative Divider overlay observed as a vertical line in the participant information context row.",
+  "all267FinalInputsReverified": true,
+  "testSourceUnchangedAfterFinalBuild": true
+}

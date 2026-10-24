@@ -196,9 +196,8 @@ struct ConversationContextBar: View {
                 .contentShape(Rectangle())
             }
         }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+        .buttonStyle(SSActionButtonStyle(softFill: false, horizontalPadding: 0))
         .background(.bar)
-        .overlay(alignment: .bottom) { Divider() }
         .accessibilityIdentifier("conversation-context-bar")
     }
 }
@@ -557,7 +556,7 @@ struct DirectChatInfoView: View {
                 }
                 .contentShape(Rectangle())
             }
-            .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+            .buttonStyle(SSActionButtonStyle(softFill: false, horizontalPadding: 0))
             .accessibilityIdentifier("direct-info-participant-context")
         }
     }

@@ -1,0 +1,126 @@
+{
+  "actualFinalImagesViewed": 19,
+  "savedRepresentativeImages": 10,
+  "scope": "Chat entry/button chrome, four language/theme/text combinations plus unread/latest; local fixtures only. Not whole-App maximum-text or authenticated API acceptance.",
+  "verdict": "No new blocking issue in changed entry button chrome. More/composer Plan are clear icons; information context vertical line removed; meaningful native/field/card/floating surfaces retained.",
+  "limitations": [
+    "Existing German largest body card word fragmentation remains. Largest draft screenshot does not show the entire draft simultaneously; functional value retention passed, not a claim that all input text is visible at once.",
+    "System AssistiveTouch overlay and native Back surface are retained."
+  ],
+  "images": [
+    {
+      "name": "fixture-chat-info-de-dark-largest.png",
+      "sha256": "080dbc7f194424f4d27f1058b17d5755d92e7511e9f7456715918f332aecf1ec",
+      "saved": true,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-draft-not-sent-de-dark-largest.png",
+      "sha256": "d7008b6038ff4239c6986ac913c67f5221800917714e03fa5938b42dcca5a5da",
+      "saved": false,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-context-de-dark-largest.png",
+      "sha256": "22d79148cf5e58cd4dd3e00d00da456f820f626b4009b7c379894231c510067f",
+      "saved": false,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-entries-de-dark-largest.png",
+      "sha256": "74fcf889dcf50126507bee1bd938c269368b3115ab2ee45a9e49a3af7d6f3913",
+      "saved": true,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-info-de-light-largest.png",
+      "sha256": "a353b94c16a2e0f632994cc4fd663e32ab41b7c4a0268d6c422f167b345ac96b",
+      "saved": true,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-draft-not-sent-de-light-largest.png",
+      "sha256": "c2f5f6b8089f52fb71683790335ee7418f4d54fa6a9ce6facb040218f1240e34",
+      "saved": false,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-context-de-light-largest.png",
+      "sha256": "be7b76dd12e1299abbb61f2424f52719da05fc8abf7d186a8704852b341c5bd2",
+      "saved": false,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-entries-de-light-largest.png",
+      "sha256": "e673d31fb5eb059b8079e39a66d428685bfeccde3027453494956daaf45ad819",
+      "saved": true,
+      "reviewer": "creation_visual_review"
+    },
+    {
+      "name": "fixture-chat-info-zh-Hans-dark-normal.png",
+      "sha256": "c3849dd64534d0c9da3563fb53fd435928c05ffa6f951746729e0d274b613bdd",
+      "saved": true,
+      "reviewer": "creation_components"
+    },
+    {
+      "name": "fixture-chat-draft-not-sent-zh-Hans-dark-normal.png",
+      "sha256": "4face09f3176cccf71fb7c31d8e16eb8b32f67c13f64e33dee99a0ec3fdec5ba",
+      "saved": false,
+      "reviewer": "creation_components"
+    },
+    {
+      "name": "fixture-chat-context-zh-Hans-dark-normal.png",
+      "sha256": "7e437428fe95c31207653212f998dd13ea8d5be328469655c29acc6569002181",
+      "saved": false,
+      "reviewer": "creation_components"
+    },
+    {
+      "name": "fixture-chat-entries-zh-Hans-dark-normal.png",
+      "sha256": "028d314fc8a945e563c1876a9a3000d16d898e82f35e58c75f72448a8ea5e4b9",
+      "saved": true,
+      "reviewer": "creation_components"
+    },
+    {
+      "name": "fixture-chat-info-zh-Hans-light-normal.png",
+      "sha256": "a6fbf61af5cdff8555a5e5850e048e65de333944bf6527af6e1f6bfe4f60e879",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-draft-not-sent-zh-Hans-light-normal.png",
+      "sha256": "e788c93aaa271db6e3ba6fa0e42a02ef3275df5e6c0782e77d723994d2808408",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-context-zh-Hans-light-normal.png",
+      "sha256": "13bd876f9a1273e081348392ef3fd36e46999cba33bb081bccf207e4256c39a6",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-entries-zh-Hans-light-normal.png",
+      "sha256": "4128e124e04103d28753eedd4c20a961b16fb40f8d70a86033c3e0061709bfd2",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-returned-to-latest.png",
+      "sha256": "94d6c1639e676c6c228d541971f3f63d006275761b584b5839545779ede3ac10",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-latest-after-history-scroll.png",
+      "sha256": "e348aca1c8454f82049d8a68dfc9847e470e5972d9ce804f2a05d8a0e2840df2",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-chat-unread-jump.png",
+      "sha256": "4b584851c023cf3ed544eb34e5989136a0c0efa08fd638c46c436cc3b1133747",
+      "saved": true,
+      "reviewer": "parent"
+    }
+  ]
+}

@@ -174,21 +174,22 @@ struct DirectChatView: View {
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     directChatTitle
-                }
+                }.ssStandaloneAction()
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         composerFocus.blur()
                         showChatInfo = true
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "ellipsis")
                             .symbolRenderingMode(.hierarchical)
                             .font(.system(size: 17, weight: .semibold))
-                            .frame(width: 32, height: 32)
-                            .contentShape(Circle())
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                     .accessibilityIdentifier("direct-chat-actions")
                     .accessibilityLabel("Chat actions")
-                }
+                }.ssStandaloneAction()
             }
             .task(id: InitialChatTaskKey(connectionID: connectionID, focus: initialFocus)) {
                 ActiveChatPresentation.begin("connection:\(connectionID)")
@@ -860,7 +861,6 @@ struct DirectChatView: View {
                             .font(.system(size: 17, weight: .semibold))
                             .foregroundStyle(SideSeatTheme.utilityAction)
                             .frame(width: 34, height: 34)
-                            .background(SideSeatTheme.fillSubtle, in: Circle())
                             .ssIconButtonHitTarget()
                     }
                     .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, cornerRadius: 999, size: .icon))
@@ -1030,7 +1030,7 @@ struct DirectChatView: View {
                         }
                     }
                 }
-                .frame(maxWidth: 190)
+                .frame(maxWidth: 190, minHeight: 44)
                 .contentShape(Rectangle())
             }
             .buttonStyle(SSPressButtonStyle())
@@ -1223,7 +1223,7 @@ struct DirectChatView: View {
             .background(SideSeatTheme.fillTertiary, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
             .contentShape(Rectangle())
         }
-        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0)).foregroundStyle(SideSeatTheme.utilityAction)
+        .buttonStyle(SSActionButtonStyle(softFill: false, horizontalPadding: 0)).foregroundStyle(SideSeatTheme.utilityAction)
         .accessibilityLabel(AppLocalization.string("Back to latest messages"))
         .accessibilityValue(store.pendingRemoteCount > 0 ? AppLocalization.string("\(store.pendingRemoteCount) new messages") : "")
         .accessibilityIdentifier("chat-new-messages")
