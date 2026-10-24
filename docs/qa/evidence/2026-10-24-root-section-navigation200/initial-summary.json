@@ -1,0 +1,49 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 2,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Flow200 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1792803198.965,
+  "passedTests" : 2,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792802708.14,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertTrue failed",
+      "targetName" : "Flow200UITests",
+      "testIdentifier" : 2,
+      "testIdentifierString" : "SectionNavigationStylePhoneUITests/testFixturePageSwipesAndPinnedSelectors()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow200/Flow200UITests/SectionNavigationStylePhoneUITests/testFixturePageSwipesAndPinnedSelectors",
+      "testName" : "testFixturePageSwipesAndPinnedSelectors()"
+    }
+  ],
+  "title" : "Test - Flow200",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 3
+}

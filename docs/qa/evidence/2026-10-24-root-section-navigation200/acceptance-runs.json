@@ -1,0 +1,54 @@
+{
+  "latestSelectedChecksAllPassed": true,
+  "notASingleUninterruptedSuite": true,
+  "latestChecks": [
+    {
+      "test": "testExistingSessionSelectorStripsReadOnly",
+      "result": "passed",
+      "seconds": 21.222,
+      "run": "navigation"
+    },
+    {
+      "test": "testFixturePageSwipesAndPinnedSelectors",
+      "result": "passed",
+      "seconds": 68.634,
+      "run": "gestures"
+    },
+    {
+      "test": "testFixtureSectionNavigationLanguageAppearanceAndSizeMatrix",
+      "result": "passed",
+      "seconds": 449.852,
+      "run": "navigation"
+    }
+  ],
+  "allRunsIncludingFailures": [
+    {
+      "test": "testExistingSessionSelectorStripsReadOnly",
+      "result": "passed",
+      "seconds": 21.222,
+      "run": "navigation"
+    },
+    {
+      "test": "testFixturePageSwipesAndPinnedSelectors",
+      "result": "failed",
+      "seconds": 15.779,
+      "run": "navigation"
+    },
+    {
+      "test": "testFixtureSectionNavigationLanguageAppearanceAndSizeMatrix",
+      "result": "passed",
+      "seconds": 449.852,
+      "run": "navigation"
+    },
+    {
+      "test": "testFixturePageSwipesAndPinnedSelectors",
+      "result": "passed",
+      "seconds": 68.634,
+      "run": "gestures"
+    }
+  ],
+  "matrixConfigurations": 8,
+  "pagesPerConfiguration": 2,
+  "scope": "section navigation only; no invitation/calendar API journey repeated",
+  "normalSession": "existing session, no test auth flags, selector-only screenshots; no account creation/sign-out/product submission"
+}

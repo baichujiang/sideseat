@@ -427,12 +427,10 @@ private struct TogetherHomeView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(SideSeatTheme.spaceXS)
-        .background(SideSeatTheme.Together.decisionWell, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS))
+        .ssSectionNavigationTrack()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Together"))
         .accessibilityIdentifier("together-segmented-control")
-        .ssActionOutline(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS)
         .sheet(isPresented: $showsSectionPicker) {
             NavigationStack {
                 List(TogetherSection.allCases) { section in
@@ -483,10 +481,10 @@ private struct TogetherHomeView: View {
                 Image(systemName: "chevron.down").font(.subheadline.weight(.semibold))
                     .accessibilityHidden(true)
             }
-            .foregroundStyle(SideSeatTheme.utilityAction)
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceXS)
             .frame(maxWidth: .infinity, minHeight: 44)
+            .ssSectionNavigationItem(isSelected: true)
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -512,12 +510,10 @@ private struct TogetherHomeView: View {
                     }
                 }
             }
-            .foregroundStyle(isSelected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.Together.ink)
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceXS)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(isSelected ? SideSeatTheme.ProductAction.fill : Color.clear,
-                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+            .ssSectionNavigationItem(isSelected: isSelected)
             .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         }
         .buttonStyle(SSPressButtonStyle())

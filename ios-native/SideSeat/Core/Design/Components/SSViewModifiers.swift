@@ -64,6 +64,25 @@ private struct SSRootNavigationTitleLabel: View {
 }
 
 extension View {
+    /// Quiet section navigation shared by root pages; selection stays distinct from a primary action.
+    func ssSectionNavigationItem(isSelected: Bool) -> some View {
+        let shape = RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+        return foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondaryStrong)
+            .background {
+                if isSelected {
+                    shape.fill(SideSeatTheme.surface)
+                        .overlay(shape.strokeBorder(SideSeatTheme.ControlSelection.border, lineWidth: 0.5))
+                }
+            }
+    }
+
+    func ssSectionNavigationTrack() -> some View {
+        padding(SideSeatTheme.spaceXS)
+            .background(SideSeatTheme.fillTertiary,
+                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS,
+                                     style: .continuous))
+    }
+
     func ssRootNavigationTitle(_ title: LocalizedStringKey) -> some View {
         navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)

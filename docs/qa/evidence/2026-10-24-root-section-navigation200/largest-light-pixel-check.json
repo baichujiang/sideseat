@@ -1,0 +1,38 @@
+{
+  "source": "fixture-section-plans-zh-Hans-light-largest.png",
+  "method": "read-only NSBitmapImageRep RGB sampling; no image editing",
+  "selectedSurface": {
+    "pixel": [
+      150,
+      350
+    ],
+    "rgb": [
+      255,
+      255,
+      255
+    ]
+  },
+  "track": {
+    "pixel": [
+      900,
+      350
+    ],
+    "rgb": [
+      233,
+      233,
+      237
+    ]
+  },
+  "page": {
+    "pixel": [
+      20,
+      350
+    ],
+    "rgb": [
+      245,
+      245,
+      249
+    ]
+  },
+  "observation": "Selected surface and track are present in the native screenshot; independent visual review agreed."
+}

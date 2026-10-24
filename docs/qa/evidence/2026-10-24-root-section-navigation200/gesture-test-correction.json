@@ -1,0 +1,23 @@
+{
+  "initialRun": {
+    "seconds": 15.779,
+    "result": "failed",
+    "selectedSectionBeforeDrag": "recommendations",
+    "query": "ScrollView with together-section- prefix, firstMatch",
+    "actualTargetInXCTestLog": "together-section-intentions",
+    "assertionKept": "destination tab isSelected"
+  },
+  "targetedRerun": {
+    "seconds": 68.634,
+    "result": "passed",
+    "change": "Use the explicit current section identifier before each real drag, and assert that surface is hittable.",
+    "covers": [
+      "Together four page transitions",
+      "Plans two page transitions",
+      "actual content movement and fixed selectors on both pages",
+      "create and cancel returning to the same plan section"
+    ]
+  },
+  "productUnchangedDuringTestRepair": true,
+  "gestureCoordinatesChanged": false
+}

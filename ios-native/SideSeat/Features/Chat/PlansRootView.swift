@@ -187,12 +187,10 @@ struct PlansRootView: View {
                         .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
                         .fontWeight(isSelected ? .semibold : .medium)
                         .fixedSize(horizontal: false, vertical: true)
-                        .foregroundStyle(isSelected ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.Together.ink)
                         .padding(.horizontal, SideSeatTheme.spaceSM)
                         .padding(.vertical, SideSeatTheme.spaceXS)
                         .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(isSelected ? SideSeatTheme.ProductAction.fill : Color.clear,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .ssSectionNavigationItem(isSelected: isSelected)
                         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 }
                 .buttonStyle(SSPressButtonStyle())
@@ -200,10 +198,7 @@ struct PlansRootView: View {
                 .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }
         }
-        .padding(SideSeatTheme.spaceXS)
-        .background(SideSeatTheme.Together.decisionWell,
-            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS))
-        .ssActionOutline(cornerRadius: SideSeatTheme.controlRadius + SideSeatTheme.spaceXS)
+        .ssSectionNavigationTrack()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Plans"))
         .accessibilityIdentifier("plans-segmented-control")

@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-24
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -40,6 +40,13 @@
 
 Root pages may use one compact brand/navigation signature. Secondary pages use
 standard iOS titles and back behavior.
+
+Plans and Together section navigation shares `ssSectionNavigationTrack` and
+`ssSectionNavigationItem`: a neutral `fillTertiary` track, selected `surface`
+with a 0.5pt `ControlSelection.border`, and primary/secondary text with selected
+weight. Keep the track free of an outer action outline; reserve solid
+`ProductAction` fills for explicit primary actions. Preserve the 44pt targets,
+selected accessibility state, paging and Together's adaptive section chooser.
 
 ### Planning clarity
 
