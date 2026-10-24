@@ -15,5 +15,7 @@
   "testSourcesSHA256": {
     "StatusMetadataPhoneUITests.swift": "895fb2bb6440de0437455b44ecdd1163f254cd7cbae0599884f6852320005eb5",
     "PlanFirstUsePhoneUITests.swift": "88b8bdbc38f07b38c4fc8eb42cacfb598589d5921b379ad3cbd3756bb863218c"
-  }
+  },
+  "sourceCommit": "d017759dcf70276a8636fa5519d7842df2350256",
+  "sourcePushed": true
 }
