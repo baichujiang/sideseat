@@ -234,6 +234,7 @@ import XCTest
             assertHomeSection("waitingResponse", language: language)
             capture("home-redesign-offline-filled-\(tag)")
             let firstPart = revealHomeItem(first, section: "waitingResponse")
+            assertKnownCardTime(first, dayOffset: 1, hourOffset: 14, durationMinutes: 60, language: language)
             tapHomeItem(first, visible: firstPart)
             XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].firstMatch.waitForExistence(timeout: 10))
             XCTAssertTrue(app.buttons["plan-card-accept-ui-plan-1"].waitForExistence(timeout: 10))
@@ -247,6 +248,7 @@ import XCTest
                 let outgoing = app.buttons["plans-row-ui-plan-outgoing"]
                 let last = app.buttons["plans-row-ui-plan-outgoing-3"]
                 _ = revealHomeItem(outgoing, section: "waitingResponse")
+                assertKnownCardTime(outgoing, dayOffset: 1, hourOffset: 13, durationMinutes: 60, language: language)
                 capture("home-redesign-vertical-waiting-first-\(tag)")
                 _ = revealHomeItem(last, section: "waitingResponse")
                 XCTAssertEqual(outgoing.frame.minX, last.frame.minX, accuracy: 1)
@@ -259,6 +261,7 @@ import XCTest
                 guard let before = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
                     XCTFail("A real waiting card must be visible before swiping its rail"); return
                 }
+                assertKnownCardTime(before, dayOffset: 1, hourOffset: 13, durationMinutes: 60, language: language)
                 let beforeID = before.identifier, beforeX = before.frame.minX
                 rail.coordinate(withNormalizedOffset: CGVector(dx: 0.82, dy: 0.5))
                     .press(forDuration: 0.08,
@@ -274,7 +277,9 @@ import XCTest
 
             app.buttons["plans-tab-upcoming"].tap()
             assertHomeSection("upcoming", language: language)
-            _ = revealHomeItem(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming")
+            let confirmed = app.buttons["plans-row-ui-plan-accepted"]
+            _ = revealHomeItem(confirmed, section: "upcoming")
+            assertKnownCardTime(confirmed, dayOffset: 2, hourOffset: 18, durationMinutes: 90, language: language)
             capture("home-redesign-confirmed-\(tag)")
             homeCreate.tap()
             XCTAssertTrue(app.descendants(matching: .any)["time-poll-title"].firstMatch.waitForExistence(timeout: 10))
@@ -328,17 +333,30 @@ import XCTest
                contentSizeCategory: "UICTContentSizeCategoryAccessibilityXXXL")
         func showComplete(_ card: XCUIElement, section: String, name: String) {
             XCTAssertTrue(card.waitForExistence(timeout: 10))
-            for _ in 0..<12 {
+            var offset: CGFloat = 0, part = 1
+            for _ in 0..<20 {
                 let viewport = homeListViewport(section: section).insetBy(dx: 0, dy: 8)
                 let frame = card.frame
-                if viewport.insetBy(dx: -0.501, dy: -0.501).contains(frame) {
+                XCTAssertGreaterThanOrEqual(frame.width + 0.001, 44)
+                XCTAssertGreaterThanOrEqual(frame.height + 0.001, 44)
+                let segment = frame.height <= viewport.height * 0.6 ? frame
+                    : CGRect(x: frame.minX, y: frame.minY + offset, width: frame.width,
+                             height: min(viewport.height * 0.6, frame.height - offset))
+                print("PLAN_HOME_SEGMENT card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
+                if viewport.insetBy(dx: -0.501, dy: -0.501).contains(segment) {
                     XCTAssertTrue(card.isHittable)
-                    capture(name); return
+                    assertHomeTarget(homeCreate)
+                    print("PLAN_HOME_READABLE card=\(card.identifier) frame=\(frame) segment=\(segment) viewport=\(viewport) part=\(part)")
+                    capture(part == 1 && segment == frame ? name : name + "-part-\(part)")
+                    if offset + segment.height >= frame.height - 0.501 { return }
+                    // Adjacent actual screenshots overlap by 24pt, so no content is skipped.
+                    offset += segment.height - 24
+                    part += 1
+                    continue
                 }
-                XCTAssertLessThanOrEqual(frame.height, viewport.height,
-                                         "These representative cards must fit after scrolling")
-                let delta = frame.minY - viewport.minY
-                let distance = min(abs(delta), viewport.height * 0.6)
+                let delta = segment.minY < viewport.minY ? segment.minY - viewport.minY
+                    : segment.maxY - viewport.maxY
+                let distance = min(max(abs(delta), 64), viewport.height * 0.6)
                 let startY = delta > 0 ? viewport.maxY - 16 : viewport.minY + 16
                 let endY = startY + (delta > 0 ? -distance : distance)
                 let origin = app.coordinate(withNormalizedOffset: .zero)
@@ -348,7 +366,7 @@ import XCTest
                         withVelocity: .slow, thenHoldForDuration: 0.2)
             }
             capture(name + "-unreachable")
-            XCTFail("The entire representative card must be visible above the creation action")
+            XCTFail("Every part of the representative card must be readable above the creation action")
         }
         assertHomeSection("waitingResponse", language: "de")
         showComplete(app.buttons["plans-row-ui-plan-1"], section: "waitingResponse", name: "home-redesign-max-complete-task")
@@ -356,6 +374,61 @@ import XCTest
         app.buttons["plans-tab-upcoming"].tap()
         assertHomeSection("upcoming", language: "de")
         showComplete(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming", name: "home-redesign-max-complete-confirmed")
+    }
+
+    func testHomeRedesignLiveCandidateDatesRemainExplicitlyUndecided() throws {
+        struct Account: Decodable { let role: String; let accessToken: String }
+        struct Fixture: Decodable { let bundle: String; let finalBlockToken: String; let accounts: [Account] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the separate, untouched two-date heading-layout plan.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        continueAfterFailure = false
+        for (language, large) in [("zh-Hans", false), ("de", true)] {
+            let tag = "\(language)-\(large ? "system-largest-dark" : "normal-light")"
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
+                "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(large ? "dark" : "light")", "-UIPreferredContentSizeCategoryName",
+                large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+            app.launch()
+            let tab = app.tabBars.buttons[language == "de" ? "Pläne" : "计划"]
+            XCTAssertTrue(tab.waitForExistence(timeout: 20)); tab.tap()
+            let card = app.buttons["plans-coordinated-\(fixture.finalBlockToken)"]
+            XCTAssertTrue(card.waitForExistence(timeout: 20))
+            let visible = revealHomeItem(card, section: "waitingResponse")
+            XCTAssertTrue(card.label.contains(language == "de" ? "Zeit noch offen" : "时间待定"))
+            XCTAssertTrue(card.label.contains(language == "de" ? "2 Tage ·" : "2 天可选 ·"))
+            XCTAssertNil(card.label.range(of: #"\b(?:[01]?\d|2[0-3]):[0-5]\d\b"#, options: .regularExpression),
+                         "A candidate window must not masquerade as a chosen final interval")
+            assertHomeSection("waitingResponse", language: language)
+            capture("home-redesign-live-candidate-undecided-\(tag)")
+            tapHomeItem(card, visible: visible)
+            XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+            XCTAssertTrue(app.descendants(matching: .any)["time-poll-date-range"].firstMatch.exists)
+            capture("home-redesign-live-candidate-original-detail-\(tag)")
+            app.navigationBars.firstMatch.buttons.firstMatch.tap()
+            assertHomeSection("waitingResponse", language: language)
+        }
+    }
+
+    private func assertKnownCardTime(_ card: XCUIElement, dayOffset: Int, hourOffset: Int,
+                                     durationMinutes: Int, language: String) {
+        let calendar = Calendar.autoupdatingCurrent
+        let day = calendar.date(byAdding: .day, value: dayOffset, to: calendar.startOfDay(for: Date()))!
+        let start = calendar.date(byAdding: .hour, value: hourOffset, to: day)!
+        let end = start.addingTimeInterval(TimeInterval(durationMinutes * 60))
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: language)
+        formatter.timeZone = calendar.timeZone
+        formatter.dateFormat = "HH:mm"
+        let from = formatter.string(from: start), until = formatter.string(from: end)
+        XCTAssertTrue(card.label.contains(from) && card.label.contains(until),
+                      "The original known interval must remain in the card's date/time description: \(card.label)")
+        XCTAssertFalse(card.label.contains(language == "de" ? "Zeit noch offen" : "时间待定"),
+                       "An existing conversation proposal already has a concrete date and interval")
     }
 
     private func assertHomeSection(_ section: String, language: String) {

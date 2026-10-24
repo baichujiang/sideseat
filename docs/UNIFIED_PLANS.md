@@ -57,6 +57,20 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Unified native card schedule — Preview 214
+
+Actionable, waiting and confirmed overview cards share the same leading date/time
+column and trailing name, state, available location, people/progress and next step.
+Small existing activity artwork moves to the trailing edge. At accessibility sizes
+the schedule and information stack without fixed column width or body-text caps.
+
+Existing concrete intervals, including pending conversation invitations, keep
+their real clock values. Cards with only candidate dates show their original date
+count/range and Time to be decided. Cross-day end dates, years and time zones keep
+the existing formatter; candidate windows never become a chosen final interval.
+Only the existing private card layout changes; grouping, navigation, submission,
+invitations and Calendar rules remain in place. See the [214 QA](./qa/2026-10-24-plan-date-column.md).
+
 ## Native Plans home — Preview 213
 
 Planning and Confirmed remain the two root sections, with the fixed title and

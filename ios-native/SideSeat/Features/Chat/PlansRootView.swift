@@ -683,118 +683,91 @@ private struct PlanOverviewLabel: View {
     }
     private var secondary: Color { SideSeatTheme.textSecondaryStrong }
     private var topic: NativeWeeklyIntentTopic { PlanHomeArtwork.activityTopic(for: title) ?? .explore }
+    private var displayDate: String? { start != nil || !candidateDates.isEmpty ? timing.dateText : nil }
+    private var displayTime: String { timing.clockText ?? AppLocalization.string("Time to be decided") }
 
     var body: some View {
         SSFlowCard(contentPadding: style == .waiting ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD,
                    contentSpacing: 0, activityTopic: topic) {
-            switch style {
-            case .task: task
-            case .waiting: waiting
-            case .meetup: meetup
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
+            layout {
+                schedule
+                    .frame(width: typeSize.isAccessibilitySize ? nil : 92, alignment: .leading)
+                information
             }
         }
         .foregroundStyle(SideSeatTheme.textPrimary)
         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel([presentation.cardStatusTitle, title, timing.dateText, timing.clockText,
+        .accessibilityLabel([presentation.cardStatusTitle, title, displayDate, displayTime,
             timing.zoneText, style == .waiting ? waitingSummary : context, progress, location,
             presentation.cardActionTitle].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", "))
+        .accessibilityHint(style == .meetup ? presentation.cardActionTitle : "")
     }
 
-    private var identity: some View {
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceSM))
-        return layout {
-            if !typeSize.isAccessibilitySize {
-                PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity,
-                                size: style == .waiting ? 40 : 52)
-            }
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                activityTitle(style == .waiting ? .subheadline : .headline)
-                schedule
-                status
-            }
-        }
-    }
-
-    private var task: some View {
+    private var information: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            identity
-            footerLayout {
-                PlanHomePeople(people: people, text: progress ?? context)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
-                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                Text(presentation.cardActionTitle)
-                    .font(.footnote.weight(.semibold))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-                    .padding(.horizontal, SideSeatTheme.spaceSM)
-                    .padding(.vertical, SideSeatTheme.spaceXS)
-                    .frame(minHeight: 32, alignment: .leading)
-                    .background(SideSeatTheme.ProductAction.fill,
-                                in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    .layoutPriority(1)
-            }
-        }
-    }
-
-    private var waiting: some View {
-        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            identity
-            footerLayout {
-                PlanHomePeople(people: people, text: progress ?? context)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                    activityTitle(style == .waiting ? .subheadline : .headline)
+                    status
+                    if let location, !location.isEmpty {
+                        Text(location).font(.caption).foregroundStyle(secondary)
+                            .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 if !typeSize.isAccessibilitySize {
-                    Spacer(minLength: 0)
-                    chevron
+                    PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity,
+                                    size: style == .waiting ? 36 : 40)
+                }
+            }
+            if style == .task {
+                ViewThatFits(in: .horizontal) {
+                    if !typeSize.isAccessibilitySize {
+                        HStack(spacing: SideSeatTheme.spaceSM) {
+                            peopleSummary
+                            Spacer(minLength: 0)
+                            action
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                        peopleSummary
+                        action.frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+            } else {
+                HStack(spacing: SideSeatTheme.spaceSM) {
+                    peopleSummary
+                    if !typeSize.isAccessibilitySize {
+                        Spacer(minLength: 0)
+                        chevron
+                    }
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var meetup: some View {
-        let layout = typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-        return layout {
-            if let start {
-                VStack(spacing: 2) {
-                    Text(timing.datePart(start, template: "MMM")).font(.caption.weight(.medium))
-                    Text(timing.dayNumber(start)).font(.title2.weight(.semibold)).monospacedDigit()
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                }
-                .frame(minWidth: 44).foregroundStyle(secondary)
-                .padding(.vertical, SideSeatTheme.spaceXS)
-                .background(SideSeatTheme.fillSubtle,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .accessibilityHidden(true)
-            }
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                activityTitle(.headline)
-                Text((start.map { timing.datePart($0, template: "EEE") + " · " } ?? "")
-                     + (timing.clockText ?? timing.dateText))
-                    .font(.subheadline.weight(.medium)).monospacedDigit()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityLabel(timing.dateText + ", " + (timing.clockText ?? ""))
-                if let start, timing.datePart(start, template: "y") != timing.datePart(now, template: "y") {
-                    Text(timing.datePart(start, template: "y")).font(.caption).foregroundStyle(secondary)
-                }
-                if let location, !location.isEmpty {
-                    Text(location).font(.caption).foregroundStyle(secondary)
-                        .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                PlanHomePeople(people: people, text: context)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
-                zone
-            }.frame(maxWidth: .infinity, alignment: .leading)
-            if !typeSize.isAccessibilitySize {
-                PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity, size: 44)
-                chevron
-            }
-        }
-        .accessibilityHint(presentation.cardActionTitle)
+    private var peopleSummary: some View {
+        PlanHomePeople(people: people, text: progress ?? context)
+            .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+    }
+
+    private var action: some View {
+        Text(presentation.cardActionTitle)
+            .font(.footnote.weight(.semibold))
+            .fixedSize(horizontal: false, vertical: true)
+            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
+            .padding(.horizontal, SideSeatTheme.spaceSM)
+            .padding(.vertical, SideSeatTheme.spaceXS)
+            .frame(minHeight: 32, alignment: .leading)
+            .background(SideSeatTheme.ProductAction.fill,
+                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 
     private var waitingSummary: String {
@@ -802,12 +775,6 @@ private struct PlanOverviewLabel: View {
             return String(format: AppLocalization.string("Waiting for %@ to confirm"), waitingFor)
         }
         return [presentation.cardStatusTitle, progress].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-    }
-
-    private var footerLayout: AnyLayout {
-        typeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
     }
 
     private var status: some View {
@@ -835,9 +802,12 @@ private struct PlanOverviewLabel: View {
 
     private var schedule: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            Text(timing.dateText + (timing.clockText.map { " · " + $0 } ?? ""))
-                .font(style == .task ? .subheadline : .footnote)
-                .foregroundStyle(style == .task ? SideSeatTheme.textPrimary : secondary)
+            if let displayDate {
+                Text(displayDate).font(.footnote.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Text(displayTime)
+                .font(.caption).foregroundStyle(secondary).monospacedDigit()
                 .fixedSize(horizontal: false, vertical: true)
             zone
         }
