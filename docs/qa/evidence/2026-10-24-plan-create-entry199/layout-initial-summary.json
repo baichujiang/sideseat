@@ -1,0 +1,69 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64e",
+        "deviceId" : "00008110-001A69110CC1401E",
+        "deviceName" : "iPhone (4)",
+        "modelName" : "iPhone 14 Plus",
+        "osBuildNumber" : "23G83",
+        "osVersion" : "26.6.1",
+        "platform" : "iOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 3,
+      "passedTests" : 4,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "Flow199 · Built with macOS 26.3.1",
+  "expectedFailures" : 0,
+  "failedTests" : 3,
+  "finishTime" : 1792801564.846,
+  "passedTests" : 4,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1792801468.023,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "XCTAssertGreaterThanOrEqual failed: (\"43.99999999999999\") is less than (\"44.0\")",
+      "targetName" : "Flow199UITests",
+      "testIdentifier" : 4,
+      "testIdentifierString" : "PlanStatePresentationUITests/testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow199/Flow199UITests/PlanStatePresentationUITests/testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold",
+      "testName" : "testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold()"
+    },
+    {
+      "failureText" : "XCTAssertGreaterThanOrEqual failed: (\"43.99999999999999\") is less than (\"44.0\")",
+      "targetName" : "Flow199UITests",
+      "testIdentifier" : 5,
+      "testIdentifierString" : "PlanStatePresentationUITests/testHomeToolbarAcrossLanguagesSizesAndPlanStates()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow199/Flow199UITests/PlanStatePresentationUITests/testHomeToolbarAcrossLanguagesSizesAndPlanStates",
+      "testName" : "testHomeToolbarAcrossLanguagesSizesAndPlanStates()"
+    },
+    {
+      "failureText" : "Invalid key path hittable specified in predicate format string (XCTElementQueryInvalidPredicate)",
+      "targetName" : "Flow199UITests",
+      "testIdentifier" : 7,
+      "testIdentifierString" : "PlanStatePresentationUITests/testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable()",
+      "testIdentifierURL" : "test://com.apple.xcode/Flow199/Flow199UITests/PlanStatePresentationUITests/testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+      "testName" : "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable()"
+    }
+  ],
+  "title" : "Test - Flow199",
+  "topInsights" : [
+    {
+      "category" : "Common Failures",
+      "impact" : "66% of failures",
+      "text" : "2 runs of 2 tests failed with XCTAssertGreaterThanOrEqual failed: (\"43.99999999999999\") is less than (\"44.0\")"
+    }
+  ],
+  "totalTestCount" : 7
+}

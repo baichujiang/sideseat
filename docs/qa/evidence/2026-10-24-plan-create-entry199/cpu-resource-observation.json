@@ -1,0 +1,14 @@
+{
+  "type": "cpu usage",
+  "build": 199,
+  "start": "2026-10-24T00:20:23.148Z",
+  "end": "2026-10-24T00:22:24.481Z",
+  "averageCPUPercent": 74,
+  "cpuSeconds": 90,
+  "durationSeconds": 121.33,
+  "systemAction": "none",
+  "occurredDuring": "continuous phone journey, detail/final-time interactions",
+  "causeProven": false,
+  "fixedInThisStage": false,
+  "rawReportPublished": false
+}

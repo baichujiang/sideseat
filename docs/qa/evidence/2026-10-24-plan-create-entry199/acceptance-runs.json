@@ -1,0 +1,163 @@
+{
+  "allLatestSelectedChecksPassed": true,
+  "notASingleUninterruptedLayoutSuite": true,
+  "latestChecks": [
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testFirstHomeOpensCreateDirectlyWithoutLinkEntry",
+      "result": "passed",
+      "seconds": 11.284,
+      "run": "entry-smoke"
+    },
+    {
+      "class": "PlanFirstUsePhoneUITests",
+      "test": "testNativeContactCardCreateFillInviteConfirmAndCalendar",
+      "result": "passed",
+      "seconds": 369.816,
+      "run": "phone"
+    },
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testEmptyHomeWaitsForInitialLoadBeforeShowingItsActions",
+      "result": "passed",
+      "seconds": 19.934,
+      "run": "layout"
+    },
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testMessagesEntryUsesFirstLevelPlans",
+      "result": "passed",
+      "seconds": 15.938,
+      "run": "layout"
+    },
+    {
+      "class": "PlanFirstUsePhoneUITests",
+      "test": "testPlanHomeEntryAfterFullFlow",
+      "result": "passed",
+      "seconds": 19.016,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold",
+      "result": "passed",
+      "seconds": 19.85,
+      "run": "layout-final"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testHomeToolbarAcrossLanguagesSizesAndPlanStates",
+      "result": "passed",
+      "seconds": 89.739,
+      "run": "layout-final"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testInitialLoadingDoesNotShowTheEmptyPlanLayout",
+      "result": "passed",
+      "seconds": 11.469,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+      "result": "passed",
+      "seconds": 35.587,
+      "run": "history"
+    }
+  ],
+  "allRunsIncludingFailures": [
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testFirstHomeOpensCreateDirectlyWithoutLinkEntry",
+      "result": "passed",
+      "seconds": 11.284,
+      "run": "entry-smoke"
+    },
+    {
+      "class": "PlanFirstUsePhoneUITests",
+      "test": "testNativeContactCardCreateFillInviteConfirmAndCalendar",
+      "result": "passed",
+      "seconds": 369.816,
+      "run": "phone"
+    },
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testEmptyHomeWaitsForInitialLoadBeforeShowingItsActions",
+      "result": "passed",
+      "seconds": 19.934,
+      "run": "layout"
+    },
+    {
+      "class": "PlanCreationPresentationUITests",
+      "test": "testMessagesEntryUsesFirstLevelPlans",
+      "result": "passed",
+      "seconds": 15.938,
+      "run": "layout"
+    },
+    {
+      "class": "PlanFirstUsePhoneUITests",
+      "test": "testPlanHomeEntryAfterFullFlow",
+      "result": "passed",
+      "seconds": 19.016,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold",
+      "result": "failed",
+      "seconds": 8.477,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testHomeToolbarAcrossLanguagesSizesAndPlanStates",
+      "result": "failed",
+      "seconds": 9.521,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testInitialLoadingDoesNotShowTheEmptyPlanLayout",
+      "result": "passed",
+      "seconds": 11.469,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+      "result": "failed",
+      "seconds": 8.361,
+      "run": "layout"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold",
+      "result": "passed",
+      "seconds": 19.85,
+      "run": "layout-final"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testHomeToolbarAcrossLanguagesSizesAndPlanStates",
+      "result": "passed",
+      "seconds": 89.739,
+      "run": "layout-final"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+      "result": "failed",
+      "seconds": 36.206,
+      "run": "layout-final"
+    },
+    {
+      "class": "PlanStatePresentationUITests",
+      "test": "testTwoTabsKeepTheRootHeadingFixedAndHistoryReachable",
+      "result": "passed",
+      "seconds": 35.587,
+      "run": "history"
+    }
+  ],
+  "unresolvedExtraLeftSwipeRecorded": true
+}

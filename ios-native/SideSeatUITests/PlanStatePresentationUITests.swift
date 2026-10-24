@@ -3,21 +3,24 @@ import XCTest
 @MainActor final class PlanStatePresentationUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false, loading: Bool = false, longList: Bool = false) {
+    private func launch(accessibility: Bool = false, layout: Bool = false, reference: Bool = false, loading: Bool = false, longList: Bool = false, language: String = "zh-Hans", empty: Bool = false, contentSizeCategory: String? = nil) {
+        app?.terminate()
         if let bundle = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_PRESENTATION_QA_BUNDLE"] {
             app = XCUIApplication(bundleIdentifier: bundle)
         } else { app = XCUIApplication() }
         app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
-            "--ui-testing-skip-tutorial", "--ui-testing-chats", "--ui-testing-language=zh-Hans", "--ui-testing-local-api"]
+            "--ui-testing-skip-tutorial", "--ui-testing-chats", "--ui-testing-language=\(language)", "--ui-testing-local-api"]
         if accessibility { app.launchArguments += ["--ui-testing-appearance=dark", "--ui-testing-dynamic-type-accessibility"] }
         if layout { app.launchArguments += ["--ui-testing-plans-mixed-waiting", "--ui-testing-plans-waiting-rail"] }
         if reference { app.launchArguments += ["--ui-testing-mutual-opportunity"] }
         if loading { app.launchArguments += ["--ui-testing-plans-loading"] }
         if longList { app.launchArguments += ["--ui-testing-plans-long-list"] }
+        if empty { app.launchArguments += ["--ui-testing-plans-empty"] }
+        if let contentSizeCategory { app.launchArguments += ["-UIPreferredContentSizeCategoryName", contentSizeCategory] }
         app.launchEnvironment["SIDESEAT_API_BASE_URL_OVERRIDE"] = "http://127.0.0.1:9"
         app.launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 20))
-        app.tabBars.buttons["计划"].tap()
+        app.tabBars.buttons[language == "de" ? "Pläne" : "计划"].tap()
     }
 
     override func tearDown() { app?.terminate() }
@@ -72,9 +75,20 @@ import XCTest
         XCTAssertTrue(heading.label.contains("计划"))
         let headingY = heading.frame.minY
         let pickerY = picker.frame.minY
-        app.scrollViews["plans-scroll-waitingResponse"].swipeUp(velocity: .slow)
-        XCTAssertFalse(app.buttons["plans-create-unified"].isHittable,
-                       "The long list must actually scroll before checking the fixed heading")
+        let scroll = app.scrollViews["plans-scroll-waitingResponse"]
+        let cards = scroll.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-row-'"))
+        guard let first = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
+            XCTFail("A plan card must be visible before scrolling"); return
+        }
+        let firstID = first.identifier, firstY = first.frame.minY
+        scroll.swipeUp(velocity: .slow)
+        guard let after = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
+            XCTFail("A plan card must be visible after scrolling"); return
+        }
+        XCTAssertTrue(after.identifier != firstID || abs(after.frame.minY - firstY) > 20,
+                      "A visible card must move or change before checking the fixed toolbar")
+        XCTAssertTrue(app.buttons["plans-create-unified"].isHittable,
+                      "Creation remains in the toolbar while the plan list scrolls")
         XCTAssertEqual(heading.frame.minY, headingY, accuracy: 2)
         XCTAssertEqual(picker.frame.minY, pickerY, accuracy: 2)
         XCTAssertTrue(app.buttons["plans-history"].isHittable)
@@ -92,13 +106,100 @@ import XCTest
         XCTAssertTrue(app.navigationBars.firstMatch.exists)
         app.navigationBars.buttons.firstMatch.tap()
         XCTAssertTrue(history.waitForExistence(timeout: 10))
-        app.navigationBars.buttons.firstMatch.tap()
+        let historyBar = app.navigationBars["历史计划"]
+        XCTAssertTrue(historyBar.waitForExistence(timeout: 10))
+        historyBar.buttons.firstMatch.tap()
         XCTAssertTrue(picker.waitForExistence(timeout: 10))
         XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
         XCTAssertTrue(app.navigationBars["计划"].exists)
-        app.scrollViews["plans-scroll-upcoming"].swipeLeft()
-        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        assertRootToolbar(language: "zh-Hans")
         capture("confirmed-tab-after-history")
+        homeCreate.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-title"].firstMatch.waitForExistence(timeout: 10))
+        let cancel = app.navigationBars.buttons["取消"]
+        XCTAssertTrue(cancel.isHittable); cancel.tap()
+        XCTAssertTrue(picker.waitForExistence(timeout: 10))
+        XCTAssertTrue(picker.buttons.element(boundBy: 1).isSelected)
+        assertRootToolbar(language: "zh-Hans")
+        capture("confirmed-tab-after-create-cancel")
+    }
+
+    func testHomeToolbarAcrossLanguagesSizesAndPlanStates() {
+        // Both store states use an intentionally offline coordinated-plan endpoint;
+        // these checks accept the toolbar layout, not the whole page's empty/error state.
+        continueAfterFailure = false
+        for language in ["zh-Hans", "de"] {
+            for large in [false, true] {
+                for empty in [true, false] {
+                    let tag = "\(language)-\(large ? "largest" : "normal")-\(empty ? "empty-store" : "populated-store")"
+                    launch(accessibility: large, layout: !empty, longList: !empty,
+                           language: language, empty: empty, contentSizeCategory: "UICTContentSizeCategoryL")
+                    let expectedCreateID = empty ? "plans-create-primary" : "plans-create-unified"
+                    XCTAssertTrue(app.buttons[expectedCreateID].waitForExistence(timeout: 10))
+                    if empty {
+                        // This empties PlansStore only; the coordinated-plan endpoint is intentionally offline.
+                        // Verify the stable toolbar, not a clean whole-page empty state.
+                        XCTAssertTrue(app.descendants(matching: .any)["plans-loading"].firstMatch.waitForNonExistence(timeout: 10))
+                    } else {
+                        XCTAssertTrue(app.buttons["plans-row-ui-plan-1"].waitForExistence(timeout: 10))
+                    }
+                    let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
+                    XCTAssertEqual(picker.buttons.count, 2)
+                    XCTAssertTrue(picker.buttons.element(boundBy: 0).isSelected)
+                    assertRootToolbar(language: language)
+                    capture("home-toolbar-\(tag)")
+                }
+            }
+        }
+    }
+
+    func testGermanToolbarKeepsTheFullActionBeforeTheIconOnlyThreshold() {
+        continueAfterFailure = false
+        launch(layout: true, language: "de", contentSizeCategory: "UICTContentSizeCategoryL")
+        XCTAssertTrue(app.buttons["plans-row-ui-plan-1"].waitForExistence(timeout: 10))
+        assertRootToolbar(language: "de")
+        let regularWidth = homeCreate.frame.width
+        launch(layout: true, language: "de", contentSizeCategory: "UICTContentSizeCategoryXXL")
+        XCTAssertTrue(app.buttons["plans-row-ui-plan-1"].waitForExistence(timeout: 10))
+        assertRootToolbar(language: "de")
+        XCTAssertGreaterThan(homeCreate.frame.width, regularWidth + 1,
+                             "The system xxLarge argument must visibly enlarge the full action, rather than leave the default size or show only a plus")
+        capture("home-toolbar-de-xxLarge-populated")
+    }
+
+    private var homeCreate: XCUIElement {
+        app.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).firstMatch
+    }
+
+    private func assertRootToolbar(language: String) {
+        let nav = app.navigationBars.firstMatch
+        let heading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
+        let create = homeCreate
+        let history = app.buttons["plans-history"]
+        XCTAssertTrue(heading.waitForExistence(timeout: 10))
+        XCTAssertTrue(create.isHittable && history.isHittable)
+        XCTAssertTrue(heading.label.contains(language == "de" ? "Pläne" : "计划"))
+        XCTAssertEqual(create.label, language == "de" ? "Plan starten" : "发起计划")
+        XCTAssertEqual(nav.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).count, 1)
+        for element in [heading, create, history] {
+            let frame = element.frame
+            XCTAssertFalse(frame.isEmpty)
+            XCTAssertGreaterThanOrEqual(frame.minX, nav.frame.minX - 1)
+            XCTAssertLessThanOrEqual(frame.maxX, nav.frame.maxX + 1)
+            XCTAssertGreaterThanOrEqual(frame.minY, nav.frame.minY - 1)
+            XCTAssertLessThanOrEqual(frame.maxY, nav.frame.maxY + 1)
+        }
+        for control in [create, history] {
+            // CGRect arithmetic can represent an exact 44pt span as 43.99999999999999.
+            XCTAssertGreaterThanOrEqual(control.frame.width, 44 - 0.001)
+            XCTAssertGreaterThanOrEqual(control.frame.height, 44 - 0.001)
+        }
+        XCTAssertLessThanOrEqual(history.frame.maxX, heading.frame.minX + 1)
+        XCTAssertLessThanOrEqual(heading.frame.maxX, create.frame.minX + 1)
+        for section in ["waitingResponse", "upcoming"] {
+            XCTAssertEqual(app.scrollViews["plans-scroll-\(section)"].buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).count, 0)
+        }
+        print("PLAN_HOME_TOOLBAR \(language) heading=\(heading.frame) create=\(create.frame) history=\(history.frame)")
     }
 
     func testInitialLoadingDoesNotShowTheEmptyPlanLayout() {

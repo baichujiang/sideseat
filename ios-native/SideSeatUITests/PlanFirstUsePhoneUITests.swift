@@ -1257,6 +1257,41 @@ import XCTest
         app.terminate()
     }
 
+    func testPlanHomeEntryAfterFullFlow() throws {
+        struct ContactFixture: Decodable {
+            let title: String
+            let bundle: String
+            let accounts: [NativeAccount]
+        }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires the completed disposable contact flow.")
+        let fixture = try JSONDecoder().decode(ContactFixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+        nativeSignIn(owner, bundle: fixture.bundle)
+        app.tabBars.buttons["计划"].tap()
+        let create = app.buttons["plans-create-unified"]
+        XCTAssertTrue(create.waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["暂时没有筹划中的活动"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["plans-tab-waitingResponse"].isSelected)
+        XCTAssertTrue(create.isHittable)
+        XCTAssertEqual(app.navigationBars["计划"].buttons.matching(identifier: "plans-create-unified").count, 1)
+        capture(app, "plans-home-entry-live-planning")
+        app.buttons["plans-tab-upcoming"].tap()
+        let plan = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
+        XCTAssertTrue(plan.waitForExistence(timeout: 20))
+        XCTAssertTrue(create.isHittable)
+        capture(app, "plans-home-entry-live-confirmed")
+        create.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["time-poll-title"].firstMatch.waitForExistence(timeout: 10))
+        capture(app, "plans-home-entry-live-create")
+        app.navigationBars.buttons["取消"].tap()
+        XCTAssertTrue(create.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["plans-tab-upcoming"].isSelected)
+        XCTAssertTrue(plan.isHittable)
+        capture(app, "plans-home-entry-live-create-cancel")
+    }
+
     func testNativeContactCardDarkAccessibilityAfterFullFlow() throws {
         struct ContactFixture: Decodable {
             let title: String

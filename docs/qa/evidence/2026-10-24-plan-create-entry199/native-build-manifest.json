@@ -1,0 +1,31 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused isolated generated project; all tracked inputs refreshed from active checkout; project.yml byte-identical.",
+  "privateLocalConfigurationMatched": true,
+  "binarySHA256": {
+    "SideSeat Preview": "6d721f059e1da29849c45e1b603ce34a820fe63208d301baeee2da94a35eee29",
+    "SideSeat Preview.debug.dylib": "5c4e77c81862be0533ae02cfb1c50e304e47268d101db3838bd54cbec9f79868"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "build": 199,
+  "strictSignatureVerified": true,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "backendRelease": false,
+  "webRelease": false,
+  "fullFlowUITestSourceSHA256": "31d9ffc3f52694b0d5ef1cca0b256c6c7fc4cd28a2275f8695543196c2aad8f7",
+  "initialLayoutAndLiveHomeUITestSourceSHA256": {
+    "PlanFirstUsePhoneUITests.swift": "dd199dd7d9a8025ed7cf0b556c543b953500a6c586d833fd470f2c908942a267",
+    "PlanStatePresentationUITests.swift": "e81d4d31547d4127eb557e392da533ba3001b6a608ff7ea0bf5a1751cbb0faec",
+    "PlanCreationPresentationUITests.swift": "8d573038fd650763a70cecceb2c8e915349dad40b7e07972a55dbf21f9adc782"
+  },
+  "productUnchangedDuringUITestRepairs": true,
+  "matrixAndThresholdUITestSourceSHA256": {
+    "PlanFirstUsePhoneUITests.swift": "dd199dd7d9a8025ed7cf0b556c543b953500a6c586d833fd470f2c908942a267",
+    "PlanStatePresentationUITests.swift": "eb081b690fd0d4862dfccd260a5c514659dcb01eec2e18ec9166aecc326e8b9e",
+    "PlanCreationPresentationUITests.swift": "8d573038fd650763a70cecceb2c8e915349dad40b7e07972a55dbf21f9adc782"
+  },
+  "historyFocusedUITestSourceSHA256": "ba507a5fd5e16827185d3d67f9d60da4c8b5299edd2b34cc797bf76b16fd828d"
+}

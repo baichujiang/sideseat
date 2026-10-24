@@ -113,6 +113,19 @@ struct PlansRootView: View {
         .toolbar {
             if !isHistory {
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button { showsPlanCreation = true } label: {
+                        if dynamicTypeSize >= .xxxLarge {
+                            Image(systemName: "plus")
+                        } else {
+                            Label("Start a plan", systemImage: "plus")
+                                .labelStyle(.titleAndIcon)
+                        }
+                    }
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
+                    .accessibilityLabel(AppLocalization.string("Start a plan"))
+                    .accessibilityIdentifier(hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary")
+                }.ssStandaloneAction()
+                ToolbarItem(placement: .topBarLeading) {
                     Button { router.navigate(to: .planHistory) } label: {
                         Label("Plan history", systemImage: "clock.arrow.circlepath")
                             .labelStyle(.iconOnly)
@@ -212,7 +225,6 @@ struct PlansRootView: View {
 
     @ViewBuilder
     private func sectionContent(_ section: MVPPlanSection) -> some View {
-        if section != .ended { planActions }
         if initiallyLoading {
             SSLoadingState("Loading plans")
                 .frame(maxWidth: .infinity, minHeight: 200)
@@ -268,16 +280,6 @@ struct PlansRootView: View {
                 }
             }
         }
-    }
-
-    private var planActions: some View {
-        VStack(spacing: 0) {
-            PlanActionButton(title: AppLocalization.string("Start a plan"), symbol: "plus", kind: .commit,
-                accessibilityID: hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary") {
-                showsPlanCreation = true
-            }
-        }
-        .accessibilityElement(children: .contain).accessibilityIdentifier("plans-actions")
     }
 
     private var actionOverview: some View {
