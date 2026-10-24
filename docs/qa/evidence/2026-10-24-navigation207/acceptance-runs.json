@@ -42,7 +42,6 @@
   ],
   "singleAllPassedSuite": false,
   "app207FrozenAcrossTestOnlyRepair": true,
-  "sourceCommitPendingReceipt": true,
   "scope": [
     "Two history/chat/root round trips",
     "Active final-page middle left swipe",
@@ -57,5 +56,7 @@
   "notRun": [
     "Full real invitation API journey",
     "Browser or backend release"
-  ]
+  ],
+  "sourceCommit": "f1b12449549414833dd5c4978267920f0e80f96d",
+  "sourcePushed": true
 }

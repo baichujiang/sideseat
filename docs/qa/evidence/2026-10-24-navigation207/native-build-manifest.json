@@ -11,5 +11,7 @@
   "productFrozenDuringTestOnlyRepairs": true,
   "testSourceSHA256": "e576723a6ea3ec9e81a35ef67b9debe0649d9746cbddf514c41fdc7fd2e0dc64",
   "backendReleased": false,
-  "webReleased": false
+  "webReleased": false,
+  "sourceCommit": "f1b12449549414833dd5c4978267920f0e80f96d",
+  "sourcePushed": true
 }

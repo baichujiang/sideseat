@@ -21,7 +21,22 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 206 is the current installed development build. Sequential repair2
+- Preview 207 is the current installed development build. Sequential repair3
+  consumes horizontal first/last section boundary drags using existing clamps;
+  the same1.5 direction threshold,20pt edge/exclusions/VoiceOver/vertical scrolling,
+  valid paging, routing and state stay. No new state/request/component. Source
+  f1b12449 is pushed. Real206 baseline failed67.753s with chat over root after
+  two history returns/extra left. Final207 separate cases131.483/123.623/94.022s
+  passed, normal/largest history/card boundary/create-cancel and Shared rail/
+  Together. Mixed suite had a largest1018pt-card targeting failure; only test
+  visible-region targeting repaired, strict root/nav/44pt retained; Shared case
+  and full helper callgraph unchanged, so its94.022s retained. Do not call one
+  all-passed suite.27 actual final images reviewed,6 final+1 failure saved.
+  Phone207 normalPID8448,267/Local/signature/binary verified,97 preserved;
+  Runner/stage private files cleaned,no new App reports or real writes/backend/
+  web release. Repairs4–5/final supplements pending. Offline navigation fixture
+  acceptance does not prove real API flow. See207 release/sequential QA.
+- Preview 206 was the previous development build. Sequential repair2
   compacts accessibility availability status/summary and removes repeated same-day
   dates from final-time footer; full AX dates, all state text/IDs, selection/manual
   submission/invitation/Calendar rules stay. No new state/request. Sourceaa816c08
