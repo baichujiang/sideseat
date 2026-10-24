@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 当前Preview204；收藏资料入口并入头像／姓名，独立行删除；四组合专项与20张实图复核通过，普通启动核验。无新增App报告或后端／网页发布；最大字卡片允许滚动，其他既有观察保留。2026-10-24，Europe/Berlin。
+**状态：** 当前Preview205；顺序修复第1项时段菜单通过230.727秒专项／24张实图复核，普通启动核验。第2–5项及补验进行中，无后端／网页发布。2026-10-24，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview204，收藏资料入口**：头像和姓名整区无框可点，右侧箭头提示，删除正文独占一行的资料按钮。复用原回调、ID与局部用户信息，至少44pt，无新状态／请求／依赖；推荐／探索／聊天与公开／私密资料规则保留。源码 `985af339` 已推送。同包四组合中德普通／最大字浅深 **209.294秒通过**，8次头像／姓名打开和返回，收藏保留；20张最终实图查看、8张保存。初轮23.688秒仅修测试容器定位，App不变。最大字整卡需滚动，私有详情实图为普通视觉字号，只验路由；公开资料分支仅源码审查。手机204普通启动 **PID8022**，普通97保留；267／Local／签名／二进制一致，Runner／私密文件清理，无真实账号／计划写入删除或新增App报告。无后端／网页／Schema发布，api/www仍Ready `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`；未重跑真实匹配／发送／邀请至日历API链／单元／领域／浏览器，其他既有观察保留。[204交付](./releases/2026-10-24-preview204-saved-profile-header.md)、[QA与实图](./qa/2026-10-24-saved-profile-header.md)。
+当前 **Preview205，时段菜单**：Menu直接列出时间按钮与当前勾选，移除嵌套inline Picker；原48项／半小时步长／24:00／Int值／规则／ID保持，无新状态／组件／请求。源码 `92910c5f` 已推送。最终同包中普通／德最大字 **230.727秒通过**，真实滚动／3秒静置／精确值／校验／关闭／保留，24张实际图复核、5张保存。204单次基线未复现旧间歇问题；中间测试定位／误点失败及原生24:00紧底边范围保留。手机205普通启动 **PID8303**、普通97保留；267／Local／签名／二进制一致，Runner／私密材料清理，无真实写入或新增App报告。无后端／网页发布。第2–5项及最终补验未完成。[205交付](./releases/2026-10-24-preview205-hour-menu.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
+
+此前 **Preview204，收藏资料入口**：头像和姓名整区无框可点，右侧箭头提示，删除正文独占一行的资料按钮。复用原回调、ID与局部用户信息，至少44pt，无新状态／请求／依赖；推荐／探索／聊天与公开／私密资料规则保留。源码 `985af339` 已推送。同包四组合中德普通／最大字浅深 **209.294秒通过**，8次头像／姓名打开和返回，收藏保留；20张最终实图查看、8张保存。初轮23.688秒仅修测试容器定位，App不变。最大字整卡需滚动，私有详情实图为普通视觉字号，只验路由；公开资料分支仅源码审查。手机204普通启动 **PID8022**，普通97保留；267／Local／签名／二进制一致，Runner／私密文件清理，无真实账号／计划写入删除或新增App报告。无后端／网页／Schema发布，api/www仍Ready `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`；未重跑真实匹配／发送／邀请至日历API链／单元／领域／浏览器，其他既有观察保留。[204交付](./releases/2026-10-24-preview204-saved-profile-header.md)、[QA与实图](./qa/2026-10-24-saved-profile-header.md)。
 
 此前 **Preview203，推荐空态**：居中图标／短标题／真实寻找中意愿说明，实色寻找更多与文字查看意愿集中纵排；搜索成功无结果给静态短说明，最大德文复合词拆行已修。复用主次组件，无新状态／请求／规则，原gates、按需／禁重复／重试／会员分页／过滤／匹配及入口ID保留。源码 `7dac7681` 已推送。同一最终包八组合布局与入口 **322.259秒**、加载／失败恢复定向复测 **26.855秒**分次通过；中间文案与测试失败范围明确，不称一次套件全通过。32张最终实图及2张改前图复核，最大字无意愿需滚动看按钮；原生Retry AX34.333pt未改，只验可达与实际恢复，新空态CTA仍44pt。手机203普通启动 **PID8005**，普通97保留；267／Local／签名／二进制一致，Runner／私密文件清理，无真实账号／计划创建删除或新增App报告。无后端／网页／Schema发布，api/www仍Ready `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`；公开flag不等于逐账户assignment。未测真实匹配／发送／邀请至日历完整API链／单元／领域／浏览器，Explore关闭仅源码审查，既有观察保留。[203交付](./releases/2026-10-24-preview203-recommendation-empty.md)、[QA与实图](./qa/2026-10-24-recommendation-empty.md)。
 
@@ -126,9 +128,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `985af339`已推送，后端保持既有生产；[204来源](./qa/evidence/2026-10-24-saved-profile-header204/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (204)` | 收藏资料入口四组合／20张实图复核，严格签名／安装／普通启动PID8022；[交付](./releases/2026-10-24-preview204-saved-profile-header.md) |
-| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；204收藏入口专项通过，Runner／私密文件清理，普通97保留；[设备核验](./qa/evidence/2026-10-24-saved-profile-header204/device-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `92910c5f`已推送，后端保持既有生产；[205来源](./qa/evidence/2026-10-24-hours205/native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (205)` | 时段菜单专项通过，严格签名／安装／普通启动PID8303；[交付](./releases/2026-10-24-preview205-hour-menu.md) |
+| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；205时段专项通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-hours205/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`，Ready | 原生产 1392 源码核验，只改两个后端文件、加来源标记；1390 项保留。候选/正式四次浏览器流程通过；[来源](./qa/evidence/2026-10-23-cross-day185/source-verification.json) |

@@ -21,7 +21,20 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 204 is the current installed development build. Saved cards open the
+- Preview 205 is the current installed development build. Sequential repair1
+  removes nested inline Picker from daily-hour Menu, using direct buttons and
+  current checkmark. Same48 integer options/half-hour step/24:00/rules/IDs; no new
+  state/component/request. Source92910c5f is pushed. Final same-package full two
+  language/text combinations passed230.727s with real07/24 scroll,3s stationarity,
+  exact values, validation, backdrop dismissal and input retention.24 actual images
+  viewed,5 saved.204 single-menu baseline passed34.602s; intermittent old reset
+  not reproduced there, so do not claim its bridge cause proved. Test-only earlier
+  ID/virtualized-row/backdrop failures retain scopes; product frozen. Native24:00
+  bottom edge remains tight but readable. Phone205 normal PID8303,267/Local/strict
+  signature/binary verified;97 preserved, Runner/private material cleaned, no real
+  writes/new App reports/backend/web release. Repairs2–5 and final supplemental
+  acceptance are still pending; see sequential-reliability QA and205 release.
+- Preview 204 was the previous development build. Saved cards open the
   existing profile/private-intention sheet by tapping avatar/name, with a trailing
   chevron; remove the standalone body profile row. Reuse peerIdentity locally and
   SSPress with44pt target; no new state/request/component or business-rule change.
