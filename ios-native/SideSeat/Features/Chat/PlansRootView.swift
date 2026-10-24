@@ -837,19 +837,48 @@ private struct PlanOverviewLabel: View {
                 }
             } else {
                 let dates = timing.candidateDays
-                if let first = dates.first, let last = dates.last, first != last {
-                    Text(String(format: AppLocalization.string("%d dates"), dates.count))
-                        .font(.caption2).foregroundStyle(secondary)
-                    Text(timing.dateLabel(first, weekday: false)).font(.footnote.weight(.semibold))
-                    Text("– " + timing.dateLabel(last, weekday: false))
-                        .font(.caption.weight(.semibold)).foregroundStyle(secondary)
-                } else if let displayDate {
-                    Text(displayDate).font(.footnote.weight(.semibold))
+                if let range = timing.candidateRangeText {
+                    if let context = timing.candidateRangeContext {
+                        Text(context).font(.caption2).foregroundStyle(secondary)
+                    }
+                    ViewThatFits(in: .horizontal) {
+                        Text(range).font(.title3.weight(.bold)).fixedSize()
+                        VStack(alignment: .leading, spacing: 2) {
+                            if let first = dates.first, let last = dates.last {
+                                candidateDate(first)
+                                if first != last { candidateDate(last, isEnd: true) }
+                            }
+                        }
+                        .font(.footnote.weight(.semibold))
                         .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                Text(displayTime).font(.caption).foregroundStyle(secondary)
+                if dates.count > 1 {
+                    let count = String(format: AppLocalization.string("%d dates"), dates.count)
+                    ViewThatFits(in: .horizontal) {
+                        Text(count + " · " + displayTime).fixedSize()
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(count)
+                            Text(displayTime)
+                        }
+                    }
+                    .font(.caption2).foregroundStyle(secondary)
+                } else {
+                    Text(displayTime).font(.caption).foregroundStyle(secondary)
+                }
             }
             zone
+        }
+    }
+
+    private func candidateDate(_ date: Date, isEnd: Bool = false) -> some View {
+        let prefix = isEnd ? "– " : ""
+        return ViewThatFits(in: .horizontal) {
+            Text(prefix + timing.dateLabel(date, weekday: false)).fixedSize()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(timing.datePart(date, template: "y")).font(.caption2).foregroundStyle(secondary)
+                Text(prefix + timing.datePart(date, template: "MMMd"))
+            }
         }
     }
 

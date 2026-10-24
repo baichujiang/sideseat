@@ -57,6 +57,23 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Candidate date hierarchy — Preview 216
+
+Candidate-only overview cards now use a small localized month (and year when
+needed), a prominent day range such as 25–31, and subordinate actual selectable
+date count plus Time to be decided. Sparse dates keep their actual count; the
+range shows the first and last selected dates, not a continuous final interval.
+Cross-month/year ranges retain complete endpoints and needed years, with a
+whole-date fallback when the concise range does not fit; if a whole endpoint
+cannot fit, year and complete month/day form explicit groups. Single/missing dates
+keep their existing semantics. The 112pt regular column and xxLarge stacking,
+known-time schedule branch, full AX dates and all existing rules stay unchanged.
+
+This corrects a display discrepancy: the owner's 14 Plus already had Preview215,
+but its candidate-only cards differed from demos with chosen times. Acceptance
+uses seven-date candidate plans as its primary example. See the
+[216 QA](./qa/2026-10-25-candidate-hierarchy.md).
+
 ## Readable schedule endpoints — Preview 215
 
 Native overview dates use a prominent month/day, with weekday and any required

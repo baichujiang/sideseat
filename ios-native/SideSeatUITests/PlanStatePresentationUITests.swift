@@ -445,6 +445,70 @@ import XCTest
         }
     }
 
+    /// Read-only candidate cards, including the seven-date range seen on the owner's phone.
+    func testHomeCandidateScheduleHierarchyAcrossTextSizes() throws {
+        struct Account: Decodable { let role: String; let accessToken: String }
+        struct Candidate: Decodable { let name: String; let token: String; let dates: [String] }
+        struct Fixture: Decodable { let bundle: String; let accounts: [Account]; let candidateCases: [Candidate] }
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_CONTACTS_JSON"]
+        try XCTSkipIf(raw == nil, "Requires fresh seven-date, long-title, sparse and cross-year candidate cards.")
+        let fixture = try JSONDecoder().decode(Fixture.self, from: Data(raw!.utf8))
+        let owner = try XCTUnwrap(fixture.accounts.first { $0.role == "owner" })
+        XCTAssertEqual(fixture.candidateCases.count, 4)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Europe/Berlin"))
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = calendar.timeZone
+        parser.dateFormat = "yyyy-MM-dd"
+        continueAfterFailure = false
+        for (language, category, tag) in [
+            ("zh-Hans", "UICTContentSizeCategoryL", "zh-Hans-normal-light"),
+            ("zh-Hans", "UICTContentSizeCategoryXL", "zh-Hans-xLarge-light"),
+            ("en", "UICTContentSizeCategoryL", "en-normal-light"),
+            ("de", "UICTContentSizeCategoryAccessibilityXXXL", "de-system-largest-dark")
+        ] {
+            let large = category == "UICTContentSizeCategoryAccessibilityXXXL"
+            app?.terminate(); app = XCUIApplication(bundleIdentifier: fixture.bundle)
+            app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials",
+                "--ui-testing-skip-tutorial", "--ui-testing-time-poll-live", "--ui-testing-language=\(language)",
+                "--ui-testing-appearance=\(large ? "dark" : "light")", "-UIPreferredContentSizeCategoryName", category]
+            if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
+            app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]
+            app.launch()
+            let tab = app.tabBars.buttons[language == "de" ? "Pläne" : language == "en" ? "Plans" : "计划"]
+            XCTAssertTrue(tab.waitForExistence(timeout: 20)); tab.tap()
+            assertHomeSection("waitingResponse", language: language)
+            let format = DateFormatter()
+            format.locale = Locale(identifier: language); format.timeZone = calendar.timeZone
+            func dateLabel(_ date: Date) -> String {
+                let year = calendar.component(.year, from: date) != calendar.component(.year, from: Date())
+                format.setLocalizedDateFormatFromTemplate((year ? "y" : "") + "MMMd")
+                return format.string(from: date)
+            }
+            for (index, candidate) in fixture.candidateCases.enumerated() {
+                let dates = try candidate.dates.map { try XCTUnwrap(parser.date(from: $0)) }.sorted()
+                let first = try XCTUnwrap(dates.first), last = try XCTUnwrap(dates.last)
+                let card = app.buttons["plans-coordinated-\(candidate.token)"]
+                XCTAssertTrue(card.waitForExistence(timeout: 20))
+                let count = language == "de" ? "\(dates.count) Tage ·" : language == "en" ? "\(dates.count) dates ·" : "\(dates.count) 天可选 ·"
+                XCTAssertTrue(card.label.contains(count), card.label)
+                XCTAssertTrue(card.label.contains(dateLabel(first) + " – " + dateLabel(last)), card.label)
+                XCTAssertTrue(card.label.contains(language == "de" ? "Zeit noch offen" : language == "en" ? "Time to be decided" : "时间待定"))
+                XCTAssertNil(card.label.range(of: #"\b(?:[01]?\d|2[0-3]):[0-5]\d\b"#, options: .regularExpression),
+                             "Candidate dates must not invent a final clock interval")
+                showCompleteHomeCard(card, section: "waitingResponse", name: "candidate-\(candidate.name)-\(tag)")
+                if index == 0 {
+                    tapHomeItem(card, visible: revealHomeItem(card, section: "waitingResponse"))
+                    XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
+                    XCTAssertTrue(app.descendants(matching: .any)["time-poll-date-range"].firstMatch.exists)
+                    capture("candidate-original-detail-\(tag)")
+                    app.navigationBars.firstMatch.buttons.firstMatch.tap()
+                    assertHomeSection("waitingResponse", language: language)
+                }
+            }
+        }
+    }
+
     private func showCompleteHomeCard(_ card: XCUIElement, section: String, name: String) {
         XCTAssertTrue(card.waitForExistence(timeout: 10))
         var offset: CGFloat = 0, part = 1

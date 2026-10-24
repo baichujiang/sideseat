@@ -267,6 +267,25 @@ struct PlanOverviewTiming {
         parser.locale = Locale(identifier: "en_US_POSIX"); parser.timeZone = zone; parser.dateFormat = "yyyy-MM-dd"
         return candidateDates.compactMap { parser.date(from: $0) }.sorted()
     }
+    var candidateRangeContext: String? {
+        let dates = candidateDays
+        guard let first = dates.first, let last = dates.last, first != last,
+              calendar.isDate(first, equalTo: last, toGranularity: .month) else { return nil }
+        let year = calendar.component(.year, from: first) != calendar.component(.year, from: now)
+        return datePart(first, template: year ? "yMMM" : "MMM")
+    }
+    var candidateRangeText: String? {
+        let dates = candidateDays
+        guard let first = dates.first, let last = dates.last else { return nil }
+        if first == last { return dateLabel(first) }
+        let year = calendar.component(.year, from: now)
+        let format = DateIntervalFormatter()
+        format.locale = locale; format.calendar = calendar; format.timeZone = zone
+        format.dateTemplate = calendar.isDate(first, equalTo: last, toGranularity: .month) ? "d"
+            : calendar.component(.year, from: first) == year
+                && calendar.component(.year, from: last) == year ? "MMMd" : "yMMMd"
+        return format.string(from: first, to: last)
+    }
     var dateText: String {
         if let start { return dateLabel(start) }
         let dates = candidateDays

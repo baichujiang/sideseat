@@ -164,6 +164,65 @@ struct PlanPresentationTests {
         #expect(display.datePart(try #require(display.candidateDays.last), template: "yMMMd") == "1 Jan 2027")
     }
 
+    @Test("A compact candidate span retains the actual number of selectable dates")
+    func overviewCandidateRangeAndActualCount() throws {
+        let reference = try #require(ISO8601DateFormatter().date(from: "2026-10-25T12:00:00Z"))
+        for (language, month, range) in [
+            ("en_GB", "Oct", "25 – 31"), ("zh_Hans", "10月", "25 – 31日"), ("de_DE", "Okt", "25.–31.")
+        ] {
+            var display = PlanOverviewTiming(start: nil, end: nil,
+                candidateDates: (25...31).map { "2026-10-\($0)" }, timeZone: "Europe/Berlin", now: reference,
+                locale: Locale(identifier: language))
+            let fullRange = try #require(display.candidateRangeText)
+            #expect(fullRange.replacingOccurrences(of: "\u{2009}", with: " ") == range)
+            #expect(display.candidateRangeContext == month)
+            #expect(display.candidateDays.count == 7)
+            #expect(display.dateText.hasPrefix(String(format: AppLocalization.string("%d dates · %@"), 7, "")))
+            display.candidateDates = ["2026-10-31", "2026-10-25"]
+            #expect(display.candidateRangeText == fullRange && display.candidateRangeContext == month)
+            #expect(display.candidateDays.count == 2)
+            #expect(display.dateText.hasPrefix(String(format: AppLocalization.string("%d dates · %@"), 2, "")))
+            #expect(display.clockText == nil)
+            display.candidateDates = ["2027-10-25", "2027-10-31"]
+            #expect(display.candidateRangeContext?.contains("2027") == true)
+            #expect(display.candidateRangeText == fullRange)
+        }
+    }
+
+    @Test("Candidate ranges localize month boundaries and preserve both years")
+    func overviewCandidateRangeLocalesAndYears() throws {
+        let reference = try #require(ISO8601DateFormatter().date(from: "2026-10-25T12:00:00Z"))
+        for (language, months, yearParts) in [
+            ("en_GB", ["Oct", "Nov"], ["31 Dec 2026", "1 Jan 2027"]),
+            ("zh_Hans", ["10月31日", "11月2日"], ["2026年12月31日", "2027年1月1日"]),
+            ("de_DE", ["Okt.", "Nov."], ["31. Dez. 2026", "1. Jan. 2027"])
+        ] {
+            var display = PlanOverviewTiming(start: nil, end: nil,
+                candidateDates: ["2026-11-02", "2026-10-31"], timeZone: "Europe/Berlin", now: reference,
+                locale: Locale(identifier: language))
+            let monthRange = try #require(display.candidateRangeText)
+            for month in months { #expect(monthRange.contains(month)) }
+            #expect(!monthRange.contains("2026"))
+            #expect(display.candidateRangeContext == nil)
+            display.candidateDates = ["2027-01-01", "2026-12-31"]
+            let yearRange = try #require(display.candidateRangeText)
+            for part in yearParts { #expect(yearRange.contains(part)) }
+            #expect(display.candidateRangeContext == nil)
+            #expect(display.candidateDays.count == 2 && display.clockText == nil)
+        }
+    }
+
+    @Test("One candidate keeps its exact date label and no candidates have no range")
+    func overviewCandidateRangeSingleAndMissing() throws {
+        var display = PlanOverviewTiming(start: nil, end: nil, timeZone: "Europe/Berlin", now: now,
+                                         locale: Locale(identifier: "en_GB"))
+        #expect(display.candidateRangeText == nil)
+        #expect(display.candidateRangeContext == nil)
+        display.candidateDates = ["2027-01-01"]
+        #expect(display.candidateRangeText == display.dateLabel(try #require(display.candidateDays.first)))
+        #expect(display.candidateRangeContext == nil)
+    }
+
     @Test("Only a different viewer zone needs an explicit overview zone; DST offsets remain visible")
     func overviewZones() throws {
         let start = try #require(ISO8601DateFormatter().date(from: "2026-10-24T23:30:00Z"))
