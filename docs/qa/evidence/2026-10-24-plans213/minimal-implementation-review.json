@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-24T21:17:20.944744+00:00",
+  "baseCommit": "ec213b3c27ef04c3f4265b7934554c52fb8c8005",
+  "independentReview": "passed, no material findings",
+  "productFiles": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "717b2757e1f0631743cdadd5a9925a66be60727cfabed0674aa2f815f4519022",
+    "ios-native/Configuration/Preview.xcconfig": "0aa0dc22dbb7a54006257832ab2eac6d76ae289f19f6bd1d9610c454e3f3c625"
+  },
+  "existingFunctionsByteIdentical": {
+    "coordinatedOverview": true,
+    "conversationOverview": true,
+    "coordinatedCard": true,
+    "coordinated": true,
+    "loadCoordinatedPlans": true,
+    "plans": true
+  },
+  "stateDeclarationsUnchanged": true,
+  "createSheetAndCreatedPlanHandoffUnchanged": true,
+  "newRequestOrRuleOrDependency": false,
+  "sharedListLocation": "API/list model unchanged; only existing supplied locations shown",
+  "layout": "Local underline tabs; native safeAreaInset right-aligned create; three existing card styles reuse artwork and people"
+}

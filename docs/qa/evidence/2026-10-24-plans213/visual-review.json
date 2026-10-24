@@ -1,0 +1,603 @@
+{
+  "checkedAt": "2026-10-24T21:23:56.496241+00:00",
+  "focusedOriginalsActuallyViewed": 21,
+  "reviews": [
+    {
+      "source": "focused-review-a.json",
+      "review": {
+        "build": "Preview213",
+        "method": "11 separate view_image calls with original detail; no montage or AX-only review.",
+        "actualImageCount": 11,
+        "indices": [
+          0,
+          10
+        ],
+        "result": "Scoped visible-layout review passes; no new intrinsic clipping/collision observed.",
+        "importantLimits": [
+          "Maximum-size confirmed cards in indices 0 and 5 are only partly inside the captured list viewport; no full-card visual claim.",
+          "Maximum-size unchanged history in index 4 has lower timezone/location/actions outside the unobscured viewport; no whole-history claim.",
+          "The red network error/retry visible in list/history captures is a known offline-coordination fixture condition, not a newly discovered regression and not a clean empty page.",
+          "System AssistiveTouch occlusion is recorded separately.",
+          "Screenshots establish visible layout only; interaction outcomes are established by the parent test evidence."
+        ],
+        "images": [
+          {
+            "index": 0,
+            "name": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_02826C25-22D7-4FC4-9A7E-529EB3E2D1AB.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Confirmed home, German system maximum, dark",
+            "visible": "Header/history icon, section labels and underline are readable. Vertical confirmed-card date block and activity title are visible. Complete plus/create capsule and all five tab labels/icons have a visible gap and do not intersect.",
+            "visibleLimit": "The confirmed card continues below the list viewport; only the beginning of its time line is shown. This image does not prove the entire maximum-size confirmed card. AssistiveTouch overlaps the activity-title right edge. The red coordination-network error is an intentional offline-fixture limitation, not a clean empty page."
+          },
+          {
+            "index": 1,
+            "name": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_6E03120E-0095-4A98-8692-AE7FDD3E91A2.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Confirmed home, Chinese normal, light",
+            "visible": "Entire confirmed card is visible: October 26 date block, complete activity title, weekday and 18:00–19:30, location, avatar/name, activity art and chevron. Text and art do not collide. Complete create button is separate from the bottom tabs.",
+            "visibleLimit": "Red coordination-network error/retry remains from the known offline fixture. This is one ordinary confirmed card, not all schedule/long-title combinations."
+          },
+          {
+            "index": 2,
+            "name": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_D9A0B38F-2B05-4E4B-8C7F-3D0129367436.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Creation modal, German maximum configuration, dark",
+            "visible": "Visible title and close icon are complete. Activity/location inputs, date selector, daily 09:00–17:00, Europe/Berlin, two-line friend-suggestion option and disabled bottom continuation label are readable without collision.",
+            "visibleLimit": "This is a blank, keyboard-hidden creation modal. It proves only visible layout, not filled input, calendar-menu interaction or successful submission. No root create/tab intersection applies while the modal covers them."
+          },
+          {
+            "index": 3,
+            "name": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_6B0EE262-31A6-4AB8-A3A7-83526968D272.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Creation modal, Chinese normal, light",
+            "visible": "Visible title/close icon, activity/location inputs, date row, both daily-time choices, timezone and suggestion checkbox are readable. The disabled continuation button is complete and separate from form content.",
+            "visibleLimit": "Blank, keyboard-hidden form only; this does not prove entered text or creation completion."
+          },
+          {
+            "index": 4,
+            "name": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_BE1E1B7C-08AB-4267-AC63-9DA0AFD3C6E4.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "History, German system maximum, dark",
+            "visible": "History heading/back icon, ended status, activity title, full visible date/year and 21:18–22:18 are readable in the upper card. Bottom tab labels/icons remain clear.",
+            "visibleLimit": "Unchanged history card extends beyond this viewport: timezone is partly behind the bottom tab region, location and remaining actions are not fully shown. No full-history-card or scrolling-reachability acceptance is claimed. Red error/retry is the known offline-coordination fixture; AssistiveTouch is a separate system overlay."
+          },
+          {
+            "index": 5,
+            "name": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_3D5E7FED-C863-4158-A18F-0AA76567783D.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Return from history to confirmed home, German system maximum, dark",
+            "visible": "Root header and confirmed tab are restored. Visible date block/title and upper time line are legible. Complete large create capsule and five-tab bar remain separate with a clear gap.",
+            "visibleLimit": "As in index 0, the lower confirmed card is outside the list viewport. AssistiveTouch covers part of the title at right. Red error/retry persists from the fixture. This image alone cannot prove the entire maximum-size card."
+          },
+          {
+            "index": 6,
+            "name": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_9597B00F-2906-445C-A1C5-FE0C57F01EF4.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Return from history to confirmed home, Chinese normal, light",
+            "visible": "Complete ordinary confirmed card remains readable with its date, full title/time, location, avatar, activity art and chevron. The lower-right create button and tab bar do not intersect.",
+            "visibleLimit": "The known red coordination-network error is still present. Visual return state only, not an additional route execution proof."
+          },
+          {
+            "index": 7,
+            "name": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_B1B7577C-8EAE-4F8F-99C7-8A8A3F806CA5.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "History, Chinese normal, light",
+            "visible": "Entire visible history card is readable: ended status, full date/time/timezone, location, avatar/name, feedback row, both outcome controls and repeat text. No label/outline collisions or tab intersection are visible.",
+            "visibleLimit": "This is one unmodified history fixture card. Red coordination-network error/retry is present. The screenshot does not itself prove outcome or repeat actions."
+          },
+          {
+            "index": 8,
+            "name": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_1908BA18-BEB1-4C35-AC45-F415ED470BFB.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Horizontal waiting section, Chinese normal, light",
+            "visible": "Two task cards show distinct activity art, readable full titles, date/time, gray-dot status, avatar/context and complete invitation CTA. The long Chinese task title wraps into two lines without clipping. First waiting card is fully readable with art/date/status/avatar and chevron. Create button and bottom tabs are separate.",
+            "visibleLimit": "Second waiting card is an intentional clipped horizontal preview and is additionally crossed by AssistiveTouch; its complete text is not proven here. Red error/retry is the known coordination fixture. This screenshot does not cover maximum-size waiting cards."
+          },
+          {
+            "index": 9,
+            "name": "shared-plan-117-home-redesign-offline-empty-confirmed-de-system-largest-dark_0_9F922B9F-2308-4882-903A-2A4BA1D39E08.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Offline confirmed list without cards, German system maximum, dark",
+            "visible": "Header, tabs, complete retry text, complete large create capsule and all five bottom tabs are readable. Create and tab bar have a visible gap.",
+            "visibleLimit": "This is a network-error fixture with no visible cards, not a clean empty-state design or successful backend fetch. No confirmed-card coverage."
+          },
+          {
+            "index": 10,
+            "name": "shared-plan-117-home-redesign-offline-empty-confirmed-zh-Hans-normal-light_0_BAF0DCC9-018A-4667-A76A-6B0E671FAC8F.png",
+            "pass": true,
+            "passScope": "No new intrinsic layout defect in the actually visible reviewed area.",
+            "actualOriginalViewed": true,
+            "scope": "Offline confirmed list without cards, Chinese normal, light",
+            "visible": "Root header, selected tab, retry text and complete lower-right create button are readable. All five tab icons/labels remain distinct and clear of the create button.",
+            "visibleLimit": "A red network error is visible, so this must not be described as a clean empty page. No card or data-load acceptance is inferred."
+          }
+        ]
+      }
+    },
+    {
+      "source": "focused-review-b.json",
+      "review": {
+        "reviewer": "plan_home_design_context",
+        "method": "Each of indices 11-20 was opened individually with tools.view_image(detail=original); no montage or AX-only substitution.",
+        "scope": "Visual pixel review of supplied phone screenshots only; no source edit, no phone operation, no test execution.",
+        "pass": true,
+        "blockingDefects": [],
+        "scopeNotes": [
+          "Offline coordination network-error content is an existing fixture limitation, not a clean whole-page production visual.",
+          "Maximum-size long cards legitimately continue outside the scroll viewport; pass is restricted to the portions actually shown.",
+          "Existing private-chat invitation badge wraps its German word at maximum font; no glyph edge clipping observed and no claim this old detail was redesigned."
+        ],
+        "images": [
+          {
+            "index": 11,
+            "name": "shared-plan-117-home-redesign-offline-empty-store-de-system-largest-dark_0_B8A80A70-EF80-46BA-A4D1-FEC546BAD3FF.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/D368BE30-4E8A-4694-A9C9-1E051FB3EA95.png",
+            "pass": true,
+            "finding": "Maximum-size German dark offline empty root: fixed heading, both tabs, complete retry text/action and complete creation label/button visible; creation remains separated from the tab bar.",
+            "visibleLimit": "Offline coordination endpoint error is expected fixture scope, not a clean empty-state proof. No plan card is present.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 12,
+            "name": "shared-plan-117-home-redesign-offline-empty-store-zh-Hans-normal-light_0_02BD3F26-635B-4B8C-964C-248892A5C156.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/340EB130-05A6-4547-B57A-009C84B1D4D2.png",
+            "pass": true,
+            "finding": "Normal Chinese light offline empty root: complete heading, both tabs, retry action, bottom-right creation and all tab-bar items visible without clipping.",
+            "visibleLimit": "Expected English network-error fixture text is shown. No clean production empty-state claim; no plan card is present.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 13,
+            "name": "shared-plan-117-home-redesign-offline-filled-de-system-largest-dark_0_A9889994-1619-4F36-827C-DF347F78E622.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/2179E8B3-D61B-49A8-BA1D-B990C3ADDA2C.png",
+            "pass": true,
+            "finding": "Maximum-size German dark populated root: heading/tabs and complete creation button/tab bar have no clipping; first Library study card title and beginning of date are readable.",
+            "visibleLimit": "Network-error fixture and large section heading consume the first viewport. Only the title and first visible date portion of the first card are covered; its lower status/footer require natural scrolling. AssistiveTouch overlay is system UI.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 14,
+            "name": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_51E00EDB-7693-428C-B8B8-A780A13E8B37.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/45390805-83AF-4E26-81DA-9CAAD6BB9D09.png",
+            "pass": true,
+            "finding": "Normal Chinese light populated root: both actionable cards show complete names, dates/times, status, organizer/avatar and review-invitation actions. First waiting card is complete; creation is below the rail and above the tab bar.",
+            "visibleLimit": "The next waiting card is intentionally only partly visible at the horizontal rail edge. AssistiveTouch overlaps part of that preview; this is system overlay, not app clipping. Existing offline endpoint error remains above the cards.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 15,
+            "name": "shared-plan-117-home-redesign-offline-loading-de-system-largest-dark_0_E220FDEE-A800-4C43-9A01-BF23C3A1CEB8.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/A8913FB5-ECA6-431D-BC47-C77A324AF849.png",
+            "pass": true,
+            "finding": "Maximum-size German dark loading root: loading indicator and two-line loading text are complete. Heading/tabs and full creation button/tab bar remain visible and separated.",
+            "visibleLimit": "Loading fixture only; no card/status-body coverage.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 16,
+            "name": "shared-plan-117-home-redesign-offline-loading-zh-Hans-normal-light_0_E4B9B891-0C1F-4FCC-AE83-677EBC69B2CE.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/D4BF4AB3-8334-4EBE-810D-712F7125D701.png",
+            "pass": true,
+            "finding": "Normal Chinese light loading root: loading indicator/text, fixed heading/tabs, creation button and tab bar render completely.",
+            "visibleLimit": "Loading fixture only; no card/status-body coverage.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 17,
+            "name": "shared-plan-117-home-redesign-original-invitation-de-system-largest-dark_0_03172294-AB41-419C-8826-770D6B46E8B3.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/F3936F71-DD96-4E0B-8700-A6D483988C33.png",
+            "pass": true,
+            "finding": "Maximum-size German dark opens the existing private-chat invitation: header, invitation badge, activity title and visible date lines remain within their containers; root creation button correctly absent from detail.",
+            "visibleLimit": "Existing badge wraps Zusagen ausstehend over three lines, including a short final nd line; glyphs are not cut. This tall original invitation continues below the chat viewport, so full time/actions are not covered in this image. This is navigation-to-original-detail evidence, not complete detail visual acceptance.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 18,
+            "name": "shared-plan-117-home-redesign-original-invitation-zh-Hans-normal-light_0_2458645C-F54D-423F-BC20-DC1A230E5D08.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/B31CAD41-D1B2-4E42-85E0-A0C11958C408.png",
+            "pass": true,
+            "finding": "Normal Chinese light original private-chat invitation: complete activity, date/time, location, status and accept/propose-new-time/decline actions visible without collisions; chat composer remains separate.",
+            "visibleLimit": "This is original detail/navigation evidence, not the redesigned home. Later chat messages continue outside the visible scroll area.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 19,
+            "name": "shared-plan-117-home-redesign-vertical-waiting-first-de-system-largest-dark_0_2E65D0AD-B3A3-4818-9B10-9897BFE25164.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/5F0D7AEC-AB1A-457B-8108-971E005B91EC.png",
+            "pass": true,
+            "finding": "Maximum-size German dark vertically reflowed waiting section: preceding review-invitation action and organizer text are fully visible; waiting heading/count and first waiting-card title/date beginning readable; full creation button and tab bar remain separate.",
+            "visibleLimit": "The preceding card begins above the viewport. The first waiting card continues below its visible date line; its lower status/footer are not proved by this image. Natural scrolling is required; no complete-card-first-screen claim.",
+            "viewedOriginalIndividually": true
+          },
+          {
+            "index": 20,
+            "name": "shared-plan-117-home-redesign-vertical-waiting-last-de-system-largest-dark_0_55511492-BC93-4E7B-9CDE-050DC8DC38EB.png",
+            "path": "/tmp/sideseat213-private/focused-attachments/A8F6706C-F4E1-44A8-BF35-81772787E980.png",
+            "pass": true,
+            "finding": "Maximum-size German dark lower waiting list: preceding card status and organizer footer are complete; last card activity name, wrapped start/end time and visible waiting status are readable without side-edge clipping. Full creation button remains above the tab bar.",
+            "visibleLimit": "This is a scrolled portion: previous card title is above the viewport, and the last card lower footer is below it. The image proves visible portions, not simultaneous full long-card display. AssistiveTouch lies over non-text card margin.",
+            "viewedOriginalIndividually": true
+          }
+        ]
+      }
+    }
+  ],
+  "retained": [
+    {
+      "name": "home-normal-planning-offline.png",
+      "sourceCapture": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_51E00EDB-7693-428C-B8B8-A780A13E8B37.png",
+      "sha256": "848ea5fe086e3c22b22c19de5f6d9b4f0399fe22d04f3af17bf4bfbc13f11d7b",
+      "scope": "Deliberately offline coordinated endpoint; legacy cards/navigation only"
+    },
+    {
+      "name": "home-normal-waiting-offline.png",
+      "sourceCapture": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_1908BA18-BEB1-4C35-AC45-F415ED470BFB.png",
+      "sha256": "0cc6fb648d75dd1780e10ce72f73c63e43892782742430bf071417e513e07a93",
+      "scope": "Deliberately offline coordinated endpoint; legacy cards/navigation only"
+    },
+    {
+      "name": "home-normal-confirmed-offline.png",
+      "sourceCapture": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_6E03120E-0095-4A98-8692-AE7FDD3E91A2.png",
+      "sha256": "fa89c437863fe4d89626b4a5a823629af9fe7da028193897ac0f15a9a29a985e",
+      "scope": "Deliberately offline coordinated endpoint; legacy cards/navigation only"
+    },
+    {
+      "name": "home-max-empty-store-offline.png",
+      "sourceCapture": "shared-plan-117-home-redesign-offline-empty-store-de-system-largest-dark_0_B8A80A70-EF80-46BA-A4D1-FEC546BAD3FF.png",
+      "sha256": "62dd04dead9081550a3f835012bc7b6f6d058ba1972e71d696a3e5caac11ccec",
+      "scope": "Deliberately offline coordinated endpoint; legacy cards/navigation only"
+    },
+    {
+      "name": "home-max-confirmed.png",
+      "sourceCapture": "shared-plan-117-home-redesign-max-complete-confirmed_0_0A1FB561-3798-429A-B7A6-9F7830489D6F.png",
+      "sha256": "371b21d744a457ba93e358939ac4fcf4c433b75a372bb892beee7d082c8d97b3",
+      "scope": "Full representative card after deliberate scrolling at real system AXXXL; controlled offline endpoint is above viewport"
+    },
+    {
+      "name": "home-max-waiting.png",
+      "sourceCapture": "shared-plan-117-home-redesign-max-complete-waiting_0_BE7D58EC-589C-45AA-80CB-7F0E00B688D9.png",
+      "sha256": "d8155f94fbb22999e7ab645c632442d4342aaff076ab74e3349f75c48c7a7376",
+      "scope": "Full representative card after deliberate scrolling at real system AXXXL; controlled offline endpoint is above viewport"
+    },
+    {
+      "name": "home-max-task.png",
+      "sourceCapture": "shared-plan-117-home-redesign-max-complete-task_0_CF19E7DA-7329-40D6-AC7A-E0E03458C467.png",
+      "sha256": "0f83b7bff2e536114d64747a1c26f1444348b6b742ed94f28536b03067a957db",
+      "scope": "Full representative card after deliberate scrolling at real system AXXXL; controlled offline endpoint is above viewport"
+    },
+    {
+      "name": "home-live-confirmed.png",
+      "sourceCapture": "phone-first-plan-plans-home-entry-live-confirmed_0_91B4A4E3-7D99-4EC9-BD68-4DA3082E5E92.png",
+      "sha256": "b9df74c81580cce849cbcbefc7526e4d23225729522e8155c4fcc1ad8e75ac7d",
+      "scope": "Real API confirmed cross-day card, clean page"
+    },
+    {
+      "name": "home-live-planning.png",
+      "sourceCapture": "phone-first-plan-plans-home-entry-live-planning_0_2D1C60D5-F35B-4A97-8569-296F539D0EFC.png",
+      "sha256": "578836cdf9e4b751007aab913537e9fbeca87693fabec28d1013deee3ce3e2ec",
+      "scope": "Real API clean empty planning page"
+    },
+    {
+      "name": "flow-calendar.png",
+      "sourceCapture": "phone-first-plan-contacts-calendar-result_0_08521F91-F924-45C2-831B-9A040AAAEF96.png",
+      "sha256": "3a875636bf9abb68bfcc02802a785ee13d587f45d8a54030f0b0001fffaafdb4",
+      "scope": "Preview213 new complete-flow actual capture; visible scope in per-image reviews; exact endpoints/uniqueness separately verified by API"
+    },
+    {
+      "name": "flow-submit-share.png",
+      "sourceCapture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_5BC72347-3179-44F1-AD34-62CB5B9652B0.png",
+      "sha256": "61f4e58ec88732ff78477deb215dbe4aa2cecbb35542622b60ea0760700647cb",
+      "scope": "Preview213 new complete-flow actual capture; visible scope in per-image reviews; exact endpoints/uniqueness separately verified by API"
+    },
+    {
+      "name": "flow-invitation-review.png",
+      "sourceCapture": "phone-first-plan-contacts-review-final-invitees_0_8233D66A-1092-4322-B717-E0FF4A9AE3C7.png",
+      "sha256": "680a14e183db782f6ce40a11d75a4633ddda8ae9434117c6d8f904d61a39ab10",
+      "scope": "Preview213 new complete-flow actual capture; visible scope in per-image reviews; exact endpoints/uniqueness separately verified by API"
+    },
+    {
+      "name": "flow-cross-day-summary.png",
+      "sourceCapture": "phone-first-plan-final-cross-day-morning-and-summary_0_334B32E8-D786-4A0D-9D00-31DAAB5812A2.png",
+      "sha256": "7692b48f8ce6d92c5f2650153ba45c5078cc6a6979de04c36a801a6215a6fb84",
+      "scope": "Preview213 new complete-flow actual capture; visible scope in per-image reviews; exact endpoints/uniqueness separately verified by API"
+    },
+    {
+      "name": "flow-invitation-highlight.png",
+      "sourceCapture": "phone-first-plan-invitation-continuous-across-midnight_0_0EE8F737-B490-4CDA-B8CE-D3E350C11240.png",
+      "sha256": "429b42c76cc6d7158857edba10b7f2dc716994206f5a3af9f7d97dd324a18ab1",
+      "scope": "Preview213 new complete-flow actual capture; visible scope in per-image reviews; exact endpoints/uniqueness separately verified by API"
+    }
+  ],
+  "fullFlowOriginalsActuallyViewed": 25,
+  "fullFlowReviews": [
+    {
+      "scope": "Preview 213 current complete physical-device flow; only index 0–8 of this run, each original PNG inspected separately via view_image(detail=original); no Preview 212 evidence reused.",
+      "reviewer": "plan_home_minimal_review",
+      "overall": "pass within explicitly visible scope",
+      "reviewedCount": 9,
+      "repositoryOrDeviceModified": false,
+      "images": [
+        {
+          "index": 0,
+          "name": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_E0F1FE04-8720-460F-BA09-F8E15145B0E3.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/86EFB5A2-1D29-4C5B-8638-863A81D16E67.png",
+          "result": "pass",
+          "observed": "名称、可选地点、候选日期、灰点收集空闲与时区、0人已填写可读；两格选中边框/勾选、未提交及已选1天1小时、提交并分享/选择最终时间完整。",
+          "visibleLimit": "时间表仅当前四列及09:00–14:00可见；右侧AssistiveTouch覆盖约12:00–12:30局部格，不据此宣称全表无覆盖；单图不证明点选历史。"
+        },
+        {
+          "index": 1,
+          "name": "phone-first-plan-compact-empty-timetable_0_8A0B9E46-D800-4CB7-B808-C934BC8EF91A.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/85C16376-3A34-4DE6-A177-11870D5CF38B.png",
+          "result": "pass",
+          "observed": "空时间表、0人已填写、未提交/0天0小时清楚；提交并分享灰色禁用、选择最终时间独立可见，标题与分享入口完整。",
+          "visibleLimit": "仅当前四列和09:00–14:00视口；AssistiveTouch覆盖局部格；没有创建表单，本图是创建后详情。"
+        },
+        {
+          "index": 2,
+          "name": "phone-first-plan-compact-responded-people_0_9D65E650-CAC3-4B06-BD55-32A4F7DACFC8.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/CB031CD2-678B-4FBD-BAA5-4522889EF120.png",
+          "result": "pass",
+          "observed": "参与者与进度弹层完整显示计划标题、2人已填写、两个不同参与者的已提交空闲及自己的标识；说明明确填写有空不代表确认参加，完成勾选可见。",
+          "visibleLimit": "仅此次两个参与者和此弹层；不扩展为任意大名单验收，AssistiveTouch在空白区。"
+        },
+        {
+          "index": 3,
+          "name": "phone-first-plan-contacts-calendar-result_0_08521F91-F924-45C2-831B-9A040AAAEF96.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/250884BE-10D0-4BAA-B4FB-6A98FE40CD6E.png",
+          "result": "pass",
+          "observed": "日历搜索结果一条，标题Contact plan d4d058b1、2026年10月25日23:00及图书馆二楼可读，关闭/清除/结果箭头完整，键盘不挡结果。",
+          "visibleLimit": "搜索列表图不显示结束时间或另一账号日历，精确跨天结束与双方唯一性须以本轮原生断言和API证据为准；AssistiveTouch在键盘底部。"
+        },
+        {
+          "index": 4,
+          "name": "phone-first-plan-contacts-explicit-acceptance_0_FDC22511-A8EF-4FCE-A48F-251C871F223B.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/9D53084B-7994-4C8D-ADF3-6B803ED4826D.png",
+          "result": "pass",
+          "observed": "接受后详情显示待发起人正式发出、图书馆二楼；周日23:00–24:00与周一00:00–01:00高亮各自完整，受邀时段图例、2/2已确认、本人已接受及我无法参加入口可读。",
+          "visibleLimit": "右侧AssistiveTouch部分覆盖谁会参加字尾；这是系统浮层局部覆盖，不将该入口判为完整无遮挡。两个日期高亮完整，但不据单图证明数据写入。"
+        },
+        {
+          "index": 5,
+          "name": "phone-first-plan-contacts-owner-submitted-and-share-open_0_5BC72347-3179-44F1-AD34-62CB5B9652B0.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/F6D47C32-6474-4971-BAA2-2AD118737FF4.png",
+          "result": "pass",
+          "observed": "提交后分享面板显示计划标题、App好友及选择联系人发送计划卡片说明；分享网页链接、复制链接与完成动作完整；背景1人已填写及所选格人数1可见。",
+          "visibleLimit": "分享弹层遮住详情下半部为预期；AssistiveTouch位于App好友行右下方/说明区下缘，不据此宣称全背景时间表可见。"
+        },
+        {
+          "index": 6,
+          "name": "phone-first-plan-contacts-peer-inline-availability_0_8758FBC4-CC4B-46F9-8306-C20C8A9AB875.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/09C4AB4A-8B27-4993-92C0-D66AD920CAF8.png",
+          "result": "pass",
+          "observed": "参与者详情没有编辑铅笔；名称、地点、日期/状态/时区、2人已填写和头像可读；选中格人数2，底栏已提交空闲、1天1小时及等待发起人邀请完整。",
+          "visibleLimit": "时间表仅四列与09:00–14:30当前视口；AssistiveTouch覆盖右侧12:30附近局部格；不把可见状态作为网络保存的独立证明。"
+        },
+        {
+          "index": 7,
+          "name": "phone-first-plan-contacts-received-chat-card_0_42A6FA67-97D8-458F-966C-5BE884ED7D65.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/06DC0DDB-A146-4057-BC0B-BC1F3D297588.png",
+          "result": "pass",
+          "observed": "收到的首次聊天计划卡片标题、待你选空闲、填写我的空闲动作完整，文本和卡片内边距正常，消息输入行与入口完整。",
+          "visibleLimit": "仅此短标题与普通字号聊天卡片，未改聊天页面，只记录此轮流程可见范围；不含具体候选日期/时间。"
+        },
+        {
+          "index": 8,
+          "name": "phone-first-plan-contacts-received-chat-card_0_E7D5523C-D897-4203-B0A0-57F73A33C8A1.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/B79C7F67-6FAE-486D-B577-F3F931F1CC59.png",
+          "result": "pass",
+          "observed": "收到正式邀请后的同一聊天卡片显示完整跨天范围2026年10月25日23:00–2026年10月26日01:00，合理换为两行；待你确认和查看邀请入口完整。",
+          "visibleLimit": "仅普通字号此聊天卡片，未改聊天页面，不能替代正式邀请详情、接受写入或日历结果断言；AssistiveTouch在空白区。"
+        }
+      ]
+    },
+    {
+      "build": "Preview213",
+      "captureSet": "New full native flow, parent-reported 368.518 seconds / eight API phases",
+      "method": "Eight separate original-detail view_image calls for indices 9–16 from this capture set. No Preview212 image reuse.",
+      "actualImageCount": 8,
+      "result": "No intrinsic text/action overlap or clipping observed within these eight actual visible viewports.",
+      "limits": [
+        "Only ordinary Chinese screenshots in indices 9–16 are covered by this review.",
+        "Stills establish visible UI state and displayed times, not the gesture sequence, delivery, exact persistence, invitation completion or Calendar uniqueness. Those require the separate test/API evidence.",
+        "System AssistiveTouch occlusion and ordinary scroll/keyboard viewport limits are recorded individually.",
+        "This review does not claim visual acceptance for every page in the full flow."
+      ],
+      "images": [
+        {
+          "index": 9,
+          "name": "phone-first-plan-contacts-review-final-invitees_0_8233D66A-1092-4322-B717-E0FF4A9AE3C7.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Invitation review",
+          "visible": "Activity and location are separate and readable. The final interval is explicitly 2026/10/25 23:00–2026/10/26 01:00 with Europe/Berlin. Two invitees including the organizer are selected; the footer count and complete Send invitations button are readable.",
+          "visibleLimit": "The lower Invite friends section continues under the fixed footer. AssistiveTouch crosses the lower participant-card separator/right edge. This frame shows review readiness, not the completed send or Calendar write."
+        },
+        {
+          "index": 10,
+          "name": "phone-first-plan-contacts-select-and-send_0_F0FC399B-A78D-4D11-95A5-FCFC8F41AA82.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Select and send to App contact",
+          "visible": "The contact invitation modal shows one selected contact, a complete explanation, full Send to 1 contact button and separate search field. Title/close control and action labels do not overlap.",
+          "visibleLimit": "One selected contact is visible. Delivery is not established by this single pre-send screenshot; the parent API/test evidence supplies that result."
+        },
+        {
+          "index": 11,
+          "name": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_4FB5201A-50BC-4A78-ACB5-A36A6F3CCA20.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Submitted availability after contact send",
+          "visible": "Activity title, editable location, share icon, date range, collecting status/full timezone and one-person response count are readable. Sunday 09:00 and 09:30 cells retain green selection borders, checkmarks and count 1. Submitted availability and 1 day/1 hour footer plus Choose final time action are complete.",
+          "visibleLimit": "Only the first four days and current vertical timetable viewport are shown. AssistiveTouch overlays unselected cells at right. This screenshot does not independently establish card delivery or all persisted slots."
+        },
+        {
+          "index": 12,
+          "name": "phone-first-plan-creation-information-without-timetable_0_040040BD-42D9-472D-A665-CB7CF6AB76FD.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Creation information without timetable",
+          "visible": "Entered activity title, optional location field, candidate dates 25–31 October, daily 09:00–17:00 and Europe/Berlin are readable. The activity-suggestion option and enabled Next: fill availability action are complete; no timetable is shown in the creation form.",
+          "visibleLimit": "Keyboard is hidden; this frame does not test date selection or creation completion. It shows one ordinary-size form."
+        },
+        {
+          "index": 13,
+          "name": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_8E36E02A-2A14-4B40-A196-EDEFCC3A66F7.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Final selection at morning cells",
+          "visible": "Selection mode explanation and legend are clear. Sunday 09:00 and 09:30 show time labels, response count 2, own-availability marks and amber final-selection borders/checks. Footer says 25 October 09:00–10:00, 1 hour, with clear selection and complete review-invitees action.",
+          "visibleLimit": "This is the resulting selection state. Tap/cancel/drag/erase behavior is not independently inferred from a still image. AssistiveTouch covers some unselected right-side cells."
+        },
+        {
+          "index": 14,
+          "name": "phone-first-plan-final-cross-day-evening_0_862BE7CE-C648-4350-8E8E-A899B46F0203.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Final cross-day evening portion",
+          "visible": "Sunday 23:00 and 23:30 amber cells show complete borders/time/checkmarks. Footer explicitly says 25–26 October 23:00–00:00 and 1 hour; clear and next action are complete.",
+          "visibleLimit": "The early next-day portion is outside this vertical viewport and not yet included in this intermediate summary. Do not label this frame as the final two-hour selection. AssistiveTouch overlays unselected cells at right."
+        },
+        {
+          "index": 15,
+          "name": "phone-first-plan-final-cross-day-morning-and-summary_0_334B32E8-D786-4A0D-9D00-31DAAB5812A2.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Final cross-day morning portion and summary",
+          "visible": "Monday 00:00 and 00:30 amber cells have readable times, checks and complete borders. Both selected day headers are marked. Footer explicitly reads 25–26 October 23:00–01:00, 2 hours, with complete clear and review-invitees controls. Europe/Berlin and the selection legend are readable.",
+          "visibleLimit": "The previous evening cells are not simultaneously in view; index 14 separately shows them. A repeated-hour offset label 02:00 +01:00 is visible on Sunday. Only the currently shown columns/rows are visually reviewed; AssistiveTouch overlays right-side unselected cells."
+        },
+        {
+          "index": 16,
+          "name": "phone-first-plan-inline-information-editing_0_90500C1C-3D34-464B-88A6-3FAB48FF2C49.png",
+          "result": "pass-visible",
+          "actualOriginalViewed": true,
+          "scope": "Inline activity and location editing",
+          "visible": "Fixed activity-name and optional-location labels, complete entered fields/caret, and both Cancel and Save controls are visible above the real keyboard/prediction panel. Divider, collection date/status/timezone, zero-response count and upper draft-selected cells are readable.",
+          "visibleLimit": "Keyboard covers lower timetable rows as expected. This is ordinary Chinese editing, not maximum-font acceptance or a completed save. The selected draft cells still show zero submitted responses, as visibly labeled."
+        }
+      ]
+    },
+    {
+      "reviewer": "plan_home_design_context",
+      "build": 213,
+      "sourceIndex": "/tmp/sideseat213-private/complete-image-index.json",
+      "sourceScope": "Only fresh Preview 213 complete-flow captures indices 17-24; no Preview 212 screenshots used.",
+      "method": "Each original PNG opened separately with tools.view_image(detail=original); no montage or AX-only review.",
+      "result": "pass",
+      "blockingDefects": [],
+      "scopeNotes": [
+        "This assigned subset is normal Chinese light detail/share UI; no whole-App or maximum-font conclusion is drawn from it.",
+        "No Calendar screenshot is in indices 17-24. Exact Calendar endpoints/uniqueness must be supported by the separate API observer, not inferred from these images.",
+        "System AssistiveTouch overlaps a few right-side margins; modal dimming/occlusion of the underlying page is intentional."
+      ],
+      "images": [
+        {
+          "index": 17,
+          "name": "phone-first-plan-inline-information-saved-draft-preserved_0_B15F02E7-4BFE-4A28-B3EF-CD04AB754F45.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/3AC90931-4040-414A-A507-27361E037A48.png",
+          "result": "pass",
+          "finding": "Normal Chinese light plan detail shows the saved name and location with inline edit affordances, separate share icon, complete dates/status/count row, and two selected half-hour cells. The bottom unsent state, selected one-day/one-hour summary, Submit and share, and Choose final time actions are fully readable without app overlap.",
+          "visibleLimit": "Only the visible timetable rows and first four dates are shown. This screenshot visually shows the local unsent selection; exact persisted data/draft preservation is established separately by assertions/API. System AssistiveTouch covers part of later right-column cells.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 18,
+          "name": "phone-first-plan-invitation-continuous-across-midnight_0_0EE8F737-B490-4CDA-B8CE-D3E350C11240.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/54FF9A02-F5AA-49BF-AE3C-6B151717FACA.png",
+          "result": "pass",
+          "finding": "Invitation detail shows complete title, waiting-for-your-confirmation status and location. Both day panels visibly label Oct 25 23:00-24:00 and Oct 26 00:00-01:00, with uninterrupted highlighted final blocks and invited-time legends. The response progress, explanatory rule text, accept and decline actions are readable and separated.",
+          "visibleLimit": "Visual scope is the two displayed day panels and visible actions. System AssistiveTouch partly overlays the right end of Who will attend; no app text-edge clipping observed. Exact server timestamps and Calendar uniqueness are separate API evidence.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 19,
+          "name": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_3697E1AC-0586-4C5D-AD36-C432309C38A3.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/37B04CB8-1C5B-4C7D-8829-B4AABDEC6370.png",
+          "result": "pass",
+          "finding": "Owner before filling opens a complete share-plan sheet: heading/dismiss, plan name, App friends row/subtitle/arrow, share-web-link and copy-link choices render without app clipping. The dimmed background shows collecting availability and zero responses.",
+          "visibleLimit": "The sheet intentionally covers the lower background timetable/actions. System AssistiveTouch overlaps the App friends row right margin; this image proves visible owner entry presentation, not that any destination was sent.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 20,
+          "name": "phone-first-plan-share-permissions-owner-CONFIRMED_0_B31C7212-6CB9-4133-A7EB-B15B67B40260.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/F26E7ED4-C084-410E-8BD5-D634DDD67C1B.png",
+          "result": "pass",
+          "finding": "Confirmed owner share sheet shows complete plan name and exact displayed Oct 25 2026 23:00-Oct 26 2026 01:00 summary. App friends, share-web-link and copy-link choices remain fully legible. The dimmed background status is Confirmed.",
+          "visibleLimit": "Lower background day panel is behind the modal by design. System AssistiveTouch overlaps part of the App friends chevron margin. Sharing authorization/results and exact stored endpoints rely on separate assertions/API; this is not a Calendar screenshot.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 21,
+          "name": "phone-first-plan-share-permissions-owner-INVITING_0_1CAD7F21-4266-4F98-8E02-A18B9F797C0A.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/FC24DC20-B59A-4026-828D-5D33FC0967F0.png",
+          "result": "pass",
+          "finding": "Inviting owner share sheet shows complete name and cross-midnight time summary, App friends row and both link actions. The visible background status says ready for you to send formally, consistent with the owner phase.",
+          "visibleLimit": "This modal image does not expose the underlying formal-send action or complete lower day panel; it proves only the share entry layout in this phase. System AssistiveTouch partly overlays the right App friends row margin.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 22,
+          "name": "phone-first-plan-share-permissions-participant-COLLECTING_0_730F1662-007F-4BAA-ACC1-3FD888A89143.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/B92FA842-221E-42F1-ABC9-8EE97ABADE0E.png",
+          "result": "pass",
+          "finding": "Collecting participant share sheet contains complete heading/name and the two external link actions, without an App friends row. The dimmed background has read-only name/location, collecting status and one responded person; visible first-date cells show the existing response.",
+          "visibleLimit": "Only visible upper background rows are covered; the modal covers lower content. This image establishes visible role-specific share choices, not server permission enforcement or participant submission. System AssistiveTouch overlaps the right tile margin without covering its copy-link text.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 23,
+          "name": "phone-first-plan-share-permissions-participant-CONFIRMED_0_1F918180-068D-4968-AE20-AB89FBB651FA.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/E6D1AEC2-F98A-46B2-B7D6-60AE2EDE338D.png",
+          "result": "pass",
+          "finding": "Confirmed participant share sheet shows complete plan name, full cross-midnight date/time summary and both external link actions, without App friends. Confirmed state and upper invited-time panel remain visible behind the modal.",
+          "visibleLimit": "The modal hides lower background content and is not Calendar evidence. Exact final endpoints, two-calendar uniqueness and permissions require separate API/assertion evidence. AssistiveTouch overlaps the right tile margin; text remains readable.",
+          "viewedOriginalIndividually": true
+        },
+        {
+          "index": 24,
+          "name": "phone-first-plan-share-permissions-participant-INVITING_0_F520727D-C8C9-4719-B88A-5F3963E7C653.png",
+          "path": "/tmp/sideseat213-private/complete-attachments/D3B12441-C7EB-45B1-96ED-499783AF936F.png",
+          "result": "pass",
+          "finding": "Inviting participant share sheet shows complete name, full cross-midnight date/time summary and both external link choices, without App friends. The background state says waiting for your confirmation, and the upper invited-time panel remains readable.",
+          "visibleLimit": "The sheet hides the underlying accept/decline actions and lower day panel; those are covered in image 18, not this image. Exact state transitions/authorization are separate assertion/API evidence. System AssistiveTouch overlaps right tile margin without app text clipping.",
+          "viewedOriginalIndividually": true
+        }
+      ]
+    }
+  ],
+  "maximumFullCards": {
+    "originalsActuallyViewed": 3,
+    "reviewer": "root, each original image viewed",
+    "result": "pass",
+    "scope": "Complete representative task including CTA, complete waiting status/people and complete confirmed date/time/location/people above the creation action; normal scroll-cut neighbouring cards and AssistiveTouch margin recorded"
+  },
+  "cleanLiveHome": {
+    "originalsActuallyViewed": 4,
+    "reviewer": "root, each original image viewed",
+    "result": "pass",
+    "scope": "Real empty planning, confirmed cross-day card, creation and cancel return; no offline error banner"
+  },
+  "totalOriginalsActuallyViewed": 53
+}

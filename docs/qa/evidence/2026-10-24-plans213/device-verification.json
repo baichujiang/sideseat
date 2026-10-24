@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-24T21:28:27.554451+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 213,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8883,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Two disposable QA accounts and one plan for the complete real API flow; separate legacy controlled offline navigation/layout fixture",
+  "qaAccountsRemoved": 2,
+  "qaTokens401": 2,
+  "qaLinks404": 1,
+  "privateLaunchConfigurationRemoved": true,
+  "generatedRunnerProjectRemoved": true,
+  "disposablePrivateFixtureRemoved": true,
+  "defaultDeviceIdentityVerifiedBeforeInstall": true
+}

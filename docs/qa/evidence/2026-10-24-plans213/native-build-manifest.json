@@ -1,0 +1,25 @@
+{
+  "build": 213,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "068a5829f4565eaef68a69ab0620f9993bbea9bf184498544b903571b1848515",
+    "SideSeat Preview.debug.dylib": "1b185ef63e4b6633da2efd504416cc94929420c7c7795df9f10bfc698ddf86d0"
+  },
+  "productFrozenDuringTestOnlyRepairs": true,
+  "testSourceSHA256": "536af3253a5cf65ae85954b5c9fa76f00d51b651d8e5074896e1edcd222e45d8",
+  "backendReleased": false,
+  "webReleased": false,
+  "sourceCommit": "595c3ba5210ecca6ac7e89b54645cc4934e5a5a5",
+  "sourcePushed": true,
+  "all267InputsMatchCommittedSource": true,
+  "finalProductFrozenDuringAcceptance": true,
+  "testSourcesAtDeliverySHA256": {
+    "PlanStatePresentationUITests.swift": "536af3253a5cf65ae85954b5c9fa76f00d51b651d8e5074896e1edcd222e45d8",
+    "PlanFirstUsePhoneUITests.swift": "5d07f032c83af3fc82a1742c27c1c14dd0f6ef52a6710b6aa12e75994b89c3e9",
+    "PlanNavigationRegressionPhoneUITests.swift": "81946f04371b2ecf6f489874dd183db72fe519dfe23442c5291ccfa74a6bcdd1"
+  },
+  "executionSourceScope": "Focused methods/helpers unchanged after initial execution; later edits cleaned unused legacy assumptions and added independent maximum full-card test. Complete flow method unchanged; supplement/live built from final test source. Navigation regression helper is static-parse only."
+}

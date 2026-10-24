@@ -1,0 +1,53 @@
+{
+  "build": 213,
+  "productSourceFrozen": true,
+  "focused": [
+    {
+      "case": "loading and empty store, zh normal / de system AXXXL",
+      "seconds": 57.457,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "case": "populated navigation and waiting, same two combinations",
+      "seconds": 173.726,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "focusedScope": "Existing controlled legacy fixtures with deliberately offline coordinated endpoint; not clean real API home acceptance",
+  "sourceAtFocusedRun": {
+    "PlanFirstUsePhoneUITests.swift": "5d07f032c83af3fc82a1742c27c1c14dd0f6ef52a6710b6aa12e75994b89c3e9",
+    "PlanStatePresentationUITests.swift": "0d21f4d1c864fa015d9e6ae1ed30947f83140bc09ce8a6232bcd5fb456fe155a"
+  },
+  "laterTestOnlyChanges": "Updated unused cross-page picker and viewport assertions, then added a maximum-size full-card capture method; executed focused methods and helpers unchanged",
+  "nativeComplete": {
+    "seconds": 368.518,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "apiPhasesPassed": 8,
+    "scope": "This new Preview213 execution, not Preview212 evidence"
+  },
+  "maximumFullCards": {
+    "seconds": 41.91,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "actualOriginals": 3
+  },
+  "cleanLiveHome": {
+    "seconds": 19.354,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "actualOriginals": 4
+  },
+  "totalPassFailSkip": [
+    5,
+    0,
+    0
+  ]
+}

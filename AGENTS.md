@@ -35,8 +35,21 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is212 below. See web release/QA records.
-- Preview212 is the current installed development build, source 281ddeec03b5983f9dac50d8ea342087bc8a8570 pushed.
+  No native rebuild in that web stage; current native build is213 below. See web release/QA records.
+- Preview213 is the current installed development build, source 595c3ba5210ecca6ac7e89b54645cc4934e5a5a5 pushed.
+  Plans uses local underline tabs, a trailing create capsule above native tabbar
+  through safeAreaInset, and three compact card layouts with existing small
+  artwork/people. Same state, six data/route functions and creation sheet/handoff;
+  no new request/data/dependency or invitation/Calendar rule. Independent minimal
+  review passed. Same frozen App five phone cases passed:57.457/173.726s focused,
+  41.910s full max cards,368.518s complete/eight API,19.354s clean live home.
+  21+3+25+4=53 new originals individually reviewed; offline fixture and clean API
+  home scopes separate, no whole-App max-text/manual performance claim.
+  Normal213 PID8883,267/Local/signature/binary match commit; ordinary97 retained.
+  Two QA accounts401/one link404;Runner/private launch/fixture/project removed,
+  new App reports0. No backend/web/Schema release or unchanged unit/domain/browser
+  repeat. See213 QA and release records.
+- Preview212 was the previous installed development build, source 281ddeec03b5983f9dac50d8ea342087bc8a8570 pushed.
   Inline name/location use fixed labels, the existing field chrome and native
   one-to-three-line editing viewports; trailing actions, editable-only pencil and
   a light divider clarify hierarchy. No new entry/state/request/component; exact

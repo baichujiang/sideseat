@@ -1,14 +1,16 @@
 # 已部署功能与归档边界
 
-**状态：** 原生Preview212；分享网页已统一日期下收集状态，候选及正式双浏览器流程通过并清理。2026-10-24，Europe/Berlin。
+**状态：** 原生Preview213；分享网页已统一日期下收集状态，候选及正式双浏览器流程通过并清理。2026-10-24，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-分享网页与 App 的收集状态布局统一：活动名、独立地点、候选日期，以及日期下方灰点灰字「收集空闲 · 时区」。活动待定仍显示「选择活动」，原邀请／日历规则保持。产品源码 `55ac4667` 已推送；生产 `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz` READY，同一候选原样提升，api／www／根域名一致。1393项生产基线逐SHA1验证，只覆盖1个TSX并新增来源标记，1392项保持、上传1394项全部匹配；无迁移或后端规则改动。候选 Chromium／WebKit 32.032／32.653秒、正式31.519／31.826秒完整流程通过，三种布局及72次状态几何检查通过。窄屏已补真实视口验收；6个专用账号、18条链接401／404清理。该网页阶段未重建原生；当前原生版本见下方212记录。[网页交付](./releases/2026-10-24-share-status-metadata.md)、[网页验收](./qa/2026-10-24-share-status-metadata.md)。
+分享网页与 App 的收集状态布局统一：活动名、独立地点、候选日期，以及日期下方灰点灰字「收集空闲 · 时区」。活动待定仍显示「选择活动」，原邀请／日历规则保持。产品源码 `55ac4667` 已推送；生产 `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz` READY，同一候选原样提升，api／www／根域名一致。1393项生产基线逐SHA1验证，只覆盖1个TSX并新增来源标记，1392项保持、上传1394项全部匹配；无迁移或后端规则改动。候选 Chromium／WebKit 32.032／32.653秒、正式31.519／31.826秒完整流程通过，三种布局及72次状态几何检查通过。窄屏已补真实视口验收；6个专用账号、18条链接401／404清理。该网页阶段未重建原生；当前原生版本见下方213记录。[网页交付](./releases/2026-10-24-share-status-metadata.md)、[网页验收](./qa/2026-10-24-share-status-metadata.md)。
 
-原生当前 **Preview212，计划信息编辑分层**：名称／地点有固定标签和统一原生输入背景，复用三行编辑视口；取消／保存靠右，轻铅笔提示可直接点改，细分隔线区分信息与时间表。完整值、原权限／空闲草稿／提交分享／邀请及日历规则保持。源码 `281ddeec` 已推送。最终同包普通／真实系统最大字号owner／participant专项468.029秒、完整原生链371.918秒／8阶段API通过；32张专项＋25张流程原图逐张实看，候选栏实际边界已补验。前包与未通过范围单列，独立最简审查通过。默认手机212普通启动PID8816，267／Local／严格签名／二进制及两测试源码与提交一致，97保留；两批4账号／6链接401／404清理，Runner／私密启动材料移除。新增App报告0份，无本轮后端／网页发布。[交付](./releases/2026-10-24-preview212-plan-information-editor.md)、[验收与实图](./qa/2026-10-24-plan-information-editor.md)。
+原生当前 **Preview213，计划首页重做**：顶部保留抬头／历史，发起入口移至底导航上方右侧并独立留位；两分栏改轻下划线，三类紧凑卡片采用小型活动图和名称／日期／状态／单一步骤层级，纵向待处理／横向等待及最大字号纵排保持。复用原状态和回调，无新数据／请求／依赖，邀请及日历规则保持；独立最简复查通过。源码 `595c3ba5` 已推送。同一冻结App五例通过：57.457／173.726／41.910秒布局导航与最大完整卡、368.518秒完整链／8API、19.354秒真实首页；53张新原图逐张查看，离线fixture与clean真实页分开。默认手机213正常PID8883，267输入／Local／签名／二进制与提交一致，97保留；2账号401／1链接404，Runner和私密材料移除，新增App报告0份，无本轮后端／网页发布。[交付](./releases/2026-10-24-preview213-plan-home-redesign.md)、[验收与实图](./qa/2026-10-24-plan-home-redesign.md)。
+
+此前 **Preview212，计划信息编辑分层**：名称／地点有固定标签和统一原生输入背景，复用三行编辑视口；取消／保存靠右，轻铅笔提示可直接点改，细分隔线区分信息与时间表。完整值、原权限／空闲草稿／提交分享／邀请及日历规则保持。源码 `281ddeec` 已推送。最终同包普通／真实系统最大字号owner／participant专项468.029秒、完整原生链371.918秒／8阶段API通过；32张专项＋25张流程原图逐张实看，候选栏实际边界已补验。前包与未通过范围单列，独立最简审查通过。默认手机212普通启动PID8816，267／Local／严格签名／二进制及两测试源码与提交一致，97保留；两批4账号／6链接401／404清理，Runner／私密启动材料移除。新增App报告0份，无本轮后端／网页发布。[交付](./releases/2026-10-24-preview212-plan-information-editor.md)、[验收与实图](./qa/2026-10-24-plan-information-editor.md)。
 
 此前 **Preview211，计划状态归入时间表**：「收集空闲」改为日期信息下方的灰点灰字，与完整时区同排；标题只保留活动名／分享，地点独立。复用现有组件与本地状态，无新状态／请求／依赖，原邀请及日历规则保持。源码 `d017759d` 已推送。同包普通／真实系统最大字号四组合154.962秒、完整好友到双方日历368.720秒／8阶段API通过，19张专项及25张流程实图复核。默认手机211普通启动PID8696，267／Local／严格签名／二进制一致，普通97保留；2专用账号及3链接401／404清理，Runner／私密配置移除。新增App报告0份，明细见设备证据；该原生阶段无后端或网页发布。[交付](./releases/2026-10-24-preview211-collection-status-metadata.md)、[验收](./qa/2026-10-24-plan-status-metadata.md)。
 
@@ -16,7 +18,7 @@
 
 此前 **Preview209，最终顺序验收**：顺序第1–5项及最终补验完成。真实系统最大字号私密详情233.208秒范围保留，最终公开资料117.565秒通过，长用户名完整换行；同一最终App包原生好友完整流程370.491秒／8阶段API通过。只对公开用户名增加一行自然换行，2个DEBUG夹具条件复用授权GET，无新业务状态／请求／依赖。源码 `e5666c31` 已提交推送。默认手机209普通启动PID8573，267输入／Local／严格签名／二进制一致、普通97保留；2专用账号及6条链接回收，Runner／私密配置清理。本收尾新增App报告2份（明细见设备证据）；第5项既有CPU resource诊断单列，不称纯人工性能已优化。无本轮后端／网页发布。[交付](./releases/2026-10-24-preview209-sequential-acceptance.md)、[QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
 
-旧版本段落中的“待补验”描述当时范围，当前结论以上述212为准。
+旧版本段落中的“待补验”描述当时范围，当前结论以上述213为准。
 
 此前 **Preview208，日期／刻度与卡头可读**：固定日历日期／小时局部xLarge上限，Day补44pt命中区，活动卡头辅助字号纵排；普通布局、完整AX日期、事件／路由／规则保持，无新状态请求。源码 `ee243bf2` 已推送。最终同包同次 **42.296／41.022秒，2通过、0失败／跳过**：14日期实际OCR、Day44、双位小时完整、源标题完整词、真实最大字收件标题63.333pt、提出计划取消和意愿卡操作不重叠。7最终原图逐张核对，7最终＋5before保留，前包／测试失败范围明确。手机208普通启动 **PID8498**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密清理，无新增App报告／真实写入／后端网页发布。第5项调查完成，最后补验继续。[208交付](./releases/2026-10-24-preview208-readable-calendar-headings.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
 
@@ -148,9 +150,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 网页 `55ac4667`、原生 `281ddeec` 均已推送；[网页来源](./qa/evidence/2026-10-24-web-status-metadata/source-verification.json)／[212来源](./qa/evidence/2026-10-24-plan-information212/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (212)` | 信息编辑专项及完整链通过，严格签名／安装／普通启动PID8816；[交付](./releases/2026-10-24-preview212-plan-information-editor.md) |
-| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；212通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-plan-information212/device-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 网页 `55ac4667`、原生 `595c3ba5` 均已推送；[网页来源](./qa/evidence/2026-10-24-web-status-metadata/source-verification.json)／[213来源](./qa/evidence/2026-10-24-plans213/native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (213)` | 首页普通／最大字号、完整链及真实首页通过，严格签名／安装／正常PID8883；[交付](./releases/2026-10-24-preview213-plan-home-redesign.md) |
+| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；213通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-plans213/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz`，READY | 1393基线逐项核验，仅1TSX＋来源标记；1392项保持、上传1394全匹配，无迁移。候选／正式双引擎流程及metadata视觉通过；[网页交付](./releases/2026-10-24-share-status-metadata.md) |
