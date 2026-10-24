@@ -1,0 +1,780 @@
+{
+  "build": 215,
+  "stage": "final",
+  "actualCaptures": 39,
+  "uniquePixelHashes": 28,
+  "captureIndex": {
+    "schedule": [
+      {
+        "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-1_0_B986EE4A-4BE3-477A-B50A-5AA02DC50416.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/2EA79751-1DBF-4706-B91D-9201D7EB670D.png",
+        "index": 0,
+        "sha256": "ffee47ac0668ebd125a1fd2a918d71e30bad030bdb8f921fbeb575506ec0619a",
+        "retainedFile": "candidate-max-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-2_0_A72C0DBC-2B0D-42AD-A84A-359C6534EC4F.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/C646C2CE-B98D-4EE7-A5D6-A0AD937BEE8A.png",
+        "index": 1,
+        "sha256": "4686784c28108ee2b082f6b5f8debf0abf656ade327fd2b19800eaca7ada3106",
+        "retainedFile": "candidate-max-part-2.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-3_0_B9EC034A-E051-4158-A44B-AB6237399B28.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/32573857-9983-4C77-A4F2-84EE3A1899C1.png",
+        "index": 2,
+        "sha256": "db1909830ae07acd63f66cba4f42c961b5b9ce18062d0fd711b4d9ad38290995",
+        "retainedFile": "candidate-max-part-3.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-candidate-en-normal-light_0_5D837598-7642-4045-9556-BB3191E11808.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/D9871EAC-213D-4A9C-AC4B-FC039A06951C.png",
+        "index": 3,
+        "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb"
+      },
+      {
+        "name": "shared-plan-117-schedule-candidate-zh-Hans-normal-light_0_69EC4F8F-5B2D-4DBF-B315-93C5CE805937.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/22DC75FC-1912-4486-80D2-CF7A99A8150D.png",
+        "index": 4,
+        "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281",
+        "retainedFile": "schedule-normal.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-candidate-zh-Hans-xLarge-light_0_1C28B7DB-CC31-463E-AA94-7E9DD2BF7BB6.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/B33C6AD5-EBFC-4072-9588-A2037D3C87C3.png",
+        "index": 5,
+        "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce",
+        "retainedFile": "schedule-xlarge.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-1_0_2A39331A-9101-4E85-938E-ED3FDEEB8AB5.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/49A40FD0-EF61-4316-9165-74D5DBBF9E6C.png",
+        "index": 6,
+        "sha256": "693d39f305e485f13c236a5562537714b6ec73efac5c3c7575026a993b342e96",
+        "retainedFile": "cross-day-max-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-2_0_55B72F7F-CEC0-4F22-93E8-B2AEDD88EF07.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/7DE9EEE5-C392-408F-A196-40448E82BE30.png",
+        "index": 7,
+        "sha256": "ab5d3848a75dc5619d0554c9b78abba69742a9b4df648dcb15cdafa678c9b44c",
+        "retainedFile": "cross-day-max-part-2.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-3_0_627F5CF3-03B1-4C32-90CE-F99F07101F6C.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/9554BD85-B5A7-4861-92BE-588F192416A8.png",
+        "index": 8,
+        "sha256": "4f529ef3e9750efa67526cad0e931a831f7d6afbd18481c80619a8478ecf29cf",
+        "retainedFile": "cross-day-max-part-3.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-en-normal-light_0_79662820-09A2-4DFE-81BE-9A8A5699616D.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/71261BBC-F979-4BF8-B02B-DFADBE75A5E0.png",
+        "index": 9,
+        "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-zh-Hans-normal-light_0_D62A4D88-3CA8-46FF-989F-AAE4053966DD.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/27779B13-E178-491B-BD64-F923BCC52C4E.png",
+        "index": 10,
+        "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-day-zh-Hans-xLarge-light_0_D77E157B-967C-4661-B63A-93112F0B86E6.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/4EA0A285-948E-421A-9DF2-DEA48040BE2B.png",
+        "index": 11,
+        "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-1_0_1D4AC037-92B3-44D7-97EF-AE0DA8D57C79.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/28544B86-7C67-437D-8AC6-ADB962CBAF24.png",
+        "index": 12,
+        "sha256": "241a3c9fb7b28ddd6472cc91cd342e0727b961e5b5779a7521f539aed0b2a9ed",
+        "retainedFile": "cross-year-max-part-1.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-2_0_E2460F72-8948-4F4B-9CD6-21FAE58570A1.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/FA0AE8C8-A85E-4581-8D87-8E5602F6369F.png",
+        "index": 13,
+        "sha256": "b357171fbbc70da1e6499372af06a03b8d2b0b68f4ec970934910cf353c6758b",
+        "retainedFile": "cross-year-max-part-2.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-3_0_D99E6407-D09E-4B91-B735-466CC8076B80.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/6BEC18A6-0419-4743-8D5A-F266E54CDD50.png",
+        "index": 14,
+        "sha256": "3caed281bedbd7ef7a646ea099e68fed2c50819578e7c4a08110c0266e87bf7c",
+        "retainedFile": "cross-year-max-part-3.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-en-normal-light_0_80480BE0-2210-4466-A92F-697241F94A0C.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/824817C1-DF68-4001-9857-ED2FE34D8BC6.png",
+        "index": 15,
+        "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb",
+        "retainedFile": "schedule-english.png"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-zh-Hans-normal-light_0_75DDD5EF-30A2-45BC-ACA9-F9D8BF703711.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/BBD2E7E7-3910-4CAE-A3BA-92618FA15083.png",
+        "index": 16,
+        "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281"
+      },
+      {
+        "name": "shared-plan-117-schedule-cross-year-zh-Hans-xLarge-light_0_8E8A2BFC-3C92-4793-BAAE-CC75F048626F.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/138E7977-0506-4A9E-9766-4EE13E012200.png",
+        "index": 17,
+        "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-1_0_E8BFA971-DF5F-42E9-8924-30DEA6EB45B0.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/BD8461DA-05DA-41D1-A82E-D61B8FC49594.png",
+        "index": 18,
+        "sha256": "82c28777ffb0318f1f3a2bb5d80a86f1d791c36402b14d7af9a0a54feffaae61"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-2_0_459DB910-8468-4927-9B87-94FFA78223B7.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/C6285885-8B45-4384-96EF-00BF36A6CAD2.png",
+        "index": 19,
+        "sha256": "4a73d7aba86c23d82fb496236c76aa536a4b88bb35659031da8263acb0ae851d"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-3_0_3386057C-EE29-41BC-BB44-EABA22FF11CE.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/1D04A03A-82D1-4D25-9FA9-D8D5372FBFD8.png",
+        "index": 20,
+        "sha256": "4a73d7aba86c23d82fb496236c76aa536a4b88bb35659031da8263acb0ae851d"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-en-normal-light_0_E96D0940-FF6A-4A06-8CBC-3911509778AE.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/ED8F0686-3942-48FE-9737-7788E6242E1A.png",
+        "index": 21,
+        "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-zh-Hans-normal-light_0_C87BF2D3-822C-4E1D-A48A-B78EA62363FA.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/7216F48B-58B8-48D6-88C6-D4FB28C1611E.png",
+        "index": 22,
+        "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281"
+      },
+      {
+        "name": "shared-plan-117-schedule-same-day-zh-Hans-xLarge-light_0_BE40DE10-EEAE-4B36-ABB6-4013995D391F.png",
+        "path": "/tmp/sideseat215-private/schedule-final-attachments/5D174CDF-8000-405F-849B-A1791BDCE110.png",
+        "index": 23,
+        "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce"
+      }
+    ],
+    "focused": [
+      {
+        "name": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_ADC86EE0-9FD5-4DD9-87B8-EF2CF936C55A.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/7D533AE9-77BE-42B4-9203-160CA26B419F.png",
+        "index": 0,
+        "sha256": "e36d871f4ba32b4318873d4182863da2b10c9eaa109b977a4fe531864e43d296"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_6F2CF65F-8D74-4F2C-8E43-87D769584355.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/FF1F0834-E4D7-40FA-ABC1-AA976EDC9A07.png",
+        "index": 1,
+        "sha256": "a89a18aebc93447b437d04615f16f1a5b0dd857e99ba16a8b81b92aaf39c852d",
+        "retainedFile": "confirmed-normal-offline.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_60384BCC-8C95-458B-A9E0-9A6FA0044DFB.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/AF36A15B-ED13-4A95-A141-02D0CFD206DA.png",
+        "index": 2,
+        "sha256": "9ace7ed873625e28710cee33f7138b8dc40844f4ade3d2cb6aab4bb66bd018e9"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_6A0A969C-6700-4FBC-836B-B27DBC6F63B4.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/07C7A85E-7B74-4484-9C68-8E6962307EE0.png",
+        "index": 3,
+        "sha256": "2b626f3a145ef02ce52c2f2eedbe52064e7b3649c7d0ac4bae0119700ef65e83"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_FC8B0FC0-ADC3-4F72-B1D5-C0DE9FD5AD04.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/513C43D9-92C3-438D-841E-D883D69F5121.png",
+        "index": 4,
+        "sha256": "c649cb300841d25eafc8638d120fe66fb82eb7e444c9926e64951ac6e15b7908"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_F4AA0122-0F11-4A05-80E5-B7D9B7F03770.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/DD66E2E1-88C6-4FEE-BD97-2E67255FC6E0.png",
+        "index": 5,
+        "sha256": "e36d871f4ba32b4318873d4182863da2b10c9eaa109b977a4fe531864e43d296"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_E586954D-1736-4EE0-BAA7-9F6399972D63.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/381E9C0E-7D63-408F-ACC1-DE5BE4DEAA74.png",
+        "index": 6,
+        "sha256": "dfe1a21a9d4ff1eddc6a334aaff89229b85e17016d249b7c5be1feac986ab118"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_17AFD61A-BFB4-4CC7-8526-6C9EADD3E7D1.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/3A94E155-B95F-4CDC-870C-C0621395C547.png",
+        "index": 7,
+        "sha256": "761755c2b2a8b3011184c2bdae61eb41247f5d3da76deac311b41e9e9cdf9821"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_4DB7D0B2-9C3B-408B-8E8E-4B5735AFEA86.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/6064C493-4273-4A16-A83F-80C3AC1F7B11.png",
+        "index": 8,
+        "sha256": "bbe24797a136384f18d2919948364e4e85e2a21572e54e85d84a72d83b4154ea",
+        "retainedFile": "waiting-normal-offline.png"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-offline-filled-de-system-largest-dark_0_5EBDD41D-28DA-4F51-855F-B94102D0A6DE.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/F8382ADB-8C1D-47A6-8C90-57858B210B25.png",
+        "index": 9,
+        "sha256": "42fd14a77d8f9664a2133831e960273cd2656f4aad368e34e95775dd8285ff55"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_C0B775DC-87D7-4653-8CF0-A427BE32B44A.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/0E74E446-47AA-4C9A-8D40-1162F6583B86.png",
+        "index": 10,
+        "sha256": "1b76c84d171094ac8cbc77bb6e4b2c0d553305acf548d4df5144f735c37c72d9"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-original-invitation-de-system-largest-dark_0_A1D4C32E-9CA3-4303-A9E7-84CD4FCA2492.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/BE108C3A-79B7-4D09-A9AB-7DA760A4C04B.png",
+        "index": 11,
+        "sha256": "f2cd868d2f483a63d77f078a5dbf8cf120a24c37f5f50c1c1a57b03b4c506580"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-original-invitation-zh-Hans-normal-light_0_E5A16E57-6414-4131-B54F-24C6310E3042.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/3626F838-4F39-43FD-BC39-08237E996D32.png",
+        "index": 12,
+        "sha256": "5fe9c297f0add33fdb5dc079c68286e9ff268efff27ff1979167fe980fba1f9d"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-vertical-waiting-first-de-system-largest-dark_0_5904EFDA-4AF8-4C1A-8F0F-893F4D51830C.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/B9E325EA-38BB-49E3-8AFE-3707660A74A0.png",
+        "index": 13,
+        "sha256": "b72df70001c0143e4d598bf52840c64b2b0989ce01ee965baa67f3dc240ea31f"
+      },
+      {
+        "name": "shared-plan-117-home-redesign-vertical-waiting-last-de-system-largest-dark_0_4B261ECC-D73B-48ED-A77C-A029C97EAB01.png",
+        "path": "/tmp/sideseat215-private/focused-final-attachments/CF61EBD5-BDF4-4819-AEF0-C08FFBA9B3E2.png",
+        "index": 14,
+        "sha256": "44cdc95dca323396b5556f5ed9d19ccc55d35c902a7cc64e1f967f9c19b10676"
+      }
+    ]
+  },
+  "reviews": {
+    "schedule-final-review-zh-home": {
+      "build": 215,
+      "stage": "final",
+      "captures": 8,
+      "uniqueOriginalPixelsViewed": 2,
+      "result": "passed within scope",
+      "images": [
+        {
+          "name": "shared-plan-117-schedule-candidate-zh-Hans-normal-light_0_69EC4F8F-5B2D-4DBF-B315-93C5CE805937.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/22DC75FC-1912-4486-80D2-CF7A99A8150D.png",
+          "index": 4,
+          "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Original viewed",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-candidate-zh-Hans-xLarge-light_0_1C28B7DB-CC31-463E-AA94-7E9DD2BF7BB6.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/B33C6AD5-EBFC-4072-9588-A2037D3C87C3.png",
+          "index": 5,
+          "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Original viewed",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-day-zh-Hans-normal-light_0_D62A4D88-3CA8-46FF-989F-AAE4053966DD.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/27779B13-E178-491B-BD64-F923BCC52C4E.png",
+          "index": 10,
+          "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-day-zh-Hans-xLarge-light_0_D77E157B-967C-4661-B63A-93112F0B86E6.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/4EA0A285-948E-421A-9DF2-DEA48040BE2B.png",
+          "index": 11,
+          "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-year-zh-Hans-normal-light_0_75DDD5EF-30A2-45BC-ACA9-F9D8BF703711.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/BBD2E7E7-3910-4CAE-A3BA-92618FA15083.png",
+          "index": 16,
+          "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-year-zh-Hans-xLarge-light_0_8E8A2BFC-3C92-4793-BAAE-CC75F048626F.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/138E7977-0506-4A9E-9766-4EE13E012200.png",
+          "index": 17,
+          "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-same-day-zh-Hans-normal-light_0_C87BF2D3-822C-4E1D-A48A-B78EA62363FA.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/7216F48B-58B8-48D6-88C6-D4FB28C1611E.png",
+          "index": 22,
+          "sha256": "6dca12f16eb52d036c3946bd808126ed8b8bdcb653367442c5b010224e898281",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        },
+        {
+          "name": "shared-plan-117-schedule-same-day-zh-Hans-xLarge-light_0_BE40DE10-EEAE-4B36-ABB6-4013995D391F.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/5D174CDF-8000-405F-849B-A1791BDCE110.png",
+          "index": 23,
+          "sha256": "96fdb335e77073ae98a9ef5b93bf5934bed36c5e576bfea979c9a4d08a0641ce",
+          "review": "All four cards fully visible. Prominent month/day and weekday; same-day14:00–15:30;23:00→Oct29 01:00;Dec31 23:30→Jan1,2027 01:30 complete. Candidate count/Oct27/–Oct28/TBD on distinct rows, no fragmented month/day. No changed schedule clipping or collision.",
+          "pixelReview": "Exact SHA matches viewed index4(normal) or5(xLarge); pixel review reused",
+          "limits": "Chinese L/XL light only. AssistiveTouch over candidate artwork; no whole-App/max/manual-performance claim."
+        }
+      ]
+    },
+    "schedule-final-review-en": {
+      "scope": "Four individually viewed actual FINAL App215 English normal/light layout-only captures; candidate count/range separation and known endpoint dates/year/clocks. Does not cover offscreen pages, other font sizes, sending, Calendar or final detail routes. AssistiveTouch covers only right artwork area, not changed schedule.",
+      "reviewedCount": 4,
+      "blockingFindings": [],
+      "entries": [
+        {
+          "name": "shared-plan-117-schedule-candidate-en-normal-light_0_5D837598-7642-4045-9556-BB3191E11808.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/D9871EAC-213D-4A9C-AC4B-FC039A06951C.png",
+          "index": 3,
+          "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Candidate now has separate 2 dates count, complete Oct 27 and – Oct 28 rows, followed by Time to be decided. No date fragment, clipping or invented clock. Entire candidate card/action visible. AssistiveTouch overlaps right artwork edge, not schedule."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-day-en-normal-light_0_79662820-09A2-4DFE-81BE-9A8A5699616D.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/71261BBC-F979-4BF8-B02B-DFADBE75A5E0.png",
+          "index": 9,
+          "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Cross-day Oct 28/Wed/11:00 PM → Oct 29/1:00 AM: complete date-clock groups, no split time token or clipping. Other cards and bottom action also visible."
+        },
+        {
+          "name": "shared-plan-117-schedule-cross-year-en-normal-light_0_80480BE0-2210-4466-A92F-697241F94A0C.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/824817C1-DF68-4001-9857-ED2FE34D8BC6.png",
+          "index": 15,
+          "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Cross-year Dec 31/Thu/11:30 PM → Jan 1, 2027/1:30 AM: end date with year fits one row; complete clocks, no overlap. Entire card/action visible."
+        },
+        {
+          "name": "shared-plan-117-schedule-same-day-en-normal-light_0_E96D0940-FF6A-4A06-8CBC-3911509778AE.png",
+          "path": "/tmp/sideseat215-private/schedule-final-attachments/ED8F0686-3942-48FE-9737-7788E6242E1A.png",
+          "index": 21,
+          "sha256": "90760bc5d741eda0e9f8d512fc09653496b481f0a49aedfb86206d8582d811bb",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Same-day Oct 28/Wed with complete 2:00 PM and – 3:30 PM on two intentional whole-clock lines. No split minute or PM token; both endpoints readable. Candidate separate rows also visible."
+        }
+      ]
+    },
+    "schedule-final-review-max": {
+      "build": "Preview 215 FINAL candidate layout",
+      "reviewer": "schedule_review",
+      "scope": "12 final original German true system-largest dark overview PNGs from schedule-final result; no source/device edits",
+      "viewedOriginals": 12,
+      "uniqueByteHashes": 11,
+      "materialFindings": [],
+      "overall": "Final grouped candidate count and individual endpoint dates are complete and readable. Same-day, cross-day and cross-year endpoint groups also remain readable, including full 2027 end year. No product-content overlap, clock-digit clipping or fragmented dates observed in assigned scope.",
+      "coverage": {
+        "candidate": [
+          0,
+          1,
+          2
+        ],
+        "crossDay": [
+          6,
+          7,
+          8
+        ],
+        "crossYear": [
+          12,
+          13,
+          14
+        ],
+        "sameDay": [
+          18,
+          19
+        ]
+      },
+      "duplicateCaptures": [
+        {
+          "indices": [
+            19,
+            20
+          ],
+          "sha256": "4a73d7aba86c23d82fb496236c76aa536a4b88bb35659031da8263acb0ae851d"
+        }
+      ],
+      "limitations": [
+        "Maximum-size cards stack and need scrolling; continuous overlapping parts demonstrate reachability/readability, not single-screen fit.",
+        "System AssistiveTouch overlay partially covers right edges of some action surfaces; separately recorded from product layout.",
+        "These final indices are overview cards only. No whole-App maximum-size or full detail-page visual acceptance is claimed.",
+        "Current-year start dates omit 2026 by existing rule. Final cross-year end visibly includes 2027. Candidate screenshot is current-year October range, not a cross-year candidate visual fixture.",
+        "Earlier 16-image review belongs to pre-final build scope and is not substituted for these final captures."
+      ],
+      "images": [
+        {
+          "index": 0,
+          "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-1_0_B986EE4A-4BE3-477A-B50A-5AA02DC50416.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/2EA79751-1DBF-4706-B91D-9201D7EB670D.png",
+          "sha256": "ffee47ac0668ebd125a1fd2a918d71e30bad030bdb8f921fbeb575506ec0619a",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Final candidate group complete: 2 Tage on its own line, 27. Okt. complete, – 28. Okt. complete, then Zeit noch offen. No fractured endpoint date fragments. Title begins below; top shows tail of prior card outside candidate scope."
+        },
+        {
+          "index": 1,
+          "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-2_0_A72C0DBC-2B0D-42AD-A84A-359C6534EC4F.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/C646C2CE-B98D-4EE7-A5D6-A0AD937BEE8A.png",
+          "sha256": "4686784c28108ee2b082f6b5f8debf0abf656ade327fd2b19800eaca7ada3106",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Candidate continuation overlaps end date/undecided label and title from part 1; complete title Weekend study and coffee 988d5f, status Deine freien Zeiten fehlen, and 0 Personen haben geantwortet visible. CTA begins at lower edge."
+        },
+        {
+          "index": 2,
+          "name": "shared-plan-117-schedule-candidate-de-system-largest-dark-part-3_0_B9EC034A-E051-4158-A44B-AB6237399B28.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/32573857-9983-4C77-A4F2-84EE3A1899C1.png",
+          "sha256": "db1909830ae07acd63f66cba4f42c961b5b9ce18062d0fd711b4d9ad38290995",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Candidate tail repeats full title/status/progress and shows complete Zeittabelle öffnen CTA plus card bottom. System AssistiveTouch overlaps right edge of action. Combined 0/1/2 continuously cover the whole candidate card."
+        },
+        {
+          "index": 6,
+          "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-1_0_2A39331A-9101-4E85-938E-ED3FDEEB8AB5.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/49A40FD0-EF61-4316-9165-74D5DBBF9E6C.png",
+          "sha256": "693d39f305e485f13c236a5562537714b6ec73efac5c3c7575026a993b342e96",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Final cross-day start group complete: prominent 28. Okt., Mi, 23:00; down arrow to 29. Okt. and complete 01:00. No clipped endpoint digits or date fragments. Title 跨夜聚餐 and beginning of status visible."
+        },
+        {
+          "index": 7,
+          "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-2_0_55B72F7F-CEC0-4F22-93E8-B2AEDD88EF07.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/7DE9EEE5-C392-408F-A196-40448E82BE30.png",
+          "sha256": "ab5d3848a75dc5619d0554c9b78abba69742a9b4df648dcb15cdafa678c9b44c",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Cross-day continuation overlaps both clocks/end date/title, then full Bereit zum endgültigen Senden status and 1 von 2 haben zugesagt progress. Action begins at bottom."
+        },
+        {
+          "index": 8,
+          "name": "shared-plan-117-schedule-cross-day-de-system-largest-dark-part-3_0_627F5CF3-03B1-4C32-90CE-F99F07101F6C.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/9554BD85-B5A7-4861-92BE-588F192416A8.png",
+          "sha256": "4f529ef3e9750efa67526cad0e931a831f7d6afbd18481c80619a8478ecf29cf",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Cross-day tail overlaps end clock/title/status/progress, then full Prüfen und senden action and card bottom. System AssistiveTouch over action right edge. Combined 6/7/8 continuously cover card."
+        },
+        {
+          "index": 12,
+          "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-1_0_1D4AC037-92B3-44D7-97EF-AE0DA8D57C79.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/28544B86-7C67-437D-8AC6-ADB962CBAF24.png",
+          "sha256": "241a3c9fb7b28ddd6472cc91cd342e0727b961e5b5779a7521f539aed0b2a9ed",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Final cross-year start group complete: prominent 31. Dez., Do, 23:30; down arrow to 1. Jan. 2027 then complete 01:30. Year 2027 is wholly visible with end date, no clipping/fragmentation. Title 跨年见面 and status beginning visible."
+        },
+        {
+          "index": 13,
+          "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-2_0_E2460F72-8948-4F4B-9CD6-21FAE58570A1.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/FA0AE8C8-A85E-4581-8D87-8E5602F6369F.png",
+          "sha256": "b357171fbbc70da1e6499372af06a03b8d2b0b68f4ec970934910cf353c6758b",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Cross-year continuation overlaps start clock/end date/year/end clock/title and shows full status plus progress; CTA begins at bottom."
+        },
+        {
+          "index": 14,
+          "name": "shared-plan-117-schedule-cross-year-de-system-largest-dark-part-3_0_D99E6407-D09E-4B91-B735-466CC8076B80.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/6BEC18A6-0419-4743-8D5A-F266E54CDD50.png",
+          "sha256": "3caed281bedbd7ef7a646ea099e68fed2c50819578e7c4a08110c0266e87bf7c",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Cross-year tail overlaps end clock/title/status/progress, then full Prüfen und senden action and card bottom. AssistiveTouch at right action edge. Combined 12/13/14 continuously cover card."
+        },
+        {
+          "index": 18,
+          "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-1_0_E8BFA971-DF5F-42E9-8924-30DEA6EB45B0.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/BD8461DA-05DA-41D1-A82E-D61B8FC49594.png",
+          "sha256": "82c28777ffb0318f1f3a2bb5d80a86f1d791c36402b14d7af9a0a54feffaae61",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Final same-day group complete: prominent 28. Okt., Mi, entire 14:00 – 15:30 on one line; title 下午咖啡 and status begin below. Endpoint clocks unbroken."
+        },
+        {
+          "index": 19,
+          "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-2_0_459DB910-8468-4927-9B87-94FFA78223B7.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/C6285885-8B45-4384-96EF-00BF36A6CAD2.png",
+          "sha256": "4a73d7aba86c23d82fb496236c76aa536a4b88bb35659031da8263acb0ae851d",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Same-day tail overlaps full clock range/title, then full status/progress/action and card bottom. AssistiveTouch overlaps action right edge. Pair 18/19 already covers whole card."
+        },
+        {
+          "index": 20,
+          "name": "shared-plan-117-schedule-same-day-de-system-largest-dark-part-3_0_3386057C-EE29-41BC-BB44-EABA22FF11CE.png",
+          "originalPath": "/tmp/sideseat215-private/schedule-final-attachments/1D04A03A-82D1-4D25-9FA9-D8D5372FBFD8.png",
+          "sha256": "4a73d7aba86c23d82fb496236c76aa536a4b88bb35659031da8263acb0ae851d",
+          "viewedOriginal": true,
+          "verdict": "pass-within-stated-overview-scope",
+          "observation": "Final-part same-day capture visually repeats 19, with same complete status/progress/action and bottom. Counted as inspected capture, not extra unique coverage."
+        }
+      ]
+    },
+    "focused-final-review-a": {
+      "reviewedAt": "2026-10-24T22:48:26.481134+00:00",
+      "build": 215,
+      "reviewer": "schedule_validation",
+      "originalCount": 8,
+      "scope": "Final focused offline navigation run, images0–7. New homepage same-day typography plus original creation/history visible scope. Not clean API, full flow or whole-App typography verification.",
+      "blockingFindings": [],
+      "summary": "All eight actual originals inspected. Normal homepage date is prominent and same-day clocks stay intact. Maximum homepage reflows wide; complete tall card metadata is outside these initial captures. Original creation/history routes remain legible in the stated scope.",
+      "images": [
+        {
+          "index": 0,
+          "attachmentName": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_ADC86EE0-9FD5-4DD9-87B8-EF2CF936C55A.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/7D533AE9-77BE-42B4-9203-160CA26B419F.png",
+          "sha256": "e36d871f4ba32b4318873d4182863da2b10c9eaa109b977a4fe531864e43d296",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "confirmed",
+          "language": "de",
+          "textSizeAndAppearance": "system-largest-dark",
+          "observations": [
+            "Changed homepage schedule displays a prominent 27. Okt. date, separate Di weekday and intact 18:00–19:30 clock range across the full available width.",
+            "Confirmed tab, original activity title and fixed create action are readable."
+          ],
+          "limitations": [
+            "This initial viewport contains only the top of the tall card; status, location and people below are not reviewed here.",
+            "Expected controlled-offline network error occupies a large region; this is not a clean API homepage.",
+            "System AssistiveTouch overlaps the right side of the card near the clock-row margin, without hiding its digits."
+          ]
+        },
+        {
+          "index": 1,
+          "attachmentName": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_6F2CF65F-8D74-4F2C-8E43-87D769584355.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/FF1F0834-E4D7-40FA-ABC1-AA976EDC9A07.png",
+          "sha256": "a89a18aebc93447b437d04615f16f1a5b0dd857e99ba16a8b81b92aaf39c852d",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "confirmed",
+          "language": "zh-Hans",
+          "textSizeAndAppearance": "normal-light",
+          "observations": [
+            "Changed card has a visually stronger October 27 date, separate Tuesday weekday and compact single-line18:00–19:30 range.",
+            "Activity title, confirmed status, Maxvorstadt, Mina, right artwork and chevron are visible within the complete card; right-bottom create action remains separate."
+          ],
+          "limitations": [
+            "Expected controlled-offline network error is visible above the card.",
+            "AssistiveTouch sits in the blank lower-right page area."
+          ]
+        },
+        {
+          "index": 2,
+          "attachmentName": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_60384BCC-8C95-458B-A9E0-9A6FA0044DFB.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/AF36A15B-ED13-4A95-A141-02D0CFD206DA.png",
+          "sha256": "9ace7ed873625e28710cee33f7138b8dc40844f4ade3d2cb6aab4bb66bd018e9",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "creation",
+          "language": "de",
+          "textSizeAndAppearance": "system-largest-dark",
+          "observations": [
+            "Original creation sheet opens with complete activity/place placeholders, candidate-day range,09:00 and17:00 controls, Europe/Berlin and friend-proposal option.",
+            "German labels reflow, and close plus bottom fill-my-times action remain readable."
+          ],
+          "limitations": [
+            "This is the initial empty form only: no typing, picker expansion, submission or full creation flow is inferred.",
+            "AssistiveTouch overlaps blank space at the lower-right edge of the second form group."
+          ]
+        },
+        {
+          "index": 3,
+          "attachmentName": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_6A0A969C-6700-4FBC-836B-B27DBC6F63B4.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/07C7A85E-7B74-4484-9C68-8E6962307EE0.png",
+          "sha256": "2b626f3a145ef02ce52c2f2eedbe52064e7b3649c7d0ac4bae0119700ef65e83",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "creation",
+          "language": "zh-Hans",
+          "textSizeAndAppearance": "normal-light",
+          "observations": [
+            "Original creation sheet displays name/place fields, October26–November1 candidates,09:00–17:00 daily window, timezone, proposal option and bottom next-step action without truncated labels."
+          ],
+          "limitations": [
+            "Initial empty form only; no data entry or picker behavior is inferred.",
+            "AssistiveTouch is in the blank lower-right form area."
+          ]
+        },
+        {
+          "index": 4,
+          "attachmentName": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_FC8B0FC0-ADC3-4F72-B1D5-C0DE9FD5AD04.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/513C43D9-92C3-438D-841E-D883D69F5121.png",
+          "sha256": "c649cb300841d25eafc8638d120fe66fb82eb7e444c9926e64951ac6e15b7908",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "history",
+          "language": "de",
+          "textSizeAndAppearance": "system-largest-dark",
+          "observations": [
+            "Original history route shows its heading, ended state, Coffee after class and October24,2026 with full clock values22:46 and23:46 on two lines.",
+            "Large history card continues vertically; the split range does not fragment individual clock strings."
+          ],
+          "limitations": [
+            "Original history uses its existing presentation; this is not the changed homepage schedule.",
+            "Zone/location and later history actions are below the viewport or tab bar and are not fully reviewed.",
+            "Expected controlled-offline network error is visible.",
+            "AssistiveTouch overlaps right card margin beside year/time area."
+          ]
+        },
+        {
+          "index": 5,
+          "attachmentName": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_F4AA0122-0F11-4A05-80E5-B7D9B7F03770.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/DD66E2E1-88C6-4FEE-BD97-2E67255FC6E0.png",
+          "sha256": "e36d871f4ba32b4318873d4182863da2b10c9eaa109b977a4fe531864e43d296",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "history-return",
+          "language": "de",
+          "textSizeAndAppearance": "system-largest-dark",
+          "observations": [
+            "Return restores confirmed tab with the same prominent date, separate weekday, intact18:00–19:30 and visible title/create action."
+          ],
+          "limitations": [
+            "Only top of tall card is visible, requiring scroll for remaining metadata.",
+            "Expected controlled-offline network error remains; this is not clean API evidence.",
+            "AssistiveTouch overlaps right margin near the clock line."
+          ]
+        },
+        {
+          "index": 6,
+          "attachmentName": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_E586954D-1736-4EE0-BAA7-9F6399972D63.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/381E9C0E-7D63-408F-ACC1-DE5BE4DEAA74.png",
+          "sha256": "dfe1a21a9d4ff1eddc6a334aaff89229b85e17016d249b7c5be1feac986ab118",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "history-return",
+          "language": "zh-Hans",
+          "textSizeAndAppearance": "normal-light",
+          "observations": [
+            "Return restores confirmed tab, complete compact card and prominent date/weekday/single-line18:00–19:30, with activity, status, location, person and artwork unchanged.",
+            "Right-bottom creation action remains visible above the tab bar."
+          ],
+          "limitations": [
+            "Expected controlled-offline network error remains visible.",
+            "AssistiveTouch is in blank lower-right space."
+          ]
+        },
+        {
+          "index": 7,
+          "attachmentName": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_17AFD61A-BFB4-4CC7-8526-6C9EADD3E7D1.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/3A94E155-B95F-4CDC-870C-C0621395C547.png",
+          "sha256": "761755c2b2a8b3011184c2bdae61eb41247f5d3da76deac311b41e9e9cdf9821",
+          "reviewedOriginal": true,
+          "result": "pass-with-stated-scope",
+          "case": "history",
+          "language": "zh-Hans",
+          "textSizeAndAppearance": "normal-light",
+          "observations": [
+            "Original history route shows complete ended card, activity, full October24,2026 date,22:44–23:44, timezone, place and person.",
+            "Feedback, happened/did-not-happen and invite-again actions are visible within the card."
+          ],
+          "limitations": [
+            "History presentation is unchanged by the homepage typography work.",
+            "Expected controlled-offline network error is visible.",
+            "AssistiveTouch sits in the blank region just below the card.",
+            "Only visible presentation and navigation are assessed; no feedback mutation is inferred."
+          ]
+        }
+      ]
+    },
+    "focused-final-review-b": {
+      "scope": "Seven individually viewed FINAL App215 controlled offline fixture originals (indices8–14). Normal task and horizontal waiting schedule display, maximum visible vertical waiting segments and original invitation routes. Expected red coordination-network banner is fixture scope, not clean API home. No maximum whole-card/detail or sending/calendar claim.",
+      "reviewedCount": 7,
+      "blockingFindings": [],
+      "entries": [
+        {
+          "name": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_4DB7D0B2-9C3B-408B-8E8E-4B5735AFEA86.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/6064C493-4273-4A16-A83F-80C3AC1F7B11.png",
+          "index": 8,
+          "sha256": "bbe24797a136384f18d2919948364e4e85e2a21572e54e85d84a72d83b4154ea",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Normal Chinese horizontal waiting rail: first fully visible card has complete 10月26日, 周一 and 13:00–14:00 date column; neighboring card intentionally peeks beyond right viewport. Normal two task cards above retain complete 14:00–15:00. Long second task title intentionally truncates. Offline red network banner expected; AssistiveTouch overlays neighbor peek, not primary date column."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-offline-filled-de-system-largest-dark_0_5EBDD41D-28DA-4F51-855F-B94102D0A6DE.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/F8382ADB-8C1D-47A6-8C90-57858B210B25.png",
+          "index": 9,
+          "sha256": "42fd14a77d8f9664a2133831e960273cd2656f4aad368e34e95775dd8285ff55",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "German actual maximum/dark initial offline page: header/tabs/create action visible, expected large red network banner and task-section heading. Only first card prominent 26. Okt. and Mo visible at bottom; clock and rest of card offscreen. This is entry/chrome evidence only, not full-card readability."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_C0B775DC-87D7-4653-8CF0-A427BE32B44A.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/0E74E446-47AA-4C9A-8D40-1162F6583B86.png",
+          "index": 10,
+          "sha256": "1b76c84d171094ac8cbc77bb6e4b2c0d553305acf548d4df5144f735c37c72d9",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Normal Chinese task cards: prominent complete 10月26日, weekday and 14:00–15:00 range on both cards; status, location, inviter and review action fit without overlap. First horizontal waiting card has complete 13:00–14:00; adjacent card peeks intentionally. Expected offline banner; AssistiveTouch over adjacent rail artwork area."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-original-invitation-de-system-largest-dark_0_A1D4C32E-9CA3-4303-A9E7-84CD4FCA2492.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/BE108C3A-79B7-4D09-A9AB-7DA760A4C04B.png",
+          "index": 11,
+          "sha256": "f2cd868d2f483a63d77f078a5dbf8cf120a24c37f5f50c1c1a57b03b4c506580",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Original German maximum/dark invitation chat route visible: peer, original plan title and beginning of date/year content; existing status wraps within word and remainder/endpoints/actions offscreen. No maximum-detail visual completeness claim. AssistiveTouch is beside card, not over visible date. This unchanged detail source is route proof only."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-original-invitation-zh-Hans-normal-light_0_E5A16E57-6414-4131-B54F-24C6310E3042.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/3626F838-4F39-43FD-BC39-08237E996D32.png",
+          "index": 12,
+          "sha256": "5fe9c297f0add33fdb5dc079c68286e9ff268efff27ff1979167fe980fba1f9d",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "Original Chinese normal invitation chat route: full dated cross-midnight interval 2026年10月25日23:44→10月26日00:44, original invitation title/location, confirm/propose/decline actions visible. AssistiveTouch in blank side area; no interval overlap. Does not show every later chat message."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-vertical-waiting-first-de-system-largest-dark_0_5904EFDA-4AF8-4C1A-8F0F-893F4D51830C.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/B9E325EA-38BB-49E3-8AFE-3707660A74A0.png",
+          "index": 13,
+          "sha256": "b72df70001c0143e4d598bf52840c64b2b0989ce01ee965baa67f3dc240ea31f",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "German maximum vertical first waiting card visible schedule: complete 26. Okt., Mo and 13:00–14:00, no split clock tokens or collisions. Only top of activity title visible below viewport; upper previous task footer visible. Fixed create/tabbar stay separate; AssistiveTouch beside schedule. No whole-card claim."
+        },
+        {
+          "name": "shared-plan-117-home-redesign-vertical-waiting-last-de-system-largest-dark_0_4B261ECC-D73B-48ED-A77C-A029C97EAB01.png",
+          "path": "/tmp/sideseat215-private/focused-final-attachments/CF61EBD5-BDF4-4819-AEF0-C08FFBA9B3E2.png",
+          "index": 14,
+          "sha256": "44cdc95dca323396b5556f5ed9d19ccc55d35c902a7cc64e1f967f9c19b10676",
+          "viewedOriginal": true,
+          "result": "pass_with_documented_scope",
+          "observation": "German maximum vertical last waiting card: previous card full lower activity/status/location/inviter content visible, followed by next complete 26. Okt., Mo and 13:00–14:00 schedule. Remaining next-card information below viewport. Fixed create/tabbar separate; AssistiveTouch over unused right schedule space. No whole-card or all-first-screen claim."
+        }
+      ]
+    }
+  },
+  "scope": "Final layout24 plus focused navigation15 captures all reviewed, using exact SHA equivalence where declared. Maximum schedule cards covered by continuous segments; focused max screenshots only current visible viewport, not full-card proof. Offline and clean API fixture scopes separate; system floating overlays recorded."
+}

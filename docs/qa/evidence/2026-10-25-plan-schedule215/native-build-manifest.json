@@ -1,0 +1,24 @@
+{
+  "build": 215,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "eeac3f601de1f464f6de6e5d2497dda9ca1257831ee7892d4149c57d6dcc0400",
+    "SideSeat Preview.debug.dylib": "b463a4fcfddff222d43e490da8bc5d55f85b6435a8f4402a6bcbd9bbc7c0f84d"
+  },
+  "testSourceSHA256": "52ed2ac0ed2bbea491ff78f1de7a63bd3dc1ae4c658fca28141487c1c268e606",
+  "backendReleased": false,
+  "webReleased": false,
+  "sourceCommit": "586e8f112e3fd4c9f1f951fb30ce232675ae9206",
+  "sourcePushed": true,
+  "all267InputsMatchCommittedSource": true,
+  "finalProductFrozenDuringAcceptance": true,
+  "initialProductReplacedAfterCandidatePixelFinding": true,
+  "testSourcesAtDeliverySHA256": {
+    "PlanPresentationTests.swift": "3ce706e17b63cb099b6983a34c5a9d66062fd14d5866b73531b43030dde84c34",
+    "PlanStatePresentationUITests.swift": "52ed2ac0ed2bbea491ff78f1de7a63bd3dc1ae4c658fca28141487c1c268e606"
+  },
+  "executionSourceScope": "Final unit17, schedule211.776s and navigation183.158s run from exact delivery test source. Pre-candidate product and earlier method/routing results separately retained, excluded from final acceptance."
+}

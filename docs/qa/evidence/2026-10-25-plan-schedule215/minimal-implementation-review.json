@@ -1,0 +1,24 @@
+{
+  "build": 215,
+  "baseCommit": "0749b35aedadc90526af61aa8382347af2b2c227",
+  "independentReview": "No material findings",
+  "reviewScope": "Final schedule and candidate typography, display helpers and quantity strings; independent source review and final original-pixel validation complete.",
+  "outsidePrivateCardByteIdentical": true,
+  "newPersistentStateRequestSchemaDependency": false,
+  "originalAXDescriptionAndDateTimeRulesPreserved": true,
+  "regularColumnPoints": 112,
+  "stackingStartsAt": "xxLarge",
+  "sameDay": "Whole range if it fits, otherwise whole clocks on separate rows",
+  "crossDay": "Prominent startmonth/day plus weekday/year, startclock, arrow-linked complete enddate/endclock",
+  "productSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "2b67db698bb3aa0ea86188991e5520753a974681f53e1b8f92371082b2246922",
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "ec52ff20af326d29e6de1608506f18c26fd153f3d7f6228079c07ae40be0e7e7"
+  },
+  "finalScope": "No business behavior change; only date grouping/typography and original AX summary retained.",
+  "originalClockAndZoneFormattingByteIdentical": true,
+  "candidateParser": "Extracted existing sorted POSIX parser; unchanged AX count/range and year logic",
+  "candidateTypography": "Count, first date and last date each separate; single date/fallback preserved",
+  "independentFinalCandidateReview": "No material findings",
+  "finalPixelValidation": "Passed: final normal/xLarge/en/max captures, candidate groups and crossyear2027 intact; no changed schedule clipping. Viewport and system overlay limits in visual-review.json.",
+  "sourceCommit": "586e8f112e3fd4c9f1f951fb30ce232675ae9206"
+}

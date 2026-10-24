@@ -1,0 +1,58 @@
+{
+  "build": 215,
+  "finalPhoneRuns": [
+    {
+      "run": "schedule",
+      "method": "Flow215UITests.PlanStatePresentationUITests testHomeScheduleEndpointsAcrossLanguagesAndTextSizes",
+      "seconds": 211.776,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "run": "focused-matrix",
+      "method": "Flow215UITests.PlanStatePresentationUITests testHomeRedesignPopulatedNavigationAndWaitingAcrossTextSizes",
+      "seconds": 183.158,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "finalUnit": {
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 0.049
+  },
+  "scheduleCombinations": [
+    "zh-Hans L light",
+    "zh-Hans xLarge light",
+    "en L light",
+    "de actual AccessibilityXXXL dark"
+  ],
+  "scheduleAssertions": "16 card checks: same-day, cross-day, cross-year and candidate in each combination, exact AX date/clocks/year; strict viewport and44pt controls; overlapping maximum-text segments. Final layout-only method does not visit details.",
+  "navigationScope": "Separate final original pending conversation route, tabs, creation/cancel, history/return, horizontal waiting and maximum-text vertical waiting. Controlled offline legacy fixture, not clean API workflow.",
+  "initialRuns": [
+    {
+      "run": "schedule",
+      "seconds": 468.885,
+      "verdict": "Superseded product; not final acceptance. Chinese xLarge candidate dates fragmented despite automated passes."
+    },
+    {
+      "run": "focused-matrix",
+      "seconds": 183.304,
+      "verdict": "Superseded product; not final acceptance. Chinese xLarge candidate dates fragmented despite automated passes."
+    }
+  ],
+  "initialUnitSeconds": 0.073,
+  "initialDetailScope": "Before final candidate fix,16 coordinated-plan detail open/return visits passed;40 captures reviewed. Initial source/binary and test method differed from final; not counted as final App acceptance.",
+  "finalProductFrozen": true,
+  "finalSourceFilesMatched": true,
+  "notRerun": [
+    "unchanged complete native invitation-to-Calendar API journey",
+    "unchanged browser/domain tests",
+    "unchanged loading/empty-store case",
+    "whole-App maximum-font or manual-performance acceptance"
+  ],
+  "noNewPersistentStateRequestSchemaDependency": true
+}

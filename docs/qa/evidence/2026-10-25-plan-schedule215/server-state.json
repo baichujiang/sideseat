@@ -1,0 +1,99 @@
+{
+  "before": [
+    {
+      "name": "same-day",
+      "phase": "INVITING",
+      "chosenStart": "2026-10-28T13:00:00.000Z",
+      "chosenEnd": "2026-10-28T14:30:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "cross-day",
+      "phase": "INVITING",
+      "chosenStart": "2026-10-28T22:00:00.000Z",
+      "chosenEnd": "2026-10-29T00:00:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "cross-year",
+      "phase": "INVITING",
+      "chosenStart": "2026-12-31T22:30:00.000Z",
+      "chosenEnd": "2027-01-01T00:30:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "candidate",
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": []
+    }
+  ],
+  "after": [
+    {
+      "name": "same-day",
+      "phase": "INVITING",
+      "chosenStart": "2026-10-28T13:00:00.000Z",
+      "chosenEnd": "2026-10-28T14:30:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "cross-day",
+      "phase": "INVITING",
+      "chosenStart": "2026-10-28T22:00:00.000Z",
+      "chosenEnd": "2026-10-29T00:00:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "cross-year",
+      "phase": "INVITING",
+      "chosenStart": "2026-12-31T22:30:00.000Z",
+      "chosenEnd": "2027-01-01T00:30:00.000Z",
+      "invitationVersion": 1,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": [
+        "ACCEPTED"
+      ]
+    },
+    {
+      "name": "candidate",
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participants": 0,
+      "mySlots": [],
+      "invitations": []
+    }
+  ],
+  "unchanged": true
+}

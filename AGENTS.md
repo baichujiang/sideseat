@@ -35,8 +35,23 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is214 below. See web release/QA records.
-- Preview214 is the current installed development build, source 0dcad2188b963914bdafdf4e98788976f9ec0a10 pushed.
+  No native rebuild in that web stage; current native build is215 below. See web release/QA records.
+- Preview215 is the current installed development build, source 586e8f112e3fd4c9f1f951fb30ce232675ae9206 pushed.
+  Overview month/day is prominent, weekday/year separate; whole same-day clocks
+  and arrow-linked cross-day endpoints retain end year. Candidate count/complete
+  first/last dates are separate. Regular column112pt, xxLarge+ stacks; existing
+  horizontal sections/create/AX/rules stay. Same sorted parser extracted, three
+  quantity strings, no new state/request; independent final minimal review passed.
+  Final unit17/0.049s, phone layout211.776s/four combinations and navigation183.158s
+  passed.39 captures/28 unique pixels reviewed; maximum cards use continuous
+  segments, exact duplicates reuse SHA review, system overlays scoped. Initial
+  candidate xLarge fragmentation found in pixels, fixed/rebuilt/retested; old
+  468.885s/routing scope is not final acceptance. Normal215 PID8962,267/Local/
+  signature/binary match commit, ordinary97 retained.2QA accounts401/4links404,
+  Runner/private removed, new App reports0. No backend/web/Schema release, full
+  invitation-Calendar API journey repeat or whole-App max/performance claim.
+  See215 QA/release;214 below is historical.
+- Preview214 was the previous installed development build, source 0dcad2188b963914bdafdf4e98788976f9ec0a10 pushed.
   All three Plans overview styles share a leading date/time and trailing activity
   information/artwork; accessibility stacks. Candidate-only cards show existing
   Time to be decided; real pending intervals, cross-day dates/year/timezone stay.

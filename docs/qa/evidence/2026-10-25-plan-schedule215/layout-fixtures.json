@@ -1,0 +1,27 @@
+{
+  "build": 215,
+  "scope": "API-prepared disposable layout cases, not phone-created workflow",
+  "cases": [
+    {
+      "name": "same-day",
+      "start": "2026-10-28T13:00:00.000Z",
+      "end": "2026-10-28T14:30:00.000Z",
+      "localStart": "2026-10-28, 14:00",
+      "localEnd": "2026-10-28, 15:30"
+    },
+    {
+      "name": "cross-day",
+      "start": "2026-10-28T22:00:00.000Z",
+      "end": "2026-10-29T00:00:00.000Z",
+      "localStart": "2026-10-28, 23:00",
+      "localEnd": "2026-10-29, 01:00"
+    },
+    {
+      "name": "cross-year",
+      "start": "2026-12-31T22:30:00.000Z",
+      "end": "2027-01-01T00:30:00.000Z",
+      "localStart": "2026-12-31, 23:30",
+      "localEnd": "2027-01-01, 01:30"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "suite": "PlanPresentationTests",
+  "passed": 17,
+  "failed": 0,
+  "skipped": 0,
+  "testExecutionSeconds": 0.049,
+  "scope": "Native Simulator Development using current active product/test sources; state presentation plus same-day/candidate/crossyear/DST formatting. Phone215 product tested separately.",
+  "sourceSHA256": "3ce706e17b63cb099b6983a34c5a9d66062fd14d5866b73531b43030dde84c34",
+  "finalProductAndCandidateParser": true
+}
