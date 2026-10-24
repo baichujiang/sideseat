@@ -21,7 +21,24 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 205 is the current installed development build. Sequential repair1
+- Preview 206 is the current installed development build. Sequential repair2
+  compacts accessibility availability status/summary and removes repeated same-day
+  dates from final-time footer; full AX dates, all state text/IDs, selection/manual
+  submission/invitation/Calendar rules stay. No new state/request. Sourceaa816c08
+  is pushed. Minimal final same-package two cases53.286/446.529s passed,0failed/skipped:
+  four zh/de normal/largest dark combinations,14 actual pixel checks, cross-day
+  paint/reverse erase,44pt, local drafts/back/relaunch and footer<40% window.
+  27 final actual images reviewed,7 final+1 before saved;9 Foundation format samples
+  are separate. IMPORTANT correction:193/205/206 original PNGs contain complete
+  opaque text/selection borders. Earlier blank-grid claim was viewer misreading;
+  read png-content-audit. All row-overlay/opacity experiments were reverted;
+  TimePollGrid through EOF is byte-identical to205. Do not claim a rendering-bug
+  fix or reuse reverted experiment passes as final acceptance. Phone206 normal
+  PID8417,267/Local/signature/binary verified,97 retained;Runner/stage private files
+  cleaned,no new App reports/backend/web release. Two disposable QA accounts and
+  layout plan retained ONLY for this task's later full acceptance/cleanup.
+  Repairs3–5 and final supplemental acceptance remain pending; see206 release/QA.
+- Preview 205 was the previous development build. Sequential repair1
   removes nested inline Picker from daily-hour Menu, using direct buttons and
   current checkmark. Same48 integer options/half-hour step/24:00/rules/IDs; no new
   state/component/request. Source92910c5f is pushed. Final same-package full two
