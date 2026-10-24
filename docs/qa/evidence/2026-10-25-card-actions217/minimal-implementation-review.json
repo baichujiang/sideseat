@@ -1,0 +1,16 @@
+{
+  "build": 217,
+  "baseCommit": "cdb080cde1bcd4fc7d762cd616f43a3967e3fa10",
+  "independentReview": "No material findings",
+  "scope": "Root card builders and current three-file product diff; same parent Button/route, presentation/date/count/AX contracts. Existing tint lookup and PlanHomePeople unchanged; dead artwork/render-onlyflag removed. Footer fixes intrinsic child width with flexible spacer and existing vertical fallback.",
+  "newStateRequestSchemaDependency": false,
+  "formatterSourceByteIdenticalTo216": true,
+  "uiTestSourceByteIdenticalTo216": true,
+  "productSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "4787ed497484a38ebdd450b1e683ed49b77d4201b68ab3e7e6eb995c5099233b",
+    "ios-native/SideSeat/Features/Chat/PlanHomeArtwork.swift": "f28355c170e2233fe8b6c9729a5e094761425d764fef7e7d534fc2cb5ded8d46"
+  },
+  "pixelReview": "Final49captures/39unique original pixels reviewed; action trailing/bottom and decorations absent, actual people retained. Scope limits in visual-review.json.",
+  "sourceCommit": "e8cbc4bab14dd821a8a18d94a6c732450cbc7d10",
+  "sourcePushed": true
+}

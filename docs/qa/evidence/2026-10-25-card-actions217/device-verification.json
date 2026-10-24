@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-24T23:52:31.943001+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 217,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9008,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Two disposableQA accounts, acceptedcontact/twoQAmessages and four collecting plans prepared; candidate UI read-only, before/after server state identical, offline navigation separate. No real user data writes.",
+  "deviceIdentityVerifiedBeforeInstall": true,
+  "qaAccountsRemoved": 2,
+  "qaLinks404": 4,
+  "sourceCommit": "e8cbc4bab14dd821a8a18d94a6c732450cbc7d10",
+  "sourcePushed": true,
+  "all267CommittedSourceInputsVerified": true,
+  "privateFixtureRemoved": true,
+  "privateLaunchConfigurationRemoved": true,
+  "privateGeneratedRunnerProjectRemoved": true
+}

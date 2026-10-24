@@ -1,0 +1,400 @@
+{
+  "build": 217,
+  "actualCaptures": 49,
+  "uniquePixelHashes": 39,
+  "stage": "final",
+  "allCandidateUniqueOriginalsViewedAtOriginalResolution": true,
+  "candidateCaptureIndex": [
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-1_0_4C8A09B8-A250-4448-9713-5EC0008A190B.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/1566245A-A178-4109-AA90-26DFE8C5A002.png",
+      "sha256": "3995081ad1c4d470aa435c61082b646e0d40b2e685f49dda24c2eaa3c6556604",
+      "index": 0,
+      "retainedFile": "cross-year-max-part1.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-2_0_35474E01-3739-4965-B8BD-576F973B78CF.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/3CAD2E1F-EE47-44EF-A642-1D068F458B98.png",
+      "sha256": "67cd60c7fbec888bdd924530f88850999e9b5b9b1c10410f4635c91f43434f21",
+      "index": 1,
+      "retainedFile": "cross-year-max-part2.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-3_0_A0CBE86B-B817-4191-A79E-69A33308A59E.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/411B9CEB-0261-4944-84F2-08E96A68B352.png",
+      "sha256": "67cd60c7fbec888bdd924530f88850999e9b5b9b1c10410f4635c91f43434f21",
+      "index": 2,
+      "exactPixelDuplicateOfIndex": 1,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-en-normal-light_0_9A7BFD87-2B06-47B4-BA78-045C253EE3EB.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/3DEF88D9-E327-48FD-B7FD-4B8EF2DD637A.png",
+      "sha256": "e5a98fe2bb4f70de5a02eda7a31fe39faa323d28d82a0d7d156eab7442b474ee",
+      "index": 3,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-zh-Hans-normal-light_0_24AF1C88-A534-4647-BFCB-63C615C30558.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/14FDB556-9B11-40D9-B39F-2418FC638B02.png",
+      "sha256": "3fa946bf62f3d4ca58719bd0531ffce0f79d14bc08a23f817942d60b466cac6e",
+      "index": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-zh-Hans-xLarge-light_0_AA4A9647-BCFE-4C42-B6BB-6966A4D4F5C5.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/299826B6-09C1-4CFF-A737-ACE525765AB1.png",
+      "sha256": "2e6956a85bac5077adadd3a80770051951d25449f550e717e805bcc0cfba571d",
+      "index": 5,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-1_0_88ABC0BD-E4C0-4012-BEF5-D3BDFC8D610F.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/B3DA597E-4025-405D-83A9-5502BC919BF5.png",
+      "sha256": "c9a6bb73621cc58a85c3bc2dd6e5d006814e622d1f24d0fe11efd9eff32ffc0c",
+      "index": 6,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-2_0_1CFE34CB-338D-4C13-B97E-37D9E663E08E.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/979900D3-FE7F-48C6-910F-4A3DD839A2C2.png",
+      "sha256": "f3ab08b9f74629efeea2b3a78b5bc5a4a90e8384b95bbd3854e78a6c3d896580",
+      "index": 7,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-3_0_A6B517B3-5542-4D4F-A1E6-1CD932EB3CC5.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/32079A62-0161-4FF8-B037-E81CD3FBAF24.png",
+      "sha256": "abdd94253c4b7f56378f4d16d810bbd411e6f43d127ee64828d81dfe7c553e4b",
+      "index": 8,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-en-normal-light_0_A2A6C358-BC9B-4343-ABB4-991B050744DE.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/1EFEC3C3-70DF-4611-A7A0-937C5C038687.png",
+      "sha256": "4d3ee499243fab2e60e9aba6f52fffe2f697ec55dd6687abeee0a0fa9e03e2f8",
+      "index": 9,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-zh-Hans-normal-light_0_A1C15AC3-4FA6-48FF-A68E-A552218D77BB.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/262B6DB5-FFDB-413A-96D3-E954E6CD3C8B.png",
+      "sha256": "3fa946bf62f3d4ca58719bd0531ffce0f79d14bc08a23f817942d60b466cac6e",
+      "index": 10,
+      "exactPixelDuplicateOfIndex": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-zh-Hans-xLarge-light_0_52F61CBB-6DAD-4F94-82A5-5D79412D1D48.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/6A39A76F-0B06-4A21-87F4-346C721AD90A.png",
+      "sha256": "2e6956a85bac5077adadd3a80770051951d25449f550e717e805bcc0cfba571d",
+      "index": 11,
+      "exactPixelDuplicateOfIndex": 5,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-de-system-largest-dark_0_558539D6-7846-4064-A185-EDAEF9727F5C.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/88936521-3D8D-4A75-9650-72B636EA2E04.png",
+      "sha256": "450e7b81f3bf89272b6d1bbe7a31dcde85bf85fe53a6c85a2503d7a70d9cb136",
+      "index": 12,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-en-normal-light_0_EACEE352-B244-4FC3-A63B-626028A596D2.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/F0105F68-84AA-4720-9451-44B0C8308E7E.png",
+      "sha256": "6cfea107f59a24029648413449217964bca0627a903be3b093db433719080a6d",
+      "index": 13,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-zh-Hans-normal-light_0_2E748D16-EE9D-44B6-AEFD-12EE647ACD5E.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/43F498C3-7FFB-4742-87E5-8C5652EEC737.png",
+      "sha256": "f6b9fe285081f996e4f59b405cbbdd403a8d0317f1a9e6c65ca65d95168e43d4",
+      "index": 14,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-zh-Hans-xLarge-light_0_D3C61C4E-D608-47D8-ACC5-C64661B7F467.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/0E6D267E-DF75-456D-9E08-2C048698DEBA.png",
+      "sha256": "ad177cb2294d1207305be6d304697238d08f82e4be5484365aad6dbedcf64f30",
+      "index": 15,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-1_0_4EFB3875-13C7-4FBF-B8BD-1255B70A1FB2.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/A61467B8-839E-4A65-831C-515C7F40B286.png",
+      "sha256": "e034afc52486299831671b7ec14dbb66aa218276b15379c26c649f7965cb0832",
+      "index": 16,
+      "retainedFile": "candidate-max-part1.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-2_0_70DCBF49-DBE8-4DE0-AA60-D614BD54687C.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/B5F7F4A9-0F9A-4B19-BF08-62887C557E78.png",
+      "sha256": "65427d83416b3140f98cf89f0cc4b0ab9f8bee2e0bf8a3f5f98301ddfcaaf4eb",
+      "index": 17,
+      "retainedFile": "candidate-max-part2.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-3_0_5AB08025-7514-4716-9D67-5055FE22F445.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/AAD0BD19-E0EA-4922-AC48-757CF290C672.png",
+      "sha256": "65427d83416b3140f98cf89f0cc4b0ab9f8bee2e0bf8a3f5f98301ddfcaaf4eb",
+      "index": 18,
+      "exactPixelDuplicateOfIndex": 17,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-en-normal-light_0_0625C389-6A67-4BF5-8ECC-4E6193454F2C.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/2EEAB45B-84A3-4788-BDB3-A69D14D0FF8A.png",
+      "sha256": "7a97fe5a71bc236ffc79058eb2dda60a73540bdcbb716c949e22f74a449feecb",
+      "index": 19,
+      "retainedFile": "candidate-english.png",
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-zh-Hans-normal-light_0_E50F17B5-97E3-4443-ADEB-223F4F238D62.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/9AF01C94-042D-449C-B68D-0B61B4D3D4F4.png",
+      "sha256": "e8e2d72a3a61a4b91ac0787e71a13c38ea7550020c125d27a7e8a1243228e505",
+      "index": 20,
+      "retainedFile": "candidate-normal.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-zh-Hans-xLarge-light_0_7E3097DF-F62E-43ED-9523-78EA757B6D85.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/14FB3D0A-8FA1-4906-ADE5-0EA405A948E3.png",
+      "sha256": "86f2b6b8ae2dd2d58cfeee8926ef6f52660d71e19857d8776db1f2527c90ae91",
+      "index": 21,
+      "retainedFile": "candidate-xlarge.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-1_0_01AB62E4-5F14-4D1A-82CF-8DFEB90F98B1.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/B0F7467E-B5DD-4D1C-B398-8305C27B66C5.png",
+      "sha256": "79a2e4a219c94ad60d1854dee4aead731e3fd3de234410841337bef353196dc3",
+      "index": 22,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-2_0_869414AC-DABA-41D4-AC15-411D8B6FAE5A.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/671C6060-5E16-4C59-9E1E-6ADE606A21E2.png",
+      "sha256": "6c6f6a60204430fd60bf2d598c4545f0f4856516569840c3b386a8bebd84ab99",
+      "index": 23,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-3_0_72DFB648-988B-4830-B875-1A3457102E80.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/C001C28E-C85D-4BA4-A226-2F55774BA317.png",
+      "sha256": "6c6f6a60204430fd60bf2d598c4545f0f4856516569840c3b386a8bebd84ab99",
+      "index": 24,
+      "exactPixelDuplicateOfIndex": 23,
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-en-normal-light_0_544DDC1F-B0AB-4625-BFB2-13D5BFA4C4BE.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/44039616-51D6-41C1-B543-6B555912343D.png",
+      "sha256": "4d3ee499243fab2e60e9aba6f52fffe2f697ec55dd6687abeee0a0fa9e03e2f8",
+      "index": 25,
+      "exactPixelDuplicateOfIndex": 9,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-zh-Hans-normal-light_0_B9A60A33-4C31-49A8-AD11-676433950C01.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/C434ED23-E1CE-4AF3-BD43-CA68BB05F4E2.png",
+      "sha256": "3fa946bf62f3d4ca58719bd0531ffce0f79d14bc08a23f817942d60b466cac6e",
+      "index": 26,
+      "exactPixelDuplicateOfIndex": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-zh-Hans-xLarge-light_0_D54FD75A-37AE-4095-AB1C-688A5E06708D.png",
+      "path": "/tmp/sideseat217-private/candidate-attachments/3F0AA18B-8DD1-4333-89F3-4D629BDD6120.png",
+      "sha256": "2e6956a85bac5077adadd3a80770051951d25449f550e717e805bcc0cfba571d",
+      "index": 27,
+      "exactPixelDuplicateOfIndex": 5,
+      "reviewer": "root"
+    }
+  ],
+  "candidateReview": "No material findings: Chinese L/XL and English L action trailing, decorative art absent, date/count/title/action intact. German actual AXXXL taskCTA follows progress in existing vertical fallback and is right-aligned.",
+  "candidateIndependentReviews": {
+    "card_action_review": "12 captures/9 unique German originals, exact duplicates2\u21921/18\u219217/24\u219223",
+    "card_action_scope": "8 captures/7 unique English and original detail images, exactduplicate25\u21929"
+  },
+  "scopeLimits": [
+    "Maximum cards require overlapping continuous segments, not one-screen layouts.",
+    "AssistiveTouch OS overlay can cover right-side CTA/text or grid at its fixed screen position; not a product layout collision.",
+    "Original German maximum detail only firstscreen/header/topgrid/footer acceptance; not entire maximum detail timetable.",
+    "No whole-App max-font/performance or full invitation-to-Calendar API journey repeat.",
+    "Offline API warning is intentional fixture behavior, not a clean live API home.",
+    "Navigation maximum snapshots show visible portions only; separate maximum-complete images establish full three-card reading.",
+    "Existing unchanged German chat word fragmentation and old history card wrapping are outside overview change acceptance."
+  ],
+  "threeTypesCaptureIndex": [
+    {
+      "name": "shared-plan-117-home-redesign-confirmed-de-system-largest-dark_0_6EC70912-DB76-44FE-B346-A3A001EE02C5.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/D5FCD492-3D29-43F4-A589-01306A171982.png",
+      "sha256": "f4b00913a2e9ff5d5221ba38670c7a7e9424bf3355b9fa76917dcd397e2b4189",
+      "index": 0,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-confirmed-zh-Hans-normal-light_0_6631F6EE-48BB-470D-BD9A-D3E72EEC2C1F.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/A80BBC90-EDDA-48E9-A10E-92EB9D61A62E.png",
+      "sha256": "d246b1adfdfc3788ff01b143da525f8616c135640f7db7a11dfb11efba697f9d",
+      "index": 1,
+      "retainedFile": "confirmed-normal-offline.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-creation-de-system-largest-dark_0_EBE6FA55-2E30-4389-BEEB-77BBC87B4DA0.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/B12F1D2B-0BB7-4006-86FF-0D5B4A6EF760.png",
+      "sha256": "4e0a5ffba102a18177f148ea4a0271104ee30b63fee1a905997910a8a9d562ef",
+      "index": 2,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-creation-zh-Hans-normal-light_0_AB019EE0-0CCF-4FEE-BFDC-4685C1ED380C.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/B23DF8F6-75E8-4B6F-9105-78189CEDDD39.png",
+      "sha256": "89651f8de6d6924abb9dc23d0be3af96da3b3e79ebb3290ce5ffbacadfc35070",
+      "index": 3,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-history-de-system-largest-dark_0_C1DBFC67-0478-4B16-8296-433470DBB7E2.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/0B9B3A9A-8B13-43D6-878D-B6DFE9C1115E.png",
+      "sha256": "9f91918335841c4c2307da5712c2f7bdb36693063b45c27b811c3f9b9b28e2e4",
+      "index": 4,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-history-return-de-system-largest-dark_0_78E62549-3DE5-4FF7-B010-97936BC6B6CC.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/5A31E96B-1E2B-440C-8DED-4F4275126683.png",
+      "sha256": "f4b00913a2e9ff5d5221ba38670c7a7e9424bf3355b9fa76917dcd397e2b4189",
+      "index": 5,
+      "exactPixelDuplicateOfIndex": 0,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-history-return-zh-Hans-normal-light_0_22530E57-DC7B-43CC-8343-BB73E7265222.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/3E6EF94F-A379-4D90-A445-DFF792D29389.png",
+      "sha256": "d246b1adfdfc3788ff01b143da525f8616c135640f7db7a11dfb11efba697f9d",
+      "index": 6,
+      "exactPixelDuplicateOfIndex": 1,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-history-zh-Hans-normal-light_0_6EB150AB-2586-4176-8348-DAA204C6D18E.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/CFDCD809-B440-4A20-977A-52A1D451516F.png",
+      "sha256": "3edff0ad0f4e07719fe5b2f3bcb8cb6ab8a2402ffdd7d46bfbe9b0fc96566baf",
+      "index": 7,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-horizontal-waiting-zh-Hans-normal-light_0_AC41FD81-5032-4E91-BF45-4BB0F3321A61.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/1B67406E-443B-4AD4-B18C-6DE254ED6122.png",
+      "sha256": "0ba30c94bcab0897ae0ae5326d7469502da7b04bd13913f9613b646e057477ec",
+      "index": 8,
+      "retainedFile": "waiting-normal-offline.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-confirmed-part-1_0_06DED1E2-7BCD-452D-877D-531A9FE8F560.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/7520CF6F-A3AD-4A4D-BCC4-0F4C07B07A74.png",
+      "sha256": "8822b1743165d68fe28fe6148608f0a27a8f3aec0946a3881782953c2acc3c3c",
+      "index": 9,
+      "retainedFile": "confirmed-max-part1.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-confirmed-part-2_0_3C457FA7-5D09-4734-8AC1-179E458A0D47.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/2A3D30B6-555F-4277-A574-00EBB61E6FA6.png",
+      "sha256": "dbf22411c0c268a53c70c7098fde8c5130e08c7977112a0202efbf55e4907516",
+      "index": 10,
+      "retainedFile": "confirmed-max-part2.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-task-part-1_0_AB450245-0223-4465-BF65-617A65C3DD18.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/D029BF79-099A-4E8E-B09F-C39840F2584E.png",
+      "sha256": "1ba6902962eeb8689a04071b179993d0249610739f442e0a762716348bbc265a",
+      "index": 11,
+      "retainedFile": "task-max-part1.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-task-part-2_0_5D6C0DCB-4CC5-4ED8-8592-A4C5845458C6.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/07261163-4199-46CE-B4C4-2515320832B5.png",
+      "sha256": "77c7fa4b962aeb3abe8dfa37318f492e59ed04216151502c6d2060df71202df8",
+      "index": 12,
+      "retainedFile": "task-max-part2.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-waiting-part-1_0_3DA778D3-90E1-44A4-BF21-359A14F882E0.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/E62BA423-0E9A-4D0B-BB96-25AA946FD165.png",
+      "sha256": "3bcce3e92eb0498f180125db124f4a775afbfe6880b44673873445e6752afbb0",
+      "index": 13,
+      "retainedFile": "waiting-max-part1.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-max-complete-waiting-part-2_0_53ED7360-9D77-40FC-9188-6C3BE1639505.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/E77F72ED-BBF5-4461-8595-C1D9FA4139DC.png",
+      "sha256": "bbaa31ce4681b4433a95ddd328e9bbb8d6451e5389c24100699b63e7cb19c7ed",
+      "index": 14,
+      "retainedFile": "waiting-max-part2.png",
+      "reviewer": "card_action_review"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-offline-filled-de-system-largest-dark_0_E0A98224-21D9-4BF2-B1C4-A5577FC31045.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/3674E7A3-A261-4A79-9F03-928BB45D84C8.png",
+      "sha256": "8ff7680428cf3e4e8f7d90295389e64c7c612786b9a52e3b2ba603d2cf64f103",
+      "index": 15,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-offline-filled-zh-Hans-normal-light_0_D9325A81-68F7-40E3-80A4-F778FED42FA4.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/6C2D55DA-6195-40D5-A9BD-731EFD1ED610.png",
+      "sha256": "68b4fc711c925b88b299cf0586d7d148e7f7ccbed528e0ad9ba9354ba854e5f2",
+      "index": 16,
+      "retainedFile": "task-normal-offline.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-original-invitation-de-system-largest-dark_0_349409CF-1626-43F2-AF02-737DFF63E9A7.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/1CB53DD4-11FF-498C-B2EE-8EEDD943A7FA.png",
+      "sha256": "8ad502e57b27f30b6522967c7d79ec79ab4ec230c9ad29e11ea66dbe37e78123",
+      "index": 17,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-original-invitation-zh-Hans-normal-light_0_1CAC3457-61CC-4F1F-AAF2-87D8C2FDF871.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/600B144C-7984-4850-A7AD-D286C3B5588A.png",
+      "sha256": "f8064c5bcfa92f1e513bf1a4e6e0953ecb66aac792bcffac7f530a01f52b9e22",
+      "index": 18,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-vertical-waiting-first-de-system-largest-dark_0_77AAE351-F552-4542-92CF-7229726EE720.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/2949B914-3BCB-49E6-A4D1-3A66AE24DF03.png",
+      "sha256": "a6a988a5476549222ccaad477aa1c74ed5a492d630526c34544e112ec204a7a3",
+      "index": 19,
+      "reviewer": "card_action_scope"
+    },
+    {
+      "name": "shared-plan-117-home-redesign-vertical-waiting-last-de-system-largest-dark_0_199DB315-D190-4728-922C-D42A00CC2D81.png",
+      "path": "/tmp/sideseat217-private/three-types-attachments/1F674985-810A-4D14-A75B-38EC74C97A09.png",
+      "sha256": "3cbdde7e7bf416ff63c5315db6198e4bee0b7a2403d585c798a5d7f49d62a0de",
+      "index": 20,
+      "reviewer": "card_action_scope"
+    }
+  ],
+  "allFinalUniqueOriginalsViewedAtOriginalResolution": true,
+  "threeTypesReview": "No material findings: Chinese ordinary full task/action at trailing edge, waiting rail and confirmed full card retain date/title/status/location/real people; six German maximum originals cover all three complete cards in overlapping segments.",
+  "threeTypesIndependentReviews": {
+    "card_action_review": "6maximum complete segments/6unique original pixels",
+    "card_action_scope": "8German navigation captures/7unique; exactduplicate5\u21920"
+  }
+}

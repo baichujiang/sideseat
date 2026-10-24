@@ -35,8 +35,20 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is216 below. See web release/QA records.
-- Preview216 is the current installed development build, source c4fd4dcdda906adbe96bd48f44846f19a1f64c4b pushed.
+  No native rebuild in that web stage; current native build is217 below. See web release/QA records.
+- Preview217 is the current installed development build, source e8cbc4bab14dd821a8a18d94a6c732450cbc7d10 pushed.
+  Task footer restores flexible space: progress leading/action trailing-bottom,
+  existing vertical fallback for insufficient width. Decorative right covers and
+  dead rendering/render-onlyflag removed; title uses full information width,
+  original people/tint/date/AX/routes/rules stay. No new state/request/dependency;
+  independent minimal review passed. Same frozen App candidate254.545s/four
+  combinations, maximum-three-types64.702s and navigation182.700s passed.49actual
+  captures/39unique original pixels reviewed; offline/max/OS-overlay scopes stay.
+  Normal217 PID9008,267/Local/signature/binary match commit,97 retained;2QAaccounts
+  401/4links404,Runner/private removed,new App reports0. No backend/web release or
+  unchanged unit/domain/browser/full invitation API repeat. See217 QA/release;
+  216 below is historical.
+- Preview216 was the previous installed development build, source c4fd4dcdda906adbe96bd48f44846f19a1f64c4b pushed.
   Candidate-only month/dayrange is prominent with subordinate actual count/TBD;
   sparse2 stays2, complete crossmonth/year endpoints use explicit year/month-day
   fallback when needed. Known-time branch/AX/routes/rules stay; no new state or

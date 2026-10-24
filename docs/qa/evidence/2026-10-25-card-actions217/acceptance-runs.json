@@ -1,0 +1,44 @@
+{
+  "build": 217,
+  "finalPhoneRuns": [
+    {
+      "method": "testHomeCandidateScheduleHierarchyAcrossTextSizes",
+      "seconds": 254.545,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "method": "testHomeRedesignMaximumCardsRemainFullyReachable",
+      "seconds": 64.702,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "method": "testHomeRedesignPopulatedNavigationAndWaitingAcrossTextSizes",
+      "seconds": 182.7,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "execution": "Candidate separately, then two offline cases together on same frozen signed App; all final no product/test repairs.",
+  "candidateCombinations": [
+    "zh-Hans L light",
+    "zh-Hans xLarge light",
+    "en L light",
+    "de actual AccessibilityXXXL dark"
+  ],
+  "candidateAssertions": "Four real QA candidate cards per combination; exact AX dates/count/TBD/no fake clock; strictviewport44pt overlappingsegments; original detail open/back firstcard per combination.",
+  "threeTypesScope": "Controlled offline legacy fixtures, ordinary Chinese and actual maximumGerman; original chat invitation route, creation/cancel/historyreturn, horizontalwaiting/maximumvertical and allthree fullcards via continuoussegments.",
+  "sourceTestUnchanged": true,
+  "testSourceSHA256": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c",
+  "noNewStateRequestSchemaDependency": true,
+  "notRerun": [
+    "Unchanged unit/domain/browser tests",
+    "Complete invitation-to-Calendar API journey",
+    "Whole-App maximum-font or manual-performance acceptance"
+  ],
+  "unitScope": "21620/.054s not a217rerun; formatter source byte-identical."
+}
