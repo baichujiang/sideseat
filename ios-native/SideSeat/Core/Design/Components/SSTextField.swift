@@ -234,7 +234,7 @@ struct SSFieldMessage: View {
     }
 }
 
-private struct SSFieldChrome: View {
+struct SSFieldChrome: View {
     var body: some View {
         RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             .fill(SideSeatTheme.fillTertiary)

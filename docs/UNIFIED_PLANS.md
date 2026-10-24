@@ -57,6 +57,23 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Native inline information hierarchy — Preview 212
+
+The owner still taps the activity title or location directly to edit. A small
+decorative pencil identifies each editable value; read-only participants keep
+the ordinary heading. Editing uses fixed Activity name and Location (optional)
+labels above the existing multiline fields, with the same shared field surface
+as other native forms. Both editing fields use the same one-to-three-line native
+viewport; longer values scroll internally without changing stored contents or
+limits. Cancel and Save align to the trailing edge, stacking only
+when their full labels cannot fit. A light divider separates activity information
+from candidate dates, passive status and the timetable.
+
+This adds no entry, workflow step, state or request. Original edit permissions,
+trimming, limits, save/error handling, availability drafts, explicit submission,
+sharing, invitation versions and Calendar rules remain unchanged. Focused and
+full-flow acceptance are recorded in the [212 QA](./qa/2026-10-24-plan-information-editor.md).
+
 ## Collection stage metadata — Preview 211
 
 The native editable COLLECT detail keeps title/share and editable location in

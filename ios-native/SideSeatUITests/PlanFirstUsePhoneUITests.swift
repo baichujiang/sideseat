@@ -756,7 +756,7 @@ import XCTest
         app.buttons["plan-edit-cancel"].tap()
         XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
         app.descendants(matching: .any)["plan-detail-location"].tap()
-        let locationEditor = app.textFields["plan-edit-location"]
+        let locationEditor = app.textFields["plan-edit-location"].exists ? app.textFields["plan-edit-location"] : app.textViews["plan-edit-location"]
         XCTAssertTrue(locationEditor.waitForExistence(timeout: 10))
         replace(locationEditor, with: "图书馆二楼")
         capture(app, "inline-information-editing")
@@ -1913,7 +1913,7 @@ import XCTest
             let heading = app.staticTexts["time-poll-detail-title"]
             XCTAssertTrue(heading.waitForExistence(timeout: 25)); let original = heading.label
             XCTAssertFalse(app.buttons["plan-edit-information"].exists)
-            XCTAssertFalse(app.textFields["plan-edit-location"].exists)
+            XCTAssertFalse(app.textFields["plan-edit-location"].exists || app.textViews["plan-edit-location"].exists)
             let share = app.buttons["plan-share-open"]
             let status = app.staticTexts["plan-display-status"]
             let metadata = app.descendants(matching: .any)["plan-collection-metadata"].firstMatch
@@ -2012,7 +2012,7 @@ import XCTest
             app.navigationBars[shareTitle].buttons[language == "de" ? "Fertig" : "完成"].tap()
             XCTAssertTrue(heading.waitForExistence(timeout: 10))
             reveal(place); place.tap()
-            let location = app.textFields["plan-edit-location"]
+            let location = app.textFields["plan-edit-location"].exists ? app.textFields["plan-edit-location"] : app.textViews["plan-edit-location"]
             XCTAssertTrue(location.waitForExistence(timeout: 10))
             let originalInput = try XCTUnwrap(location.value as? String)
             replace(location, with: originalInput + " Library level 2")

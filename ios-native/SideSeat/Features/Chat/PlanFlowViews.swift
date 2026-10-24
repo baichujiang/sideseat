@@ -447,8 +447,11 @@ struct PlanDetailHeading: View {
             HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
                 Group {
                     if let editTitle {
-                        title.onTapGesture(perform: editTitle)
-                            .accessibilityAction(named: Text("Edit"), editTitle)
+                        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+                            title.accessibilityAction(named: Text("Edit"), editTitle)
+                            Image(systemName: "pencil").font(.system(size: 12))
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong.opacity(0.6)).accessibilityHidden(true)
+                        }.contentShape(Rectangle()).onTapGesture(perform: editTitle)
                     } else { title }
                 }.frame(maxWidth: .infinity, alignment: .leading)
                 if showsSharing { PlanShareActions(poll: poll, store: store).fixedSize() }
@@ -481,8 +484,11 @@ struct PlanDetailHeading: View {
 
     @ViewBuilder private var metadata: some View {
         if let editLocation {
-            location.onTapGesture(perform: editLocation)
-                .accessibilityAction(named: Text("Edit"), editLocation)
+            HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+                location.accessibilityAction(named: Text("Edit"), editLocation)
+                Image(systemName: "pencil").font(.system(size: 12))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong.opacity(0.6)).accessibilityHidden(true)
+            }.contentShape(Rectangle()).onTapGesture(perform: editLocation)
         } else if let value = poll.location, !value.isEmpty {
             Label(value, systemImage: "mappin.and.ellipse").fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("plan-detail-location")

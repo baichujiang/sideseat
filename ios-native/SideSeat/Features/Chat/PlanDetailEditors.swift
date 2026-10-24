@@ -53,38 +53,66 @@ struct PlanInlineInformation: View {
     private var hasChanges: Bool { trimmedTitle != poll.title || trimmedLocation != (poll.location ?? "") }
 
     var body: some View {
-        if editing && editable {
-            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                TextField("Activity name", text: $title, axis: .vertical)
-                    .font(.title2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
-                    .focused($focus, equals: .title).submitLabel(.next)
-                    .accessibilityIdentifier("plan-edit-title")
-                    .onSubmit { focus = .location }
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Image(systemName: "mappin.and.ellipse").foregroundStyle(.secondary)
-                    TextField("Location (optional)", text: $location)
-                        .foregroundStyle(SideSeatTheme.textPrimary)
-                        .focused($focus, equals: .location).submitLabel(.done)
-                        .accessibilityIdentifier("plan-edit-location")
-                        .onSubmit { save() }
-                }.font(.subheadline).frame(minHeight: 44)
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    Button("Cancel", systemImage: "xmark") { focus = nil; editing = false }
-                        .buttonStyle(SSActionButtonStyle(size: .compact))
-                        .accessibilityIdentifier("plan-edit-cancel")
-                    Spacer(minLength: 0)
-                    Button("Save", systemImage: "checkmark") { save() }
-                        .buttonStyle(SSActionButtonStyle(prominent: true, size: .compact))
-                        .disabled(!hasChanges || trimmedTitle.isEmpty || title.count > 120 || location.count > 200 || !store.canMutate)
-                        .accessibilityIdentifier("plan-edit-save")
+        VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+            if editing && editable {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        Text("Activity name")
+                            .font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("plan-edit-title-label")
+                        TextField("Activity name", text: $title, axis: .vertical)
+                            .font(.title2.weight(.semibold)).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
+                            .focused($focus, equals: .title).submitLabel(.next)
+                            .accessibilityIdentifier("plan-edit-title")
+                            .onSubmit { focus = .location }
+                            .padding(.horizontal, 14).padding(.vertical, 13)
+                            .frame(minHeight: 44, alignment: .leading)
+                            .background(SSFieldChrome())
+                    }
+                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                        Text("Location (optional)")
+                            .font(.caption.weight(.semibold)).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .accessibilityIdentifier("plan-edit-location-label")
+                        TextField("Location (optional)", text: $location, axis: .vertical)
+                            .font(.subheadline).foregroundStyle(SideSeatTheme.textPrimary).lineLimit(1...3)
+                            .focused($focus, equals: .location).submitLabel(.done)
+                            .accessibilityIdentifier("plan-edit-location")
+                            .onSubmit { save() }
+                            .padding(.horizontal, 14).padding(.vertical, 13)
+                            .frame(minHeight: 44, alignment: .leading)
+                            .background(SSFieldChrome())
+                    }
+                    ViewThatFits(in: .horizontal) {
+                        HStack(spacing: SideSeatTheme.spaceSM) { cancelAction; saveAction }
+                            .fixedSize(horizontal: true, vertical: false)
+                        VStack(alignment: .trailing, spacing: SideSeatTheme.spaceSM) { cancelAction; saveAction }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .accessibilityElement(children: .contain).accessibilityIdentifier("plan-edit-actions")
                 }
-            }.textFieldStyle(.plain)
-        } else {
-            PlanDetailHeading(poll: poll, store: store, showsSharing: showsSharing,
-                showsStatus: poll.planningPhase != "COLLECTING" || poll.hasFixedTime,
-                editTitle: editable ? { begin(.title) } : nil,
-                editLocation: editable ? { begin(.location) } : nil)
+                .textFieldStyle(.plain)
+                .accessibilityElement(children: .contain).accessibilityIdentifier("plan-information-editor")
+            } else {
+                PlanDetailHeading(poll: poll, store: store, showsSharing: showsSharing,
+                    showsStatus: poll.planningPhase != "COLLECTING" || poll.hasFixedTime,
+                    editTitle: editable ? { begin(.title) } : nil,
+                    editLocation: editable ? { begin(.location) } : nil)
+            }
+            Divider()
         }
+    }
+
+    private var cancelAction: some View {
+        Button("Cancel", systemImage: "xmark") { focus = nil; editing = false }
+            .buttonStyle(SSActionButtonStyle(size: .compact))
+            .accessibilityIdentifier("plan-edit-cancel")
+    }
+
+    private var saveAction: some View {
+        Button("Save", systemImage: "checkmark") { save() }
+            .buttonStyle(SSActionButtonStyle(prominent: true, size: .compact))
+            .disabled(!hasChanges || trimmedTitle.isEmpty || title.count > 120 || location.count > 200 || !store.canMutate)
+            .accessibilityIdentifier("plan-edit-save")
     }
 
     private func begin(_ field: Field) {
