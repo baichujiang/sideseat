@@ -1,0 +1,17 @@
+{
+  "build": 216,
+  "baseCommit": "f5047d6ce67c4360add5a1163b807466651b6bd7",
+  "independentReview": "No material findings",
+  "scope": "Candidate-only date hierarchy; known-time branch and surrounding view byte-identical, original AX dates/clocks/zone unchanged. Actual candidate count, month/year context and complete date fallback preserved.",
+  "newStateRequestSchemaDependency": false,
+  "regularColumnPoints": 112,
+  "stackingStartsAt": "xxLarge",
+  "productSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "469f7c3468270935dcf06b72fc6ca50e08625c6dd0079d0d656eeccbea0870cb",
+    "ios-native/SideSeat/Features/Chat/PlanPresentation.swift": "c86fb24c6f5dc26eb252fdbcb5629e2ab1f3c6dbbf6e0c7297cb2d45ca0f938a"
+  },
+  "pixelReview": "Final28captures/20unique original pixels reviewed, Chinese xLarge complete endpoint repaired; limits in visual-review.json.",
+  "finalHelperIndependentReview": "No material findings; full endpoint label first, year and complete month/day fallback when necessary.",
+  "sourceCommit": "c4fd4dcdda906adbe96bd48f44846f19a1f64c4b",
+  "sourcePushed": true
+}

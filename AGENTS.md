@@ -35,8 +35,20 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is215 below. See web release/QA records.
-- Preview215 is the current installed development build, source 586e8f112e3fd4c9f1f951fb30ce232675ae9206 pushed.
+  No native rebuild in that web stage; current native build is216 below. See web release/QA records.
+- Preview216 is the current installed development build, source c4fd4dcdda906adbe96bd48f44846f19a1f64c4b pushed.
+  Candidate-only month/dayrange is prominent with subordinate actual count/TBD;
+  sparse2 stays2, complete crossmonth/year endpoints use explicit year/month-day
+  fallback when needed. Known-time branch/AX/routes/rules stay; no new state or
+  request, independent final minimal review passed. User14Plus was already215;
+  discrepancy came from candidate-only vs chosen-time demos, not wrong device.
+  Unit20/0.054s, final phone four combinations252.269s,28captures/20unique pixels
+  reviewed. Initial xLarge crossyear fragmentation repaired/rebuilt/full rerun;
+  initial251.244s is not final acceptance. Normal216 PID8989,267/Local/signature/
+  binary match commit,97 retained;2QA accounts401/4links404,Runner/private removed,
+  new App reports0. No backend/web release/full invitation API repeat or whole-App
+  max/performance claim. See216 QA/release;215 below is historical.
+- Preview215 was the previous installed development build, source 586e8f112e3fd4c9f1f951fb30ce232675ae9206 pushed.
   Overview month/day is prominent, weekday/year separate; whole same-day clocks
   and arrow-linked cross-day endpoints retain end year. Candidate count/complete
   first/last dates are separate. Regular column112pt, xxLarge+ stacks; existing

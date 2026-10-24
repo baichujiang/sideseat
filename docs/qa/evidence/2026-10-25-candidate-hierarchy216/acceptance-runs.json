@@ -1,0 +1,35 @@
+{
+  "build": 216,
+  "finalPhoneRuns": [
+    {
+      "method": "Flow216UITests/PlanStatePresentationUITests/testHomeCandidateScheduleHierarchyAcrossTextSizes",
+      "seconds": 252.269,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "finalUnit": {
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 0.054
+  },
+  "combinations": [
+    "zh-Hans L light",
+    "zh-Hans xLarge light",
+    "en L light",
+    "de actual AccessibilityXXXL dark"
+  ],
+  "assertions": "Four candidate-only cases per combination, exact original AX count/dates/TBD/no clock, strict viewport/44pt/overlapping segments; first original detail open/back in each combination.",
+  "finalProductFrozen": true,
+  "initialPhoneAutomatedPassNotFinalSeconds": 251.244,
+  "initialRejectedReason": "Chinese xLarge crossyear enddate fragmentation; repaired, rebuilt, full matrix rerun.",
+  "serverBeforeAfter": "Four collectingQA plans exact read-only state invariant; no user records modified.",
+  "notRerun": [
+    "Unchanged full invitation-to-Calendar API journey",
+    "Unchanged web/domain/loading-empty cases",
+    "Whole-App maximum font/manual performance"
+  ],
+  "uiTestSourceSHA256": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+}

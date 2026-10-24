@@ -1,0 +1,10 @@
+{
+  "initialPhoneUISeconds": 251.244,
+  "automatedPassed": 1,
+  "finalAcceptance": false,
+  "reason": "Chinese xLarge complete end date fragmented into 2027\u5e741\u6708 /1\u65e5; repaired with explicit year/month-day groups, rebuilt and reran all combinations.",
+  "retainedImage": "initial-cross-year-xlarge.png",
+  "imageSHA256": "ccc9899bf7d7303a67d1f3921e9828e56a6aa400616cbc7830991baa35acb74b",
+  "finalProductDiff": "Only view endpoint fallback; formatter and phone test source byte-identical.",
+  "testSetupAttempts": "Initial missing local xctestrun due quoting error and existing result path rejected; no phone test executed in either setup attempt."
+}

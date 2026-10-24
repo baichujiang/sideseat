@@ -1,0 +1,239 @@
+{
+  "build": 216,
+  "stage": "final",
+  "actualCaptures": 28,
+  "uniquePixelHashes": 20,
+  "allUniqueOriginalsViewedAtOriginalResolution": true,
+  "review": "Passed. Chinese month/dayrange prominent, sparse actual2 vs7 retained, Chinese xLarge2027year+wholeJanuary1 endpoint fixed. English complete endpoints/actions and German maximum full-card continuous segments passed.",
+  "captureIndex": [
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-1_0_BD517F98-FD39-4CA9-B921-143E806E2764.png",
+      "path": "/tmp/sideseat216-private/final-attachments/2C48840D-0FB3-494C-A92D-D60EE3540A77.png",
+      "sha256": "7afd62b3e1b54466d66b95e26afd78e46c7cd191e1f279a0bc47d2a53da8cf9b",
+      "index": 0,
+      "retainedFile": "cross-year-max-part1.png",
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-2_0_51758D8F-27AC-4454-9588-ED4FB0ADB9F9.png",
+      "path": "/tmp/sideseat216-private/final-attachments/555B26B4-3E8E-48CC-9D61-6A942C12EE09.png",
+      "sha256": "07e282fc22d99976f6f6639ac9737c7ae88085cec715bcbd3f71b0b2f74120e7",
+      "index": 1,
+      "retainedFile": "cross-year-max-part2.png",
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-de-system-largest-dark-part-3_0_4BD01B14-38BC-405F-90F3-59C84E4CF570.png",
+      "path": "/tmp/sideseat216-private/final-attachments/611A15DA-2A65-4B83-B75B-42E41F13611A.png",
+      "sha256": "07e282fc22d99976f6f6639ac9737c7ae88085cec715bcbd3f71b0b2f74120e7",
+      "index": 2,
+      "exactPixelDuplicateOfIndex": 1,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-en-normal-light_0_60D6025D-605D-45C6-A710-AE1600D1B49E.png",
+      "path": "/tmp/sideseat216-private/final-attachments/C5710EBA-393A-4056-B127-19CFA9AE3009.png",
+      "sha256": "3548b7444a64e6b4bfb385da2b57943b6906d57eb499a6f2a7fed1082561f4e9",
+      "index": 3,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-zh-Hans-normal-light_0_DA9663FE-0B9F-440F-8AD1-7EBFFBB03B07.png",
+      "path": "/tmp/sideseat216-private/final-attachments/48ECA798-D772-422B-BA1F-9EF40BD59DFE.png",
+      "sha256": "c0feb1cc2e73f765262832936d80a42da65798aefddc3a8f045eebdc04144e2b",
+      "index": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-cross-year-zh-Hans-xLarge-light_0_95B50198-961C-445C-BD3B-0F6CB62909BB.png",
+      "path": "/tmp/sideseat216-private/final-attachments/B0748F3C-200C-4648-95C6-5F78C0D61529.png",
+      "sha256": "321f50a6a644adf0ccaf1c46d87278959fdb0d75d74f89097e92f97a5fa01db7",
+      "index": 5,
+      "retainedFile": "cross-year-xlarge.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-1_0_5418A8F2-7847-45C0-AC4C-5AF3EDD0F026.png",
+      "path": "/tmp/sideseat216-private/final-attachments/0B22DCD4-C25B-4B30-88AF-53476E947BE2.png",
+      "sha256": "e40d6b6d514b5711142b630827696b0112a60d52b41b10351a217b8bcabbf2fe",
+      "index": 6,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-2_0_A60EFB57-E453-409F-AA3B-9D169E075866.png",
+      "path": "/tmp/sideseat216-private/final-attachments/2403A524-CF87-416F-B661-3D82771D3FD1.png",
+      "sha256": "ad498c3a329b712eca2e7207ea14b0ef8b592e96f1a2bffd60b5bba1e0d487c7",
+      "index": 7,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-de-system-largest-dark-part-3_0_20E1FE21-52B8-4137-88F5-D90624BA7A2A.png",
+      "path": "/tmp/sideseat216-private/final-attachments/3411763C-ECC5-4688-9892-AB0B9E85443D.png",
+      "sha256": "79cb58d8bb1b01889cf4f8d31ec99d285b4a88e4d6494506692901d38e8d222e",
+      "index": 8,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-en-normal-light_0_4DAF31B6-ED47-4A96-A73F-0024F50C509A.png",
+      "path": "/tmp/sideseat216-private/final-attachments/FCE70CE1-DDF5-4CC2-828D-41AD2AE51F15.png",
+      "sha256": "3548b7444a64e6b4bfb385da2b57943b6906d57eb499a6f2a7fed1082561f4e9",
+      "index": 9,
+      "exactPixelDuplicateOfIndex": 3,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-zh-Hans-normal-light_0_FEFD5B51-B9C3-49E9-AB75-C74AF6674B6D.png",
+      "path": "/tmp/sideseat216-private/final-attachments/6FE6A4BC-341A-4169-BE85-84A257FA4DC7.png",
+      "sha256": "c0feb1cc2e73f765262832936d80a42da65798aefddc3a8f045eebdc04144e2b",
+      "index": 10,
+      "exactPixelDuplicateOfIndex": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-long-title-zh-Hans-xLarge-light_0_4F9BEECD-5545-4FE4-A93D-A895B6493635.png",
+      "path": "/tmp/sideseat216-private/final-attachments/ADC46D9C-CB48-4471-9EAD-39732C15DAAF.png",
+      "sha256": "321f50a6a644adf0ccaf1c46d87278959fdb0d75d74f89097e92f97a5fa01db7",
+      "index": 11,
+      "exactPixelDuplicateOfIndex": 5,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-de-system-largest-dark_0_67866DF2-B65A-46D9-9AEA-DB8CD64C9C01.png",
+      "path": "/tmp/sideseat216-private/final-attachments/DF2E2B6C-B7E2-406C-BEB6-B3DE2D0D4091.png",
+      "sha256": "e6cf679f4a3dfa4e9903576711985fe634d85cc700218d3911a3a1aa15aa3519",
+      "index": 12,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-en-normal-light_0_A86FDDED-1152-43EE-B6BA-7BA5F5BE674A.png",
+      "path": "/tmp/sideseat216-private/final-attachments/11FE6D54-F594-4249-9A4B-1E0C9B137E61.png",
+      "sha256": "bb93ecbd98af1ba4dcf77fea89c0aa2aa081b287496fb9fcfbf1d5404766dfff",
+      "index": 13,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-zh-Hans-normal-light_0_434ABA22-9E18-4CB8-8370-47B80C1262CB.png",
+      "path": "/tmp/sideseat216-private/final-attachments/52A232C4-1787-4261-8DB7-DF5721E59CD7.png",
+      "sha256": "5b6dd04fdc8bfe7415291b8044fd8995f171350093a0c41901c66e074f0b117d",
+      "index": 14,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-original-detail-zh-Hans-xLarge-light_0_C0A311DC-357C-47DA-9E73-9796374D4C44.png",
+      "path": "/tmp/sideseat216-private/final-attachments/A8354A7B-9DE6-4022-A74A-B2CFD5F0DB51.png",
+      "sha256": "f14cd9598e7eacac8e53222be69831d49acc5c11d0da589a1593ea7fb06566d6",
+      "index": 15,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-1_0_B20F710E-5D3D-4931-A00B-EB9406E7C67B.png",
+      "path": "/tmp/sideseat216-private/final-attachments/42A8E92A-8F35-470B-AA8F-271E3711B097.png",
+      "sha256": "fd4fd2013fad6661968ec47adebbf916d8b1afdc6972b49b417f1adc114d3394",
+      "index": 16,
+      "retainedFile": "seven-day-max-part1.png",
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-2_0_AE59C368-326C-4A3F-A9BC-FBE2D0969162.png",
+      "path": "/tmp/sideseat216-private/final-attachments/68F576C2-79C3-414D-B5AC-B0C4307900F0.png",
+      "sha256": "ab5089bbdd54374b52eba8d1a9e220972844b76f1269347d1efa061c8d3473b4",
+      "index": 17,
+      "retainedFile": "seven-day-max-part2.png",
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-de-system-largest-dark-part-3_0_99C541FC-4D48-4B5E-9F5E-78BC3EC0F675.png",
+      "path": "/tmp/sideseat216-private/final-attachments/630A83F4-F9DF-4BC1-A4A1-5E9AC7D2E825.png",
+      "sha256": "2bee4d17c726c3981e0db349ff3ebca67830059ba59d9cd8829416caefb0cffb",
+      "index": 18,
+      "retainedFile": "seven-day-max-part3.png",
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-en-normal-light_0_644199CB-B893-4A01-9D9C-16B564400A76.png",
+      "path": "/tmp/sideseat216-private/final-attachments/9CD752D7-2C78-4E19-A53A-EEFC75A97204.png",
+      "sha256": "18741ce71d63a9bfa4eee76dc1f99212f815642cd8c9d727a4c0531e757dceaf",
+      "index": 19,
+      "retainedFile": "candidate-english.png",
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-zh-Hans-normal-light_0_2108F4E0-C769-4D3C-ACD5-726C9CE3D050.png",
+      "path": "/tmp/sideseat216-private/final-attachments/F6BCD173-B116-4FD1-ABE3-91EFD5E68D9D.png",
+      "sha256": "8223c03b1bef7deb13104642cbeadc331b88c0da7b25d159fabe269f310fa499",
+      "index": 20,
+      "retainedFile": "candidate-normal.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-seven-day-zh-Hans-xLarge-light_0_C91CEE6D-628E-4A8F-9C3C-1365ADB51E07.png",
+      "path": "/tmp/sideseat216-private/final-attachments/16335DC7-EC6A-439A-B51B-97CC435DA350.png",
+      "sha256": "399d4bc17ef1d21e70ac757af9ab1b65540df90632ad0e3a2baa76128d88dbb2",
+      "index": 21,
+      "retainedFile": "candidate-xlarge.png",
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-1_0_FA5173BA-6CD8-4028-AF13-6BDD15F1200F.png",
+      "path": "/tmp/sideseat216-private/final-attachments/CDEB0F7F-05C6-46B1-8092-90BF8B9298A8.png",
+      "sha256": "eb3eea7233c029a54e048a1571904055d3964841d8c44e4cec0e7c7bae02d100",
+      "index": 22,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-2_0_8F4552F4-13B2-482E-A827-F27541A3C413.png",
+      "path": "/tmp/sideseat216-private/final-attachments/E67EB18C-6FDD-402E-BE2B-7334390455F6.png",
+      "sha256": "aa64c81ff95f2b13c27d59b16409a1f3951c00b6b18a7e9867e62d5f0a01eef0",
+      "index": 23,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-de-system-largest-dark-part-3_0_A47C6B6B-47DB-48B3-A6E3-D592163F15A7.png",
+      "path": "/tmp/sideseat216-private/final-attachments/59AA0F9F-E907-4B46-ADA7-99E502D0EAED.png",
+      "sha256": "aa64c81ff95f2b13c27d59b16409a1f3951c00b6b18a7e9867e62d5f0a01eef0",
+      "index": 24,
+      "exactPixelDuplicateOfIndex": 23,
+      "reviewer": "schedule_review"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-en-normal-light_0_FF900FA0-2A70-44EE-8EAF-5BB971B6E937.png",
+      "path": "/tmp/sideseat216-private/final-attachments/BC5D48A5-2509-4E9F-8610-8BCDB77B5BA5.png",
+      "sha256": "3548b7444a64e6b4bfb385da2b57943b6906d57eb499a6f2a7fed1082561f4e9",
+      "index": 25,
+      "exactPixelDuplicateOfIndex": 3,
+      "reviewer": "compact_candidate_range"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-zh-Hans-normal-light_0_2E400D14-CAD7-4612-9056-B6FB14E74B92.png",
+      "path": "/tmp/sideseat216-private/final-attachments/DF95E13A-F01A-4E56-BF3C-08BBC6A68E08.png",
+      "sha256": "c0feb1cc2e73f765262832936d80a42da65798aefddc3a8f045eebdc04144e2b",
+      "index": 26,
+      "exactPixelDuplicateOfIndex": 4,
+      "reviewer": "root"
+    },
+    {
+      "name": "shared-plan-117-candidate-sparse-zh-Hans-xLarge-light_0_DC5FB6E0-A737-4D94-AAF2-D0E1A46AD875.png",
+      "path": "/tmp/sideseat216-private/final-attachments/0519A7CD-0259-4E09-9AED-1AD43A013D60.png",
+      "sha256": "321f50a6a644adf0ccaf1c46d87278959fdb0d75d74f89097e92f97a5fa01db7",
+      "index": 27,
+      "exactPixelDuplicateOfIndex": 5,
+      "reviewer": "root"
+    }
+  ],
+  "scopeLimits": [
+    "Maximum cards use continuous overlapping segments, not all content on one screen.",
+    "AssistiveTouch system overlay can cover right artwork/status/action or grid; scoped separately from product collisions.",
+    "Original German maximum detail route/header/top09 visible; fixedfooter leaves only small timetable portion, not full maximum detail acceptance.",
+    "Only plan overview hierarchy and original detail open/back; no full invitation-to-Calendar API journey repeat or whole-App max/performance claim."
+  ],
+  "reviewedRootUniqueIndices": [
+    4,
+    5,
+    20,
+    21
+  ],
+  "independentReviews": {
+    "schedule_review": "12captures/10unique final German originals; no material findings",
+    "compact_candidate_range": "8captures/6unique final English and detail originals; no material findings"
+  }
+}

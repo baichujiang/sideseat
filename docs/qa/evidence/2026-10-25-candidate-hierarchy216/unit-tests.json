@@ -1,0 +1,22 @@
+{
+  "suite": "PlanPresentationTests",
+  "passed": 20,
+  "failed": 0,
+  "skipped": 0,
+  "testExecutionSeconds": 0.054,
+  "scope": "Simulator Development; candidate count, same-month month/day range, sparse count, cross-month/year in English/Chinese/German, prior plan-state/clock/zone tests. Formatter source byte-identical in final phone product. Final endpoint ViewThatFits repair is UI-only and is covered by the subsequent phone matrix.",
+  "sourceSHA256": "bf6e2dacb8470af5914c19dc812b6026048af0421d1d00d7078d7e3b2e577354",
+  "formatterSHA256": "c86fb24c6f5dc26eb252fdbcb5629e2ab1f3c6dbbf6e0c7297cb2d45ca0f938a",
+  "initialAttempts": [
+    {
+      "scope": "Simulator launch stalled before tests; targeted selected Simulator reboot, no phone/global service change."
+    },
+    {
+      "executed": 20,
+      "passed": 19,
+      "failed": 1,
+      "seconds": 0.08,
+      "scope": "Two expectations failed in one test: expected German standalone month Okt. versus actual iOS Okt (without period). Test literal corrected; product unchanged."
+    }
+  ]
+}
