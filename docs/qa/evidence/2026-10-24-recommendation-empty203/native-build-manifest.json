@@ -28,5 +28,7 @@
   "testOnlyTimingRepair": "Skip extra home wait for transient loading observations and query skeleton immediately; prior attempt first queried at4.82s after four-second fixture finished.",
   "finalVisualCleanup": "Dedicated shorter inline result copy avoids German largest-text compound-word fragmentation; no shared old Explore copy change.",
   "finalLayoutUITestSourceSHA256": "6bbb380b9264c79207adfaa6ac6f46aa95cbf4f5fc05ece52fef31dd839ea6ce",
-  "retryTestScope": "Changed empty-state CTAs retain44pt checks. Unchanged native error Retry has AXheight34.333; verify its full visibility, hittability and real recovery, not a new minimum-size contract. App unchanged."
+  "retryTestScope": "Changed empty-state CTAs retain44pt checks. Unchanged native error Retry has AXheight34.333; verify its full visibility, hittability and real recovery, not a new minimum-size contract. App unchanged.",
+  "sourceCommit": "7dac76810e3649c179ca17e612100fa5ec2ef0ee",
+  "sourcePushed": true
 }

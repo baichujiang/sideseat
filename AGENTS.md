@@ -21,7 +21,26 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 202 is the current installed development build. Chat title/More hide
+- Preview 203 is the current installed development build. Together recommendation
+  empties use a centered 340pt icon/title/status group, existing solid Find more
+  primary and text View intentions secondary; Explore-off retains sole original
+  intention action. Successful empty exploration has dedicated short static copy,
+  fixing actual German compound fragmentation. No new state/component/request;
+  same gates, matching, on-demand load/disabled/retry/paging/filter/routes/IDs.
+  Source 7dac7681 is pushed. Same final product passed 322.259s eight layout/route
+  combinations and 26.855s targeted loading/error recovery, in separate invocations;
+  do not claim one all-passed suite. Initial 7.262s late skeleton test and real copy
+  fix, then 21.519s unchanged native Retry AX 34.333pt assertion failure retain scopes.
+  Final test only scopes that old native control to visibility/hittability/recovery;
+  changed empty CTAs keep strict 44pt. 32 final actual images plus 2 before viewed,
+  12 final saved (15 including before/intermediate). Largest German no-intention
+  state needs scrolling to actions; do not claim all first-screen/whole-App visual
+  acceptance. Installed 203/normal PID8005, strict 267/Local/signature/binary verified;
+  ordinary 97 retained, Runner/private files cleaned, no accounts/plans created or
+  deleted and no new App reports. No backend/web release, real recommendation/API
+  invitation journey/unit/domain/browser repeat. Existing unrelated observations
+  remain; Explore-off branch is code-reviewed only. See 203 QA/release for scopes.
+- Preview 202 was the previous development build. Chat title/More hide
   the native shared plate; More is an unframed ellipsis, composer Plan loses gray
   circle; context/info rows and unread/latest lose redundant action fill while
   single parent/floating surfaces remain. Remove the decorative context Divider
