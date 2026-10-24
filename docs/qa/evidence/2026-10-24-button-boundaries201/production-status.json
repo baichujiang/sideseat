@@ -1,0 +1,20 @@
+{
+  "backendReleased": false,
+  "webReleased": false,
+  "hosts": [
+    {
+      "hostname": "api.sideseat.de",
+      "deploymentID": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+      "readyState": "READY",
+      "deploymentURL": "sideseat-gjtfma7wp-baichus-projects.vercel.app"
+    },
+    {
+      "hostname": "www.sideseat.de",
+      "deploymentID": "dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7",
+      "readyState": "READY",
+      "deploymentURL": "sideseat-gjtfma7wp-baichus-projects.vercel.app"
+    }
+  ],
+  "recordedAt": "2026-10-24T01:09:52.986Z",
+  "checkScope": "Read-only deployment lookup during this stage; api and www both returned READY on the unchanged deployment."
+}

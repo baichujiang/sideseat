@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// Default chrome for standalone actions. Content cards keep their own button style.
+/// Quiet utilities, soft secondary actions and solid commits. Selection owns its own boundary.
 struct SSActionButtonStyle: ButtonStyle {
     enum Size: Equatable { case regular, compact, toolbar, icon }
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var prominent = false
+    var softFill = true
     var horizontalPadding: CGFloat = 12
     var cornerRadius: CGFloat = SideSeatTheme.controlRadius
     var size: Size = .regular
@@ -15,10 +16,9 @@ struct SSActionButtonStyle: ButtonStyle {
         let compact = size == .compact || size == .toolbar
         let radius: CGFloat = size == .compact || size == .icon ? 999 : size == .toolbar ? 12 : cornerRadius
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        let fill = prominent && isEnabled ? SideSeatTheme.ProductAction.fill
+        let fill = prominent ? (isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.Interaction.disabledFill)
+            : size == .toolbar || size == .icon || !softFill ? Color.clear
             : destructive ? SideSeatTheme.statusDangerText.opacity(0.08) : SideSeatTheme.fillTertiary
-        let border = destructive ? SideSeatTheme.statusDangerText
-            : prominent && isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.actionBorder.opacity(0.8)
         configuration.label
             .font(compact ? .callout.weight(.semibold) : .subheadline.weight(prominent ? .semibold : .medium))
             .multilineTextAlignment(.center)
@@ -30,7 +30,6 @@ struct SSActionButtonStyle: ButtonStyle {
             .padding(.vertical, size == .icon ? 0 : compact ? 6 : 8)
             .frame(minWidth: size == .icon ? 44 : compact ? 32 : 44, minHeight: compact ? 36 : 44)
             .background(fill, in: shape)
-            .overlay(shape.strokeBorder(border, lineWidth: 1))
             .frame(minWidth: 44, minHeight: 44)
             .contentShape(Rectangle())
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
@@ -43,15 +42,6 @@ extension View {
     func ssToolbarAction() -> some View {
         labelStyle(.iconOnly)
             .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
-    }
-
-    /// Shared boundary for controls that already own their padding and fill.
-    func ssActionOutline(cornerRadius: CGFloat = SideSeatTheme.controlRadius, destructive: Bool = false) -> some View {
-        overlay {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .strokeBorder(destructive ? SideSeatTheme.statusDangerText : SideSeatTheme.actionBorder, lineWidth: 1)
-                .allowsHitTesting(false)
-        }
     }
 }
 

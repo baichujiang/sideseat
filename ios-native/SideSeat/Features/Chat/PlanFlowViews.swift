@@ -109,7 +109,7 @@ struct PlanJourneyProgress: View {
     }
 }
 
-/// Filled controls commit a choice; outlined controls edit or share; arrows only open a destination.
+/// Commits use solid fills, editing utilities use soft fills, and navigation keeps its arrow.
 enum PlanActionKind: Equatable { case commit, edit, utility, navigate, decline }
 
 struct PlanActionLabel: View {
@@ -123,6 +123,14 @@ struct PlanActionLabel: View {
         if !isEnabled { return SideSeatTheme.textSecondaryStrong }
         return kind == .commit ? SideSeatTheme.ProductAction.foreground
             : kind == .decline ? SideSeatTheme.danger : SideSeatTheme.textPrimary
+    }
+
+    private var fill: Color {
+        switch kind {
+        case .commit: isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.Interaction.disabledFill
+        case .edit, .utility: SideSeatTheme.fillTertiary
+        case .navigate, .decline: .clear
+        }
     }
 
     var body: some View {
@@ -144,9 +152,7 @@ struct PlanActionLabel: View {
         .padding(.horizontal, SideSeatTheme.spaceMD).padding(.vertical, SideSeatTheme.spaceSM)
         .frame(maxWidth: .infinity, minHeight: 48)
         .foregroundStyle(foreground)
-        .background(kind == .commit ? (isEnabled ? SideSeatTheme.ProductAction.fill : SideSeatTheme.Interaction.disabledFill) : Color.clear,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-        .ssActionOutline(destructive: kind == .decline)
+        .background(fill, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore).accessibilityLabel(title)
     }
@@ -218,7 +224,6 @@ struct PlanShareSheet: View {
                             accessibilityID: "plan-invite-contacts"
                         ) { showsContacts = true }
                         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                        .ssActionOutline()
                     }
 
                     VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {

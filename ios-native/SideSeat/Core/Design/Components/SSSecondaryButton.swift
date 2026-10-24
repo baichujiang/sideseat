@@ -45,7 +45,6 @@ private struct SSSecondaryButtonStyle: ButtonStyle {
             configuration.label
                 .opacity(isEnabled ? 1 : 0.46)
                 .foregroundStyle(SideSeatTheme.textPrimary)
-                .ssActionOutline()
                 .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
         case .softFill:
             configuration.label
@@ -55,10 +54,6 @@ private struct SSSecondaryButtonStyle: ButtonStyle {
                     RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                         .fill(Color.primary.opacity(configuration.isPressed ? 0.1 : 0.06))
                 )
-                .overlay {
-                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                        .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
-                }
                 .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
                 .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
         }

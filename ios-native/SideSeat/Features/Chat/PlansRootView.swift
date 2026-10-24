@@ -721,12 +721,6 @@ private struct PlanOverviewLabel: View {
                     .frame(minHeight: 32, alignment: .leading)
                     .background(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.fill : SideSeatTheme.ControlSelection.fill,
                                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                    .overlay {
-                        if presentation.nextStep != .confirm {
-                            RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                                .strokeBorder(SideSeatTheme.separator, lineWidth: 0.5)
-                        }
-                    }
             }
         }
     }

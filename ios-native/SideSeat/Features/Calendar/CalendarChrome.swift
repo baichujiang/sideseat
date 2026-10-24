@@ -211,9 +211,6 @@ struct CalendarOffscreenEventButton: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .background(SideSeatTheme.surface, in: Capsule())
-            .overlay {
-                Capsule().strokeBorder(SideSeatTheme.utilityAction.opacity(0.22), lineWidth: 1)
-            }
             .shadow(color: .black.opacity(0.08), radius: 4, y: 1)
             .frame(maxWidth: availableWidth)
             .frame(minHeight: 44)

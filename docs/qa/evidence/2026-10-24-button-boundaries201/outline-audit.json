@@ -1,0 +1,23 @@
+{
+  "scope": "Current native App, including shared controls. No archived implementation inspected or edited. Retained compatibility feature rules and routes unchanged.",
+  "removed": [
+    "Default decorative strokes on 75 explicit SSActionButtonStyle uses and inherited actions. The App default uses softFill:false; explicit secondary components keep their soft fills and toolbar/icon utilities stay transparent.",
+    "Outer box around Messages greeting/notification shortcuts; tile and unread badge stay",
+    "Second outlines on filled primary, soft secondary, share-poster, intention save/contact actions",
+    "Plain text secondary links and redundant plan share/contact row boundary",
+    "Quick-fill suggestion chips, plan-card next-step hint, long-press menu Cancel",
+    "Calendar smart-add Cancel/Start over and floating offscreen-event utility strokes",
+    "Notifications Mark all as read duplicate custom/native toolbar chrome; use the shared unframed icon toolbar with the full localized accessibility name."
+  ],
+  "retained": [
+    "Field boundaries and search field surface",
+    "Timetable cell grid, selected/partial day indicators, availability/final-time selections",
+    "Selected section/choice boundary, selected trait and checkmarks",
+    "Content cards, menus and confirmation container boundaries",
+    "Avatar/badge overlap separation and identity verification indicators",
+    "Existing retained outcome/compatibility semantics"
+  ],
+  "simplification": "Removed ssActionOutline helper and call sites, unused actionBorder theme token and prompt border function. One softFill flag avoids global visual containment without changing inherited 44pt targets, role color, typography or feedback. No new app files, feature state, requests or dependencies.",
+  "verificationBoundary": "Source audit covers current native call sites. Phone tests cover only their explicitly listed pages/actions; detail/share and invitation-to-Calendar API journey are not executed in this stage.",
+  "targetedVisualRepair": "Fixed-width Messages shortcut labels cap at xxxLarge, consistent with compact navigation typography; full accessible names remain. Added after actual initial maximum-German image review."
+}

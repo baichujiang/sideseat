@@ -1021,7 +1021,6 @@ struct PlanActivityIdeasView: View {
                         Label(value, systemImage: "arrow.up.left")
                             .font(.caption.weight(.medium)).padding(.horizontal, SideSeatTheme.spaceMD).frame(minHeight: 44)
                             .background(SideSeatTheme.surface, in: Capsule())
-                            .overlay(Capsule().strokeBorder(SideSeatTheme.actionBorder))
                     }.buttonStyle(.plain)
                         .accessibilityLabel(String(format: AppLocalization.string("Fill with %@"), value))
                         .accessibilityIdentifier("plan-activity-complete-\(value)")

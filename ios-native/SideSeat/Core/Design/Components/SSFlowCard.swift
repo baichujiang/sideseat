@@ -400,8 +400,10 @@ struct SSFlowChoice: View {
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
+                if isSelected {
+                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
+                        .strokeBorder(SideSeatTheme.ControlSelection.border, lineWidth: 1)
+                }
             }
             .contentShape(Rectangle())
         }
@@ -466,10 +468,6 @@ struct SSIntentionActionRow<Contact: View>: View {
                 .foregroundStyle(SideSeatTheme.utilityAction)
                 .background(isBookmarked ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillSubtle,
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-                .overlay {
-                    RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                        .strokeBorder(SideSeatTheme.actionBorder, lineWidth: 1)
-                }
             }
             .buttonStyle(SSPressButtonStyle())
             .disabled(isDisabled)
@@ -496,14 +494,8 @@ struct SSIntentionContactButton: View {
                     opensConversation ? SideSeatTheme.statusSuccessText.opacity(0.12) : SideSeatTheme.BrandAction.fill,
                     in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
                 )
-                .overlay {
-                    if opensConversation {
-                        RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
-                            .strokeBorder(SideSeatTheme.statusSuccessText.opacity(0.35), lineWidth: 1)
-                    }
-                }
         }
-        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+        .buttonStyle(SSPressButtonStyle())
         .disabled(isDisabled)
         .accessibilityIdentifier(identifier)
     }

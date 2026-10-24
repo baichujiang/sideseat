@@ -573,10 +573,6 @@ private struct SSLongPressActionMenuSheet: View {
                                 style: .continuous
                             )
                         )
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .strokeBorder(SideSeatTheme.separator.opacity(0.42), lineWidth: 0.5)
-                        }
                 }
                 .buttonStyle(SSPressButtonStyle())
                 .accessibilityIdentifier("long-press-menu-cancel")
@@ -1024,10 +1020,6 @@ private struct SSActionPrompt: View {
                 actionBackground(action.role),
                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
-                    .strokeBorder(actionBorder(action.role), lineWidth: 0.5)
-            }
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -1053,17 +1045,6 @@ private struct SSActionPrompt: View {
             SideSeatTheme.fillTertiary
         case .destructive:
             SideSeatTheme.danger.opacity(colorScheme == .dark ? 0.2 : 0.1)
-        }
-    }
-
-    private func actionBorder(_ role: SSActionPromptAction.Role) -> Color {
-        switch role {
-        case .standard:
-            SideSeatTheme.ControlSelection.border
-        case .cancel:
-            SideSeatTheme.separator.opacity(0.38)
-        case .destructive:
-            SideSeatTheme.danger.opacity(0.28)
         }
     }
 

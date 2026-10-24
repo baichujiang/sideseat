@@ -63,7 +63,7 @@ struct SSShareActionBar: View {
                         in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous)
                     )
                 }
-                .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+                .buttonStyle(SSPressButtonStyle())
                 .disabled(isPreparing)
                 .accessibilityIdentifier("\(accessibilityPrefix)-system")
             }

@@ -72,10 +72,13 @@ struct InboxNotificationsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Mark all as read") { store.markAllRead() }
+                Button { store.markAllRead() } label: {
+                    Label("Mark all as read", systemImage: "checkmark.message")
+                }
+                    .ssToolbarAction()
                     .disabled(store.unreadCount == 0)
                     .accessibilityIdentifier("notifications-read-all")
-            }
+            }.ssStandaloneAction()
         }
         .refreshable { await store.refresh(using: session) }
         .task { await store.refresh(using: session) }

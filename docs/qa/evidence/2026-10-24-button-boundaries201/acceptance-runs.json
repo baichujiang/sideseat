@@ -1,0 +1,57 @@
+{
+  "initialRun": {
+    "normalSessionReadOnly": {
+      "passed": true,
+      "seconds": 9.561
+    },
+    "fourCombinationFixture": {
+      "functionalAssertionsPassed": true,
+      "seconds": 273.78,
+      "largestMessageShortcutVisualAccepted": false
+    },
+    "auth": {
+      "passed": false,
+      "seconds": 6.472,
+      "reason": "Test reveal helper unconditionally queried a NavigationBar absent from Login. No product assertion ran after that lookup."
+    }
+  },
+  "repairs": [
+    {
+      "kind": "test only",
+      "change": "Use the navigation bar top only when it exists; otherwise use the window top. Retain whole-control reachability, 44pt and all behavioral checks."
+    },
+    {
+      "kind": "product visual",
+      "change": "Cap only fixed-width Messages shortcut label typography at xxxLarge; retain full accessibility label, tile and target. Initial largest German names had split into several fragments."
+    },
+    {
+      "kind": "product visual",
+      "change": "Actual notifications image had inherited custom fill plus native toolbar chrome. Make root inherited utility backgrounds transparent without changing target/role/typography; use icon-only Notifications shared toolbar with full localized accessible name."
+    }
+  ],
+  "authRerun": {
+    "passed": true,
+    "seconds": 38.928,
+    "sameProductAsFinalNavigation": false,
+    "scope": "Intermediate label revision; final full suite reruns auth after root-utility and Notifications cleanup."
+  },
+  "scope": "No full invitation/Calendar API journey in this stage; initial visual issue is not concealed by passing functional assertions.",
+  "labelRevisionNavigation": {
+    "normalSessionPassed": true,
+    "normalSessionSeconds": 9.587,
+    "fixtureFunctionalPassed": true,
+    "fixtureSeconds": 272.615,
+    "binaryScope": "Messages label cap installed, before later utility/Notifications toolbar cleanup. Do not treat as final-package acceptance."
+  },
+  "finalCompleteSuite": {
+    "sameProductPackage": true,
+    "passed": true,
+    "passedTests": 3,
+    "failedTests": 0,
+    "skippedTests": 0,
+    "normalSessionSeconds": 10.033,
+    "fixtureMatrixSeconds": 270.4,
+    "authSeconds": 39.335,
+    "rootUtilitiesAndNotificationsIncluded": true
+  }
+}

@@ -157,16 +157,9 @@ struct CalendarSmartAddView: View {
                             Circle()
                                 .fill(SideSeatTheme.Interaction.neutralControlFill)
                                 .frame(width: 34, height: 34)
-                                .overlay {
-                                    Circle()
-                                        .strokeBorder(
-                                            SideSeatTheme.separator.opacity(0.55),
-                                            lineWidth: 0.5
-                                        )
-                                }
                         }
                 }
-                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
                 .disabled(store.isSaving)
                 .accessibilityLabel("Cancel")
                 .accessibilityIdentifier("smart-schedule-cancel")
@@ -434,13 +427,6 @@ struct CalendarSmartAddView: View {
                         .foregroundStyle(SideSeatTheme.textPrimary)
                         .frame(width: 48, height: 48)
                         .background(SideSeatTheme.Interaction.neutralControlFill, in: Circle())
-                        .overlay {
-                            Circle()
-                                .strokeBorder(
-                                    SideSeatTheme.separator.opacity(0.55),
-                                    lineWidth: 0.5
-                                )
-                        }
                 }
                 .disabled(store.isSaving)
                 .accessibilityLabel("Start over")

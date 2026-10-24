@@ -193,13 +193,6 @@ enum SideSeatTheme {
     /// Hairline borders that adapt to light, dark, and increased-contrast appearances.
     static let separator = Color(uiColor: .separator)
 
-    /// Standalone controls retain a visible boundary in both appearances.
-    static let actionBorder = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.42, green: 0.49, blue: 0.45, alpha: 1)
-            : UIColor(red: 0.64, green: 0.69, blue: 0.66, alpha: 1)
-    })
-
     /// Product actions are quiet ink in Light and soft chalk in Dark. Rose stays an accent.
     enum ProductAction {
         static let fill = Color(uiColor: UIColor { traits in

@@ -54,7 +54,6 @@ private struct SSPrimaryButtonStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(foreground)
             .background(background(isPressed: configuration.isPressed))
-            .ssActionOutline(cornerRadius: chrome == .capsule ? 999 : SideSeatTheme.controlRadius)
             .opacity(configuration.isPressed ? SideSeatTheme.Interaction.pressedOpacity : 1)
             .scaleEffect(configuration.isPressed && !reduceMotion ? SideSeatTheme.Interaction.pressedScale : 1)
             .animation(

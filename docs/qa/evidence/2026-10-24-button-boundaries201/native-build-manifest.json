@@ -1,0 +1,29 @@
+{
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused isolated generated project; all 267 tracked inputs and private Local configuration verified against active checkout. Final root utility background and Notifications toolbar cleanup rebuilt and installed before the final complete three-case UI suite.",
+  "privateLocalConfigurationMatched": true,
+  "binarySHA256": {
+    "SideSeat Preview": "8025a8e748ab47d0d3a18f4f473dfb7b79794a948f526397c4929a0fbcbadfb5",
+    "SideSeat Preview.debug.dylib": "b8721a86c9f3db7b8112c4bdd3d78c8ac7439207a6f989eea7d6253025de88b1"
+  },
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "build": 201,
+  "strictSignatureVerified": true,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "backendRelease": false,
+  "webRelease": false,
+  "initialUITestSourceSHA256": "f7869a7838b923e07777183a95af28fb328b86638e5fb7444b402c829735a7f3",
+  "preLabelReviewBinarySHA256": {
+    "SideSeat Preview": "180154563fb9591431f014a25ee8878c2dd8c2af2bc79c7d1cc938892d9828e0",
+    "SideSeat Preview.debug.dylib": "a2678ef936e4d8406be586c9880db8f52b45164031220386ab453fbe2867e4c9"
+  },
+  "repairedUITestSourceSHA256": "102c500641bb6fa727be468589404526809ab7a95e2eeb4663457c292ba3da52",
+  "preUtilityReviewBinarySHA256": {
+    "SideSeat Preview": "24434fd3b180be24f80ef8fd3c39d34c080cf8872e1410e537259b6a06bc955f",
+    "SideSeat Preview.debug.dylib": "54a29d95a9361a1a57f8862810b577db6b05eab8940e0b66cff5925bfebaf4b3"
+  },
+  "finalUITestSourceSHA256": "76058ff82e2d56dc24ca4b768c140e89f38718de496e64c0850b6cabccf56d21"
+}

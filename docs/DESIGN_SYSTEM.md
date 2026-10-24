@@ -60,16 +60,32 @@ labels and the next action; they do not replace those explanations.
 
 Each detail has a contextual action area. Plans reserve the solid ProductAction
 control for creating, sending invitations or explicitly confirming participation.
-Choosing time and reviewing a roster use outlined controls; sharing uses an outlined
-share icon and text, with a separately labelled Copy link utility. Viewing Calendar
+Choosing time and reviewing a roster use soft filled controls; sharing uses a quiet
+unframed share icon, with a separately labelled Copy link utility. Viewing Calendar
 or opening another destination uses a light row with a destination icon and arrow.
-Declining uses red text and an x-circle. Icons, explicit labels and fill/border/arrow
+Declining uses red text and an x-circle. Icons, explicit labels and fill/arrow
 structure distinguish effects without relying on color alone. Inline availability
-edits retain their automatic-save feedback. Link sharing
+edits retain explicit submission and local-draft feedback. Link sharing
 cannot depend on finding an overflow menu. Destructive cancellation stays in that
 menu. Keep the current paired ProductAction colors, availability colors and design
 tokens. Pass Dynamic Type into presented sheets; let the availability page scroll
 in accessibility sizes instead of compressing the timetable out of view.
+
+### Button boundaries — 2026-10-24
+
+Use boundaries for fields, content containers and meaningful selection states,
+not as the default signal that something is tappable. `SSActionButtonStyle` keeps
+toolbar/icon utilities transparent, regular/compact secondary actions softly filled,
+and prominent commits solid. None adds a decorative stroke. Text links stay plain;
+filled primary actions do not acquire a second outline. The App root uses
+`softFill: false` so inherited utilities stay transparent while retaining the
+shared target, disabled, press and destructive-role behavior. Explicit secondary
+components own their soft fills. Existing 44pt hit targets,
+labels, disabled feedback and press feedback remain. A selection border/checkmark,
+timetable cell grid, avatar or badge separation stroke still has a specific purpose.
+Message shortcuts keep their icon tiles and labels without an outer button box.
+Navigation rows keep their destination arrow, while decline actions use red text.
+Remove redundant call-site outlines instead of wrapping already styled labels again.
 
 ### Public invitation visual continuity — 2026-10-04
 

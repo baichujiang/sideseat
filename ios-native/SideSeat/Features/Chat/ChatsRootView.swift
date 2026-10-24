@@ -170,6 +170,7 @@ struct ChatsRootView: View {
                     }
                 Text(title)
                     .font(.footnote.weight(.medium))
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                     .foregroundStyle(SideSeatTheme.textPrimary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -178,7 +179,7 @@ struct ChatsRootView: View {
             .frame(width: max(96, min(greetingTileSize, 76) + 28))
             .contentShape(Rectangle())
         }
-        .buttonStyle(SSPressButtonStyle()).ssActionOutline()
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(title)
         .accessibilityValue(String(count))
         .accessibilityIdentifier(identifier)
