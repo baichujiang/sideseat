@@ -21,7 +21,19 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview209 is the current installed development build. Sequential repairs1–5
+- Preview210 is the current installed development build. Source6f8866ae2b120a219d5529b1fa6fcc573854386f pushed.
+  Creation opens the editable timetable; no auto share or new creation handoff.
+  First owner Submit and share awaits clean saved acknowledgement; failed/newer
+  draft stays. Submission Retry reuses it; later owner Save changes and participant
+  submissions do not share. Header share remains independent, old.share decodes/
+  consumes silently, review/final/invitation/Calendar rules stay. No new state,
+  request or dependency. Unsubmitted-owner card opens timetable first.
+  Unit44/2suites4.333s, same-App phone18.195/102.643s failure+normal/systemmax and
+  full366.562s/eight API phases passed.19 focused plus full originals reviewed.
+  Normal210 PID8662,267/Local/signature/binary verified,97 retained;2QA accounts/
+  4links401/404 and Runner/private cleaned. New App reports1,see device
+  evidence; no manual-performance claim. No backend/web release. See210 receipt.
+- Preview209 was the previous installed development build. Sequential repairs1–5
   and final supplements complete; prior pending statements below are historical.
   Source e5666c31e380d861ed7d54a74d45f661377b9d2a pushed. Public username wraps with one fixedSize;
   two DEBUG-only fixture conditions reuse authorized GET, no new product state,
