@@ -1,0 +1,18 @@
+{
+  "stagePrivateArtifactsRemoved": [
+    "sideseat207-uninstall-runner.private.json",
+    "sideseat207-apps-after.private.json",
+    "sideseat207-reports-after.private.json",
+    "sideseat207-final-binary.private.json",
+    "sideseat207-processes-after.private.json",
+    "sideseat207-source.private.json",
+    "sideseat207-normal-launch.private.json",
+    "sideseat207-install.private.json",
+    "sideseat207-reports-before.private.json",
+    "sideseat207-runner.private.xctestrun",
+    "generated Flow207 scheme"
+  ],
+  "sharedDisposableFixtureRetainedForTaskFinalAcceptance": true,
+  "phoneRunnerRemoved": true,
+  "ordinaryApp97Preserved": true
+}

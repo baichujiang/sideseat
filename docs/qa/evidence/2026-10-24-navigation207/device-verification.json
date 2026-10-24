@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-24T13:25:37.479570+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 207,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8448,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "disposableFixtureRetainedForFinalAcceptance": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Offline navigation; no real account/plan/message writes",
+  "realAccountOrPlanWrites": 0
+}

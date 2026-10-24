@@ -1,0 +1,53 @@
+{
+  "reviewedOriginalImages": 27,
+  "images": [
+    "navigation-card-middle-extra-left-de-largest-dark.png",
+    "navigation-card-middle-extra-left-zh-Hans-normal-light.png",
+    "navigation-create-after-boundary-de-largest-dark.png",
+    "navigation-create-after-boundary-waiting-rail.png",
+    "navigation-create-after-boundary-zh-Hans-normal-light.png",
+    "navigation-create-cancel-retained-section-de-largest-dark.png",
+    "navigation-create-cancel-retained-section-waiting-rail.png",
+    "navigation-create-cancel-retained-section-zh-Hans-normal-light.png",
+    "navigation-extra-left-after-history-de-largest-dark.png",
+    "navigation-extra-left-after-history-zh-Hans-normal-light.png",
+    "navigation-final-boundary-de-largest-dark.png",
+    "navigation-final-boundary-zh-Hans-normal-light.png",
+    "navigation-history-1-de-largest-dark.png",
+    "navigation-history-1-zh-Hans-normal-light.png",
+    "navigation-history-2-de-largest-dark.png",
+    "navigation-history-2-zh-Hans-normal-light.png",
+    "navigation-history-chat-1-de-largest-dark.png",
+    "navigation-history-chat-1-zh-Hans-normal-light.png",
+    "navigation-history-chat-2-de-largest-dark.png",
+    "navigation-history-chat-2-zh-Hans-normal-light.png",
+    "navigation-history-record-initial-visible-region-de-largest-1.png",
+    "navigation-history-record-initial-visible-region-de-largest-2.png",
+    "navigation-history-record-initial-visible-region-zh-normal-1.png",
+    "navigation-history-record-initial-visible-region-zh-normal-2.png",
+    "navigation-together-first-page-returned.png",
+    "navigation-together-last-page-boundary.png",
+    "navigation-waiting-rail-excluded-from-paging.png"
+  ],
+  "reviewers": {
+    "hour_picker_source": {
+      "count": 16,
+      "scope": "11 Chinese normal + 5 Shared rail/Together originals"
+    },
+    "hours_regression_test": {
+      "count": 11,
+      "scope": "German largest originals"
+    },
+    "root": {
+      "scope": "Actual206 failure and final zh/de boundary root originals"
+    }
+  },
+  "result": "Navigation scope passed; root and selected section retained after boundary swipes; create/cancel and valid paging remain usable.",
+  "limits": [
+    "Offline API error banner intentional",
+    "German maximum body/date typography belongs to next stage",
+    "Near-identical viewer omissions checked against actual PNG pixels; not reported as App defects"
+  ],
+  "retainedFinalImages": 6,
+  "retainedProductFailureImages": 1
+}

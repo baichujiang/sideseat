@@ -1,0 +1,12 @@
+{
+  "build": 206,
+  "sourceCommit": "aa816c088acd790dca9dfde5c0ef0581719752db",
+  "binarySHA256": {
+    "SideSeat Preview": "2b2e1a3ab888ad79386437451e625979ac05a74c076358a1612619b498e69fe9",
+    "SideSeat Preview.debug.dylib": "c7839ee07f94d196f6d55c39a2879e4cf6b31e928969911fb1baf15a66c45ae9"
+  },
+  "durationSeconds": 67.753,
+  "passed": 0,
+  "failed": 1,
+  "scope": "Two history/chat/root returns, active final-section list middle swipe left. AX chat=true, heading/page zero frames, selected=false; actual photo retained. Product failure reproduced."
+}

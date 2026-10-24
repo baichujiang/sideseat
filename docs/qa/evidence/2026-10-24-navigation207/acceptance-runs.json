@@ -1,0 +1,61 @@
+{
+  "baseline206": {
+    "durationSeconds": 67.753,
+    "result": "product failure",
+    "scope": "Extra left swipe after two history/chat returns; chat true, root zero frame, section false"
+  },
+  "earlier207": {
+    "regularTargetSeconds": 137.082,
+    "mixedSuite": {
+      "historyCaseFailedSeconds": 197.231,
+      "sharedCasePassedSeconds": 94.022,
+      "reason": "Largest history card was1018.333pt high versus742pt viewport; test demanded whole-card fit, scrolled8times until virtualized record disappeared. Fixed only card-visible-region targeting."
+    }
+  },
+  "finalCasesAcrossSeparateInvocations": [
+    {
+      "name": "regular history and extra boundary",
+      "durationSeconds": 131.483,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "combination": "zh-Hans normal light"
+    },
+    {
+      "name": "largest history and extra boundary",
+      "durationSeconds": 123.623,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "combination": "de largest dark"
+    },
+    {
+      "name": "Shared Together boundaries and waiting rail",
+      "durationSeconds": 94.022,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "combination": "zh-Hans normal light",
+      "retainedFromMixedRun": true,
+      "reason": "Shared case and every called helper byte-identical after card-only test repair; same App207 binary. Do not describe the mixed invocation as all-passed."
+    }
+  ],
+  "singleAllPassedSuite": false,
+  "app207FrozenAcrossTestOnlyRepair": true,
+  "sourceCommitPendingReceipt": true,
+  "scope": [
+    "Two history/chat/root round trips",
+    "Active final-page middle left swipe",
+    "Visible card middle boundary swipe",
+    "Root toolbar/selected page/44pt remain strict",
+    "Create/cancel keeps section",
+    "Normal valid page changes both directions",
+    "Plans first boundary",
+    "Actual horizontal waiting rail moves without root page change",
+    "Together first/last boundaries and valid two-page return"
+  ],
+  "notRun": [
+    "Full real invitation API journey",
+    "Browser or backend release"
+  ]
+}

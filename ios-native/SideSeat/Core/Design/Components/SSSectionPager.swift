@@ -172,8 +172,8 @@ private final class SSPageGestureController: UIViewController, UIGestureRecogniz
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let pan = gestureRecognizer as? UIPanGestureRecognizer else { return false }
         let velocity = pan.velocity(in: view)
-        guard abs(velocity.x) > abs(velocity.y) * 1.5 else { return false }
-        return velocity.x < 0 ? selectionIndex < pageCount - 1 : selectionIndex > 0
+        // Consume boundary drags; the existing clamps keep the current section fixed.
+        return abs(velocity.x) > abs(velocity.y) * 1.5
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
