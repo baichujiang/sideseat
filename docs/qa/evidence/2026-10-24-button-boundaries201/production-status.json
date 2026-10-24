@@ -16,5 +16,8 @@
     }
   ],
   "recordedAt": "2026-10-24T01:09:52.986Z",
-  "checkScope": "Read-only deployment lookup during this stage; api and www both returned READY on the unchanged deployment."
+  "checkScope": "Read-only deployment lookup during this stage; api and www both returned READY on the unchanged deployment.",
+  "postSourcePushVerifiedAt": "2026-10-24T01:33:29.186935+00:00",
+  "postSourcePushResult": "Both hosts rechecked READY with the same deployment ID after source commit push.",
+  "sourceCommit": "1c34c6d2c001a914b207102bdfc2af2f10c6f479"
 }

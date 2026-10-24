@@ -21,7 +21,25 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 200 is the current installed development build. Plans/Together section
+- Preview 201 is the current installed development build. Shared button styles
+  remove decorative outlines; root utilities use softFill:false, preserving 44pt,
+  role colors, typography and feedback while explicit secondary controls own fills.
+  Primary/text/shortcut/calendar tools lose redundant strokes; meaningful field,
+  container and selection boundaries stay. Notifications use the shared unframed
+  icon toolbar with full AX name; shortcut labels cap at xxxLarge. No rules changed.
+  Source 1c34c6d2 is pushed. Final SAME-PACKAGE three-case suite passed 10.033s
+  normal-session read-only / 270.400s four-combination five-tab/entry matrix /
+  39.335s auth controls, zero failed/skipped; 47 actual images viewed, 15 saved.
+  Initial 6.472s auth test lacked a navigation bar: test lookup repaired only;
+  actual maximum-label fragmentation and Notifications double chrome were fixed
+  and the final whole suite rerun. Intermediate results retain their own scope.
+  Installed 201/normal PID7916, strict source/signature/binary verified; ordinary97
+  retained. Runner/private files cleaned; no accounts/plans created/deleted or new
+  App reports. No backend/web release, API journey/unit/domain/browser repeat.
+  Existing Calendar maximum date clipping and detail/menu/dock/CPU/extra-left-swipe
+  observations remain; do not claim whole-App maximum-text visual acceptance.
+  See 201 QA/release for scopes, actual images and unchanged production deployment.
+- Preview 200 was the previous development build. Plans/Together section
   selectors share a fillTertiary track, surface selection and 0.5pt neutral border;
   remove the outer action outline and ProductAction selection colors. Use the
   two modifiers in the existing file, preserving targets/IDs/selection/paging/chooser

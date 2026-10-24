@@ -25,5 +25,6 @@
     "SideSeat Preview": "24434fd3b180be24f80ef8fd3c39d34c080cf8872e1410e537259b6a06bc955f",
     "SideSeat Preview.debug.dylib": "54a29d95a9361a1a57f8862810b577db6b05eab8940e0b66cff5925bfebaf4b3"
   },
-  "finalUITestSourceSHA256": "76058ff82e2d56dc24ca4b768c140e89f38718de496e64c0850b6cabccf56d21"
+  "finalUITestSourceSHA256": "76058ff82e2d56dc24ca4b768c140e89f38718de496e64c0850b6cabccf56d21",
+  "sourceCommit": "1c34c6d2c001a914b207102bdfc2af2f10c6f479"
 }
