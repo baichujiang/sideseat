@@ -80,9 +80,12 @@ struct HomeDateStripView: View {
                     style: .strip,
                     calendar: calendar
                 )
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
 
                 CalendarEventDots(items: items)
             }
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(day.formatted(date: .complete, time: .omitted))

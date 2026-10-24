@@ -1,0 +1,32 @@
+{
+  "originals": [
+    {
+      "retainedName": "before-week-dates-de-largest-dark.png",
+      "sourceSHA256": "30581bb36cd86631cc703df7626c05cd954756c16cfbe4dd1c16ac487a8c6fb1"
+    },
+    {
+      "retainedName": "before-chat-source-de-largest-dark.png",
+      "sourceSHA256": "74fcf889dcf50126507bee1bd938c269368b3115ab2ee45a9e49a3af7d6f3913"
+    }
+  ],
+  "weekFacts": {
+    "dimensions": [
+      1284,
+      2778
+    ],
+    "mode": "RGB",
+    "headerPixelY": [
+      1014,
+      1181
+    ],
+    "heightPoints": 56,
+    "scale": 3,
+    "lastTodayBlueSectionWidthPixels": 100,
+    "nextRowIsDivider": true,
+    "inference": "The circle is cut near its middle, day number absent; verified by pixels and original image."
+  },
+  "chatFacts": {
+    "scope": "App-generated MutualOpportunitySourceCard title, not TEXT message or composer",
+    "wordFragmentObserved": "Gemeinsa / m Kaffee / trinken"
+  }
+}

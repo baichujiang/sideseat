@@ -479,6 +479,7 @@ struct HomeWeekTimetableView: View {
                 style: .weekHeader,
                 calendar: calendar
             )
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
         }
@@ -520,6 +521,7 @@ struct HomeWeekTimetableView: View {
             ForEach(1..<24, id: \.self) { hour in
                 Text(CalendarChrome.compactHour(hour))
                     .font(CalendarChrome.Typography.hourRail)
+                    .dynamicTypeSize(...DynamicTypeSize.xLarge)
                     .foregroundStyle(SideSeatTheme.textSecondary)
                     .lineLimit(1)
                     .frame(width: timeGutter - 8, alignment: .trailing)
@@ -529,6 +531,7 @@ struct HomeWeekTimetableView: View {
 
             Text(CalendarChrome.compactHour(24))
                 .font(CalendarChrome.Typography.hourRail)
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
                 .foregroundStyle(SideSeatTheme.textSecondary)
                 .lineLimit(1)
                 .frame(width: timeGutter - 8, alignment: .trailing)

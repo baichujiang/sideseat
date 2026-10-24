@@ -1,0 +1,69 @@
+{
+  "initialCandidate": {
+    "calendarSeconds": 0.043,
+    "calendarResult": "UIFont budget xxLarge58.287>56 before App launch",
+    "sourceSeconds": 26.13,
+    "sourceResult": "Test selector card ID hidden by outer bubble"
+  },
+  "intermediateXlargeWeek": {
+    "calendarSeconds": 40.328,
+    "calendarResult": "14 week dates passed; actual Day width34pt failed strict44 and original screenshot shows date ellipsis",
+    "sourceSeconds": 56.562,
+    "sourceResult": "Title OCR/Propose cancel passed; test header ID hidden by actual intention edit button"
+  },
+  "firstCompleteFinalApp": {
+    "calendarSeconds": 39.722,
+    "sourceSeconds": 39.447,
+    "passed": 2,
+    "failed": 0,
+    "limit": "Root maximum only; sheet ordinary. Not final whole maximum acceptance"
+  },
+  "notRun": [
+    "Real invitation API journey (task final acceptance later)",
+    "Browser or backend deployment"
+  ],
+  "beforeHourRailAppSystemMaximum": {
+    "calendarSeconds": 40.601,
+    "sourceSeconds": 40.83,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "sameInvocation": true,
+    "variants": [
+      "zh-Hans regular light",
+      "de system accessibilityXXXL dark"
+    ],
+    "weekDaysPaintedOCR": 14,
+    "dayStripWidth": 44,
+    "maximumRecipientTitleHeight": 63.333333333333314,
+    "appFrozenDuringTestOnlyRepairs": true,
+    "scope": "Date/card targets passed, visual review then found hour-rail ellipsis; not final product acceptance"
+  },
+  "finalSameAppSystemMaximum": {
+    "calendarSeconds": 42.296,
+    "sourceSeconds": 41.022,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "sameInvocation": true,
+    "variants": [
+      "zh-Hans regular light",
+      "de actual system accessibilityXXXL dark"
+    ],
+    "weekDaysPaintedOCR": 14,
+    "dayStripWidth": 44,
+    "maximumRecipientTitleHeight": 63.333333333333314,
+    "weekHourRailOCR": [
+      "17",
+      "18",
+      "19",
+      "20"
+    ],
+    "dayHourRailOCR": [
+      "10",
+      "11"
+    ],
+    "hourMatcher": "Exact pure two-digit10\u201323; excludes current-time HH:mm badge",
+    "sourceAndBinaryFrozen": true
+  }
+}

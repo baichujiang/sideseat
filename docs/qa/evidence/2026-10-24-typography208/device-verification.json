@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-24T14:03:10.578891+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 208,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8498,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "disposableFixtureRetainedForFinalAcceptance": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Offline typography/navigation with actual system maximum; no real account/plan/message writes",
+  "realAccountOrPlanWrites": 0,
+  "earlierPackageReportsAlsoCheckedAt": "2026-10-24T13:55:18Z",
+  "earlierNewAppReports": []
+}

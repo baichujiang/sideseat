@@ -1,0 +1,17 @@
+{
+  "stagePrivateArtifactsRemoved": [
+    "sideseat208-reports-after.private.json",
+    "sideseat208-uninstall-runner.private.json",
+    "sideseat208-processes-after.private.json",
+    "sideseat208-normal-launch.private.json",
+    "sideseat208-apps-after.private.json",
+    "sideseat208-final-binary.private.json",
+    "sideseat208-reports-before.private.json",
+    "sideseat208-source.private.json",
+    "sideseat208-install.private.json",
+    "sideseat208-runner.private.xctestrun",
+    "generated Flow208 scheme"
+  ],
+  "sharedDisposableFixtureRetainedForFinalAcceptance": true,
+  "runnerRemoved": true
+}

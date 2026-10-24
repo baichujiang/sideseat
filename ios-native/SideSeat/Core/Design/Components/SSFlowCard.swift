@@ -56,6 +56,7 @@ struct SSActivityHeaderBand<Content: View>: View {
 }
 
 struct SSFlowCardHeader: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     let subtitle: String
     let systemImage: String
@@ -63,7 +64,10 @@ struct SSFlowCardHeader: View {
     var activityTopic: NativeWeeklyIntentTopic? = nil
 
     var body: some View {
-        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
+        layout {
             if let activityTopic {
                 SSActivityArtwork(topic: activityTopic, size: 48)
             } else {
