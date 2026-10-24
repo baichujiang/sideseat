@@ -1,0 +1,279 @@
+{
+  "historicalObservationCorrected": true,
+  "oldPngAudit": "png-content-audit.json",
+  "earlierAttempts": [
+    {
+      "scope": "205 baseline AX-only two languages; original PNG is painted",
+      "durationSeconds": 56.39,
+      "result": "passed functional only"
+    },
+    {
+      "scope": "206 opacity-only experiment; original PNG is painted",
+      "durationSeconds": 56.529,
+      "result": "passed functional only; experiment reverted"
+    },
+    {
+      "scope": "206 pre-minimal AX-only; not final",
+      "durationSeconds": 58.712,
+      "result": "passed functional only"
+    },
+    {
+      "scope": "Earlier matrix full-frame assertion, no diagnostic",
+      "durationSeconds": 313.952,
+      "result": "failed"
+    },
+    {
+      "scope": "Row experiment target; experiment reverted",
+      "durationSeconds": 53.514,
+      "result": "passed interim"
+    },
+    {
+      "scope": "Test used nonexistent quarter-slot ID3; corrected to0/2/48/50",
+      "durationSeconds": 7.904,
+      "result": "failed test lookup"
+    },
+    {
+      "scope": "Credential renewal before expiry; session elapsed, not case duration",
+      "elapsedSeconds": 93.784,
+      "result": "interrupted"
+    },
+    {
+      "scope": "Frame right428.500010 vs window428 +0.5; test added0.001pt epsilon. Real tall availability footer also found.",
+      "durationSeconds": 389.167,
+      "result": "failed frame assertion"
+    },
+    {
+      "scope": "Row experiment full suite, later reverted as unnecessary",
+      "durationsSeconds": [
+        53.889,
+        450.183
+      ],
+      "result": "passed interim"
+    }
+  ],
+  "final": {
+    "scope": "Original grid/gestures byte-identical to205; compact availability/final footers only",
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "durationsSeconds": [
+      53.286,
+      446.529
+    ],
+    "combinations": [
+      "de largest dark original outer-scroll path",
+      "zh-Hans/de normal/largest dark full local-draft matrix"
+    ],
+    "checks": [
+      "actual screen border/fill pixels",
+      "ordinary diagonal cross-date availability rectangle and final continuous range",
+      "reverse erase",
+      "tap/deselect/drag",
+      "availability preserved during final editing",
+      "back/reopen/relaunch final draft",
+      "44pt controls",
+      "complete footer text, nonoverlap, largest availability footer<40% window",
+      "no Undo",
+      "server availability/invitations unchanged"
+    ],
+    "pixelChecks": [
+      {
+        "capture": "timetable-original-path-painted-de-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-original-path-reopened-de-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-availability-rectangle-drag-zh-Hans-normal-dark",
+        "borderRGB": [
+          59,
+          158,
+          128
+        ],
+        "fillRGB": [
+          3,
+          13,
+          5
+        ],
+        "maxChannelDifference": 145
+      },
+      {
+        "capture": "timetable-final-cross-day-drag-zh-Hans-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-selected-zh-Hans-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-reopened-zh-Hans-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-selected-zh-Hans-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-reopened-zh-Hans-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-availability-rectangle-drag-de-normal-dark",
+        "borderRGB": [
+          59,
+          158,
+          128
+        ],
+        "fillRGB": [
+          3,
+          13,
+          5
+        ],
+        "maxChannelDifference": 145
+      },
+      {
+        "capture": "timetable-final-cross-day-drag-de-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-selected-de-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-reopened-de-normal-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-selected-de-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      },
+      {
+        "capture": "timetable-final-reopened-de-largest-dark",
+        "borderRGB": [
+          242,
+          184,
+          77
+        ],
+        "fillRGB": [
+          58,
+          52,
+          21
+        ],
+        "maxChannelDifference": 184
+      }
+    ]
+  },
+  "finalProductAndTestSourceFrozen": true
+}

@@ -1,0 +1,96 @@
+{
+  "assertions" : {
+    "crossYearBothYearsPresent" : true,
+    "fullAccessibilityDatesRetained" : true,
+    "startAndEndClocksPresent" : true,
+    "visibleDateComponentsPresent" : true
+  },
+  "currentYearInPlanTimeZone" : 2026,
+  "recordedAtUTC" : "2026-10-24T12:36:36Z",
+  "sampleCount" : 9,
+  "samples" : [
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-26T09:00:00Z",
+      "fullAccessibilityLabel" : "2026年10月26日 09:00 – 2026年10月26日 10:00",
+      "locale" : "zh-Hans",
+      "scenario" : "same-day",
+      "startUTC" : "2026-10-26T08:00:00Z",
+      "summary" : "10月26日 · 09:00–10:00"
+    },
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-27T00:00:00Z",
+      "fullAccessibilityLabel" : "2026年10月26日 23:00 – 2026年10月27日 01:00",
+      "locale" : "zh-Hans",
+      "scenario" : "cross-day",
+      "startUTC" : "2026-10-26T22:00:00Z",
+      "summary" : "10月26日至27日 · 23:00–01:00"
+    },
+    {
+      "dateTemplate" : "yMMMd",
+      "endUTC" : "2027-01-01T00:00:00Z",
+      "fullAccessibilityLabel" : "2026年12月31日 23:00 – 2027年1月1日 01:00",
+      "locale" : "zh-Hans",
+      "scenario" : "cross-year",
+      "startUTC" : "2026-12-31T22:00:00Z",
+      "summary" : "2026年12月31日至2027年1月1日 · 23:00–01:00"
+    },
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-26T09:00:00Z",
+      "fullAccessibilityLabel" : "26.10.2026, 09:00 – 26.10.2026, 10:00",
+      "locale" : "de",
+      "scenario" : "same-day",
+      "startUTC" : "2026-10-26T08:00:00Z",
+      "summary" : "26. Okt. · 09:00–10:00"
+    },
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-27T00:00:00Z",
+      "fullAccessibilityLabel" : "26.10.2026, 23:00 – 27.10.2026, 01:00",
+      "locale" : "de",
+      "scenario" : "cross-day",
+      "startUTC" : "2026-10-26T22:00:00Z",
+      "summary" : "26.–27. Okt. · 23:00–01:00"
+    },
+    {
+      "dateTemplate" : "yMMMd",
+      "endUTC" : "2027-01-01T00:00:00Z",
+      "fullAccessibilityLabel" : "31.12.2026, 23:00 – 01.01.2027, 01:00",
+      "locale" : "de",
+      "scenario" : "cross-year",
+      "startUTC" : "2026-12-31T22:00:00Z",
+      "summary" : "31. Dez. 2026 – 1. Jan. 2027 · 23:00–01:00"
+    },
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-26T09:00:00Z",
+      "fullAccessibilityLabel" : "Oct 26, 2026 at 9:00 AM – Oct 26, 2026 at 10:00 AM",
+      "locale" : "en",
+      "scenario" : "same-day",
+      "startUTC" : "2026-10-26T08:00:00Z",
+      "summary" : "Oct 26 · 09:00–10:00"
+    },
+    {
+      "dateTemplate" : "MMMd",
+      "endUTC" : "2026-10-27T00:00:00Z",
+      "fullAccessibilityLabel" : "Oct 26, 2026 at 11:00 PM – Oct 27, 2026 at 1:00 AM",
+      "locale" : "en",
+      "scenario" : "cross-day",
+      "startUTC" : "2026-10-26T22:00:00Z",
+      "summary" : "Oct 26 – 27 · 23:00–01:00"
+    },
+    {
+      "dateTemplate" : "yMMMd",
+      "endUTC" : "2027-01-01T00:00:00Z",
+      "fullAccessibilityLabel" : "Dec 31, 2026 at 11:00 PM – Jan 1, 2027 at 1:00 AM",
+      "locale" : "en",
+      "scenario" : "cross-year",
+      "startUTC" : "2026-12-31T22:00:00Z",
+      "summary" : "Dec 31, 2026 – Jan 1, 2027 · 23:00–01:00"
+    }
+  ],
+  "scope" : "Foundation formatting samples matching FinalTimeControls.summary and its full accessibility label; not nine additional physical-device test combinations.",
+  "timeZone" : "Europe/Berlin"
+}

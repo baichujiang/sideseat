@@ -10,8 +10,9 @@ struct FinalTimeControls: View {
         HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
             VStack(alignment: .leading, spacing: 4) {
                 if let range {
-                    Text(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: timeZone))
+                    Text(summary(range))
                         .font(.subheadline.weight(.semibold))
+                        .accessibilityLabel(unifiedPlanTimeLabel(start: range.start, end: range.end, timeZone: timeZone))
                         .accessibilityIdentifier("time-poll-final-summary")
                     Text(Duration.seconds(range.duration).formatted(.units(allowed: [.hours, .minutes], width: .abbreviated).locale(AppLocalization.selectedLanguage.locale)))
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -27,5 +28,19 @@ struct FinalTimeControls: View {
                     .accessibilityLabel("Clear final time").accessibilityIdentifier("time-poll-reset-final")
             }
         }.dynamicTypeSize(...DynamicTypeSize.accessibility1)
+    }
+
+    private func summary(_ range: TimePollFinalRange) -> String {
+        let zone = TimeZone(identifier: timeZone) ?? .current
+        var calendar = Calendar(identifier: .gregorian); calendar.timeZone = zone
+        let currentYear = calendar.component(.year, from: Date())
+        let includesYear = calendar.component(.year, from: range.start) != currentYear
+            || calendar.component(.year, from: range.end) != currentYear
+        let date = DateIntervalFormatter()
+        date.locale = AppLocalization.selectedLanguage.locale; date.timeZone = zone
+        date.dateTemplate = includesYear ? "yMMMd" : "MMMd"
+        let clock = timePollClockFormatter(timeZone)
+        return date.string(from: range.start, to: range.end) + " · "
+            + clock.string(from: range.start) + "–" + clock.string(from: range.end)
     }
 }

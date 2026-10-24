@@ -589,18 +589,25 @@ struct TimePollDetailView: View {
 
     private func saveStatus(_ poll: NativeTimePoll) -> some View {
         let failed = store.submissionFailed && !store.saving
-        return HStack(spacing: SideSeatTheme.spaceSM) {
-            if store.saving { ProgressView().controlSize(.small) }
-            else { Image(systemName: failed ? "exclamationmark.circle" : store.saved ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(failed ? SideSeatTheme.danger : store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong) }
-            Text(store.saving ? "Submitting…" : failed ? "Couldn't submit" : store.saved ? "Availability submitted" : store.restoredDraft ? "Draft restored · not submitted" : "Not submitted")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textPrimary)
-                .accessibilityIdentifier(store.saved ? "time-poll-saved" : "time-poll-save-state")
-            Spacer(minLength: 0)
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
+        return layout {
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                if store.saving { ProgressView().controlSize(.small) }
+                else { Image(systemName: failed ? "exclamationmark.circle" : store.saved ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(failed ? SideSeatTheme.danger : store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong) }
+                Text(store.saving ? "Submitting…" : failed ? "Couldn't submit" : store.saved ? "Availability submitted" : store.restoredDraft ? "Draft restored · not submitted" : "Not submitted")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(store.saved ? SideSeatTheme.statusSuccessText : SideSeatTheme.textPrimary)
+                    .accessibilityIdentifier(store.saved ? "time-poll-saved" : "time-poll-save-state")
+            }
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
             Text(failed ? AppLocalization.string("Your choices are kept. Please retry.") : selectionSummary(poll))
                 .font(.caption).foregroundStyle(.secondary)
-        }
+                .frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : nil, alignment: .leading)
+                .accessibilityIdentifier("time-poll-selection-summary")
+        }.dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 
     private func selectionSummary(_ poll: NativeTimePoll) -> String {

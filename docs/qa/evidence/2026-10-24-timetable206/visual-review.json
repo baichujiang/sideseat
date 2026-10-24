@@ -1,0 +1,30 @@
+{
+  "finalBuild": 206,
+  "finalProductScope": "Original grid/touch/scroll unchanged; compact footer display only",
+  "actualFinalImagesViewed": 27,
+  "chinese": {
+    "normal": 8,
+    "largest": 4,
+    "theme": "dark"
+  },
+  "germanMatrix": {
+    "normal": 8,
+    "largest": 4,
+    "theme": "dark"
+  },
+  "germanOriginalPath": 3,
+  "finalImagesRetained": 7,
+  "beforeTallFooterRetained": 1,
+  "findings": [
+    "Footer status and selection summary remain complete without overlap",
+    "Largest availability footer approximately one quarter screen, test enforces under40%",
+    "Single-day final date appears once; cross-day25h and clear states remain correct",
+    "Actual original PNG pixels confirm grid content; prior viewer blank observation corrected"
+  ],
+  "limits": [
+    "Largest long page headings require scrolling",
+    "System AssistiveTouch can cover a small right-edge area",
+    "Not whole-App, notification delivery, expiry, invitation API or browser acceptance"
+  ],
+  "historicalBlankObservationCorrected": true
+}

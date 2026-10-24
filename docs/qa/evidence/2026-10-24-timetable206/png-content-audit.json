@@ -1,0 +1,128 @@
+{
+  "scope": "Read-only original PNG pixels. Corrects prior viewer-based blank-grid observation; not evidence of a product blank-grid bug.",
+  "regionNormalized": [
+    0,
+    0.56,
+    1,
+    0.8
+  ],
+  "amberPredicate": "r>200,120<g<220,b<120,alpha>200",
+  "records": [
+    {
+      "label": "193 retained evidence",
+      "pngSHA256": "7761864b391df13b7048943eac75b7dc7636b404e9ace02f841a6534ef39ee75",
+      "mode": "RGB",
+      "size": [
+        1284,
+        2778
+      ],
+      "opaqueAmberPixels": 30686,
+      "opaqueBrightPixels": 7014,
+      "borderRGBA": [
+        242,
+        184,
+        77,
+        255
+      ],
+      "fillRGBA": [
+        58,
+        52,
+        21,
+        255
+      ]
+    },
+    {
+      "label": "205 baseline",
+      "pngSHA256": "fcccbca097b4c8f53ea8c9a126a8e723cf1bdfcb0c7cff1d44044f92c4c44200",
+      "mode": "RGB",
+      "size": [
+        1284,
+        2778
+      ],
+      "opaqueAmberPixels": 30686,
+      "opaqueBrightPixels": 7088,
+      "borderRGBA": [
+        242,
+        184,
+        77,
+        255
+      ],
+      "fillRGBA": [
+        58,
+        52,
+        21,
+        255
+      ]
+    },
+    {
+      "label": "206 opacity experiment",
+      "pngSHA256": "f476e36a8d25813a124d9da12053e4966b6fbcbd051edcfbe2ab34be540fbccb",
+      "mode": "RGB",
+      "size": [
+        1284,
+        2778
+      ],
+      "opaqueAmberPixels": 30686,
+      "opaqueBrightPixels": 7088,
+      "borderRGBA": [
+        242,
+        184,
+        77,
+        255
+      ],
+      "fillRGBA": [
+        58,
+        52,
+        21,
+        255
+      ]
+    },
+    {
+      "label": "206 compact-date experiment",
+      "pngSHA256": "833c702e18ceadf1a393db0442504dd60bc1dc8eeaee5309fe1c7d9502d5aef8",
+      "mode": "RGB",
+      "size": [
+        1284,
+        2778
+      ],
+      "opaqueAmberPixels": 30686,
+      "opaqueBrightPixels": 6504,
+      "borderRGBA": [
+        242,
+        184,
+        77,
+        255
+      ],
+      "fillRGBA": [
+        58,
+        52,
+        21,
+        255
+      ]
+    },
+    {
+      "label": "206 row experiment",
+      "pngSHA256": "13a5c5998c7e069f716ad6e96c52217e7812e5fb9d204687de017e0f085a0897",
+      "mode": "RGB",
+      "size": [
+        1284,
+        2778
+      ],
+      "opaqueAmberPixels": 30686,
+      "opaqueBrightPixels": 6504,
+      "borderRGBA": [
+        242,
+        184,
+        77,
+        255
+      ],
+      "fillRGBA": [
+        58,
+        52,
+        21,
+        255
+      ]
+    }
+  ],
+  "conclusion": "All retained originals contain opaque selection borders and text. Grid/touch/opacity experiments were reverted; final scope is compact footer layout and pixel regression tests."
+}
