@@ -202,7 +202,9 @@ import XCTest
 
     private func visibleCardBounds(top: CGFloat) -> CGRect {
         let window = app.windows.firstMatch.frame
-        let bottom = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : window.maxY
+        var bottom = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : window.maxY
+        let create = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).firstMatch
+        if create.exists { bottom = min(bottom, create.frame.minY) }
         return CGRect(x: window.minX, y: top, width: window.width, height: max(0, bottom - top))
     }
 
@@ -264,8 +266,7 @@ import XCTest
         XCTAssertTrue(rail.waitForExistence(timeout: 8), "The existing fixture must expose the real waiting rail")
         let window = app.windows.firstMatch.frame
         let top = app.descendants(matching: .any)["plans-segmented-control"].firstMatch.frame.maxY
-        let visible = CGRect(x: window.minX, y: top, width: window.width,
-                             height: max(0, app.tabBars.firstMatch.frame.minY - top))
+        let visible = visibleCardBounds(top: top).intersection(page.frame)
         for _ in 0..<8 {
             if rail.isHittable && visible.insetBy(dx: -0.501, dy: -0.501).contains(rail.frame) { break }
             page.swipeUp(velocity: .slow)

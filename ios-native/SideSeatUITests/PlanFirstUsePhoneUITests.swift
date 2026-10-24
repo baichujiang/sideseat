@@ -1288,7 +1288,8 @@ import XCTest
         XCTAssertTrue(app.staticTexts["暂时没有筹划中的活动"].waitForExistence(timeout: 20))
         XCTAssertTrue(app.buttons["plans-tab-waitingResponse"].isSelected)
         XCTAssertTrue(create.isHittable)
-        XCTAssertEqual(app.navigationBars["计划"].buttons.matching(identifier: "plans-create-unified").count, 1)
+        XCTAssertEqual(app.navigationBars["计划"].buttons.matching(identifier: "plans-create-unified").count, 0)
+        XCTAssertLessThanOrEqual(create.frame.maxY, app.tabBars.firstMatch.frame.minY)
         capture(app, "plans-home-entry-live-planning")
         app.buttons["plans-tab-upcoming"].tap()
         let plan = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch

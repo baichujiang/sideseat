@@ -98,12 +98,21 @@ struct PlansRootView: View {
                     sectionPicker
                         .padding(.horizontal, SideSeatTheme.screenHorizontal)
                         .padding(.top, SideSeatTheme.spaceXS)
-                        .padding(.bottom, SideSeatTheme.spaceMD)
-                        .background(SideSeatTheme.bgGrouped)
+                        .padding(.bottom, SideSeatTheme.spaceXS)
                     Divider()
                     SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
                         sectionScroll(section)
                     }
+                }
+                .background(SideSeatTheme.PlanHome.background)
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    HStack {
+                        Spacer(minLength: 0)
+                        createPlanButton
+                    }
+                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                    .padding(.vertical, SideSeatTheme.spaceMD)
+                    .background(SideSeatTheme.PlanHome.background)
                 }
                 .ssRootNavigationTitle("Plans")
             }
@@ -112,19 +121,6 @@ struct PlansRootView: View {
         .toolbar(.visible, for: .navigationBar)
         .toolbar {
             if !isHistory {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showsPlanCreation = true } label: {
-                        if dynamicTypeSize >= .xxxLarge {
-                            Image(systemName: "plus")
-                        } else {
-                            Label("Start a plan", systemImage: "plus")
-                                .labelStyle(.titleAndIcon)
-                        }
-                    }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 12, size: .toolbar))
-                    .accessibilityLabel(AppLocalization.string("Start a plan"))
-                    .accessibilityIdentifier(hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary")
-                }.ssStandaloneAction()
                 ToolbarItem(placement: .topBarLeading) {
                     Button { router.navigate(to: .planHistory) } label: {
                         Label("Plan history", systemImage: "clock.arrow.circlepath")
@@ -177,6 +173,24 @@ struct PlansRootView: View {
         .accessibilityIdentifier(isHistory ? "plans-history-root" : "plans-root")
     }
 
+    private var createPlanButton: some View {
+        Button { showsPlanCreation = true } label: {
+            Label("Start a plan", systemImage: "plus")
+                .font(.body.weight(.semibold))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, SideSeatTheme.spaceLG)
+                .padding(.vertical, SideSeatTheme.spaceMD)
+                .frame(minHeight: 48)
+                .foregroundStyle(SideSeatTheme.ProductAction.foreground)
+                .background(SideSeatTheme.ProductAction.fill, in: Capsule())
+                .contentShape(Capsule())
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+        }
+        .buttonStyle(SSPressButtonStyle())
+        .accessibilityLabel(AppLocalization.string("Start a plan"))
+        .accessibilityIdentifier(hasPlans || initiallyLoading ? "plans-create-unified" : "plans-create-primary")
+    }
+
     private var sectionPicker: some View {
         HStack(spacing: SideSeatTheme.spaceXS) {
             ForEach(MVPPlanSection.ordered) { section in
@@ -190,15 +204,19 @@ struct PlansRootView: View {
                         .padding(.horizontal, SideSeatTheme.spaceSM)
                         .padding(.vertical, SideSeatTheme.spaceXS)
                         .frame(maxWidth: .infinity, minHeight: 44)
-                        .ssSectionNavigationItem(isSelected: isSelected)
-                        .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                        .foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondaryStrong)
+                        .padding(.bottom, SideSeatTheme.spaceSM)
+                        .overlay(alignment: .bottom) {
+                            Capsule().fill(isSelected ? SideSeatTheme.PlanHome.ink : .clear)
+                                .frame(width: 36, height: 3)
+                        }
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(SSPressButtonStyle())
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
                 .accessibilityIdentifier("plans-tab-\(section.rawValue)")
             }
         }
-        .ssSectionNavigationTrack()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Plans"))
         .accessibilityIdentifier("plans-segmented-control")
@@ -667,75 +685,70 @@ private struct PlanOverviewLabel: View {
     private var topic: NativeWeeklyIntentTopic { PlanHomeArtwork.activityTopic(for: title) ?? .explore }
 
     var body: some View {
-        SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: topic) {
-            activityHeader
-            Group {
-                switch style {
-                case .task: task
-                case .waiting: waiting
-                case .meetup: meetup
-                }
+        SSFlowCard(contentPadding: style == .waiting ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD,
+                   contentSpacing: 0, activityTopic: topic) {
+            switch style {
+            case .task: task
+            case .waiting: waiting
+            case .meetup: meetup
             }
-            .padding(.horizontal, SideSeatTheme.spaceMD)
-            .padding(.vertical, SideSeatTheme.spaceSM)
         }
         .foregroundStyle(SideSeatTheme.textPrimary)
         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel([presentation.cardStatusTitle, title, timing.dateText, timing.clockText,
-            timing.zoneText, style == .waiting ? waitingSummary : context, location,
+            timing.zoneText, style == .waiting ? waitingSummary : context, progress, location,
             presentation.cardActionTitle].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", "))
     }
 
-    private var activityHeader: some View {
-        SSActivityHeaderBand(topic: topic, horizontalPadding: SideSeatTheme.spaceMD, verticalPadding: SideSeatTheme.spaceSM) {
-            HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-                activityTitle(style == .waiting ? .callout : .headline)
-                if !typeSize.isAccessibilitySize {
-                    if isChoosingActivity {
-                        Image(systemName: "lightbulb")
-                            .font(.title2.weight(.light))
-                            .foregroundStyle(SideSeatTheme.Together.categoryInk(for: topic))
-                            .frame(width: 40, height: 40).accessibilityHidden(true)
-                    } else {
-                        SSActivityArtwork(topic: topic, size: style == .waiting ? 36 : 44)
-                    }
-                }
+    private var identity: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceSM))
+        return layout {
+            if !typeSize.isAccessibilitySize {
+                PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity,
+                                size: style == .waiting ? 40 : 52)
+            }
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                activityTitle(style == .waiting ? .subheadline : .headline)
+                schedule
+                status
             }
         }
     }
 
     private var task: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            schedule
-            let footer = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-            footer {
-                PlanHomePeople(people: people, text: context)
+            identity
+            footerLayout {
+                PlanHomePeople(people: people, text: progress ?? context)
                     .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                action.font(.footnote.weight(.semibold))
-                    .foregroundStyle(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
+                Text(presentation.cardActionTitle)
+                    .font(.footnote.weight(.semibold))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                     .padding(.horizontal, SideSeatTheme.spaceSM)
+                    .padding(.vertical, SideSeatTheme.spaceXS)
                     .frame(minHeight: 32, alignment: .leading)
-                    .background(presentation.nextStep == .confirm ? SideSeatTheme.ProductAction.fill : SideSeatTheme.ControlSelection.fill,
+                    .background(SideSeatTheme.ProductAction.fill,
                                 in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                    .layoutPriority(1)
             }
         }
     }
 
     private var waiting: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            schedule
-            let footer = typeSize.isAccessibilitySize
-                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-            footer {
-                PlanHomePeople(people: people, text: waitingSummary)
-                    .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
-                if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                action.font(.caption.weight(.medium)).foregroundStyle(secondary)
+            identity
+            footerLayout {
+                PlanHomePeople(people: people, text: progress ?? context)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                if !typeSize.isAccessibilitySize {
+                    Spacer(minLength: 0)
+                    chevron
+                }
             }
         }
     }
@@ -752,12 +765,13 @@ private struct PlanOverviewLabel: View {
                         .foregroundStyle(SideSeatTheme.textPrimary)
                 }
                 .frame(minWidth: 44).foregroundStyle(secondary)
-                .padding(.horizontal, SideSeatTheme.spaceXS).padding(.vertical, SideSeatTheme.spaceXS)
+                .padding(.vertical, SideSeatTheme.spaceXS)
                 .background(SideSeatTheme.fillSubtle,
                             in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
                 .accessibilityHidden(true)
             }
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                activityTitle(.headline)
                 Text((start.map { timing.datePart($0, template: "EEE") + " · " } ?? "")
                      + (timing.clockText ?? timing.dateText))
                     .font(.subheadline.weight(.medium)).monospacedDigit()
@@ -766,16 +780,18 @@ private struct PlanOverviewLabel: View {
                 if let start, timing.datePart(start, template: "y") != timing.datePart(now, template: "y") {
                     Text(timing.datePart(start, template: "y")).font(.caption).foregroundStyle(secondary)
                 }
-                let metadata = [location, context].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
-                if !metadata.isEmpty {
-                    PlanHomePeople(people: people, text: metadata)
-                        .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
+                if let location, !location.isEmpty {
+                    Text(location).font(.caption).foregroundStyle(secondary)
+                        .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                PlanHomePeople(people: people, text: context)
+                    .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
                 zone
             }.frame(maxWidth: .infinity, alignment: .leading)
             if !typeSize.isAccessibilitySize {
-                Image(systemName: "chevron.right").font(.caption2.weight(.semibold)).foregroundStyle(secondary)
-                    .accessibilityHidden(true)
+                PlanHomeArtwork(title: title, isChoosingActivity: isChoosingActivity, size: 44)
+                chevron
             }
         }
         .accessibilityHint(presentation.cardActionTitle)
@@ -786,6 +802,27 @@ private struct PlanOverviewLabel: View {
             return String(format: AppLocalization.string("Waiting for %@ to confirm"), waitingFor)
         }
         return [presentation.cardStatusTitle, progress].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
+    private var footerLayout: AnyLayout {
+        typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+    }
+
+    private var status: some View {
+        HStack(alignment: .firstTextBaseline, spacing: SideSeatTheme.spaceXS) {
+            Circle().fill(secondary.opacity(0.6)).frame(width: 5, height: 5)
+                .accessibilityHidden(true)
+            Text(waitingFor == nil ? presentation.cardStatusTitle : waitingSummary)
+                .font(.caption).fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(secondary)
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.right").font(.caption2.weight(.semibold)).foregroundStyle(secondary)
+            .accessibilityHidden(true)
     }
 
     private func activityTitle(_ font: Font) -> some View {
@@ -809,13 +846,6 @@ private struct PlanOverviewLabel: View {
         if let name = timing.zoneText {
             Text(name).font(.caption).foregroundStyle(secondary)
                 .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-    private var action: some View {
-        HStack(spacing: SideSeatTheme.spaceXS) {
-            Image(systemName: presentation.nextStep.cardActionSymbol).accessibilityHidden(true)
-            Text(presentation.cardActionTitle).fixedSize(horizontal: false, vertical: true)
-            Image(systemName: "chevron.right").font(.caption2).accessibilityHidden(true)
         }
     }
 }

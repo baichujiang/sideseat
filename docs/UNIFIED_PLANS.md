@@ -57,6 +57,20 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Native Plans home — Preview 213
+
+Planning and Confirmed remain the two root sections, with the fixed title and
+existing history entry. Start a plan moves to a trailing capsule above the native
+tab bar; the root safe-area inset reserves its own space outside the lists.
+The same creation sheet and create-to-timetable handoff remain in place.
+
+Actionable plans stay vertical, while waiting plans keep their horizontal rail
+and View all. At accessibility sizes the existing vertical waiting layout remains.
+Cards use small existing activity artwork, name/date/status hierarchy, people and
+one next step; confirmed cards use the date block and existing detail route.
+No grouping, permissions, stored records, submission, invitation or Calendar
+rules change. See the [213 QA](./qa/2026-10-24-plan-home-redesign.md).
+
 ## Native inline information hierarchy — Preview 212
 
 The owner still taps the activity title or location directly to edit. A small

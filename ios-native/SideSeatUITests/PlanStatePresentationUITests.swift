@@ -75,6 +75,7 @@ import XCTest
         XCTAssertTrue(heading.label.contains("计划"))
         let headingY = heading.frame.minY
         let pickerY = picker.frame.minY
+        let createY = homeCreate.frame.minY
         let scroll = app.scrollViews["plans-scroll-waitingResponse"]
         let cards = scroll.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-row-'"))
         guard let first = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
@@ -88,7 +89,8 @@ import XCTest
         XCTAssertTrue(after.identifier != firstID || abs(after.frame.minY - firstY) > 20,
                       "A visible card must move or change before checking the fixed toolbar")
         XCTAssertTrue(app.buttons["plans-create-unified"].isHittable,
-                      "Creation remains in the toolbar while the plan list scrolls")
+                      "Creation remains in its independent bottom action area while the list scrolls")
+        XCTAssertEqual(homeCreate.frame.minY, createY, accuracy: 2)
         XCTAssertEqual(heading.frame.minY, headingY, accuracy: 2)
         XCTAssertEqual(picker.frame.minY, pickerY, accuracy: 2)
         XCTAssertTrue(app.buttons["plans-history"].isHittable)
@@ -126,7 +128,7 @@ import XCTest
 
     func testHomeToolbarAcrossLanguagesSizesAndPlanStates() {
         // Both store states use an intentionally offline coordinated-plan endpoint;
-        // these checks accept the toolbar layout, not the whole page's empty/error state.
+        // these checks accept root navigation and the bottom action area, not a clean empty/error page.
         continueAfterFailure = false
         for language in ["zh-Hans", "de"] {
             for large in [false, true] {
@@ -180,8 +182,11 @@ import XCTest
         XCTAssertTrue(create.isHittable && history.isHittable)
         XCTAssertTrue(heading.label.contains(language == "de" ? "Pläne" : "计划"))
         XCTAssertEqual(create.label, language == "de" ? "Plan starten" : "发起计划")
-        XCTAssertEqual(nav.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).count, 1)
-        for element in [heading, create, history] {
+        let createPredicate = NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])
+        XCTAssertEqual(nav.buttons.matching(createPredicate).count, 0,
+                       "Creation belongs to the independent bottom action area")
+        XCTAssertEqual(app.buttons.matching(createPredicate).count, 1)
+        for element in [heading, history] {
             let frame = element.frame
             XCTAssertFalse(frame.isEmpty)
             XCTAssertGreaterThanOrEqual(frame.minX, nav.frame.minX - 1)
@@ -195,11 +200,227 @@ import XCTest
             XCTAssertGreaterThanOrEqual(control.frame.height, 44 - 0.001)
         }
         XCTAssertLessThanOrEqual(history.frame.maxX, heading.frame.minX + 1)
-        XCTAssertLessThanOrEqual(heading.frame.maxX, create.frame.minX + 1)
+        let window = app.windows.firstMatch.frame
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(window.insetBy(dx: -0.501, dy: -0.501).contains(create.frame))
+        XCTAssertEqual(create.frame.maxX, picker.frame.maxX, accuracy: 1,
+                       "The action shares the page's trailing alignment")
+        XCTAssertGreaterThan(create.frame.midX, window.midX)
+        XCTAssertLessThanOrEqual(create.frame.maxY, tabBar.frame.minY - 1,
+                                 "The full action must remain above the tab bar")
         for section in ["waitingResponse", "upcoming"] {
-            XCTAssertEqual(app.scrollViews["plans-scroll-\(section)"].buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).count, 0)
+            let page = app.scrollViews["plans-scroll-\(section)"]
+            XCTAssertEqual(page.buttons.matching(createPredicate).count, 0)
+            if app.buttons["plans-tab-\(section)"].isSelected {
+                XCTAssertTrue(page.exists && page.isHittable)
+                XCTAssertLessThanOrEqual(page.frame.maxY, create.frame.minY + 0.501,
+                                         "The list viewport must end before the fixed creation action")
+            }
         }
-        print("PLAN_HOME_TOOLBAR \(language) heading=\(heading.frame) create=\(create.frame) history=\(history.frame)")
+        print("PLAN_HOME_CHROME \(language) heading=\(heading.frame) create=\(create.frame) history=\(history.frame) tabBar=\(tabBar.frame)")
+    }
+
+    /// Existing legacy fixtures deliberately use an offline coordinated endpoint.
+    /// These captures cover layout/navigation, and are not clean API/empty-state evidence.
+    func testHomeRedesignPopulatedNavigationAndWaitingAcrossTextSizes() {
+        continueAfterFailure = false
+        for (language, large) in [("zh-Hans", false), ("de", true)] {
+            let tag = "\(language)-\(large ? "system-largest-dark" : "normal-light")"
+            launch(accessibility: large, layout: true, language: language,
+                   contentSizeCategory: large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL")
+            let first = app.buttons["plans-row-ui-plan-1"]
+            XCTAssertTrue(first.waitForExistence(timeout: 10))
+            assertHomeSection("waitingResponse", language: language)
+            capture("home-redesign-offline-filled-\(tag)")
+            let firstPart = revealHomeItem(first, section: "waitingResponse")
+            tapHomeItem(first, visible: firstPart)
+            XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].firstMatch.waitForExistence(timeout: 10))
+            XCTAssertTrue(app.buttons["plan-card-accept-ui-plan-1"].waitForExistence(timeout: 10))
+            capture("home-redesign-original-invitation-\(tag)")
+            app.navigationBars.firstMatch.buttons.firstMatch.tap()
+            assertHomeSection("waitingResponse", language: language)
+
+            if large {
+                XCTAssertFalse(app.scrollViews["plans-waiting-rail"].exists)
+                XCTAssertFalse(app.buttons["plans-toggle-outgoing"].exists)
+                let outgoing = app.buttons["plans-row-ui-plan-outgoing"]
+                let last = app.buttons["plans-row-ui-plan-outgoing-3"]
+                _ = revealHomeItem(outgoing, section: "waitingResponse")
+                capture("home-redesign-vertical-waiting-first-\(tag)")
+                _ = revealHomeItem(last, section: "waitingResponse")
+                XCTAssertEqual(outgoing.frame.minX, last.frame.minX, accuracy: 1)
+                XCTAssertGreaterThan(last.frame.minY, outgoing.frame.minY)
+                capture("home-redesign-vertical-waiting-last-\(tag)")
+            } else {
+                let rail = app.scrollViews["plans-waiting-rail"]
+                _ = revealHomeItem(rail, section: "waitingResponse", complete: true)
+                let cards = rail.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-row-'"))
+                guard let before = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
+                    XCTFail("A real waiting card must be visible before swiping its rail"); return
+                }
+                let beforeID = before.identifier, beforeX = before.frame.minX
+                rail.coordinate(withNormalizedOffset: CGVector(dx: 0.82, dy: 0.5))
+                    .press(forDuration: 0.08,
+                           thenDragTo: rail.coordinate(withNormalizedOffset: CGVector(dx: 0.18, dy: 0.5)),
+                           withVelocity: .slow, thenHoldForDuration: 0.2)
+                guard let after = cards.allElementsBoundByIndex.first(where: { $0.isHittable }) else {
+                    XCTFail("A real waiting card must remain visible after the rail moves"); return
+                }
+                XCTAssertTrue(after.identifier != beforeID || abs(after.frame.minX - beforeX) > 20)
+                assertHomeSection("waitingResponse", language: language)
+                capture("home-redesign-horizontal-waiting-\(tag)")
+            }
+
+            app.buttons["plans-tab-upcoming"].tap()
+            assertHomeSection("upcoming", language: language)
+            _ = revealHomeItem(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming")
+            capture("home-redesign-confirmed-\(tag)")
+            homeCreate.tap()
+            XCTAssertTrue(app.descendants(matching: .any)["time-poll-title"].firstMatch.waitForExistence(timeout: 10))
+            capture("home-redesign-creation-\(tag)")
+            let cancel = app.navigationBars.buttons[language == "de" ? "Abbrechen" : "取消"]
+            assertHomeTarget(cancel); cancel.tap()
+            assertHomeSection("upcoming", language: language)
+
+            app.buttons["plans-history"].tap()
+            let history = app.descendants(matching: .any)["plans-history-root"].firstMatch
+            XCTAssertTrue(history.waitForExistence(timeout: 10))
+            let record = app.buttons["plans-row-ui-plan-completed"]
+            let recordPart = revealHomeItem(record, section: "ended")
+            capture("home-redesign-history-\(tag)")
+            tapHomeItem(record, visible: recordPart)
+            XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].firstMatch.waitForExistence(timeout: 10))
+            app.navigationBars.firstMatch.buttons.firstMatch.tap()
+            XCTAssertTrue(history.waitForExistence(timeout: 10))
+            app.navigationBars.firstMatch.buttons.firstMatch.tap()
+            assertHomeSection("upcoming", language: language)
+            capture("home-redesign-history-return-\(tag)")
+        }
+    }
+
+    func testHomeRedesignLoadingAndEmptyStoreKeepIndependentCreation() {
+        continueAfterFailure = false
+        for (language, large) in [("zh-Hans", false), ("de", true)] {
+            let tag = "\(language)-\(large ? "system-largest-dark" : "normal-light")"
+            launch(accessibility: large, loading: true, language: language, empty: true,
+                   contentSizeCategory: large ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL")
+            let loading = app.descendants(matching: .any)["plans-loading"].firstMatch
+            XCTAssertTrue(loading.waitForExistence(timeout: 2))
+            XCTAssertTrue(app.buttons["plans-create-unified"].exists)
+            XCTAssertFalse(app.buttons["plans-create-primary"].exists)
+            capture("home-redesign-offline-loading-\(tag)")
+            assertHomeSection("waitingResponse", language: language)
+            XCTAssertTrue(loading.waitForNonExistence(timeout: 12))
+            XCTAssertTrue(app.buttons["plans-create-primary"].waitForExistence(timeout: 5))
+            XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-row-'")).count, 0)
+            assertHomeSection("waitingResponse", language: language)
+            capture("home-redesign-offline-empty-store-\(tag)")
+            app.buttons["plans-tab-upcoming"].tap()
+            assertHomeSection("upcoming", language: language)
+            capture("home-redesign-offline-empty-confirmed-\(tag)")
+        }
+    }
+
+    func testHomeRedesignMaximumCardsRemainFullyReachable() {
+        continueAfterFailure = false
+        launch(accessibility: true, layout: true, language: "de",
+               contentSizeCategory: "UICTContentSizeCategoryAccessibilityXXXL")
+        func showComplete(_ card: XCUIElement, section: String, name: String) {
+            XCTAssertTrue(card.waitForExistence(timeout: 10))
+            for _ in 0..<12 {
+                let viewport = homeListViewport(section: section).insetBy(dx: 0, dy: 8)
+                let frame = card.frame
+                if viewport.insetBy(dx: -0.501, dy: -0.501).contains(frame) {
+                    XCTAssertTrue(card.isHittable)
+                    capture(name); return
+                }
+                XCTAssertLessThanOrEqual(frame.height, viewport.height,
+                                         "These representative cards must fit after scrolling")
+                let delta = frame.minY - viewport.minY
+                let distance = min(abs(delta), viewport.height * 0.6)
+                let startY = delta > 0 ? viewport.maxY - 16 : viewport.minY + 16
+                let endY = startY + (delta > 0 ? -distance : distance)
+                let origin = app.coordinate(withNormalizedOffset: .zero)
+                origin.withOffset(CGVector(dx: 12, dy: startY))
+                    .press(forDuration: 0.08,
+                        thenDragTo: origin.withOffset(CGVector(dx: 12, dy: endY)),
+                        withVelocity: .slow, thenHoldForDuration: 0.2)
+            }
+            capture(name + "-unreachable")
+            XCTFail("The entire representative card must be visible above the creation action")
+        }
+        assertHomeSection("waitingResponse", language: "de")
+        showComplete(app.buttons["plans-row-ui-plan-1"], section: "waitingResponse", name: "home-redesign-max-complete-task")
+        showComplete(app.buttons["plans-row-ui-plan-outgoing"], section: "waitingResponse", name: "home-redesign-max-complete-waiting")
+        app.buttons["plans-tab-upcoming"].tap()
+        assertHomeSection("upcoming", language: "de")
+        showComplete(app.buttons["plans-row-ui-plan-accepted"], section: "upcoming", name: "home-redesign-max-complete-confirmed")
+    }
+
+    private func assertHomeSection(_ section: String, language: String) {
+        XCTAssertTrue(app.descendants(matching: .any)["direct-chat"].firstMatch.waitForNonExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["plans-history-root"].firstMatch.exists)
+        XCTAssertTrue(app.tabBars.buttons[language == "de" ? "Pläne" : "计划"].isSelected)
+        let picker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
+        XCTAssertEqual(picker.buttons.count, 2)
+        XCTAssertEqual(picker.buttons.allElementsBoundByIndex.filter(\.isSelected).count, 1)
+        XCTAssertTrue(app.buttons["plans-tab-\(section)"].isSelected)
+        for control in picker.buttons.allElementsBoundByIndex { assertHomeTarget(control) }
+        assertRootToolbar(language: language)
+    }
+
+    private func assertHomeTarget(_ control: XCUIElement) {
+        XCTAssertTrue(control.waitForExistence(timeout: 5)); XCTAssertTrue(control.isHittable)
+        XCTAssertTrue(app.windows.firstMatch.frame.insetBy(dx: -0.501, dy: -0.501).contains(control.frame))
+        XCTAssertGreaterThanOrEqual(control.frame.width + 0.001, 44)
+        XCTAssertGreaterThanOrEqual(control.frame.height + 0.001, 44)
+    }
+
+    private func homeListViewport(section: String) -> CGRect {
+        let page = app.scrollViews["plans-scroll-\(section)"]
+        let window = app.windows.firstMatch.frame
+        let top = section == "ended" ? app.navigationBars.firstMatch.frame.maxY
+            : app.descendants(matching: .any)["plans-segmented-control"].firstMatch.frame.maxY
+        let bottom = section == "ended" ? app.tabBars.firstMatch.frame.minY : min(page.frame.maxY, homeCreate.frame.minY)
+        return page.frame.intersection(CGRect(x: window.minX, y: top, width: window.width, height: max(0, bottom - top)))
+    }
+
+    /// Cards may be taller than the viewport at system maximum; controls and the rail still require full visibility.
+    private func revealHomeItem(_ item: XCUIElement, section: String, complete: Bool = false) -> CGRect {
+        XCTAssertTrue(item.waitForExistence(timeout: 10))
+        for attempt in 0..<16 {
+            let viewport = homeListViewport(section: section)
+            let frame = item.exists ? item.frame : .zero
+            let visible = frame.intersection(viewport)
+            print("PLAN_HOME_REVEAL \(item.identifier) attempt=\(attempt) frame=\(frame) viewport=\(viewport) visible=\(visible)")
+            if item.exists && item.isHittable && visible.width >= 44 && visible.height >= 44
+                && (!complete || viewport.insetBy(dx: -0.501, dy: -0.501).contains(frame)) {
+                XCTAssertGreaterThanOrEqual(frame.width + 0.001, 44)
+                XCTAssertGreaterThanOrEqual(frame.height + 0.001, 44)
+                return visible
+            }
+            let down = !frame.isEmpty && frame.minY < viewport.minY
+            let start = CGPoint(x: viewport.minX + 12, y: viewport.minY + viewport.height * (down ? 0.25 : 0.75))
+            let end = CGPoint(x: start.x, y: viewport.minY + viewport.height * (down ? 0.75 : 0.25))
+            let origin = app.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: start.x - app.frame.minX, dy: start.y - app.frame.minY))
+                .press(forDuration: 0.08,
+                       thenDragTo: origin.withOffset(CGVector(dx: end.x - app.frame.minX, dy: end.y - app.frame.minY)),
+                       withVelocity: .slow, thenHoldForDuration: 0.2)
+        }
+        capture("home-redesign-item-unreachable-\(item.identifier)")
+        XCTFail("The requested item needs a real visible 44pt region, with the entire rail above the action area")
+        return .zero
+    }
+
+    private func tapHomeItem(_ item: XCUIElement, visible: CGRect) {
+        XCTAssertTrue(item.isHittable)
+        XCTAssertGreaterThanOrEqual(visible.width, 44); XCTAssertGreaterThanOrEqual(visible.height, 44)
+        let point = CGPoint(x: visible.minX + visible.width * 0.2, y: visible.midY)
+        XCTAssertTrue(visible.contains(point) && item.frame.contains(point))
+        app.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: point.x - app.frame.minX, dy: point.y - app.frame.minY)).tap()
     }
 
     func testInitialLoadingDoesNotShowTheEmptyPlanLayout() {
@@ -228,9 +449,6 @@ import XCTest
         XCTAssertTrue(togetherHeading.isHittable)
         XCTAssertTrue(togetherHeading.label.contains("同行"))
         let headingY = togetherHeading.frame.minY
-        let picker = app.descendants(matching: .any)["together-segmented-control"].firstMatch
-        let pickerY = picker.frame.minY
-        let pickerHeight = picker.frame.height
         capture("together-card-reference")
         app.tabBars.buttons["计划"].tap()
         let planHeading = app.descendants(matching: .any)["root-navigation-title"].firstMatch
@@ -238,8 +456,9 @@ import XCTest
         XCTAssertTrue(planHeading.label.contains("计划"))
         XCTAssertEqual(planHeading.frame.minY, headingY, accuracy: 2)
         let planPicker = app.descendants(matching: .any)["plans-segmented-control"].firstMatch
-        XCTAssertEqual(planPicker.frame.minY, pickerY, accuracy: 2)
-        XCTAssertEqual(planPicker.frame.height, pickerHeight, accuracy: 2)
+        XCTAssertGreaterThanOrEqual(planPicker.frame.minY, planHeading.frame.maxY)
+        XCTAssertTrue(app.windows.firstMatch.frame.contains(planPicker.frame))
+        for control in planPicker.buttons.allElementsBoundByIndex { assertHomeTarget(control) }
         let row = app.buttons["plans-row-ui-plan-1"]
         reveal(row)
         XCTAssertTrue(row.label.contains("Library study"))
@@ -400,7 +619,7 @@ import XCTest
         XCTAssertTrue(row.waitForExistence(timeout: 10))
         XCTAssertTrue(row.label.contains("Dinner in town"))
         XCTAssertFalse(row.label.contains("Europe/Berlin"))
-        XCTAssertLessThanOrEqual(row.frame.height, 144, "The date summary and shared activity band should stay compact")
+        XCTAssertLessThanOrEqual(row.frame.height, 144, "The date summary and activity identity should stay compact")
         print("PLAN_CARD_METRIC upcoming \(row.frame.height)")
         capture("upcoming-date-summary")
         row.tap()
@@ -440,7 +659,7 @@ import XCTest
     }
 
     private func capture(_ name: String) {
-        let image = XCTAttachment(screenshot: app.screenshot())
+        let image = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         image.name = "shared-plan-117-" + name; image.lifetime = .keepAlways; add(image)
     }
 }
