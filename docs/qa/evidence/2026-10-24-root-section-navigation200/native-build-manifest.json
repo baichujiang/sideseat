@@ -17,5 +17,6 @@
   "webRelease": false,
   "initialUITestSourceSHA256": "c7c70e9b6b8ad973ac27b7f700c19bf6a6ade93f41085e287a3bfb59c013d3ec",
   "gestureRepairUITestSourceSHA256": "bf1a8ca8a486667f988e24685739341c7415dd06bc2979cfaa8fedaae527fb51",
-  "productUnchangedDuringUITestRepair": true
+  "productUnchangedDuringUITestRepair": true,
+  "sourceCommit": "14b78274dc2f894b20d3ac30b41407bb75a47019"
 }

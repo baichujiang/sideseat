@@ -21,7 +21,22 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 199 is the current installed development build. Move plan creation to
+- Preview 200 is the current installed development build. Plans/Together section
+  selectors share a fillTertiary track, surface selection and 0.5pt neutral border;
+  remove the outer action outline and ProductAction selection colors. Use the
+  two modifiers in the existing file, preserving targets/IDs/selection/paging/chooser
+  rules and all business/compatibility behavior. Source 14b78274 is pushed.
+  Normal-session read-only navigation passed 21.222s, eight language/theme/size
+  cases 449.852s and targeted paging/pinned-selector/create-cancel 68.634s.
+  Initial 15.779s test dragged a hidden firstMatch page; only targeting the active
+  page by ID changed. Same product and coordinates; preserve this test boundary.
+  Installed 200/normal PID 7858, strict source/binary/signature verified; ordinary 97
+  retained, Runner/private files cleaned, no accounts created/deleted or new App
+  reports. No backend/web release or API journey/unit/domain/browser repeat.
+  Actual normal-session selector strips are distinct from offline layout fixtures.
+  Prior 199 CPU/extra-left-swipe and existing detail/menu/dock issues are NOT fixed.
+  See 200 QA/release for actual images, tests and scope.
+- Preview 199 was the previous development build. Move plan creation to
   the trailing root toolbar with the existing neutral outlined style; history
   leads. Keep one entry and existing IDs/creation rules; at xxxLarge+ show plus
   with the full accessibility name. Source 183a350b is pushed. Same-product
