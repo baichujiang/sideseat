@@ -2,15 +2,16 @@
 
 **Status:** Current dependency roadmap; deployed facts live in [Deployed state](./DEPLOYED_STATE.md).
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-24
 
 **Governing product:** [Product](./PRODUCT.md) and [User Flow](./USER_FLOW.md).
 
 The dated Build 34–40 rollout diary, expired demo instructions and previous
 roadmap are preserved in the [frozen historical copy](../archive/2026-10-15-retired/docs/ROADMAP-2026-09-09.md).
 Do not use its old “current release”, phone-update tasks or QA windows as today's
-work queue. Current development delivery is Preview 103; ordinary SideSeat 97 is
-a separate supported older client. This roadmap records dependency gates, not
+work queue. Current development delivery and acceptance are listed in
+[Deployed state](./DEPLOYED_STATE.md); ordinary SideSeat97 is a separate supported
+older client. This roadmap records dependency gates, not
 fresh acceptance of every implemented feature.
 
 ## Goal
@@ -63,15 +64,24 @@ discovery Pod formation. Separately approved manual link-based planning follows
 
 ## Supporting coordination and Calendar work
 
-The owner approved manual unified planning on 2026-10-15: collect availability or
-choose a time → explicit selected invitations → every selected person accepts →
-Calendar projections. Native implementation and verification are tracked in
-[Unified plans](./UNIFIED_PLANS.md); actual backend/Preview delivery belongs in
-[Deployed state](./DEPLOYED_STATE.md). This manual link-based coordination is not
-the gated discovery Pod or old group-chat product and creates no repeat/Outcome
-credit. The native grid/autosave mechanism and archived boundary remain. The owner also
-approved poll-scoped guest filling, editable nicknames and confirmation directly
-on the share page without downloading or registering; see [Time polls](./TIME_POLLS.md).
+The approved manual flow publishes a valid candidate timetable first: activity,
+optional location/ideas, dates and daily voting hours → create COLLECT and share
+to App contacts or browser guests → local timetable selection with explicit
+availability submission → organizer chooses a continuous final interval and
+reviews the invitation roster → individual accept/decline/pending → organizer
+may publish at any time, notifying and projecting to Calendar only for accepted
+account participants; guests view the published arrangement on the shared page.
+When activity ideas are enabled, choose the activity before formal invitations.
+Zero responses do not block invitations. Creation has no timetable
+preview or separate fixed-time entry; native grids have no Undo.
+
+Implementation and the existing-record/guest/invitation contracts are in
+[Unified plans](./UNIFIED_PLANS.md) and [Time polls](./TIME_POLLS.md). This manual
+coordination remains separate from the gated discovery Pod and does not create
+one-to-one repeat/Outcome credit. Browser guests can participate and explicitly
+RSVP without installing or registering; their private credentials and recovery
+links retain the existing [guest identity rules](./GUEST_IDENTITY.md). Native availability uses local drafts
+and explicit submission. The frozen archive boundary remains.
 
 Calendar reliability, smart input, search and import/export maintenance may
 continue within current authority. Read-only EventKit Busy/Available remains

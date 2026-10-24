@@ -1,0 +1,34 @@
+{
+  "passed": false,
+  "checks": [
+    {
+      "phase": "contacts-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan ce4b3c79",
+      "location": null,
+      "candidateDates": [
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-24T14:50:52.096Z"
+    }
+  ],
+  "failure": "GET /api/v1/time-polls/07YUFaJ4XUEoJNUsqa6e0NIwpbjlt1jg: 401; Sign in is required.\n\n401 !== 200\n"
+}

@@ -378,7 +378,8 @@ final class PublicProfileStore {
         defer { isLoading = false }
 
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated"),
+           !ProcessInfo.processInfo.arguments.contains("--ui-testing-public-profile-live") {
             profile = .uiTestingFixture
             return
         }

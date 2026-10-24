@@ -107,6 +107,7 @@ private struct ProfileHeader: View {
                     Text("@\(username)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Text(schoolSummary.displayLine)

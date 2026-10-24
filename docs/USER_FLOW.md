@@ -1,12 +1,30 @@
 # SideSeat User Flow
 
-**Status:** Frozen v1.0 for the current one-to-one flow
+**Status:** One-to-one v1.0 contract retained; approved manual planning follows the current flow below
 
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-24
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
+
+## Current manual plan flow — 2026-10-24
+
+Create a COLLECT plan from activity/location, candidate dates and daily hours,
+with optional activity ideas; creation has no timetable preview. App contacts
+and browser guests fill the same detail timetable and explicitly submit local
+availability drafts. The organizer can choose a continuous final interval even
+with zero responses, review the roster and send invitations. Invitees accept,
+decline or leave pending; the organizer may publish at any time. Only accepted
+account participants receive notifications and SideSeat Calendar entries; guests
+view the final arrangement on the shared page. Activity ideas must be decided
+before formal invitations are sent.
+
+The canonical selection, guest/record compatibility and consent contract is in
+[Unified plans](./UNIFIED_PLANS.md#current-manual-plan-flow--2026-10-24).
+Actual releases and verification scopes are in [Deployed state](./DEPLOYED_STATE.md).
+Preview-numbered sections below are dated evolution, superseded by newer
+amendments; they are not additional current entry paths or fresh acceptance.
 
 ## Activity undecided, time already set — Preview 156
 
@@ -177,7 +195,7 @@ See [Shared native plan presentation](./PLAN_PRESENTATION.md).
 
 ## Unified manual plans — owner-approved 2026-10-15
 
-**Current creation amendment — 2026-10-23 / Preview 191:** enter the activity
+**Creation amendment — 2026-10-23 / Preview 191 (preview removed in 194):** enter the activity
 and optional location, set candidate dates and daily voting hours, and share
 the candidate timetable. Creation shows a read-only preview and one Share for
 availability action; there is no final-time selection or mode switch at this

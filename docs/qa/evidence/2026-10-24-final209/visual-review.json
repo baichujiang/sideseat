@@ -1,0 +1,44 @@
+{
+  "initialPackageOriginalsReviewed": 32,
+  "initialPackageSplit": {
+    "privateSavedProfile": 20,
+    "publicBeforeUsernameWrap": 12
+  },
+  "finalPublicOriginalsReviewed": 12,
+  "finalPublicReviewers": {
+    "hour_picker_source": 6,
+    "hours_regression_test": 6
+  },
+  "finalPublicResult": "Normal identity fully visible; actual system maximum long username wraps across three complete lines without ellipsis, cropping or overlap; avatar/name routes return with bookmark retained.",
+  "retainedProfileImages": [
+    "saved-header-zh-normal.png",
+    "private-profile-de-largest.png",
+    "public-profile-zh-normal.png",
+    "public-profile-de-largest.png",
+    "before-public-username-de-largest.png"
+  ],
+  "limits": [
+    "Maximum cards/detail require normal scrolling; not all content is on first screen",
+    "Private source unaffected by final PublicProfileView-only line; retained earlier scoped pass",
+    "System AssistiveTouch is separate from App chrome",
+    "Native flow screenshots are Chinese ordinary light; true largest layouts covered by separate profile/earlier sequential matrix scopes",
+    "Intermediate1h selection snapshots precede final2h cross-day range; not a duration mismatch",
+    "Calendar result screenshot shows title/location/start; exact end and uniqueness proved by API, not this crop",
+    "System AssistiveTouch may cover a local grid/roster edge; separate from App chrome"
+  ],
+  "finalNativeOriginalsReviewed": 24,
+  "finalNativeReviewers": {
+    "hour_picker_source": 8,
+    "hours_regression_test": 8,
+    "timetable_blank_source": 8
+  },
+  "finalNativeResult": "All24 actual originals opened: creation without preview, preserved local draft, manual submission, role-specific share controls, inline participant availability, final selection and cross-day invitation highlights agree. No new text crop, overlap or obscured primary App action.",
+  "finalNativeRetainedImages": [
+    "flow-calendar-result.png",
+    "flow-create-information.png",
+    "flow-final-cross-day.png",
+    "flow-invitation-highlight.png",
+    "flow-participant-availability.png",
+    "flow-published-empty-timetable.png"
+  ]
+}

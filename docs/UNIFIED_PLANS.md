@@ -3,6 +3,36 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Current manual plan flow — 2026-10-24
+
+Enter activity and optional location → choose candidate dates and daily voting
+hours (optional friends' activity suggestions) → create one COLLECT plan and
+share to App contacts or a browser guest → edit availability directly in its
+timetable and explicitly submit → organizer selects a continuous final interval
+on the same timetable, reviews invitees and sends formal invitations → each
+invitee accepts, declines or leaves pending → organizer may publish at any time;
+only accepted account participants are notified and receive their unique
+SideSeat Calendar projection. Guests view the published arrangement on the share
+page and retain the same RSVP version rules, without a personal Calendar row.
+Later acceptance before the start follows the existing publication rules. Zero availability responses never block final selection or invitation.
+
+When activity ideas are enabled, the organizer must choose the activity before
+sending formal invitations. Creation has no timetable preview or separate fixed-time branch. The timetable
+appears immediately after creation. Native selection supports tap/toggle and
+hold-paint/erase, including cross-day final drafts; discontinuous final drafts
+remain editable and disable review. Availability is a local draft until explicit
+submission; filling availability is separate from accepting an invitation, and
+sending invitations is separate from publishing to Calendar. Native grids have
+no one-step Undo. Existing records, guest identity, invitation versions and
+conversation-bound one-to-one consent rules remain unchanged.
+
+Actual installed builds, source hashes and verification scopes are recorded in
+[Deployed state](./DEPLOYED_STATE.md) and the
+[sequential reliability acceptance](./qa/2026-10-24-sequential-reliability-fixes.md).
+The Preview-numbered sections below describe dated changes; newer amendments
+supersede older descriptions. They are not additional current entry paths or
+fresh acceptance claims.
+
 ## Native creation uses the shared editor — Preview 196
 
 Owner amendment 2026-10-24: use the same native Form/Section, grouped canvas,
@@ -430,12 +460,11 @@ on confirmed details; only pending replies show the instruction to confirm.
 
 ## One shared lifecycle
 
-`TimePoll` is the persisted root of manual plans. `COLLECT` starts in COLLECTING;
-`FIXED` with a known activity starts in INVITING with its creator accepted;
-the optional activity-ideas combination starts in COLLECTING as described above. Known-activity creation
-supports 2–20 expected people, with five as the native default. The optional
-theme start leaves the response estimate unset; the existing invitation roster
-limit remains twenty. Existing conversation-bound
+`TimePoll` is the persisted root of manual plans. Current native creation sends
+COLLECT and starts in COLLECTING; optional activity ideas use that same entry.
+FIXED and expected-count fields remain supported contracts for existing records
+and compatible clients, rather than a separate current native creation branch.
+The existing invitation roster limit remains twenty. Existing conversation-bound
 PlanCommitment/PlanRequest records remain intact and appear alongside these
 records in Plans. Their origin consent, bilateral Outcomes and Repeat rules are
 not imported into manual plans. Discovery Pod and archived code remain disabled.
@@ -665,7 +694,7 @@ Existing `GET/POST /api/v1/time-polls`, `GET/DELETE /{token}` and
 All use the authenticated v1 envelope and OpenAPI contract. The 192-bit token
 serves as an invite capability for link holders. The guest web page shows the
 shared poll and supports filling, nickname editing and confirmation without
-downloading or registering; see [Guest participation](./TIME_POLLS.md#guest-participation--owner-decision-2026-10-15). No third-party code/page/save service is involved.
+downloading or registering; see [Guest participation](./GUEST_IDENTITY.md). No third-party code/page/save service is involved.
 
 TimePollInvitation has unique `(pollId,userId)` membership. CalendarEntry has an
 optional cascading TimePoll relation, unique `(userId,timePollId)`, and a relation
@@ -676,8 +705,10 @@ manual-plan projections, preserving existing payload shapes otherwise.
 
 Shared plan writes acquire existing ordered user safety locks before a poll row
 lock. Block/account removal use the same safety boundary and remove projections.
-The native autosave queue remains bound to its login generation; mutation actions
-wait for the current save. Detail refresh reads the same persisted root. Plans
+Explicit response submissions remain bound to their login generation and serialize
+against conflicting mutations while a request is in flight. A local unsubmitted
+draft does not block sharing or final-time invitation. Refresh preserves the local
+edit revision and reads the same persisted root. Plans
 and Calendar reload after changes and foreground activation.
 
 “Calendar sync” here means each participant's Sideseat Calendar. Existing calendar

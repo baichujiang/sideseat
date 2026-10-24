@@ -2,12 +2,29 @@
 
 Owner decision: 2026-10-15. Supersedes the original-page embedding in Preview 98.
 
-SwiftUI creation, 30-minute rectangular paint/erase, immediate preview, automatic
-save, participant heatmap and best windows are implemented by Sideseat. No
-When2meet source code or save service is used. Sideseat account authentication
-replaces provider name/password login in the app. The owner also approved a
-poll-scoped browser guest on 2026-10-15; see Guest participation below.
+SideSeat implements native creation, 30-minute paint/erase cells, local drafts,
+explicit availability submission and participant heatmaps. No When2meet source
+code or save service is used. SideSeat account authentication applies in the App;
+share-page guests use poll-scoped private participation credentials.
 
+
+## Current manual plan flow — 2026-10-24
+
+Create a COLLECT plan from activity/location, candidate dates and daily hours,
+with optional activity ideas; creation has no timetable preview. App contacts
+and browser guests fill the same detail timetable and explicitly submit local
+availability drafts. The organizer can choose a continuous final interval even
+with zero responses, review the roster and send invitations. Invitees accept,
+decline or leave pending; the organizer may publish at any time. Only accepted
+account participants receive notifications and SideSeat Calendar entries; guests
+view the final arrangement on the shared page. Activity ideas must be decided
+before formal invitations are sent.
+
+The canonical selection, guest/record compatibility and consent contract is in
+[Unified plans](./UNIFIED_PLANS.md#current-manual-plan-flow--2026-10-24).
+Actual releases and verification scopes are in [Deployed state](./DEPLOYED_STATE.md).
+Preview-numbered sections below are dated evolution, superseded by newer
+amendments; they are not additional current entry paths or fresh acceptance.
 
 ## Shared native editor presentation — Preview 196
 
@@ -18,7 +35,7 @@ Remove the custom gray title surface, separate idea card and content outlines.
 Real date/hour/Clear actions keep their existing outline. Input, validation,
 creation payload and the existing sharing/invitation/Calendar flow remain intact.
 
-## Current creation form layout — Preview 195
+## Creation form layout — Preview 195
 
 Activity/location use a quiet identity surface; date/hour settings share one
 outlined region, with time zone under the hours. The existing optional activity
@@ -27,7 +44,7 @@ with the original centered Clear dates action. Activity names wrap visually;
 Return normalizes embedded newlines to spaces and dismisses input. Preserve the
 same request, dates, hour validation and all invitation/Calendar behavior.
 
-## Current native creation presentation — Preview 194
+## Native creation presentation — Preview 194
 
 Creation has no timetable preview: retain activity/location, candidate dates,
 daily hours, time zone and the optional friends' ideas checkbox. Create the same
@@ -37,7 +54,7 @@ state/slot calculations and dead preview grid options. Preserve existing date,
 hour, title and location validation, idempotency, invitation and Calendar rules.
 No backend or browser change is required.
 
-## Current native grid interaction — Preview 193
+## Native grid interaction — Preview 193
 
 Both editable native grids omit the one-step Undo button and snapshot state.
 Tap again to deselect; hold and drag to paint or erase, and tap a day header to
@@ -46,7 +63,7 @@ unchanged. Availability uses the normal Time corner label; final-time guidance
 stays in its existing text row; scroll layout and viewport dimensions remain. Older native
 Undo descriptions below are historical; browser interaction is unchanged here.
 
-## Current creation — Preview 191
+## Creation — Preview 191 (preview superseded by 194)
 
 New native plans enter one collection-first flow: activity/location, candidate
 dates and daily voting hours, a read-only timetable preview, then Share for
@@ -75,52 +92,37 @@ on confirmed details; only pending replies show the instruction to confirm.
 
 ## Mobile selection
 
-Ordinary vertical and horizontal swipes over the cells scroll without editing.
-A tap changes one 30-minute cell. Hold for 0.4 seconds for light feedback, then
-drag to preview a rectangular range; release applies it and starts autosave.
-Starting on an available cell erases the range. A cancelled gesture discards the
-preview. The most recent committed selection change can be undone once; Undo
-also uses the normal autosave queue. Cells are 44 points high, with adaptive
-separator borders. Accessibility activation still toggles an individual cell.
+Ordinary swipes scroll without editing. A tap toggles one 30-minute displayed
+cell; holding and dragging previews paint or erase, and release commits the
+local draft. Starting on selected cells erases; cancelling discards the preview.
+Native grids omit Undo. Cells retain 44pt targets and accessibility activation.
 
-In My availability, tapping a weekday/date header selects every candidate slot
-for that date within the plan's configured hours. A partially selected day becomes
-fully selected; tapping a fully selected day clears it. Other dates are preserved.
-The header shows empty, partial and full states, including accessible values and
-select/clear hints. This change uses the same one-step Undo and autosave queue.
-Selected cells/full-day headers use teal; partially selected day headers use
-amber. A compact legend, checkmarks/minus symbols and accessible values accompany
-the colors in Light and Dark. Group results keeps noninteractive date labels. This does not extend the poll's
-immutable time range or change anybody else's response.
+Availability date headers select or clear all candidate slots inside that day's
+configured voting hours, preserving other dates. Teal/checkmarks and partial
+states communicate personal availability; amber/square checks distinguish final
+time selection. Final selection uses the same tap/toggle/drag mechanics across
+candidate dates. Review requires one continuous actual interval; disconnected
+selections remain a local draft for correction. Other people's responses do not
+change when selecting or clearing your own cells.
 
-UIKit tap/long-press recognition arbitrates with the enclosing scroll views;
-the zero-distance SwiftUI drag that previously intercepted scrolling is removed.
-The persisted slot model retains 15-minute IDs for existing data and older clients.
-The current web and native grids group two adjacent slots into one 30-minute cell,
-halving the row count without shrinking the 44-point/pixel touch targets. Edits
-apply to both IDs. Opening an old response never rounds or rewrites it: a cell with
-only one quarter selected is amber/partial; tapping it fills both quarters, tapping
-a fully selected cell clears both, and Undo restores the exact original IDs.
-An old range ending on an odd quarter retains its shorter boundary cell. Groups
-never cross dates or discontinuous intervals; repeated DST rows keep their IDs.
-Heatmap counts require each person to be available throughout the whole displayed
-cell. The group result is the full timetable, without recommendation cards.
-New native collection-hour pickers use half-hour steps.
+Persisted slots retain 15-minute IDs for existing records. Two adjacent slots
+form each displayed 30-minute cell. An old partially selected quarter stays
+partial on opening; tapping fills both quarters, and tapping a full cell clears
+both. Legacy boundary instants and repeated DST IDs remain exact. Heatmap counts
+require availability throughout the displayed cell; the full timetable supplies
+the group result, without recommendation cards.
 
 ## Data and saving
 
-The detail header separates collection status, plan title, date range, optional
-location and the explicitly labelled time zone. Name editing stays compact and
-separate from availability controls. While editing, a persistent bottom bar shows
-the actual save state: choose times, saving, saved automatically, or failed with
-Retry. The saved summary includes selected days and total hours. Success appears
-only after the existing serialized queue is acknowledged; failures retain the draft.
-Native organizers and participants (121), and the public share page, edit directly
-in the group timetable, keeping total counts and own checkmarks visible without a
-completion or personal/group switch. A participant's saved response keeps the table
-visible with a next-step notice to wait for the organizer and explicitly confirm
-the final invitation. Availability does not confirm participation or create a
-Calendar entry.
+The detail header places activity title and share together, status/location below,
+then date/time zone and response count/avatars. Nickname editing is absent from
+the native detail. Participants edit directly in the same timetable. A draft is
+saved locally while selection changes; the explicit submit/update action sends
+it. Pending changes, submitting, acknowledged success and failure/Retry reflect
+actual request state. Failure preserves the draft; refresh does not replace it.
+A submitted response keeps the timetable visible while the next step is to wait
+for a final invitation and explicitly respond. Availability never confirms
+attendance, creates Calendar entries or reads the personal Calendar.
 
 API: `GET/POST /api/v1/time-polls`, `GET/DELETE /api/v1/time-polls/{token}`,
 `PUT /api/v1/time-polls/{token}/response`. Contract: `openapi/v1.json`.
@@ -151,15 +153,15 @@ Explicit invitation end is persisted through confirmation and Calendar projectio
 omitting it keeps the older duration/60-minute fallback. Blocked creators
 are unavailable; blocked participants are excluded from visible data/statistics.
 
-The client binds each autosave queue to its original login generation, serializes
-writes and coalesces newer pending gestures. Account switches drop old queued
-changes, and unauthorized JSON requests cannot retry under a replacement session. It
-keeps the draft on save failure and offers Retry. Server refresh cannot replace a
-pending draft. Detail views refresh visible responses every ten seconds while
-active; closing a view cancels refresh, while a pending save retains its store until
-acknowledged. The shared URL opens a guest web page, with an optional native deep link. Availability changes do not create commitment or read personal Calendar. The
+Explicit submissions are scoped to the original login generation and serialized
+against conflicting writes. Account switches cancel old-session work; unauthorized
+requests cannot retry under a replacement session. Failure retains the local draft
+and offers an explicit retry. Refresh cannot replace pending local changes.
+Active details refresh visible responses every ten seconds; closing cancels
+refresh, while an in-flight submission retains its store until acknowledged. The shared URL opens a guest web page, with an optional native deep link. Availability changes do not create commitment or read personal Calendar. The
 approved unified planning flow can explicitly convert results to invitations;
-Calendar projections require all selected people to accept. See
+The organizer explicitly publishes without waiting for every response; only
+accepted account invitees receive notifications and unique Calendar projections. See
 [Unified plans](./UNIFIED_PLANS.md).
 
 Preview 113 binds each native refresh to its request and the current local edit
@@ -173,7 +175,37 @@ Verification is recorded in the dated QA/release records. Historic When2meet
 phone runners and receipts are evidence for Preview 98 only and must not be run
 against the native replacement.
 
-## Guest participation — owner decision 2026-10-15
+## Guest participation — current identity and RSVP contract
+
+Share-page guests enter a display name, fill the same timetable and explicitly
+submit availability, then return to view the highlighted final invitation and
+accept or decline its current version. They need no App, registration or account.
+Filling availability and opening the link never accept attendance.
+
+Since the approved2026-10-21 identity update, a first join creates an independent
+guest ID and random private credential. Names are display values; a matching
+name cannot claim another record. A scoped HttpOnly/Secure/SameSite cookie
+remembers the credential, and every write checks the expected participant ID.
+The personal recovery link restores the same server record without creating a
+duplicate response or resetting RSVP. Its private fragment is cleared before
+POST verification. Local unsubmitted drafts stay in the original browser.
+Credential-less legacy records remain preserved and follow the existing verified
+owner-assisted recovery rules, not automatic name-based takeover. The complete
+current contract is [Guest identity](./GUEST_IDENTITY.md).
+
+The organizer may publish without waiting for pending or declined invitees.
+Accepted account participants receive their unique SideSeat Calendar projections;
+guests view final details on the same shared page and do not receive User Calendar
+rows. Existing compatibility APIs and persisted records stay intact. Native
+participant rename APIs remain compatibility surfaces; this document does not
+reintroduce the removed native nickname-editing entry.
+
+The following original rollout notes are retained as historical implementation
+context. Their same-name recovery, no-private-link, automatic-save and all-accept
+statements were superseded by the current contracts above and must not be used
+as today's behavior or fresh acceptance evidence.
+
+### Superseded guest rollout notes — 2026-10-15/16
 
 The public share page lets people enter a recognizable nickname, select the same
 30-minute grid as the native app, edit their nickname and confirm the current

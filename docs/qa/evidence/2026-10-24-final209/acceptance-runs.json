@@ -1,0 +1,91 @@
+{
+  "build": 209,
+  "priorPackage": {
+    "privateSavedProfile": {
+      "seconds": 233.208,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "variants": [
+        "zh-Hans normal light",
+        "zh-Hans normal dark",
+        "de system accessibilityXXXL light",
+        "de system accessibilityXXXL dark"
+      ],
+      "avatarAndNameVisits": 8,
+      "maximumNameHeight": 58.6666666667,
+      "retentionScope": "Private sheet and all involved source unchanged by final one-line PublicProfileView username wrapping; scoped pass retained, not rerun as final-package private test"
+    },
+    "publicProfile": {
+      "seconds": 117.868,
+      "passed": 1,
+      "scope": "API route and expected identity passed; actual largest screenshot exposed truncated username despite full AX label. Superseded by final wrap acceptance"
+    },
+    "fullNativeFlow": {
+      "seconds": 378.947,
+      "passed": 1,
+      "apiPhases": 8,
+      "scope": "Passed before public username wrapping; retained separately, not claimed as final package native acceptance"
+    }
+  },
+  "finalPackage": {
+    "publicProfile": {
+      "seconds": 117.565,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "variants": [
+        "zh-Hans normal light",
+        "de actual system accessibilityXXXL dark"
+      ],
+      "avatarAndNameVisits": 4,
+      "exactDisplayNameAndUsernameMatchAPI": true,
+      "longMaximumUsernameHeightGreaterThan80": true,
+      "bookmarkPreserved": true,
+      "routing": "Real authorized public GET from fixture peer; no private fixture substitution"
+    },
+    "fullNativeFlow": {
+      "seconds": 370.491,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "apiPhases": 8,
+      "rolePhaseSharePermissionChecks": 6,
+      "crossDayFinalDurationMs": 7200000,
+      "uniqueExactCalendarEntriesPerAccount": [
+        1,
+        1
+      ],
+      "manualSubmissionsForBothAccounts": true,
+      "finalAppSameAsPublicProfile117565": true,
+      "locator": "Prefix shared-plan-card button containing exact title StaticText descendant; operation text in same card",
+      "productSourceAndBinaryFrozen": true,
+      "originalPNGs": 24
+    }
+  },
+  "unchangedRules": [
+    "Manual availability submission",
+    "Existing selection and cross-day rules",
+    "Invitation accept/reject/ignore and organizer publication",
+    "Only accepted account Calendar entries"
+  ],
+  "notRun": [
+    "Browser participant flow (web/backend unchanged)",
+    "Unit/domain tests (no domain logic changes)",
+    "Pure manual CPU benchmark"
+  ],
+  "testOnlyMultiCardFailure": {
+    "seconds": 117.132,
+    "passed": 0,
+    "failed": 1,
+    "apiPhasesPassed": 3,
+    "cause": "Test selected first chat plan card left by previous full flow; exact title assertion caught old title. Only test locator scoped to current unique title and its expected action; App frozen.",
+    "resolution": "Final query scopes matching card by its exact StaticText title descendant, not parent Button label; operation text stays within card."
+  },
+  "expiredSessionAttempt": {
+    "apiPhasesPassed": 1,
+    "result": "Observer401 at45-minute expiry and separate test selector mismatch; both corrected before next complete run.",
+    "uiSeconds": 131.475,
+    "uiResult": "Parent Button label excludes title; actual AX snapshot proves title is StaticText descendant. Changed only test to containing(.staticText, identifier: fixture.title)."
+  }
+}

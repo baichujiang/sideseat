@@ -317,6 +317,8 @@ extension NativeMutualOpportunity {
             endsAt: flexible ? nil : end.ISO8601Format(),
             expiresAt: start.addingTimeInterval(-15 * 60).ISO8601Format(),
             peer: NativeMutualOpportunityPeer(
+                userId: arguments.contains("--ui-testing-public-profile-live")
+                    ? ProcessInfo.processInfo.environment["SIDESEAT_QA_PUBLIC_PROFILE_USER_ID"] : nil,
                 displayName: "Mia",
                 avatarUrl: "p02",
                 verifiedStudent: true,

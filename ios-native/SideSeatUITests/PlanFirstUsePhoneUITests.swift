@@ -680,9 +680,10 @@ import XCTest
             app.tabBars.buttons["消息"].tap()
             let row = app.buttons["inbox-row-\(fixture.connectionID)"]
             XCTAssertTrue(row.waitForExistence(timeout: 20)); row.tap()
-            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'")).firstMatch
+            let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shared-plan-card-'"))
+                .containing(.staticText, identifier: fixture.title).firstMatch
             XCTAssertTrue(card.waitForExistence(timeout: 20))
-            XCTAssertTrue(app.staticTexts[expectedAction].waitForExistence(timeout: 10))
+            XCTAssertTrue(card.staticTexts[expectedAction].waitForExistence(timeout: 10))
             capture(app, "contacts-received-chat-card"); card.tap()
             XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 20))
             XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)

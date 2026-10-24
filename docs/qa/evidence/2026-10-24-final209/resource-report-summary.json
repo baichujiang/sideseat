@@ -1,0 +1,40 @@
+{
+  "newReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-24-163916.ips",
+      "build": 209,
+      "pid": 8534,
+      "start": "2026-10-24 16:37:10.022 +0200",
+      "end": "2026-10-24 16:39:12.293 +0200",
+      "event": "cpu usage",
+      "actionTaken": "none",
+      "cpu": "90 seconds cpu time over 122 seconds (74% cpu average), exceeding limit of 50% cpu over 180 seconds",
+      "duration": "122.27s",
+      "frameworkFrames": {
+        "XCTAutomationSupport": 68,
+        "AXRuntime": 33,
+        "UIAccessibility": 144
+      },
+      "scope": "Native automated final-selection portion; full UI/API run passed; not a pure manual performance measurement"
+    },
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-24-165834.ips",
+      "build": 209,
+      "pid": 8563,
+      "start": "2026-10-24 16:56:29.352 +0200",
+      "end": "2026-10-24 16:58:31.120 +0200",
+      "event": "cpu usage",
+      "actionTaken": "none",
+      "cpu": "90 seconds cpu time over 122 seconds (74% cpu average), exceeding limit of 50% cpu over 180 seconds",
+      "duration": "121.77s",
+      "frameworkFrames": {
+        "XCTAutomationSupport": 27,
+        "AXRuntime": 87,
+        "UIAccessibility": 102
+      },
+      "scope": "Native automated final-selection portion; full UI/API run passed; not a pure manual performance measurement"
+    }
+  ],
+  "crashExitReports": 0,
+  "interpretation": "Two real CPU resource reports with action none. Framework stacks support earlier separate profiling attribution; no zero-resource or manual-optimization claim."
+}
