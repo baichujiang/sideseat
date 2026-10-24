@@ -21,7 +21,22 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 198 is the current installed development build. Shared plan headings
+- Preview 199 is the current installed development build. Move plan creation to
+  the trailing root toolbar with the existing neutral outlined style; history
+  leads. Keep one entry and existing IDs/creation rules; at xxxLarge+ show plus
+  with the full accessibility name. Source 183a350b is pushed. Same-product
+  phone journey passed 369.816s/eight API phases; heading matrix 89.739s,
+  German xxLarge 19.850s, live home 19.016s and scoped history return 35.587s
+  passed. Initial float/query test repairs and the second-run extra-left-swipe
+  failure are recorded; extra left swipe remains unresolved, not fixed by
+  removing it from this stage's acceptance. Zero new crashes but ONE CPU resource
+  report (detail/final-time phase, 74%/121.33s, action none), cause unproven.
+  Do not claim zero resource reports. Installed 199/normal PID7839, strict
+  signature and source/binary match verified; ordinary97 stays. Two accounts/
+  one link, Runner/private files cleaned. No backend/web release or unit/domain/
+  browser repeat. Matrix is offline toolbar-only; actual clean home checked
+  separately. Existing detail/menu/dock issues unchanged. See 199 QA/release.
+- Preview 198 was the previous development build. Shared plan headings
   keep title/share, status/location and adaptive date-zone/response-avatar tiers.
   Titles align at 20pt; remove duplicate top padding on confirmation/expiry;
   preserve tap targets, activity order, scroll anchors and invitation/Calendar rules.

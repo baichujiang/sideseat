@@ -27,5 +27,6 @@
     "PlanStatePresentationUITests.swift": "eb081b690fd0d4862dfccd260a5c514659dcb01eec2e18ec9166aecc326e8b9e",
     "PlanCreationPresentationUITests.swift": "8d573038fd650763a70cecceb2c8e915349dad40b7e07972a55dbf21f9adc782"
   },
-  "historyFocusedUITestSourceSHA256": "ba507a5fd5e16827185d3d67f9d60da4c8b5299edd2b34cc797bf76b16fd828d"
+  "historyFocusedUITestSourceSHA256": "ba507a5fd5e16827185d3d67f9d60da4c8b5299edd2b34cc797bf76b16fd828d",
+  "sourceCommit": "183a350b5456908f3f40e9dcbcc2e0645d352e3e"
 }
