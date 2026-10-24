@@ -1,0 +1,1160 @@
+{
+  "focused": {
+    "count": 32,
+    "actualOriginalsOpened": true,
+    "visualAccepted": true,
+    "sameFinalLocationCapApp": true,
+    "seconds": 468.029,
+    "actualKeyboardAndInputAssistantBoundariesUsed": true,
+    "retainedSHA256": {
+      "focused-max-location-actions.png": "ec19c5ca009338d912540a807f8c34a1631fa0315411f4443480931ee4dd48f2",
+      "focused-max-location-field.png": "ae813cac725fe4b887b81328be9b42706fe7e5931cf37b39e4c6b494992ef093",
+      "focused-max-title-actions.png": "6099964c80d0a51c3f0751a18c6028eea769d8e8393cca20c4f90d5e42b8efba",
+      "focused-max-title-field.png": "a6ec4687a57881cb209e89aeb0733d2f85d41daa19115f254e73c0574cd08d74",
+      "focused-normal-editing.png": "0f60db143d23de5b21b480be99e2365c803a9ae14948923eea8f52c966c90af3",
+      "focused-normal-initial-actions.png": "5d5942f8d6d0a73d0df22a798416c4135f273c97cda455d8b7776d8e16bbe33c",
+      "focused-max-readonly-title-bottom.png": "b9bcc3485c6e8c8ab32b6c62b644efd9eeff3352a09f0553a91986d0cb0ff957",
+      "focused-max-readonly-title-top.png": "f5173225603067f90b04035fa91a1c093fd3c82197c602083b4c39340a303dee"
+    },
+    "scope": "Normal Chinese light and actual system maximum German dark owner/participant. Each input/action is checked in its own scrolled viewport; complete readonly long values are read in overlapping segments.",
+    "reviewA": {
+      "review": "Preview 212 final capped App; input-assistant-aware focused run 468.029 seconds",
+      "source_manifest": "/tmp/sideseat212-assistant-focused-pngs.private.json",
+      "image_directory": "/tmp/sideseat212-information-assistant-images",
+      "requested_indices": [
+        0,
+        10
+      ],
+      "actual_original_images_viewed": 11,
+      "method": "One view_image tool call per original PNG; no montage or AX-only substitution.",
+      "result": "Targeted visible layout passes. Images 7 and 8 visibly demonstrate full action controls and complete three-line location field above the real input-assistant panel.",
+      "new_intrinsic_layout_defects_observed": [],
+      "scope_limits": [
+        "German actual system maximum typography only for these eleven images; normal Chinese images are assigned to another reviewer.",
+        "Long read-only text is checked across natural scroll segments. No claim that all long content fits in the first screen.",
+        "Three-line editor viewports show internally scrolled tail content; full persisted value and absence of availability/invite mutations require API evidence, not screenshot inference.",
+        "System AssistiveTouch overlays and fixed-header/footer scroll boundaries are recorded per image.",
+        "The superseded 449.231-second screenshot set is not used as the visual acceptance evidence for this review."
+      ],
+      "images": [
+        {
+          "index": 0,
+          "exportedFileName": "EB9EFA7E-1F60-45A3-A7BA-89A09D3BB9F8.png",
+          "scope": "Participant read-only location, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Long location is readable through its last line above the app footer. No edit pencil or editor controls are shown. The title is above the current scroll viewport.",
+          "viewport_or_system_overlay_limitation": "AssistiveTouch partially covers the right edge of the restored-draft footer status."
+        },
+        {
+          "index": 1,
+          "exportedFileName": "D0F6634A-B3AB-44CF-8210-AE91D40E747C.png",
+          "scope": "Participant read-only title, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Long title is readable down to its final word; top edge is at the navigation scroll boundary. No edit pencil. Submit-availability and waiting text remain visible.",
+          "viewport_or_system_overlay_limitation": "This is a scrolled segment, not proof that the entire header fits in one screen; AssistiveTouch crosses the right footer status."
+        },
+        {
+          "index": 2,
+          "exportedFileName": "6E6B7BD9-8406-4BCE-92C6-D2E8F0D00FC0.png",
+          "scope": "Participant read-only title segment 1",
+          "actual_original_viewed": true,
+          "visible_observation": "The lower title segment including the final word is fully readable above the fixed footer. Together with segment 0 the title can be read in full.",
+          "viewport_or_system_overlay_limitation": "The first line is slightly behind the navigation scroll boundary; AssistiveTouch crosses the right footer status."
+        },
+        {
+          "index": 3,
+          "exportedFileName": "08CEE5A9-45C9-4A59-B062-0CD3DD412F49.png",
+          "scope": "Participant read-only title segment 0",
+          "actual_original_viewed": true,
+          "visible_observation": "The start of the title and share icon are readable, with natural word wrapping and no horizontal clipping.",
+          "viewport_or_system_overlay_limitation": "The final word continues below the fixed-footer boundary at this scroll position; segment 1 exposes it."
+        },
+        {
+          "index": 4,
+          "exportedFileName": "7987BFCE-8644-4EBD-B3E0-23A032FF33B9.png",
+          "scope": "Saved private availability draft, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Date range, collecting status, complete Europe/Berlin timezone and zero-response count are readable. A selected 09:00 timetable cell has a visible outline, checkmark and count zero. Restored unsent half-hour draft and both owner footer actions are visible.",
+          "viewport_or_system_overlay_limitation": "Only the top timetable row is in this viewport; AssistiveTouch overlays the right portion of the visible grid, not the count/checkmark."
+        },
+        {
+          "index": 5,
+          "exportedFileName": "8FAB095F-DBBD-4917-B14A-30C524854D8A.png",
+          "scope": "Saved owner location, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Long location wraps naturally through its last line. The edit pencil remains by the first location line. Saved state preserves the restored unsent draft and owner footer actions.",
+          "viewport_or_system_overlay_limitation": "The upper title is outside the current viewport. AssistiveTouch partially overlaps the final location-line end; this is a system floating overlay."
+        },
+        {
+          "index": 6,
+          "exportedFileName": "E152B849-DEAD-4162-A331-E992F7806571.png",
+          "scope": "Saved owner title, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Entire long title is readable from its first to final word. Title pencil and share control are visible without collision. Restored draft summary and both owner footer actions remain readable.",
+          "viewport_or_system_overlay_limitation": "Location continues below the current viewport; this does not demonstrate all metadata in one screen."
+        },
+        {
+          "index": 7,
+          "exportedFileName": "B2C6D69B-199F-47FA-9744-8D36768276D7.png",
+          "scope": "Location-entry action controls, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Actual PNG shows complete Cancel and Save controls, including icons, text and all borders, above the real input-assistant panel with a visible gap. The location field shows three complete tail lines and its caret.",
+          "viewport_or_system_overlay_limitation": "Not an AX-only conclusion. Upper title content is intentionally outside the scroll viewport; the keyboard and AssistiveTouch remain below the action area."
+        },
+        {
+          "index": 8,
+          "exportedFileName": "DA78C592-004B-4B6F-83F6-5581872DF7DE.png",
+          "scope": "Location-entry location field, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Location label, three tail lines, caret and full rounded lower field edge are visibly above the real input-assistant panel.",
+          "viewport_or_system_overlay_limitation": "The title label is outside this scroll viewport. Action controls are not visible in this field-target image and are separately proven by image 7. Three lines are an internal field viewport, not a truncated stored value."
+        },
+        {
+          "index": 9,
+          "exportedFileName": "C2937917-91D9-4067-AA8C-E99883CDFA52.png",
+          "scope": "Location-entry title field, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Activity-name label and full three-line title field are above the keyboard; the location label is also readable.",
+          "viewport_or_system_overlay_limitation": "The lower location field is behind the input-assistant panel at this title-target scroll position. Image 8 separately proves the location field and image 7 proves actions. Do not claim every control is simultaneously visible here."
+        },
+        {
+          "index": 10,
+          "exportedFileName": "994CF4F3-31B3-4231-8E16-834F3C3AB35B.png",
+          "scope": "Initial location entry, German maximum size",
+          "actual_original_viewed": true,
+          "visible_observation": "Three location tail lines, insertion caret and the lower rounded field edge are visibly above the input-assistant panel.",
+          "viewport_or_system_overlay_limitation": "The title field label and top edge are outside the current scroll viewport. Full long title/location values are not all printed at once inside capped three-line fields."
+        }
+      ]
+    },
+    "reviewB": {
+      "actualViewed": 11,
+      "manifestIndicesZeroBased": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "method": "Each fresh actual PNG individually opened with view_image(detail=original); no substitution of earlier 449-second images or AX-only evidence",
+      "runScope": "Input-assistant-aware focused run, 468.029 seconds; App binary unchanged",
+      "images": [
+        {
+          "index": 11,
+          "file": "5D9BAEE5-243F-40D5-8D5E-BBF1904BA844.png",
+          "capture": "information-editor-before-cancel-de-largest_0_16A98B1F-FC92-4B57-BBFE-9FC83D1EC056.png",
+          "observation": "Fresh maximum before-cancel: Ort (optional), the edited location tail including QA, and both complete Abbrechen/Speichern buttons are visibly above the keyboard/input-assistant glass. The earlier action-label occlusion is resolved in this actual PNG."
+        },
+        {
+          "index": 12,
+          "file": "6F226CF3-F27B-43A6-B054-7DDD9A094020.png",
+          "capture": "information-editor-actions-title-entry-de-largest_0_A2FCCEA7-8B3E-46C7-B196-E36EE0B926C5.png",
+          "observation": "Fresh maximum actions-title-entry: Abbrechen and disabled Speichern are complete, readable and separately outlined/filled above the input assistant. Full displayed location lines and its label remain distinct from the action row."
+        },
+        {
+          "index": 13,
+          "file": "11FED812-B1B3-4476-B57F-8989B7918396.png",
+          "capture": "information-editor-field-plan-edit-location-title-entry-de-largest_0_5DC8008A-47DA-47EB-8E89-3381260C4015.png",
+          "observation": "Fresh maximum location-field: Ort (optional) and all three displayed location lines including the full final line der Pinakothek are readable above the input assistant; the field lower edge no longer hides text behind the candidate bar."
+        },
+        {
+          "index": 14,
+          "file": "8E67474B-2859-4269-B026-68EBCD6DBB4D.png",
+          "capture": "information-editor-field-plan-edit-title-title-entry-de-largest_0_73C9834C-9EC9-4EF3-ABFF-3276492AC2A3.png",
+          "observation": "Maximum title-field: fixed Aktivitätsname label and three displayed title lines/caret are readable within the dark field. Separate Ort label follows below. Lower location content is outside this title-focused viewport, not a claim of simultaneous full editor visibility."
+        },
+        {
+          "index": 15,
+          "file": "2E24D553-0831-4CBE-995A-E52A31E13A7D.png",
+          "capture": "information-editor-initial-title-entry-de-largest_0_7931C06C-59CC-4CB4-B452-7BE8A9DC0849.png",
+          "observation": "Maximum initial title entry: fixed name/location labels and distinct field surfaces identify the inputs without relying on placeholders. Title content wraps in the field; scrolling is needed for later location/actions."
+        },
+        {
+          "index": 16,
+          "file": "BDC5880A-B468-4C06-915F-D38C52311654.png",
+          "capture": "information-editor-initial-private-draft-de-largest_0_8BA8154E-639A-4023-BDCF-1781E44925A7.png",
+          "observation": "Maximum private draft: complete date and collecting/timezone text wrap, zero responses, selected 09:00 cell and restored-unsubmitted half-hour summary are visible. Submit-and-share and final-time controls are distinct and readable."
+        },
+        {
+          "index": 17,
+          "file": "E8DF69EC-3716-4242-B1D6-5C3186C7DF1D.png",
+          "capture": "information-editor-participant-readonly-plan-detail-location-zh-Hans-normal_0_9690D43F-AA0F-4E12-A36B-DE822899A3A3.png",
+          "observation": "Normal participant after location tap: full saved two-line title and long two-line location, date/status/timezone and zero responses are readable. No editor/pencils or keyboard appears; unsubmitted local half-hour draft remains visible."
+        },
+        {
+          "index": 18,
+          "file": "650ED738-D19E-409D-AADD-770789A22EF3.png",
+          "capture": "information-editor-participant-readonly-time-poll-detail-title-zh-Hans-normal_0_F14686F7-9381-4F37-A9A6-93C76EF68713.png",
+          "observation": "Normal participant after title tap: same complete saved values remain read-only with no editor or keyboard. Metadata and local-draft state are distinct from the participation action."
+        },
+        {
+          "index": 19,
+          "file": "96D87082-8EEF-411D-B69B-960223DAC259.png",
+          "capture": "information-editor-saved-private-draft-zh-Hans-normal_0_53E8B644-5C87-4BD1-920E-F7D3DAA62911.png",
+          "observation": "Normal saved owner draft: complete changed title/location, owner pencils/share, zero responses and selected 09:00 half-hour are visible. Footer remains unsubmitted with separate submit-and-share/final-time actions."
+        },
+        {
+          "index": 20,
+          "file": "916380AF-2457-4CB1-B4C2-2EFA65A9C460.png",
+          "capture": "information-editor-saved-location-zh-Hans-normal_0_F5C78E68-AC33-409E-9389-3C9E87882070.png",
+          "observation": "Normal saved location: long saved location wraps naturally below the full title; separate owner pencil/share and date/status area do not overlap the text."
+        },
+        {
+          "index": 21,
+          "file": "84D68F53-CF4E-4602-A056-242CD3735770.png",
+          "capture": "information-editor-saved-title-zh-Hans-normal_0_699FC39F-3EFD-420D-9383-10E8D9E136BC.png",
+          "observation": "Normal saved title: full two-line saved title and full long location remain readable alongside the decorative pencils/share action and unsubmitted selected draft."
+        }
+      ],
+      "visualAcceptance": "PASS within these reviewed frames. The earlier maximum cancel/save and location-bottom visibility gaps are visibly resolved in fresh indices 11–13.",
+      "issues": [],
+      "systemOverlays": "Keyboard and input assistant remain on screen as expected. The targeted action row and location text are now above their visible glass/candidate region. AssistiveTouch sits on the keyboard/grid away from the inspected action labels; it is not treated as an App defect.",
+      "limitations": [
+        "These 11 of 32 images cover distinct scroll positions. The whole editor and all long values are not claimed to fit on the first screen at maximum text size.",
+        "Multi-line fields may show a current internally scrolled portion; exact complete field values, 44pt targets and zero server availability/invitations are separate test/API evidence.",
+        "This partition does not include the full long German read-only title top/bottom pair or Calendar endpoints; those scopes are not inferred here."
+      ]
+    },
+    "reviewC": {
+      "review": "Preview212 candidate-bar-aware final focused image review C",
+      "actualImagesOpened": 10,
+      "runScope": "Fresh images from the 468.029-second focused run; prior 449.231-second image review was not reused.",
+      "manifestIndices": {
+        "first": 22,
+        "last": 31,
+        "indexing": "zero based"
+      },
+      "method": "Every supplied original PNG was opened individually with view_image.",
+      "result": "No visual blocker observed in these ten ordinary-font images.",
+      "appearance": "Chinese ordinary font, light appearance; original and changed field values, labels, actions, candidate/keyboard visible region, and private draft.",
+      "limits": [
+        "This subset does not contain maximum-font, post-cancel result, saved long read-only portions, error, or Calendar scenes.",
+        "When the keyboard/candidate bar is present, the lower timetable is outside the available viewport; all editor labels, fields and actions in this subset remain above it.",
+        "Screenshot review does not independently prove 44 pt target measurement, API values, cancellation persistence, invitation/availability counts, full-flow correctness, or package identity."
+      ],
+      "assistiveTouch": {
+        "editorImages": "Indices22–30: floating system control is over the bottom keyboard region, clear of fields and Cancel/Save.",
+        "draftImage": "Index31: floating system control covers a small area of the right timetable column around noon; heading and footer remain visible."
+      },
+      "images": [
+        {
+          "manifestIndex": 22,
+          "image": "7DDD6112-953E-4B8B-BA4C-D167FAA3967E.png",
+          "originalOpenedIndividually": true,
+          "state": "location-entry action view",
+          "observation": "Two-line title, three-line location, persistent labels, enabled Save/Cancel, and divider are fully readable.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 23,
+          "image": "3AE95476-989E-400F-9D87-244D64416B23.png",
+          "originalOpenedIndividually": true,
+          "state": "location field view",
+          "observation": "The complete displayed three-line location and caret fit within the field; labels and actions are separate and readable.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 24,
+          "image": "ACEA8DBF-F0A8-4DAC-A3C0-B17B2EE60E0A.png",
+          "originalOpenedIndividually": true,
+          "state": "title after location entry",
+          "observation": "Full two-line title and three-line location are readable with fixed labels and enabled actions.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 25,
+          "image": "BECE2B9A-00EB-4E79-BBF8-5D831103D37C.png",
+          "originalOpenedIndividually": true,
+          "state": "initial location-entry view",
+          "observation": "Both multiline values, labels, and Cancel/Save remain fully above the keyboard region.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 26,
+          "image": "C57818D7-69A9-42DC-A59B-B08E33D0C071.png",
+          "originalOpenedIndividually": true,
+          "state": "changed values before Cancel",
+          "observation": "Changed title and location each wrap clearly; Cancel and enabled Save are complete and unobscured.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 27,
+          "image": "35D5404F-C511-4A2B-A94B-4BFAE31E7F9A.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title-entry actions",
+          "observation": "Existing one-line title and two-line location fit; Cancel is visible and Save is visibly disabled.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 28,
+          "image": "DB48F03C-EC0E-439F-8517-B9500AC11CA9.png",
+          "originalOpenedIndividually": true,
+          "state": "location while title focused",
+          "observation": "Two-line location, fixed label, title, and disabled Save fit without collision.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 29,
+          "image": "738E7D4C-885E-4B8D-94DF-1DDF39F8E3A3.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title field",
+          "observation": "Complete title and caret are inside the field; both labels and right-aligned actions remain readable.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 30,
+          "image": "CF0B4A01-E741-451B-94F1-8E9E6683087E.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title-entry editor",
+          "observation": "Fields and labels, Cancel/disabled Save, and divider are completely above the visible keyboard candidate area.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Editor is visible above keyboard/candidate region; lower timetable is not fully visible."
+        },
+        {
+          "manifestIndex": 31,
+          "image": "B4ABAFB9-03D8-4938-84EC-E86CB58A58BB.png",
+          "originalOpenedIndividually": true,
+          "state": "initial private availability draft",
+          "observation": "Display-mode two-line title/location, light pencils, divider, date/status/time zone, local selected cell, and unsubmitted footer are readable.",
+          "appOverlapOrClipping": "None observed in the reviewed editor/header/actions.",
+          "visibleRange": "Current timetable viewport only; 14:00 row partly meets footer boundary."
+        }
+      ]
+    }
+  },
+  "initialFailureFrameOpened": true,
+  "limitations": [
+    "Maximum type requires scrolling; no claim all labels, inputs, controls and timetable appear simultaneously",
+    "A title-target screenshot does not prove the location behind the keyboard; each has its own complete visible capture",
+    "Native three-line input scrolls internally; full saved contents separately checked through exact AX values and API",
+    "System AssistiveTouch locally overlays some content",
+    "Calendar screenshot directly shows title/location/start; exact end and both unique projections checked separately"
+  ],
+  "initialFullBeforeLocationCap": {
+    "count": 25,
+    "actualOriginalsOpened": true,
+    "reviewFiles": [
+      "a",
+      "b",
+      "c"
+    ],
+    "scope": "Initial package before location lineLimit(1...3); not final acceptance",
+    "reviewA": {
+      "build": 212,
+      "scope": "Full native flow PNG indices 0 through 7 only",
+      "method": "All eight actual PNGs opened individually with view_image original; no manifest-only or contact-sheet review.",
+      "actual_image_count": 8,
+      "result": "No new intrinsic text overlap or clipping observed in the visible assigned scope.",
+      "images": [
+        {
+          "index": 0,
+          "file": "3402554A-02A2-402C-A0A5-86CE19D0CEDD.png",
+          "actual_original_viewed": true,
+          "visible_review": "Calendar search result: title, location and October 25 23:00 start are readable above keyboard. No intrinsic overlap or clipping observed. End time and uniqueness are not shown."
+        },
+        {
+          "index": 1,
+          "file": "9A0A6896-BA50-42B7-8191-A5BBFC6C5947.png",
+          "actual_original_viewed": true,
+          "visible_review": "Confirmed participant share panel: complete title and cross-day date range, web-share/copy actions; no App-friend action. Confirmed title/location behind sheet remain readable without edit pencils. Modal backdrop occlusion is intentional."
+        },
+        {
+          "index": 2,
+          "file": "DAF7C6CD-91F4-439B-9D1E-8B8B0ACF893B.png",
+          "actual_original_viewed": true,
+          "visible_review": "Confirmed owner share panel: complete title and cross-day range, App-friend card plus web-share/copy actions. No new text clipping or collision; system AssistiveTouch partly covers the trailing App-friend arrow."
+        },
+        {
+          "index": 3,
+          "file": "B69A97E8-C523-4552-81D9-88C89B8489B0.png",
+          "actual_original_viewed": true,
+          "visible_review": "Explicit acceptance result: awaiting-organizer status, location, both dated invitation tables, 2/2 progress, accepted copy and decline action readable. Full 23:00–24:00 and 00:00–01:00 highlights and time labels visible."
+        },
+        {
+          "index": 4,
+          "file": "55A03F90-E2D7-4137-B748-93E6DB76BF2A.png",
+          "actual_original_viewed": true,
+          "visible_review": "Pending invitation across midnight: pending-confirmation state, complete two-date highlighted timetable, 1/2 progress, confirm and decline actions readable. Grid time labels and borders are present."
+        },
+        {
+          "index": 5,
+          "file": "D9BA6242-5099-48BF-AD5F-A639561B31BA.png",
+          "actual_original_viewed": true,
+          "visible_review": "Inviting participant share panel: cross-day date range readable, web-share/copy actions only; pending invitation status remains behind sheet. No new intrinsic clipping or overlap."
+        },
+        {
+          "index": 6,
+          "file": "72CCD5E5-765F-4093-AADA-B662E7B640E8.png",
+          "actual_original_viewed": true,
+          "visible_review": "Received chat invitation card: title, complete cross-day start/end text wrapping onto two lines, pending status and view-invitation CTA readable. Chat toolbar/input stay distinct."
+        },
+        {
+          "index": 7,
+          "file": "894FD55F-74BA-42CC-9C42-5DE07ADE10CA.png",
+          "actual_original_viewed": true,
+          "visible_review": "Inviting owner share panel: awaiting-owner-formal-send status behind sheet; complete title/date range and App-friend/web-share/copy actions visible. No new intrinsic clipping or collision."
+        }
+      ],
+      "limitations": [
+        "Calendar PNG directly shows title, location and start only; exact end, uniqueness and two accounts Calendar results require separate API/test evidence.",
+        "System AssistiveTouch overlaps small right-side screenshot regions, including parts of people/share affordances; this is distinct from App layout.",
+        "Share sheets intentionally obscure lower background timetable content. Only visible background regions are assessed.",
+        "This normal-Chinese subset contains invitation/confirmed/share/Calendar states, not the new information-editor screenshots or maximum-size editor layout.",
+        "Static images show outcomes, not continuous interactions. Reviewer changed no source and operated no device."
+      ]
+    },
+    "reviewB": {
+      "actualViewed": 8,
+      "manifestIndicesZeroBased": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "method": "Each actual exported PNG individually viewed with view_image(detail=original)",
+      "images": [
+        {
+          "index": 8,
+          "file": "F5AD3692-DBAE-40BF-9FD7-31319FB4B3A6.png",
+          "capture": "phone-first-plan-contacts-review-final-invitees_0_A3AF232D-50FC-4CAF-879B-441C2E6F2FA3.png",
+          "observation": "Invitation review: activity/location, full 2026/10/25 23:00 to 2026/10/26 01:00 and Europe/Berlin are readable; both selected people and their partially-unsurveyed notice are visible. Bottom summary invites two including owner; send action is separate and complete."
+        },
+        {
+          "index": 9,
+          "file": "401139EE-6A88-422B-BB33-B448714DA382.png",
+          "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_357C934D-2DB3-47D8-9517-B4C10FA21A05.png",
+          "observation": "Cross-day morning: selected amber 00:00 and 00:30 cells on the following day are visibly painted with borders/checks. Date/status/timezone and two-person count are readable. Bottom summary explicitly spans 25 to 26 Oct, 23:00–01:00, two hours; next action is complete."
+        },
+        {
+          "index": 10,
+          "file": "F7644ED3-10EA-4265-AE2F-A796EA87A1C5.png",
+          "capture": "phone-first-plan-final-cross-day-evening_0_5A05033A-AA7F-43E3-A5D1-DB64191564F2.png",
+          "observation": "Cross-day evening intermediate: selected amber 23:00 and 23:30 cells on the first day are visible; intermediate summary ends at next midnight and states one hour. No blank-grid issue; next action is complete."
+        },
+        {
+          "index": 11,
+          "file": "72B67CA0-C71B-4637-B249-DFE58A4359CE.png",
+          "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_A1D45C72-7EE4-4B6D-A970-6192720587EE.png",
+          "observation": "Final selection same-day intermediate: 09:00 and 09:30 display submitted availability count two, own green check and distinct final amber border/check. Summary states 09:00–10:00 and one hour. Labels and next action do not collide."
+        },
+        {
+          "index": 12,
+          "file": "748578FF-F8FA-4CCC-B0EE-3A1E32F91D56.png",
+          "capture": "phone-first-plan-compact-responded-people_0_63D5D29C-FC7E-4364-BD11-A3AC69D02296.png",
+          "observation": "People/progress sheet: two responses, both submitted availability states, participant identity marker, and the reminder that availability is not attendance are complete. Done action remains distinct."
+        },
+        {
+          "index": 13,
+          "file": "1DBF5ECB-AB32-4CA9-92BC-A42D42D378B2.png",
+          "capture": "phone-first-plan-contacts-peer-inline-availability_0_E9DBD2F4-C516-4C72-8CB4-254C60E57BC5.png",
+          "observation": "Participant collecting detail: title/location have no owner edit pencils, date/status/full Europe/Berlin remain distinct from two-person avatar control. Green selected 09:00/09:30 cells show count two; bottom saved state and waiting-for-invitation next step are readable."
+        },
+        {
+          "index": 14,
+          "file": "EB71527E-8F82-44A6-BBAE-8D2451C6DA89.png",
+          "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_55772A54-35D9-4ABC-ABB7-D2F7019EBF15.png",
+          "observation": "Participant sharing sheet: plan title, sharing-for-friends-without-App text, web-share and copy-link actions are separate. Dimmed collecting detail is visible behind it; no owner App-friends invite control is shown in this participant sheet."
+        },
+        {
+          "index": 15,
+          "file": "F1953B85-7F5C-49B0-BCCE-58D42B54F5CF.png",
+          "capture": "phone-first-plan-contacts-received-chat-card_0_BD5E4D38-71AB-426B-88DB-BC2383A56F7F.png",
+          "observation": "Received chat card: colored title band, waiting-for-availability state and direct fill-my-availability action are clearly separated and readable. Chat header and composer remain distinct; no card text overlaps the action."
+        }
+      ],
+      "blockingProductIssueObserved": false,
+      "systemOverlay": "AssistiveTouch is present near the right edge. It partly covers unrelated fourth-column grid cells in selection/availability captures and the right edge of the copy-link tile in the share capture. These are system overlays, not application text clipping or blank-grid defects; the selected target cells and key summaries remain visible.",
+      "limitations": [
+        "The images show different intermediate stages and scroll positions; a single selection screenshot is not proof of the complete gesture history.",
+        "This partition does not include the information editor focused largest-text screens, actual acceptance/publication tap, or Calendar results. It does not independently prove exact Calendar endpoints, uniqueness or API cleanup.",
+        "The participant/roster scope is the two visible QA people in these frames, not an arbitrary large roster. No offscreen content or maximum-text full-page claim is made."
+      ]
+    },
+    "reviewC": {
+      "review": "Preview212 complete native flow: original-image review C",
+      "actualImagesOpened": 9,
+      "manifestIndices": {
+        "first": 16,
+        "last": 24,
+        "indexing": "zero based"
+      },
+      "method": "Each original PNG was opened separately with view_image; no collage or manifest substituted for visual review.",
+      "result": "No visual blocker observed in the new information editor or supplied ordinary-font flow captures.",
+      "scope": "Chinese ordinary text size, light appearance; creation, empty/local/submitted timetable, in-place information editing, sharing, and contact selection.",
+      "limits": [
+        "These nine captures do not cover system maximum text size, long multiline location, failed-save/error, formal invitation, or Calendar views.",
+        "Screenshots show visible UI only. Request behavior, durable drafts, eight API phases, exact Calendar endpoint and uniqueness require the independent test/API evidence.",
+        "Timetable rows/columns beyond the visible viewport, or content behind a share modal/keyboard, are not claimed to be simultaneously visible.",
+        "AssistiveTouch is a system overlay and is recorded separately from App layout."
+      ],
+      "images": [
+        {
+          "manifestIndex": 16,
+          "image": "59C8459F-681D-45BB-B830-215269E043B6.png",
+          "originalOpenedIndividually": true,
+          "state": "submitted availability after sending",
+          "visible": "Title, editable location with pencils, divider, date/status/time zone, one submitted response, two selected cells, submitted footer, and choose-final-time action are readable.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "Only the first visible date columns and hours through 14:00 are in the viewport; no claim all candidate dates/hours are simultaneously visible.",
+          "assistiveTouch": "System AssistiveTouch covers a small part of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 17,
+          "image": "70DB7312-A1F9-4119-B6CF-9A902098BCDA.png",
+          "originalOpenedIndividually": true,
+          "state": "contact selection",
+          "visible": "Plan summary, selected contact, explanatory text, send-to-one-contact action, and search field are fully visible.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "This is a single-contact selection view, not proof of larger contact-list behavior.",
+          "assistiveTouch": "System AssistiveTouch lies in otherwise empty right-side space."
+        },
+        {
+          "manifestIndex": 18,
+          "image": "B25665BF-C94B-4F42-AB21-94E3274CA3F9.png",
+          "originalOpenedIndividually": true,
+          "state": "sharing after own submission",
+          "visible": "The sheet shows readable plan summary, App friends row, web-share and copy-link controls; the dimmed background shows the new heading and submitted cells.",
+          "overlapAndClipping": "No app text overlap or truncation observed in the sheet; background dimming is modal presentation.",
+          "visibleRangeLimits": "The share sheet intentionally covers the lower timetable and footer.",
+          "assistiveTouch": "System AssistiveTouch sits near the lower-right edge of the App friends row; primary text and share controls remain legible."
+        },
+        {
+          "manifestIndex": 19,
+          "image": "3FFBC818-2CA4-4298-9D3E-233001DF21D2.png",
+          "originalOpenedIndividually": true,
+          "state": "information saved, local availability draft visible",
+          "visible": "Saved location, title and light pencil affordances, divider, collection metadata, selected cells, unsubmitted state, Submit and share, and choose-final-time action are readable.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "The screenshot shows current local selection and unsubmitted UI; persistence and request results require separate test/API evidence.",
+          "assistiveTouch": "System AssistiveTouch covers a small portion of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 20,
+          "image": "2C20DA1C-ED0C-4476-A9AA-2C00FF040F93.png",
+          "originalOpenedIndividually": true,
+          "state": "editing information with keyboard",
+          "visible": "Both persistent field labels, full short title and location, field fills, right-aligned cancel/save actions, divider, date/status metadata, and selected cells above the keyboard are readable.",
+          "overlapAndClipping": "No clipping of field values or cancel/save labels and no editor/keyboard overlap observed.",
+          "visibleRangeLimits": "The system keyboard occupies the lower viewport; the full timetable and submission footer are not visible. This short-location image does not verify long multiline or maximum-font layout.",
+          "assistiveTouch": "System AssistiveTouch is over the lower keyboard region, outside the editor and save/cancel controls."
+        },
+        {
+          "manifestIndex": 21,
+          "image": "57D95D34-26B4-41CE-B790-27CC5767A909.png",
+          "originalOpenedIndividually": true,
+          "state": "local availability selection before editing",
+          "visible": "Editable heading and optional-location affordance, divider, complete date/status/time zone, selected cells, unsubmitted summary, and both footer actions are readable.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "The visible timetable is bounded by the viewport; gesture behavior and server state cannot be inferred from one image.",
+          "assistiveTouch": "System AssistiveTouch covers a small portion of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 22,
+          "image": "E3A390E7-1857-4FAC-A39D-7FFC22D647A3.png",
+          "originalOpenedIndividually": true,
+          "state": "top sharing before availability",
+          "visible": "Share sheet title/summary, App friends, web-link share, and copy-link controls are readable; the dimmed background visibly has zero responses and no selected cells.",
+          "overlapAndClipping": "No app text overlap or truncation observed in the sheet.",
+          "visibleRangeLimits": "The share modal covers lower page content; the image does not alone prove whether a request was sent.",
+          "assistiveTouch": "System AssistiveTouch is near the lower-right edge of the App friends row without hiding its primary text."
+        },
+        {
+          "manifestIndex": 23,
+          "image": "38280EBC-AEF0-4A79-AC09-72025B35CB5A.png",
+          "originalOpenedIndividually": true,
+          "state": "empty timetable immediately after creation",
+          "visible": "Heading, optional location with pencil, divider, date/status/time zone, zero-response summary, empty grid, zero-selection footer, disabled Submit and share, and choose-final-time action are readable.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "Only the currently visible timetable rows and columns are shown; no automatic share modal is present in this image.",
+          "assistiveTouch": "System AssistiveTouch covers a small portion of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 24,
+          "image": "15EC70EE-F01A-4594-9C11-E28B20F7D4B4.png",
+          "originalOpenedIndividually": true,
+          "state": "creation without timetable preview",
+          "visible": "Activity title, optional location, candidate date range, daily 09:00–17:00 range, full time zone, optional activity-ideas checkbox, and Next: fill availability action are readable.",
+          "overlapAndClipping": "No app text overlap or truncation observed.",
+          "visibleRangeLimits": "This is the ordinary-font creation screen; it does not verify maximum-font creation layout.",
+          "assistiveTouch": "System AssistiveTouch lies in empty right-side space below the form."
+        }
+      ]
+    }
+  },
+  "full": {
+    "count": 25,
+    "actualOriginalsOpened": true,
+    "sameFinalLocationCapApp": true,
+    "retainedSHA256": {
+      "flow-participant-calendar.png": "4a906d466650ab08e0983570fce1bba167e7defbb7433cf09eec534ec6709de6",
+      "flow-formal-invitation.png": "72962927de82a4d33782bb26d29709f426909479e17309394ac9ada5f4466468",
+      "flow-final-cross-day.png": "cff34975b094eb0fd25688972c6095643943970de4a86f74af4b91899dd99d5d",
+      "flow-participant-availability.png": "920814c00fc5934befbc67a69ac3aa2d70134a5cd9824729adddc0913dfbcae5",
+      "flow-submit-and-share.png": "afd085b5adca737dae3de47fc9db73ad82ba5a7688a23f80dc60c6c6cb1503f4",
+      "flow-information-saved-draft.png": "ebdb23b2f40720dcb2b769f34f514ccdac8dacd5b3654e5e202f7d19b73b1c2e",
+      "flow-information-editing.png": "b967347ce8cf2f9518a28ba99e1777d021c1a527f99fa2a61ae262043ed34f6c"
+    },
+    "scope": "Final package, Chinese normal light complete flow. Previous confirmed and new invitation cards are different QA plans, not duplicate delivery of the same poll.",
+    "reviewA": {
+      "build": 212,
+      "package_scope": "Final three-line-location-cap package; this review does not reuse pre-cap images.",
+      "flow_evidence_reference": "Parent reports final full flow 371.918 seconds with eight API phases; images independently reviewed here.",
+      "actual_image_count": 8,
+      "method": "Indices 0–7 each opened individually using view_image at original detail.",
+      "result": "PASS in visible assigned static visual scope; no new intrinsic clipping/overlap observed.",
+      "images": [
+        {
+          "index": 0,
+          "file": "2F03A1DB-F54D-47EE-8CAF-81E33396FF7E.png",
+          "actual_original_viewed": true,
+          "review": "Final-package Calendar search result: activity title, location and October 25 23:00 start are clear above keyboard. No visible intrinsic clipping/overlap. Exact end and uniqueness are not displayed."
+        },
+        {
+          "index": 1,
+          "file": "C965A4B6-C705-4B56-AE29-02B44EEED6F3.png",
+          "actual_original_viewed": true,
+          "review": "Final-package CONFIRMED participant: readable confirmed badge/title/location behind share sheet; sheet contains full cross-day range and web-share/copy actions, with no App-friend action. Visible labels fit."
+        },
+        {
+          "index": 2,
+          "file": "8ACEDE9F-951E-420F-958F-06222979D7C6.png",
+          "actual_original_viewed": true,
+          "review": "Final-package CONFIRMED owner: readable confirmed header and full range in share sheet; App-friend, web-share and copy actions are distinct. AssistiveTouch partly covers the trailing App-friend affordance, not its main text."
+        },
+        {
+          "index": 3,
+          "file": "F60D1327-90ED-4246-AD9C-13318F39AB30.png",
+          "actual_original_viewed": true,
+          "review": "Final-package explicit acceptance: waiting-for-organizer status, two date-specific highlighted invitation tables, 2/2 progress and accepted footer readable. Both 23:00–24:00 and 00:00–01:00 ranges and time labels are visible; no intrinsic collision."
+        },
+        {
+          "index": 4,
+          "file": "E9F191C3-FDE0-4CE1-B86A-D0399EE32710.png",
+          "actual_original_viewed": true,
+          "review": "Final-package pending invitation: pending-confirmation status and location readable; two highlighted date tables show the continuous cross-midnight range. 1/2 progress, confirmation CTA and decline action are separated and readable."
+        },
+        {
+          "index": 5,
+          "file": "5201C285-DF90-40E3-9B11-E2D364819098.png",
+          "actual_original_viewed": true,
+          "review": "Final-package INVITING participant share: pending header behind sheet and complete cross-day range in sheet; only web-share/copy actions. No new visible truncation/overlap."
+        },
+        {
+          "index": 6,
+          "file": "7A560F45-B3CC-4841-9E36-A3A6AC66833D.png",
+          "actual_original_viewed": true,
+          "review": "Final-package chat screen: current invitation card and a distinct previous confirmed activity card are both visible. Each title, full cross-day date text, state and corresponding view action fit, with no overlap with chat input."
+        },
+        {
+          "index": 7,
+          "file": "28DE3A0C-6011-40CF-9D7B-530A7EF32E4B.png",
+          "actual_original_viewed": true,
+          "review": "Final-package INVITING owner share: waiting-for-owner-to-send header behind sheet, complete range, App-friend card and web-share/copy actions visible and readable. No intrinsic collision."
+        }
+      ],
+      "system_overlay": "AssistiveTouch overlaps small right-side regions such as people/share affordances; it is distinct from App rendering. Sheet backdrop and lower-background occlusion are expected modal presentation.",
+      "limitations": [
+        "Calendar screenshot establishes only title/location/start visually; exact end, uniqueness and both accounts Calendar results require separate API evidence.",
+        "This eight-image normal-Chinese subset covers invitation/confirmed/share/chat/Calendar states, not the capped location editor itself or its maximum-text scrolling behavior.",
+        "Only visible regions are assessed. Sharing sheets cover lower background timetable content.",
+        "Static outcomes do not independently prove interactions or timing. Reviewer changed no source and operated no phone."
+      ]
+    },
+    "reviewB": {
+      "packageScope": "Final capped Preview212 package, final full-flow captures; independently reviewed, not substituted with earlier 368-second run images",
+      "actualViewed": 8,
+      "manifestIndicesZeroBased": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "method": "Each listed actual exported PNG individually opened with view_image(detail=original)",
+      "images": [
+        {
+          "index": 8,
+          "file": "E09E12CC-DC77-457D-A72D-FFCAFB5DD9D4.png",
+          "capture": "phone-first-plan-contacts-review-final-invitees_0_3F1954C9-A98A-4151-9DF7-ABD7A703DA45.png",
+          "observation": "Final-package review sheet: activity/location, complete 2026/10/25 23:00–2026/10/26 01:00 and Europe/Berlin are readable. Two selected people show the partially-unsurveyed warning; invite-two summary and send action are complete."
+        },
+        {
+          "index": 9,
+          "file": "0F951E9D-EAC1-4CEC-9795-C3CA92FD7841.png",
+          "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_7A9C27C4-A7A9-4A31-A83C-79EF0D6ACE4C.png",
+          "observation": "Final-package morning selection: next-day 00:00 and 00:30 cells are amber with border/checks. Candidate date, collecting caption/full timezone and two-person control are separate. Final summary states 25→26 Oct 23:00–01:00, two hours; next action is readable."
+        },
+        {
+          "index": 10,
+          "file": "D4AE3629-194C-4842-B449-D1785FBF7653.png",
+          "capture": "phone-first-plan-final-cross-day-evening_0_BB0C0CDE-3A69-4BEC-96A2-44F906570A1C.png",
+          "observation": "Final-package evening intermediate: first-day 23:00 and 23:30 cells are visibly selected; the intermediate bottom summary says 23:00–00:00, one hour. This is an earlier stage than the two-hour morning result."
+        },
+        {
+          "index": 11,
+          "file": "238E2EC6-0FD5-443A-BDBF-ECD245B1C210.png",
+          "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_1B4DD7F3-839B-4BF3-8A6F-1DE02C1ED8EB.png",
+          "observation": "Final-package same-day intermediate: 09:00/09:30 show green own availability and count two with distinct amber final-selection border/check. Summary reads 09:00–10:00, one hour; no overlap with the next action."
+        },
+        {
+          "index": 12,
+          "file": "8C449F3B-0AE2-4745-AE6A-AC910D99CF2B.png",
+          "capture": "phone-first-plan-compact-responded-people_0_5DA59039-EBB1-4D4C-B400-DF9286B38EB1.png",
+          "observation": "Final-package people sheet: two submitted-availability rows and two-person count are complete; availability-not-attendance reminder and Done action are separate."
+        },
+        {
+          "index": 13,
+          "file": "5B297514-D4D6-48BF-AD21-DB379691632E.png",
+          "capture": "phone-first-plan-contacts-peer-inline-availability_0_0FF96834-F97E-44EE-B29E-68D36972B5BD.png",
+          "observation": "Final-package participant detail: title/location appear without owner edit pencils; collecting caption/timezone, two-person avatars, selected 09:00/09:30 count-two cells and saved/wait-for-invitation footer are readable."
+        },
+        {
+          "index": 14,
+          "file": "AD807CEF-DFD8-4831-B414-8F63643CAC0A.png",
+          "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_CC643160-76EE-42ED-B76C-610F7C2879C8.png",
+          "observation": "Final-package participant share sheet: title, without-App explanatory text, web-share/copy-link tiles and Done action are clear. Dimmed detail behind shows the earlier one-response collecting state; no owner App-friend invite action is present."
+        },
+        {
+          "index": 15,
+          "file": "176D0357-D99A-4ABE-B3E6-FEED05F738E0.png",
+          "capture": "phone-first-plan-contacts-received-chat-card_0_8353065B-280B-499F-AE06-9DD438C38347.png",
+          "observation": "Final-package chat: an older confirmed plan card remains above a different new plan card. The new card has a distinct title band, waiting-for-availability state and direct fill-my-availability action; the older card shows confirmed time and view-plan action. Header/composer/cards do not overlap."
+        }
+      ],
+      "blockingProductIssueObserved": false,
+      "systemOverlay": "AssistiveTouch overlays a small area near the right edge: unrelated fourth-column grid cells and the right edge of the copy-link tile. Selected time cells, critical summaries and primary actions remain visible. This is a system overlay, not missing grid rendering or an App clipping defect.",
+      "limitations": [
+        "Separate screenshots show intermediate evening/same-day selections and the later cross-day result; they do not by themselves establish every gesture or API transition.",
+        "No focused largest-text information editor or Calendar endpoint screen appears in these eight captures. Exact calendar endpoints, uniqueness and eight API phases remain separate evidence.",
+        "Only the visible two-person scenario and these scroll positions are reviewed. The older confirmed chat card belongs to a different plan and is not evidence of duplicate delivery for the new plan."
+      ]
+    },
+    "reviewC": {
+      "review": "Final Preview212 complete-flow original-image review C",
+      "packageScope": "Final location three-line-viewport package; these are fresh final-run images, not reused pre-cap images.",
+      "actualImagesOpened": 9,
+      "manifestIndices": {
+        "first": 16,
+        "last": 24,
+        "indexing": "zero based"
+      },
+      "method": "All nine supplied originals opened individually with view_image.",
+      "result": "No visual blocker observed within these nine ordinary-font captures.",
+      "scope": "Chinese ordinary text size, light appearance; title/location display and editing, divider and actions, draft/submitted timetable, contacts, sharing, and creation.",
+      "limits": [
+        "The nine captures do not include system maximum text size, long three-line-field scrolling, error states, formal invitation, or Calendar.",
+        "Keyboard and modal presentation limit visible content; timetable beyond the viewport is not claimed to fit simultaneously.",
+        "AssistiveTouch is reported separately as a system overlay.",
+        "Visual review does not independently verify requests, persisted drafts, eight API phases, exact Calendar endpoint, uniqueness, package binary, or performance."
+      ],
+      "images": [
+        {
+          "manifestIndex": 16,
+          "image": "9321B999-0534-4400-B4BF-71AC0BA939CA.png",
+          "originalOpenedIndividually": true,
+          "state": "submitted timetable after contact send",
+          "visible": "Header title and location have light pencils; divider, date/status/time-zone row, submitted selection, and choose-final-time control are readable.",
+          "overlapAndClipping": "No app text collision or cut value observed.",
+          "visibleRangeLimits": "Only the visible date columns and timetable hours through 14:00 are shown.",
+          "assistiveTouch": "AssistiveTouch overlaps a small portion of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 17,
+          "image": "E7E8728E-7262-40FD-B844-14AFFD23313E.png",
+          "originalOpenedIndividually": true,
+          "state": "contact selection",
+          "visible": "Selected contact, plan summary, explanatory text, send action, and search field fit clearly.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "Single selected contact shown; not evidence for long lists.",
+          "assistiveTouch": "AssistiveTouch sits in empty right-side space."
+        },
+        {
+          "manifestIndex": 18,
+          "image": "B06A20E2-245F-4215-A87E-3CB419B41536.png",
+          "originalOpenedIndividually": true,
+          "state": "share sheet after own submission",
+          "visible": "Share title and plan summary, App friends row, web-share and copy-link controls fit; submitted cells and new heading remain visible in the dimmed background.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "Share sheet intentionally covers lower timetable/footer; dimmed background is modal presentation.",
+          "assistiveTouch": "AssistiveTouch overlaps the lower-right edge region of the App friends card; main labels remain readable."
+        },
+        {
+          "manifestIndex": 19,
+          "image": "862B1CF7-6C0F-4D2C-8A1B-9D632D62D3C1.png",
+          "originalOpenedIndividually": true,
+          "state": "display after information save with local draft",
+          "visible": "Saved location and title, light pencils, divider, collection metadata, selected cells, unsubmitted summary, and Submit and share action are readable.",
+          "overlapAndClipping": "No app text collision or cut value observed.",
+          "visibleRangeLimits": "A short location is shown. Image alone does not prove durable storage or request behavior.",
+          "assistiveTouch": "AssistiveTouch overlaps a small part of the rightmost timetable column."
+        },
+        {
+          "manifestIndex": 20,
+          "image": "B1181830-5B48-4E55-B597-4A67BD88383C.png",
+          "originalOpenedIndividually": true,
+          "state": "in-place information editor with keyboard",
+          "visible": "Persistent activity-name and optional-location labels, shared field fills, short values, right-aligned Cancel/Save, and divider are fully visible above the keyboard.",
+          "overlapAndClipping": "No label, field value, or action clipping observed.",
+          "visibleRangeLimits": "The keyboard occupies the lower viewport; timetable and footer below it are not all visible. This ordinary-font short-value image does not establish the long-value three-line maximum-font case.",
+          "assistiveTouch": "AssistiveTouch is over the keyboard bottom region, outside the editor."
+        },
+        {
+          "manifestIndex": 21,
+          "image": "263F03B1-F425-40A9-ADF7-2FF8A9937357.png",
+          "originalOpenedIndividually": true,
+          "state": "local selection before information save",
+          "visible": "Title and optional-location edit affordance, divider, complete collection metadata, local selected cells, unsubmitted summary, and both footer actions are readable.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "Only current viewport rows/columns are visible; gesture correctness requires separate test evidence.",
+          "assistiveTouch": "AssistiveTouch overlaps a small part of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 22,
+          "image": "1BA60305-EA76-41BE-9191-4A814FC4A1E7.png",
+          "originalOpenedIndividually": true,
+          "state": "optional sharing before filling",
+          "visible": "Share summary and all three existing share actions are readable; empty grid and zero-response state are visible behind the modal.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "The modal obscures lower detail content. The screenshot does not prove request order.",
+          "assistiveTouch": "AssistiveTouch is near the lower-right edge of the App friends card without hiding its primary text."
+        },
+        {
+          "manifestIndex": 23,
+          "image": "02AA4781-AE6C-4A08-BA8B-6CDA0DB33E8B.png",
+          "originalOpenedIndividually": true,
+          "state": "empty timetable after creation",
+          "visible": "Title, optional location with pencils, divider, full collection metadata, empty grid, zero-selection state, disabled Submit and share, and choose-final-time action are readable.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "No share modal is present; grid extends beyond the visible hours/columns.",
+          "assistiveTouch": "AssistiveTouch covers a small portion of the rightmost timetable column around noon."
+        },
+        {
+          "manifestIndex": 24,
+          "image": "4CD92913-7784-467F-B45B-727A97036759.png",
+          "originalOpenedIndividually": true,
+          "state": "creation before timetable",
+          "visible": "Name, optional location, candidate dates, daily 09:00–17:00 range, complete time zone, optional activity ideas, and Next: fill availability action fit without a timetable preview.",
+          "overlapAndClipping": "No app text collision or truncation observed.",
+          "visibleRangeLimits": "Ordinary-font creation screen only; not maximum-font creation acceptance.",
+          "assistiveTouch": "AssistiveTouch sits in empty right-side space below the form."
+        }
+      ]
+    }
+  },
+  "actualMaxLocationFailureImageOpened": true,
+  "sixthFocusedAutomationOnly": {
+    "count": 32,
+    "actualOriginalsOpened": true,
+    "automationSeconds": 449.231,
+    "visualAccepted": false,
+    "scope": "Normal text and readonly long content passed visual review; largest inputs/actions partially occluded by SystemInputAssistantView before test viewport repair",
+    "reviewA": {
+      "build": 212,
+      "package_scope": "Final location-three-line-cap App, focused screenshots indices 0–10 only.",
+      "actual_image_count": 11,
+      "method": "Each actual PNG separately opened with view_image original; no montage or manifest-only substitution.",
+      "result": "Read-only/saved values and private draft presentation visually supported. Maximum-text field/action viewport acceptance remains limited by actual keyboard-accessory occlusion in specific captures; no blanket visual pass.",
+      "images": [
+        {
+          "index": 0,
+          "file": "AC7260D5-FDD4-4298-AA4E-5FF303AB169D.png",
+          "actual_original_viewed": true,
+          "review": "Read-only participant location: complete long location wraps over multiple lines; no edit pencil. Upper title tail and bottom local-draft footer are visible. Scrolled viewport intentionally crops earlier title content."
+        },
+        {
+          "index": 1,
+          "file": "AEE0D6B0-3BC2-40EA-991F-B2BC38B95F01.png",
+          "actual_original_viewed": true,
+          "review": "Read-only participant title: large title body and trailing words are readable; first-line top sits under navigation clipping at this scroll position. No editing controls or edit pencil. Full-title first edge is separately visible in segment 0."
+        },
+        {
+          "index": 2,
+          "file": "8E835B9D-2CC9-459A-99E0-E2590D02C743.png",
+          "actual_original_viewed": true,
+          "review": "Read-only title segment 1: trailing title words including the final word are visible; top is scrolled beneath navigation. Paired with segment 0 rather than claimed as all text on one screen."
+        },
+        {
+          "index": 3,
+          "file": "318EA9E3-A721-43DD-974B-2A479413B50F.png",
+          "actual_original_viewed": true,
+          "review": "Read-only title segment 0: title starts with a complete first word and continues through the long natural wrap; final word is partly outside the lower scroll viewport. Segment 1 supplies its full view."
+        },
+        {
+          "index": 4,
+          "file": "122AEADA-BD5E-42DB-B372-AC465F4843FB.png",
+          "actual_original_viewed": true,
+          "review": "Saved metadata/private draft: location tail, divider, full candidate dates, gray collection caption/time zone, zero submitted responders and selected 09:00 cell with count zero are visible. Local half-hour draft footer remains unsent and its two owner actions fit."
+        },
+        {
+          "index": 5,
+          "file": "E4F6F851-494A-4EB1-9028-D5D63C0A0486.png",
+          "actual_original_viewed": true,
+          "review": "Saved owner location: long value wraps naturally and the final location words are readable above the footer; light pencil indicates editability. Footer still shows unsent restored half-hour draft."
+        },
+        {
+          "index": 6,
+          "file": "ED3649DE-3BB6-494C-9B68-74F966A3A06F.png",
+          "actual_original_viewed": true,
+          "review": "Saved owner title: full long title and light pencil are visible; location begins below. Text is naturally tall and requires scrolling, without ellipsis. Footer remains distinct."
+        },
+        {
+          "index": 7,
+          "file": "0453F986-710A-4DDB-9DAD-6FB93A049639.png",
+          "actual_original_viewed": true,
+          "review": "Location-entry action capture: location label and three-line field tail/caret are readable above the keyboard accessory. Only the top rounded edges of Cancel/Save are visible; their text and most of the buttons are behind the system prediction/accessory panel. This image does not visually pass complete-action visibility."
+        },
+        {
+          "index": 8,
+          "file": "1EBA6FF2-57D8-41EF-9708-9FAE6DC5D701.png",
+          "actual_original_viewed": true,
+          "review": "Location-field targeted capture: activity-name label and its three-line field tail are clear, then location label and first two visible location lines. Lower location content/background lies behind the keyboard prediction/accessory panel; this image does not show the complete location field."
+        },
+        {
+          "index": 9,
+          "file": "B1DB3CC3-87CF-4FF3-B9F9-44BA278E5C10.png",
+          "actual_original_viewed": true,
+          "review": "Title-field targeted capture: activity-name label and complete three-line visible field tail are clear. Location label/upper lines below are visible, while its lower part is behind the system input panel; no full location-field claim."
+        },
+        {
+          "index": 10,
+          "file": "DFECCFB6-5A31-4438-A22E-BDD6EC053BCB.png",
+          "actual_original_viewed": true,
+          "review": "Initial location entry: title field tail, location label and three location tail lines/caret are readable; location chrome lower edge runs into the system keyboard accessory area. Buttons are below the shown usable content area."
+        }
+      ],
+      "concrete_visibility_gap": {
+        "actions_index": 7,
+        "location_field_index": 8,
+        "description": "In the original 1284×2778 PNGs, the prediction/accessory panel begins near y=1743, above the keyboard key area. In action capture 7 the buttons begin near y=1723, so the panel covers their text and most of their bounds. Target capture 8 also places the lower location field behind that panel.",
+        "distinction": "This is visible system keyboard/accessory occlusion of scrollable content, not the AssistiveTouch overlay, not intrinsic text truncation and not evidence that stored values were cut.",
+        "next_evidence": "Parent is correcting usable-viewport/reveal tests to include the actual accessory panel. Additional actual scrolled captures are required before declaring complete controls visible."
+      },
+      "limitations": [
+        "Full long title/location need natural scrolling; no requirement or claim that they fit on one screen.",
+        "Three-line editable fields show an internally scrolled portion. Exact full saved strings and unchanged availability/invitation data are parent API evidence, not inferred from these partial field views.",
+        "Restored-draft footer shows unsent half-hour selection while submitted count remains zero; this does not independently inspect backend state.",
+        "AssistiveTouch overlaps small right-side regions in some non-keyboard captures and is separate from the keyboard-accessory issue.",
+        "The parent reports a 449.231-second automation pass, but that AX-based result is not substituted for missing actual visual viewport evidence.",
+        "Reviewer changed no source and operated no device."
+      ]
+    },
+    "reviewB": {
+      "actualViewed": 11,
+      "manifestIndicesZeroBased": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "method": "Each actual PNG individually opened with view_image(detail=original)",
+      "runScope": "449.231-second focused run; interaction/AX results are separate from visual acceptance",
+      "images": [
+        {
+          "index": 11,
+          "file": "80B37AB0-A73B-4753-A380-8425AFE7D646.png",
+          "capture": "information-editor-before-cancel-de-largest_0_095A707F-CCDF-433A-857E-F9D548CFE959.png",
+          "observation": "Maximum German before-cancel: location label and the visible tail of the edited location (including QA) are readable. Cancel/save only expose their upper edges; their labels are behind the system input assistant/keyboard glass. This frame does not pass complete-action visual visibility."
+        },
+        {
+          "index": 12,
+          "file": "C3282ECC-316C-499D-B18A-6F6EB7F8DCBD.png",
+          "capture": "information-editor-actions-title-entry-de-largest_0_6DAF3302-54A7-46D6-81EE-436AECAF5E55.png",
+          "observation": "Maximum German title-entry actions: location label and three displayed location lines are visible, but cancel/save labels remain obscured by the system input assistant. The screenshot name and passing AX geometry are not sufficient visual evidence for readable actions."
+        },
+        {
+          "index": 13,
+          "file": "86A7148D-15F0-4826-BA8D-98E43F9FE737.png",
+          "capture": "information-editor-field-plan-edit-location-title-entry-de-largest_0_71DC9049-5F7E-4DFF-BD22-9328423B4EA7.png",
+          "observation": "Maximum German location-field title-entry: the fixed location label is visible; the lowest part of the displayed field is occluded by the input assistant. The title label is above the outer scroll viewport at this position. Full field/action visual visibility is not established in this frame."
+        },
+        {
+          "index": 14,
+          "file": "83A6915D-E0B0-43AE-A66C-0E8C75E4845B.png",
+          "capture": "information-editor-field-plan-edit-title-title-entry-de-largest_0_8314402F-2423-4125-A749-78C855C84FD9.png",
+          "observation": "Maximum German title field: fixed activity-name label, distinct dark field surface and three displayed title lines/caret are readable above the input assistant. Location label is separate below; lower location content is intentionally not all visible at this scroll position."
+        },
+        {
+          "index": 15,
+          "file": "D77D525F-B4AE-4F08-B0BB-1A4606031B73.png",
+          "capture": "information-editor-initial-title-entry-de-largest_0_CC5B58E0-3941-4A3D-98E8-E3D0F65BEF19.png",
+          "observation": "Maximum German initial title editor: distinct fixed name/location labels and the title field identify the two inputs. Title text wraps within its field; lower location content is behind the keyboard. No all-fields-at-once claim."
+        },
+        {
+          "index": 16,
+          "file": "C0B4FA03-4946-40C8-A57F-FA04819F6D1D.png",
+          "capture": "information-editor-initial-private-draft-de-largest_0_D2F27924-D11F-4CA3-820A-159F8EDD0353.png",
+          "observation": "Maximum German private draft: complete date/status/timezone wrap, zero-response count, selected 09:00 cell and restored-unsubmitted/half-hour summary are visible. Submit-and-share and final-time actions are distinct. AssistiveTouch overlays only the right side of the grid."
+        },
+        {
+          "index": 17,
+          "file": "7B89F215-4C50-4AFD-9E6D-5CEB4FA2D5ED.png",
+          "capture": "information-editor-participant-readonly-plan-detail-location-zh-Hans-normal_0_7C724C11-8564-4BBA-89B2-8EC1DA6233E7.png",
+          "observation": "Normal Chinese participant after location tap: full saved two-line title and long location are readable, without owner pencils or an editor/keyboard. Zero responses and restored unsubmitted half-hour selection remain visible."
+        },
+        {
+          "index": 18,
+          "file": "E2F67E41-C4CA-4BF1-B93F-3CFA5DA16C59.png",
+          "capture": "information-editor-participant-readonly-time-poll-detail-title-zh-Hans-normal_0_F00FF326-9636-4506-9900-5A57D0677787.png",
+          "observation": "Normal Chinese participant after title tap: saved title/location remain read-only; no editor or keyboard opens. Date/status/timezone, empty response count and the local unsubmitted selection are readable."
+        },
+        {
+          "index": 19,
+          "file": "5D10A67A-E9F1-48D2-9F14-98CC4C17DACC.png",
+          "capture": "information-editor-saved-private-draft-zh-Hans-normal_0_5A0A5FF8-0CC5-498D-88E5-3A48471807D7.png",
+          "observation": "Normal Chinese owner saved private draft: changed title/location, decorative owner pencils, zero responses and selected 09:00 half-hour remain visible. Footer is unsubmitted with separate submit-and-share/final-time controls."
+        },
+        {
+          "index": 20,
+          "file": "9A1A246B-1170-4B05-A440-FF3F4FF384A4.png",
+          "capture": "information-editor-saved-location-zh-Hans-normal_0_ADEE363B-F3D4-4918-8FF1-89F17F7154AD.png",
+          "observation": "Normal Chinese saved location: complete saved long location wraps on two lines below the title, with separate pencil/share and metadata. No text/control overlap is visible."
+        },
+        {
+          "index": 21,
+          "file": "7AF9A92F-36E7-4FE6-A429-82ACBA2E343C.png",
+          "capture": "information-editor-saved-title-zh-Hans-normal_0_2FA9E22E-52F6-427B-8DD0-F8B6FF76693F.png",
+          "observation": "Normal Chinese saved title: full saved two-line title and long location, share action, owner pencils, zero-response metadata and unsubmitted draft footer remain readable."
+        }
+      ],
+      "visualAcceptance": "PARTIAL: normal saved/read-only/draft views and maximum title-field hierarchy are readable. Maximum action visibility and the affected location-field bottom are not visually accepted in indices 11–13.",
+      "followUp": "Parent identified actual SystemInputAssistantView above the keyboard body. The test viewport was corrected using that observed frame; new screenshots are required before maximum action visibility passes. App binary is unchanged.",
+      "systemOverlays": "Keyboard/input assistant occlusion is explicitly recorded above; it is not mistaken for text truncation or a new business-rule defect. AssistiveTouch also overlays a small unrelated grid area.",
+      "limitations": [
+        "Only these 11 of 32 PNGs were viewed in this partition. Long values and editor sections require scrolling; simultaneous first-screen visibility of the entire page is not claimed.",
+        "Visible field text can represent the currently scrolled part of a multi-line field; exact full values and zero server availability/invitations are separately API/test evidence.",
+        "This partition contains no complete saved long German title top/bottom display-value pair or Calendar endpoint, so those visual scopes are not claimed here."
+      ]
+    },
+    "reviewC": {
+      "review": "Final Preview212 focused original-image review C",
+      "actualImagesOpened": 10,
+      "manifestIndices": {
+        "first": 22,
+        "last": 31,
+        "indexing": "zero based"
+      },
+      "method": "Each of the ten supplied original PNGs was individually opened with view_image.",
+      "result": "No visual blocker observed in this ordinary-font subset.",
+      "scope": "Chinese ordinary text size/light appearance; unchanged and changed values, title/location entry, fixed labels, Cancel/Save visibility, divider, keyboard-visible region, and initial local availability draft.",
+      "limits": [
+        "This subset does not include maximum-system-font, saved read-only long-value portions, after-cancel result, failed-save, or Calendar views.",
+        "Screenshots do not independently prove exact API values, unchanged availability/invitations, 44 pt hit testing, or request/cancellation behavior; those rely on test and API evidence.",
+        "Only editor and timetable content within the keyboard or footer bounded viewport is claimed visible."
+      ],
+      "assistiveTouch": {
+        "keyboardImages": "Indices22–30: system AssistiveTouch is in the lower keyboard region, outside fields and Cancel/Save.",
+        "draftImage": "Index31: system AssistiveTouch overlays a small part of the right timetable column around noon; header and footer remain unobscured."
+      },
+      "images": [
+        {
+          "manifestIndex": 22,
+          "image": "8E3A60CC-65CF-48B0-A131-0E369E645929.png",
+          "originalOpenedIndividually": true,
+          "state": "location-entry actions",
+          "visible": "Two-line activity name and three-line German location, both fixed labels, enabled Save and Cancel, and divider are readable above keyboard.",
+          "overlapAndVisibleLimits": "The keyboard limits the visible timetable; no field/action clipping observed."
+        },
+        {
+          "manifestIndex": 23,
+          "image": "94583A16-82EB-48DE-9979-3DF5FAE046DD.png",
+          "originalOpenedIndividually": true,
+          "state": "location-field capture",
+          "visible": "Full displayed three-line location, two-line name, fixed labels and both actions remain readable.",
+          "overlapAndVisibleLimits": "No input-value edge collision observed; lower timetable is outside keyboard-visible viewport."
+        },
+        {
+          "manifestIndex": 24,
+          "image": "AAB0AEA7-65D7-4D40-BC8F-7E7402200B3F.png",
+          "originalOpenedIndividually": true,
+          "state": "title-field capture after location entry",
+          "visible": "Two-line title is fully visible with its label; three-line location, Cancel and Save remain clearly separated.",
+          "overlapAndVisibleLimits": "No label/value/action overlap observed; this is ordinary text size."
+        },
+        {
+          "manifestIndex": 25,
+          "image": "A05F8B50-748F-4B84-9C2B-306DAFFE87C5.png",
+          "originalOpenedIndividually": true,
+          "state": "initial location-entry capture",
+          "visible": "Location caret and complete displayed three-line value fit the field. Labels and enabled Cancel/Save remain above the keyboard.",
+          "overlapAndVisibleLimits": "No clipping observed in the editor; keyboard intentionally occupies lower screen."
+        },
+        {
+          "manifestIndex": 26,
+          "image": "05963FC7-6EE4-42AE-9191-3F72C71F7E35.png",
+          "originalOpenedIndividually": true,
+          "state": "changed values before cancel",
+          "visible": "Changed title and changed location wrap to two lines each; Cancel and enabled Save are visible and separate from divider.",
+          "overlapAndVisibleLimits": "This image is before Cancel; cancellation persistence cannot be established from this frame."
+        },
+        {
+          "manifestIndex": 27,
+          "image": "2586BE8A-02A5-4244-87D4-09996AD5B620.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title-entry actions",
+          "visible": "Existing title and two-line location fit; fixed labels and Cancel are visible. Save is visibly disabled for the unchanged values.",
+          "overlapAndVisibleLimits": "No app collision or clipping observed; disabled state is visible, but its business condition is verified separately."
+        },
+        {
+          "manifestIndex": 28,
+          "image": "C57285C6-D0AD-494D-939B-C7E701CA2813.png",
+          "originalOpenedIndividually": true,
+          "state": "location on title entry",
+          "visible": "Two-line location and fixed label fit; title, Cancel and disabled Save remain above keyboard.",
+          "overlapAndVisibleLimits": "No value or action clipping observed."
+        },
+        {
+          "manifestIndex": 29,
+          "image": "C98D92EE-ADCF-4452-BDC4-0AF0694CEBF3.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title field",
+          "visible": "Complete one-line title and caret fit inside field; optional-location label, two-line location and disabled Save remain readable.",
+          "overlapAndVisibleLimits": "No edge collision observed; no claim all lower timetable content is simultaneously visible."
+        },
+        {
+          "manifestIndex": 30,
+          "image": "EBD44810-4265-444B-9DA9-0EC56D974DC0.png",
+          "originalOpenedIndividually": true,
+          "state": "initial title-entry full editor",
+          "visible": "Fixed labels, one-line title, two-line location, right-aligned Cancel/disabled Save and divider are fully visible.",
+          "overlapAndVisibleLimits": "The keyboard occupies lower screen; editor actions remain above it."
+        },
+        {
+          "manifestIndex": 31,
+          "image": "7747A2D1-88CB-4F8B-A5CD-3FB15D5B274E.png",
+          "originalOpenedIndividually": true,
+          "state": "initial private availability draft",
+          "visible": "Display-mode two-line title and two-line location with light pencil affordances, divider, collection metadata, local selection and unsubmitted footer are readable.",
+          "overlapAndVisibleLimits": "Only visible timetable rows are reviewed; bottom 14:00 row is partly outside the content viewport at the footer."
+        }
+      ]
+    }
+  }
+}

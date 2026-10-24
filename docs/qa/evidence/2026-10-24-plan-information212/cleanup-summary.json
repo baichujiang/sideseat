@@ -1,0 +1,21 @@
+{
+  "accountsRemoved": 4,
+  "tokens401": 4,
+  "links404": 6,
+  "batches": [
+    {
+      "accountsRemoved": 2,
+      "tokens401": 2,
+      "links404": 5,
+      "at": "2026-10-24T20:20:00.332Z",
+      "record": "final212-cleanup.json"
+    },
+    {
+      "accountsRemoved": 2,
+      "tokens401": 2,
+      "links404": 1,
+      "at": "2026-10-24T20:32:31.675Z",
+      "record": "assistant-final212-cleanup.json"
+    }
+  ]
+}

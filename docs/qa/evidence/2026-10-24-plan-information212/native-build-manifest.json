@@ -1,0 +1,24 @@
+{
+  "build": 212,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "63419dfe999da2df2a46573558073a31e1afe555a1cdc41316e85cc0c27102ab",
+    "SideSeat Preview.debug.dylib": "7d003a29ff315fa3eb093ffa626ded6378cca667f53a03f6b7931c5bbeb24867"
+  },
+  "testSourceSHA256": "24c33df8700d64899f6d4051b5e103b9d278f65309d92781312724c3ecf13e2d",
+  "backendReleased": false,
+  "webReleased": false,
+  "finalProductFrozenDuringAcceptance": true,
+  "initialProductRepair": "Location uses the title native lineLimit(1...3); final full371.918s and assistant-aware focused468.029s run on same final binary",
+  "testSourcesSHA256": {
+    "PlanInformationEditorPhoneUITests.swift": "24c33df8700d64899f6d4051b5e103b9d278f65309d92781312724c3ecf13e2d",
+    "PlanFirstUsePhoneUITests.swift": "c3cc66df596bb73e1c0efddae508c1b8951486df91d527da31f1dd04fddc7edd"
+  },
+  "sourceCommit": "281ddeec03b5983f9dac50d8ea342087bc8a8570",
+  "sourcePushed": true,
+  "all267InputsMatchCommittedSource": true,
+  "testSourcesMatchCommittedSource": true
+}

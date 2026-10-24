@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-10-24T20:32:33.878780+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 212,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8816,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "disposableFixtureRetainedForFinalAcceptance": false,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Four disposable QA accounts across two batches; two complete-flow plans and four separate layout plans. No real user data modified.",
+  "disposableDataCleanup": {
+    "accountsRemoved": 4,
+    "tokens401": 4,
+    "links404": 6,
+    "batches": [
+      {
+        "accountsRemoved": 2,
+        "tokens401": 2,
+        "links404": 5,
+        "at": "2026-10-24T20:20:00.332Z",
+        "record": "final212-cleanup.json"
+      },
+      {
+        "accountsRemoved": 2,
+        "tokens401": 2,
+        "links404": 1,
+        "at": "2026-10-24T20:32:31.675Z",
+        "record": "assistant-final212-cleanup.json"
+      }
+    ]
+  },
+  "privateLaunchConfigurationRemoved": true,
+  "generatedRunnerProjectRemoved": true,
+  "defaultDeviceIdentityVerifiedBeforeInstall": true,
+  "appCrashExitReports": 0,
+  "cpuResourceReports": 0
+}

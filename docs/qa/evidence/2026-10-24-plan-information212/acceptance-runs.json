@@ -1,0 +1,110 @@
+{
+  "build": 212,
+  "initialFocused": {
+    "seconds": 29.721,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "Extra test assumption that interactive keyboard must be fully dismissed before field checks",
+    "repair": "Test only: inspect each full field/action within actual visible viewport above keyboard; preserve geometry, content, permissions and draft assertions",
+    "actualFrameFromRecordingReviewed": true
+  },
+  "unrepeatedScopes": [
+    "unchanged unit tests",
+    "unchanged domain tests",
+    "browser flow",
+    "historical inline-header matrix"
+  ],
+  "backendReleased": false,
+  "webReleased": false,
+  "secondFocused": {
+    "seconds": 10.307,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "Test required fresh Not submitted despite legitimate persisted Draft restored \u00b7 not submitted from preceding run",
+    "repair": "Test only: accept the two exact localized unsubmitted states, keep selected-cell/submit-enabled/no-saved/no-share assertions"
+  },
+  "initialNativeFullBeforeLocationCap": {
+    "seconds": 368.518,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sameFrozenApp": false,
+    "APIChecks": 8,
+    "language": "zh-Hans",
+    "textSize": "normal",
+    "scope": "Initial package before location three-line viewport; not final acceptance"
+  },
+  "nativeFullFinal": {
+    "seconds": 371.918,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sameFinalFrozenApp": true,
+    "APIChecks": 8,
+    "language": "zh-Hans",
+    "textSize": "normal"
+  },
+  "thirdFocused": {
+    "seconds": 216.567,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "failure": "Actual maximum-size long location field height523pt exceeded keyboard-visible viewport508pt",
+    "productRepair": "Reuse title native three-line editing viewport for location; full value remains editable via internal scrolling; no business logic change"
+  },
+  "fourthFocused": {
+    "seconds": 107.288,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "scope": "Final location-cap App, but reused earlier mutated layout fixture",
+    "failure": "Earlier run already saved the same exact name and location; Save correctly disabled as unchanged",
+    "repair": "Prepare a fresh separate disposable heading-layout poll; no test or App changes"
+  },
+  "fifthFocused": {
+    "seconds": 389.271,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "scope": "Final App; all normal and max owner editor geometry/cancel/save assertions passed before read-only title check",
+    "failure": "Saved read-only long title529pt cannot be simultaneously visible within513pt viewport",
+    "repair": "Test only: inspect long read-only value in visible upper/lower portions; keep exact full AX value and strict whole field/label/action geometry"
+  },
+  "finalProductFrozenDuringAcceptance": true,
+  "sixthFocusedAutomationOnly": {
+    "seconds": 449.231,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sameFinalFrozenApp": true,
+    "combinations": [
+      "zh-Hans normal light owner",
+      "zh-Hans normal light participant",
+      "de actual systemAccessibilityXXXL dark owner",
+      "de actual systemAccessibilityXXXL dark participant"
+    ],
+    "fieldAndActionFullViewport": true,
+    "displayValueReading": "Exact full AX text plus overlapping visible segments for oversized read-only values",
+    "visualAccepted": false,
+    "visualFailure": "Actual iOS SystemInputAssistantView begins45pt above Keyboard AX frame; largest input/action captures partially occluded. No product regression established; interaction/AX pass only."
+  },
+  "focusedFinal": {
+    "seconds": 468.029,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "sameFinalFrozenApp": true,
+    "combinations": [
+      "zh-Hans normal light owner",
+      "zh-Hans normal light participant",
+      "de actual systemAccessibilityXXXL dark owner",
+      "de actual systemAccessibilityXXXL dark participant"
+    ],
+    "viewportUsesActualKeyboardAndSystemInputAssistantFrames": true,
+    "fieldAndActionFullViewport": true,
+    "displayValueReading": "Exact full AX text plus overlapping visible segments for oversized read-only values",
+    "visualReview": "32 actual originals individually reviewed; accepted"
+  }
+}

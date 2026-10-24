@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-24T19:41:00.631558+00:00",
+  "baseCommit": "084b82b194573c4eb1bb1540058bdbeac1c6a69f",
+  "independentMinimalReview": "passed",
+  "productFiles": {
+    "ios-native/SideSeat/Features/Chat/PlanDetailEditors.swift": "fc7624b9d04efdaf2ba3122e18e3a2b3e2a6638a3672977d12172d13eb898086",
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": "c0277250fc5ff8b41a53668c9dfa974ed94047144c71d314fda311c0421ff97e",
+    "ios-native/SideSeat/Core/Design/Components/SSTextField.swift": "5f92aeddb16b93a6a3f64a6906dbc2ba3574b51b3df32317ce13d50d791b22a5",
+    "ios-native/Configuration/Preview.xcconfig": "26839a66488643b19c308d793c8db5e25abaa658bccf07b76bb01ce4982544f8"
+  },
+  "beginAndSaveByteIdentical": true,
+  "beginAndSaveSHA256": "064104862c917cccd616e661043d47df3d7446c733977e9dd66c6192e81fdf9a",
+  "metadataEditabilityGateUnchanged": true,
+  "stateAndFocusDeclarationsUnchanged": true,
+  "storeMutateCallsBeforeAndAfter": [
+    1,
+    1
+  ],
+  "sharedFieldChromeOnlyAccessLevelChanged": true,
+  "newAPIOrSchemaOrDomainFiles": [],
+  "newStateOrRequestOrDependency": false,
+  "readOnlyBranchesHaveNoPencil": true,
+  "locationEditingViewport": "Same native lineLimit(1...3) as title; internal scroll retains complete field value"
+}

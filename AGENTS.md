@@ -35,8 +35,22 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild; installed Preview211 retained. See web release/QA records.
-- Preview211 is the current installed development build. Source d017759dcf70276a8636fa5519d7842df2350256 pushed.
+  No native rebuild in that web stage; current native build is212 below. See web release/QA records.
+- Preview212 is the current installed development build, source 281ddeec03b5983f9dac50d8ea342087bc8a8570 pushed.
+  Inline name/location use fixed labels, the existing field chrome and native
+  one-to-three-line editing viewports; trailing actions, editable-only pencil and
+  a light divider clarify hierarchy. No new entry/state/request/component; exact
+  values, permissions, drafts, sharing, invitation and Calendar rules preserved.
+  Independent minimal review passed. Final same-App focused468.029s normal/actual
+  system-max owner/participant and native full371.918s/eight API phases passed;
+  32 focused plus25 full originals individually reviewed. Initial runs and449.231s
+  AX-only pass with real input-assistant occlusion retain scope; test now reads
+  actual keyboard+assistant bounds, pixels confirm complete fields/actions.
+  Normal212 PID8816,267/Local/signature/binary and both test sources match commit,
+  ordinary97 preserved;4QA accounts/6links401/404,Runner/private launch cleaned.
+  New App reports0; no pure-manual performance claim, backend/web release or
+  unchanged unit/domain/browser repeat. See212 release and QA records.
+- Preview211 was the previous installed development build. Source d017759dcf70276a8636fa5519d7842df2350256 pushed.
   Collecting detail uses a grey dot/caption below candidate dates with full time
   zone; title/share and location stay separate. Reuse existing presentation key
   and adaptive row, no new state/request/dependency. FIXED/INVITING/confirmed/
