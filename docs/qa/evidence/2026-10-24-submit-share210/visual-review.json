@@ -1,0 +1,40 @@
+{
+  "focusedOriginalPNGsReviewed": 19,
+  "focusedReviewers": {
+    "hour_picker_source": 7,
+    "hours_regression_test": 6,
+    "timetable_blank_source": 6
+  },
+  "result": "All actual originals reviewed: first owner CTA enabled only with draft, successful first submit opens sharing, later owner edits/participant saves stay in timetable; real failure and retry keep selection with readable error; actual system maximum share actions complete without overlap.",
+  "limits": [
+    "Maximum details may need ordinary scrolling to reach first timetable cells; not all first-screen content",
+    "Screenshots prove visible states; actual request counts and order checked separately by API",
+    "Near-identical image viewer omission was checked against original RGB PNG pixels; not treated as a product blank-grid failure",
+    "Complete native journey frames are ordinary Chinese light; system maximum coverage is the separate focused cases",
+    "Calendar crop displays start/title/location; exact end and uniqueness established by API, not screenshot crop",
+    "Intermediate final1h snapshots precede final2h cross-day selection, not conflicting durations"
+  ],
+  "focusedRetainedPNGs": [
+    "failure-draft-kept.png",
+    "owner-edit-saved-de-largest.png",
+    "owner-submit-and-share-de-largest.png",
+    "owner-submit-and-share.png",
+    "participant-saved-de-largest.png",
+    "share-de-largest.png"
+  ],
+  "completeOriginalPNGsReviewed": 25,
+  "completeReviewers": {
+    "hour_picker_source": 9,
+    "hours_regression_test": 8,
+    "timetable_blank_source": 8
+  },
+  "completeResult": "All25 actual originals reviewed: creation CTA opens editable timetable without modal, own unsaved slots precede acknowledged first submission and share panel, contact and participant submission, cross-day final interval/invitation and published Calendar are readable without new overlap/crop.",
+  "completeRetainedPNGs": [
+    "flow-calendar.png",
+    "flow-create.png",
+    "flow-created-editable.png",
+    "flow-invitation.png",
+    "flow-participant-submitted.png",
+    "flow-submitted-share.png"
+  ]
+}

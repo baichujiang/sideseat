@@ -111,7 +111,7 @@ if (mode === 'prepare') {
   } else if (mode === 'observe' || mode === 'observe-direct' || mode === 'observe-ideas') {
     const ideas = mode === 'observe-ideas', direct = mode !== 'observe';
     assert(logPath);
-    const phases = ideas ? ['fixed-created', 'fixed-delivered', 'fixed-suggested', 'fixed-invited', 'fixed-accepted', 'fixed-published', 'fixed-calendar'] : direct ? ['direct-created', 'direct-delivered', 'direct-formal-invitation', 'direct-peer-accepted', 'direct-published', 'direct-calendar-verified'] : ['contacts-created', 'contacts-delivered', 'contacts-owner-submitted', 'contacts-peer-submitted', 'contacts-formal-invitation', 'contacts-peer-accepted', 'contacts-published', 'contacts-calendar-verified'];
+    const phases = ideas ? ['fixed-created', 'fixed-delivered', 'fixed-suggested', 'fixed-invited', 'fixed-accepted', 'fixed-published', 'fixed-calendar'] : direct ? ['direct-created', 'direct-delivered', 'direct-formal-invitation', 'direct-peer-accepted', 'direct-published', 'direct-calendar-verified'] : ['contacts-created', 'contacts-owner-submitted', 'contacts-delivered', 'contacts-peer-submitted', 'contacts-formal-invitation', 'contacts-peer-accepted', 'contacts-published', 'contacts-calendar-verified'];
     const checks = [], seen = new Set(); let failure;
     async function verify(phase) {
       if (!f.pollToken) {
@@ -131,14 +131,15 @@ if (mode === 'prepare') {
         assert.equal(p.invitations.length, 0, 'A candidate timetable must not send invitations before explicit final-time review.');
       }
       if (ideas) { assert.equal(p.location, '校园'); assert.equal(p.activitySelection.isOpen, !formal); }
-      assert.equal(p.summary.participantCount, direct ? 0 : index >= 3 ? 2 : index >= 2 ? 1 : 0);
-      assert.deepEqual(p.mySlotIds, !direct && index >= 2 ? [0, 1, 2, 3] : []);
+      assert.equal(p.summary.participantCount, direct ? 0 : index >= 3 ? 2 : index >= 1 ? 1 : 0);
+      assert.deepEqual(p.mySlotIds, !direct && index >= 1 ? [0, 1, 2, 3] : []);
       assert.deepEqual(theirs.mySlotIds, !direct && index >= 3 ? [0, 1, 2, 3] : []);
       const item = list.polls.find(x => x.token === f.pollToken);
-      if (index === 0) assert.equal(item, undefined);
+      const delivered = index >= (direct ? 1 : 2);
+      if (!delivered) assert.equal(item, undefined);
       else { assert(item); assert.equal(item.didRespond, !direct && index >= 3); }
       const messages = history.messages.filter(m => m.body?.includes('/time-polls/' + f.pollToken));
-      assert.equal(messages.length, index === 0 ? 0 : 1);
+      assert.equal(messages.length, delivered ? 1 : 0);
       if (index >= 1 && index < 3) assert.equal(theirs.didRespond, false);
       if (formal) {
         assert.equal(p.invitationVersion, 1); assert.equal(p.invitations.filter(i => i.status === 'ACCEPTED').length, index >= (ideas ? 4 : direct ? 3 : 5) ? 2 : 1);

@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-24T17:17:05.846206+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 210,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8662,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-24-191327.ips",
+      "lastModDate": "2026-10-24T17:13:27.000Z"
+    }
+  ],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "disposableFixtureRetainedForFinalAcceptance": false,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Two disposable QA accounts and four dedicated plans; real API writes confined to these accounts",
+  "disposableCleanup": {
+    "accountsRemoved": 2,
+    "tokens401": 2,
+    "links404": 4,
+    "at": "2026-10-24T17:17:04.101Z"
+  },
+  "newAppReportClassification": {
+    "cpuResource": 1,
+    "crashExit": 0,
+    "summary": "resource-report-summary.json"
+  }
+}

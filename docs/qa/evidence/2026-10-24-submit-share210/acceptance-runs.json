@@ -1,0 +1,90 @@
+{
+  "build": 210,
+  "unit": {
+    "tests": 44,
+    "suites": 2,
+    "seconds": 4.333,
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0,
+    "environment": "iPhone17Pro Simulator / Development",
+    "scope": [
+      "TimePollTests",
+      "PlanPresentationTests"
+    ],
+    "includes": [
+      "Manual submit only",
+      "503 explicit retry and newer edits",
+      "Durable local drafts",
+      "Request/session isolation",
+      "Owner first next-step and existing participant/invitation/Calendar states"
+    ]
+  },
+  "appReview": {
+    "reviewer": "hour_picker_source",
+    "result": "No blockers or unnecessary state/dependency",
+    "changes": [
+      "Remove creation next.share write",
+      "Consume old share handoff without auto modal; preserve enum decode/review",
+      "First owner Submit and share gates on clean saved acknowledgement and no submission failure",
+      "Submission Retry reuses same action; later owner edits and participant unchanged",
+      "Unsubmitted owner card prioritizes filling; no invitation gate"
+    ]
+  },
+  "focusedPhone": {
+    "failureSeconds": 18.195,
+    "successVariantsSeconds": 102.643,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "sameInvocation": true,
+    "variants": [
+      "zh-Hans normal light",
+      "de actual system AccessibilityXXXL dark"
+    ],
+    "scope": [
+      "Empty draft submit disabled",
+      "Independent title share before any submission",
+      "First owner submit acknowledged then share",
+      "Later owner Save changes stays in timetable",
+      "Participant submit stays in timetable",
+      "Real404 failure and Retry keep selection without share"
+    ],
+    "targetMinimumPt": 44,
+    "noNewProductFailureHooks": true,
+    "actualOriginalPNGs": 19,
+    "appSourceAndBinaryFrozen": true
+  },
+  "completeNativePhone": {
+    "seconds": 366.562,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "apiPhases": 8,
+    "firstPhases": [
+      "created",
+      "owner-submitted",
+      "delivered"
+    ],
+    "responsesAtFirstPhases": [
+      0,
+      1,
+      1
+    ],
+    "cardCountAtFirstPhases": [
+      0,
+      0,
+      1
+    ],
+    "sharePermissionChecks": 6,
+    "finalDurationMs": 7200000,
+    "crossLocalMidnight": true,
+    "exactUniqueCalendarPerAccount": [
+      1,
+      1
+    ],
+    "actualOriginalPNGs": 25,
+    "sameFrozenAppAsFocusedPhone": true,
+    "scope": "Actual native create/no-auto-share, optional header share, first submit/share then contact card, participant manual submit, final review/invitation/accept/publish/Calendar"
+  }
+}

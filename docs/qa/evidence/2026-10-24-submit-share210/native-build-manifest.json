@@ -1,0 +1,23 @@
+{
+  "build": 210,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "6848fd54022f8ff4d181a9fd3a9628285b277e1cd28a4ab74758f3f242921584",
+    "SideSeat Preview.debug.dylib": "70bd88fa21415c7d9a09975c8096b23df6091c6386ffbe9b45dfd35b2c95db6a"
+  },
+  "productFrozenDuringTestOnlyRepairs": true,
+  "testSourceSHA256": "e0123170c612778ed4c1f8adcfd8bf99de4898bded81cc89d56dc41d681320aa",
+  "backendReleased": false,
+  "webReleased": false,
+  "testSourcesSHA256": {
+    "SubmitSharePhoneUITests.swift": "e0123170c612778ed4c1f8adcfd8bf99de4898bded81cc89d56dc41d681320aa",
+    "PlanFirstUsePhoneUITests.swift": "7352b7d334edc4f1196c77b794cd940a0483c6cfaca7ba937a692a1afc383b97"
+  },
+  "unitTestSourcesSHA256": {
+    "TimePollTests.swift": "6eb3e2a88e4d3bf3dedad7c4b86681579e5d84837a3caf17a892d74e575d8f7c",
+    "PlanPresentationTests.swift": "7de6685b4af6ae933b7d037d2579a03ed0a4ef59bcf44ae9382883833b9f4304"
+  }
+}

@@ -11,9 +11,12 @@
 ## Current manual plan flow — 2026-10-24
 
 Create a COLLECT plan from activity/location, candidate dates and daily hours,
-with optional activity ideas; creation has no timetable preview. App contacts
-and browser guests fill the same detail timetable and explicitly submit local
-availability drafts. The organizer can choose a continuous final interval even
+with optional activity ideas; creation has no timetable preview and opens the
+editable detail directly. The organizer fills their own availability first, then
+Submit and share acknowledges that draft before opening the share panel.
+The title's share entry remains available earlier; later owner edits and all
+participant submissions save without opening sharing. App contacts and browser
+guests fill the same detail timetable and explicitly submit local drafts. The organizer can choose a continuous final interval even
 with zero responses, review the roster and send invitations. Invitees accept,
 decline or leave pending; the organizer may publish at any time. Only accepted
 account participants receive notifications and SideSeat Calendar entries; guests

@@ -7,8 +7,10 @@ Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
 Enter activity and optional location → choose candidate dates and daily voting
 hours (optional friends' activity suggestions) → create one COLLECT plan and
-share to App contacts or a browser guest → edit availability directly in its
-timetable and explicitly submit → organizer selects a continuous final interval
+open its editable timetable without a share modal → organizer fills their own
+availability → Submit and share explicitly saves it, then opens sharing to App
+contacts or browser guests → friends fill the timetable and explicitly submit →
+organizer selects a continuous final interval
 on the same timetable, reviews invitees and sends formal invitations → each
 invitee accepts, declines or leaves pending → organizer may publish at any time;
 only accepted account participants are notified and receive their unique
@@ -25,6 +27,14 @@ submission; filling availability is separate from accepting an invitation, and
 sending invitations is separate from publishing to Calendar. Native grids have
 no one-step Undo. Existing records, guest identity, invitation versions and
 conversation-bound one-to-one consent rules remain unchanged.
+
+Creation's primary action is Next: fill my availability. The first owner
+submission opens sharing only after the current draft is acknowledged and clean;
+failure, an in-flight newer edit or a participant submission never opens it.
+Later owner edits retain Save changes. The title's share action stays available
+before any submission, so filling is the recommended order, not a new gate.
+Old persisted share handoffs are decoded and consumed without opening a modal;
+final-time selections and review handoffs retain their existing compatibility.
 
 Actual installed builds, source hashes and verification scopes are recorded in
 [Deployed state](./DEPLOYED_STATE.md) and the

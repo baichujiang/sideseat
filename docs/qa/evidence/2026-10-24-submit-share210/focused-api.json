@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "variant": "normal",
+      "phase": "COLLECTING",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "participantSlots": [
+        0,
+        1
+      ],
+      "invitationVersion": 0
+    },
+    {
+      "variant": "systemMaximum",
+      "phase": "COLLECTING",
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "participantSlots": [
+        0,
+        1
+      ],
+      "invitationVersion": 0
+    }
+  ]
+}

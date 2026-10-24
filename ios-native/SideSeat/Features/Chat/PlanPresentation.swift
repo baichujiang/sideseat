@@ -89,8 +89,8 @@ struct PlanPresentation: Sendable {
         }
         if phase == "COLLECTING", let activity, activity.isOpen {
             return Self(status: .choosingActivity,
-                        nextStep: isOwner ? (respondedCount > (didRespond ? 1 : 0) ? .chooseTime : .shareAvailability)
-                            : didRespond ? .waitForOrganizer : .fillAvailability,
+                        nextStep: !didRespond ? .fillAvailability
+                            : isOwner ? (respondedCount > 1 ? .chooseTime : .shareAvailability) : .waitForOrganizer,
                         detail: AppLocalization.string("Suggest activities and fill free time here. Neither is a commitment to attend."))
         }
         let status: PlanDisplayStatus = switch phase {
@@ -107,7 +107,7 @@ struct PlanPresentation: Sendable {
         switch status {
         case .findingTime:
             if isOwner {
-                step = respondedCount > (didRespond ? 1 : 0) ? .chooseTime : .shareAvailability
+                step = !didRespond ? .fillAvailability : respondedCount > 1 ? .chooseTime : .shareAvailability
             } else {
                 step = didRespond ? .waitForOrganizer : .fillAvailability
             }

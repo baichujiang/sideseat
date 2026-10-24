@@ -1,0 +1,23 @@
+{
+  "newReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-24-191327.ips",
+      "build": "1.0.0 (210)",
+      "pid": "8652",
+      "start": "2026-10-24 19:11:23.106 +0200",
+      "end": "2026-10-24 19:13:23.621 +0200",
+      "event": "cpu usage",
+      "actionTaken": "none",
+      "cpu": "90 seconds cpu time over 121 seconds (75% cpu average), exceeding limit of 50% cpu over 180 seconds",
+      "duration": "120.51s",
+      "frameworkFrames": {
+        "XCTAutomationSupport": 31,
+        "AXRuntime": 91,
+        "UIAccessibility": 141
+      },
+      "scope": "Automated native UI test, not a pure manual benchmark"
+    }
+  ],
+  "crashExitReports": 0,
+  "interpretation": "Real resource diagnostics retained; no zero-resource or pure-manual performance optimization claim."
+}

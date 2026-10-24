@@ -157,7 +157,7 @@ struct TimePollCreateView: View {
         }.ssStandaloneAction() }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !titleFocused && !locationFocused {
-                SSFlowActionDock(title: AppLocalization.string("Share for availability"), detail: "",
+                SSFlowActionDock(title: AppLocalization.string("Next: fill my availability"), detail: "",
                                  isLoading: creating, isEnabled: canCreate,
                                  accessibilityID: "time-poll-create-confirm") { Task { await create() } }
             }
@@ -298,10 +298,6 @@ struct TimePollCreateView: View {
                 body: CreateTimePollRequest(title: title, timeZone: calendar.timeZone.identifier, dates: candidateDateKeys,
                     startMinute: startMinute, endMinute: endMinute, location: location, planningMode: "COLLECT",
                     chooseActivityTogether: chooseActivityTogether ? true : nil), idempotencyKey: createKey)
-            if let userID = session.currentUser?.id {
-                TimePollFinalDraft(selected: [], choosingFinal: false, invitationVersion: 0, next: .share)
-                    .save(userID: userID, token: response.data.token)
-            }
             onCreate(response.data)
         } catch { self.error = error.localizedDescription }
     }
@@ -349,7 +345,11 @@ struct TimePollDetailView: View {
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
-                        Button("Retry") { if deleting { Task { await delete() } } else { Task { await store.retry(session: session) } } }
+                        Button("Retry") {
+                            if deleting { Task { await delete() } }
+                            else if store.submissionFailed { Task { await submitAvailability() } }
+                            else { Task { await store.retry(session: session) } }
+                        }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
                 } else {
@@ -520,9 +520,9 @@ struct TimePollDetailView: View {
                         : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))
                     layout {
                         if !store.saved {
-                            PlanActionButton(title: AppLocalization.string(poll.didRespond ? "Save changes" : "Submit my availability"), symbol: "checkmark", kind: .commit,
+                            PlanActionButton(title: AppLocalization.string(poll.didRespond ? "Save changes" : poll.isOwner ? "Submit and share" : "Submit my availability"), symbol: "checkmark", kind: .commit,
                                              isLoading: store.saving, accessibilityID: "time-poll-submit") {
-                                Task { await store.submit(session: session) }
+                                Task { await submitAvailability() }
                             }.disabled(!store.hasChanges || store.saving || store.acting)
                         }
                         if poll.isOwner {
@@ -562,6 +562,12 @@ struct TimePollDetailView: View {
         if poll.hasFixedTime { showsInvite = true } else { pickingFinalTime = true }
     }
 
+    private func submitAvailability() async {
+        let shareAfterSubmission = store.poll?.isOwner == true && store.poll?.didRespond == false
+        await store.submit(session: session)
+        if shareAfterSubmission && store.saved && !store.submissionFailed { showsSharing = true }
+    }
+
     private func restoreFinalDraft() {
         guard !restoredFinalDraft, let poll = store.poll, let userID = session.currentUser?.id else { return }
         restoredFinalDraft = true
@@ -572,7 +578,6 @@ struct TimePollDetailView: View {
         if draft.choosingFinal { beginFinalSelection(poll) }
         let next = draft.next; draft.next = nil; draft.save(userID: userID, token: store.token)
         if next == .review, finalRange != nil { showsInvite = true }
-        if next == .share { showsSharing = true }
     }
 
     private func persistFinalDraft() {
