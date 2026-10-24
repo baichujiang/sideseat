@@ -1,12 +1,16 @@
 # 已部署功能与归档边界
 
-**状态：** 当前Preview208；顺序第1–4项通过，原PNG已纠正旧空白误判。第5项调查完成，最后补验继续，无后端／网页发布。2026-10-24，Europe/Berlin。
+**状态：** 当前Preview209；顺序第1–5项、资料与完整原生流程补验及清理已完成，无本轮后端／网页发布。2026-10-24，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-当前 **Preview208，日期／刻度与卡头可读**：固定日历日期／小时局部xLarge上限，Day补44pt命中区，活动卡头辅助字号纵排；普通布局、完整AX日期、事件／路由／规则保持，无新状态请求。源码 `ee243bf2` 已推送。最终同包同次 **42.296／41.022秒，2通过、0失败／跳过**：14日期实际OCR、Day44、双位小时完整、源标题完整词、真实最大字收件标题63.333pt、提出计划取消和意愿卡操作不重叠。7最终原图逐张核对，7最终＋5before保留，前包／测试失败范围明确。手机208普通启动 **PID8498**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密清理，无新增App报告／真实写入／后端网页发布。第5项调查完成，最后补验继续。[208交付](./releases/2026-10-24-preview208-readable-calendar-headings.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
+当前 **Preview209，最终顺序验收**：顺序第1–5项及最终补验完成。真实系统最大字号私密详情233.208秒范围保留，最终公开资料117.565秒通过，长用户名完整换行；同一最终App包原生好友完整流程370.491秒／8阶段API通过。只对公开用户名增加一行自然换行，2个DEBUG夹具条件复用授权GET，无新业务状态／请求／依赖。源码 `e5666c31` 已提交推送。默认手机209普通启动PID8573，267输入／Local／严格签名／二进制一致、普通97保留；2专用账号及6条链接回收，Runner／私密配置清理。本收尾新增App报告2份（明细见设备证据）；第5项既有CPU resource诊断单列，不称纯人工性能已优化。无本轮后端／网页发布。[交付](./releases/2026-10-24-preview209-sequential-acceptance.md)、[QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
+
+旧版本段落中的“待补验”描述当时范围，当前结论以上述209为准。
+
+此前 **Preview208，日期／刻度与卡头可读**：固定日历日期／小时局部xLarge上限，Day补44pt命中区，活动卡头辅助字号纵排；普通布局、完整AX日期、事件／路由／规则保持，无新状态请求。源码 `ee243bf2` 已推送。最终同包同次 **42.296／41.022秒，2通过、0失败／跳过**：14日期实际OCR、Day44、双位小时完整、源标题完整词、真实最大字收件标题63.333pt、提出计划取消和意愿卡操作不重叠。7最终原图逐张核对，7最终＋5before保留，前包／测试失败范围明确。手机208普通启动 **PID8498**、普通97保留；267／Local／签名／二进制一致，Runner／阶段私密清理，无新增App报告／真实写入／后端网页发布。第5项调查完成，最后补验继续。[208交付](./releases/2026-10-24-preview208-readable-calendar-headings.md)、[顺序QA](./qa/2026-10-24-sequential-reliability-fixes.md)。
 
 208后续性能调查：测试／证据源码 `dc5fe0b6` 已推送，App源码／二进制不变。七天计划四段Time Profiler全部在控制窗口内、300.997秒专项通过；静置采样权重约1.94／1.98%，自动化坐标／AX84.26／96.23%，其中95.127／99.485%权重含自动化快照栈。未改算法，不称纯人工性能已优化。确有1份88%／102.07秒CPU resource，action none，时间对应自动化高负载；报告已记录，App同PID完成测试、普通启动恢复PID8510，普通97保留，Runner／阶段私密清理。最后补验继续。[性能调查](./releases/2026-10-24-preview208-performance-investigation.md)。
 
@@ -136,9 +140,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `ee243bf2`已推送，后端保持既有生产；[208来源](./qa/evidence/2026-10-24-typography208/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (208)` | 排版专项通过，严格签名／安装／普通启动PID8498；[交付](./releases/2026-10-24-preview208-readable-calendar-headings.md) |
-| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；208排版专项通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-typography208/device-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `e5666c31`已推送，后端保持既有生产；[209来源](./qa/evidence/2026-10-24-final209/native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (209)` | 完整补验通过，严格签名／安装／普通启动PID8573；[交付](./releases/2026-10-24-preview209-sequential-acceptance.md) |
+| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；209最终原生流程通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-24-final209/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_97Yg1PF8Pn2Fb3is5MJC4FNL3Cb7`，Ready | 原生产 1392 源码核验，只改两个后端文件、加来源标记；1390 项保留。候选/正式四次浏览器流程通过；[来源](./qa/evidence/2026-10-23-cross-day185/source-verification.json) |

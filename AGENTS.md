@@ -21,7 +21,20 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 208 is the current installed development build. Sequential repair4
+- Preview209 is the current installed development build. Sequential repairs1–5
+  and final supplements complete; prior pending statements below are historical.
+  Source e5666c31e380d861ed7d54a74d45f661377b9d2a pushed. Public username wraps with one fixedSize;
+  two DEBUG-only fixture conditions reuse authorized GET, no new product state,
+  request, component or rules. Real system maximum private detail233.208s retained
+  with unchanged private source; final public117.565s and final same-App native
+  full flow370.491s/eight API phases pass. Initial wrong-card/parent-label/45min
+  credential failures retain scope, not counted as acceptance. Actual originals
+  reviewed; cleanup2QA accounts/6links401/404. Normal209 PID8573,267/Local/
+  signature/binary verified,97 preserved,Runner/private cleaned. Final-stage new
+  App reports2,see device evidence;208 performance CPU resource remains
+  explicitly recorded, no pure-manual optimization claim. No backend/web release.
+  Current canonical docs reconciled;see209 release and sequential QA.
+- Preview 208 was the previous installed development build. Sequential repair4
   caps fixed Calendar date/hour metadata atxLarge, Day hit area44pt, and makes
   SSFlowCardHeader vertical only at accessibility sizes. Normal card layout,
   full date AX, events/selection/routes/rules stay; no new state/request/component.

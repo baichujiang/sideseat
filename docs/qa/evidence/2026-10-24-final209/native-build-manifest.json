@@ -15,5 +15,7 @@
   "testSourcesSHA256": {
     "SavedProfileHeaderPhoneUITests.swift": "6b3235f50adb3bc7d5556512d4c47c22c9c9af826b37b249e7aab393e3d0470e",
     "PlanFirstUsePhoneUITests.swift": "c8c42bbaee249f42740cc4164fc292cf9b45f53e1062efa56b979e0ea2e24a69"
-  }
+  },
+  "sourceCommit": "e5666c31e380d861ed7d54a74d45f661377b9d2a",
+  "sourcePushed": true
 }
