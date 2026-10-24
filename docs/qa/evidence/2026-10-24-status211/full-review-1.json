@@ -1,0 +1,32 @@
+{
+  "preview": 211,
+  "actualOriginalImagesViewed": 8,
+  "method": "Each requested PNG opened individually with view_image at original detail. No phone or repository operations.",
+  "files": [
+    "307A6C71-B611-4AA1-BE8E-8B7F692B1809.png",
+    "6936893E-CDCC-4E58-9F87-363E4819DD1D.png",
+    "145F586E-6678-489E-ABF1-1FDC9A1722F1.png",
+    "37E1B6BF-803A-4E97-A743-8B9A8A2D6D41.png",
+    "02D04A08-0715-4FAB-997A-514DFE668984.png",
+    "A3241008-2141-4FFA-81BF-58FED9443B17.png",
+    "C72DAF7C-F896-4A61-9FFE-A2AA1F2E754E.png",
+    "547B2E25-F123-4FAB-AAF7-8F12B2F743FB.png"
+  ],
+  "observations": [
+    "The early owner share capture shows an empty timetable with zero responses behind a manually opened sheet. The complete App-friends, web-share and copy options remain available.",
+    "The saved-information/private-draft capture shows both 09:00 and 09:30 first-day cells checked, zero published responses, one hour unsubmitted, and complete Submit and share plus Choose final time actions. Title, location, date metadata and footer do not overlap.",
+    "After contact delivery, the owner's two selected cells remain green with count one and a submitted-one-hour footer. The redundant submit button is absent; choose-final-time remains visible.",
+    "The participant submission capture shows the same two cells with count two, two respondents in the header, a submitted-one-hour footer and the instruction to wait for the organizer's invitation. No share sheet is open.",
+    "Collecting and final-selection states show the small gray dot and plain collecting-availability text plus complete Europe/Berlin beneath the date range. The old collecting capsule is absent from the title/location area.",
+    "Final evening selection shows amber 23:00 and 23:30 cells, a first-date-to-next-date 23:00-00:00 one-hour summary, separate clear action and complete roster-next CTA. Its amber mode explanation is distinct from the gray collecting metadata.",
+    "The invitation capture shows first-day 23:00-24:00 and next-day 00:00-01:00 green invitation segments, the pending-confirmation header badge, response progress and complete confirm/decline actions. There is no contradictory time range.",
+    "The inviting-owner share capture retains the pending-formal-issuance badge and App-friends option. The confirmed-participant share capture instead shows the confirmed badge and only web-share/copy. Both sheet summaries display the full cross-midnight range and complete Done/title/action labels."
+  ],
+  "outcome": "No new visible text truncation, in-app control overlap or inconsistent selected/invited time range was found within these eight ordinary Chinese light-mode captures.",
+  "limits": [
+    "This part does not contain the actual create-to-timetable transition, first-submit opening the share sheet, contact-picker/chat-card screen, acceptance/publish tap itself, or either Calendar screen. Their execution cannot be claimed as visually reviewed from this subset.",
+    "Exact Calendar endpoints, occurrence uniqueness, both accounts' server records and the eight API checkpoints require the separate API evidence; they are not inferred from these images.",
+    "System AssistiveTouch overlays small portions of the rightmost grid or response-list entry in some captures and is separate from App layout.",
+    "The parent reported the same-package 368.720-second full native pass and eight successful API stages. This reviewer did not rerun or independently query those stages."
+  ]
+}

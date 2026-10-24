@@ -457,10 +457,21 @@ struct TimePollDetailView: View {
                             .padding(.horizontal, SideSeatTheme.spaceMD)
                     } else {
                         PlanAdaptiveRow {
-                            Text(dateRange(poll) + "\n" + poll.timeZone)
-                                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                Text(dateRange(poll) + (poll.planningPhase == "COLLECTING" ? "" : "\n" + poll.timeZone))
+                                    .accessibilityIdentifier("time-poll-date-range")
+                                if poll.planningPhase == "COLLECTING" {
+                                    let status = poll.presentation(at: now).status
+                                    Label {
+                                        Text((status == .findingTime ? AppLocalization.string("Collecting availability") : status.title) + " · " + poll.timeZone)
+                                    } icon: {
+                                        Circle().fill(SideSeatTheme.textSecondaryStrong.opacity(0.6))
+                                            .frame(width: 5, height: 5).accessibilityHidden(true)
+                                    }.accessibilityIdentifier("plan-display-status")
+                                }
+                            }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                                 .fixedSize(horizontal: false, vertical: true)
-                                .accessibilityIdentifier("time-poll-date-range")
+                                .accessibilityElement(children: .contain).accessibilityIdentifier("plan-collection-metadata")
                         } trailing: {
                             PlanResponseSummary(poll: poll) { showsPeople = true }
                         }.padding(.horizontal, SideSeatTheme.screenHorizontal)

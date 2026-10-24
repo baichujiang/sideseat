@@ -1915,7 +1915,8 @@ import XCTest
             XCTAssertFalse(app.buttons["plan-edit-information"].exists)
             XCTAssertFalse(app.textFields["plan-edit-location"].exists)
             let share = app.buttons["plan-share-open"]
-            let status = app.descendants(matching: .any)["plan-display-status"].firstMatch
+            let status = app.staticTexts["plan-display-status"]
+            let metadata = app.descendants(matching: .any)["plan-collection-metadata"].firstMatch
             let place = app.descendants(matching: .any)["plan-detail-location"].firstMatch
             let dates = app.staticTexts["time-poll-date-range"]
             let count = app.staticTexts["time-poll-response-count"], people = app.buttons["plan-people-open"]
@@ -1968,29 +1969,30 @@ import XCTest
             XCTAssertGreaterThanOrEqual(share.frame.width, 43.99); XCTAssertGreaterThanOrEqual(share.frame.height, 43.99)
             XCTAssertGreaterThanOrEqual(share.frame.minX, heading.frame.maxX + 4)
             XCTAssertLessThanOrEqual(max(heading.frame.minY, share.frame.minY), min(heading.frame.maxY, share.frame.maxY))
-            XCTAssertGreaterThanOrEqual(status.frame.minY, max(heading.frame.maxY, share.frame.maxY))
             XCTAssertGreaterThanOrEqual(place.frame.minY, max(heading.frame.maxY, share.frame.maxY))
             capture(app, "detail-heading-top-\(large ? "largest" : "normal")-\(language)")
-            reveal(status); reveal(place)
-            XCTAssertFalse(status.frame.intersects(place.frame))
-            if large {
-                XCTAssertGreaterThanOrEqual(place.frame.minY, status.frame.maxY + 3.5)
-                XCTAssertGreaterThan(place.frame.height, status.frame.height)
-            } else {
-                XCTAssertGreaterThanOrEqual(place.frame.minX, status.frame.maxX + 7.5)
-                XCTAssertLessThan(max(status.frame.minY, place.frame.minY), min(status.frame.maxY, place.frame.maxY))
-            }
-            reveal(dates); reveal(count); reveal(people)
+            reveal(place); reveal(dates); reveal(status)
+            XCTAssertTrue(metadata.exists)
+            XCTAssertFalse(app.buttons["plan-display-status"].exists)
+            XCTAssertTrue(status.waitForExistence(timeout: 5))
+            XCTAssertTrue(status.label.contains("Europe/Berlin"))
+            XCTAssertFalse(dates.label.contains("Europe/Berlin"))
             XCTAssertGreaterThanOrEqual(dates.frame.minY, place.frame.maxY)
-            XCTAssertGreaterThan(dates.frame.height, count.frame.height)
+            XCTAssertGreaterThanOrEqual(status.frame.minY, dates.frame.maxY)
+            XCTAssertFalse(status.frame.intersects(place.frame))
+            for item in [dates, status] {
+                XCTAssertTrue(metadata.frame.insetBy(dx: -0.501, dy: -0.501).contains(item.frame))
+            }
+            reveal(count); reveal(people)
+            XCTAssertGreaterThan(metadata.frame.height, count.frame.height)
             XCTAssertGreaterThanOrEqual(people.frame.minX - count.frame.maxX, 8)
             XCTAssertGreaterThanOrEqual(people.frame.width, 43.99); XCTAssertGreaterThanOrEqual(people.frame.height, 43.99)
-            XCTAssertFalse(dates.frame.intersects(count.frame)); XCTAssertFalse(dates.frame.intersects(people.frame))
+            XCTAssertFalse(metadata.frame.intersects(count.frame)); XCTAssertFalse(metadata.frame.intersects(people.frame))
             XCTAssertFalse(count.frame.intersects(people.frame))
-            let datesAbovePeople = dates.frame.maxY <= min(count.frame.minY, people.frame.minY) + 0.5
+            let datesAbovePeople = metadata.frame.maxY <= min(count.frame.minY, people.frame.minY) + 0.5
             if large { XCTAssertTrue(datesAbovePeople) }
             else if language == "zh-Hans" { XCTAssertFalse(datesAbovePeople) }
-            if !datesAbovePeople { XCTAssertGreaterThanOrEqual(count.frame.minX, dates.frame.maxX + 7.5) }
+            if !datesAbovePeople { XCTAssertGreaterThanOrEqual(count.frame.minX, metadata.frame.maxX + 7.5) }
             XCTAssertTrue(app.descendants(matching: .any)["time-poll-grid"].exists)
             capture(app, "detail-heading-metadata-bottom-\(large ? "largest" : "normal")-\(language)")
             let peoplePoint = CGPoint(x: people.frame.minX + 12, y: people.frame.midY)

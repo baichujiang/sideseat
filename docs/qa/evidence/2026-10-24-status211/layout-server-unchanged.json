@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-24T17:52:32.177Z",
+  "checks": [
+    {
+      "role": "owner",
+      "guestResponses": 0,
+      "phase": "COLLECTING",
+      "didRespond": false,
+      "ownSlots": [],
+      "invitationVersion": 0,
+      "invitations": 0,
+      "chosenStart": null,
+      "chosenEnd": null
+    },
+    {
+      "role": "participant",
+      "guestResponses": 0,
+      "phase": "COLLECTING",
+      "didRespond": false,
+      "ownSlots": [],
+      "invitationVersion": 0,
+      "invitations": 0,
+      "chosenStart": null,
+      "chosenEnd": null
+    },
+    {
+      "role": "owner",
+      "guestResponses": 8,
+      "phase": "COLLECTING",
+      "didRespond": false,
+      "ownSlots": [],
+      "invitationVersion": 0,
+      "invitations": 0,
+      "chosenStart": null,
+      "chosenEnd": null
+    },
+    {
+      "role": "participant",
+      "guestResponses": 8,
+      "phase": "COLLECTING",
+      "didRespond": false,
+      "ownSlots": [],
+      "invitationVersion": 0,
+      "invitations": 0,
+      "chosenStart": null,
+      "chosenEnd": null
+    }
+  ]
+}

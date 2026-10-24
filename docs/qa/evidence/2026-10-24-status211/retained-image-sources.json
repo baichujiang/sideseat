@@ -1,0 +1,67 @@
+[
+  {
+    "file": "focused-zh-normal-zero-heading.png",
+    "source": "7A61B288-5C4F-43D0-A9F2-729F1D9FBBA8.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "focused-zh-normal-eight-metadata.png",
+    "source": "C27B6CF4-52DA-47FE-900E-69462F7CEA51.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "focused-de-systemmax-owner-heading.png",
+    "source": "26D04739-FBF2-4F51-9940-CEDEDFDEC1BF.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "focused-de-systemmax-owner-metadata.png",
+    "source": "09C22988-391E-407C-950A-C9176C945C80.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "focused-de-systemmax-participant-people.png",
+    "source": "BEEB8801-EDB6-45E6-ACE7-63CF9222C156.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "focused-de-systemmax-owner-final.png",
+    "source": "38940833-0C02-4DB9-AF73-BEB0BC55D841.png",
+    "run": "final-focused"
+  },
+  {
+    "file": "flow-creation.png",
+    "source": "C7DDF7ED-F6EE-4C5A-9234-88630FBB28FE.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-created-own-timetable.png",
+    "source": "3AAA6BAC-2B34-4A77-A816-F53C0982E324.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-submit-and-share.png",
+    "source": "9669BFC6-BD43-4428-BAF6-BAFB2AE0C32B.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-participant-availability.png",
+    "source": "02D04A08-0715-4FAB-997A-514DFE668984.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-final-cross-day.png",
+    "source": "B0AD5A84-5D6E-4AF1-8BFA-65EDF5831F31.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-formal-invitation.png",
+    "source": "6936893E-CDCC-4E58-9F87-363E4819DD1D.png",
+    "run": "final-complete-native"
+  },
+  {
+    "file": "flow-participant-calendar.png",
+    "source": "978368C7-0F24-4A4D-97FE-FFCB6D983F9E.png",
+    "run": "final-complete-native"
+  }
+]

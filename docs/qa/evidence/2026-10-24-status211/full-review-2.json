@@ -1,0 +1,58 @@
+{
+  "build": 211,
+  "reviewPart": 2,
+  "actualOriginalPNGsViewed": 8,
+  "method": "Each original exported PNG listed in review-part-2.json was opened separately with view_image.",
+  "images": [
+    {
+      "index": 1,
+      "file": "A688D44A-6963-494C-B1CC-24C6A499C828.png",
+      "observation": "Owner confirmed state and location remain readable in the original heading style. Share summary shows the complete 23:00-to-next-day-01:00 interval, with background split at midnight. App friends, web share, copy and Done are visible and separated."
+    },
+    {
+      "index": 2,
+      "file": "2301FFEE-F451-4942-B621-C6E13C452E3C.png",
+      "observation": "Participant pending-confirmation state retains its invitation heading badge. Cross-day highlighted interval and full share summary are readable. Only web share/copy are present; organizer-only App friends is absent."
+    },
+    {
+      "index": 3,
+      "file": "B3D31596-E348-4A2B-8D4F-F537C7F27AF6.png",
+      "observation": "Invitation review shows full start/end dates, 23:00-to-next-day-01:00 and the time zone. Two checked roster rows agree with the footer count including the organizer. Partial-availability notes are distinct from checks; Adjust time and Send invitations are readable."
+    },
+    {
+      "index": 4,
+      "file": "87A2ABCF-BC96-497D-A5A2-9D26929A48E1.png",
+      "observation": "In final selection, title/share/location occupy the heading without the collection badge. The date row contains a small grey dot and Collecting availability plus time zone, separate from two-response/avatar controls. Selected 09:00 and 09:30 cells have complete amber borders/checks; footer reads 09:00-10:00 and one hour. This is an intermediate selection before the final cross-day two-hour range."
+    },
+    {
+      "index": 5,
+      "file": "BD73A7EF-125E-41B3-97F4-54A45B636470.png",
+      "observation": "Participant collecting state appears as grey metadata beneath candidate dates, with one submitted response and readable timetable counts. The share sheet contains title, web share, copy and Done, with no organizer-only App friends entry."
+    },
+    {
+      "index": 6,
+      "file": "54FB7812-D019-4468-83B8-15E29C8EA158.png",
+      "observation": "Contact selection shows one selected contact and a send-to-one-contact action. Instruction text, close, primary action and search remain legible and separated."
+    },
+    {
+      "index": 7,
+      "file": "DE31E305-D193-4E2C-B84E-2C125DF40DD0.png",
+      "observation": "Inline location edit retains the two selected local cells while submitted count remains zero. Grey collection/time-zone metadata is readable under the date range. Cancel and Save stay above the keyboard; the keyboard only reduces the table viewport."
+    },
+    {
+      "index": 8,
+      "file": "3AAA6BAC-2B34-4A77-A816-F53C0982E324.png",
+      "observation": "New plan opens directly to the empty timetable with no share sheet. Heading contains title/share and optional location. Date metadata reads Collecting availability plus the time zone, with a grey dot and no capsule. Zero responses and zero selected hours agree with the disabled Submit and share action. Choose final time remains separate."
+    }
+  ],
+  "result": "No blocking text clipping, absent timetable drawing, or overlapping primary App controls observed in these eight images. The collecting-only status move is visible while invitation/confirmed badges remain.",
+  "limits": [
+    "These eight frames do not include a Calendar result screen, the chat plan-card detail, or the actual accept/publish button presses. They must not be described as complete visual coverage of those actions.",
+    "Full exact Calendar end times and uniqueness are established by separate API evidence, not inferred from screenshot crops.",
+    "Request acknowledgement order and successful submission/delivery are established by the completed native UI/API flow; these static images show states only.",
+    "Actual system maximum typography belongs to separate focused acceptance; this group is ordinary Chinese light.",
+    "The intermediate one-hour final selection precedes the later cross-day two-hour invitation and is not a conflicting final duration.",
+    "System AssistiveTouch is a separate floating control and may cover a local edge."
+  ],
+  "safety": "No account identities, credentials or private URLs included."
+}

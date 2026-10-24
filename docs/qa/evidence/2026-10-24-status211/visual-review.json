@@ -1,0 +1,48 @@
+{
+  "build": 211,
+  "passed": true,
+  "method": "Each final original PNG viewed individually with view_image; disjoint reviewer assignments. Root additionally viewed ordinary zero-person and system-max metadata originals.",
+  "focusedOriginalsViewed": 19,
+  "completeOriginalsViewed": 25,
+  "finalOriginalsRetained": 13,
+  "earlierFailureOriginalRetained": 1,
+  "reviews": [
+    {
+      "kind": "focused",
+      "part": 0,
+      "record": "focused-review-0.json"
+    },
+    {
+      "kind": "focused",
+      "part": 1,
+      "record": "focused-review-1.json"
+    },
+    {
+      "kind": "full",
+      "part": 0,
+      "record": "full-review-0.json"
+    },
+    {
+      "kind": "full",
+      "part": 1,
+      "record": "full-review-1.json"
+    },
+    {
+      "kind": "full",
+      "part": 2,
+      "record": "full-review-2.json"
+    }
+  ],
+  "observations": [
+    "Ordinary title/share and independent long location remain clear. Grey dot and plain collecting status/time zone sit below dates, outside heading.",
+    "Zero/eight responses, three avatars/+5, adaptive maximum-text stacking and final-selection metadata retain their hierarchy.",
+    "All complete native visible stages reviewed with no new fixed-layout truncation or overlap in this scope."
+  ],
+  "limits": [
+    "Real maximum-font long pages require scrolling; partial top content at metadata scroll positions is not text truncation.",
+    "In some maximum-font people captures, a count line is close to the footer viewport; screenshots alone do not prove generous bottom clearance.",
+    "System AssistiveTouch overlays a small right-side region of some originals.",
+    "Calendar image directly shows title/location/start; exact end and one entry per account verified by eight-stage API checks and native assertions, not inferred from cropped image.",
+    "This is scoped collecting-header acceptance plus normal-size full flow, not whole-app maximum-font audit."
+  ]
+}

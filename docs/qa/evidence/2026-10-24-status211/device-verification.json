@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-24T17:56:59.680114+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "previewBuild": 211,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 8696,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "disposableFixtureRetainedForFinalAcceptance": false,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "testFixtureScope": "Two disposable QA accounts; two read-only layout plans with eight guest responses plus one App-created complete-flow plan. No real user data modified.",
+  "disposableDataCleanup": {
+    "accountsRemoved": 2,
+    "tokens401": 2,
+    "links404": 3,
+    "at": "2026-10-24T17:56:39.045Z"
+  },
+  "privateLaunchConfigurationRemoved": true,
+  "generatedRunnerProjectRemoved": true,
+  "defaultDeviceIdentityVerifiedBeforeInstall": true,
+  "appCrashExitReports": 0
+}

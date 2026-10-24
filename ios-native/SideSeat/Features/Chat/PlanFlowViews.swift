@@ -437,6 +437,7 @@ struct PlanDetailHeading: View {
     let poll: NativeTimePoll
     let store: TimePollStore
     var showsSharing = true
+    var showsStatus = true
     var statusIdentifier = "plan-display-status"
     var editTitle: (() -> Void)? = nil
     var editLocation: (() -> Void)? = nil
@@ -456,7 +457,7 @@ struct PlanDetailHeading: View {
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
                 : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
             layout {
-                status.fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
+                if showsStatus { status.fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true) }
                 metadata.frame(maxWidth: .infinity, alignment: .leading)
             }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.frame(maxWidth: .infinity, alignment: .leading)

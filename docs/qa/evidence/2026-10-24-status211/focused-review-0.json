@@ -1,0 +1,32 @@
+{
+  "build": "Preview 211",
+  "review": "Actual per-image original PNG visual inspection; read-only, no App or device changes.",
+  "actual_image_count": 10,
+  "result": "No new intrinsic truncation or horizontal overlap observed in this visual scope.",
+  "observations": [
+    "Normal activity title and trailing share control remain distinct; location is readable below.",
+    "Date metadata contains a small gray status dot and localized collection text with the full Europe/Berlin time zone, rather than an extra title status pill.",
+    "Zero-response count and people control are distinct. Eight-response layouts retain count, three visible avatars and +5 overflow without placing count text on the control border.",
+    "At German maximum size, long location and the complete collection status/time zone wrap vertically and are readable in the corresponding scrolled captures.",
+    "Final-selection captures retain date/status metadata and separate own-availability/final-time legends; visible time labels and responder counts are readable.",
+    "Owner and participant footer actions shown in these captures remain within their horizontal bounds."
+  ],
+  "limitations": [
+    "Maximum-size title, location and metadata do not fit together on the first screen; scrolling is required and represented by multiple captures.",
+    "The participant people capture places the second count line close to the lower scrolling viewport edge. This image alone does not establish a fixed layout clipping defect.",
+    "The system AssistiveTouch floating control partly covers some right-side content in the screenshots. It is separate from the App layout.",
+    "Static visual review does not independently establish interactions, VoiceOver behavior, delivery or calendar completion; full flow testing remains with the parent task."
+  ],
+  "files_actually_viewed_original": [
+    "BEEB8801-EDB6-45E6-ACE7-63CF9222C156.png",
+    "2EAB53FC-6FF1-48F9-9CF0-31DE687662A7.png",
+    "38940833-0C02-4DB9-AF73-BEB0BC55D841.png",
+    "09C22988-391E-407C-950A-C9176C945C80.png",
+    "26D04739-FBF2-4F51-9940-CEDEDFDEC1BF.png",
+    "641F9858-7C0C-4777-B8ED-326BF95CDC56.png",
+    "49FFE65D-D867-4AB3-ADC7-D2A1E3011D87.png",
+    "7572DDE4-2CBC-4F75-9FF0-97838B8D1EDB.png",
+    "25F1620A-2D98-4825-9663-0359D5E2BA37.png",
+    "7A61B288-5C4F-43D0-A9F2-729F1D9FBBA8.png"
+  ]
+}

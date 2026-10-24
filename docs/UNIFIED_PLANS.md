@@ -43,6 +43,21 @@ The Preview-numbered sections below describe dated changes; newer amendments
 supersede older descriptions. They are not additional current entry paths or
 fresh acceptance claims.
 
+## Collection stage metadata — Preview 211
+
+The native editable COLLECT detail keeps title/share and editable location in
+its heading. Its stage moves to the existing date/people metadata group: date
+range first, then a small grey dot and regular caption containing Collecting
+availability and the time zone. Dates/status remain full-width and naturally
+wrap; the existing adaptive row stacks against people/avatars when needed.
+The stage is passive text, with no capsule or calendar icon. Activity-idea stages
+keep their own existing status wording in this same location.
+
+This applies only where the editable collection timetable is rendered. Legacy
+fixed-time collecting plans retain their heading status. Invitation, confirmed,
+expired and invitation-adjustment headings keep their existing status/overrides;
+shared overview badges are unchanged. No state, request or consent rule changes.
+
 ## Native creation uses the shared editor — Preview 196
 
 Owner amendment 2026-10-24: use the same native Form/Section, grouped canvas,

@@ -1,0 +1,62 @@
+{
+  "build": "Preview 211",
+  "review_method": "Every listed actual PNG viewed individually at original detail. Read-only visual review; no device or repository changes.",
+  "actual_image_count": 9,
+  "result": "No new intrinsic text truncation or layout overlap observed in the visible flow captures.",
+  "visible_stages": [
+    {
+      "file": "C7DDF7ED-F6EE-4C5A-9234-88630FBB28FE.png",
+      "observation": "Creation information form shows activity name, optional location, candidate dates, daily range, full time zone, optional suggestions and next-step availability CTA; no timetable preview."
+    },
+    {
+      "file": "2EDBFDA5-6300-4DF7-8B54-EBD2462A8228.png",
+      "observation": "Own availability draft shows two selected half-hour cells, zero submitted responders, one-day/one-hour unsent summary, submit-and-share action and final-selection entry. Date/status/time zone are readable in metadata."
+    },
+    {
+      "file": "9669BFC6-BD43-4428-BAF6-BAFB2AE0C32B.png",
+      "observation": "Share panel is visible over the submitted timetable with one responder. App-friend card, web-link sharing and copy-link actions are distinct and readable."
+    },
+    {
+      "file": "08CA52D8-ECF3-4129-B018-CD8379EE4F09.png",
+      "observation": "Received chat plan card shows activity title, availability-needed status and explicit fill-my-availability action."
+    },
+    {
+      "file": "80D8D10F-4CBB-49E0-8FE4-0D4E32008451.png",
+      "observation": "Participants sheet shows two submitted responses, separate people rows, and explicit explanation that availability does not constitute attendance confirmation."
+    },
+    {
+      "file": "B0AD5A84-5D6E-4AF1-8BFA-65EDF5831F31.png",
+      "observation": "Final-selection view retains gray collection status in date metadata, distinct legends and clear selected next-day midnight cells. Footer visibly summarizes the cross-day 23:00–01:00 interval over two dates as two hours and offers invitation-list review."
+    },
+    {
+      "file": "B03BB508-BD45-4DDF-A2EC-AE54400E905E.png",
+      "observation": "Received chat invitation card shows full cross-day start/end text across two lines, pending-confirmation status and view-invitation action."
+    },
+    {
+      "file": "9FAE7C6A-3773-4CCB-9715-2914CDE73B3B.png",
+      "observation": "Accepted invitation view retains title-area awaiting-formal-send status and location. Two dated tables visibly highlight 23:00–24:00 and 00:00–01:00. Two-of-two confirmation progress and accepted/waiting-for-owner copy are readable."
+    },
+    {
+      "file": "978368C7-0F24-4A4D-97FE-FFCB6D983F9E.png",
+      "observation": "Calendar search visibly returns the activity with its location and start at 23:00 on the expected first date. Search result is above the keyboard and readable."
+    }
+  ],
+  "limitations": [
+    "The final Calendar screenshot displays the event start only; it does not visually establish the exact end timestamp.",
+    "These nine PNGs do not show two distinct actors Calendar screens or the owner final-send confirmation. API and test assertions are separate evidence for those outcomes.",
+    "Screenshots show selected outcomes, not continuous gestures or network ordering. Tap/cancel/drag correctness and delivery chronology are independently established by the parent test run.",
+    "The system AssistiveTouch floating control partly overlaps some noncritical right-side screenshot regions and is separate from App layout.",
+    "This complete-flow image set uses normal Chinese typography; German system-maximum layout was reviewed separately in the focused ten-image set."
+  ],
+  "files_actually_viewed_original": [
+    "978368C7-0F24-4A4D-97FE-FFCB6D983F9E.png",
+    "9FAE7C6A-3773-4CCB-9715-2914CDE73B3B.png",
+    "B03BB508-BD45-4DDF-A2EC-AE54400E905E.png",
+    "B0AD5A84-5D6E-4AF1-8BFA-65EDF5831F31.png",
+    "80D8D10F-4CBB-49E0-8FE4-0D4E32008451.png",
+    "08CA52D8-ECF3-4129-B018-CD8379EE4F09.png",
+    "9669BFC6-BD43-4428-BAF6-BAFB2AE0C32B.png",
+    "2EDBFDA5-6300-4DF7-8B54-EBD2462A8228.png",
+    "C7DDF7ED-F6EE-4C5A-9234-88630FBB28FE.png"
+  ]
+}

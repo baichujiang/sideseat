@@ -81,6 +81,7 @@ struct PlanInlineInformation: View {
             }.textFieldStyle(.plain)
         } else {
             PlanDetailHeading(poll: poll, store: store, showsSharing: showsSharing,
+                showsStatus: poll.planningPhase != "COLLECTING" || poll.hasFixedTime,
                 editTitle: editable ? { begin(.title) } : nil,
                 editLocation: editable ? { begin(.location) } : nil)
         }

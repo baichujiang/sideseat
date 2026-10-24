@@ -1,0 +1,32 @@
+{
+  "preview": 211,
+  "actualOriginalImagesViewed": 9,
+  "method": "Each requested PNG opened individually with view_image at original detail.",
+  "files": [
+    "DD20DC19-8CBA-4F2B-A5E4-2C1C40C00E29.png",
+    "242E3997-0061-492C-ADA3-E52EADE5B90A.png",
+    "F6E8A26B-616B-4BE4-8226-FEE724BC38C9.png",
+    "1A63FBDA-60ED-47A9-940B-47D97D129489.png",
+    "5DB57FAF-AA15-4EED-BA1E-182E8852F451.png",
+    "C27B6CF4-52DA-47FE-900E-69462F7CEA51.png",
+    "19243BCB-D465-45FB-B809-F5AE425A5E05.png",
+    "BECF1D11-989E-4D02-AF2E-A86F371D3765.png",
+    "5279CB20-F79E-4190-9657-BC274D5D0D31.png"
+  ],
+  "observations": [
+    "Normal Chinese zero/eight states show the complete title with separate share icon and long German location. The old title-area status capsule is absent.",
+    "The date range is followed by a small gray dot and plain gray collecting-availability text plus complete Europe/Berlin. There is no colored capsule around this status.",
+    "Normal zero count is next to metadata with a separate people entry. Eight responses use three visible avatar initials, +5 and a chevron; status, count and avatar entry do not overlap.",
+    "German real maximum participant date/status image shows the full long location, cross-month dates, Freie Zeiten sammeln and complete Europe/Berlin across natural lines, without an ellipsis or word truncation.",
+    "German maximum heading images show the complete multi-line title, separate share icon and long location. Scroll-position changes move earlier title lines outside the viewport when metadata is revealed.",
+    "German maximum owner people image shows eight responses and compact avatar overflow. The response count wraps to two lines and its second line lies very near the scrolling viewport's bottom edge in this particular capture.",
+    "The normal Chinese final-selection image retains the same plain collecting status/date/time-zone metadata. Its separate amber final-selection guidance, three date columns, response counts and disabled roster-next action are legible. No time was selected or submitted during this read-only check."
+  ],
+  "limits": [
+    "This part contains four German maximum images and five Chinese normal images, including one normal final-selection image; it does not contain the German maximum final-selection capture.",
+    "Long maximum-font pages require vertical scrolling. Heading/location captures do not show every status/count line simultaneously. The owner-people capture alone is insufficient to claim generous clearance below the complete two-line count.",
+    "AssistiveTouch overlays a small right-side area on several images, including near the avatar group; it is separate from in-app text layout.",
+    "No new fixed-layout word truncation, status capsule, or collision between status and location/date/avatars was observed within the reviewed states. This is a scoped screenshot review, not a whole-app accessibility audit.",
+    "The parent reported the 154.962-second focused pass. This reviewer did not rerun the tests, operate the phone, or modify App/test/repository files."
+  ]
+}

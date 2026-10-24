@@ -1,0 +1,54 @@
+{
+  "build": 211,
+  "sourceReview": {
+    "result": "Independent read-only minimal implementation review passed",
+    "scope": "Ordinary collecting detail only; no business-state/request mutation",
+    "preserved": [
+      "Legacy fixed-time status",
+      "INVITING/CONFIRMED/expired headings and overrides",
+      "Existing PlanStatusBadge elsewhere",
+      "Existing date/people adaptive row, count/avatar behavior and targets",
+      "Create→fill→submit/share and final invitation/Calendar rules"
+    ],
+    "newStatus": "Local Collecting availability text plus time zone; grey dot and caption; no badge fill or action",
+    "localization": "Reuse existing key; Chinese and German values updated; global Finding a time unchanged"
+  },
+  "notRun": [
+    "Unchanged unit/domain suites",
+    "Browser participant flow (no web/backend change)",
+    "Historical inline-header matrix method (assertions updated; replacement focused cases run)"
+  ],
+  "initialPhoneFailures": [
+    {
+      "seconds": 16.071,
+      "failed": 1,
+      "scope": "Any-type firstMatch picked decorative5pt AX Other sharing the Label identifier, not the status StaticText. Actual originalPNG shows correct layout."
+    },
+    {
+      "seconds": 20.952,
+      "failed": 1,
+      "scope": "Test incorrectly assumed the text was under that Other. Exported actual AX proves dot Other and full status StaticText are siblings under metadata. Correct locator selects StaticText by stable identifier."
+    }
+  ],
+  "testRepairScope": "Role-specific status StaticText; precise wording/time-zone, complete visibility, metadata geometry and44pt checks retained; App source/binary unchanged.",
+  "focused": {
+    "test": "StatusMetadataPhoneUITests/testCollectingStatusUsesDateMetadataAcrossRolesAndTextSizes",
+    "seconds": 154.962,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "combinations": 4,
+    "actualOriginalPNGs": 19,
+    "source": "Same frozen App211"
+  },
+  "completeNative": {
+    "test": "PlanFirstUsePhoneUITests/testNativeContactCardCreateFillInviteConfirmAndCalendar",
+    "seconds": 368.72,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "apiPhases": 8,
+    "actualOriginalPNGs": 25,
+    "source": "Same frozen App211"
+  }
+}
