@@ -1973,9 +1973,9 @@
 "Add an activity and choose when. You stay in control of finding company and Explore visibility." = "Add an activity and choose when. You stay in control of finding company and Explore visibility.";
 "Finding company for you" = "Finding company for you";
 "Based on %lld intentions finding company" = "Based on %lld intentions finding company";
-"No new company right now" = "No new company right now";
-"%lld intentions are still finding company. New suggestions will appear here." = "%lld intentions are still finding company. New suggestions will appear here.";
-"Review your intentions to start or resume finding company." = "Review your intentions to start or resume finding company.";
+"No new company right now" = "No new recommendations yet";
+"%lld intentions are still finding company. New suggestions will appear here." = "Still finding company for %lld of your intentions.";
+"Review your intentions to start or resume finding company." = "Add an intention or resume a paused one in My intentions.";
 "View my intentions" = "View my intentions";
 "Finding company" = "Finding company";
 "Intention paused" = "Paused";
@@ -2092,7 +2092,7 @@
 
 "Search again" = "Search again";
 
-"No new recommendations right now." = "No new recommendations right now.";
+"No new recommendations right now." = "No more recommendations right now";
 
 /* Membership and invitation redemption */
 "Free membership" = "Free membership";
@@ -3207,3 +3207,4 @@
 "App friends" = "App friends";
 "Choose contacts and send a plan card." = "Choose contacts and send a plan card.";
 "For friends without the App" = "For friends without the App";
+"New ideas will appear here as students share them." = "New ideas will appear here as students share them.";

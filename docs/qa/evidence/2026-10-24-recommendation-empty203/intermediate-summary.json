@@ -1,0 +1,11 @@
+{
+  "title": "Test - Flow203",
+  "result": "Failed",
+  "passedTests": 1,
+  "failedTests": 1,
+  "skippedTests": 0,
+  "startTime": 1792808514.383,
+  "finishTime": 1792808847.624,
+  "totalTestCount": 2,
+  "scope": "Intermediate product before final dedicated result copy. Layout/routes8states passed322.159s; transient loading observation failed7.262s because first query was at4.82s after four-second fixture. Not final acceptance."
+}

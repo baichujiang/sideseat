@@ -1,0 +1,12 @@
+{
+  "title": "Test - Flow203",
+  "result": "Passed",
+  "passedTests": 1,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "startTime": 1792808387.473,
+  "finishTime": 1792808411.377,
+  "totalTestCount": 1,
+  "phoneBuild": 202,
+  "scope": "Before change: local fixture, Chinese standard light, zero and one active intention. Two images actually viewed by parent."
+}

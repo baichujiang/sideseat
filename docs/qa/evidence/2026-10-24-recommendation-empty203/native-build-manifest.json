@@ -1,0 +1,32 @@
+{
+  "build": 203,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "nativeTrackedInputsVerified": 248,
+  "configurationAndScriptsVerified": 18,
+  "sharedCalendarPolicyResourceVerified": 1,
+  "isolatedSource": "/tmp/sideseat195-source",
+  "project": "Reused isolated generated project after refreshing all267 tracked inputs from the active checkout. No new App Swift files.",
+  "privateLocalConfigurationMatched": true,
+  "binarySHA256": {
+    "SideSeat Preview": "b0cc8d0ac791192b8e842fe6d60ed2f2b5addf3d4c1630877005d0bb976aa2e4",
+    "SideSeat Preview.debug.dylib": "b18edad072ff7b2d132917b94b1b8f6adb85768bd9b997fe8785ab68ec5243bb"
+  },
+  "baselinePhoneBuild": 202,
+  "baselineUITestSourceSHA256": "1df8005a172c126b3a568a426405f8df51921d0ebc93ac28b2093e1ba691d542",
+  "backendRelease": false,
+  "webRelease": false,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "strictSignatureVerified": true,
+  "finalUITestSourceSHA256": "7b5543ebf2ea3f42f2a417ef861208b63c3635ec29cabb6532ca09a15ccde190",
+  "all267InputsReverified": true,
+  "productFrozenDuringAcceptance": true,
+  "preResultCopyCleanupBinarySHA256": {
+    "SideSeat Preview": "05d66982f4577331a7158ef034965a8521544061cb7f2e7a1eeb6e6a5afb57cd",
+    "SideSeat Preview.debug.dylib": "394889cafa67de32b438da35a19485aa6e0c7a905a77c1d19c081b6ba803ab9d"
+  },
+  "layoutUITestSourceSHA256": "71f9b6f6121052f0aad314c3ef3b73191e6a6c409182a70dbfcf09edad3ee4f2",
+  "testOnlyTimingRepair": "Skip extra home wait for transient loading observations and query skeleton immediately; prior attempt first queried at4.82s after four-second fixture finished.",
+  "finalVisualCleanup": "Dedicated shorter inline result copy avoids German largest-text compound-word fragmentation; no shared old Explore copy change.",
+  "finalLayoutUITestSourceSHA256": "6bbb380b9264c79207adfaa6ac6f46aa95cbf4f5fc05ece52fef31dd839ea6ce",
+  "retryTestScope": "Changed empty-state CTAs retain44pt checks. Unchanged native error Retry has AXheight34.333; verify its full visibility, hittability and real recovery, not a new minimum-size contract. App unchanged."
+}

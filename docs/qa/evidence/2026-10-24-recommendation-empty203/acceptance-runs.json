@@ -1,0 +1,26 @@
+{
+  "scope": "Recommendation empty presentation and existing local-fixture entry routes, not authenticated matching/sending/invitation API acceptance.",
+  "intermediate": {
+    "layoutSeconds": 322.159,
+    "loadingSeconds": 7.262,
+    "loadingResult": "Failed: first skeleton query at4.82sec after four-second fixture; test timing corrected.",
+    "visualIssue": "German compound-word fragmentation fixed with dedicated short result copy; product rebuilt."
+  },
+  "finalProduct": {
+    "layoutAndRoutes": {
+      "name": "testEmptyStateLayoutsAndRoutes()",
+      "durationInSeconds": 322.2587308883667,
+      "result": "Passed"
+    },
+    "sameInvocationLoadingSeconds": 21.519,
+    "sameInvocationLoadingResult": "Failed solely at extra44pt assertion on unchanged native Retry with AXheight34.333. New empty CTAs keep strict44pt checks.",
+    "targetedLoadingAndRecovery": {
+      "name": "testLoadingAndFailureRecovery()",
+      "durationInSeconds": 26.85534107685089,
+      "result": "Passed"
+    },
+    "productUnchangedDuringFinalTestScopeRepair": true,
+    "allRequiredScopesPassed": true,
+    "singleUninterruptedSuiteAllPassed": false
+  }
+}

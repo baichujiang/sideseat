@@ -1972,9 +1972,9 @@
 "Add an activity and choose when. You stay in control of finding company and Explore visibility." = "Füge eine Aktivität hinzu und wähle eine Zeit. Du bestimmst, ob du Gesellschaft suchst und in Entdecken sichtbar bist.";
 "Finding company for you" = "Wir suchen Gesellschaft für dich";
 "Based on %lld intentions finding company" = "Auf Basis von %lld aktiven Suchvorhaben";
-"No new company right now" = "Gerade keine neuen Vorschläge";
-"%lld intentions are still finding company. New suggestions will appear here." = "Für %lld Vorhaben suchst du weiterhin Gesellschaft. Neue Vorschläge erscheinen hier.";
-"Review your intentions to start or resume finding company." = "Prüfe deine Vorhaben, um die Suche zu starten oder fortzusetzen.";
+"No new company right now" = "Noch keine neuen Vorschläge";
+"%lld intentions are still finding company. New suggestions will appear here." = "Die Suche läuft weiter. Aktive Vorhaben: %lld.";
+"Review your intentions to start or resume finding company." = "Veröffentliche unter Vorhaben einen Wunsch oder setze eine pausierte Suche fort.";
 "View my intentions" = "Meine Vorhaben ansehen";
 "Finding company" = "Suche aktiv";
 "Intention paused" = "Pausiert";
@@ -2091,7 +2091,7 @@
 
 "Search again" = "Erneut suchen";
 
-"No new recommendations right now." = "Im Moment gibt es keine neuen Vorschläge.";
+"No new recommendations right now." = "Momentan keine weiteren Vorschläge";
 
 /* Membership and invitation redemption */
 "Free membership" = "Kostenlose Mitgliedschaft";
@@ -3206,3 +3206,4 @@
 "App friends" = "App-Freunde";
 "Choose contacts and send a plan card." = "Kontakte auswählen und eine Plankarte senden.";
 "For friends without the App" = "Für Freunde ohne App";
+"New ideas will appear here as students share them." = "Neue Vorschläge erscheinen hier, sobald andere sie teilen.";

@@ -1,0 +1,17 @@
+{
+  "productBuild": 203,
+  "rawSuiteResult": "Failed",
+  "scope": "Final product layout/routes case accepted independently; same invocation loading case failed solely at extra minimum44pt assertion on unchanged native Retry. Product unchanged for subsequent targeted test repair.",
+  "tests": [
+    {
+      "name": "testEmptyStateLayoutsAndRoutes()",
+      "durationInSeconds": 322.2587308883667,
+      "result": "Passed"
+    },
+    {
+      "name": "testLoadingAndFailureRecovery()",
+      "durationInSeconds": 21.518957018852234,
+      "result": "Failed"
+    }
+  ]
+}

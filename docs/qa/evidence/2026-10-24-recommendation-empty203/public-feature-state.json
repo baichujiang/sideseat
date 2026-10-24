@@ -1,0 +1,13 @@
+{
+  "serverTime": "2026-10-24T02:14:09.437Z",
+  "endpoint": "https://api.sideseat.de/api/v1/client-config",
+  "features": {
+    "v2WeeklyIntent": true,
+    "v2MutualOpportunity": true,
+    "v2AutomaticMatching": true,
+    "v2ExploreIntents": true,
+    "v2Recommendations": false
+  },
+  "maintenanceMode": false,
+  "scope": "Read-only public config; Together opportunities also require per-account experiment assignment. v2Recommendations belongs to old Discover, not this screen."
+}

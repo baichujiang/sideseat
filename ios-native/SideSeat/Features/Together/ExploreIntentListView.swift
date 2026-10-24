@@ -144,13 +144,24 @@ struct ExploreIntentListView: View {
                     if let issue = store.issue {
                         Text(issue).font(.footnote).foregroundStyle(SideSeatTheme.danger)
                     } else if store.hasLoaded && !store.isLoading {
-                        Text("No new recommendations right now.")
-                            .font(.footnote).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, SideSeatTheme.spaceSM)
-                            .accessibilityIdentifier("explore-intents-empty")
+                        VStack(spacing: SideSeatTheme.spaceMD) {
+                            Image(systemName: "sparkle.magnifyingglass")
+                                .font(.system(size: 28, weight: .medium))
+                                .foregroundStyle(SideSeatTheme.textSecondary)
+                                .accessibilityHidden(true)
+                            Text("No new recommendations right now.")
+                                .font(.headline)
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                            Text(AppLocalization.string("New ideas will appear here as students share them."))
+                                .font(.subheadline)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        }
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 340)
+                        .padding(.vertical, SideSeatTheme.spaceXL)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityIdentifier("explore-intents-empty")
                     }
                 } else if store.isLoading, store.intents.isEmpty {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 120)

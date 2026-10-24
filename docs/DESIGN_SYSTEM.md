@@ -48,6 +48,13 @@ weight. Keep the track free of an outer action outline; reserve solid
 `ProductAction` fills for explicit primary actions. Preserve the 44pt targets,
 selected accessibility state, paging and Together's adaptive section chooser.
 
+Together recommendation empty states use one centered, unframed group (maximum
+340pt): quiet people icon, short title, status-aware description and vertically
+aligned actions. Find more is the product primary; View my intentions is a text
+secondary, or the sole primary when Explore is unavailable. Successful exploration
+with no results uses a static icon/title/description, without an extra retry.
+Keep loading/errors distinct, preserve finding counts and allow natural text scroll.
+
 ### Planning clarity
 
 For first use, explain the link → agreement → Calendar path. Creation opens directly

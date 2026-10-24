@@ -723,12 +723,9 @@ private struct TogetherHomeView: View {
                             opportunities: opportunityStore.opportunities,
                             renderOpportunity: { AnyView(opportunityCard($0)) }, store: exploreStore)
                     }
-                    if !hasRequestedMoreRecommendations || exploreStore.isLoading || exploreStore.issue != nil || exploreStore.hasMore {
-                        Button {
-                            savedWhileBrowsingIDs.removeAll()
-                            hasRequestedMoreRecommendations = true
-                            Task { await loadExploration() }
-                        } label: {
+                    if !showsInitialRecommendationEmptyState,
+                       !hasRequestedMoreRecommendations || exploreStore.isLoading || exploreStore.issue != nil || exploreStore.hasMore {
+                        Button(action: findMoreRecommendations) {
                             HStack(spacing: SideSeatTheme.spaceSM) {
                                 if exploreStore.isLoading { ProgressView() }
                                 else { Image(systemName: "sparkle.magnifyingglass") }
@@ -1015,25 +1012,58 @@ private struct TogetherHomeView: View {
 
     private var emptyOpportunityState: some View {
         let count = findingCount(at: Date())
-        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-            Label(AppLocalization.string("No new company right now"), systemImage: "person.2")
-                .font(.headline)
-            Text(count > 0
-                ? String(format: AppLocalization.string("%lld intentions are still finding company. New suggestions will appear here."), Int64(count))
-                : AppLocalization.string("Review your intentions to start or resume finding company."))
-                .font(.subheadline)
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true)
-            Button(AppLocalization.string("View my intentions")) {
-                sectionSelection.wrappedValue = .intentions
+        return VStack(spacing: SideSeatTheme.spaceXL) {
+            VStack(spacing: SideSeatTheme.spaceMD) {
+                Image(systemName: "person.2")
+                    .font(.system(size: 25, weight: .medium))
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .frame(width: 64, height: 64)
+                    .background(SideSeatTheme.fillSubtle, in: Circle())
+                    .accessibilityHidden(true)
+                Text(AppLocalization.string("No new company right now"))
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                Text(count > 0
+                    ? String(format: AppLocalization.string("%lld intentions are still finding company. New suggestions will appear here."), Int64(count))
+                    : AppLocalization.string("Review your intentions to start or resume finding company."))
+                    .font(.subheadline)
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            .buttonStyle(.bordered).frame(minHeight: 44)
-            .accessibilityIdentifier("together-discovery-empty-action")
+            .fixedSize(horizontal: false, vertical: true)
+
+            VStack(spacing: SideSeatTheme.spaceXS) {
+                if exploreEnabled {
+                    SSPrimaryButton(title: AppLocalization.string("Find more recommendations"),
+                        fill: .product, height: 48, accessibilityID: "together-find-more",
+                        action: findMoreRecommendations)
+                    SSSecondaryButton(title: AppLocalization.string("View my intentions"),
+                        accessibilityID: "together-discovery-empty-action") {
+                        sectionSelection.wrappedValue = .intentions
+                    }
+                } else {
+                    SSPrimaryButton(title: AppLocalization.string("View my intentions"),
+                        fill: .product, height: 48, accessibilityID: "together-discovery-empty-action") {
+                        sectionSelection.wrappedValue = .intentions
+                    }
+                }
+            }
         }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: 340)
         .padding(.vertical, SideSeatTheme.spaceXL)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("together-opportunities-empty")
+    }
+
+    private var showsInitialRecommendationEmptyState: Bool {
+        displayedOpportunities.isEmpty && opportunityStore.issue == nil && !hasRequestedMoreRecommendations
+    }
+
+    private func findMoreRecommendations() {
+        savedWhileBrowsingIDs.removeAll()
+        hasRequestedMoreRecommendations = true
+        Task { await loadExploration() }
     }
 
     private func opportunityCard(_ opportunity: NativeMutualOpportunity, inRecommendations: Bool = true) -> some View {

@@ -1744,7 +1744,7 @@ final class VisualQAScreenshotUITests: XCTestCase {
             XCTAssertTrue(more.isEnabled)
             more.tap()
             XCTAssertFalse(more.isEnabled, "The original full-width action shows loading and prevents duplicate requests")
-            let empty = app.staticTexts["explore-intents-empty"]
+            let empty = app.descendants(matching: .any)["explore-intents-empty"].firstMatch
             XCTAssertTrue(empty.waitForExistence(timeout: 8))
             revealFlowElement(empty, in: app)
             XCTAssertEqual(empty.frame.midX, app.frame.midX, accuracy: 2)

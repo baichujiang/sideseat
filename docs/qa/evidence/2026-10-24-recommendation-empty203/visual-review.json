@@ -1,0 +1,207 @@
+{
+  "actualFinalImagesViewed": 32,
+  "actualBeforeImagesViewed": 2,
+  "savedFinalImages": 12,
+  "scope": "Chinese ordinary light/dark and German largest light/dark, zero/one finding intention, first empty and searched empty, plus loading/error/recovery. Actual phone local-fixture screenshots.",
+  "verdict": "Changed empty UI and final dedicated copy have no blocking visual issue; German compound split fixed. One centered group, solid primary/text secondary, no redundant outline.",
+  "limitations": [
+    "German largest with no finding intention needs vertical scrolling to reach both actions; controls are fully visible after scrolling.",
+    "Unchanged native Retry AXheight34.333 is outside the changed CTA44pt contract; its real recovery/visibility/hittability passed.",
+    "System AssistiveTouch overlay remains; do not claim its covered pixels are visible.",
+    "This is not whole-App maximum-text or real recommendation API acceptance."
+  ],
+  "images": [
+    {
+      "name": "fixture-recommendation-search-empty-bottom-active-de-largest-dark.png",
+      "sha256": "dd99562d9db76b6b848f268c2806364ff43a82a308c3db200c799ce95edd066b",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-active-de-largest-dark.png",
+      "sha256": "522608eb4062b91582b9b8eb82418529af75dbecc40b3802c53bd0010341abe1",
+      "saved": true,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-empty-active-de-largest-dark.png",
+      "sha256": "9e51727c7c43366aaad0f8323151bdd583e827c373640bb825bae5304d3754bf",
+      "saved": true,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-active-de-largest-dark.png",
+      "sha256": "9e51727c7c43366aaad0f8323151bdd583e827c373640bb825bae5304d3754bf",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-bottom-none-de-largest-dark.png",
+      "sha256": "d21c6c40d433be41752a7ddc9729a2fe89585d7187e824bcb030d54adbe1e646",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-none-de-largest-dark.png",
+      "sha256": "4e83737ac12b6672a76311c0b73313fd7f42253481f6a994d36efe56ff60e8c5",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-empty-none-de-largest-dark.png",
+      "sha256": "5cfcce4a6c8e7c4a62b29f8c6c9f8942b9962b0b9ceb944b3c6cbc451d6e781a",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-none-de-largest-dark.png",
+      "sha256": "66e8449c490dac6d3f34436b4ec160792cc7e4a6ef1db5604aad870cdf600ef9",
+      "saved": false,
+      "reviewer": "recommend_empty_source"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-bottom-active-de-largest-light.png",
+      "sha256": "03c92a52cd3863b5d3ce8a331789564cf77f475ca1ed7ad57adda06c7c4c234c",
+      "saved": false,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-active-de-largest-light.png",
+      "sha256": "4e2c179d53920cddede8d53a2c75d313b4844cf96ee5891cfaa14d4380eb2965",
+      "saved": false,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-empty-active-de-largest-light.png",
+      "sha256": "89cb29414bf4c2c3ae4d8460c3aa51414fe2482a12ab2db2300ad61baffa62b2",
+      "saved": false,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-active-de-largest-light.png",
+      "sha256": "89cb29414bf4c2c3ae4d8460c3aa51414fe2482a12ab2db2300ad61baffa62b2",
+      "saved": false,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-bottom-none-de-largest-light.png",
+      "sha256": "570a4e8ff0e525092b7e36d270c9e2f26f6fee33fa80e0ebe0261b315138d487",
+      "saved": false,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-none-de-largest-light.png",
+      "sha256": "717a28f2bbae7d0f46c087c51c74e8d107bd955ae9e8730d425550e40202a895",
+      "saved": true,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-empty-none-de-largest-light.png",
+      "sha256": "850b9a431d864d59e4e71d23bec11a22762c278420257b35ec385f4d032083da",
+      "saved": true,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-none-de-largest-light.png",
+      "sha256": "c68ca5b4a3f16d9efb39874718be2b9bafc7ce79c252e5099c4de72f4b5c6eca",
+      "saved": true,
+      "reviewer": "recommend_empty_qa"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-active-zh-Hans-normal-dark.png",
+      "sha256": "5e7d152e836e7aaead2f15932aa9993c6340a5578822142bf573c9c6739ea021",
+      "saved": false,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-empty-active-zh-Hans-normal-dark.png",
+      "sha256": "70d00fd87e345451b218245f7e3e668416db7a0a383be7169a00ae7e3c690891",
+      "saved": true,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-active-zh-Hans-normal-dark.png",
+      "sha256": "70d00fd87e345451b218245f7e3e668416db7a0a383be7169a00ae7e3c690891",
+      "saved": false,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-none-zh-Hans-normal-dark.png",
+      "sha256": "114d5252890e89a956e0cf161e849a954c89a953eb964baf0a1289a9af9692b7",
+      "saved": false,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-empty-none-zh-Hans-normal-dark.png",
+      "sha256": "2c7f6b18c3bfe6b32891f353e59d2d83245ced8a1a19cd27c99b26c9096b8a42",
+      "saved": false,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-none-zh-Hans-normal-dark.png",
+      "sha256": "2c7f6b18c3bfe6b32891f353e59d2d83245ced8a1a19cd27c99b26c9096b8a42",
+      "saved": false,
+      "reviewer": "recommend_empty_tests"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-active-zh-Hans-normal-light.png",
+      "sha256": "c41659cc5aea4963682d9d94d3ac6fd71e068aedc81e938814f28d902919065b",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-empty-active-zh-Hans-normal-light.png",
+      "sha256": "2a60d2dd641a4dfcd23d548d004f860577bc6ace5bdbe30488b1cf8782452763",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-active-zh-Hans-normal-light.png",
+      "sha256": "d731dbb82072a7459946a4f31fd7fc3bb346bb64ecedf0f541690481a8d30ea1",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-search-empty-none-zh-Hans-normal-light.png",
+      "sha256": "4235aaed5c29e1ad0089e8daedde01b8f5b2ca1e85a8dc82f9715e1fd0343dc3",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-empty-none-zh-Hans-normal-light.png",
+      "sha256": "144243ea3aef98253abb894b0f6824bf82ba59a24fa62c42d642077bce8cc620",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-empty-top-none-zh-Hans-normal-light.png",
+      "sha256": "144243ea3aef98253abb894b0f6824bf82ba59a24fa62c42d642077bce8cc620",
+      "saved": false,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-error-recovered.png",
+      "sha256": "0db3ed1c3b51ad4b57760953e1d14b1c9ef5cbc09674ed09f2466ea18eddc10d",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-load-error.png",
+      "sha256": "1a454e0f463a471e92fde79fe034dbc53e7e910e38a7124c47ab1f8d24ed05e2",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-search-loading.png",
+      "sha256": "000a4a7505e20e40f64962d08f2d4d6c184c916fc89011e84692a0d9922cc8c5",
+      "saved": true,
+      "reviewer": "parent"
+    },
+    {
+      "name": "fixture-recommendation-loading.png",
+      "sha256": "c93e52b8d8e3a4a3f3a6a16191636a8148a7515a194be3b434a63f5a1ce668d8",
+      "saved": true,
+      "reviewer": "parent"
+    }
+  ]
+}
