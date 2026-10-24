@@ -19,5 +19,7 @@
   "deviceUDID": "00008110-001A69110CC1401E",
   "finalUITestSourceSHA256": "249b093eed1d5719b0b6e96f9fa219e06c5a8eee449338661f21deae7be7c556",
   "testOnlyRepair": "Initial23.688s run could not find the saved card container because existing together-bookmarks ID overrides it in AX. Scope uniqueness to the active bookmarks scroll view; preserve peer containment,44pt and real avatar/name route checks. App unchanged.",
-  "all267InputsReverified": true
+  "all267InputsReverified": true,
+  "sourceCommit": "985af339ae4ec99ebc10f292c19f9072d96ebce3",
+  "sourcePushed": true
 }

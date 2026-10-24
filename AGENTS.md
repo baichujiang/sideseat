@@ -21,7 +21,22 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview 203 is the current installed development build. Together recommendation
+- Preview 204 is the current installed development build. Saved cards open the
+  existing profile/private-intention sheet by tapping avatar/name, with a trailing
+  chevron; remove the standalone body profile row. Reuse peerIdentity locally and
+  SSPress with44pt target; no new state/request/component or business-rule change.
+  Recommendation/Explore/chat scope and public/private routing stay unchanged.
+  Source985af339 is pushed. Same-package four language/theme/text combinations
+  passed209.294s, eight avatar/name visits and returns, bookmark retained;20 actual
+  images viewed,8 saved. Initial23.688s absent card-container AX query fixed only
+  in the test; unique active-page entry/header containment/44pt rules retained.
+  Largest cards scroll; private-detail sheet captures use ordinary visual text,
+  so no maximum-text detail or public-profile network acceptance claim. Installed
+  204/normal PID8022,267/Local/signature/binary verified; ordinary97 preserved.
+  Runner/private files cleaned, no real account/plan mutations or new App reports.
+  No backend/web release or full invitation API/unit/domain/browser repeat. Other
+  existing observations remain. See204 QA/release for actual images and limits.
+- Preview 203 was the previous development build. Together recommendation
   empties use a centered 340pt icon/title/status group, existing solid Find more
   primary and text View intentions secondary; Explore-off retains sole original
   intention action. Successful empty exploration has dedicated short static copy,
