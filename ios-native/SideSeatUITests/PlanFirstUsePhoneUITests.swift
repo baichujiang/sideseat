@@ -1860,6 +1860,8 @@ import XCTest
                 "--ui-testing-deep-link=/time-polls/\(f.finalBlockToken)"]
             if large { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
             app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": owner.accessToken]; app.launch()
+            // Dismiss a leftover system AssistiveTouch menu without changing its setting.
+            app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 8, dy: 20)).tap()
             let heading = app.staticTexts["time-poll-detail-title"]
             XCTAssertTrue(heading.waitForExistence(timeout: 25)); let original = heading.label
             XCTAssertFalse(app.buttons["plan-edit-information"].exists)
@@ -1867,28 +1869,114 @@ import XCTest
             let share = app.buttons["plan-share-open"]
             let status = app.descendants(matching: .any)["plan-display-status"].firstMatch
             let place = app.descendants(matching: .any)["plan-detail-location"].firstMatch
+            let dates = app.staticTexts["time-poll-date-range"]
+            let count = app.staticTexts["time-poll-response-count"], people = app.buttons["plan-people-open"]
+            let scroll = app.scrollViews["time-poll-detail-scroll"]
+            XCTAssertTrue(scroll.exists && place.exists)
+            let originalPlace = place.label
+            let detailNavigation = app.navigationBars[language == "de" ? "Gemeinsam planen" : "共同计划"]
+            XCTAssertTrue(detailNavigation.exists)
+            func visibleDetailBounds() -> CGRect {
+                let bounds = scroll.frame.intersection(app.frame)
+                let top = max(bounds.minY, detailNavigation.frame.maxY + 4)
+                var bottom = min(bounds.maxY, app.frame.maxY - 12)
+                for id in ["time-poll-save-state", "time-poll-saved", "time-poll-submit", "unified-plan-invite-window"] {
+                    let footer = app.descendants(matching: .any)[id].firstMatch
+                    if footer.exists && footer.isHittable { bottom = min(bottom, footer.frame.minY - 8) }
+                }
+                if app.keyboards.firstMatch.exists { bottom = min(bottom, app.keyboards.firstMatch.frame.minY - 8) }
+                return CGRect(x: bounds.minX, y: top, width: bounds.width, height: max(0, bottom - top))
+            }
+            func reveal(_ element: XCUIElement) {
+                XCTAssertTrue(element.waitForExistence(timeout: 10))
+                for _ in 0..<10 {
+                    let visible = visibleDetailBounds()
+                    if element.isHittable && visible.contains(element.frame) { break }
+                    XCTAssertGreaterThan(visible.height, 44)
+                    let above = element.frame.minY < visible.minY
+                    let overflow = above ? visible.minY - element.frame.minY : max(0, element.frame.maxY - visible.maxY)
+                    let distance = min(max(overflow + 12, 24), visible.height * 0.4)
+                    let x = min(visible.minX + 12, visible.maxX - 4)
+                    let start = CGPoint(x: x, y: visible.midY)
+                    let end = CGPoint(x: x, y: start.y + (above ? distance : -distance))
+                    XCTAssertTrue(visible.contains(start) && visible.contains(end))
+                    print("DETAIL_SCROLL198 \(language) id=\(element.identifier) overflow=\(overflow) start=\(start) end=\(end) visible=\(visible)")
+                    let origin = app.coordinate(withNormalizedOffset: .zero)
+                    origin.withOffset(CGVector(dx: start.x - app.frame.minX, dy: start.y - app.frame.minY))
+                        .press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: end.x - app.frame.minX, dy: end.y - app.frame.minY)))
+                }
+                XCTAssertTrue(element.isHittable)
+                let visible = visibleDetailBounds()
+                let geometry = "id=\(element.identifier) element=\(element.frame) scroll=\(scroll.frame) nav=\(detailNavigation.frame) visible=\(visible)"
+                print("DETAIL_VIEWPORT198 \(language) \(large ? "largest" : "normal") \(geometry)")
+                XCTAssertTrue(visible.contains(element.frame), "The entire element must be visible above the fixed controls; \(geometry)")
+                XCTAssertGreaterThanOrEqual(element.frame.minX, app.frame.minX + 19.5)
+                XCTAssertLessThanOrEqual(element.frame.maxX, app.frame.maxX - 19.5)
+            }
             XCTAssertEqual(app.buttons.matching(identifier: "plan-share-open").count, 1)
             XCTAssertFalse(app.navigationBars.buttons["plan-share-open"].exists)
-            XCTAssertTrue(share.isHittable)
+            capture(app, "detail-heading-before-first-reveal-\(large ? "largest" : "normal")-\(language)")
+            reveal(heading); reveal(share)
             XCTAssertGreaterThanOrEqual(share.frame.width, 43.99); XCTAssertGreaterThanOrEqual(share.frame.height, 43.99)
             XCTAssertGreaterThanOrEqual(share.frame.minX, heading.frame.maxX + 4)
+            XCTAssertLessThanOrEqual(max(heading.frame.minY, share.frame.minY), min(heading.frame.maxY, share.frame.maxY))
             XCTAssertGreaterThanOrEqual(status.frame.minY, max(heading.frame.maxY, share.frame.maxY))
             XCTAssertGreaterThanOrEqual(place.frame.minY, max(heading.frame.maxY, share.frame.maxY))
-            capture(app, "detail-heading-\(large ? "largest" : "normal")-\(language)")
+            capture(app, "detail-heading-top-\(large ? "largest" : "normal")-\(language)")
+            reveal(status); reveal(place)
+            XCTAssertFalse(status.frame.intersects(place.frame))
+            if large {
+                XCTAssertGreaterThanOrEqual(place.frame.minY, status.frame.maxY + 3.5)
+                XCTAssertGreaterThan(place.frame.height, status.frame.height)
+            } else {
+                XCTAssertGreaterThanOrEqual(place.frame.minX, status.frame.maxX + 7.5)
+                XCTAssertLessThan(max(status.frame.minY, place.frame.minY), min(status.frame.maxY, place.frame.maxY))
+            }
+            reveal(dates); reveal(count); reveal(people)
+            XCTAssertGreaterThanOrEqual(dates.frame.minY, place.frame.maxY)
+            XCTAssertGreaterThan(dates.frame.height, count.frame.height)
+            XCTAssertGreaterThanOrEqual(people.frame.minX - count.frame.maxX, 8)
+            XCTAssertGreaterThanOrEqual(people.frame.width, 43.99); XCTAssertGreaterThanOrEqual(people.frame.height, 43.99)
+            XCTAssertFalse(dates.frame.intersects(count.frame)); XCTAssertFalse(dates.frame.intersects(people.frame))
+            XCTAssertFalse(count.frame.intersects(people.frame))
+            let datesAbovePeople = dates.frame.maxY <= min(count.frame.minY, people.frame.minY) + 0.5
+            if large { XCTAssertTrue(datesAbovePeople) }
+            else if language == "zh-Hans" { XCTAssertFalse(datesAbovePeople) }
+            if !datesAbovePeople { XCTAssertGreaterThanOrEqual(count.frame.minX, dates.frame.maxX + 7.5) }
+            XCTAssertTrue(app.descendants(matching: .any)["time-poll-grid"].exists)
+            capture(app, "detail-heading-metadata-bottom-\(large ? "largest" : "normal")-\(language)")
+            let peoplePoint = CGPoint(x: people.frame.minX + 12, y: people.frame.midY)
+            XCTAssertTrue(people.frame.contains(peoplePoint))
+            XCTAssertTrue(visibleDetailBounds().contains(peoplePoint))
+            app.coordinate(withNormalizedOffset: .zero)
+                .withOffset(CGVector(dx: peoplePoint.x - app.frame.minX, dy: peoplePoint.y - app.frame.minY)).tap()
+            let peopleList = app.descendants(matching: .any)["plan-people-list"].firstMatch
+            XCTAssertTrue(peopleList.waitForExistence(timeout: 10))
+            capture(app, "detail-heading-people-\(large ? "largest" : "normal")-\(language)")
+            app.buttons["plan-people-done"].tap()
+            XCTAssertTrue(peopleList.waitForNonExistence(timeout: 10))
+            reveal(share)
             share.tap()
             XCTAssertTrue(app.buttons["plan-copy-link"].waitForExistence(timeout: 10))
-            app.navigationBars.buttons.matching(NSPredicate(format: "label IN %@", ["完成", "Done", "Fertig"])).firstMatch.tap()
+            let shareTitle = language == "de" ? "Plan teilen" : "分享计划"
+            app.navigationBars[shareTitle].buttons[language == "de" ? "Fertig" : "完成"].tap()
             XCTAssertTrue(heading.waitForExistence(timeout: 10))
-            app.descendants(matching: .any)["plan-detail-location"].tap()
+            reveal(place); place.tap()
             let location = app.textFields["plan-edit-location"]
-            XCTAssertTrue(location.waitForExistence(timeout: 10)); location.typeText("Library level 2")
+            XCTAssertTrue(location.waitForExistence(timeout: 10))
+            let originalInput = try XCTUnwrap(location.value as? String)
+            replace(location, with: originalInput + " Library level 2")
+            XCTAssertEqual(location.value as? String, originalInput + " Library level 2")
             XCTAssertFalse(app.buttons["plan-share-open"].exists)
             let save = app.buttons["plan-edit-save"]
-            for _ in 0..<5 where !save.isHittable { app.scrollViews["time-poll-detail-scroll"].swipeUp() }
+            reveal(save)
             XCTAssertTrue(save.isHittable); XCTAssertGreaterThanOrEqual(save.frame.height, 43.99)
             capture(app, "detail-heading-editing-\(large ? "largest" : "normal")-\(language)")
-            app.buttons["plan-edit-cancel"].tap()
+            let cancel = app.buttons["plan-edit-cancel"]
+            reveal(cancel); cancel.tap()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
             XCTAssertTrue(heading.waitForExistence(timeout: 10)); XCTAssertEqual(heading.label, original)
+            reveal(place); XCTAssertEqual(place.label, originalPlace)
             XCTAssertFalse(app.buttons["plan-edit-save"].exists)
             app.terminate()
         }

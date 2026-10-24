@@ -428,6 +428,7 @@ struct SharedPlanChatCard: View {
 
 /// A flat identity header keeps the timetable as the dominant detail surface.
 struct PlanDetailHeading: View {
+    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
     let store: TimePollStore
     var showsSharing = true
@@ -446,9 +447,12 @@ struct PlanDetailHeading: View {
                 }.frame(maxWidth: .infinity, alignment: .leading)
                 if showsSharing { PlanShareActions(poll: poll, store: store).fixedSize() }
             }
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: SideSeatTheme.spaceSM) { status.fixedSize(); metadata.fixedSize() }
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) { status; metadata }
+            let layout = typeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+                : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
+            layout {
+                status.fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
+                metadata.frame(maxWidth: .infinity, alignment: .leading)
             }.font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -456,7 +460,7 @@ struct PlanDetailHeading: View {
     private var title: some View {
         Text(poll.title).font(.title2.weight(.semibold))
             .fixedSize(horizontal: false, vertical: true)
-            .frame(minHeight: editTitle == nil ? 0 : 44, alignment: .leading)
+            .frame(minHeight: 44, alignment: .leading)
             .contentShape(Rectangle())
             .accessibilityIdentifier("time-poll-detail-title")
     }

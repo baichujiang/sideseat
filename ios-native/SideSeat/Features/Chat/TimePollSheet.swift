@@ -444,14 +444,20 @@ struct TimePollDetailView: View {
     private func collectionSurface(_ poll: NativeTimePoll) -> some View {
         ScrollViewReader { reader in
             ScrollView {
-                VStack(spacing: SideSeatTheme.spaceMD) {
+                VStack(spacing: SideSeatTheme.spaceSM) {
                     collectionHeader(poll)
                     if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd {
                         InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone, isDraft: true)
                             .padding(.horizontal, SideSeatTheme.spaceMD)
                     } else {
-                        PlanResponseSummary(poll: poll) { showsPeople = true }
-                            .padding(.horizontal, SideSeatTheme.spaceMD)
+                        PlanAdaptiveRow {
+                            Text(dateRange(poll) + "\n" + poll.timeZone)
+                                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("time-poll-date-range")
+                        } trailing: {
+                            PlanResponseSummary(poll: poll) { showsPeople = true }
+                        }.padding(.horizontal, SideSeatTheme.screenHorizontal)
                         TimePollGrid(table: poll.timetable, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalSelected: $finalSelected,
                             chooseNoFreeTime: !poll.didRespond && store.selected.isEmpty ? { store.chooseNoFreeTime() } : nil) {}
                             .disabled(store.acting).allowsHitTesting(!store.acting)
@@ -481,9 +487,11 @@ struct TimePollDetailView: View {
             if poll.activitySelection?.isOpen == true {
                 PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle, showsSuggestion: $editingActivity)
             }
-            Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
-        }.padding(.horizontal, SideSeatTheme.spaceMD)
+            if poll.hasFixedTime {
+                Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
+            }
+        }.padding(.horizontal, SideSeatTheme.screenHorizontal)
     }
 
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {

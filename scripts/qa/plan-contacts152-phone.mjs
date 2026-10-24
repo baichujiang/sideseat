@@ -57,13 +57,18 @@ if (mode === 'prepare') {
     assert.deepEqual(p.mySlotIds, []); assert.equal(p.invitationVersion ?? 0, 0);
     await fs.writeFile(`${out}/picker-api.json`, JSON.stringify({ passed: true, phase: p.phase, responses: 0, invitationVersion: 0, ownSubmittedSlots: [] }, null, 2));
     console.log('Picker interactions left availability and invitations unchanged on the server.');
-  } else if (mode === 'final-block-layout') {
+  } else if (mode === 'final-block-layout' || mode === 'heading-layout') {
     assert(!f.finalBlockToken);
     const dates = [3, 4].map(days => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10));
-    const p = await call('/api/v1/time-polls', owner, 'POST', { title: 'Final time picker layout ' + randomBytes(3).toString('hex'), dates, startMinute: 540, endMinute: 1260, timeZone: 'Europe/Berlin' }, 201);
+    const heading = mode === 'heading-layout';
+    const p = await call('/api/v1/time-polls', owner, 'POST', {
+      title: (heading ? 'Weekend study and coffee ' : 'Final time picker layout ') + randomBytes(3).toString('hex'),
+      ...(heading ? { location: 'Universitätsbibliothek, Gruppenraum im zweiten Obergeschoss' } : {}),
+      dates, startMinute: 540, endMinute: 1260, timeZone: 'Europe/Berlin',
+    }, 201);
     f.finalBlockToken = p.token;
     await fs.writeFile(privatePath, JSON.stringify(f), { mode: 0o600 });
-    console.log('Prepared a separate collecting plan for maximum-text picker checks.');
+    console.log(heading ? 'Prepared a separate collecting plan with a long title and location for heading checks.' : 'Prepared a separate collecting plan for maximum-text picker checks.');
   } else if (mode === 'invitation-layout') {
     assert(!f.invitationCases, 'Use each disposable layout fixture once.');
     f.invitationCases = [];

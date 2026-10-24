@@ -9,6 +9,7 @@ struct ExpiredTimePollView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
                 PlanDetailHeading(poll: poll, store: store, statusIdentifier: "unified-plan-phase")
+                    .padding(.horizontal, SideSeatTheme.spaceXS)
                 if let start = poll.chosenStart, let end = poll.chosenEnd {
                     Text(unifiedPlanTimeLabel(start: start, end: end, timeZone: poll.timeZone))
                 }
@@ -19,7 +20,8 @@ struct ExpiredTimePollView: View {
                 Button("Back to plans", action: backToPlans)
                     .buttonStyle(.bordered).tint(SideSeatTheme.utilityAction)
                     .frame(minHeight: 44).accessibilityIdentifier("unified-plan-expired-back")
-            }.padding(SideSeatTheme.spaceLG).frame(maxWidth: .infinity, alignment: .leading)
+            }.padding(.horizontal, SideSeatTheme.spaceLG).padding(.bottom, SideSeatTheme.spaceLG)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }.accessibilityIdentifier("unified-plan-expired")
     }
 }
@@ -245,10 +247,13 @@ struct UnifiedPlanConfirmationView: View {
         ScrollViewReader { reader in
         ScrollView {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
-                PlanDetailHeading(poll: poll, store: store, statusIdentifier: "unified-plan-phase")
-                    .id("plan-detail-start")
-                if let start = poll.chosenStart, let end = poll.chosenEnd {
-                    InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone)
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    PlanDetailHeading(poll: poll, store: store, statusIdentifier: "unified-plan-phase")
+                        .padding(.horizontal, SideSeatTheme.spaceSM)
+                        .id("plan-detail-start")
+                    if let start = poll.chosenStart, let end = poll.chosenEnd {
+                        InvitationTimetableView(start: start, end: end, timeZone: poll.timeZone)
+                    }
                 }
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Divider()
@@ -291,7 +296,7 @@ struct UnifiedPlanConfirmationView: View {
                     Text("Choosing another time asks everyone to confirm again.")
                         .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 }
-            }.padding(SideSeatTheme.spaceMD)
+            }.padding(.horizontal, SideSeatTheme.spaceMD).padding(.bottom, SideSeatTheme.spaceMD)
         }
         .background(SideSeatTheme.bgGrouped)
         .task(id: poll.invitationVersion) {
