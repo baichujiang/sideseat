@@ -1,0 +1,1108 @@
+{
+  "scope": "Standalone browser visual prototype; no App or phone changes.",
+  "generatedAt": "2026-10-25T00:29:16.284Z",
+  "browser": "147.0.7727.15",
+  "viewport": {
+    "width": 428,
+    "height": 926
+  },
+  "nativeDynamicTypeVerified": false,
+  "phoneInstallationPerformed": false,
+  "geometry": {
+    "together": {
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 428,
+        "height": 926
+      },
+      "header": {
+        "x": 0,
+        "y": 54,
+        "width": 428,
+        "height": 58
+      },
+      "title": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      },
+      "body": {
+        "x": 0,
+        "y": 112,
+        "width": 428,
+        "height": 702
+      },
+      "tabbar": {
+        "x": 20,
+        "y": 826,
+        "width": 388,
+        "height": 78
+      },
+      "tabs": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ],
+      "gutter": 20,
+      "rootOverflow": false,
+      "background": "rgb(247, 247, 243)"
+    },
+    "plans": {
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 428,
+        "height": 926
+      },
+      "header": {
+        "x": 0,
+        "y": 54,
+        "width": 428,
+        "height": 58
+      },
+      "title": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      },
+      "body": {
+        "x": 0,
+        "y": 112,
+        "width": 428,
+        "height": 702
+      },
+      "tabbar": {
+        "x": 20,
+        "y": 826,
+        "width": 388,
+        "height": 78
+      },
+      "tabs": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ],
+      "gutter": 20,
+      "rootOverflow": false,
+      "background": "rgb(247, 247, 243)"
+    },
+    "calendar": {
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 428,
+        "height": 926
+      },
+      "header": {
+        "x": 0,
+        "y": 54,
+        "width": 428,
+        "height": 58
+      },
+      "title": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      },
+      "body": {
+        "x": 0,
+        "y": 112,
+        "width": 428,
+        "height": 702
+      },
+      "tabbar": {
+        "x": 20,
+        "y": 826,
+        "width": 388,
+        "height": 78
+      },
+      "tabs": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ],
+      "gutter": 20,
+      "rootOverflow": false,
+      "background": "rgb(247, 247, 243)"
+    },
+    "messages": {
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 428,
+        "height": 926
+      },
+      "header": {
+        "x": 0,
+        "y": 54,
+        "width": 428,
+        "height": 58
+      },
+      "title": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      },
+      "body": {
+        "x": 0,
+        "y": 112,
+        "width": 428,
+        "height": 702
+      },
+      "tabbar": {
+        "x": 20,
+        "y": 826,
+        "width": 388,
+        "height": 78
+      },
+      "tabs": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ],
+      "gutter": 20,
+      "rootOverflow": false,
+      "background": "rgb(247, 247, 243)"
+    },
+    "me": {
+      "viewport": {
+        "x": 0,
+        "y": 0,
+        "width": 428,
+        "height": 926
+      },
+      "header": {
+        "x": 0,
+        "y": 54,
+        "width": 428,
+        "height": 58
+      },
+      "title": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      },
+      "body": {
+        "x": 0,
+        "y": 112,
+        "width": 428,
+        "height": 702
+      },
+      "tabbar": {
+        "x": 20,
+        "y": 826,
+        "width": 388,
+        "height": 78
+      },
+      "tabs": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ],
+      "gutter": 20,
+      "rootOverflow": false,
+      "background": "rgb(247, 247, 243)"
+    }
+  },
+  "checks": [
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"together\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "together:shared geometry",
+      "pass": true,
+      "detail": {
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "width": 428,
+          "height": 926
+        },
+        "header": {
+          "x": 0,
+          "y": 54,
+          "width": 428,
+          "height": 58
+        },
+        "title": {
+          "x": 64,
+          "y": 70,
+          "width": 300,
+          "height": 26
+        },
+        "body": {
+          "x": 0,
+          "y": 112,
+          "width": 428,
+          "height": 702
+        },
+        "tabbar": {
+          "x": 20,
+          "y": 826,
+          "width": 388,
+          "height": 78
+        },
+        "tabs": [
+          {
+            "x": 26,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          },
+          {
+            "x": 101.1875,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 176.390625,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 251.59375,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 326.796875,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          }
+        ],
+        "gutter": 20,
+        "rootOverflow": false,
+        "background": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "together:centered title",
+      "pass": true,
+      "detail": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      }
+    },
+    {
+      "name": "together:five equal touch targets",
+      "pass": true,
+      "detail": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "name": "together:last item clears footer",
+      "pass": true,
+      "detail": {
+        "itemBottom": 782.1875,
+        "viewportBottom": 814,
+        "padding": 31.8125
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"plans\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "plans:shared geometry",
+      "pass": true,
+      "detail": {
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "width": 428,
+          "height": 926
+        },
+        "header": {
+          "x": 0,
+          "y": 54,
+          "width": 428,
+          "height": 58
+        },
+        "title": {
+          "x": 64,
+          "y": 70,
+          "width": 300,
+          "height": 26
+        },
+        "body": {
+          "x": 0,
+          "y": 112,
+          "width": 428,
+          "height": 702
+        },
+        "tabbar": {
+          "x": 20,
+          "y": 826,
+          "width": 388,
+          "height": 78
+        },
+        "tabs": [
+          {
+            "x": 26,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          },
+          {
+            "x": 101.1875,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 176.390625,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 251.59375,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 326.796875,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          }
+        ],
+        "gutter": 20,
+        "rootOverflow": false,
+        "background": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "plans:centered title",
+      "pass": true,
+      "detail": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      }
+    },
+    {
+      "name": "plans:five equal touch targets",
+      "pass": true,
+      "detail": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "name": "plans:last item clears footer",
+      "pass": true,
+      "detail": {
+        "itemBottom": 696.375,
+        "viewportBottom": 756,
+        "padding": 59.625
+      }
+    },
+    {
+      "name": "plans:dedicated action area",
+      "pass": true,
+      "detail": {
+        "x": 0,
+        "y": 756,
+        "width": 428,
+        "height": 58
+      }
+    },
+    {
+      "name": "plans:no duplicate inner action",
+      "pass": true,
+      "detail": "Whole-card entry; participant avatars retained."
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"calendar\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "calendar:shared geometry",
+      "pass": true,
+      "detail": {
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "width": 428,
+          "height": 926
+        },
+        "header": {
+          "x": 0,
+          "y": 54,
+          "width": 428,
+          "height": 58
+        },
+        "title": {
+          "x": 64,
+          "y": 70,
+          "width": 300,
+          "height": 26
+        },
+        "body": {
+          "x": 0,
+          "y": 112,
+          "width": 428,
+          "height": 702
+        },
+        "tabbar": {
+          "x": 20,
+          "y": 826,
+          "width": 388,
+          "height": 78
+        },
+        "tabs": [
+          {
+            "x": 26,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          },
+          {
+            "x": 101.1875,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 176.390625,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 251.59375,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 326.796875,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          }
+        ],
+        "gutter": 20,
+        "rootOverflow": false,
+        "background": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "calendar:centered title",
+      "pass": true,
+      "detail": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      }
+    },
+    {
+      "name": "calendar:five equal touch targets",
+      "pass": true,
+      "detail": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "name": "calendar:last item clears footer",
+      "pass": true,
+      "detail": {
+        "itemBottom": 794,
+        "viewportBottom": 814,
+        "padding": 20
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"messages\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "messages:shared geometry",
+      "pass": true,
+      "detail": {
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "width": 428,
+          "height": 926
+        },
+        "header": {
+          "x": 0,
+          "y": 54,
+          "width": 428,
+          "height": 58
+        },
+        "title": {
+          "x": 64,
+          "y": 70,
+          "width": 300,
+          "height": 26
+        },
+        "body": {
+          "x": 0,
+          "y": 112,
+          "width": 428,
+          "height": 702
+        },
+        "tabbar": {
+          "x": 20,
+          "y": 826,
+          "width": 388,
+          "height": 78
+        },
+        "tabs": [
+          {
+            "x": 26,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          },
+          {
+            "x": 101.1875,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 176.390625,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 251.59375,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 326.796875,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          }
+        ],
+        "gutter": 20,
+        "rootOverflow": false,
+        "background": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "messages:centered title",
+      "pass": true,
+      "detail": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      }
+    },
+    {
+      "name": "messages:five equal touch targets",
+      "pass": true,
+      "detail": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "name": "messages:last item clears footer",
+      "pass": true,
+      "detail": {
+        "itemBottom": 740.1875,
+        "viewportBottom": 814,
+        "padding": 73.8125
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"me\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "me:shared geometry",
+      "pass": true,
+      "detail": {
+        "viewport": {
+          "x": 0,
+          "y": 0,
+          "width": 428,
+          "height": 926
+        },
+        "header": {
+          "x": 0,
+          "y": 54,
+          "width": 428,
+          "height": 58
+        },
+        "title": {
+          "x": 64,
+          "y": 70,
+          "width": 300,
+          "height": 26
+        },
+        "body": {
+          "x": 0,
+          "y": 112,
+          "width": 428,
+          "height": 702
+        },
+        "tabbar": {
+          "x": 20,
+          "y": 826,
+          "width": 388,
+          "height": 78
+        },
+        "tabs": [
+          {
+            "x": 26,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          },
+          {
+            "x": 101.1875,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 176.390625,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 251.59375,
+            "y": 833,
+            "width": 75.203125,
+            "height": 64
+          },
+          {
+            "x": 326.796875,
+            "y": 833,
+            "width": 75.1875,
+            "height": 64
+          }
+        ],
+        "gutter": 20,
+        "rootOverflow": false,
+        "background": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "me:centered title",
+      "pass": true,
+      "detail": {
+        "x": 64,
+        "y": 70,
+        "width": 300,
+        "height": 26
+      }
+    },
+    {
+      "name": "me:five equal touch targets",
+      "pass": true,
+      "detail": [
+        {
+          "x": 26,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        },
+        {
+          "x": 101.1875,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 176.390625,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 251.59375,
+          "y": 833,
+          "width": 75.203125,
+          "height": 64
+        },
+        {
+          "x": 326.796875,
+          "y": 833,
+          "width": 75.1875,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "name": "me:last item clears footer",
+      "pass": true,
+      "detail": {
+        "itemBottom": 774,
+        "viewportBottom": 814,
+        "padding": 40
+      }
+    },
+    {
+      "name": "all pages:same canvas",
+      "pass": true,
+      "detail": {
+        "together": "rgb(247, 247, 243)",
+        "plans": "rgb(247, 247, 243)",
+        "calendar": "rgb(247, 247, 243)",
+        "messages": "rgb(247, 247, 243)",
+        "me": "rgb(247, 247, 243)"
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"plans\",\"size\":\"large\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "plans:1.25x no horizontal root overflow",
+      "pass": true,
+      "detail": {
+        "browserFontScale": 1.25,
+        "nativeDynamicType": false
+      }
+    },
+    {
+      "name": "plans:1.25x complete waiting card above action area",
+      "pass": true,
+      "detail": {
+        "cardTop": 524.5,
+        "cardBottom": 731,
+        "scrollTop": 168,
+        "scrollBottom": 756,
+        "dockTop": 756
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"messages\",\"size\":\"large\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "messages:1.25x no horizontal root overflow",
+      "pass": true,
+      "detail": {
+        "browserFontScale": 1.25,
+        "nativeDynamicType": false
+      }
+    },
+    {
+      "name": "assets:{\"view\":\"single\",\"page\":\"plans\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "prototype navigation:together",
+      "pass": true,
+      "detail": "Local draft only."
+    },
+    {
+      "name": "prototype navigation:plans",
+      "pass": true,
+      "detail": "Local draft only."
+    },
+    {
+      "name": "prototype navigation:calendar",
+      "pass": true,
+      "detail": "Local draft only."
+    },
+    {
+      "name": "prototype navigation:messages",
+      "pass": true,
+      "detail": "Local draft only."
+    },
+    {
+      "name": "prototype navigation:me",
+      "pass": true,
+      "detail": "Local draft only."
+    },
+    {
+      "name": "assets:{\"view\":\"board\"}",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "assets:{\"view\":\"foundation\"}",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}
