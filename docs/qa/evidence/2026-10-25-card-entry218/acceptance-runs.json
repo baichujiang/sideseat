@@ -1,0 +1,38 @@
+{
+  "build": 218,
+  "finalPhoneRuns": [
+    {
+      "method": "testHomeCandidateScheduleHierarchyAcrossTextSizes",
+      "seconds": 232.292,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "method": "testHomeRedesignPopulatedNavigationAndWaitingAcrossTextSizes",
+      "seconds": 181.38,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "execution": "Separate cases on the same frozen signed218 App; no product/test repairs.",
+  "candidateCombinations": [
+    "zh-Hans L light",
+    "zh-Hans xLarge light",
+    "en L light",
+    "de actual AccessibilityXXXL dark"
+  ],
+  "candidateAssertions": "Four realQA cards per combination, exactoriginalAXdate/count/TBD/no fakeclock, strictviewport44pt/continuoussegments; first card tap at left20% away from formerCTA opens original detail/timetable thenreturns in each combination.",
+  "navigationScope": "Controlled offline legacy fixtures, normalChinese/actualmaximumGerman; originalpendingchat route/accept control, tabs, create/cancel/historyreturn, horizontalwaiting/maximumvertical; maxvisibleportiononly.",
+  "testSourceUnchanged": true,
+  "testSourceSHA256": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c",
+  "productFrozenDuringAllFinalAcceptance": true,
+  "notRerun": [
+    "Unchanged unit/domain/browser tests",
+    "Complete invitation-to-Calendar API journey",
+    "Maximum-complete private/confirmed card case",
+    "Whole-App max-font/manual performance"
+  ],
+  "noNewStateRequestSchemaDependency": true
+}

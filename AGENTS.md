@@ -35,8 +35,21 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is217 below. See web release/QA records.
-- Preview217 is the current installed development build, source e8cbc4bab14dd821a8a18d94a6c732450cbc7d10 pushed.
+  No native rebuild in that web stage; current native build is218 below. See web release/QA records.
+- Preview218 is the current installed development build, source 144edd48f92927e95892c6408f361484722e2e2a pushed.
+  Duplicate filled inner action label/task-only layout removed; all card styles
+  reuse people/progress and lightweight chevron. Original parent Button/route and
+  full AX action description stay: collecting manual plans open original timetable,
+  other phases/conversation retain original details. Date/status/rules unchanged,
+  no new state/request; independent minimal review passed. Same frozen App real
+  candidate four combinations232.292s and original navigation181.380s passed.
+  40actualcaptures/35unique original pixels reviewed; maxcandidate continuous
+  segments, offline/private-max-visible/OSoverlay scopes separate. Normal218
+  PID9025,267/Local/signature/binary match commit,97 retained;2QAaccounts401/
+  4links404,Runner/private removed,new App reports0. No backend/web release or
+  unchanged unit/domain/browser/full invitation API/max-complete private-card
+  repeat. See218 QA/release;217 below is historical.
+- Preview217 was the previous installed development build, source e8cbc4bab14dd821a8a18d94a6c732450cbc7d10 pushed.
   Task footer restores flexible space: progress leading/action trailing-bottom,
   existing vertical fallback for insufficient width. Decorative right covers and
   dead rendering/render-onlyflag removed; title uses full information width,

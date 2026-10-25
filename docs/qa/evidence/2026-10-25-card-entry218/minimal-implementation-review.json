@@ -1,0 +1,14 @@
+{
+  "build": 218,
+  "baseCommit": "847d0e4d5ce06e2eeeec31bc2b33419d3461da65",
+  "independentReview": "No material findings",
+  "scope": "Complete two-product-file diff, card builders and exact comparisons: outside private card component, parent Buttons/routes and private card body/full AX/schedule/status/title unchanged. Task-only VTF/footer and display-only action helper deleted; existing people/chevron footer reused.",
+  "newStateRequestSchemaDependency": false,
+  "uiTestSourceUnchanged": true,
+  "productSHA256": {
+    "ios-native/SideSeat/Features/Chat/PlansRootView.swift": "d0447c416c9f921e59077833bff7823993a8192efaf963499c2c63f404170d40"
+  },
+  "pixelReview": "Final40captures/35unique original pixels reviewed. InnerfilledCTAremoved, people/normalchevron retained; wholecardoriginalroutes passed. Limits in visual-review.json.",
+  "sourceCommit": "144edd48f92927e95892c6408f361484722e2e2a",
+  "sourcePushed": true
+}

@@ -1,0 +1,67 @@
+{
+  "readOnlyUI": true,
+  "cases": [
+    {
+      "name": "seven-day",
+      "dates": [
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31"
+      ],
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participantCount": 0,
+      "mySlotIds": []
+    },
+    {
+      "name": "long-title",
+      "dates": [
+        "2026-10-25",
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31"
+      ],
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participantCount": 0,
+      "mySlotIds": []
+    },
+    {
+      "name": "sparse",
+      "dates": [
+        "2026-10-25",
+        "2026-10-31"
+      ],
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participantCount": 0,
+      "mySlotIds": []
+    },
+    {
+      "name": "cross-year",
+      "dates": [
+        "2026-12-31",
+        "2027-01-01"
+      ],
+      "phase": "COLLECTING",
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "participantCount": 0,
+      "mySlotIds": []
+    }
+  ]
+}

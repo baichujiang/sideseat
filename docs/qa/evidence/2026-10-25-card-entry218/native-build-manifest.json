@@ -1,0 +1,19 @@
+{
+  "build": 218,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 267,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "df9b7976231c1daa13e0675bca8f74e79437acd95a39099ffdba91c0bf4a1be3",
+    "SideSeat Preview.debug.dylib": "eecf19dddd2b0fe253560f17db638a8ea48180aeb05ca2d57b713bee1759dc45"
+  },
+  "testSourceSHA256": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c",
+  "backendReleased": false,
+  "webReleased": false,
+  "productFrozenDuringAllFinalAcceptance": true,
+  "compiledPhoneTestSourceMatched": true,
+  "sourceCommit": "144edd48f92927e95892c6408f361484722e2e2a",
+  "sourcePushed": true,
+  "all267CommittedSourceInputsVerified": true
+}
