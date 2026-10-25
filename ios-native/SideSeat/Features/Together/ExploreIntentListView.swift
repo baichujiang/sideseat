@@ -342,8 +342,7 @@ struct ExploreIntentCard: View {
     var body: some View {
         SSFlowCard(
             contentPadding: 0,
-            contentSpacing: 0,
-            activityTopic: intent.topic
+            contentSpacing: 0
         ) {
             SSActivityHeaderBand(
                 topic: intent.topic,

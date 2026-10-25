@@ -839,6 +839,7 @@ import XCTest
         let accept = app.buttons["unified-plan-accept"]
         XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
+        XCTAssertEqual(app.staticTexts["plan-next-step"].firstMatch.label, "待发起人正式发出")
         nativePhase("contacts-peer-accepted"); capture(app, "contacts-explicit-acceptance")
 
         nativeSignIn(owner, bundle: fixture.bundle); openListCard()

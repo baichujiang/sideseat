@@ -172,7 +172,7 @@ struct HomeMonthCalendarView: View {
     private var monthGrid: some View {
         VStack(spacing: 8) {
             LazyVGrid(columns: columns, spacing: 0) {
-                ForEach(weekdayLabels, id: \.self) { label in
+                ForEach(Array(weekdayLabels.enumerated()), id: \.offset) { _, label in
                     Text(label)
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -188,6 +188,8 @@ struct HomeMonthCalendarView: View {
             }
         }
         .padding(.horizontal, 16)
+        // Fixed seven-column metadata must keep every day legible; full dates remain in AX.
+        .dynamicTypeSize(...DynamicTypeSize.xLarge)
         .contentShape(Rectangle())
         .simultaneousGesture(monthSwipeGesture)
     }

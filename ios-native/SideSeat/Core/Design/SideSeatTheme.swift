@@ -24,14 +24,10 @@ import SwiftUI
 /// Never reuse the brand accent for
 /// calendar “now”, errors, or success. See `docs/DESIGN_SYSTEM.md`.
 enum SideSeatTheme {
-    /// Owner-approved Plans home palette; other product surfaces keep their current tokens.
+    /// Activity-specific accents sit on the same product foundation as every root page.
     enum PlanHome {
-        static let background = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
-            ? UIColor(red: 0.07, green: 0.09, blue: 0.08, alpha: 1)
-            : UIColor(red: 0.973, green: 0.969, blue: 0.949, alpha: 1) })
-        static let ink = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
-            ? UIColor(red: 0.89, green: 0.94, blue: 0.90, alpha: 1)
-            : UIColor(red: 0.14, green: 0.24, blue: 0.21, alpha: 1) })
+        static let background = SideSeatTheme.bg
+        static let ink = SideSeatTheme.textPrimary
         static let sage = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
             ? UIColor(red: 0.13, green: 0.20, blue: 0.16, alpha: 1)
             : UIColor(red: 0.90, green: 0.94, blue: 0.90, alpha: 1) })
@@ -91,17 +87,18 @@ enum SideSeatTheme {
 
     // MARK: - Semantic (product)
 
-    /// Main flow background (`systemBackground`).
-    static let bg = Color(uiColor: .systemBackground)
-    /// Grouped list background (`systemGroupedBackground`).
-    static let bgGrouped = Color(uiColor: .systemGroupedBackground)
-    /// Cards / inset grouped rows (`secondarySystemGroupedBackground`).
-    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
-    static let textPrimary = Color.primary
-    static let textSecondary = Color.secondary
+    /// Owner-approved root foundation, shared by product pages and their detail surfaces.
+    private static let canvasUIColor = adaptiveUIColor(light: 0xF7F7F3, dark: 0x121714)
+    private static let surfaceUIColor = adaptiveUIColor(light: 0xFFFFFF, dark: 0x1C2420)
+    private static let inkUIColor = adaptiveUIColor(light: 0x1C2421, dark: 0xE3F0E6)
+    static let bg = Color(uiColor: canvasUIColor)
+    static let bgGrouped = bg
+    static let surface = Color(uiColor: surfaceUIColor)
+    static let textPrimary = Color(uiColor: inkUIColor)
+    static let textSecondary = Color(uiColor: adaptiveUIColor(light: 0x747B75, dark: 0xB6BFB7))
     /// Default tint for navigation, menus, close/cancel controls, and other utility actions.
     /// Product accent is opt-in so ordinary controls never inherit brand Rose accidentally.
-    static let utilityAction = Color.primary
+    static let utilityAction = textPrimary
     /// Secondary text used at compact sizes where the system secondary alpha can miss WCAG AA.
     static let textSecondaryStrong = Color(
         uiColor: UIColor { traits in
@@ -186,19 +183,19 @@ enum SideSeatTheme {
     )
     /// Pin / restore / soft caution — never use for selection or errors.
     static let warning = Color.orange
-    /// Non-grouped elevated fill (chat peer bubbles, soft chips).
-    static let fillSubtle = Color(uiColor: .secondarySystemBackground)
+    /// Neutral control wells and inset surfaces, distinct from the white content material.
+    static let fillSubtle = Color(uiColor: adaptiveUIColor(light: 0xEDEFE8, dark: 0x303A34))
     /// Control / chip wells (`tertiarySystemFill`).
     static let fillTertiary = Color(uiColor: .tertiarySystemFill)
     /// Hairline borders that adapt to light, dark, and increased-contrast appearances.
-    static let separator = Color(uiColor: .separator)
+    static let separator = Color(uiColor: adaptiveUIColor(light: 0xE7EAE3, dark: 0x3A453D))
 
     /// Product actions are quiet ink in Light and soft chalk in Dark. Rose stays an accent.
     enum ProductAction {
         static let fill = Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor(red: 0.87, green: 0.90, blue: 0.88, alpha: 1)
-                : UIColor(red: 0.16, green: 0.19, blue: 0.18, alpha: 1)
+                : UIColor(red: 0.149, green: 0.196, blue: 0.176, alpha: 1)
         })
         static let foreground = Color(uiColor: UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -234,11 +231,7 @@ enum SideSeatTheme {
 
     /// Neutral selected surfaces keep filters, tabs and private saves readable without a pink wash.
     enum ControlSelection {
-        static let fill = Color(uiColor: UIColor { traits in
-            traits.userInterfaceStyle == .dark
-                ? UIColor(red: 0.22, green: 0.23, blue: 0.23, alpha: 1)
-                : UIColor(red: 0.89, green: 0.90, blue: 0.90, alpha: 1)
-        })
+        static let fill = SideSeatTheme.fillSubtle
         static let border = SideSeatTheme.textSecondaryStrong.opacity(0.45)
     }
 
@@ -284,11 +277,11 @@ enum SideSeatTheme {
         static let decisionHandle = adaptive(light: 0xEBDDCA, dark: 0x514635)
         static let decisionHandleInk = adaptive(light: 0x72562D, dark: 0xF2DBAF)
         static let decisionHandleBorder = adaptive(light: 0xC7B58F, dark: 0x8D7B5A)
-        static let canvas = adaptive(light: 0xFAF3EC, dark: 0x1C171A)
+        static let canvas = SideSeatTheme.bg
         static let selectedTab = ControlSelection.fill
         /// Selection is neutral; weight and the accessibility state reinforce the active page.
         static let navigationSelection = ControlSelection.fill
-        static let ink = adaptive(light: 0x35262E, dark: 0xF7EDE9)
+        static let ink = SideSeatTheme.textPrimary
         static let border = adaptive(light: 0xE9DDD5, dark: 0x493A42)
         static let shadow = Color(red: 0.30, green: 0.15, blue: 0.20)
         static let cardPadding: CGFloat = 20
@@ -372,10 +365,10 @@ enum SideSeatTheme {
         }
         /// Color is scoped to the compact greeting and notification shortcuts in Messages.
         static var greetingTile: Color {
-            adaptiveBubbleColor(light: 0xEAF1FF, dark: 0x1C2F4A)
+            SideSeatTheme.fillSubtle
         }
         static var greetingIcon: Color {
-            adaptiveBubbleColor(light: 0x3A72CA, dark: 0x9FC4FF)
+            SideSeatTheme.textSecondaryStrong
         }
         /// A muted berry-clay brand surface for long-form reading. It is intentionally darker
         /// than the canvas without returning to the high-saturation interaction Rose.
@@ -423,7 +416,8 @@ enum SideSeatTheme {
     /// Inputs, small buttons (`radiusControl` in design docs).
     static let controlRadius: CGFloat = 14
     /// Content cards (`radiusCard`).
-    static let cardRadius: CGFloat = 22
+    static let cardRadius: CGFloat = 24
+    static let managementRadius: CGFloat = 20
     /// Login brand block (`radiusHero`).
     static let heroRadius: CGFloat = 28
 
@@ -437,13 +431,15 @@ enum SideSeatTheme {
     static let spaceXXL: CGFloat = 32
     /// Typical horizontal screen inset (within 16–22).
     static let screenHorizontal: CGFloat = 20
+    /// iOS 26's native floating tab bar overlays the scroll canvas. Keep the final row reachable.
+    static let rootScrollBottomClearance: CGFloat = 104
 
     // MARK: - Shadow (cards & brand primary CTA only; list rows have none)
 
-    static let cardShadowOpacity: Double = 0.08
-    static let cardShadowRadius: CGFloat = 18
-    static let cardShadowY: CGFloat = 8
-    static var cardShadow: Color { magenta.opacity(cardShadowOpacity) }
+    static let cardShadowOpacity: Double = 0.025
+    static let cardShadowRadius: CGFloat = 12
+    static let cardShadowY: CGFloat = 4
+    static var cardShadow: Color { textPrimary.opacity(cardShadowOpacity) }
 
     // MARK: - Interaction
 
@@ -571,28 +567,40 @@ enum SideSeatTheme {
 
     // MARK: - Chrome
 
+    private static func adaptiveUIColor(light: UInt32, dark: UInt32) -> UIColor {
+        UIColor { traits in
+            let rgb = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(red: CGFloat((rgb >> 16) & 0xFF) / 255,
+                           green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                           blue: CGFloat(rgb & 0xFF) / 255, alpha: 1)
+        }
+    }
+
     @MainActor
     static func configureChrome() {
-        let accent = UIColor.label
+        let accent = inkUIColor
         UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = .label
 
         let tab = UITabBarAppearance()
-        tab.configureWithDefaultBackground()
+        tab.configureWithOpaqueBackground()
+        tab.backgroundColor = surfaceUIColor
         configureTabItems(tab.stackedLayoutAppearance, accent: accent)
         configureTabItems(tab.inlineLayoutAppearance, accent: accent)
         configureTabItems(tab.compactInlineLayoutAppearance, accent: accent)
-        tab.shadowColor = UIColor.separator.withAlphaComponent(0.22)
+        tab.shadowColor = .clear
+        tab.selectionIndicatorTintColor = UIColor(fillSubtle)
         UITabBar.appearance().standardAppearance = tab
         UITabBar.appearance().scrollEdgeAppearance = tab
         UITabBar.appearance().tintColor = accent
 
         let nav = UINavigationBarAppearance()
-        nav.configureWithDefaultBackground()
+        nav.configureWithOpaqueBackground()
+        nav.backgroundColor = canvasUIColor
         nav.shadowColor = .clear
         UINavigationBar.appearance().standardAppearance = nav
         UINavigationBar.appearance().scrollEdgeAppearance = nav
-        UINavigationBar.appearance().tintColor = .label
-        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).tintColor = .label
+        UINavigationBar.appearance().tintColor = accent
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).tintColor = accent
     }
 
     @MainActor
@@ -644,22 +652,7 @@ struct SideSeatCardBackground: View {
 
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(SideSeatTheme.surface.opacity(0.96))
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                SideSeatTheme.peach.opacity(0.55),
-                                SideSeatTheme.rose.opacity(0.25),
-                                SideSeatTheme.orchid.opacity(0.35),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-            }
+            .fill(SideSeatTheme.surface)
             .shadow(
                 color: SideSeatTheme.cardShadow,
                 radius: SideSeatTheme.cardShadowRadius,

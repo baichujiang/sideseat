@@ -296,9 +296,7 @@ struct CalendarDayTimelineView: View {
             if calendar.isDateInToday(date) {
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     let now = context.date
-                    let minute =
-                        calendar.component(.hour, from: now) * 60
-                        + calendar.component(.minute, from: now)
+                    let minute = CalendarTimelineClock.minute(of: now, calendar: calendar)
 
                     HStack(spacing: 0) {
                         CalendarNowTimeBadge(date: now)
@@ -437,6 +435,7 @@ struct CalendarDayTimelineView: View {
                     .transition(.opacity)
                 }
             }
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .padding(.leading, timeGutter)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -488,11 +487,7 @@ struct CalendarDayTimelineView: View {
     }
 
     private func slotDate(minute: Int) -> Date? {
-        calendar.date(
-            byAdding: .minute,
-            value: minute,
-            to: calendar.startOfDay(for: date)
-        )
+        CalendarTimelineClock.date(on: date, minute: minute, calendar: calendar)
     }
 
     private var scrollTargetID: String {
@@ -516,7 +511,7 @@ struct CalendarDayTimelineView: View {
     }
 
     private func slotAccessibilityLabel(minute: Int) -> String {
-        guard let slot = calendar.date(byAdding: .minute, value: minute, to: calendar.startOfDay(for: date)) else {
+        guard let slot = slotDate(minute: minute) else {
             return "Calendar time"
         }
         return slot.formatted(date: .omitted, time: .shortened)
@@ -575,6 +570,41 @@ struct CalendarDayPlacement: Identifiable, Equatable, Sendable {
     var id: String { item.id }
 }
 
+/// The fixed 00–24 grid uses local clock minutes, rather than elapsed minutes on a 23/25-hour day.
+enum CalendarTimelineClock {
+    static func minute(of date: Date, calendar: Calendar = .sideSeatBerlin) -> Int {
+        calendar.component(.hour, from: date) * 60 + calendar.component(.minute, from: date)
+    }
+
+    /// Empty slots choose the first repeated hour; edits preserve the original occurrence.
+    /// A missing spring clock time advances to the next valid time on that day.
+    static func date(on day: Date, minute: Int, preserving reference: Date? = nil,
+                     calendar: Calendar = .sideSeatBerlin) -> Date? {
+        let dayOffset = Int(floor(Double(minute) / 1_440))
+        let clockMinute = minute - dayOffset * 1_440
+        guard let targetDay = calendar.date(byAdding: .day, value: dayOffset,
+                                            to: calendar.startOfDay(for: day)) else { return nil }
+        if let reference, calendar.isDate(reference, inSameDayAs: targetDay),
+           self.minute(of: reference, calendar: calendar) == clockMinute { return reference }
+        let hour = clockMinute / 60, minute = clockMinute % 60
+        let last = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: targetDay,
+                                 matchingPolicy: .nextTime, repeatedTimePolicy: .last)
+        let preserveLast = reference.map { reference in
+            last.map { calendar.timeZone.secondsFromGMT(for: $0) == calendar.timeZone.secondsFromGMT(for: reference) } ?? false
+        } ?? false
+        return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: targetDay,
+                             matchingPolicy: .nextTime, repeatedTimePolicy: preserveLast ? .last : .first)
+    }
+
+    static func shiftedDate(_ reference: Date, from originDay: Date, to targetDay: Date, by minutes: Int,
+                            calendar: Calendar = .sideSeatBerlin) -> Date? {
+        let dayOffset = calendar.dateComponents([.day], from: calendar.startOfDay(for: originDay),
+                                               to: calendar.startOfDay(for: reference)).day ?? 0
+        return date(on: targetDay, minute: dayOffset * 1_440 + minute(of: reference, calendar: calendar) + minutes,
+                    preserving: reference, calendar: calendar)
+    }
+}
+
 enum CalendarDayLayout {
     static func placements(
         items: [HomeAgendaItem],
@@ -588,8 +618,14 @@ enum CalendarDayLayout {
             guard item.start < dayEnd, item.end > dayStart else { return nil }
             let clippedStart = max(item.start, dayStart)
             let clippedEnd = min(item.end, dayEnd)
-            let startMinute = max(0, calendar.dateComponents([.minute], from: dayStart, to: clippedStart).minute ?? 0)
-            let endMinute = min(24 * 60, calendar.dateComponents([.minute], from: dayStart, to: clippedEnd).minute ?? 0)
+            var startMinute = CalendarTimelineClock.minute(of: clippedStart, calendar: calendar)
+            var endMinute = clippedEnd == dayEnd ? 1_440 : CalendarTimelineClock.minute(of: clippedEnd, calendar: calendar)
+            if let fold = calendar.timeZone.nextDaylightSavingTimeTransition(after: clippedStart), fold <= clippedEnd,
+               calendar.timeZone.secondsFromGMT(for: fold.addingTimeInterval(-1)) > calendar.timeZone.secondsFromGMT(for: fold) {
+                // A real interval spanning the repeated hour must not reverse or disappear on the 24-hour grid.
+                endMinute = max(endMinute, CalendarTimelineClock.minute(of: fold.addingTimeInterval(-1), calendar: calendar) + 1)
+                if fold < clippedEnd { startMinute = min(startMinute, CalendarTimelineClock.minute(of: fold, calendar: calendar)) }
+            }
             guard endMinute > startMinute else { return nil }
             return (item, startMinute, endMinute)
         }

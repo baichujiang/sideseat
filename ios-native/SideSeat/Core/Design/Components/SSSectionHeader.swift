@@ -7,9 +7,8 @@ struct SSSectionHeader: View {
 
     var body: some View {
         Text(title)
-            .font(.caption.weight(.bold))
-            .textCase(.uppercase)
-            .foregroundStyle(SideSeatTheme.textPrimary)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(SideSeatTheme.textSecondary)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, SideSeatTheme.spaceXS)
             .ssAccessibilityIdentifier(accessibilityID)
@@ -51,7 +50,7 @@ struct SSProductSectionHeader: View {
 /// Grouped block: section header + inset surface for hub rows.
 struct SSGroupedSection<Content: View>: View {
     let title: String
-    var cornerRadius: CGFloat = 18
+    var cornerRadius: CGFloat = SideSeatTheme.managementRadius
     var accessibilityID: String? = nil
     @ViewBuilder var content: () -> Content
 
@@ -66,10 +65,6 @@ struct SSGroupedSection<Content: View>: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(SideSeatTheme.surface)
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.04), lineWidth: 1)
-            }
         }
     }
 }
@@ -78,7 +73,7 @@ struct SSGroupedSection<Content: View>: View {
 /// It keeps the existing grouped visual grammar while giving product code a semantic API.
 struct SSManagementSection<Content: View>: View {
     let title: String
-    var cornerRadius: CGFloat = 18
+    var cornerRadius: CGFloat = SideSeatTheme.managementRadius
     var accessibilityID: String? = nil
     @ViewBuilder var content: () -> Content
 
@@ -93,10 +88,6 @@ struct SSManagementSection<Content: View>: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .fill(SideSeatTheme.surface)
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.04), lineWidth: 1)
-            }
         }
     }
 }

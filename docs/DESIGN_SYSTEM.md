@@ -2,7 +2,7 @@
 
 **Status:** Current native design contract
 
-**Last updated:** 2026-10-24
+**Last updated:** 2026-10-25
 
 **Governing flow:** [User Flow](./USER_FLOW.md)
 
@@ -19,11 +19,13 @@
   explicit; direct edits and navigation should not gain artificial confirmations.
 - Routine buttons, filters, menus, tabs and private-save controls use neutral text
   and neutral selected surfaces. Selection also uses a checkmark, icon or weight.
-- Product primary actions use adaptive ink/chalk. Rare emphasized actions such as
-  Say hello may use deep Rose with white text. Avoid pale pink fills with red text.
+- Product primary actions use adaptive ink/chalk. Together contact actions use a
+  soft neutral capsule; an existing conversation keeps its separate success role.
+  Deep Rose remains an explicitly scoped brand emphasis, not the default greeting.
+  Avoid pale pink fills with red text.
   Original category artwork adds personality without coloring every control.
 - Brand gradients belong to Auth/Tutorial and rare hero moments, not product lists.
-- Together, Calendar, Messages and Me share one component/token system.
+- Together, Plans, Calendar, Messages and Me share one component/token system.
 - Dynamic Type, VoiceOver, Light/Dark and safe-area behavior are requirements.
 - Calendar grids and message bubbles may use specialized layout but still consume
   semantic tokens.
@@ -36,17 +38,63 @@
 | Plans | Understand and complete the next planning step | Role-specific next actions, a short shared lifecycle, visible link sharing and persistent contextual actions |
 | Calendar | Understand and edit time       | Neutral grid and date selections; solid blue for today, separate current-time marker       |
 | Messages | Coordinate and manage Plans    | Reading comfort over brand saturation; source and Plan cards have distinct surfaces |
-| Me       | Identity and settings          | Native grouped hierarchy; light brand wash only where useful                        |
+| Me       | Identity and settings          | White identity and management groups; preserve user-selected personalization         |
 
 Root pages may use one compact brand/navigation signature. Secondary pages use
 standard iOS titles and back behavior.
 
-Plans and Together section navigation shares `ssSectionNavigationTrack` and
-`ssSectionNavigationItem`: a neutral `fillTertiary` track, selected `surface`
-with a 0.5pt `ControlSelection.border`, and primary/secondary text with selected
-weight. Keep the track free of an outer action outline; reserve solid
-`ProductAction` fills for explicit primary actions. Preserve the 44pt targets,
-selected accessibility state, paging and Together's adaptive section chooser.
+### Shared native root foundation — 2026-10-25
+
+This is the implemented source contract for the five native root pages. The
+[local design draft](./designs/2026-10-25-root-foundation-v1/README.md) records the
+approved visual direction; its browser dimensions are not native layout metrics.
+This section does not establish a test result, installation or release status.
+
+The shared light palette is warm-white canvas `#F7F7F3`, white content surface
+`#FFFFFF`, primary ink `#1C2421`, secondary text `#747B75`, neutral selection fill
+`#EDEFE8` and separator `#E7EAE3`. Product primary fill remains `#26322D` with its
+paired foreground. Each semantic token has its native dark counterpart. Existing
+strong secondary text, system control fills, category bands and semantic state
+colors retain their separate roles; this palette does not recolor every item.
+
+Use `SideSeatTheme.screenHorizontal` for 20pt root content margins. The common
+content-card radius is 24pt, management-group radius 20pt and control radius 14pt.
+`SSFlowCard`, `SSGroupedSection` and `SSManagementSection` use the shared surface
+without a default decorative outer stroke or colored card shadow. Hierarchy
+comes from spacing, typography, quiet row dividers and meaningful content.
+Activity category bands and genuine identity decoration remain scoped to their
+existing content roles.
+
+All five root titles use `ssRootNavigationTitle`: a compact 22pt app mark, 7pt
+gap and semibold `title3` in the native inline navigation principal area. This
+compact title label caps at `xxxLarge` and stays on one line. Body content,
+form fields and rows continue to follow the system text setting; sheets preserve
+their existing Dynamic Type propagation. Native navigation controls retain their
+own hit areas and system placement rather than inheriting browser header slots.
+
+Plans, Together and Calendar section/view navigation share `SSRootTabs`:
+equal-width transparent targets, primary/secondary text with selected weight,
+and a 24 × 3pt capsule underline for the selected item. Each target is at least
+56pt high; its compact label caps at `xxxLarge` and may wrap. Accessibility
+preserves the selected trait and existing identifiers. There is no filled track
+or outer action outline. Together
+retains its section-menu fallback at accessibility sizes or when labels do not
+fit, plus the existing paging and scroll-position behavior.
+
+The bottom five destinations remain the native `TabView` managed by iOS. Bar
+height, item placement, glass and safe areas are system-owned; do not treat the
+HTML draft's independent 112px footer, 78px pill or screenshot pixels as an App
+geometry guarantee. The iOS 26 floating bar can overlay scrolling content.
+`rootScrollBottomClearance = 104` supplies explicit scroll clearance on root
+lists that need it, including Together, Messages and Me. Plans keeps its separate
+creation dock through `safeAreaInset`; Calendar retains its existing grid/viewport
+ownership. These native mechanisms must keep final items and controls reachable.
+
+Preserve each page's information structure: Together keeps its three sections,
+Plans its two sections and contextual creation entry, Calendar its existing view
+and tool controls, Messages its search/shortcuts/conversations, and Me its
+identity and management groups. The foundation does not add matching controls to
+every header, add new routes, or alter invitation and Calendar rules.
 
 Together recommendation empty states use one centered, unframed group (maximum
 340pt): quiet people icon, short title, status-aware description and vertically
@@ -90,7 +138,8 @@ shared target, disabled, press and destructive-role behavior. Explicit secondary
 components own their soft fills. Existing 44pt hit targets,
 labels, disabled feedback and press feedback remain. A selection border/checkmark,
 timetable cell grid, avatar or badge separation stroke still has a specific purpose.
-Message shortcuts keep their icon tiles and labels without an outer button box.
+Message shortcuts share one white group with a quiet internal divider; their
+individual icon-and-label targets do not acquire outer button boxes.
 Navigation rows keep their destination arrow, while decline actions use red text.
 Remove redundant call-site outlines instead of wrapping already styled labels again.
 Chat context bars and native information rows use `softFill: false` because their
@@ -123,10 +172,12 @@ Tokens live in `SideSeatTheme.swift`; calendar-specific metrics live in
 | `BrandAction.*`                | rare deep-Rose primary action with white text                  |
 | `ProductAction.*`              | paired ink/chalk product button fill and foreground           |
 | `activityInset`                | warm neutral activity context                                |
-| `Together.headerFill`          | colored top row in all three Together card lists              |
+| `Together.headerFill`          | retained activity-category surface for explicit `SSActivityHeaderBand` consumers, including Explore; not the root cards' general header fill |
 | `verifiedSeal`                 | verified trust state; never reuse interaction Rose            |
-| `bg`, `bgGrouped`, `surface`   | system-adaptive canvases and cards                            |
-| `textPrimary`, `textSecondary` | system-adaptive content hierarchy                             |
+| `bg`, `bgGrouped`, `surface`   | shared adaptive canvas `#F7F7F3` and white content surface in Light |
+| `textPrimary`, `textSecondary` | shared adaptive ink `#1C2421` and secondary `#747B75` in Light |
+| `fillSubtle` / `separator` | neutral `#EDEFE8` control/selection well and `#E7EAE3` separator in Light |
+| `fillTertiary` / `textSecondaryStrong` | existing native system control well and stronger compact text; separate from the new secondary palette |
 | `danger`, `success`            | destructive/error and success semantics                       |
 | `calendarToday` / `onCalendarToday` | solid current-date marker and high-contrast number in Month/Week/Day, without an outer outline |
 | `calendarNow`                  | current-time line and time badge                              |
@@ -154,6 +205,8 @@ Reusable controls live in `Core/Design/Components/`:
 - `SSPrimaryButton`, `SSSecondaryButton`;
 - `SSTextField`, `SSSecureField`, `SSFieldMessage`;
 - `SSCard`, `SSSectionHeader`, `SSGroupedSection`;
+- `SSRootTabs` / `SSRootTabItem` for root section and Calendar view navigation;
+- `SSManagementSection` / `SSManagementRow` for identity, campus and settings groups;
 - `SSFlowCard`, `SSFlowCardHeader`, `SSFlowNotice`, `SSFlowChoice` and
   `SSFlowActionDock` for the Together → Plan journey;
 - `SSActivityArtwork` and `SSActivityChoice` for the six illustrated activity categories;
@@ -162,6 +215,17 @@ Reusable controls live in `Core/Design/Components/`:
 - `SSActionPrompt` for product-owned confirmation;
 - SideSeat share components where a stable shared pattern exists.
 
+### Together intention actions — 2026-10-25
+
+`SSIntentionActionRow` places compact actions at the trailing edge at ordinary
+text sizes. Bookmark is a 44pt icon target with its existing accessibility label;
+the selected heart retains the neutral selection fill. Contact uses
+`SSIntentionContactButton` with utility ink on a soft `fillSubtle` capsule instead
+of an equal-width filled primary action. Only the existing `opensConversation`
+state uses the chat icon, success text and a light success fill. The state and
+contact permissions are unchanged. At accessibility sizes, the row stacks and
+both actions keep their full wrapping text and at least 44pt targets.
+
 System permissions and system-owned input remain native. Product confirmations,
 dangerous operations and recurrence-scope decisions use the centered SideSeat
 prompt. Long-press menus share an action model but choose presentation by object:
@@ -169,6 +233,11 @@ message and event actions remain anchored near their source; region actions may
 use a panel. Tapping outside dismisses any custom menu.
 
 ### Together warm paper refresh — 2026-09-12
+
+Historical design progression: the dated navigation tracks, default hairline,
+colored card shadow and deep-Rose first-contact emphasis described below have
+been superseded by the 2026-10-25 shared native root foundation and compact
+neutral contact actions. The dated behavior and verification records are retained.
 
 Following review of Preview 46, the owner selected warm cream, brand Rose accents
 and restrained card layers. This replaces the forest/citron header and broad
@@ -223,12 +292,20 @@ and adaptive white/ink surfaces, preserving the established teal/amber grid colo
 
 Use one anatomy across owner Intent, Opportunity, mutual chat source, Plan list
 and chat Plan cards: context/status → concrete title → time/place/person → action.
-The shared surface uses a 22pt radius, 16pt content inset, neutral adaptive fill
-by default (Together opts into category colors), and a quiet hairline.
+The shared surface uses a 24pt radius and neutral adaptive fill without a default
+outer hairline or colored shadow. `SSFlowCard` keeps its 16pt default content
+inset; Together's card anatomy supplies its existing 20pt inset. Current root
+headers use the neutral card material with topic text, icons or artwork.
+Colored category bands remain only at explicit `SSActivityHeaderBand` call sites,
+including the retained Explore presentation.
+Root page margins are independently 20pt.
 Status always includes text; it never relies on color alone.
 Use inset notices for privacy and the effect of accepting or rescheduling.
 
-An actionable Plan or mutual Opportunity has one full-width ink/chalk primary action.
+Plan detail commits use their contextual ink/chalk primary action. Together
+contact and bookmark actions follow the compact row above. A Plans overview card
+is itself the destination target and has no duplicate inner Open timetable
+button; a quiet chevron indicates navigation.
 An undecided Opportunity uses the bidirectional interest bar described below.
 Withdraw, decline and alternate-time actions remain secondary, with targets at
 least 44pt high. At accessibility sizes, alternatives stack without shrinking
@@ -281,6 +358,11 @@ The redesign and system avatars are committed/pushed for
 [Build 38](./releases/2026-09-09-testflight-38.md); that record tracks publication.
 
 ### Private interest swipe bar — 2026-09-09
+
+Historical header progression: the full-width category bands described in the
+dated refinement below are not the current root-card header contract. The shared
+root foundation uses the neutral card material; the colored band component and
+its palette remain available to existing explicit consumers such as Explore.
 
 2026-09-21 card-header refinement: recommendation cards emphasize category
 color in the full-width peer/avatar-to-activity-artwork row. Coffee uses latte,
@@ -589,6 +671,14 @@ uses a ring, checkmark and accessibility selected state, not color alone.
 - calendar-category color appears beside category identity;
 - event editor uses one component for manual and smart-add editing.
 
+Compact calendar metadata has local text bounds: the fixed seven-column month
+grid caps weekday/day labels at `xLarge`, preserving full dates in accessibility.
+Day/Week date chips and the hour rail use the same `xLarge` metadata bound. The
+Week bottom controls, offscreen-event overlays and zoom hint, plus the Day
+offscreen-event overlay, cap their fixed chrome at `xxxLarge`. These limits do
+not cap the page, agenda or event-editor body text. Content below the grid remains
+scrollable and uses its existing system-size typography and navigation.
+
 ### Browser calendar workspace — 2026-09-21
 
 The requested Teams-inspired browser layout uses a compact app rail, a collapsible
@@ -642,17 +732,40 @@ classic/rose/ocean/forest profile cards, optional SF Symbol decorations, and
 classic/outline/spotlight surfaces. The profile card may have a light colored wash
 or stroke; display names and body text keep semantic foregrounds. Product-wide
 action colors remain unchanged. Light/dark/system is a device preference.
+Under the shared root foundation, the default classic Me identity card uses the
+same plain surface as management groups, without the default tinted stroke or
+avatar shadow. Explicitly selected non-classic themes and outline/spotlight styles
+continue to use `ProfileAppearanceSurface`; membership eligibility, optional
+decoration, membership badge, avatar editing and profile editing remain intact.
 See [Profile personalization](PROFILE_PERSONALIZATION.md) for entitlement and persistence.
 
 ### Messages greeting and notification shortcuts
 
-New greetings and Notifications use matching compact blue waving-hand/bell tiles, with labels underneath
-and count badges at their top-right corners. They sit side by side, left-aligned above the continuous conversation
-list, with separate hit targets. `Chat.greetingTile` and
-`Chat.greetingIcon` scope this requested color treatment to this shortcut. The count remains
-the total greetings in the existing request list; Notifications counts only unread notification items.
-The Messages tab retains its existing unread policy. Decorative tiles cap at 76pt and count glyphs remain
-compact at accessibility sizes; labels wrap and each button exposes its complete count to accessibility.
+New greetings and Notifications share one white rounded group with two equal
+targets and a quiet internal divider above the conversation list. Each target
+normally places its icon beside a title/count stack; `ViewThatFits` moves that
+content to a vertical arrangement when needed without shrinking or capping the
+title/count text. The decorative glyph stays 20pt inside a 38pt tile; it does
+not grow with the system text setting or consume a larger share of the first page.
+`Chat.greetingTile` and `Chat.greetingIcon` now resolve to the shared `fillSubtle`
+and `textSecondaryStrong`; the former blue shortcut treatment is replaced by
+the neutral foundation. Counts appear as text, including zero, rather than
+overlapping corner badges. Greetings still counts the existing request list;
+Notifications counts only unread notification items. Both buttons preserve their routes, identifiers,
+complete accessibility count and independent hit targets. The Messages tab's
+unread policy is unchanged.
+
+Search remains a native `UISearchTextField` with clear/cancel behavior inside a
+14pt rounded `fillSubtle` well and 20pt page margins, without the old floating
+shadow or capsule stroke. Its input font remains native preferred Body with
+content-size adjustment enabled. The well is at least 44pt high and measures
+the actual native font line height plus 16pt, rather than scaling the full 44pt
+control height. The decorative magnifier stays 18pt in a 20pt image view.
+Recent conversations form an inset white group using rounded first/last rows
+and quiet text-aligned separators. At accessibility text sizes, the name and
+date move into separate leading-aligned rows; names have no line cap, and dates
+may wrap without forcing the name into a narrow remaining column. Pin, unread, hide,
+long-press and swipe behavior remain attached to the same conversation rows.
 The notification list uses semantic text, a leading event icon, timestamp and unread dot, with a separate
 read/unread accessibility value. Empty, loading and retry states remain distinct.
 
@@ -677,4 +790,13 @@ Type. Verification evidence is tracked in the same-person remediation QA report.
 
 ## Plans home — owner-approved 2026-10-19
 
-The first photographic concept is approved for implementation. Plans home uses the centrally owned `SideSeatTheme.PlanHome` warm ivory, forest, sage and restrained terracotta tokens, with adaptive dark counterparts. Other product surfaces and Brand Rose retain their existing tokens. First-use illustration is decorative; actual cards use real inviter/organizer context and existing avatars. Title-derived default artwork never sets or changes the activity. Needs-you stays vertical; waiting stays a compact horizontal rail, reflowing vertically for accessibility sizes. Opening an overview card never commits a response. See [design and assets](./designs/2026-10-19-plans-home/README.md).
+The initial photographic concept and its scoped `SideSeatTheme.PlanHome` palette
+are recorded in [design and assets](./designs/2026-10-19-plans-home/README.md).
+Current Plans root chrome and card materials use the shared native foundation
+above. Cards prioritize a leading date/time group, activity name, explicit status
+and real participant progress/avatars. Decorative title-derived activity covers
+and the duplicate inner Open timetable action have been removed. The whole card
+opens its existing destination; it never commits a response. Needs-you stays
+vertical and waiting retains its existing horizontal/adaptive section behavior.
+The creation action remains in a dedicated trailing dock above the native tab bar.
+Brand Rose, invitation semantics and Calendar rules are unchanged.

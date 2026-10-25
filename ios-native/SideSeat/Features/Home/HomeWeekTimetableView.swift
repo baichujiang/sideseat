@@ -692,9 +692,7 @@ struct HomeWeekTimetableView: View {
     ) -> some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             let now = context.date
-            let minute =
-                calendar.component(.hour, from: now) * 60
-                + calendar.component(.minute, from: now)
+            let minute = CalendarTimelineClock.minute(of: now, calendar: calendar)
 
             HStack(spacing: 0) {
                 CalendarNowTimeBadge(date: now)
@@ -930,11 +928,7 @@ struct HomeWeekTimetableView: View {
     }
 
     private func slotDate(on day: Date, minute: Int) -> Date? {
-        calendar.date(
-            byAdding: .minute,
-            value: minute,
-            to: calendar.startOfDay(for: day)
-        )
+        CalendarTimelineClock.date(on: day, minute: minute, calendar: calendar)
     }
 
     private func canDirectDrag(
@@ -1084,11 +1078,9 @@ struct HomeWeekTimetableView: View {
     ) -> (start: Date, end: Date)? {
         guard days.indices.contains(preview.targetDayIndex) else { return nil }
         let targetDay = calendar.startOfDay(for: days[preview.targetDayIndex])
-        guard let visualStart = calendar.date(
-            byAdding: .minute,
-            value: preview.targetStartMinute,
-            to: targetDay
-        ) else { return nil }
+        guard let original = CalendarDayLayout.placements(items: [preview.item], on: preview.item.start, calendar: calendar).first else { return nil }
+        guard let visualStart = CalendarTimelineClock.shiftedDate(preview.item.start, from: preview.item.start,
+            to: targetDay, by: preview.targetStartMinute - original.startMinute, calendar: calendar) else { return nil }
 
         switch preview.operation {
         case .move:
@@ -1099,13 +1091,12 @@ struct HomeWeekTimetableView: View {
                 )
             )
         case .resizeStart:
+            guard visualStart < preview.item.end else { return nil }
             return (visualStart, preview.item.end)
         case .resizeEnd:
-            guard let visualEnd = calendar.date(
-                byAdding: .minute,
-                value: preview.targetEndMinute,
-                to: targetDay
-            ) else { return nil }
+            guard let visualEnd = CalendarTimelineClock.shiftedDate(preview.item.end, from: preview.item.start,
+                to: targetDay, by: preview.targetEndMinute - original.endMinute, calendar: calendar),
+                visualEnd > preview.item.start else { return nil }
             return (preview.item.start, visualEnd)
         }
     }
@@ -1399,6 +1390,7 @@ struct HomeWeekTimetableView: View {
                     .transition(.opacity)
                 }
             }
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .padding(.leading, timeGutter)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
@@ -1638,6 +1630,7 @@ struct HomeWeekTimetableView: View {
                 systemImage: "arrow.up.left.and.arrow.down.right"
             )
             .font(.footnote.weight(.semibold))
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             .foregroundStyle(SideSeatTheme.textPrimary)
             .padding(.horizontal, 14)
             .frame(minHeight: 38)
@@ -1708,6 +1701,7 @@ struct HomeWeekTimetableView: View {
             weekWidthControl
             CalendarTodayButton(action: onJumpToToday)
         }
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .frame(maxWidth: 300)
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

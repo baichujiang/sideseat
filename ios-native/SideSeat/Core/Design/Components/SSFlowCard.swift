@@ -5,12 +5,7 @@ import UIKit
 struct SSFlowCard<Content: View>: View {
     var contentPadding: CGFloat = SideSeatTheme.spaceLG
     var contentSpacing: CGFloat = SideSeatTheme.spaceMD
-    var activityTopic: NativeWeeklyIntentTopic? = nil
     @ViewBuilder var content: () -> Content
-
-    private var radius: CGFloat {
-        activityTopic == nil ? SideSeatTheme.cardRadius : SideSeatTheme.Together.cardRadius
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: contentSpacing, content: content)
@@ -19,15 +14,9 @@ struct SSFlowCard<Content: View>: View {
             .background(
                 SideSeatTheme.surface,
                 in: RoundedRectangle(
-                    cornerRadius: radius, style: .continuous
+                    cornerRadius: SideSeatTheme.cardRadius, style: .continuous
                 )
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(activityTopic == nil ? SideSeatTheme.separator.opacity(0.25)
-                                  : SideSeatTheme.Together.border.opacity(0.7), lineWidth: 0.5)
-            }
-            .shadow(color: activityTopic == nil ? .clear : SideSeatTheme.Together.shadow.opacity(0.045), radius: 16, y: 6)
     }
 }
 
@@ -465,13 +454,21 @@ struct SSIntentionActionRow<Contact: View>: View {
     var body: some View {
         layout {
             Button(action: onBookmark) {
-                SSIntentionActionLabel(
-                    title: AppLocalization.string(isBookmarked ? "Saved (intention)" : "Save (intention)"),
-                    icon: isBookmarked ? "heart.fill" : "heart"
-                )
+                Group {
+                    if dynamicTypeSize.isAccessibilitySize {
+                        SSIntentionActionLabel(
+                            title: AppLocalization.string(isBookmarked ? "Saved (intention)" : "Save (intention)"),
+                            icon: isBookmarked ? "heart.fill" : "heart"
+                        )
+                    } else {
+                        Image(systemName: isBookmarked ? "heart.fill" : "heart")
+                            .font(.title3)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                }
                 .foregroundStyle(SideSeatTheme.utilityAction)
-                .background(isBookmarked ? SideSeatTheme.ControlSelection.fill : SideSeatTheme.fillSubtle,
-                            in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
+                .background(isBookmarked ? SideSeatTheme.ControlSelection.fill : .clear, in: Capsule())
             }
             .buttonStyle(SSPressButtonStyle())
             .disabled(isDisabled)
@@ -479,6 +476,7 @@ struct SSIntentionActionRow<Contact: View>: View {
             .accessibilityIdentifier(bookmarkIdentifier)
             contact()
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 }
 
@@ -493,10 +491,10 @@ struct SSIntentionContactButton: View {
         Button(action: action) {
             SSIntentionActionLabel(title: title,
                 icon: opensConversation ? "bubble.left.and.bubble.right.fill" : "hand.wave.fill")
-                .foregroundStyle(opensConversation ? SideSeatTheme.statusSuccessText : SideSeatTheme.BrandAction.foreground)
+                .foregroundStyle(opensConversation ? SideSeatTheme.statusSuccessText : SideSeatTheme.utilityAction)
                 .background(
-                    opensConversation ? SideSeatTheme.statusSuccessText.opacity(0.12) : SideSeatTheme.BrandAction.fill,
-                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius)
+                    opensConversation ? SideSeatTheme.statusSuccessText.opacity(0.12) : SideSeatTheme.fillSubtle,
+                    in: Capsule()
                 )
         }
         .buttonStyle(SSPressButtonStyle())
@@ -506,6 +504,7 @@ struct SSIntentionContactButton: View {
 }
 
 private struct SSIntentionActionLabel: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
     let icon: String
 
@@ -517,9 +516,9 @@ private struct SSIntentionActionLabel: View {
                 .multilineTextAlignment(.center)
         }
         .font(.subheadline.weight(.semibold))
-        .padding(.horizontal, SideSeatTheme.spaceSM)
+        .padding(.horizontal, SideSeatTheme.spaceLG)
         .padding(.vertical, SideSeatTheme.spaceSM)
-        .frame(maxWidth: .infinity, minHeight: 48)
+        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil, minHeight: 44)
         .contentShape(Rectangle())
     }
 }

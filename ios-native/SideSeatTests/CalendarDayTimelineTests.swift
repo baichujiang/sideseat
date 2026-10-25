@@ -178,6 +178,118 @@ struct CalendarDayTimelineTests {
         #expect(resizedRequest.repeatUntil == repeatUntil.ISO8601Format())
     }
 
+    @Test("Timed cards use their Berlin clock coordinates on autumn, spring and ordinary days")
+    func wallClockPlacementAcrossSeasons() throws {
+        for offsetDay in ["2026-10-25", "2026-03-29", "2026-07-17"] {
+            let offset = offsetDay == "2026-10-25" ? "+01:00" : "+02:00"
+            let event = try absoluteItem("clock", start: "\(offsetDay)T03:01:00\(offset)", end: "\(offsetDay)T04:01:00\(offset)")
+            let placement = try #require(CalendarDayLayout.placements(items: [event], on: event.start).first)
+            #expect(placement.startMinute == 181)
+            #expect(placement.endMinute == 241)
+            #expect(placement.item.start == event.start && placement.item.end == event.end)
+            #expect(CalendarTimelineClock.minute(of: event.start) == placement.startMinute)
+        }
+    }
+
+    @Test("The last clock hour remains visible and cross-midnight clipping ends at 24")
+    func lastClockHourAcrossSeasons() throws {
+        for (day, next, offset) in [("2026-10-25", "2026-10-26", "+01:00"),
+                                     ("2026-03-29", "2026-03-30", "+02:00"),
+                                     ("2026-07-17", "2026-07-18", "+02:00")] {
+            let event = try absoluteItem("late", start: "\(day)T23:30:00\(offset)", end: "\(next)T00:30:00\(offset)")
+            let first = try #require(CalendarDayLayout.placements(items: [event], on: event.start).first)
+            let second = try #require(CalendarDayLayout.placements(items: [event], on: event.end).first)
+            #expect(first.startMinute == 1_410 && first.endMinute == 1_440)
+            #expect(second.startMinute == 0 && second.endMinute == 30)
+        }
+    }
+
+    @Test("Both repeated clock hours remain separate events and fold-spanning cards remain visible")
+    func repeatedHourPlacements() throws {
+        let first = try absoluteItem("first-fold", start: "2026-10-25T02:15:00+02:00", end: "2026-10-25T02:45:00+02:00")
+        let second = try absoluteItem("second-fold", start: "2026-10-25T02:15:00+01:00", end: "2026-10-25T02:45:00+01:00")
+        let placements = CalendarDayLayout.placements(items: [first, second], on: first.start)
+        #expect(placements.count == 2)
+        #expect(placements.allSatisfy { $0.startMinute == 135 && $0.endMinute == 165 && $0.laneCount == 2 })
+        #expect(Set(placements.map(\.lane)).count == 2)
+        #expect(Set(placements.map { $0.item.start }) == [first.start, second.start])
+        let crossing = try absoluteItem("cross-fold", start: "2026-10-25T02:45:00+02:00", end: "2026-10-25T02:15:00+01:00")
+        let range = try #require(CalendarDayLayout.placements(items: [crossing], on: first.start).first)
+        #expect(range.startMinute == 120 && range.endMinute == 180)
+        #expect(range.item.start == crossing.start && range.item.end == crossing.end)
+        let endingAtFold = try absoluteItem("fold-end", start: "2026-10-25T02:30:00+02:00", end: "2026-10-25T02:00:00+01:00")
+        let boundary = try #require(CalendarDayLayout.placements(items: [endingAtFold], on: first.start).first)
+        #expect(boundary.startMinute == 150 && boundary.endMinute == 180)
+    }
+
+    @Test("Blank-slot and drag clock minutes round-trip without shifting the date or hour")
+    func gridClockConversionAcrossSeasons() throws {
+        let calendar = Calendar.sideSeatBerlin
+        for (day, next, offset) in [("2026-10-25", "2026-10-26", "+01:00"),
+                                     ("2026-03-29", "2026-03-30", "+02:00"),
+                                     ("2026-07-17", "2026-07-18", "+02:00")] {
+            let event = try absoluteItem("slot", start: "\(day)T03:30:00\(offset)", end: "\(next)T00:00:00\(offset)")
+            #expect(CalendarTimelineClock.date(on: event.start, minute: 210) == event.start)
+            #expect(CalendarTimelineClock.date(on: event.start, minute: 1_440) == event.end)
+            let previous = try #require(CalendarTimelineClock.date(on: event.start, minute: -30))
+            #expect(CalendarTimelineClock.minute(of: previous) == 1_410)
+            #expect(calendar.dateComponents([.day], from: calendar.startOfDay(for: previous), to: calendar.startOfDay(for: event.start)).day == 1)
+        }
+    }
+
+    @Test("New repeated-hour slots choose the first occurrence while edits retain either original occurrence")
+    func repeatedHourClockConversion() throws {
+        let first = try absoluteItem("first", start: "2026-10-25T02:30:20+02:00", end: "2026-10-25T02:35:00+02:00")
+        let second = try absoluteItem("second", start: "2026-10-25T02:30:20+01:00", end: "2026-10-25T02:35:00+01:00")
+        let firstSlot = try #require(CalendarTimelineClock.date(on: first.start, minute: 150))
+        #expect(firstSlot == first.start.addingTimeInterval(-20))
+        #expect(CalendarTimelineClock.date(on: first.start, minute: 150, preserving: first.start) == first.start)
+        #expect(CalendarTimelineClock.date(on: second.start, minute: 150, preserving: second.start) == second.start)
+        #expect(CalendarTimelineClock.date(on: first.start, minute: 155, preserving: first.start) == first.end)
+        #expect(CalendarTimelineClock.date(on: second.start, minute: 155, preserving: second.start) == second.end)
+        let nextDay = try #require(CalendarTimelineClock.date(on: second.start, minute: 1_440 + 150, preserving: second.start))
+        #expect(nextDay.ISO8601Format() == "2026-10-26T01:30:00Z")
+    }
+
+    @Test("A nonexistent spring slot advances to the next valid local clock time")
+    func springGapClockConversion() throws {
+        let event = try absoluteItem("spring", start: "2026-03-29T01:30:00+01:00", end: "2026-03-29T03:30:00+02:00")
+        let slot = try #require(CalendarTimelineClock.date(on: event.start, minute: 150))
+        #expect(slot.ISO8601Format() == "2026-03-29T01:00:00Z")
+        #expect(CalendarTimelineClock.minute(of: slot) == 180)
+        let placement = try #require(CalendarDayLayout.placements(items: [event], on: event.start).first)
+        #expect(placement.startMinute == 90 && placement.endMinute == 210)
+        #expect(placement.item.end.timeIntervalSince(placement.item.start) == 3_600)
+    }
+
+    @Test("Fold-spanning resize deltas apply to real endpoints and preserve midnight and no-op instants")
+    func foldResizeUsesRealEndpointDelta() throws {
+        let event = try absoluteItem("resize-fold", start: "2026-10-25T02:45:20+02:00", end: "2026-10-25T02:15:20+01:00")
+        let projection = try #require(CalendarDayLayout.placements(items: [event], on: event.start).first)
+        #expect(projection.startMinute == 120 && projection.endMinute == 180)
+        let movedStart = try #require(CalendarTimelineClock.shiftedDate(event.start, from: event.start,
+            to: event.start, by: 125 - projection.startMinute))
+        let movedEnd = try #require(CalendarTimelineClock.shiftedDate(event.end, from: event.start,
+            to: event.start, by: 185 - projection.endMinute))
+        #expect(movedStart.ISO8601Format() == "2026-10-25T00:50:00Z")
+        #expect(movedEnd.ISO8601Format() == "2026-10-25T01:20:00Z")
+        #expect(CalendarTimelineClock.shiftedDate(event.start, from: event.start, to: event.start, by: 0) == event.start)
+        #expect(CalendarTimelineClock.shiftedDate(event.end, from: event.start, to: event.start, by: 0) == event.end)
+        let midnight = try absoluteItem("midnight", start: "2026-10-25T23:30:00+01:00", end: "2026-10-26T00:00:00+01:00")
+        let earlierEnd = try #require(CalendarTimelineClock.shiftedDate(midnight.end, from: midnight.start,
+            to: midnight.start, by: -5))
+        #expect(earlierEnd.ISO8601Format() == "2026-10-25T22:55:00Z")
+        let nextDay = try #require(CalendarTimelineClock.date(on: event.start, minute: 1_440))
+        let moved = try #require(CalendarTimelineClock.shiftedDate(event.start, from: event.start, to: nextDay, by: 5))
+        #expect(moved.ISO8601Format() == "2026-10-26T01:50:00Z")
+    }
+
+    private func absoluteItem(_ id: String, start: String, end: String) throws -> HomeAgendaItem {
+        let formatter = ISO8601DateFormatter()
+        return HomeAgendaItem(id: id, title: id, start: try #require(formatter.date(from: start)),
+                              end: try #require(formatter.date(from: end)), location: nil, colorHex: nil, source: .event)
+    }
+
     private func item(
         _ id: String,
         from startMinute: Int,

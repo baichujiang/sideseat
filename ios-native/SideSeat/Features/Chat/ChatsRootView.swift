@@ -11,15 +11,15 @@ struct ChatsRootView: View {
     @Environment(RouterPath.self) private var router
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(InboxNotificationsStore.self) private var notifications
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Bindable var store: InboxStore
-    @ScaledMetric(relativeTo: .body) private var greetingTileSize: CGFloat = 54
 
     var body: some View {
         ZStack {
             if store.payload != nil {
                 List {
                     messageShortcuts
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 12, trailing: 16))
+                        .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 12, trailing: 20))
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     if let issue = store.issue {
@@ -73,15 +73,25 @@ struct ChatsRootView: View {
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     } else {
-                        ForEach(store.pinned + store.recent) { row in
-                            inboxRow(row)
+                        let rows = store.pinned + store.recent
+                        Text("Recent")
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .accessibilityAddTraits(.isHeader)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 12, trailing: 20))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                        ForEach(rows) { row in
+                            inboxRow(row, isFirst: row.id == rows.first?.id,
+                                isLast: row.id == rows.last?.id)
                         }
                     }
                 }
                 .listStyle(.plain)
                 .listSectionSpacing(.compact)
                 .environment(\.defaultMinListRowHeight, 60)
-                .contentMargins(.bottom, 88, for: .scrollContent)
+                .scrollContentBackground(.hidden)
+                .contentMargins(.bottom, SideSeatTheme.rootScrollBottomClearance, for: .scrollContent)
                 .scrollDismissesKeyboard(.interactively)
                 .accessibilityIdentifier("inbox-list")
             } else if let issue = store.issue {
@@ -104,6 +114,7 @@ struct ChatsRootView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .background(SideSeatTheme.bgGrouped)
         .ssRootNavigationTitle("Messages")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -131,17 +142,24 @@ struct ChatsRootView: View {
     }
 
     private var messageShortcuts: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(spacing: 0) {
             messageShortcut(title: "New greetings", symbol: "hand.wave.fill",
                 count: store.messageRequests.count, identifier: "inbox-message-requests") {
                 router.navigate(to: .messageRequests)
             }
+            Divider()
+                .overlay(SideSeatTheme.separator)
+                .padding(.vertical, 16)
+                .accessibilityHidden(true)
             messageShortcut(title: "Notifications", symbol: "bell.fill",
                 count: notifications.unreadCount, identifier: "inbox-notifications") {
                 router.navigate(to: .notifications)
             }
-            Spacer(minLength: 0)
         }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.vertical, 8)
+        .background(SideSeatTheme.surface,
+            in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("inbox-shortcuts")
     }
@@ -149,34 +167,36 @@ struct ChatsRootView: View {
     private func messageShortcut(title: LocalizedStringKey, symbol: String, count: Int,
                                  identifier: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: symbol)
-                    .font(.system(size: min(greetingTileSize * 0.44, 32), weight: .medium))
-                    .foregroundStyle(SideSeatTheme.Chat.greetingIcon)
-                    .frame(width: min(greetingTileSize, 76), height: min(greetingTileSize, 76))
-                    .background(SideSeatTheme.Chat.greetingTile,
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
-                    .overlay(alignment: .topTrailing) {
-                        if let count = InboxStore.badgeLabel(for: count) {
-                            Text(count)
-                                .font(.system(size: 12, weight: .semibold).monospacedDigit())
-                                .foregroundStyle(SideSeatTheme.onAttention)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(SideSeatTheme.attention, in: Capsule())
-                                .overlay(Capsule().stroke(SideSeatTheme.bg, lineWidth: 2))
-                                .offset(x: 8, y: -5)
-                        }
-                    }
+            let image = Image(systemName: symbol)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(SideSeatTheme.Chat.greetingIcon)
+                .frame(width: 38, height: 38)
+                .background(SideSeatTheme.Chat.greetingTile,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
+                .accessibilityHidden(true)
+            let copy = VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.footnote.weight(.medium))
-                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(SideSeatTheme.textPrimary)
-                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+                Text(count, format: .number)
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
             }
-            .padding(.vertical, 6)
-            .frame(width: max(96, min(greetingTileSize, 76) + 28))
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    image
+                    copy.fixedSize(horizontal: true, vertical: false)
+                }
+                VStack(alignment: .leading, spacing: 8) {
+                    image
+                    copy
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 56, maxHeight: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -202,7 +222,7 @@ struct ChatsRootView: View {
         }
     }
 
-    private func inboxRow(_ row: NativeInboxConversation) -> some View {
+    private func inboxRow(_ row: NativeInboxConversation, isFirst: Bool, isLast: Bool) -> some View {
         Button {
             if let route = row.route {
                 if row.unreadCount > 0 {
@@ -227,18 +247,25 @@ struct ChatsRootView: View {
                         size: 44
                     )
                 }
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack {
-                        Text(row.displayName)
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(.primary)
-                            .lineLimit(1)
-                        if row.isSelfNotes != true && row.peer?.isPlus == true { SSPlusBadge() }
-                        Spacer(minLength: 8)
+                VStack(alignment: .leading, spacing: 6) {
+                    let headingLayout = typeSize.isAccessibilitySize
+                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                        : AnyLayout(HStackLayout(spacing: 8))
+                    headingLayout {
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(row.displayName)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .lineLimit(typeSize.isAccessibilitySize ? nil : 2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if row.isSelfNotes != true && row.peer?.isPlus == true { SSPlusBadge() }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         if let date = Date.sideSeatInboxISO8601(row.lastActivityAt) {
                             Text(InboxActivityFormatting.label(for: date))
                                 .font(.caption)
                                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: true)
                                 .accessibilityIdentifier("inbox-date-visual-\(row.id)")
                         }
                     }
@@ -267,7 +294,7 @@ struct ChatsRootView: View {
                     }
                 }
             }
-            .padding(.vertical, 2)
+            .padding(.vertical, 18)
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -278,7 +305,8 @@ struct ChatsRootView: View {
             row.pinned ? AppLocalization.string("Pinned") : nil,
             store.manuallyUnreadIDs.contains(row.id) ? AppLocalization.string("Marked as unread") : nil,
         ].compactMap { $0 }.joined(separator: ", "))
-        .modifier(InboxListRowStyle(pinned: row.pinned))
+        .listRowInsets(EdgeInsets(top: 0, leading: 36, bottom: 0, trailing: 36))
+        .modifier(InboxListRowStyle(pinned: row.pinned, isFirst: isFirst, isLast: isLast, inset: 20))
         .ssLongPressActionMenu(
             isEnabled: row.route != nil,
             title: row.displayName
@@ -474,19 +502,13 @@ struct MessageRequestsView: View {
 private struct InboxSearchHeader: View {
     @Binding var text: String
     @State private var isFocused = false
-    @Environment(\.colorScheme) private var colorScheme
-    @ScaledMetric(relativeTo: .body) private var fieldHeight: CGFloat = 44
 
     var body: some View {
         HStack(spacing: 12) {
             InboxSearchTextField(text: $text, isFocused: $isFocused)
-                .frame(height: fieldHeight)
-                .background(colorScheme == .dark ? SideSeatTheme.fillTertiary : SideSeatTheme.bg,
-                    in: Capsule())
-                .overlay {
-                    Capsule().strokeBorder(SideSeatTheme.separator.opacity(colorScheme == .dark ? 0.4 : 0), lineWidth: 0.5)
-                }
-                .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.06), radius: 12, y: 4)
+                .frame(minHeight: 44)
+                .background(SideSeatTheme.fillSubtle,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius, style: .continuous))
             if isFocused {
                 Button("Cancel") {
                     text = ""
@@ -497,10 +519,10 @@ private struct InboxSearchHeader: View {
                 .accessibilityIdentifier("inbox-search-cancel")
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 20)
         .padding(.top, 8)
         .padding(.bottom, 12)
-        .background(SideSeatTheme.bg)
+        .background(SideSeatTheme.bgGrouped)
     }
 }
 
@@ -520,6 +542,12 @@ private struct InboxSearchTextField: UIViewRepresentable {
         field.backgroundColor = .clear
         field.font = .preferredFont(forTextStyle: .body)
         field.adjustsFontForContentSizeCategory = true
+        let searchIcon = UIImageView(image: UIImage(systemName: "magnifyingglass",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 18, weight: .regular)))
+        searchIcon.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        searchIcon.contentMode = .center
+        field.leftView = searchIcon
+        field.leftViewMode = .always
         field.autocapitalizationType = .none
         field.autocorrectionType = .no
         field.returnKeyType = .search
@@ -535,6 +563,12 @@ private struct InboxSearchTextField: UIViewRepresentable {
         context.coordinator.parent = self
         if field.text != text { field.text = text }
         if !isFocused && field.isFirstResponder { field.resignFirstResponder() }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UISearchTextField, context: Context) -> CGSize? {
+        guard let width = proposal.width else { return nil }
+        let lineHeight = uiView.font?.lineHeight ?? UIFont.preferredFont(forTextStyle: .body).lineHeight
+        return CGSize(width: width, height: max(44, ceil(lineHeight) + 16))
     }
 
     func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
@@ -559,20 +593,33 @@ private struct InboxSearchTextField: UIViewRepresentable {
 private struct InboxListRowStyle: ViewModifier {
     @Environment(\.displayScale) private var displayScale
     var pinned = false
+    var isFirst = false
+    var isLast = false
+    var inset: CGFloat = 0
 
     func body(content: Content) -> some View {
         content
             .listRowSeparator(.hidden)
             .listRowBackground(
-                (pinned ? SideSeatTheme.Chat.pinnedRow : Color(uiColor: .systemBackground))
+                UnevenRoundedRectangle(
+                    topLeadingRadius: isFirst ? SideSeatTheme.cardRadius : 0,
+                    bottomLeadingRadius: isLast ? SideSeatTheme.cardRadius : 0,
+                    bottomTrailingRadius: isLast ? SideSeatTheme.cardRadius : 0,
+                    topTrailingRadius: isFirst ? SideSeatTheme.cardRadius : 0,
+                    style: .continuous
+                )
+                    .fill(pinned ? SideSeatTheme.Chat.pinnedRow : SideSeatTheme.surface)
                     .overlay(alignment: .bottom) {
-                        Rectangle()
-                            .fill(SideSeatTheme.Chat.inboxSeparator)
-                            .frame(height: 1 / displayScale)
-                            // Row inset + avatar + spacing: start at the message text.
-                            .padding(.leading, 16 + 44 + 12)
-                            .accessibilityHidden(true)
+                        if !isLast {
+                            Rectangle()
+                                .fill(SideSeatTheme.Chat.inboxSeparator)
+                                .frame(height: 1 / displayScale)
+                                .padding(.leading, 16 + 44 + 12)
+                                .padding(.trailing, 16)
+                                .accessibilityHidden(true)
+                        }
                     }
+                    .padding(.horizontal, inset)
             )
     }
 }

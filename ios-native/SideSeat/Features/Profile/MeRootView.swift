@@ -25,7 +25,7 @@ struct MeRootView: View {
         Group {
             if let profile = store.profile {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 20) {
                         MeHeroCard(
                             profile: profile,
                             isPlus: membershipStore.membership?.isPlus == true,
@@ -130,11 +130,9 @@ struct MeRootView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 6)
-                    // iOS 26's floating tab bar overlays scroll content. Keep the final
-                    // settings row fully scrollable above the glass bar.
-                    .padding(.bottom, 104)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, SideSeatTheme.rootScrollBottomClearance)
                 }
                 .background(SideSeatTheme.bgGrouped.ignoresSafeArea())
                 .refreshable {
@@ -491,16 +489,23 @@ private struct MeHeroCard: View {
 
     private var appearance: NativeProfileAppearance { (profile.appearance ?? .standard).effective(isPlus: isPlus) }
 
+    @ViewBuilder
     var body: some View {
+        if appearance.theme == "classic", appearance.style == "classic" {
+            cardContent
+                .background(SideSeatTheme.surface,
+                    in: RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius, style: .continuous))
+        } else {
+            cardContent
+                .modifier(ProfileAppearanceSurface(appearance: appearance))
+        }
+    }
+
+    private var cardContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             profileLayout {
                 ZStack(alignment: .bottomTrailing) {
                     ProfileAvatar(url: profile.avatarUrl, name: profile.displayName, size: 64)
-                        .overlay {
-                            Circle()
-                                .strokeBorder(Color.white.opacity(0.9), lineWidth: 3)
-                        }
-                        .shadow(color: .black.opacity(0.10), radius: 10, y: 4)
 
                     Button(action: onChangeAvatar) {
                         Image(systemName: "camera.fill")
@@ -508,9 +513,6 @@ private struct MeHeroCard: View {
                             .foregroundStyle(SideSeatTheme.textPrimary)
                             .frame(width: 26, height: 26)
                             .background(Circle().fill(SideSeatTheme.fillTertiary))
-                            .overlay {
-                                Circle().strokeBorder(SideSeatTheme.bg, lineWidth: 2)
-                            }
                     }
                     .buttonStyle(.plain)
                     .frame(width: 44, height: 44)
@@ -525,10 +527,20 @@ private struct MeHeroCard: View {
                     HStack(spacing: 14) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(profile.displayName)
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(.primary)
+                                .font(.title3.weight(.semibold))
+                                .foregroundStyle(SideSeatTheme.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .accessibilityIdentifier("me-display-name-visual")
+                            Text(profile.schoolSummary.displayLine)
+                                .font(.caption)
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-campus-summary")
+                            Text("@\(profile.username)")
+                                .font(.caption.monospaced())
+                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("me-username-visual")
                             nameLayout {
                                 if isPlus && appearance.showMembershipBadge { SSPlusBadge() }
                                 ProfileDecorationIcon(appearance: appearance)
@@ -536,16 +548,6 @@ private struct MeHeroCard: View {
                                     VerifiedSchoolMark(school: profile.school, compact: false)
                                 }
                             }
-                            Text("@\(profile.username)")
-                                .font(.caption.monospaced())
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .accessibilityIdentifier("me-username-visual")
-                            Text(profile.schoolSummary.displayLine)
-                                .font(.caption)
-                                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .accessibilityIdentifier("me-campus-summary")
                         }
                         .layoutPriority(1)
 
@@ -563,7 +565,7 @@ private struct MeHeroCard: View {
                 .accessibilityValue("\(profile.displayName), @\(profile.username)" + (isPlus && appearance.showMembershipBadge ? ", " + AppLocalization.string("Plus member") : ""))
                 .accessibilityIdentifier("me-hero-edit")
             }
-            .padding(16)
+            .padding(20)
 
             if isPreparingAvatar {
                 Divider().opacity(0.5)
@@ -580,7 +582,6 @@ private struct MeHeroCard: View {
                     .accessibilityIdentifier("profile-avatar-error")
             }
         }
-        .modifier(ProfileAppearanceSurface(appearance: appearance))
     }
 
     private var profileLayout: AnyLayout {

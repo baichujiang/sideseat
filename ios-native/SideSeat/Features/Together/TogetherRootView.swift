@@ -282,11 +282,7 @@ private struct TogetherHomeView: View {
             VStack(spacing: 0) {
                 sectionPicker(at: context.date)
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.top, SideSeatTheme.spaceXS)
-                    .padding(.bottom, SideSeatTheme.spaceMD)
                     .background(SideSeatTheme.bgGrouped)
-
-                Divider()
 
                 SSSectionPager(sections: TogetherSection.allCases, selection: sectionSelection) { section in
                     ScrollViewReader { scrollProxy in
@@ -300,7 +296,7 @@ private struct TogetherHomeView: View {
                             }
                             .padding(.horizontal, SideSeatTheme.screenHorizontal)
                             .padding(.top, SideSeatTheme.spaceMD)
-                            .padding(.bottom, SideSeatTheme.spaceXL)
+                            .padding(.bottom, SideSeatTheme.rootScrollBottomClearance)
                         }
                         .accessibilityIdentifier("together-section-\(section.rawValue)")
                         .refreshable {
@@ -417,17 +413,16 @@ private struct TogetherHomeView: View {
                 sectionMenu(at: now)
             } else {
                 ViewThatFits(in: .horizontal) {
-                    HStack(spacing: SideSeatTheme.spaceXS) {
-                        ForEach(TogetherSection.allCases) { section in
-                            sectionButton(section, at: now)
-                        }
-                    }
+                    SSRootTabs(items: TogetherSection.allCases.map { section in
+                        SSRootTabItem(id: section, title: LocalizedStringKey(section.title),
+                            accessibilityID: "together-tab-\(section.rawValue)",
+                            accessibilityLabel: sectionTitle(section, at: now))
+                    }, selection: sectionSelection)
                     sectionMenu(at: now)
                 }
             }
         }
         .frame(maxWidth: .infinity)
-        .ssSectionNavigationTrack()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Together"))
         .accessibilityIdentifier("together-segmented-control")
@@ -484,7 +479,12 @@ private struct TogetherHomeView: View {
             .padding(.horizontal, SideSeatTheme.spaceSM)
             .padding(.vertical, SideSeatTheme.spaceXS)
             .frame(maxWidth: .infinity, minHeight: 44)
-            .ssSectionNavigationItem(isSelected: true)
+            .padding(.bottom, SideSeatTheme.spaceSM)
+            .foregroundStyle(SideSeatTheme.textPrimary)
+            .overlay(alignment: .bottomLeading) {
+                Capsule().fill(SideSeatTheme.utilityAction)
+                    .frame(width: 24, height: 3)
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(SSPressButtonStyle())
@@ -492,34 +492,6 @@ private struct TogetherHomeView: View {
         .accessibilityValue(sectionTitle(selectedSection, at: now))
         .accessibilityHint(AppLocalization.string("Choose a section"))
         .accessibilityIdentifier("together-section-menu")
-    }
-
-    private func sectionButton(_ section: TogetherSection, at now: Date) -> some View {
-        let isSelected = section == selectedSection
-        return Button { sectionSelection.wrappedValue = section } label: {
-            HStack(spacing: SideSeatTheme.spaceSM) {
-                Text(section.title)
-                    .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
-                    .fontWeight(isSelected ? .semibold : .medium)
-                    .fixedSize(horizontal: true, vertical: true)
-                if dynamicTypeSize.isAccessibilitySize {
-                    Spacer(minLength: 0)
-                    if isSelected {
-                        Image(systemName: "checkmark")
-                            .accessibilityHidden(true)
-                    }
-                }
-            }
-            .padding(.horizontal, SideSeatTheme.spaceSM)
-            .padding(.vertical, SideSeatTheme.spaceXS)
-            .frame(maxWidth: .infinity, minHeight: 44)
-            .ssSectionNavigationItem(isSelected: isSelected)
-            .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
-        }
-        .buttonStyle(SSPressButtonStyle())
-        .accessibilityLabel(sectionTitle(section, at: now))
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityIdentifier("together-tab-\(section.rawValue)")
     }
 
     private func sectionTitle(_ section: TogetherSection, at now: Date) -> String {
@@ -801,7 +773,7 @@ private struct TogetherHomeView: View {
                 }
                 .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
             } else {
-                SSFlowCard(activityTopic: .explore) {
+                SSFlowCard {
                     TimelineView(.periodic(from: .now, by: 60)) { context in
                         matchingSessionContent(at: context.date)
                     }
@@ -1170,13 +1142,14 @@ struct MutualOpportunityCard: View {
     var compact = false
 
     var body: some View {
-        SSFlowCard(contentPadding: 0, activityTopic: opportunity.peerActivityTopic) {
+        SSFlowCard(contentPadding: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                SSActivityHeaderBand(topic: opportunity.peerActivityTopic,
-                    verticalPadding: compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD) {
-                    peerRow
-                }
-                .accessibilityIdentifier("mutual-opportunity-peer-\(opportunity.id)")
+                peerRow
+                    .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+                    .padding(.top, SideSeatTheme.Together.cardPadding)
+                    .padding(.bottom, compact ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("mutual-opportunity-peer-\(opportunity.id)")
 
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     activityHeader
@@ -1254,7 +1227,7 @@ struct MutualOpportunityCard: View {
 
     private var peerIdentity: some View {
         HStack(alignment: .center, spacing: SideSeatTheme.spaceSM) {
-            InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 36)
+            InitialAvatar(name: opportunity.peer.displayName, url: opportunity.peer.avatarUrl, size: 44)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 (dynamicTypeSize.isAccessibilitySize
@@ -1566,7 +1539,7 @@ private struct WeeklyIntentCard: View {
                 .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
                 }
                 .padding(.trailing, SideSeatTheme.Together.cardPadding)
-                .padding(.top, SideSeatTheme.spaceMD)
+                .padding(.top, SideSeatTheme.Together.cardPadding)
             }
         }
         .tint(SideSeatTheme.utilityAction)
@@ -1599,7 +1572,7 @@ private struct WeeklyIntentCard: View {
     }
 
     private var cardContent: some View {
-        SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: intent.topic) {
+        SSFlowCard(contentPadding: 0, contentSpacing: 0) {
             if isTerminal {
                 cardHeader
             } else {
@@ -1616,16 +1589,16 @@ private struct WeeklyIntentCard: View {
     }
 
     private var cardHeader: some View {
-        SSActivityHeaderBand(topic: intent.topic) {
-            SSFlowCardHeader(
-                title: intent.activityTitle,
-                subtitle: intent.topic == .study ? intent.effectiveTogetherMode.studyTitle : intent.topic.title,
-                systemImage: intent.topic.systemImage,
-                tint: SideSeatTheme.Together.categoryInk(for: intent.topic),
-                activityTopic: intent.topic
-            )
-            .padding(.trailing, isTerminal ? 0 : (intent.status == "ACTIVE" ? 88 : 44) + SideSeatTheme.spaceSM)
-        }
+        SSFlowCardHeader(
+            title: intent.activityTitle,
+            subtitle: intent.topic == .study ? intent.effectiveTogetherMode.studyTitle : intent.topic.title,
+            systemImage: intent.topic.systemImage,
+            tint: SideSeatTheme.Together.categoryInk(for: intent.topic),
+            activityTopic: intent.topic
+        )
+        .padding(.trailing, isTerminal ? 0 : (intent.status == "ACTIVE" ? 88 : 44) + SideSeatTheme.spaceSM)
+        .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+        .padding(.top, SideSeatTheme.Together.cardPadding)
         .accessibilityIdentifier("weekly-intent-header-\(intent.id)")
     }
 

@@ -307,7 +307,9 @@ struct UnifiedPlanConfirmationView: View {
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if let error = store.error { Text(error).font(.footnote).foregroundStyle(SideSeatTheme.danger) }
                 if canReply {
-                    Text(presentation.nextStep.title).font(.caption)
+                    Text(presentation.nextStep == .waitForReplies && presentation.viewerHasConfirmed
+                        ? AppLocalization.string("Waiting for the organizer to send")
+                        : presentation.nextStep.title).font(.caption)
                         .foregroundStyle(SideSeatTheme.textSecondaryStrong).accessibilityIdentifier("plan-next-step")
                     if mine?.status != "ACCEPTED" {
                         PlanActionButton(title: AppLocalization.string("Confirm participation"), symbol: "checkmark.circle", kind: .commit, isLoading: store.acting,

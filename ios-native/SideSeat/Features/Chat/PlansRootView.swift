@@ -97,14 +97,11 @@ struct PlansRootView: View {
                 VStack(spacing: 0) {
                     sectionPicker
                         .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                        .padding(.top, SideSeatTheme.spaceXS)
-                        .padding(.bottom, SideSeatTheme.spaceXS)
-                    Divider()
                     SSSectionPager(sections: MVPPlanSection.ordered, selection: $selectedSection) { section in
                         sectionScroll(section)
                     }
                 }
-                .background(SideSeatTheme.PlanHome.background)
+                .background(SideSeatTheme.bgGrouped)
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     HStack {
                         Spacer(minLength: 0)
@@ -112,7 +109,7 @@ struct PlansRootView: View {
                     }
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
                     .padding(.vertical, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.PlanHome.background)
+                    .background(SideSeatTheme.bgGrouped)
                 }
                 .ssRootNavigationTitle("Plans")
             }
@@ -184,7 +181,7 @@ struct PlansRootView: View {
                 .foregroundStyle(SideSeatTheme.ProductAction.foreground)
                 .background(SideSeatTheme.ProductAction.fill, in: Capsule())
                 .contentShape(Capsule())
-                .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+                .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(AppLocalization.string("Start a plan"))
@@ -192,31 +189,10 @@ struct PlansRootView: View {
     }
 
     private var sectionPicker: some View {
-        HStack(spacing: SideSeatTheme.spaceXS) {
-            ForEach(MVPPlanSection.ordered) { section in
-                let isSelected = section == selectedSection
-                Button { selectedSection = section } label: {
-                    Text(section.title)
-                        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-                        .font(dynamicTypeSize.isAccessibilitySize ? .body : .subheadline)
-                        .fontWeight(isSelected ? .semibold : .medium)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, SideSeatTheme.spaceSM)
-                        .padding(.vertical, SideSeatTheme.spaceXS)
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .foregroundStyle(isSelected ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondaryStrong)
-                        .padding(.bottom, SideSeatTheme.spaceSM)
-                        .overlay(alignment: .bottom) {
-                            Capsule().fill(isSelected ? SideSeatTheme.PlanHome.ink : .clear)
-                                .frame(width: 36, height: 3)
-                        }
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(SSPressButtonStyle())
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
-                .accessibilityIdentifier("plans-tab-\(section.rawValue)")
-            }
-        }
+        SSRootTabs(items: MVPPlanSection.ordered.map { section in
+            SSRootTabItem(id: section, title: LocalizedStringKey(section.title),
+                accessibilityID: "plans-tab-\(section.rawValue)")
+        }, selection: $selectedSection)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(AppLocalization.string("Plans"))
         .accessibilityIdentifier("plans-segmented-control")
@@ -428,7 +404,6 @@ struct PlansRootView: View {
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
         let phase = plan.planningPhase(at: now)
         let presentation = plan.presentation(at: now)
-        let step = presentation.nextStep
         return Button { scrollPositions.capture(selectedSection); router.navigate(to: .timePoll(token: plan.token)) } label: {
             SSFlowCard {
                 PlanCardHeading(title: plan.title, presentation: presentation,
@@ -681,16 +656,14 @@ private struct PlanOverviewLabel: View {
     }
     private var stackedSchedule: Bool { typeSize >= .xxLarge }
     private var secondary: Color { SideSeatTheme.textSecondaryStrong }
-    private var topic: NativeWeeklyIntentTopic { PlanHomeArtwork.activityTopic(for: title) ?? .explore }
     private var displayDate: String? { start != nil || !candidateDates.isEmpty ? timing.dateText : nil }
     private var displayTime: String { timing.clockText ?? AppLocalization.string("Time to be decided") }
 
     var body: some View {
-        SSFlowCard(contentPadding: style == .waiting ? SideSeatTheme.spaceSM : SideSeatTheme.spaceMD,
-                   contentSpacing: 0, activityTopic: topic) {
+        SSFlowCard(contentPadding: SideSeatTheme.spaceLG, contentSpacing: 0) {
             let layout = stackedSchedule
                 ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceMD))
+                : AnyLayout(HStackLayout(alignment: .top, spacing: SideSeatTheme.spaceLG))
             layout {
                 schedule
                     .frame(width: stackedSchedule ? nil : 112, alignment: .leading)

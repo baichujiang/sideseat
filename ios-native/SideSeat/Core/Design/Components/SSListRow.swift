@@ -107,11 +107,7 @@ struct SSManagementRow: View {
                         Image(systemName: systemImage)
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                SideSeatTheme.fillTertiary,
-                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            )
+                            .frame(width: 24, height: 24)
                             .accessibilityHidden(true)
                     }
 

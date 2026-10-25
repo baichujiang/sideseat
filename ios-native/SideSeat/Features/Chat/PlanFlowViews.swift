@@ -395,7 +395,7 @@ struct SharedPlanChatCard: View {
 
     var body: some View {
         Button { router.handleAppRoute(.timePoll(token: token)) } label: {
-            SSFlowCard(contentPadding: 0, contentSpacing: 0, activityTopic: .study) {
+            SSFlowCard(contentPadding: 0, contentSpacing: 0) {
                 VStack(alignment: .leading, spacing: 0) {
                     SSActivityHeaderBand(topic: .study, verticalPadding: SideSeatTheme.spaceSM) {
                         Text(store.poll?.title ?? title).font(.headline)

@@ -44,13 +44,12 @@ struct HomeRootView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                .padding(.bottom, 8)
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.top, SideSeatTheme.spaceXS)
 
             calendarViewControls
-            .padding(.horizontal, 20)
-            .padding(.bottom, 10)
+            .padding(.horizontal, SideSeatTheme.screenHorizontal)
+            .padding(.bottom, SideSeatTheme.spaceLG)
 
             if calendarMode == .day {
                 HomeDateStripView(
@@ -406,12 +405,11 @@ struct HomeRootView: View {
     }
 
     private var calendarModePicker: some View {
-        Picker(AppLocalization.string("Calendar view"), selection: $calendarMode) {
-            Text("Month").tag(HomeCalendarMode.month)
-            Text("Week").tag(HomeCalendarMode.week)
-            Text("Day").tag(HomeCalendarMode.day)
-        }
-        .pickerStyle(.segmented)
+        SSRootTabs(items: [
+            .init(id: HomeCalendarMode.month, title: "Month", accessibilityID: "calendar-view-month"),
+            .init(id: .week, title: "Week", accessibilityID: "calendar-view-week"),
+            .init(id: .day, title: "Day", accessibilityID: "calendar-view-day"),
+        ], selection: $calendarMode)
         .accessibilityIdentifier("calendar-view-mode")
     }
 
