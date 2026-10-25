@@ -703,6 +703,18 @@ import XCTest
             XCTAssertTrue(copy.waitForNonExistence(timeout: 5))
         }
 
+        func centeredPrompt(_ id: String, captureName: String) -> XCUIElement {
+            let prompt = app.descendants(matching: .any).matching(identifier: id).firstMatch
+            XCTAssertTrue(prompt.waitForExistence(timeout: 10))
+            let window = app.windows.firstMatch.frame
+            XCTAssertLessThan(prompt.frame.width, window.width - 12)
+            XCTAssertTrue(window.insetBy(dx: 8, dy: 8).contains(prompt.frame))
+            XCTAssertEqual(prompt.frame.midX, window.midX, accuracy: 4)
+            XCTAssertEqual(prompt.frame.midY, window.midY, accuracy: 40)
+            capture(app, captureName)
+            return prompt
+        }
+
         nativeSignIn(owner, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
         let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
@@ -734,6 +746,12 @@ import XCTest
         XCTAssertTrue(people.label.contains("0 人已填写"))
         verifyResponseCountSeparatedFromAction("0 人已填写")
         capture(app, "compact-empty-timetable")
+        app.buttons["time-poll-menu"].tap()
+        app.buttons["删除征集"].tap()
+        let deletePrompt = centeredPrompt("time-poll-delete-prompt", captureName: "delete-plan-centered-keep")
+        app.buttons["time-poll-delete-keep"].tap()
+        XCTAssertTrue(deletePrompt.waitForNonExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
         nativePhase("contacts-created")
         verifySharePermissions(role: "owner", phase: "COLLECTING-BEFORE-FILLING")
         let firstTime = app.buttons["time-poll-cell-0"], secondTime = app.buttons["time-poll-cell-2"]
@@ -829,6 +847,12 @@ import XCTest
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
         nativePhase("contacts-formal-invitation")
         verifySharePermissions(role: "owner", phase: "INVITING")
+        app.buttons["time-poll-menu"].tap()
+        app.buttons["unified-plan-cancel"].tap()
+        let cancelPrompt = centeredPrompt("time-poll-cancel-prompt", captureName: "cancel-plan-centered-keep")
+        app.buttons["time-poll-cancel-keep"].tap()
+        XCTAssertTrue(cancelPrompt.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["unified-plan-publish"].isEnabled)
 
         nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
         verifySharePermissions(role: "participant", phase: "INVITING")
@@ -844,7 +868,13 @@ import XCTest
 
         nativeSignIn(owner, bundle: fixture.bundle); openListCard()
         app.buttons["unified-plan-publish"].tap()
-        let publish = app.buttons.matching(NSPredicate(format: "label == %@ AND identifier != %@", "正式发出", "unified-plan-publish")).firstMatch
+        let publishPrompt = centeredPrompt("unified-plan-publish-prompt", captureName: "publish-plan-centered-cancel")
+        app.buttons["unified-plan-publish-cancel"].tap()
+        XCTAssertTrue(publishPrompt.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["unified-plan-publish"].isEnabled)
+        app.buttons["unified-plan-publish"].tap()
+        _ = centeredPrompt("unified-plan-publish-prompt", captureName: "publish-plan-centered-confirm")
+        let publish = app.buttons["unified-plan-publish-confirm"]
         XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
         verifySharePermissions(role: "owner", phase: "CONFIRMED")
@@ -853,7 +883,10 @@ import XCTest
         nativeSignIn(peer, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap(); app.buttons["plans-tab-upcoming"].tap()
         let confirmed = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
-        XCTAssertTrue(confirmed.waitForExistence(timeout: 20)); confirmed.tap()
+        XCTAssertTrue(confirmed.waitForExistence(timeout: 20))
+        XCTAssertTrue(confirmed.label.contains("23:00") && confirmed.label.contains("01:00"))
+        capture(app, "confirmed-calendar-date-cross-midnight")
+        confirmed.tap()
         verifySharePermissions(role: "participant", phase: "CONFIRMED")
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20)); app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)

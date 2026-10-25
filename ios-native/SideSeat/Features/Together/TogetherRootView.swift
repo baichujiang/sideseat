@@ -1544,20 +1544,35 @@ private struct WeeklyIntentCard: View {
         }
         .tint(SideSeatTheme.utilityAction)
         .disabled(isWorking)
-        .confirmationDialog(AppLocalization.string("Delete this intention?"), isPresented: $confirmsDelete, titleVisibility: .visible) {
-            Button(AppLocalization.string("Delete"), role: .destructive, action: onDelete)
-            Button(AppLocalization.string("Cancel"), role: .cancel) {}
-        } message: {
-            Text(AppLocalization.string("This intention will stop finding company. Existing conversations and confirmed plans stay unchanged."))
+        .ssActionPrompt(
+            isPresented: $confirmsDelete,
+            title: AppLocalization.string("Delete this intention?"),
+            message: AppLocalization.string("This intention will stop finding company. Existing conversations and confirmed plans stay unchanged."),
+            systemImage: "trash.fill",
+            tint: SideSeatTheme.danger,
+            accessibilityIdentifier: "weekly-intent-delete-prompt-\(intent.id)"
+        ) {
+            [
+                SSActionPromptAction(id: "weekly-intent-delete-cancel-\(intent.id)", title: AppLocalization.string("Cancel"), role: .cancel) {},
+                SSActionPromptAction(id: "weekly-intent-delete-confirm-\(intent.id)", title: AppLocalization.string("Delete"), systemImage: "trash.fill", role: .destructive, perform: onDelete),
+            ]
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("weekly-intent-\(intent.id)")
         .sheet(item: $sharePayload) { SSActivityView(items: $0.items) }
-        .alert(AppLocalization.string("Share intention"), isPresented: Binding(
-            get: { shareIssue != nil }, set: { if !$0 { shareIssue = nil } }
-        )) {
-            Button(AppLocalization.string("OK"), role: .cancel) { shareIssue = nil }
-        } message: { Text(shareIssue ?? "") }
+        .ssActionPrompt(
+            isPresented: Binding(get: { shareIssue != nil }, set: { if !$0 { shareIssue = nil } }),
+            title: AppLocalization.string("Share intention"),
+            message: shareIssue,
+            systemImage: "exclamationmark.triangle.fill",
+            tint: SideSeatTheme.danger,
+            onDismiss: { shareIssue = nil },
+            accessibilityIdentifier: "weekly-intent-share-error-prompt-\(intent.id)"
+        ) {
+            [
+                SSActionPromptAction(id: "weekly-intent-share-error-ok-\(intent.id)", title: AppLocalization.string("OK"), role: .cancel) { shareIssue = nil },
+            ]
+        }
     }
 
     private func shareIntention() async {

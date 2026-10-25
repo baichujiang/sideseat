@@ -636,6 +636,7 @@ private enum PlanOverviewStyle { case task, waiting, meetup }
 /// Lightweight overview only. Opening a row always leads to the existing review/detail flow.
 private struct PlanOverviewLabel: View {
     @Environment(\.dynamicTypeSize) private var typeSize
+    @ScaledMetric(relativeTo: .title2) private var calendarDaySize: CGFloat = 24
     let title: String
     let presentation: PlanPresentation
     let style: PlanOverviewStyle
@@ -740,10 +741,18 @@ private struct PlanOverviewLabel: View {
     private var schedule: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
             if let start {
-                Text(timing.datePart(start, template: "MMMd"))
-                    .font(.title3.weight(.bold))
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(timing.dayContext(start)).font(.caption2).foregroundStyle(secondary)
+                if style == .meetup {
+                    Text(timing.datePart(start, template: "MMM") + " · " + timing.dayContext(start))
+                        .font(.caption).foregroundStyle(secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(timing.dayNumber(start))
+                        .font(.system(size: calendarDaySize, weight: .bold)).monospacedDigit()
+                } else {
+                    Text(timing.datePart(start, template: "MMMd"))
+                        .font(.title3.weight(.bold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(timing.dayContext(start)).font(.caption2).foregroundStyle(secondary)
+                }
                 if let end {
                     if timing.crossesDay {
                         clock(start)

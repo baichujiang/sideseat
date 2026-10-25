@@ -413,6 +413,7 @@ private struct SSAnchoredActionPopover: View {
         .accessibilityElement(children: .contain)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityIdentifier(accessibilityIdentifier)
+        .accessibilityAction(.escape) { isPresented = false }
     }
 
     private func actionButton(_ action: SSLongPressAction) -> some View {
@@ -469,12 +470,13 @@ private struct SSLongPressActionMenuModifier: ViewModifier {
     let subtitle: String?
     let actions: () -> [SSLongPressAction]
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isPresented = false
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if isEnabled {
-            content
+            let target = content
             .highPriorityGesture(
                 LongPressGesture(minimumDuration: 0.48, maximumDistance: 14)
                     .onEnded { completed in
@@ -483,12 +485,16 @@ private struct SSLongPressActionMenuModifier: ViewModifier {
                         isPresented = true
                     }
             )
-            .ssLongPressActionMenu(
-                isPresented: $isPresented,
-                title: title,
-                subtitle: subtitle,
-                actions: actions()
-            )
+            if dynamicTypeSize.isAccessibilitySize {
+                target.ssLongPressActionMenu(isPresented: $isPresented, title: title,
+                    subtitle: subtitle, actions: actions())
+            } else {
+                SSAnchoredActionMenuTarget(isPresented: $isPresented, sourceCornerRadius: 16, minimumMenuWidth: 180,
+                    menuAccessibilityLabel: [title, subtitle].compactMap { $0 }.joined(separator: ", "),
+                    menuAccessibilityIdentifier: "long-press-action-menu") {
+                    target
+                } actions: { actions() }
+            }
         } else {
             content
         }
@@ -666,7 +672,7 @@ private struct SSLongPressActionMenuSheet: View {
 }
 
 extension View {
-    /// Presents the SideSeat action panel from a long press while preserving the target's tap.
+    /// Object actions stay near their source; accessibility text uses the scrollable panel.
     func ssLongPressActionMenu(
         isEnabled: Bool = true,
         title: String,

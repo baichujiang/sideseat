@@ -217,7 +217,7 @@ struct HomeRootView: View {
                     deepLinkRouter.handleAppRoute(route)
                 }
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents(dynamicTypeSize.isAccessibilitySize ? [.large] : [.medium, .large])
             .accessibilityIdentifier("calendar-readonly-detail")
         }
         .ssActionPrompt(

@@ -341,13 +341,19 @@ struct UnifiedPlanConfirmationView: View {
             }.padding(SideSeatTheme.spaceMD).background(SideSeatTheme.surface)
                 .overlay(alignment: .top) { Divider() }.disabled(store.acting)
         }
-        .confirmationDialog("Send final plan?", isPresented: $showsPublish, titleVisibility: .visible) {
-            Button("Send final plan") {
-                Task { await store.mutate("publish", body: CancelPollPlanRequest(version: poll.invitationVersion ?? 0), session: session) }
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text(String(format: AppLocalization.string("Send to %d accepted people, including you. Pending and declined people will not be notified."), accepted))
+        .ssActionPrompt(
+            isPresented: $showsPublish,
+            title: AppLocalization.string("Send final plan?"),
+            message: String(format: AppLocalization.string("Send to %d accepted people, including you. Pending and declined people will not be notified."), accepted),
+            systemImage: "paperplane.fill",
+            accessibilityIdentifier: "unified-plan-publish-prompt"
+        ) {
+            [
+                SSActionPromptAction(id: "unified-plan-publish-cancel", title: AppLocalization.string("Cancel"), role: .cancel) {},
+                SSActionPromptAction(id: "unified-plan-publish-confirm", title: AppLocalization.string("Send final plan"), systemImage: "paperplane.fill") {
+                    Task { await store.mutate("publish", body: CancelPollPlanRequest(version: poll.invitationVersion ?? 0), session: session) }
+                },
+            ]
         }
         .sheet(isPresented: $showsPeople) {
             PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)

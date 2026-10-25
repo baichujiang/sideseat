@@ -43,6 +43,27 @@
 Root pages may use one compact brand/navigation signature. Secondary pages use
 standard iOS titles and back behavior.
 
+### Object menus, confirmations and confirmed dates — 2026-10-25
+
+An object's short action menu stays beside the pressed object, choosing above or
+below from the available space. Inbox uses the existing anchored menu at ordinary
+text sizes; accessibility sizes retain the scrollable large panel so long actions
+remain reachable. Outside tap and accessibility Escape dismiss without acting.
+Calendar's explicit time-region panels retain their existing placement.
+
+Global product confirmations use the existing centered `ssActionPrompt`, with
+clear cancel/confirm roles and scrollable content at large text sizes. Native
+input and system-permission dialogs remain native. Read-only Calendar detail
+opens at its large detent for accessibility text.
+Optional action icons must leave enough room for whole words at large text;
+omit a redundant decoration when it forces an unnatural word break.
+
+Confirmed Plan cards use a typographic calendar date: small localized month and
+weekday above a large day, with the existing complete start/end time below.
+Cross-day endpoints, year and timezone remain available, and accessibility keeps
+the original complete description. Use the existing date formatter and whole-card
+route; candidate-only and waiting cards retain their own date representations.
+
 ### Shared native root foundation — 2026-10-25
 
 This is the implemented source contract for the five native root pages. The

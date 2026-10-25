@@ -395,19 +395,35 @@ struct TimePollDetailView: View {
                 }
             }
         }
-        .alert("Cancel this plan for everyone?", isPresented: $showsCancelPlan) {
-            Button("Cancel plan", role: .destructive) {
-                Task { await store.mutate("cancel", body: CancelPollPlanRequest(version: store.poll?.invitationVersion ?? 0), session: session) }
-            }
-            Button("Keep plan", role: .cancel) { }
-        } message: {
-            Text("Everyone will see that this plan is cancelled. Its calendar entries will be removed.")
+        .ssActionPrompt(
+            isPresented: $showsCancelPlan,
+            title: AppLocalization.string("Cancel this plan for everyone?"),
+            message: AppLocalization.string("Everyone will see that this plan is cancelled. Its calendar entries will be removed."),
+            systemImage: "calendar.badge.minus",
+            tint: SideSeatTheme.danger,
+            accessibilityIdentifier: "time-poll-cancel-prompt"
+        ) {
+            [
+                SSActionPromptAction(id: "time-poll-cancel-keep", title: AppLocalization.string("Keep plan"), role: .cancel) {},
+                SSActionPromptAction(id: "time-poll-cancel-confirm", title: AppLocalization.string("Cancel plan"), systemImage: "calendar.badge.minus", role: .destructive) {
+                    Task { await store.mutate("cancel", body: CancelPollPlanRequest(version: store.poll?.invitationVersion ?? 0), session: session) }
+                },
+            ]
         }
-        .alert("Delete this poll and all responses?", isPresented: $showsDelete) {
-            Button("Delete poll", role: .destructive) { Task { await delete() } }
-            Button("Keep plan", role: .cancel) { }
-        } message: {
-            Text("This deletes the plan and everyone's availability responses.")
+        .ssActionPrompt(
+            isPresented: $showsDelete,
+            title: AppLocalization.string("Delete this poll and all responses?"),
+            message: AppLocalization.string("This deletes the plan and everyone's availability responses."),
+            systemImage: "trash.fill",
+            tint: SideSeatTheme.danger,
+            accessibilityIdentifier: "time-poll-delete-prompt"
+        ) {
+            [
+                SSActionPromptAction(id: "time-poll-delete-keep", title: AppLocalization.string("Keep plan"), role: .cancel) {},
+                SSActionPromptAction(id: "time-poll-delete-confirm", title: AppLocalization.string("Delete poll"), systemImage: "trash.fill", role: .destructive) {
+                    Task { await delete() }
+                },
+            ]
         }
         .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster, activityID: $invitationActivityID, linkParticipantCount: $invitationLinkCount).dynamicTypeSize(typeSize) } }
         .sheet(isPresented: $showsPeople) {

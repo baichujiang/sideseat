@@ -221,9 +221,17 @@ struct ProfileAppearanceSheet: View {
                 }
             }
             .interactiveDismissDisabled(changed || isSaving)
-            .confirmationDialog("Discard changes?", isPresented: $showsDiscard, titleVisibility: .visible) {
-                Button("Discard changes", role: .destructive) { dismiss() }
-                Button("Keep editing", role: .cancel) {}
+            .ssActionPrompt(
+                isPresented: $showsDiscard,
+                title: AppLocalization.string("Discard changes?"),
+                systemImage: "arrow.uturn.backward.circle.fill",
+                tint: SideSeatTheme.danger,
+                accessibilityIdentifier: "appearance-discard-prompt"
+            ) {
+                [
+                    SSActionPromptAction(id: "appearance-keep-editing", title: AppLocalization.string("Keep editing"), role: .cancel) {},
+                    SSActionPromptAction(id: "appearance-discard", title: AppLocalization.string("Discard changes"), role: .destructive) { dismiss() },
+                ]
             }
             .task { await membershipStore.load(using: session) }
         }
