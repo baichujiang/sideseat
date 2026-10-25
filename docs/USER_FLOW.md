@@ -397,14 +397,21 @@ The initial empty state leads with publishing an activity. The top-right Plans e
 to coordination and history. Recent Plans on Together contain unanswered private
 Outcome prompts; saved answers remain editable in Plans history or conversation.
 
-In My intentions, tapping a card opens its editor. The top-right × opens a delete
-confirmation; confirming removes that intention and stops new matching. The card
-has no bottom action row, pause/resume control or overflow menu. Existing
-conversations and confirmed Plans remain unchanged. Old paused intentions retain
-their status when edited and can be deleted through the same × control.
+In My intentions, tapping a current card or its title opens its existing editor.
+The title and top-right More menu use separate layout space; More contains Edit
+and Delete. Delete retains its confirmation and cancellation, and only confirming
+removes the selected intention and stops new matching. Existing conversations and
+confirmed Plans remain unchanged.
 
-The existing backend expiry and legacy pause/resume contracts remain supported
-for older clients. This card simplification does not change saved timing or expiry.
+Status is an information row above the saved timing and note. A separate footer
+places Share on the left (only for ACTIVE intentions) and Pause/Resume on the
+right. Pause uses a quiet secondary fill; Resume uses the primary fill. At
+accessibility sizes these actions stack and body text retains the system font size.
+Pausing does not delete the intention, and editing/saving a paused intention keeps
+it paused. Resume follows the current automatic-matching gate; ACTIVE alone does
+not imply that matching is running. Expired/ended cards remain read-only, with the
+existing Plan again action where offered. The original sharing request, busy state,
+time expansion, expiry, matching and compatibility contracts remain unchanged.
 
 ## 3. Automatic matching
 

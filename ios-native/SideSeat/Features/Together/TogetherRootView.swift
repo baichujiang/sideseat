@@ -1501,46 +1501,10 @@ private struct WeeklyIntentCard: View {
     private var isTerminal: Bool { status == .ended || status == .expired }
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            cardContent
-                .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
-                .onTapGesture {
-                    if !isTerminal { onEdit() }
-                }
-
-            if !isTerminal {
-                HStack(spacing: 0) {
-                    if intent.status == "ACTIVE" {
-                        Button {
-                            Task { await shareIntention() }
-                        } label: {
-                            Group {
-                                if preparingShare { ProgressView() }
-                                else { Image(systemName: "square.and.arrow.up").font(.subheadline.weight(.semibold)) }
-                            }
-                            .foregroundStyle(SideSeatTheme.utilityAction)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
-                        .disabled(preparingShare)
-                        .accessibilityLabel(AppLocalization.string("Share intention"))
-                        .accessibilityIdentifier("weekly-intent-share-\(intent.id)")
-                    }
-                Button(role: .destructive) { confirmsDelete = true } label: {
-                    Image(systemName: "xmark")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
-                .accessibilityLabel(AppLocalization.string("Delete intention"))
-                .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
-                }
-                .padding(.trailing, SideSeatTheme.Together.cardPadding)
-                .padding(.top, SideSeatTheme.Together.cardPadding)
-            }
+        cardContent
+        .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
+        .onTapGesture {
+            if !isTerminal { onEdit() }
         }
         .tint(SideSeatTheme.utilityAction)
         .disabled(isWorking)
@@ -1588,18 +1552,52 @@ private struct WeeklyIntentCard: View {
 
     private var cardContent: some View {
         SSFlowCard(contentPadding: 0, contentSpacing: 0) {
-            if isTerminal {
-                cardHeader
-            } else {
-                Button(action: onEdit) { cardHeader }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(AppLocalization.string("Edit intention"))
-                    .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
+            HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                if isTerminal {
+                    cardHeader
+                } else {
+                    Button(action: onEdit) { cardHeader }
+                        .buttonStyle(.plain)
+                        .accessibilityHint(AppLocalization.string("Edit intention"))
+                        .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
+                    Menu {
+                        Button(action: onEdit) {
+                            Label(AppLocalization.string("Edit"), systemImage: "pencil")
+                        }
+                        .accessibilityIdentifier("weekly-intent-menu-edit-\(intent.id)")
+                        Button(role: .destructive) { confirmsDelete = true } label: {
+                            Label(AppLocalization.string("Delete"), systemImage: "trash")
+                        }
+                        .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
+                    .accessibilityLabel(AppLocalization.string("More"))
+                    .accessibilityIdentifier("weekly-intent-menu-\(intent.id)")
+                }
             }
+            .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+            .padding(.top, SideSeatTheme.Together.cardPadding)
+
             details
                 .padding(.horizontal, SideSeatTheme.Together.cardPadding)
                 .padding(.top, SideSeatTheme.spaceMD)
-                .padding(.bottom, SideSeatTheme.Together.cardPadding)
+                .padding(.bottom, isTerminal && onRepeat == nil ? SideSeatTheme.Together.cardPadding : 0)
+
+            if onRepeat != nil || !isTerminal {
+                Divider()
+                    .overlay(SideSeatTheme.separator)
+                    .padding(.top, SideSeatTheme.spaceMD)
+                    .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+                actions
+                    .padding(.horizontal, SideSeatTheme.Together.cardPadding)
+                    .padding(.vertical, SideSeatTheme.spaceSM)
+            }
         }
     }
 
@@ -1611,53 +1609,12 @@ private struct WeeklyIntentCard: View {
             tint: SideSeatTheme.Together.categoryInk(for: intent.topic),
             activityTopic: intent.topic
         )
-        .padding(.trailing, isTerminal ? 0 : (intent.status == "ACTIVE" ? 88 : 44) + SideSeatTheme.spaceSM)
-        .padding(.horizontal, SideSeatTheme.Together.cardPadding)
-        .padding(.top, SideSeatTheme.Together.cardPadding)
         .accessibilityIdentifier("weekly-intent-header-\(intent.id)")
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-            if let onRepeat {
-                (dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))) {
-                    statusBadge
-                    if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: SideSeatTheme.spaceSM) }
-                    Button(action: onRepeat) {
-                        Label(AppLocalization.string("Plan again"), systemImage: "arrow.clockwise")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.utilityAction)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.horizontal, SideSeatTheme.spaceMD)
-                            .frame(minHeight: 44)
-                            .background(SideSeatTheme.fillTertiary, in: Capsule())
-                            .contentShape(Capsule())
-                    }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
-                    .accessibilityIdentifier("weekly-intent-repeat-\(intent.id)")
-                }
-            } else {
-                (dynamicTypeSize.isAccessibilitySize
-                    ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceSM))
-                    : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))) {
-                    statusBadge
-                    if let onTogglePause, !isTerminal {
-                        Button(action: onTogglePause) {
-                            Label(AppLocalization.string(intent.isPaused ? "Resume intention" : "Pause intention"),
-                                systemImage: intent.isPaused ? "play.fill" : "pause.fill")
-                                .font(.subheadline.weight(.medium))
-                                .frame(minHeight: 44)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
-                        .foregroundStyle(SideSeatTheme.utilityAction)
-                        .disabled(isWorking)
-                        .accessibilityIdentifier("weekly-intent-toggle-pause-\(intent.id)")
-                    }
-                }
-            }
+            statusBadge
 
             VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                 if let timing = intent.timePreference, timing.kind != "EXACT" {
@@ -1686,7 +1643,7 @@ private struct WeeklyIntentCard: View {
                             .frame(minHeight: 44, alignment: .leading)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
+                        .buttonStyle(SSPressButtonStyle())
                         .accessibilityValue(AppLocalization.string(showsAllTimes ? "Expanded" : "Collapsed"))
                         .accessibilityIdentifier("weekly-intent-times-toggle-\(intent.id)")
                     }
@@ -1712,6 +1669,67 @@ private struct WeeklyIntentCard: View {
                 .font(.footnote)
                 .foregroundStyle(SideSeatTheme.textSecondaryStrong)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var actions: some View {
+        (dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
+            : AnyLayout(HStackLayout(spacing: SideSeatTheme.spaceSM))) {
+            if !isTerminal, intent.status == "ACTIVE" {
+                Button {
+                    Task { await shareIntention() }
+                } label: {
+                    HStack(spacing: SideSeatTheme.spaceXS) {
+                        if preparingShare { ProgressView() }
+                        else { Image(systemName: "square.and.arrow.up") }
+                        Text(AppLocalization.string("Share"))
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(SideSeatTheme.utilityAction)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .disabled(preparingShare)
+                .accessibilityLabel(AppLocalization.string("Share intention"))
+                .accessibilityIdentifier("weekly-intent-share-\(intent.id)")
+            }
+            if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
+            if let onTogglePause, !isTerminal {
+                Button(action: onTogglePause) {
+                    Label(AppLocalization.string(intent.isPaused ? "Resume intention" : "Pause intention"),
+                          systemImage: intent.isPaused ? "play.fill" : "pause.fill")
+                        .font(.subheadline.weight(intent.isPaused ? .semibold : .medium))
+                        .foregroundStyle(intent.isPaused ? SideSeatTheme.ProductAction.foreground : SideSeatTheme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, SideSeatTheme.spaceMD)
+                        .padding(.vertical, SideSeatTheme.spaceSM)
+                        .frame(minHeight: 44)
+                        .background(intent.isPaused ? SideSeatTheme.ProductAction.fill : SideSeatTheme.fillTertiary, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil, alignment: .trailing)
+                .accessibilityIdentifier("weekly-intent-toggle-pause-\(intent.id)")
+            }
+            if let onRepeat {
+                Button(action: onRepeat) {
+                    Label(AppLocalization.string("Plan again"), systemImage: "arrow.clockwise")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(SideSeatTheme.utilityAction)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, SideSeatTheme.spaceMD)
+                        .padding(.vertical, SideSeatTheme.spaceSM)
+                        .frame(minHeight: 44)
+                        .background(SideSeatTheme.fillTertiary, in: Capsule())
+                        .contentShape(Capsule())
+                }
+                .buttonStyle(SSPressButtonStyle())
+                .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil, alignment: .trailing)
+                .accessibilityIdentifier("weekly-intent-repeat-\(intent.id)")
+            }
         }
     }
 
