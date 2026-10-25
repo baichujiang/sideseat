@@ -58,6 +58,12 @@ opens at its large detent for accessibility text.
 Optional action icons must leave enough room for whole words at large text;
 omit a redundant decoration when it forces an unnatural word break.
 
+Plan confirmation shows the invitation roster directly below the reply progress.
+Reuse the existing participant rows, complete reply labels and quiet dividers;
+do not add an expand or separate people-list step here. The collecting stage
+keeps its compact avatar summary and existing participant sheet. Existing guest
+recovery actions stay with their corresponding records and permissions.
+
 Confirmed Plan cards use a typographic calendar date: small localized month and
 weekday above a large day, with the existing complete start/end time below.
 Cross-day endpoints, year and timezone remain available, and accessibility keeps

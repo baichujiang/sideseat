@@ -715,6 +715,44 @@ import XCTest
             return prompt
         }
 
+        // The invitation roster is part of the page, rather than a second navigation step.
+        func verifyInlinePeople(stage: String, peerAccepted: Bool) {
+            let roster = app.descendants(matching: .any)["unified-plan-inline-people"].firstMatch
+            XCTAssertTrue(roster.waitForExistence(timeout: 10))
+            XCTAssertFalse(app.buttons["plan-people-open"].exists)
+            XCTAssertFalse(app.buttons["plan-people-done"].exists)
+            let scroll = app.scrollViews["unified-plan-confirmation-scroll"].firstMatch
+            XCTAssertTrue(scroll.exists)
+            let rows = roster.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-person-'"))
+            XCTAssertEqual(rows.count, 2)
+            let suffix = String((fixture.title.split(separator: " ").last ?? "").prefix(4))
+            for (name, status) in [("Ming" + suffix, "已接受"), ("Lin" + suffix, peerAccepted ? "已接受" : "待确认")] {
+                let row = rows.matching(NSPredicate(format: "label CONTAINS %@", name)).firstMatch
+                XCTAssertTrue(row.exists, "The inline roster includes \(name)")
+                XCTAssertTrue(row.label.contains(status), row.label)
+                let top = app.navigationBars.firstMatch.frame.maxY + 4
+                let footer = app.buttons["unified-plan-publish"].exists ? app.buttons["unified-plan-publish"]
+                    : app.buttons["unified-plan-decline"].exists ? app.buttons["unified-plan-decline"] : app.buttons["plan-view-calendar"]
+                XCTAssertTrue(footer.isHittable && footer.isEnabled)
+                let bottom = min(scroll.frame.maxY, footer.frame.minY - 8)
+                for _ in 0..<14 {
+                    if row.isHittable && row.frame.minY >= top && row.frame.maxY <= bottom { break }
+                    if row.frame.minY < top { scroll.swipeDown(velocity: .slow) }
+                    else { scroll.swipeUp(velocity: .slow) }
+                }
+                XCTAssertTrue(row.isHittable)
+                XCTAssertGreaterThanOrEqual(row.frame.minY, top)
+                XCTAssertLessThanOrEqual(row.frame.maxY, bottom)
+                capture(app, "inline-roster-\(stage)-\(name.hasPrefix("Ming") ? "owner" : "peer")")
+            }
+            // Return to the timetable so all existing invitation checks retain their scope.
+            let title = app.staticTexts["time-poll-detail-title"]
+            for _ in 0..<14 where !title.isHittable || title.frame.minY < app.navigationBars.firstMatch.frame.maxY {
+                scroll.swipeDown(velocity: .slow)
+            }
+            XCTAssertTrue(title.isHittable)
+        }
+
         nativeSignIn(owner, bundle: fixture.bundle)
         app.tabBars.buttons["计划"].tap()
         let create = app.buttons["plans-create-primary"].exists ? app.buttons["plans-create-primary"] : app.buttons["plans-create-unified"]
@@ -845,6 +883,7 @@ import XCTest
         XCTAssertTrue(invitation.waitForExistence(timeout: 10)); XCTAssertTrue(invitation.isEnabled)
         capture(app, "contacts-review-final-invitees"); invitation.tap()
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 20))
+        verifyInlinePeople(stage: "owner-inviting", peerAccepted: false)
         nativePhase("contacts-formal-invitation")
         verifySharePermissions(role: "owner", phase: "INVITING")
         app.buttons["time-poll-menu"].tap()
@@ -855,6 +894,7 @@ import XCTest
         XCTAssertTrue(app.buttons["unified-plan-publish"].isEnabled)
 
         nativeSignIn(peer, bundle: fixture.bundle); openChatCard(expectedAction: "查看邀请")
+        verifyInlinePeople(stage: "peer-inviting", peerAccepted: false)
         verifySharePermissions(role: "participant", phase: "INVITING")
         XCTAssertTrue(app.descendants(matching: .any)["plan-invitation-cell-1"].waitForExistence(timeout: 10))
         XCTAssertEqual(app.descendants(matching: .any).matching(identifier: "plan-invitation-legend").count, 2)
@@ -864,6 +904,7 @@ import XCTest
         XCTAssertTrue(accept.waitForExistence(timeout: 10)); accept.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
         XCTAssertEqual(app.staticTexts["plan-next-step"].firstMatch.label, "待发起人正式发出")
+        verifyInlinePeople(stage: "peer-accepted", peerAccepted: true)
         nativePhase("contacts-peer-accepted"); capture(app, "contacts-explicit-acceptance")
 
         nativeSignIn(owner, bundle: fixture.bundle); openListCard()
@@ -877,6 +918,7 @@ import XCTest
         let publish = app.buttons["unified-plan-publish-confirm"]
         XCTAssertTrue(publish.waitForExistence(timeout: 10)); publish.tap()
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20))
+        verifyInlinePeople(stage: "owner-confirmed", peerAccepted: true)
         verifySharePermissions(role: "owner", phase: "CONFIRMED")
         nativePhase("contacts-published")
 
@@ -887,6 +929,7 @@ import XCTest
         XCTAssertTrue(confirmed.label.contains("23:00") && confirmed.label.contains("01:00"))
         capture(app, "confirmed-calendar-date-cross-midnight")
         confirmed.tap()
+        verifyInlinePeople(stage: "peer-confirmed", peerAccepted: true)
         verifySharePermissions(role: "participant", phase: "CONFIRMED")
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 20)); app.buttons["plan-view-calendar"].tap()
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)

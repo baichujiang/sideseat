@@ -229,11 +229,9 @@ struct UnifiedPlanConfirmationView: View {
     @Environment(SessionStore.self) private var session
     @Environment(DeepLinkRouter.self) private var deepLinkRouter
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.dynamicTypeSize) private var typeSize
     let poll: NativeTimePoll
     @Bindable var store: TimePollStore
     let chooseAnotherTime: () -> Void
-    @State private var showsPeople = false
     @State private var showsPublish = false
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
@@ -257,22 +255,14 @@ struct UnifiedPlanConfirmationView: View {
                 }
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     Divider()
-                    let layout = typeSize.isAccessibilitySize
-                        ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceXS))
-                        : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceSM))
-                    layout {
-                        Text("Invitation replies")
-                            .font(.headline).fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Button { showsPeople = true } label: {
-                            Label("Who's joining?", systemImage: "person.2").font(.subheadline).frame(minHeight: 44)
-                        }.accessibilityIdentifier("plan-people-open")
-                    }
+                    Text("Invitation replies")
+                        .font(.headline).fixedSize(horizontal: false, vertical: true)
                     Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
                         .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("unified-plan-confirmation-count")
                     ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
                         .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
+                    PlanPeopleView(poll: poll, isInline: true)
                     if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.targetCount > poll.allInvitations.count {
                         Text(String(format: AppLocalization.string("%d places still open"), poll.targetCount - poll.allInvitations.count))
                             .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -298,6 +288,7 @@ struct UnifiedPlanConfirmationView: View {
                 }
             }.padding(.horizontal, SideSeatTheme.spaceMD).padding(.bottom, SideSeatTheme.spaceMD)
         }
+        .accessibilityIdentifier("unified-plan-confirmation-scroll")
         .background(SideSeatTheme.bgGrouped)
         .task(id: poll.invitationVersion) {
             reader.scrollTo("plan-detail-start", anchor: .top)
@@ -354,9 +345,6 @@ struct UnifiedPlanConfirmationView: View {
                     Task { await store.mutate("publish", body: CancelPollPlanRequest(version: poll.invitationVersion ?? 0), session: session) }
                 },
             ]
-        }
-        .sheet(isPresented: $showsPeople) {
-            PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
         }
     }
     private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }

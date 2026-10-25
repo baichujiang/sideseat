@@ -183,6 +183,7 @@ struct PlanPeopleView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
     let poll: NativeTimePoll
+    var isInline = false
     @State private var recoveryPersonID: String?
     @State private var preparingRecovery = false
     @State private var recoveryError: String?
@@ -195,6 +196,48 @@ struct PlanPeopleView: View {
     }
 
     var body: some View {
+        Group {
+            if isInline {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    invitationRows
+                    if let recoveryError { Text(recoveryError).foregroundStyle(SideSeatTheme.danger) }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("unified-plan-inline-people")
+            } else {
+                peopleSheet
+            }
+        }
+        .alert("Recover an old guest response", isPresented: Binding(get: { recoveryPersonID != nil }, set: { if !$0 { recoveryPersonID = nil } }), presenting: recoveryPersonID) { id in
+            Button("Generate personal recovery link") {
+                recoveryPersonID = nil
+                Task { await prepareRecovery(for: id) }
+            }.accessibilityIdentifier("guest-recovery-generate")
+            Button("Cancel", role: .cancel) { recoveryPersonID = nil }
+        } message: { _ in
+            Text("Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it.")
+        }
+        .sheet(item: $recoveryShare) { share in
+            NavigationStack {
+                ScrollView {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                    Text("Personal recovery link").font(.title2.bold())
+                    Text("Send this link only to the person who owns the old response. Anyone holding it can edit that response.")
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                    ShareLink(item: share.url) {
+                        PlanActionLabel(title: AppLocalization.string("Share personal recovery link"), symbol: "square.and.arrow.up", kind: .commit, isLoading: false)
+                    }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("guest-recovery-share-link")
+                    PlanActionButton(title: AppLocalization.string(copiedRecovery ? "Copied" : "Copy personal recovery link"), symbol: copiedRecovery ? "checkmark" : "doc.on.doc", kind: .edit, accessibilityID: "guest-recovery-copy") {
+                        UIPasteboard.general.string = share.url.absoluteString; copiedRecovery = true
+                    }
+                }.padding(SideSeatTheme.screenHorizontal)
+                }
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { recoveryShare = nil }.ssToolbarAction() }.ssStandaloneAction() }
+            }.dynamicTypeSize(typeSize).accessibilityIdentifier("guest-recovery-share")
+        }
+    }
+
+    private var peopleSheet: some View {
         NavigationStack {
             List {
                 Section {
@@ -217,13 +260,7 @@ struct PlanPeopleView: View {
                             if poll.isOwner && person.needsGuestRecovery == true { recoveryButton(person.id) }
                         }
                     } else {
-                        ForEach(poll.allInvitations) { person in
-                            row(name: person.displayName, isMe: person.isMe, guest: person.isGuest == true,
-                                status: person.status == "ACCEPTED" ? "Accepted" : person.status == "DECLINED" ? "Declined" : "Awaiting confirmation",
-                                symbol: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock",
-                                accepted: person.status == "ACCEPTED", identifier: "unified-plan-person-\(person.id)")
-                            if poll.isOwner && person.needsGuestRecovery == true { recoveryButton(person.id) }
-                        }
+                        invitationRows
                     }
                 }
                 if collecting {
@@ -236,33 +273,17 @@ struct PlanPeopleView: View {
                 Button("Done", systemImage: "checkmark") { dismiss() }.ssToolbarAction().accessibilityIdentifier("plan-people-done")
             }.ssStandaloneAction() }
             .accessibilityIdentifier("plan-people-list")
-            .alert("Recover an old guest response", isPresented: Binding(get: { recoveryPersonID != nil }, set: { if !$0 { recoveryPersonID = nil } }), presenting: recoveryPersonID) { id in
-                Button("Generate personal recovery link") {
-                    recoveryPersonID = nil
-                    Task { await prepareRecovery(for: id) }
-                }.accessibilityIdentifier("guest-recovery-generate")
-                Button("Cancel", role: .cancel) { recoveryPersonID = nil }
-            } message: { _ in
-                Text("Verify who owns this old response, then send the link privately. Their availability and invitation reply will be kept. A new link replaces any unclaimed link; after restoration, only their private key can edit it.")
-            }
-            .sheet(item: $recoveryShare) { share in
-                NavigationStack {
-                    ScrollView {
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
-                        Text("Personal recovery link").font(.title2.bold())
-                        Text("Send this link only to the person who owns the old response. Anyone holding it can edit that response.")
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        ShareLink(item: share.url) {
-                            PlanActionLabel(title: AppLocalization.string("Share personal recovery link"), symbol: "square.and.arrow.up", kind: .commit, isLoading: false)
-                        }.buttonStyle(SSPressButtonStyle()).accessibilityIdentifier("guest-recovery-share-link")
-                        PlanActionButton(title: AppLocalization.string(copiedRecovery ? "Copied" : "Copy personal recovery link"), symbol: copiedRecovery ? "checkmark" : "doc.on.doc", kind: .edit, accessibilityID: "guest-recovery-copy") {
-                            UIPasteboard.general.string = share.url.absoluteString; copiedRecovery = true
-                        }
-                    }.padding(SideSeatTheme.screenHorizontal)
-                    }
-                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done", systemImage: "checkmark") { recoveryShare = nil }.ssToolbarAction() }.ssStandaloneAction() }
-                }.dynamicTypeSize(typeSize).accessibilityIdentifier("guest-recovery-share")
-            }
+        }
+    }
+
+    private var invitationRows: some View {
+        ForEach(poll.allInvitations) { person in
+            row(name: person.displayName, isMe: person.isMe, guest: person.isGuest == true,
+                status: person.status == "ACCEPTED" ? "Accepted" : person.status == "DECLINED" ? "Declined" : "Awaiting confirmation",
+                symbol: person.status == "ACCEPTED" ? "checkmark.circle.fill" : person.status == "DECLINED" ? "xmark.circle" : "clock",
+                accepted: person.status == "ACCEPTED", identifier: "unified-plan-person-\(person.id)")
+            if poll.isOwner && person.needsGuestRecovery == true { recoveryButton(person.id) }
+            if isInline && person.id != poll.allInvitations.last?.id { Divider() }
         }
     }
 
