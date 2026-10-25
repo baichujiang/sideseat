@@ -1,0 +1,1673 @@
+{
+  "reviewedAt": "2026-10-25T23:19:01.178384+00:00",
+  "kind": "Physical iPhone original screenshot review",
+  "productPreviewBuild": 229,
+  "isPhysicalDevice": true,
+  "expectedDeviceUDID": "00008110-001A69110CC1401E",
+  "reviewMethod": "Original PNG pixels inspected directly by two visual reviewers. Exact SHA duplicates reviewed via a matching directly displayed representative; original files copied byte-for-byte with no image editing. Functional/lifecycle/APNs assertions come from XCTest and API evidence, not screenshots alone.",
+  "singleMainFlowCasePassed": true,
+  "mainFlowAPIStageCount": 23,
+  "cases": [
+    {
+      "suite": "main",
+      "resultBundle": "six-user-physical-registered.xcresult",
+      "caseDurationSeconds": 1007.053,
+      "enclosingResult": "Passed",
+      "passedTests": 1,
+      "failedTests": 0,
+      "device": {
+        "architecture": "arm64e",
+        "deviceId": "00008110-001A69110CC1401E",
+        "deviceName": "iPhone (4)",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23G83",
+        "osVersion": "26.6.1",
+        "platform": "iOS"
+      },
+      "APIReport": "phone-api.json",
+      "APIReportPassed": true,
+      "APIStageCount": 23,
+      "counts": {
+        "reviewedCaptures": 72,
+        "uniqueOriginalSHA256": 60,
+        "adoptedCaptures": 72,
+        "uniqueAdoptedSHA256": 60,
+        "excludedCaptures": 0
+      }
+    },
+    {
+      "suite": "warm",
+      "resultBundle": "push-warm.xcresult",
+      "caseDurationSeconds": 90.677,
+      "enclosingResult": "Passed",
+      "passedTests": 1,
+      "failedTests": 0,
+      "device": {
+        "architecture": "arm64e",
+        "deviceId": "00008110-001A69110CC1401E",
+        "deviceName": "iPhone (4)",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23G83",
+        "osVersion": "26.6.1",
+        "platform": "iOS"
+      },
+      "APIReport": "push-warm-api.json",
+      "APIReportPassed": true,
+      "APIStageCount": 12,
+      "counts": {
+        "reviewedCaptures": 11,
+        "uniqueOriginalSHA256": 11,
+        "adoptedCaptures": 9,
+        "uniqueAdoptedSHA256": 9,
+        "excludedCaptures": 2
+      }
+    },
+    {
+      "suite": "cold",
+      "resultBundle": "push-cold.xcresult",
+      "caseDurationSeconds": 42.981,
+      "enclosingResult": "Passed",
+      "passedTests": 1,
+      "failedTests": 0,
+      "device": {
+        "architecture": "arm64e",
+        "deviceId": "00008110-001A69110CC1401E",
+        "deviceName": "iPhone (4)",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23G83",
+        "osVersion": "26.6.1",
+        "platform": "iOS"
+      },
+      "APIReport": "push-cold-api.json",
+      "APIReportPassed": true,
+      "APIStageCount": 5,
+      "counts": {
+        "reviewedCaptures": 4,
+        "uniqueOriginalSHA256": 4,
+        "adoptedCaptures": 2,
+        "uniqueAdoptedSHA256": 2,
+        "excludedCaptures": 2
+      }
+    }
+  ],
+  "counts": {
+    "reviewedCaptureCount": 87,
+    "uniqueReviewedOriginalSHA256": 75,
+    "adoptedSafeCaptureCount": 83,
+    "uniqueAdoptedOriginalSHA256": 71,
+    "excludedPrivateCaptureCount": 4
+  },
+  "visualOutcome": {
+    "blockingProductVisualFindings": 0,
+    "acceptedForVisibleScopesOnly": true,
+    "keyPages": [
+      "Creation and first editable timetable; unsubmitted owner draft/manual submission; five owned App contacts.",
+      "All five peers fill09:00–10:00, peer3 edits own half-hour, all six common submissions.",
+      "Cross-day23:00–01:00 final draft/review then reset to common09:00–10:00 actual invitation.",
+      "Ordinary six-person rosters, role-specific accept/ignore/decline states; maximum Chinese selected-hour and peer roster segments.",
+      "Maximum German mixed replies and publish prompt message/actions; actual cancel, reopen, scroll and final-send case.",
+      "Calendar exact search/detail/Manage return; late acceptance; withdrawal and no-result searches.",
+      "Warm/cold QA App destinations after actual notifications; accepted waiting state, published Calendar and cancelled detail/no Calendar."
+    ],
+    "nonblockingRisks": [
+      "Maximum Chinese/German captures do not completely show organizer accepted row above fixed footer; do not claim maximum-type all-six-row pixel completion.",
+      "Maximum German final-send label wraps inside Endgültigen. It remains fully visible/reachable after prompt scrolling but visually awkward.",
+      "System AssistiveTouch is present and overlaps parts of grid or roster status in some originals; these areas are not claimed to be entirely unobstructed. Ordinary final roster names/statuses remain legible.",
+      "Cross-day review modal capture shows only first three selected rows plus six-person total; remaining rows not fully pixel-reviewed in that one modal frame.",
+      "Header-only maximum timetable frames do not prove selected rows visible; paired scrolled frames establish them within their stated scope."
+    ]
+  },
+  "privacy": {
+    "rule": "Adopt only QA App content; exclude full originals with any private non-QA screen content instead of editing/redacting.",
+    "mainSafeCaptures": 72,
+    "pushSafeCaptures": 11,
+    "systemHomeScreenExcludedCaptures": 4,
+    "noPasswordOrBearerURLImageAdopted": true,
+    "privateOriginalRoot": "/tmp/sideseat229-private",
+    "rawPrivateRetention": "All source exports remain private, directories0700/files0600. Four excluded system Home Screen images never copied to public evidence. No cleanup/user-original-session screenshot was exported for this review."
+  },
+  "images": [
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer5",
+      "exportedOriginal": "BFEF0BAD-91A7-48C8-A1DA-E558E9BA0F2B.png",
+      "sha256": "096feabd04ff6b1dfab11f497151243765a9cb978dcab9fb4cebbf195e7424ed",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-peer5.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer4",
+      "exportedOriginal": "9052D6A6-1FCB-4C57-ADAE-DBF52052B8EF.png",
+      "sha256": "096feabd04ff6b1dfab11f497151243765a9cb978dcab9fb4cebbf195e7424ed",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-peer4.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer3",
+      "exportedOriginal": "5CC8CE0B-1410-472C-9871-F44FAA88EB41.png",
+      "sha256": "096feabd04ff6b1dfab11f497151243765a9cb978dcab9fb4cebbf195e7424ed",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-peer3.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer2",
+      "exportedOriginal": "DEF6B8E6-02F3-4EB5-BF85-8EF1153C9180.png",
+      "sha256": "096feabd04ff6b1dfab11f497151243765a9cb978dcab9fb4cebbf195e7424ed",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-peer2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer1",
+      "exportedOriginal": "7DECF90F-F547-4422-B701-4CB6F7B1DB50.png",
+      "sha256": "096feabd04ff6b1dfab11f497151243765a9cb978dcab9fb4cebbf195e7424ed",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-peer1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-final-mixed-replies-owner",
+      "exportedOriginal": "284A6EB3-871F-4EB5-956F-1628113112AC.png",
+      "sha256": "35584b6f2c1282f8a672fb0ba029815fa2611255ea5e14a7968b8f9fc3ffc2ab",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-final-mixed-replies-owner.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer5-declined-exact-plan-absent",
+      "exportedOriginal": "304AFE00-011E-4799-821A-9A47346EC22C.png",
+      "sha256": "0718b6ee190326f06381794bba29bb517b2601fb9ee52ad6c0dedc788e5c96f8",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer5-declined-exact-plan-absent.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer2-withdrawn-exact-plan-absent",
+      "exportedOriginal": "EE7AA875-6DAD-47DE-A9DA-3A3D8021F3B7.png",
+      "sha256": "0718b6ee190326f06381794bba29bb517b2601fb9ee52ad6c0dedc788e5c96f8",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer2-withdrawn-exact-plan-absent.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-18-peer2-withdrawn-calendar-action-removed",
+      "exportedOriginal": "77E0299C-3C33-4984-BA11-AFC6CA6AC401.png",
+      "sha256": "f1bf4190005d7c6afd9a6ac3b1ab9b0f20cfb10504ab856a8aff856844baa255",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-18-peer2-withdrawn-calendar-action-removed.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer4-late-entry-manage-plan",
+      "exportedOriginal": "A9FEDBEA-31BE-4A86-B0A0-0402DCDAD341.png",
+      "sha256": "d8080a241bc58346721f6de6f6365cb83522dd9aadf91ea93fbeb35ca99e65f6",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer4-late-entry-manage-plan.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer4-late-exact-plan-result",
+      "exportedOriginal": "60D8C1F0-E9FA-4105-82CA-4E71D27F95A1.png",
+      "sha256": "1cf2138e7826278d2ca7160577dcd5def28459564659f8d6fe541b6e6cf9e829",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer4-late-exact-plan-result.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-17-peer4-late-acceptance-after-publish",
+      "exportedOriginal": "D6C74FFF-B4CC-414F-BAB5-50E17802FD0E.png",
+      "sha256": "08f97ddfa4b382e1838e196eb378dcef39d3a3d96309bab7a2e790cefb4403c3",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-17-peer4-late-acceptance-after-publish.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer1-entry-manage-plan",
+      "exportedOriginal": "AD301373-3686-44EA-A6EE-50A8ED401CE0.png",
+      "sha256": "5fbb0b41ccee90164340a0bd2fa21ef876420553da181a0563b71168f17f327b",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer1-entry-manage-plan.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-peer1-exact-plan-result",
+      "exportedOriginal": "3A01530F-BBB3-48CA-A44E-F5941E5E5E7D.png",
+      "sha256": "1cf2138e7826278d2ca7160577dcd5def28459564659f8d6fe541b6e6cf9e829",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-peer1-exact-plan-result.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-owner-entry-manage-plan",
+      "exportedOriginal": "D0BB55B3-04D6-49F7-AF86-3B22E8A3F4F5.png",
+      "sha256": "ffdf762e942e153720c0116e4c5f73598e0811f18cf12c008a67a6bd33e0c1e1",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-owner-entry-manage-plan.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-calendar-owner-exact-plan-result",
+      "exportedOriginal": "AD01FAD5-402D-4294-B937-B0EB851BC91C.png",
+      "sha256": "3d2c0ff41b051ab8265ba65c4b2c712a6f59d410d0ee0467ecdf64617630cb37",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-calendar-owner-exact-plan-result.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-16-owner-published-before-all-replies",
+      "exportedOriginal": "89E4A742-6089-41E6-81BC-335C309CB5BD.png",
+      "sha256": "68bb08c4fe1e0725d731ce125dcfa4698275b83abddf4556a5cb30c3ea75e584",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-16-owner-published-before-all-replies.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-15-maximum-publish-confirm-after-cancel-actions",
+      "exportedOriginal": "1477B71F-4F28-4D58-8236-7562D072069A.png",
+      "sha256": "9080d67287996afd979733ba77fbde496355d15d416a307e54a450cc94fb87fc",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-15-maximum-publish-confirm-after-cancel-actions.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-15-maximum-publish-confirm-after-cancel-message",
+      "exportedOriginal": "559DFE93-7066-44A0-AB30-65416F3853E8.png",
+      "sha256": "2490b31572c7dd974f8943b3f21bdbb7679e0fd45a294e8e343fe7bee150d2c0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-15-maximum-publish-confirm-after-cancel-message.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-14-maximum-publish-prompt-four-accepted-actions",
+      "exportedOriginal": "1B1DB3E2-29D3-402E-8CCC-6E21F2FE1A28.png",
+      "sha256": "3665f1ee193b4cead2d30e6f7bbfa7241209c106bc7ddd9ce986b7223784b8d1",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-14-maximum-publish-prompt-four-accepted-actions.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-14-maximum-publish-prompt-four-accepted-message",
+      "exportedOriginal": "81603A1A-464D-4A24-9975-58BA028FE4A6.png",
+      "sha256": "bb04beba03dbc78d7cc118b8f6ff94f55447e66de86c701d378881d1c9118ab0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-14-maximum-publish-prompt-four-accepted-message.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer5",
+      "exportedOriginal": "1D2BA47C-F93D-4191-A54D-90F591C9C190.png",
+      "sha256": "f45c66e8da4fb3613966602cb4dd98e703b8db46a63d78cd3dda00495f7841c3",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-peer5.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer4",
+      "exportedOriginal": "8687A918-F92C-43E0-AC0C-ED2A235630B8.png",
+      "sha256": "ea1e7404cecfdeb5d494355bc3abc03839be6a720ccad0be88cdfc5f0184dbf4",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-peer4.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer3",
+      "exportedOriginal": "72B25A4B-F8B9-43EB-B0E1-CAA04E5CC3DD.png",
+      "sha256": "db59f6dba1212afbe16f355054e75ab4b2067cd7ab6750b59360ec7b8a7dc108",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-peer3.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer2",
+      "exportedOriginal": "159F1EC5-06DE-491D-8198-75D260A916CC.png",
+      "sha256": "a1ece991fc3bae05d5bda683b6af0fdbba99111349cc639b565f416818b40f1c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-peer2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer1",
+      "exportedOriginal": "88661ABA-1487-4135-8FA5-EF6F177911C9.png",
+      "sha256": "bf500c0b10c4007483f7697c4a4fe1b177362757afc49437123ae0573c08f6df",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-peer1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-owner",
+      "exportedOriginal": "5F847D4D-653E-4119-9EA5-33D9C6DA0918.png",
+      "sha256": "910ab640782b0217029c3c82caf51f6573f4712497a95cd9e1a1607e28e76a52",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-de-maximum-mixed-replies-owner.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-13-peer5-declined",
+      "exportedOriginal": "96C235D2-ED59-411B-A7EB-3879C98CB20B.png",
+      "sha256": "32e12d8ade938749efc059f83e6b4b8772c2c377378906ae2033252523803c1a",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer5 declined header/footer; confirm remains active to change response, decline disabled,4/6count and final highlighted hour unchanged; own inline row below viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-13-peer5-declined.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-12-peer4-ignored-no-response",
+      "exportedOriginal": "58870B89-FF15-45D4-97B5-FA96A40F8DEF.png",
+      "sha256": "ba0c0c4caae7e6eb38a667ff6204df4ecff080c8d41a732336eb15425d735426",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer4 ignores without reply: pending own status,4/6count, active confirm/decline actions, no Calendar action.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-12-peer4-ignored-no-response.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-11-peer3-accepted-waiting-for-publish",
+      "exportedOriginal": "7B06206F-7F58-4732-B87B-188660DD86E8.png",
+      "sha256": "0f12c4164cb8de1eab83db850a8437026b374f2c08827083b4cf3694f5cd068c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Accepted peer state and waiting-for-organizer footer;2/6,3/6or4/6confirmed count;09:00–10:00 highlight unchanged, no Calendar action before publication. Lower roster rows partly outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-11-peer3-accepted-waiting-for-publish.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer3-invitation-detail",
+      "exportedOriginal": "88F57373-5507-4E7A-A7CD-99DF8CBD8DCD.png",
+      "sha256": "ad05b41ce11f6475b10e0310902ddbf766b1cf14bc393d3d12922591911cc717",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer3-invitation-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-11-peer2-accepted-waiting-for-publish",
+      "exportedOriginal": "229A3FA4-39C9-4695-B4A6-C024292E5ACB.png",
+      "sha256": "dd7a4df166e8e5a85ebbffd9069454c806c90b93675854480de6668b49bc0bfb",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Accepted peer state and waiting-for-organizer footer;2/6,3/6or4/6confirmed count;09:00–10:00 highlight unchanged, no Calendar action before publication. Lower roster rows partly outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-11-peer2-accepted-waiting-for-publish.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer2-invitation-detail",
+      "exportedOriginal": "15B39258-AB2B-426C-8F22-2EFA800C613A.png",
+      "sha256": "4615832cf357955baa60bf621b134051264ad62d071a9ef686ae36d8fbc2c5d0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer2-invitation-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-11-peer1-accepted-waiting-for-publish",
+      "exportedOriginal": "9092CBC1-2F71-4683-A504-9D7E2CC70326.png",
+      "sha256": "927b69a855104e14d5e7730955b190d0f698ca693b48c6763dbee747cbc5cbc7",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Accepted peer state and waiting-for-organizer footer;2/6,3/6or4/6confirmed count;09:00–10:00 highlight unchanged, no Calendar action before publication. Lower roster rows partly outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-11-peer1-accepted-waiting-for-publish.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-invited-timetable-peer1-invited-row-2",
+      "exportedOriginal": "35A91126-3B9A-4DA2-848C-4CB7C9074DA8.png",
+      "sha256": "a3fcfb8512e3ff44883414f6cd33d377813b6cfe2f2a1e9e02ab4265beb7bb55",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-invited-timetable-peer1-invited-row-2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-invited-timetable-peer1-invited-row-1",
+      "exportedOriginal": "37096D73-70EE-4837-BFDC-A289AEF75E59.png",
+      "sha256": "a3fcfb8512e3ff44883414f6cd33d377813b6cfe2f2a1e9e02ab4265beb7bb55",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-invited-timetable-peer1-invited-row-1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer1-invitation-detail",
+      "exportedOriginal": "D775076E-D03D-4D51-A35F-BF2E5021F743.png",
+      "sha256": "fae1dfbcf12d9a7c17cb2f0f0953e2028c8a7ad6c8fd3d10417170843c281fdb",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Invitation detail shows correct QA title, pending role state, date09:00–10:00 with both highlighted half-hour rows, and active confirm/decline actions. Lower roster rows outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer1-invitation-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-peer5",
+      "exportedOriginal": "C0DD5E74-4117-4BF0-801E-348B9B13CE44.png",
+      "sha256": "adf531ba83643bcbd0bc932e2ba14b43a65f7ae2a9e61c3a8dcc527e474daba2",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese peers2–4 full names/pending labels; peer5 name visible with pending label cut by footer. Owner-named capture fully shows peer5. Do not equate AX row with complete pixel row.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-peer5.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-peer4",
+      "exportedOriginal": "6D587BC8-ACB2-4DEF-AEAE-3DBFB11D741E.png",
+      "sha256": "b4370f8a04434812ec50f881ded97fd1420dd408ff603ec18ac866cf275ea607",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese peers2–4 full names/pending labels; peer5 name visible with pending label cut by footer. Owner-named capture fully shows peer5. Do not equate AX row with complete pixel row.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-peer4.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-peer3",
+      "exportedOriginal": "688CE591-E386-4203-8700-6E0B999C33C7.png",
+      "sha256": "86b4b0662f2f559a386ea9c9cdc46f98784e42a74edb3bc5df9c5d248f2d95ce",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese1/6count, peer1/peer2 full pending rows and peer3 name visible; peer3 status crosses footer. Other maximum captures provide remaining peer statuses.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-peer3.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-peer2",
+      "exportedOriginal": "514FE3C5-105F-4AD5-8EE4-7E9C3DA9038A.png",
+      "sha256": "86b4b0662f2f559a386ea9c9cdc46f98784e42a74edb3bc5df9c5d248f2d95ce",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese1/6count, peer1/peer2 full pending rows and peer3 name visible; peer3 status crosses footer. Other maximum captures provide remaining peer statuses.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-peer2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-peer1",
+      "exportedOriginal": "67B1B9F7-0DA5-4F7F-9B47-8094E5F38F60.png",
+      "sha256": "b1bbba37c4989e86928c5fc855dd0390b6b3067ff3d946b1e41ce48980f0312b",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese1/6count, peer1/peer2 full pending rows and peer3 name visible; peer3 status crosses footer. Other maximum captures provide remaining peer statuses.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-peer1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-zh-maximum-owner",
+      "exportedOriginal": "8F6314AD-E749-410A-AF19-7E8F01BED2DA.png",
+      "sha256": "011bfe2b1cda35632f38183c40686748da69640d194f9bbe15270410fb01702e",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Maximum Chinese type peers2–5 complete names/pending labels visible. Organizer accepted row is outside captured viewport despite capture name; no complete organizer-row claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-zh-maximum-owner.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-invited-timetable-owner-zh-maximum-row-2",
+      "exportedOriginal": "E6FF38FD-29B2-4AD6-8453-E1EE8244F6CB.png",
+      "sha256": "8a9a8224572f611a4b8ff16e12ca3f7a1096075a4a75ae1580fa6b99c727c579",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Actual maximum Chinese type both09:00/09:30 selected rows and clocks visible above fixed footer. AssistiveTouch overlaps lower-right selected area; not an unobstructed-grid claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-invited-timetable-owner-zh-maximum-row-2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-invited-timetable-owner-zh-maximum-row-1",
+      "exportedOriginal": "482DAA87-B1BD-4C33-AD19-5E525B5616E9.png",
+      "sha256": "dd11166077dea3b32995aa7e677345c1e9aa3b86ac87d4499db9b272e2f24078",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Actual maximum Chinese type title/status/date/hour/legend/publish action readable. Selected rows lie mostly below footer and are not accepted as fully visible here.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-invited-timetable-owner-zh-maximum-row-1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-10-owner-can-publish-with-five-pending",
+      "exportedOriginal": "33420389-47CD-418F-9C3A-391194732BFA.png",
+      "sha256": "3783586183bc82da6f651e8741eb78923feaf20f1d8ebd0bdf5baf22ed6ac075",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Actual sent invitation is Oct26 09:00–10:00, fully highlighted common hour, owner pending-publication status, five pending peers and enabled publish; owner row outside viewport.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-10-owner-can-publish-with-five-pending.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-peer5",
+      "exportedOriginal": "2B12D80A-AE46-4500-AC21-4126BEB1D98C.png",
+      "sha256": "1ff16bbe44777b5e5205549c7b07e3f0434acdd2a1e17773e28493179c0c346c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-peer5.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-peer4",
+      "exportedOriginal": "94477F77-E529-400F-9C0F-A552B570F59F.png",
+      "sha256": "1ff16bbe44777b5e5205549c7b07e3f0434acdd2a1e17773e28493179c0c346c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-peer4.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-peer3",
+      "exportedOriginal": "C90CDAF6-29F7-4F30-B916-D99953DA4FC7.png",
+      "sha256": "1ff16bbe44777b5e5205549c7b07e3f0434acdd2a1e17773e28493179c0c346c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-peer3.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-peer2",
+      "exportedOriginal": "F003543C-A658-46E7-9A2F-696058510D78.png",
+      "sha256": "1ff16bbe44777b5e5205549c7b07e3f0434acdd2a1e17773e28493179c0c346c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-peer2.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-peer1",
+      "exportedOriginal": "17E8BDD0-12AA-4B58-9053-9D7CE2B8920E.png",
+      "sha256": "1ff16bbe44777b5e5205549c7b07e3f0434acdd2a1e17773e28493179c0c346c",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-peer1.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-roster-owner-invited-owner",
+      "exportedOriginal": "CCF9A297-4DB9-4828-9006-C7EFEFBF65CF.png",
+      "sha256": "e43a4720151e47f5f23349bd58299247d1de0730f8b246c2f3b93be3b185dd7d",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Ordinary inline list shows all six QA names, five pending and accepted organizer,1/6confirmed and enabled publish. Translucent system AssistiveTouch overlaps organizer status; text still legible, no completely unobstructed-screen claim.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-roster-owner-invited-owner.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-09-review-six-invitees-cross-midnight",
+      "exportedOriginal": "FBECC214-63ED-4A38-B549-87E5D8338F53.png",
+      "sha256": "cde5fbc67898120c4961d806bbd3130d6d72452b7cfae36d5861725f5a843ffa",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Cross-midnight review shows exact Oct26 23:00 toOct27 01:00 and selected owner/first two peers; footer six invitees and send action. Remaining three review rows below viewport, not full modal roster pixel acceptance.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-09-review-six-invitees-cross-midnight.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-final-cross-midnight-morning-summary",
+      "exportedOriginal": "B9074330-B734-432E-BA2E-07D17F2AB941.png",
+      "sha256": "210c7491deafa3565b99671cf13f4ee9849a7823339956323a8c68dc848834be",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Draft final selection following day00:00/00:30 highlighted; complete cross-day23:00–01:00/two-hour summary and next action. Other fourth-column cells partly under AssistiveTouch.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-final-cross-midnight-morning-summary.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-final-cross-midnight-evening",
+      "exportedOriginal": "66F573C5-8976-4321-A2B4-F405DE45070B.png",
+      "sha256": "d909fc19cf3a44dae04de00a7fb06e4b01259a370377ec5732256ad3ca467770",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Draft final selection first candidate day23:00/23:30 highlighted; summary Oct26–27 23:00–00:00 and next action visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-final-cross-midnight-evening.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-08-six-responses-compact-avatar-summary",
+      "exportedOriginal": "04ABCA2D-68EB-4039-B2E7-73EE5FB93CD2.png",
+      "sha256": "2d0b527fc78fd805227a2b7170a0003a62500110cce43e2e200e68f873a7ccc7",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "All six submitted, compact avatars+3, common two cells each6, saved state and choose-final action visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-08-six-responses-compact-avatar-summary.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-07-peer3-edited-only-own-response",
+      "exportedOriginal": "8DEC1B82-933C-42E6-BB44-CEB8629E5C8A.png",
+      "sha256": "4ba0e58bb6dc3a7deadb504af38e5bb77b5086f062600ee6da98cecfb716b762",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer3 own second half-hour removed; first remains checked, aggregate second cell5versus first6, submitted half-hour footer. Shows own-edit separation.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-07-peer3-edited-only-own-response.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-06-peer5-submitted-own-availability",
+      "exportedOriginal": "B3A049C1-C3AF-4F7A-BC82-CC454C21AAFB.png",
+      "sha256": "3db1cc78edc3fc7e2b064db2ad94c9fbae46d945c747d21ca48be21ab31d4310",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer own09:00/09:30 selection is checked and footer says submitted, one day/one hour; aggregate submitted count increments through six; waiting-for-organizer copy visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-06-peer5-submitted-own-availability.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer5-availability-detail",
+      "exportedOriginal": "6055A423-47F2-49B4-B31C-63CD64F85F8B.png",
+      "sha256": "2768f6c9a4b2c63b6f89a2305dd9cc8bf544e3f37156bd0ea97e14be4a73a9fa",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct QA plan detail opened from chat; earlier participants aggregate fill count appears while own selection is empty and footer unsubmitted; own manual submit disabled until selection.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer5-availability-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-06-peer4-submitted-own-availability",
+      "exportedOriginal": "5DEE9B26-195D-4C4C-A11B-84EF4972A2EB.png",
+      "sha256": "9258d5c6c69b2f89f984beb461ba54ec661fe1bbc1a474a49264d453213cf9e1",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer own09:00/09:30 selection is checked and footer says submitted, one day/one hour; aggregate submitted count increments through six; waiting-for-organizer copy visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-06-peer4-submitted-own-availability.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer4-availability-detail",
+      "exportedOriginal": "BA125844-78D7-4E0B-86AA-19ED3F7F9221.png",
+      "sha256": "e5501e7a46f7f027821c4b4d819f69ce15a6092adf866d652cfecf81cd756b08",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct QA plan detail opened from chat; earlier participants aggregate fill count appears while own selection is empty and footer unsubmitted; own manual submit disabled until selection.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer4-availability-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-06-peer3-submitted-own-availability",
+      "exportedOriginal": "F8A66538-73D3-4C51-9241-F608DDB0A78B.png",
+      "sha256": "6b1b7219078e078f4b1553b286560c7341d78848866b19893ba0d210e64140fc",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer own09:00/09:30 selection is checked and footer says submitted, one day/one hour; aggregate submitted count increments through six; waiting-for-organizer copy visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-06-peer3-submitted-own-availability.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer3-availability-detail",
+      "exportedOriginal": "DED44539-A414-4D5A-8DE1-C126AEB6715F.png",
+      "sha256": "cdc09ca70fbafd46c243f6f1267f71bf4e0b8f39d527a1d71b135335e3dc852a",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct QA plan detail opened from chat; earlier participants aggregate fill count appears while own selection is empty and footer unsubmitted; own manual submit disabled until selection.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer3-availability-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-06-peer2-submitted-own-availability",
+      "exportedOriginal": "BD2A56B2-29C7-4327-84EC-D21A26CEB412.png",
+      "sha256": "f1d0f4aa1befcd201dc28a4712df17b9136e68d0c83845d2970bd002a3b33f93",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer own09:00/09:30 selection is checked and footer says submitted, one day/one hour; aggregate submitted count increments through six; waiting-for-organizer copy visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-06-peer2-submitted-own-availability.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer2-availability-detail",
+      "exportedOriginal": "377A9EB6-9F3B-4544-A621-3CFF79A26398.png",
+      "sha256": "0a01c83f79cabeb70e7ec9568df75c5160940f7424a752bb8429025d81c5a7da",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct QA plan detail opened from chat; earlier participants aggregate fill count appears while own selection is empty and footer unsubmitted; own manual submit disabled until selection.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer2-availability-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-06-peer1-submitted-own-availability",
+      "exportedOriginal": "AF12E474-2B19-4F5C-822B-211233AEAFD4.png",
+      "sha256": "eca39450e129a228abaf259ebce1f840013c0df7e68c63ed37988dae7e637937",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Peer own09:00/09:30 selection is checked and footer says submitted, one day/one hour; aggregate submitted count increments through six; waiting-for-organizer copy visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-06-peer1-submitted-own-availability.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-chat-entry-peer1-availability-detail",
+      "exportedOriginal": "DB3C0F37-150D-4E6D-9EDB-BEADC523DC43.png",
+      "sha256": "cdcb3dd7d6102b889bf08cebf3ff3a9167e1121940d1e8df8550d727d71a2cdc",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct QA plan detail opened from chat; earlier participants aggregate fill count appears while own selection is empty and footer unsubmitted; own manual submit disabled until selection.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-chat-entry-peer1-availability-detail.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-05-all-five-App-friends-selected",
+      "exportedOriginal": "602157F5-AFE3-4ED6-9C1F-AF54C00A6E11.png",
+      "sha256": "763c567d88ca6c4a231b14bef7780ab2b195c3418bc69f481ee5bef03ea7e685",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Five owned QA contacts all checked with Send to5contacts action. No non-QA contact or conversation visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-05-all-five-App-friends-selected.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-04-owner-submitted-share-panel",
+      "exportedOriginal": "BFD9EE3E-198F-42A1-A53B-F1FE60CADD4D.png",
+      "sha256": "4a59c9889b7dee3d5d9b9ab7521dfd6290a364d74a5daaaf4782344fcfc6a8ac",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "After manual submit, share sheet has App friends, share web link and copy link. No actual token URL rendered; this QA App-only original is safe.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-04-owner-submitted-share-panel.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-03-owner-unsubmitted-tap-cancel-drag-erase",
+      "exportedOriginal": "971EAC84-CC83-441C-ADB2-C551AB8741EF.png",
+      "sha256": "4dbae4c513947715d40d6fc17ccfd3c7a04178ef8cc81343d31490d42a58a771",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Own09:00/09:30 cells selected with0submitted; footer clearly says unsubmitted and one-hour draft; manual submit/share active.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-03-owner-unsubmitted-tap-cancel-drag-erase.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-02-owner-first-editable-timetable",
+      "exportedOriginal": "408D3592-B8DA-48AA-B45B-4FBDE06A8B5E.png",
+      "sha256": "aa464deeac6f9d0b9205122e90a43b41efff12b5faeca950776b33887b2bc34a",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "First editable timetable appears with0submitted, no selected own cells and disabled manual-submit/share. Date/time and choose-final action visible.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-02-owner-first-editable-timetable.png"
+    },
+    {
+      "suite": "main",
+      "capture": "plan-six-01-owner-create-candidate-dates",
+      "exportedOriginal": "4D5EF5D0-F519-42ED-A9CA-D00E97EE0AD8.png",
+      "sha256": "72cf65aaa4913a8c35727022d718e854299dfd051e9979ec7f2cf7dca9cabde6",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Direct original display; exact-hash duplicate linked to directly reviewed representative",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "QA plan creation form: title, optional location, candidate Oct26–Nov1,09:00–17:00 day range, timezone, proposal option and next-to-fill action readable. No timetable preview in form.",
+      "findings": [],
+      "publicFile": "physical229-main-plan-six-01-owner-create-candidate-dates.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-11-cancelled-plan-absent-from-calendar",
+      "exportedOriginal": "245D885A-DBB6-4CEE-8B63-58AFC11DB678.png",
+      "sha256": "913696da5e8debcd897a77c9cdb843a72c6f4e82663546cb7fdc67e070b1e030",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Actual Calendar exact-title search after warm QA plan cancellation.",
+      "findings": [
+        "Exact warm QA plan title visible in search field with No Results state.",
+        "No unrelated event content visible; absence claim limited to this exact query at capture time."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-11-cancelled-plan-absent-from-calendar.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-10-cancellation-tap-correct-plan-no-calendar",
+      "exportedOriginal": "9CEDD2E0-1C21-48F8-9B6C-E8E58C033052.png",
+      "sha256": "13043abdb4043745e01c723dfdf0019413011b18e0635d503df80bbaf4a6c863",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct warm/cold QA plan detail after cancellation notice tap.",
+      "findings": [
+        "Correct disposable QA title, Cancelled state and 09:00–10:00 invited interval visible.",
+        "Cancellation explanation states related calendar entries removed; Back to plans action replaces calendar/attendance actions.",
+        "Screenshot verifies visible destination/state; actual calendar absence relies on exact Calendar search evidence where available."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-10-cancellation-tap-correct-plan-no-calendar.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-09-foreground-real-cancellation-notice",
+      "exportedOriginal": "1C56E14A-D799-4310-B1CA-AA2E36AFED38.png",
+      "sha256": "de9b585d80c4f264f4a85510e207cfefea25e9ec1014891fa5b29d0f76669ddf",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Foreground cancellation notice for warm QA plan above QA planning list.",
+      "findings": [
+        "Expected QA cancellation notice visible.",
+        "Background list shows another owned disposable QA cold plan; no non-QA content visible.",
+        "Notice overlaps header; screenshot proves visible notice, not tap transition."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-09-foreground-real-cancellation-notice.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-08-real-publication-exact-calendar-result",
+      "exportedOriginal": "502DB1AB-4C2A-4CD4-8A13-B2A201B5E1B5.png",
+      "sha256": "fa1b85474d84f5c4ea4b656077eaccef21417574bc807f8e5e7256e1a6a51095",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Actual Calendar exact-title search for published warm QA plan.",
+      "findings": [
+        "Exactly one matching QA plan result visible for October 28, 2026 at 09:00 with QA library location.",
+        "No unrelated calendar events visible. End time is outside search result scope."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-08-real-publication-exact-calendar-result.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-07-published-tap-correct-plan-calendar-action",
+      "exportedOriginal": "D0F9C15D-BB60-4E4E-B280-A40CB0DF05E5.png",
+      "sha256": "7795b5995c9fcc458db78aa7cf92a2dc5265fdd04feea5f51d4457fe298ddeb6",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Warm QA plan after publication notice tap.",
+      "findings": [
+        "Correct disposable QA plan title, Confirmed state, 2 of 2 accepted and October 28 09:00–10:00 interval visible.",
+        "Synced to Sideseat calendars text and View in Calendar action visible."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-07-published-tap-correct-plan-calendar-action.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-06-background-published-system-notification",
+      "exportedOriginal": "93AB9C56-156B-4C3E-AD1D-26336AF963DF.png",
+      "sha256": "5012a86deafa681db85f4c2308ad6e28c43c02579e9089e7e7788dd06d81d19b",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": false,
+      "adopted": false,
+      "scope": "Private audit only: system banner associated with disposable QA plan; Home Screen background also visible.",
+      "findings": [
+        "Expected QA invitation, publication or cancellation system notice visibly present.",
+        "Home Screen exposes unrelated installed-app names/icons and badge counts. Entire original is excluded from public adoption; keep private and do not crop, redact or edit it.",
+        "No unrelated notification text observed; installed-app content is sufficient to reject adoption."
+      ],
+      "excludedReason": "System notification Home Screen includes unrelated installed-app names/icons and badge counts. Whole original kept private; not cropped, redacted or edited."
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-05-real-peer-accepted-not-yet-calendar",
+      "exportedOriginal": "7C69D405-645D-4412-9186-1A2197AFBD28.png",
+      "sha256": "9502c183b8d21b880e8552a0eea6146dea8b1c01c787d689e8c9aa8262466ca0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Warm QA plan after peer acceptance but before publication.",
+      "findings": [
+        "2 of 2 confirmed with both QA rows accepted.",
+        "Waiting for organizer to send final plan visible; calendar action absent from footer.",
+        "October 28 09:00–10:00 interval visible."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-05-real-peer-accepted-not-yet-calendar.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-04-background-tap-correct-plan-highlight",
+      "exportedOriginal": "9374E71F-DF98-4EAF-A6F9-CC60D3C06DCE.png",
+      "sha256": "30a24408b5015e1a31f3002f6b2f2c5a02fd853471380ac20bce4cddec63d351",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "QA plan detail visible after warm background or cold-launch invitation tap; captured app state only.",
+      "findings": [
+        "Correct disposable QA warm/cold plan title, awaiting own confirmation, owner accepted and 1/2 confirmed visible.",
+        "October 28 09:00–10:00 invited interval and confirmation/decline actions readable.",
+        "No calendar action offered before publication; screenshot alone does not independently prove process lifecycle or session restoration."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-04-background-tap-correct-plan-highlight.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-03-background-final-invitation-system-notification",
+      "exportedOriginal": "05E826BB-A184-4762-98A4-923CABB8C684.png",
+      "sha256": "0711eb668c243c4d6d1f82224d8f9eeaab6ae0a3bdeb544be28227c9cdf69fc4",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": false,
+      "adopted": false,
+      "scope": "Private audit only: system banner associated with disposable QA plan; Home Screen background also visible.",
+      "findings": [
+        "Expected QA invitation, publication or cancellation system notice visibly present.",
+        "Home Screen exposes unrelated installed-app names/icons and badge counts. Entire original is excluded from public adoption; keep private and do not crop, redact or edit it.",
+        "No unrelated notification text observed; installed-app content is sufficient to reject adoption."
+      ],
+      "excludedReason": "System notification Home Screen includes unrelated installed-app names/icons and badge counts. Whole original kept private; not cropped, redacted or edited."
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-02-foreground-notification-correct-chat-card",
+      "exportedOriginal": "E25AE3A5-88E5-46AA-9B04-14E43B34D035.png",
+      "sha256": "60c0171ab2531338ccfcebdd68a175a43aa22f11886fdca5da9ae3a78e2a2541",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Owned disposable QA chat opened after foreground invitation notice.",
+      "findings": [
+        "Correct QA chat and latest warm-push plan card visible, waiting for final time with View plan action.",
+        "Earlier visible messages and plan cards are owned QA content; no password/token URL present.",
+        "Capture establishes visible destination/chat card; tap behavior itself relies on test trace."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-02-foreground-notification-correct-chat-card.png"
+    },
+    {
+      "suite": "warm",
+      "capture": "plan-physical-push-01-foreground-real-share-notice",
+      "exportedOriginal": "B40FA017-2F78-408F-8B20-1C79E6F353F1.png",
+      "sha256": "a4ccac40d3716ada602a04e84a72adaa9aa8b5170a068da3e7312c36e0373e9a",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Foreground QA invitation banner over Sideseat Calendar week view.",
+      "findings": [
+        "QA invitation banner visible above Calendar screen; no system Home Screen or unrelated notification content.",
+        "Calendar background shows a truncated QA-style plan title and event-count indicators. Banner overlaps calendar heading. Safe only for visible foreground notice context."
+      ],
+      "publicFile": "physical229-warm-plan-physical-push-01-foreground-real-share-notice.png"
+    },
+    {
+      "suite": "cold",
+      "capture": "plan-physical-push-15-background-cancellation-tap-correct-plan",
+      "exportedOriginal": "83916F59-ABBA-4E78-9B60-A52F6FE1DD62.png",
+      "sha256": "a8105a810a6f48d387fbc177e43c0aff43c2a576e1734bb1f37da2f58000c244",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "Correct warm/cold QA plan detail after cancellation notice tap.",
+      "findings": [
+        "Correct disposable QA title, Cancelled state and 09:00–10:00 invited interval visible.",
+        "Cancellation explanation states related calendar entries removed; Back to plans action replaces calendar/attendance actions.",
+        "Screenshot verifies visible destination/state; actual calendar absence relies on exact Calendar search evidence where available."
+      ],
+      "publicFile": "physical229-cold-plan-physical-push-15-background-cancellation-tap-correct-plan.png"
+    },
+    {
+      "suite": "cold",
+      "capture": "plan-physical-push-14-background-real-cancellation-system-notification",
+      "exportedOriginal": "0CED4A53-CD44-4CAE-8B47-936D4959A2BA.png",
+      "sha256": "1952a7299d5f95990c852863084990e1d007b59f69966a28c91c49be17458d68",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": false,
+      "adopted": false,
+      "scope": "Private audit only: system banner associated with disposable QA plan; Home Screen background also visible.",
+      "findings": [
+        "Expected QA invitation, publication or cancellation system notice visibly present.",
+        "Home Screen exposes unrelated installed-app names/icons and badge counts. Entire original is excluded from public adoption; keep private and do not crop, redact or edit it.",
+        "No unrelated notification text observed; installed-app content is sufficient to reject adoption."
+      ],
+      "excludedReason": "System notification Home Screen includes unrelated installed-app names/icons and badge counts. Whole original kept private; not cropped, redacted or edited."
+    },
+    {
+      "suite": "cold",
+      "capture": "plan-physical-push-13-cold-tap-session-restored-correct-plan-highlight",
+      "exportedOriginal": "9E93E5FE-BB76-4B72-B629-ADE00AA6278F.png",
+      "sha256": "d923f13e5116b6adf174fc550f511a53fe438f9a5a9b47d081bfd836077e7684",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": true,
+      "adopted": true,
+      "scope": "QA plan detail visible after warm background or cold-launch invitation tap; captured app state only.",
+      "findings": [
+        "Correct disposable QA warm/cold plan title, awaiting own confirmation, owner accepted and 1/2 confirmed visible.",
+        "October 28 09:00–10:00 invited interval and confirmation/decline actions readable.",
+        "No calendar action offered before publication; screenshot alone does not independently prove process lifecycle or session restoration."
+      ],
+      "publicFile": "physical229-cold-plan-physical-push-13-cold-tap-session-restored-correct-plan-highlight.png"
+    },
+    {
+      "suite": "cold",
+      "capture": "plan-physical-push-12-cold-real-invitation-system-notification",
+      "exportedOriginal": "C751E41F-7EC7-49E8-B798-D5529E7FF7D7.png",
+      "sha256": "9d22b69f3c4d6ce40b64489e830d4bec023a45eaca02227e31aeb4c24a21088d",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "reviewMethod": "Original PNG displayed using view_image; no image transformation.",
+      "safeToAdopt": false,
+      "adopted": false,
+      "scope": "Private audit only: system banner associated with disposable QA plan; Home Screen background also visible.",
+      "findings": [
+        "Expected QA invitation, publication or cancellation system notice visibly present.",
+        "Home Screen exposes unrelated installed-app names/icons and badge counts. Entire original is excluded from public adoption; keep private and do not crop, redact or edit it.",
+        "No unrelated notification text observed; installed-app content is sufficient to reject adoption."
+      ],
+      "excludedReason": "System notification Home Screen includes unrelated installed-app names/icons and badge counts. Whole original kept private; not cropped, redacted or edited."
+    }
+  ],
+  "executionBoundaries": [
+    "Image review only: no App/phone operation, build/test execution, product/test/fixture edits or cleanup.",
+    "Physical device identity and individual pass/fail counts read from each xcresult summary. Three cases remain separate: full six-account flow, warm push, cold push.",
+    "All adopted filenames resolve to exact unchanged original SHA256; scoped visual acceptance does not mean every offscreen row was visible.",
+    "Actual APNs sending, provider receipts, session cold/warm lifecycle and backend23/12/5phase assertions require their independent reports.",
+    "No user-original-domain/session imagery or cleanup screenshot was adopted."
+  ]
+}

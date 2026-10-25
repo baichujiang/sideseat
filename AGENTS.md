@@ -21,7 +21,32 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview228 is the current installed development build. The same real six-account
+- Preview229 is the current installed development build, product03ccd83f0ecb16b1467fdab72379f50f65cd5218 pushed.
+  Default physical iPhone14Plus completed one continuous six-account plan case
+  1007.053s/23API phases; separate real foreground/background push90.677s/12phases,
+  notification cold launch42.981s/5phases and QA credential cleanup40.801s passed.
+  The two push plans use Mac API owner actions; the main plan is real App UI only.
+  Fixed-window provider logs correlate6real APNs200 successes (warm4/cold2);
+  6repeat business requests add no success logs, not a global exactly-once claim.
+  Normal229 PID10092 has no arguments/TERM-only env;268/Local/signature/binaries/
+  process match source. QA real logout, unforced QA cold login page and ended
+  persistent marker verified; ordinary domain ready, identity neither read nor
+  claimed restored. Ordinary97/oldFlow222 retained,ownFlow229 removed,new reports0.
+  Six accounts/7plans401/404 cleaned;3contexts/6access-config files+1scan file removed,
+  activeLocal/shared outputs/existingSimulators preserved.80native/22domain+notice/
+  24APNs-config checks and fullTypeScript pass; unit-stub APNs logs are not delivery.
+  Physical pixels87captures/75unique reviewed,83/71adopted,4private OS screens excluded;
+  maximum-type/AssistiveTouch scopes remain explicit. Public privacy scan passed.
+  Source/runtime/visual scopes are in [229 QA](docs/qa/2026-10-25-plan-physical-push.md)
+  and [release](docs/releases/2026-10-25-preview229-plan-physical-push.md).
+- Current production is dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth, same tested Production
+  candidate promoted without rebuild;api/www/root READY. Exact1395 baseline files
+  verified,1393preserved,2backend files+marker overlaid,1396uploaded SHA1match03ccd83f.
+  First shared-plan cancellation now notifies current selected pending/accepted
+  nonblocked registered peers; repeat cancel preserves phase/updatedAt. Direct
+  canceledAt identity is unit scope,not a public DTO assertion. No migration,
+  activity hook none; no AppStore/TestFlight or six-device acceptance claim.
+- Preview228 was the previous installed development build. The same real six-account
   plan completed23/23 cumulative functional phases across227 then228. Final
   read-only UI verification passed73.054s,1test0fail/skip. Native actual-pixel review
   completed89captures/73unique,84/69adopted across7scoped reports;5old chat viewports
@@ -49,7 +74,7 @@
   single uninterrupted same-build test pass is claimed;actual push banners unverified.
   Independent final read-only review found no material findings. See [QA](docs/qa/2026-10-25-plan-six-participants.md)
   and [release](docs/releases/2026-10-25-preview228-plan-six-participants.md).
-- The current production share page is dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f,
+- The previous production share page was dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f,
   source8c4110c1928b129103f6ac824e2afe3f0d3a0c4a pushed. One original component
   aligns capacity and wraps invitation labels at narrow large text. Exact1394
   live source hashes verified;1393 preserved,component+marker overlaid,1395uploaded

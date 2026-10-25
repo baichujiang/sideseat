@@ -1,0 +1,1169 @@
+{
+  "verifiedAt": "2026-10-25T23:10:05.813959+00:00",
+  "verificationScope": "Read-only source, local signed App artifact and Vercel alias verification. No phone operations, builds, deployment, environment changes or fixture operations.",
+  "productCommit": "03ccd83f0ecb16b1467fdab72379f50f65cd5218",
+  "native": {
+    "build": "229",
+    "bundleIdentifier": "app.sideseat.mobile.preview",
+    "apiBaseURL": "https://api.sideseat.de",
+    "appSourceInputs": 268,
+    "activeFrozenCommitAll268SHA256Match": true,
+    "sourceManifestSHA256": "3d095c6b4a0af0efb7b96c622ea0602fde518d0c2a0c2fd6436f5561e364de9a",
+    "sourceInputHashes": [
+      {
+        "path": "ios-native/Configuration/Base.xcconfig",
+        "sha256": "bad4ac85a37611c1d64e34125a6f68b604bf4feaefdff3c107fbbb6fb111132a"
+      },
+      {
+        "path": "ios-native/Configuration/Development.xcconfig",
+        "sha256": "dc53a3186ab2af4090c8c30e5c7023b0b608ec0ac1a4f2563621a729d9641f99"
+      },
+      {
+        "path": "ios-native/Configuration/Local.xcconfig.example",
+        "sha256": "8ee592baa2f52e40bf7cfdefdf9452553d3767081dfd19c2ec272ecc3eef1829"
+      },
+      {
+        "path": "ios-native/Configuration/Preview.xcconfig",
+        "sha256": "cbafdf48dde679a158cffa51fd455088126a9bcecb6178f2df6e44f5c817c724"
+      },
+      {
+        "path": "ios-native/Configuration/Production.xcconfig",
+        "sha256": "9c3034ca0a4da90062c2b4587cc28d2e16d25ab250cbf8ba0ec7cbcc04cea955"
+      },
+      {
+        "path": "ios-native/Configuration/SideSeat.storekit",
+        "sha256": "4780fe7cdf6481ed66445ca66c9be045576882455596c5288f31766aa00765c3"
+      },
+      {
+        "path": "ios-native/Configuration/Staging.xcconfig",
+        "sha256": "ae4ee294d480fe8dda5eac97cee26e774ea991de7438eb238ac164214a098144"
+      },
+      {
+        "path": "ios-native/SideSeat/Application/AppContainer.swift",
+        "sha256": "2fed0d78e36b7aedd377bd85cd2a377c58ca1749f52d96301da499987ec14af2"
+      },
+      {
+        "path": "ios-native/SideSeat/Application/AppRootView.swift",
+        "sha256": "2ab3e6decc6f0b2707f67245419a9d9f6f2f633fb083d1a41758dd03392433b1"
+      },
+      {
+        "path": "ios-native/SideSeat/Application/SideSeatApp.swift",
+        "sha256": "797299a0e22db969f8bc22de4a529ac411b68a3d147a22b60562dd80a5c6563b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Auth/AuthModels.swift",
+        "sha256": "75b8f9e3ef6665f7e7f92ac2eaa15ddcd5fa07f36f532228e432dfa00f70ec2e"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Auth/CredentialStore.swift",
+        "sha256": "058d63d8fd7212992b62d1354d3500e21ec95fa3e78db6faf43f41c3338992f2"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Auth/SessionStore.swift",
+        "sha256": "beadc6fca5146c12004ae05072dfb03ef4e87e8ab5db07ec51a139615e160c01"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Configuration/AppEnvironment.swift",
+        "sha256": "dab63596d9d030733756b86a9facfe7dc8b0745593e6628fc973b9099cad6009"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Configuration/ClientConfigurationStore.swift",
+        "sha256": "c552e420367fce697911dc9ea925f01684d1de5186444e024cc6979f5da58262"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSActionButtonStyle.swift",
+        "sha256": "743160b8308f23a538c18e9cb4c959bf3e6fad46c35bc197c3b6159a083ae4bd"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSCard.swift",
+        "sha256": "8400d79ece346cbc5704b9c585b98b552c73468f59982c138803d06fca6f0fd4"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSEmptyState.swift",
+        "sha256": "eb29d79a678f5a23373277848293a372fc43cc6e8f0a44f39f47f814591156dc"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSFlowCard.swift",
+        "sha256": "97f6087d619c938a1837e243cfe8c17e07b76459f2ae721fbe0538d941272301"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSListRow.swift",
+        "sha256": "4a4ed08bd37679e7cd37089b13c0ce126eb50cdeb9c90392051b7c7d934586f2"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSLoadingState.swift",
+        "sha256": "6abecef400e701012106946ba459e3274e2f5bfd11808962f836fcc10dcd5487"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSPlusBadge.swift",
+        "sha256": "b84898d67270aef6592048173843ea6727bcc978073b66a572bee1739886b144"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSPrimaryButton.swift",
+        "sha256": "a23b677a43247951128f98648e8a1f5f8d4ef9fde3596cf1f3a3ddf7dcf42e7b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSRootTabs.swift",
+        "sha256": "51db5514fadcf0fce8d4775b292d2b526c636073c50d459d0088f6e61ac29161"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSScreen.swift",
+        "sha256": "3ee2b46f8da29742f93398d45629790a799110a0bab7073ae3e75ca505b68a5f"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSSecondaryButton.swift",
+        "sha256": "9774965b3224e2391c603310779a2345d8838d04ac182e049d567c9190b89f8b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSSectionHeader.swift",
+        "sha256": "feee2c2b3781ddf3ebee0a6bc31fb72add67a77626eb14de9ce32cc82a13e919"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSSectionPager.swift",
+        "sha256": "0ddc2961fcfb25aca244f823ea61ada17f9bbfb40dffa9333d6143523cb2cd08"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSShareComponents.swift",
+        "sha256": "45b3456cd8471d8c95f4df5d8d947dd2e62087dd91f1e033a933269adec25517"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSTextField.swift",
+        "sha256": "5f92aeddb16b93a6a3f64a6906dbc2ba3574b51b3df32317ce13d50d791b22a5"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/Components/SSViewModifiers.swift",
+        "sha256": "17f80649fbf4ce48dca9ce54ccd8ffb3a3e916d79b675ef68838b8ca478e5385"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Design/SideSeatTheme.swift",
+        "sha256": "22e843ee8601c663120c3ffc052c8c00e14d24d628d2f173bb5b3e014ca0cb67"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Monitoring/CrashReporting.swift",
+        "sha256": "9e40cb3f654dcfd46b3b8e7f58913b84f4c02363aa77b47aa3b90d4cda6da3df"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Navigation/AppRoute.swift",
+        "sha256": "65454ae6890419caf67159075ae44a23890c3e62348a96559a61d69b5da9856b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Navigation/DeepLinkRouter.swift",
+        "sha256": "75ca932dba284f22c753b42b4e319d5fb6c0be4c70b8d696579fc71aa1abc27f"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Navigation/TabRouter.swift",
+        "sha256": "49662d257c2b8b9466fe8fdd5549eff5edd42fa3e1725f8f66315ee904b0597b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Networking/APIClient.swift",
+        "sha256": "9094cf3e3051b737e56f8c974c1fc29727bd03c23c680e5970d53e6e0a66c48b"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Networking/APIModels.swift",
+        "sha256": "65ef9c7763dec47ebb385a37594726de2c8c0b221c74b77c20ae76b8e2a59cbd"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Push/PushRegistration.swift",
+        "sha256": "8e8212eaa13e8779e63adf40959cee4b0216fc697d6e9cb3b0547d2359cc9918"
+      },
+      {
+        "path": "ios-native/SideSeat/Core/Push/SideSeatAppDelegate.swift",
+        "sha256": "e9d473ee26a73072e5b9dddd7fa3d334851fba7a4e7ed66fa7e6ffb2a8515aa0"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Auth/ForgotPasswordSheet.swift",
+        "sha256": "3d5e85af95f87c99f0a43460a2d963aad9606d225bcaeb84381bd266ceb75e2b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Auth/LoginView.swift",
+        "sha256": "98dd8bbbdd6018ba4a23735e393a93ce64fe9f5091191712dfbbde1f7faa473f"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Auth/SignupSheet.swift",
+        "sha256": "1f4140f5267b5a326de4bc672baf5fa50cece76c9909452e29116d61b178e744"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarAgendaListView.swift",
+        "sha256": "4b96109790a26802605a0123161db735b2e27f0e61f7408fad00272d3491a11b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarAllDayBand.swift",
+        "sha256": "91148d21dbdd7f4a952fc736b6ea445b33a1a64af925e9b79840031ca490b071"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarCategoryListView.swift",
+        "sha256": "dd507f7c8d39f34108f7099438cd0351f1feef1a59e5149ecaac9fc0655004e2"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarCategoryModels.swift",
+        "sha256": "569fe1ad5ebdc0d7a9c99c12cebd207475a2b52fd0dd50df088d5533b652788e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarCategoryStore.swift",
+        "sha256": "32c486a8692ebcebe8c457bc7b113770c89829d829a4f544130124b9f68dc642"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarChrome.swift",
+        "sha256": "279248dee959f5c3cff97e733c40e08a52ec266107e743dd6c875d4983a4fcc6"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarDayTimelineView.swift",
+        "sha256": "dea67c0a4753cbcd4c12b2d804a3e379497593e68d42d8a6c780a39df0ae62ef"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarEventEditorView.swift",
+        "sha256": "b57a01fc4d4d61c9b569eff15d75ca65cfe797b52af53b78066ffcd58f478fec"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarEventPresentation.swift",
+        "sha256": "aee25118363f20446f9ef0f5afbbd3ab873eee21db6f22f5393ed007dd01eb3d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarEventShareViews.swift",
+        "sha256": "08fd852b05ed4f63464c779baae582a51fbdb2f4f615a8f3b43eb5b63116ac2a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarEventTransfer.swift",
+        "sha256": "43a5e5659a58e92347d6e365afe2f554ce6cedb5900b3ce8c8c3a75c846b87c5"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarImageInput.swift",
+        "sha256": "aa89d63f8392618f5f0dc1c30e32a8f119eac996666d958ed8f94d9a1aa43242"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarNowTimeBadge.swift",
+        "sha256": "249c0858b80428c35dfcf2a90d21a433f431b45ed7d856d6f9a4a48db18174f3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarSearchView.swift",
+        "sha256": "c47eb7a48654ebb2236586aa279ddcaa627582caef1e58b81ffa23ab12b203ff"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarSmartAddModels.swift",
+        "sha256": "15529e3d7489b3559b06a8f87d762362546003e20d5c39ee28c84acf110de073"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarSmartAddStore.swift",
+        "sha256": "b34d8228971e8ace7e04311c9bd18a2035f6355cd10b5c9ceaed75f13b4fd9b0"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarSmartAddView.swift",
+        "sha256": "1219182072a20c69e8c32c56638fdf5cb1f511db7108cf3d11212e7c4a107394"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarSmartInputDefaults.swift",
+        "sha256": "b1d83dff2dcc8259110a4488602538ba8345e0dcdbba308b33d72c6d9bc9a613"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarTimelineScrollAnchor.swift",
+        "sha256": "8f73cb408a7212dae34b756dde1de31da3c8871768497514250c671cfb13cdf8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarTransferModels.swift",
+        "sha256": "e1d27bc5c9a59df972035a742c7c7d39f5c25c59fe83c85b3b428f621b85345f"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarTransferStore.swift",
+        "sha256": "b0c38df72f2aa0148639b4c3a0c150c178557edce90a75e16981cd2633fab46c"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Calendar/CalendarVoiceInput.swift",
+        "sha256": "4f2b2b3d356c4b226ef4517b93cdfd5dc0a4e80a03f7b0ca12ace75c10198b92"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatLocationCapture.swift",
+        "sha256": "d36a3e2288d515956855eff95fd852753181e4b483934e04dfcaf9d9df61fde9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatModels.swift",
+        "sha256": "6ae73ea29a41cc458655cd14fce63533e0a1f08ada2d9d949b938bdb4e201b32"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatReportSheet.swift",
+        "sha256": "3bfd5b7c4b639a4b9388c4265ad315c10682d79b2e555c3c62725060bb1e0019"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatSSEClient.swift",
+        "sha256": "d58afbebc712a4eacf874d12a44a47195c0c98cf36d42c6b03b0ae2b6773f3af"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatThreadSearchSheet.swift",
+        "sha256": "ae4fb54bff444c874652c6c680bea591ce1ff4acac5881870ef2d9f0fcb28661"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ChatsRootView.swift",
+        "sha256": "39e946a2d6ca2d8844dfcfe645489c837dcdd04b08a00abe4ae1785767bfb39d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/CommunityChatModels.swift",
+        "sha256": "4cfb6443241186afb4da28abbf3bc291cf15e0baf641f1094fbbb32947dda96a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/CommunityChatStore.swift",
+        "sha256": "2295bf28bf2831d47796a7f147b5d1f9c958b7ebccb225d9c2e504f8e1e0fe20"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/CommunityChatView.swift",
+        "sha256": "1c936aa6e6c40748ad0766dcfa99b9bed138404eccdd02773ae1a114232689f3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ContactsModels.swift",
+        "sha256": "24e15d98dec650764f5dc15a73490712599093dd7b09fc458a87f57e1690140a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ContactsStore.swift",
+        "sha256": "9069e1713877021064e54c68243250fc7aa42b0a58297e2bca39ac24f1cc9177"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ContactsView.swift",
+        "sha256": "58df185b9487ab1ecbcc2f7c900ba882479fe9ad7fdfb0c9865b188d813dfb8e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ConversationPlans.swift",
+        "sha256": "478790aea85102894095ca62972f871a207d2e744446ab455f81b74397bb0cc8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/DirectChatCache.swift",
+        "sha256": "bae07370eeb8e4524bd8a3ba70dead1939738cd3d36f5124c3aba0bcda9147c3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/DirectChatInfoView.swift",
+        "sha256": "184cf5d0ac2ad2bfb1606337ee360851040ba09911149ce9b86e90578a4ded5c"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/DirectChatStore.swift",
+        "sha256": "17e0c5ad1ea6231acdefff0578b9b9a8b9b218956aee5e6e7b41fd1916eeb5a8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/DirectChatView.swift",
+        "sha256": "0c5963eb92265e3f32c326890eb1ed72764ba58a941331bafdc3e4bbfd3f8e30"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/DirectConnectionActions.swift",
+        "sha256": "13c40362c03d91795e968114ac63660e122044333950fa848a861818d5a2991d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/FinalTimeSelection.swift",
+        "sha256": "ea73ed8fb927808ebe703ae66117fb74a6924d0799bda46026aae998d6b964c4"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/GroupChatManageModels.swift",
+        "sha256": "363268b3b66623ff2bf885974643b90d3439091f17066789f09125e4285c894b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/GroupCreateSheet.swift",
+        "sha256": "ae7c7b8d0c740a614f7f867999807f9d4f7d0b0c8e679c1135f7d815409d2202"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/GroupInfoView.swift",
+        "sha256": "db40688bb03a77ac078f2e6ad5c893e1e76e1755c0a18cf51d8e8c3fce9563b5"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/InboxChatSearch.swift",
+        "sha256": "dfa04a8730bd5dfbb23ecfa054c2991d571264b5ba3f4f5fddaad52c7bc8ff36"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/InboxNotificationsStore.swift",
+        "sha256": "661500ac291a329776c4c967847d244bc725cd5ae36769c0b425468324709098"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/InboxNotificationsView.swift",
+        "sha256": "b93b3f12e09eeee7c5cd617e75fa2c5a32ed573ad74560e3c2276a51e547f24e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/InboxStore.swift",
+        "sha256": "3285e60e66decf7de53ea2e8d35e04c9be288594c00a197309e25c9873b1f67d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanCancellationSheet.swift",
+        "sha256": "2aff757b9071b2a7ee05ec105c775d77288a7bbceafb26066d34b1154ac9b368"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanCardView.swift",
+        "sha256": "fef353cb11874476e81f5b8e5becbe65cb7d2df71b2bd185247c33fa84b256e9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanCreateSheet.swift",
+        "sha256": "91919d5d49882d368e1740a56a0680b54faa62a36dd10a522ab5390bca02b238"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanDetailEditors.swift",
+        "sha256": "b05582bd09ee0a85e91ac18949856ab0ccd25cb53dc25c8c95701d41cd017097"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift",
+        "sha256": "9b5325c454b4be43d3a96078ef703d9cb74a618d39befbd6f832e953e7679b24"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanHomeArtwork.swift",
+        "sha256": "f28355c170e2233fe8b6c9729a5e094761425d764fef7e7d534fc2cb5ded8d46"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanPresentation.swift",
+        "sha256": "9eb6daa3c754717d099353d0f95d6f0a5b79f6c3b6385d410dfc8f39aa582ea9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlansRootView.swift",
+        "sha256": "f1ace947f866fad603bee1fec0e78e932d229d11a3f3488bf643f8b474589910"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlansStore.swift",
+        "sha256": "b6388cd32054827d92d0870583d0afc5a15051dcbe5de3de7e19bd8d718a599e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ScheduleShareCardView.swift",
+        "sha256": "6de3ed3ccae03794aae5dc6ad2b73a06c228af5877650ed87de3d67baeec9a4b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ScheduleShareComposeSheet.swift",
+        "sha256": "0445cee5b04fcd557f1da9275f2bb722cc55f1c10fc1190b82ab0e5dfd56d01c"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ScheduleShareModels.swift",
+        "sha256": "e11a674f5031a0825bce3b44cadd4cd8d8ca02de7b8708670ec82e46d0a41b4b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ScheduleSharePhotoLibrary.swift",
+        "sha256": "1acf16c4e35eb094e984bc0f601d7efbc3ab5b91d7b8797d0a94847756588947"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/ScheduleShareRecipientView.swift",
+        "sha256": "e542fdf5e79aa110980d7b93da33bd05fd50364d07784353134027bf4752a515"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/SmartTimeScheduling.swift",
+        "sha256": "71aba243680b7ca0f52f1782af3e043d3a56e46048372107a443b08a5f94c9e3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/SmartTimeSuggestionSheet.swift",
+        "sha256": "c9929936f801ea525a6bc89aededb8e78c7da4cd94bbe4a882d53af19b4eb5d2"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/TimePoll.swift",
+        "sha256": "94dd8aceda4517b4bcfb63404649032c0920dd9239301eb2cbbf9c3ec5b5c593"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/TimePollSheet.swift",
+        "sha256": "cfb683a03b1ff782660ce8ae4c51db6c30c0790b61c7ad5962a6b93a5badef56"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/TimePollStore.swift",
+        "sha256": "07db8f185c611250288e843d75101e3374bba39c6b83c2be63409b4fbe00d6a4"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/UITestingChatFixtures.swift",
+        "sha256": "c315bc0892fb2a602b28efd6af3a89a77e63e0b68dee7385bbb2a4139f511dec"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift",
+        "sha256": "8d88df796a6a59318bb425f80f459d4ab1cc839e4aace430822fbbb61b0b5264"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseDetailView.swift",
+        "sha256": "2973937e5a9090b0b2eaa78ebf9c0276f2b6a0b53bf2baf170b212db2796d3d0"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseListView.swift",
+        "sha256": "c0eec95272d45b2dad9fb3363fb2cc366dcd47a9ca472097b850698d9bbcb755"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseManualAddView.swift",
+        "sha256": "090c17edb62db4d1dcdbbcc80af410c29f91cd70a9eaf4578530c19a1b32221a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseModels.swift",
+        "sha256": "a7984e23ed63b9bf2d559ac174972e24c1a5ecafc3f2021851222b8a63fc34db"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseScreenshotImport.swift",
+        "sha256": "79103f5a41aa8df21ebc3deb5744657d56659f5a70e49378def082cfd8f0846f"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseScreenshotImportView.swift",
+        "sha256": "2ef684d18c20c00b1ff86d0f180dddce785f66aae825821e35be0f1f6241483a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Courses/CourseStores.swift",
+        "sha256": "a5410f268e481718612c062a58568a8c70ec89ccd7041a01673a4ea5ca808826"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverCityPreference.swift",
+        "sha256": "2850d5233ab00765849ff12f74145bdfb6740cab58792690852ca2260779f439"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverCreateViews.swift",
+        "sha256": "8cd36a54e49fa3841f371a7f9ee844e816e7597b2017b8c52e32d3832e33840d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverDetailViews.swift",
+        "sha256": "b5a10ca37240330438078a139ca4e8fe1ef9ca1ba5aea874af0278bd87eb89cd"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverImagePreprocessor.swift",
+        "sha256": "0cd4b3b2b15b997de0ff183898e4b66e422341df184f359af66f33667996f4d9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverModels.swift",
+        "sha256": "1b599d082fbc8fcd814064fdba08cc9e5038c5753c1f13c6e78a9bcc53e4945d"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverPlanShare.swift",
+        "sha256": "92675cc32c94b0ea7e5831d8a29adb572b666d7a22b5c9378f9f3f31180eb814"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverRootView.swift",
+        "sha256": "2bd919f8547856a29dcc46f06264fd3f0e6642da364df57e2b8333040936db0b"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Discover/DiscoverStores.swift",
+        "sha256": "ddadec189421582b27d8b5065e1222a11f5e3a8005ef23e6103deafadf27c5b8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeDateStripView.swift",
+        "sha256": "1bf390308baa4e94e8f8f1ea8a97b98fc1332aa3e200b8e8e103fd52bfe58aae"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeRootView.swift",
+        "sha256": "7eb02e2e86faab36aa082f6f845b9b45cfdef6160befecc4214ae18eb0b9d0e9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeScheduleModels.swift",
+        "sha256": "8de0e311684e0e91184a07226d92c3c3d7e3c0d914a252f7c0a32a148e0f6bf9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeScheduleStore.swift",
+        "sha256": "8eecf02558691ed968560c8a4c5d2244f2034d759363d07958e0906017c3921a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeWeekTimetableView.swift",
+        "sha256": "b8d289b66e2c84801b87e63c7e7481cc83a501ba2310afb119c43e0f4641ad5e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Home/HomeWeekWindow.swift",
+        "sha256": "df84c1a2fd22c255324282b590a23cb14d52e4ba2314530156c3d275f47cfacb"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Onboarding/ProductTutorialController.swift",
+        "sha256": "21614cbe24dc6c94c8f01bbc711d8c47bc25a9155d48ff72b20ccf0ccb839c8c"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Onboarding/ProductTutorialOverlay.swift",
+        "sha256": "7fea7af760efaa6e1a91f8db0c3bc0659fa9be1f4d9bae57ee062c3886965e97"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/MeRootView.swift",
+        "sha256": "cb351ae24a2741c8e80b0ecd4b989b08c78607cbfbe1540c81da933ab45cecc5"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/MyPostsView.swift",
+        "sha256": "6406d7cacb73c7e2b52389fe1e3b96b960a298755d5e5a6a0e419a6c7e075fcc"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/OpenConversationModels.swift",
+        "sha256": "5dd49273a254bdb0189c96fd0b9c36013200ddc7ad096a21a36b60e72c3248f3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/OpenConversationStore.swift",
+        "sha256": "e6f5f9db55ab7bab8c32c2a20637edca111404cdd89a731832af5fa8029d9f58"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileAccountSheets.swift",
+        "sha256": "37f1ac4f1751186228331bc6406fe5a14b3af0b6e18376e772d1f8e36bd7d073"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileAppearance.swift",
+        "sha256": "9ca0830230a969fdb9b88038c649856a1252d6404105931671345b5852b15a17"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileAvatarPreprocessor.swift",
+        "sha256": "87c4837f2998974f187f3b5d01a0f9166ef15f40435762a52dce5c68eef448e8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileEditSheet.swift",
+        "sha256": "dc6290648837e5fbad39a7fefca6ff0faaf76f59f904be7378dd6556df7ab022"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileModels.swift",
+        "sha256": "627e071fc2599ff20e19798a28f12487795de7f48b0bb45f056a3dafc300b6ed"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/ProfileStores.swift",
+        "sha256": "8fc1c8d3e99c923b1d9219fa28cbdf52f904fe9e69bed47c4379879e39ef0ba2"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/PublicProfileView.swift",
+        "sha256": "7a451416dab6a698d9a11b58a3c6e483da93a2bb86b48e4361d57c69c0aa8799"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/SideSeatAppShare.swift",
+        "sha256": "e1bdd593ce93a10ef353bf033efe7828875b16db378b9487eb872bde0d166fd9"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Profile/StudentVerificationSheet.swift",
+        "sha256": "cddf71cc84d0238ad430e7b3f57544e12b40765dc317041900ce67c4408a328e"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/BlockedUsersStore.swift",
+        "sha256": "bb1ecb7c0e29ce98cb1a2abfd00a0a38e3c91ef1231bccae27afba275f2adfce"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/BlockedUsersView.swift",
+        "sha256": "8e1c36079d9d533160bf0c1ed37fd3b686f9224e236260f348fad7c3d21c6df3"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/DeleteAccountSheet.swift",
+        "sha256": "5807629770a92106a0eb99bf2d4c18988266f1b482043204e252695c985fa9d7"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/FeedbackRootView.swift",
+        "sha256": "498b14149e0181d5218e8f81fd37440be3d2cedd99a28dc80b03306160b72137"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/MembershipStore.swift",
+        "sha256": "dbf9e5c79c7933f1db9253f573627b905117b35cf83a3315e3a3707bfedeb6bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/MembershipView.swift",
+        "sha256": "e71583315ba32fd2385199e80fef3004295c674ab48aa5d8ebe82bc3b547e550"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/SettingsRootView.swift",
+        "sha256": "d65e7caedc77ff6be93265bb76367485720d622a21bc513575d44bc6608f1f44"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/StoreKitManager.swift",
+        "sha256": "d994d7933a579081867f53de4f74e052ab370d02e18ddf31a6bc774749fb6f57"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/StoreKitModels.swift",
+        "sha256": "75a5546dc1ddabf5a2bdeebdde9037917cd63b156498a43c833ea4f9bfa1ce04"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Settings/SupportStoreView.swift",
+        "sha256": "c2b34932160f30f803a939a4a5de4479e862015b9e177a27dfdcef7d30fb690a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Shell/AppShellView.swift",
+        "sha256": "82faea66a4b796065eed0c88ad5c5b20a1f0e47b1c44894de6e324ebc826f918"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Shell/CreateChooserSheet.swift",
+        "sha256": "6f84b087c8e851fcd7a5e34df28c1c91ef6507130c16f34bf1beac9dc4d86302"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Shell/DirectChatPlaceholderView.swift",
+        "sha256": "e7df7f90a5abfa0f27dfaf57b6ab0996346669d97623b5b93d4c65b1f0004fe4"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/ExploreIntentListView.swift",
+        "sha256": "f45b64d6da26310384157f1420586edd5f31fbe753ea02d49b5fc1025bc8fa2a"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/ExploreIntentModels.swift",
+        "sha256": "8fd785c90f1f18ae95b566b5aa75231207a25a3b09681a86867c8801dd1ab033"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/ExploreIntentStore.swift",
+        "sha256": "03a41f471129012c4bafa8e0e18096011b75fe25d3104e02b941f0e8ab42076f"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/MutualOpportunityModels.swift",
+        "sha256": "635a8ea598cd44b371ddc2bf3ac556829ae3525d5544beaf36defdfb998f0ba2"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/MutualOpportunityStore.swift",
+        "sha256": "a33bf1ee319a71a88aa683107bedc0c2e5b89c400724c2c8bd658ecf68a85067"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/TogetherRootView.swift",
+        "sha256": "43023b0e2b8801ad8ceff7959908fdb49e4ae498765d6e1bedb643f34b0e3da8"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/WeeklyIntentModels.swift",
+        "sha256": "0c37d72a97a21f771d98a9a15a3512bed55b1e13235012c5e74f2bb501dff1ff"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Together/WeeklyIntentStore.swift",
+        "sha256": "4ce239cfb6e71696eede0e851bd182cdc4bf91a37718632f511f850924840f1c"
+      },
+      {
+        "path": "ios-native/SideSeat/Generated/OpenAPI/Client.swift",
+        "sha256": "6884d43bb8cc6868cfc7c7fcefb38e3ec614c5ea46418116df4acc7336d34364"
+      },
+      {
+        "path": "ios-native/SideSeat/Generated/OpenAPI/Types.swift",
+        "sha256": "8d8d0818d067f46c2a4eae0282f24696332be3b6631b37a81abd73ef2752061b"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/AccentColor.colorset/Contents.json",
+        "sha256": "8a595337e33907773b53271e1a6a6062518f576dd3ea796eaf270ea6f7e5a379"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-coffee.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-coffee.imageset/artwork.svg",
+        "sha256": "8d53bf6e8d203604965b42e5ca05d3dff2450dd28f7170882517d0706d8243df"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-events.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-events.imageset/artwork.svg",
+        "sha256": "5702451721f248b49c32ffbfee1123e4766509772f22be58f9d76cb5ab8b4a32"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-explore.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-explore.imageset/artwork.svg",
+        "sha256": "f759256d618e397c361680ae35a9f394aab434da7d42b77bd12c82e8aae24e2f"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-food.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-food.imageset/artwork.svg",
+        "sha256": "5380af1a94d4a148c650bee940284f316a7e1a98594b4d944e52545ceb6a8de1"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-sports.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-sports.imageset/artwork.svg",
+        "sha256": "06f59674c2a5b7be1028d2af0e2ce1913cf21e234367a03cd7a9021d8b15b4ba"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-study.imageset/Contents.json",
+        "sha256": "a071b3def76b9b9b021f508a4543413fe71191fd5bfa95ef8f2f1aa87615a4bb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/ActivityArtwork-study.imageset/artwork.svg",
+        "sha256": "21113cdd89c1c1a7bdb32e874d311f7acf8077e5c60a4d5221078432b49b6d89"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png",
+        "sha256": "1a792bda882acbfe025aab45685b8552958e9cfa9e9c5d068768aafbd30dbd4c"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json",
+        "sha256": "3725fefca1cc2f15dcff52b03b7db47884c8141e5be1d4e559367b76117f8c48"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/BrandMark.imageset/BrandMark.png",
+        "sha256": "4fbb750cb2a1faf4e944b5b265ff3fd69abe0b8ba29aca17ab66408736f55349"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/BrandMark.imageset/Contents.json",
+        "sha256": "44a0121b8796d8bb11b50aace2faa899b7be1d45036d078968c904e0f0e4506d"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/Contents.json",
+        "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/LaunchBackground.colorset/Contents.json",
+        "sha256": "468d808e0b938c88623d4c358ba22748ef0aef6d3e2cddeee2888efd2986ee4e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverBadminton.imageset/Contents.json",
+        "sha256": "ce806785b4df445c9237b2ba034338e797a39b1565672617a65d38fdc53043fb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverBadminton.imageset/artwork.jpg",
+        "sha256": "c07ca492d3516ee8a5fd0925ac502e7581f17a65c22416a1652f969e0f837eb6"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverCoffee.imageset/Contents.json",
+        "sha256": "ce806785b4df445c9237b2ba034338e797a39b1565672617a65d38fdc53043fb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverCoffee.imageset/artwork.jpg",
+        "sha256": "0ccf80704b88df6f1cbf09fed29ba62d0465520ceb16e91a65c994a546ff6695"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverHotpot.imageset/Contents.json",
+        "sha256": "ce806785b4df445c9237b2ba034338e797a39b1565672617a65d38fdc53043fb"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/PlanCoverHotpot.imageset/artwork.jpg",
+        "sha256": "2fe18a878a14b658b52f1862e8fd8510aba04fa313bf00ed3980f9f48e218f0e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SchoolLogoLMU.imageset/Contents.json",
+        "sha256": "96a647f4c5c63b4d94f9a63966fe4c7625188fb9a5b81056d3af3e17feee6f4c"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SchoolLogoLMU.imageset/lmu.svg",
+        "sha256": "f742b4156476846b2eb4fbd215aa51344b365bc22521f43799f34eee54d35281"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SchoolLogoTUM.imageset/Contents.json",
+        "sha256": "5f2752d1ca9af4ba83d3be600a4b10c1450356e2e39c00a14bf26774725472c9"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SchoolLogoTUM.imageset/tum.svg",
+        "sha256": "9939cd861bbeaa86936db73cd62d39456639fcf5d9972dc0b60b73861dfdc632"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p01.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p01.imageset/avatar.svg",
+        "sha256": "0f1a38721c2cf1675393a2053007f8403943e7c4e99d7306f2ebdeaa1d09cf70"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p02.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p02.imageset/avatar.svg",
+        "sha256": "0ac58a4708b6842c06ff314d3e96c28cc4087d3f19536fc6b31edb96d36c904c"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p03.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p03.imageset/avatar.svg",
+        "sha256": "3743cb1090ff5c3f7f5eed3a47031ce8eb5b75d7db8c37098e1ea85a97646727"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p04.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p04.imageset/avatar.svg",
+        "sha256": "a0b35a312ed92215dba9509e58615b07ba401de1310e76589c8f1e917e5203be"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p05.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p05.imageset/avatar.svg",
+        "sha256": "6c417f63d97e09dbbbad618a8fc03782ad037894f5484253a8fa1f1a2392d269"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p06.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p06.imageset/avatar.svg",
+        "sha256": "effbcb364d03db5f9684b26132bf5a0d08eea465acc206102a1aebffcf2e733c"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p07.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p07.imageset/avatar.svg",
+        "sha256": "5f1624e99dbdcb7bbf19337420ec1af3454e30ad61d5fa511b664609c77bea57"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p08.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p08.imageset/avatar.svg",
+        "sha256": "c2a2754ae184fd4b806cde856181c16c9c20afb307def5e8cc9f555bb69bf759"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p09.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p09.imageset/avatar.svg",
+        "sha256": "9946c0fbfb73e2c30f2b17b56bc16002abd4f1cc9aa8cb1219f179a65777ad5e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p10.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p10.imageset/avatar.svg",
+        "sha256": "358fe9e9e4ee89d031cb713c967baf2f7ad54b1316e856843ee7a45d78e17614"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p11.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p11.imageset/avatar.svg",
+        "sha256": "9f21eeb8c82c5a3e812c8698066ceadb2c021da6b531e902f6a0c6799997e7e1"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p12.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p12.imageset/avatar.svg",
+        "sha256": "0a6f72411b5e2e948177a5957a54c69e0741572cd87bd5adc98e0d24cce6768a"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p13.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p13.imageset/avatar.svg",
+        "sha256": "19bb05309aa0b2aa4362671da0fc122bb070c0bf110c5f1333be31eacbee07b7"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p14.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p14.imageset/avatar.svg",
+        "sha256": "0ea9aa1b3f9e937367e7a123e0e41092c9c5c76e3e37a8826a31448c884efdff"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p15.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p15.imageset/avatar.svg",
+        "sha256": "fd281d381396d2c179062457612f0a883b9067e89c1fb72045a4f930e2a42189"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p16.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p16.imageset/avatar.svg",
+        "sha256": "50c0dd7f85b94077ff512ba4c0f4048d9e4dc893827ce0c0e49f643d117710d9"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p17.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p17.imageset/avatar.svg",
+        "sha256": "f1c5836fc6c13ac70acb6584f0ead55bca5d94983f498aefa504bf447d0d3256"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p18.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p18.imageset/avatar.svg",
+        "sha256": "b8bf31316c58913bfa4c8fee985e62abd1ef0ddf569d6d22a69372b4f84cf95b"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p19.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p19.imageset/avatar.svg",
+        "sha256": "4bf3b62a6c006417e64f59d88a380d3bae1057eb64f7fa13cb229ca9f9055e2e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p20.imageset/Contents.json",
+        "sha256": "ecb1a46ac81357d65f5d324c99dc4ba6413103ce123246b6887d31d05644ac3e"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Assets.xcassets/SystemAvatar-p20.imageset/avatar.svg",
+        "sha256": "bc6f8163481791bcf08f23f7dbe0cbb168e58e8e36474d3a75fd04cc694c34ae"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Info.plist",
+        "sha256": "af9c248e76f4a2b56c4a220ae5c93f091987a057ea61264521039fd1ca770999"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/Contents.json",
+        "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture1.imageset/Contents.json",
+        "sha256": "88791bfe5d31936be2456bf5902c5a9e90e84372bb5880a3e95108102d4fa24f"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture1.imageset/study-table.jpg",
+        "sha256": "88f15bd4112e5648963fbafbe57994af5a5ca99e0a2548cf3cb13675c828195a"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture2.imageset/Contents.json",
+        "sha256": "7e703a67a8434423e031d9edb70546c82e4e9a329321c472cc7e43f4907e6b57"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture2.imageset/study-seats.jpg",
+        "sha256": "c117de85784078ce962b2776ae439802700a544bdc61f4f5c0c602d718dacbe3"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture3.imageset/Contents.json",
+        "sha256": "6c2d32a47a9f5193fce9339d147590ebb456b58b5afad6338d7162e6b896ee60"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/Preview Content/Preview Assets.xcassets/DiscoverStudyFixture3.imageset/study-room.jpg",
+        "sha256": "755efe1fc2632e689e2a604955de453d4737e2be94d2f984b39df88c3f3122f8"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/PrivacyInfo.xcprivacy",
+        "sha256": "9cd23f17d6d8d13cc29a3c907b44ebe4691b113a635f85a6a29b62e8c5aa5211"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/de.lproj/InfoPlist.strings",
+        "sha256": "b1bc94a50bb0d5e70f77ebc3b9099214bb535fe08d3e5853c61cec758cbfb3a3"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/de.lproj/Localizable.strings",
+        "sha256": "a1bd0979345ba48882bff25109a60409fc9b602dba90c7d15f0cd0a431fc49ad"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/en.lproj/InfoPlist.strings",
+        "sha256": "ff7ba6547b882d718012a078911a45191bab2cf037247e980df48bca3201fe8d"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
+        "sha256": "c84ba2d6a1671b9cd16202f00c0a8aa0fcb14843b63f94acecd2dfbcc2d2588c"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/zh-Hans.lproj/InfoPlist.strings",
+        "sha256": "4a62aaafad840bf92c382115a38f0043617c71d00aab3b7a219c729883acf16b"
+      },
+      {
+        "path": "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings",
+        "sha256": "aaa75191c5f48383ca1b8a1a907deff139f147e941b954649a12a52d3ad0323f"
+      },
+      {
+        "path": "ios-native/SideSeat/SideSeat.entitlements",
+        "sha256": "72c45c189ffaddc0b594b390f4536f74919fc9165da9859bfc9b83eeb3a5e378"
+      },
+      {
+        "path": "ios-native/project.yml",
+        "sha256": "2a3278a5393431a4a6e06bba95a2c8ef8a9c5e5277d4229e29ceb59cfdd128ec"
+      },
+      {
+        "path": "ios-native/scripts/bootstrap-swift-openapi-generator.sh",
+        "sha256": "b4197d550d112b7b3d69ef2b047b832ef78abefbe700a1cfdaa1313a2f53fb95"
+      },
+      {
+        "path": "ios-native/scripts/bootstrap-xcodegen.sh",
+        "sha256": "e89a69bbac4fee86f6df8f6638929466a92be38d442b6a7fa21ad3582ac9e5f9"
+      },
+      {
+        "path": "ios-native/scripts/capture-visual-qa.sh",
+        "sha256": "3ffa1c1a752ff99f202450f1a113d09cd55dd6f96cddb9bb8ad59dee6beb5424"
+      },
+      {
+        "path": "ios-native/scripts/generate-openapi-client.sh",
+        "sha256": "85089e37132898c259a6e4fe6e54ac106a2eb6dcde97e057e69eca953543ab70"
+      },
+      {
+        "path": "ios-native/scripts/generate-project.sh",
+        "sha256": "cfce9c7a95b75126b917fe25ac06ca55629ce2cec257ec4d13cbf828e7faffe0"
+      },
+      {
+        "path": "ios-native/scripts/resolve-physical-iphone-udid.sh",
+        "sha256": "f4188c29697fd888d91399812dd9c422544bea1190a45149a9cd93524f1e4381"
+      },
+      {
+        "path": "ios-native/scripts/run-performance-gates.sh",
+        "sha256": "7bcde43a2b73abad258ffa8ddd43b4aacc572f34a569dde7cf17c637eaea4ac6"
+      },
+      {
+        "path": "ios-native/scripts/upload-sentry-dsyms.sh",
+        "sha256": "ae0397f4bc794b3cd6fcb68729f88c0499e863ac14fd84d1b96e4a8b85fe22fd"
+      },
+      {
+        "path": "ios-native/scripts/validate-production-build.sh",
+        "sha256": "aa8cfa97ab8af52aa3d0d31fea34c545c7199079b9c6f3a17d3137481657a77c"
+      },
+      {
+        "path": "ios-native/scripts/verify-device-build.sh",
+        "sha256": "b4ee7c9806b0f10bae863ee487da7a3c132f54edc42075b059a11194270ab130"
+      },
+      {
+        "path": "lib/calendar/CalendarSmartInputPolicy.json",
+        "sha256": "c5ea26274843bac8f97a6231adc4388b9640dad53c152ea5caa869138be1edc9"
+      }
+    ],
+    "localConfigurationFrozenMatchesActive": true,
+    "localConfigurationSHA256": "b23d35a9d7205c1c6222d8108853a3e6c143815295a89355083c89e4d0093220",
+    "buildLogConfirmsFrozenProjectAndSuccess": true,
+    "appCompileListExcludesUITestSources": true,
+    "strictDeepCodeSignatureValid": true,
+    "cdhash": "5fd7a0651faff0e671c70f240909178f80e3bd1e",
+    "teamIdentifier": "V4238R5R53",
+    "architectures": [
+      "arm64"
+    ],
+    "safeEntitlements": {
+      "applicationIdentifier": "V4238R5R53.app.sideseat.mobile.preview",
+      "apsEnvironment": "development",
+      "getTaskAllow": true,
+      "associatedDomains": [
+        "applinks:www.sideseat.de"
+      ]
+    },
+    "binarySHA256": {
+      "SideSeat Preview": "183d342ad531184430fe22c9f47e3543842d7880870026bfc57d56c57172ba2f",
+      "SideSeat Preview.debug.dylib": "479d8d47ea36ab95c79922ad6302585dfd9ae1b1f1fc1020ce32edbbcb698526"
+    },
+    "artifactMatchesPreinstallationBinaryProof": true,
+    "appArtifactFileCount": 22,
+    "canonicalAppArtifactFileManifestSHA256": "2409aa3de5a5e9d645b772e1da0acb19356fee9fce1e7724198138c227d077b5",
+    "existingInstallLogHasPreviewSuccess": true,
+    "installationScope": "Existing root install log and preinstallation binary evidence reused. This verifier did not query or operate the phone."
+  },
+  "production": {
+    "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+    "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+    "samePreviouslyVerifiedCandidate": true,
+    "aliases": [
+      {
+        "domain": "api.sideseat.de",
+        "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+        "readyState": "READY",
+        "target": "production"
+      },
+      {
+        "domain": "www.sideseat.de",
+        "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+        "readyState": "READY",
+        "target": "production"
+      },
+      {
+        "domain": "sideseat.de",
+        "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+        "readyState": "READY",
+        "target": "production"
+      }
+    ],
+    "all1396UploadedSourceSHA1PreviouslyVerified": true,
+    "backendFilesMatchProductCommit": [
+      {
+        "path": "lib/time-polls/notifications.ts",
+        "sha256": "f8f63a8015ba02d603dc18d353eedc62714a2ecb68a891f05b12b56ab45106c0"
+      },
+      {
+        "path": "lib/api/v1/time-poll-service.ts",
+        "sha256": "a8da8af92cef0d76cc4404e168a5507899505ddd46521e89a7848c5fc3a93fc2"
+      }
+    ],
+    "sourceRecoveryBaselineFiles": 1395,
+    "preservedBaselineFiles": 1393,
+    "overlaidBusinessFiles": 2,
+    "sourceMarkersAdded": 1
+  },
+  "uncommittedQAImplementation": [
+    {
+      "path": "ios-native/SideSeatUITests/PlanPhysicalPushPhoneUITests.swift",
+      "sha256AtInspection": "891fbb68c11053c20871c3b6b7be08b4d1f46d5ce74a7e66ccf8e26236f6fcb5",
+      "includedInApp268Manifest": false,
+      "purpose": "Uncommitted test harness written after product source freeze; not part of the installed App product."
+    },
+    {
+      "path": "scripts/qa/plan-physical-push.mjs",
+      "sha256AtInspection": "46a89633ba32736c548a24dd551c55eb8ce769a7ba6f67ce46048db676e52041",
+      "includedInApp268Manifest": false,
+      "purpose": "Uncommitted test harness written after product source freeze; not part of the installed App product."
+    }
+  ],
+  "pendingVerificationScope": "This source/release proof does not independently certify push delivery, UI assertions, final ordinary user restoration or cleanup; those require their own run evidence."
+}

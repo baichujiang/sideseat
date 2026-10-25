@@ -1,0 +1,76 @@
+{
+  "verifiedAt": "2026-10-25T22:46:07.094553+00:00",
+  "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "sourceBaseCommit": "689b43b15bc354e5e4741acffa407cca02264e4d",
+  "productCommit": "03ccd83f0ecb16b1467fdab72379f50f65cd5218",
+  "aliases": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "sameTestedProductionCandidate": true,
+  "noRebuildIdentityProof": {
+    "sameDeploymentId": true,
+    "sameDeploymentURL": true,
+    "unchangedFields": [
+      "id",
+      "url",
+      "createdAt",
+      "buildingAt",
+      "ready",
+      "readyState",
+      "target"
+    ],
+    "beforeMetadataFile": "release-candidate-deployment.json",
+    "afterMetadataFile": "release-live-final-deployment.json"
+  },
+  "sourceVerification": {
+    "report": "candidate-source-verification.json",
+    "uploadedFiles": 1396,
+    "allSourceSHA1Matched": true,
+    "preserved": 1393,
+    "overlaid": [
+      {
+        "path": "lib/time-polls/notifications.ts",
+        "sha1": "8ae23c1303461e432bfdb4ca59ef52824078e992",
+        "sha256": "f8f63a8015ba02d603dc18d353eedc62714a2ecb68a891f05b12b56ab45106c0",
+        "matchesPushedProductCommit": true
+      },
+      {
+        "path": "lib/api/v1/time-poll-service.ts",
+        "sha1": "2a72fc17e620c91a0db8b2f78325fd0fe7d37880",
+        "sha256": "a8da8af92cef0d76cc4404e168a5507899505ddd46521e89a7848c5fc3a93fc2",
+        "matchesPushedProductCommit": true
+      }
+    ],
+    "added": [
+      ".sideseat-plan-push229-source.json"
+    ]
+  },
+  "verificationRemoteReadOnly": true,
+  "promotionPerformedByVerifier": false,
+  "environmentModifiedByVerifier": false
+}

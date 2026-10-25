@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "device": "Physical iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "nativeAppBuild": 229,
+  "sameAppBinaryAcrossAllFourRuns": true,
+  "mainContinuousSingleCasePhases": 23,
+  "separateWarmPushPhases": 12,
+  "separateColdPushPhases": 5,
+  "actualRuns": [
+    {
+      "case": "six-user main",
+      "privateLog": "six-user-physical-registered.log",
+      "actualTests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 1007.053,
+      "scope": "All main mutations through actual App UI"
+    },
+    {
+      "case": "foreground/background real push",
+      "privateLog": "push-warm.log",
+      "actualTests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 90.677,
+      "scope": "Owner Mac API on independent plan; peer App and real OS notifications"
+    },
+    {
+      "case": "real notification cold launch",
+      "privateLog": "push-cold.log",
+      "actualTests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 42.981,
+      "scope": "Only actual OS notification tap launches terminated App"
+    },
+    {
+      "case": "QA logout and normal-domain return",
+      "privateLog": "push-cleanup.log",
+      "actualTests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "seconds": 40.801,
+      "scope": "Original normal user identity not read"
+    }
+  ],
+  "noSimulatorOrSyntheticPushUsedToClaimPhysicalPass": true,
+  "testHarnessRecompiledBetweenMainAndPushAppUnchanged": true,
+  "independentMinimalReviews": {
+    "product": "No material findings; six notification tests rerun by reviewer.",
+    "pushHarness": "Two review findings fixed before physical execution: observer acceptance race and hidden TabBar in cold detail. Final review: No material findings."
+  },
+  "preparationAttemptsNotCountedAsPass": [
+    "Initial automation-enable timeout before UI tests",
+    "Moved xctestrun missing product paths",
+    "Zero tests before project source registration"
+  ],
+  "at": "2026-10-25T23:15:48.426578+00:00"
+}

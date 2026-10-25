@@ -1,0 +1,121 @@
+{
+  "passed": true,
+  "scope": "cold",
+  "executionSurface": "Explicitly selected physical iPhone 14 Plus; real APNs only",
+  "nativeBuild": "229",
+  "mainPlanWasNotMutated": true,
+  "notificationsAreNotInferredFromHTTPResponses": true,
+  "checks": [
+    {
+      "phase": "cold-invitation-ready",
+      "case": "cold",
+      "action": "owner chose final time and invited only the prepared peer; real time_poll_invitation dispatch scheduled",
+      "actualPhase": "INVITING",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:11:10.782Z"
+    },
+    {
+      "phase": "cold-invitation-opened",
+      "case": "cold",
+      "action": "read-only verification",
+      "actualPhase": "INVITING",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:11:20.344Z"
+    },
+    {
+      "phase": "cold-cancellation-ready",
+      "case": "cold",
+      "action": "owner cancelled current-version plan; real plan_canceled dispatch scheduled",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:11:21.515Z"
+    },
+    {
+      "phase": "cold-cancellation-opened",
+      "case": "cold",
+      "action": "duplicate cancel requests preserve cancellation and zero Calendar rows; notification dedup requires server dispatch-log review",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:11:31.200Z"
+    },
+    {
+      "phase": "cold-case-complete",
+      "case": "cold",
+      "action": "read-only verification",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:11:31.846Z"
+    }
+  ],
+  "duplicateNotificationScope": "Business state/unique Calendars checked; dispatch exactly-once needs server logs. A short period without another banner is insufficient.",
+  "segments": [
+    {
+      "log": "push-cold.log",
+      "phases": [
+        "cold-invitation-ready",
+        "cold-invitation-opened",
+        "cold-cancellation-ready",
+        "cold-cancellation-opened",
+        "cold-case-complete"
+      ],
+      "completed": true
+    }
+  ],
+  "failure": null,
+  "at": "2026-10-25T23:11:35.373Z"
+}

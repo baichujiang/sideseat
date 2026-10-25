@@ -1,0 +1,52 @@
+{
+  "verifiedAt": "2026-10-25T22:39:57.604181+00:00",
+  "candidate": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "candidateURL": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "teamScope": "baichus-projects",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "baseline": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+  "sourceBaseCommit": "689b43b15bc354e5e4741acffa407cca02264e4d",
+  "baselineFiles": 1395,
+  "expectedUploadedFiles": 1396,
+  "actualUploadedFiles": 1396,
+  "allUploadedSourceSHA1Matched": true,
+  "localContextStillMatchesFrozenManifest": true,
+  "missing": [],
+  "unexpected": [],
+  "mismatches": [],
+  "overlaid": [
+    "lib/time-polls/notifications.ts",
+    "lib/api/v1/time-poll-service.ts"
+  ],
+  "added": [
+    ".sideseat-plan-push229-source.json"
+  ],
+  "preserved": 1393,
+  "expectedManifestSHA256": "7aac78c46dcc1ccd6bb05cf0b90783cdc91abb427192df05ce99870bbb1d89d6",
+  "aliasesBeforePromotion": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "skipDomainVerified": true,
+  "promotionPerformed": false,
+  "remoteReadOnlyInThisVerification": true
+}

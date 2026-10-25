@@ -1,0 +1,9 @@
+{
+  "buildSucceeded": true,
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "nativeBuild": 229,
+  "pushSourceSha256": "891fbb68c11053c20871c3b6b7be08b4d1f46d5ce74a7e66ccf8e26236f6fcb5",
+  "companionSha256": "46a89633ba32736c548a24dd551c55eb8ce769a7ba6f67ce46048db676e52041",
+  "embeddedFixturePrivate": true,
+  "allTestRootPathsAbsolute": true
+}

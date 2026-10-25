@@ -1,0 +1,49 @@
+{
+  "preparedAt": "2026-10-25T22:34:31.283638+00:00",
+  "baseline": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+  "baselineURL": "https://sideseat-eibsv7mvr-baichus-projects.vercel.app",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "projectName": "sideseat",
+  "cliVersion": "54.4.1",
+  "aliases": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "baselineFiles": 1395,
+  "allBaselineFileSHA1Matched": true,
+  "verifiedSourceRecovery": {
+    "activeRepository": 1347,
+    "exactHashNonArchiveExistingReleaseCache": 46,
+    "remoteSourceContents": 2
+  },
+  "context": "/tmp/sideseat-plan-push229-release",
+  "overlayPending": [
+    "lib/time-polls/notifications.ts",
+    "lib/api/v1/time-poll-service.ts"
+  ],
+  "productionEnvPulled": false,
+  "deploymentCreated": false,
+  "promotionPerformed": false,
+  "baselineManifest": "release-baseline-sha256.json",
+  "notes": [
+    "Source tree excludes .vercel runtime link; no environment files, dependency installs, builds or remote mutations were performed.",
+    "Only baseline SHA1 matching local bytes were reused; otherwise original remote deployment source was decoded and verified."
+  ]
+}

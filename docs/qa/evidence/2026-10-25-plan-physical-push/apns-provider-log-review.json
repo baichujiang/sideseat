@@ -1,0 +1,288 @@
+{
+  "passed": true,
+  "reviewedAtUTC": "2026-10-25T23:15:19.271026+00:00",
+  "scope": "Read-only Vercel provider application-log correlation for two owned real-APNs physical-iPhone cases. No phone, fixture mutation, business API call, deployment or build in this review.",
+  "deployment": {
+    "id": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+    "url": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+    "project": "sideseat",
+    "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+    "environment": "production"
+  },
+  "testWindowUTC": {
+    "since": "2026-10-25T23:09:00Z",
+    "until": "2026-10-25T23:11:40Z"
+  },
+  "queryMethod": {
+    "commands": "vercel logs <exact deployment> --since <bounded UTC> --until <bounded UTC> --query <APNs or exact private owned phase path> --limit 100 --json",
+    "redaction": "Private token paths, plan titles, account IDs, device tokens and raw request IDs omitted. Request identities are SHA-256 hashes. Raw logs retained mode0600 in private directory.",
+    "pagination": "An initial broad per-token query returned only50 records despite --limit500. It was not used as complete evidence; the final six exact-phase queries each returned1 or3 records and bounded APNs query returned6.",
+    "topLevelMessageDuplicatesNestedLog": true,
+    "countingRule": "Count each actual nested application-log line once, not the derived top-level display message again. Timestamp is the parent request timestamp, not a separate Apple response timestamp."
+  },
+  "summary": {
+    "successfulProviderAcceptancesOnOwnedPushPlans": 6,
+    "warm": 4,
+    "cold": 2,
+    "uniqueMutationRequestLogs": 12,
+    "repeatMutationRequests": 6,
+    "repeatRequestsWithAdditionalAPNsAcceptance": 0,
+    "scopedAPNsErrorLogLines": 0,
+    "allSixProviderLogsCorrelateToExactPhaseRequestIdentity": true,
+    "separateMainFlowLateAcceptanceNotIncluded": 1
+  },
+  "observations": [
+    {
+      "case": "warm",
+      "phase": "contacts",
+      "requests": [
+        {
+          "requestIdentitySHA256": "bf8cb45cded336f8d29f29e73841c900be79e542dab66bb3b48e78b8aa8045bb",
+          "requestTimeUTC": "2026-10-25T23:09:15.051Z",
+          "method": "POST",
+          "status": 201,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 0,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    },
+    {
+      "case": "warm",
+      "phase": "invitations",
+      "requests": [
+        {
+          "requestIdentitySHA256": "e628d8ec47889d4471e60140e5ca79da5165a817d4382f368cb4b3cc6816de22",
+          "requestTimeUTC": "2026-10-25T23:09:20.279Z",
+          "method": "POST",
+          "status": 200,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 0,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    },
+    {
+      "case": "warm",
+      "phase": "publish",
+      "requests": [
+        {
+          "requestIdentitySHA256": "51b25c4e8686fb7b3dc2e3be94116ad0285ae89b4babd7c97a0574bd4119529d",
+          "requestTimeUTC": "2026-10-25T23:09:33.027Z",
+          "method": "POST",
+          "status": 200,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "a19106ccb863962e5fd1aee5ca005cc77e6d01aaff71f415851d97ea105e2f66",
+          "requestTimeUTC": "2026-10-25T23:09:59.101Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "1e48578544c8dedf0d7fbd2d39c2300577820c11c0ec4f738f9f9fe2feaeb673",
+          "requestTimeUTC": "2026-10-25T23:09:59.402Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 2,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    },
+    {
+      "case": "warm",
+      "phase": "cancel",
+      "requests": [
+        {
+          "requestIdentitySHA256": "264fc149a306fa9cb3702ea84bd8fe786741af95636fd55edb4088a7ac66959c",
+          "requestTimeUTC": "2026-10-25T23:10:05.168Z",
+          "method": "POST",
+          "status": 200,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "362a972eec99924c853ba285b6c598fdaecb18fc65b15b54029911935c6a8c02",
+          "requestTimeUTC": "2026-10-25T23:10:11.479Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "7f4428d03c5e4cb76a6f75c190b4c79d1dde57d80342da766de31853835b294e",
+          "requestTimeUTC": "2026-10-25T23:10:11.698Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 2,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    },
+    {
+      "case": "cold",
+      "phase": "invitations",
+      "requests": [
+        {
+          "requestIdentitySHA256": "1eeeb35a3cd9db82e66713cca95d3a1a6c30a0068680a3cf5f0728a0a0668363",
+          "requestTimeUTC": "2026-10-25T23:11:09.842Z",
+          "method": "POST",
+          "status": 200,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 0,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    },
+    {
+      "case": "cold",
+      "phase": "cancel",
+      "requests": [
+        {
+          "requestIdentitySHA256": "2e23809c530669b350083c4129c5676757f4620f6d2185f34a5db9f297e65cdc",
+          "requestTimeUTC": "2026-10-25T23:11:20.794Z",
+          "method": "POST",
+          "status": 200,
+          "role": "initial action",
+          "providerAcceptanceLogLines": 1,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "a1ed8a983f9469c0c0aa486ff6f74b240e4b1d412407aa79360e30429d72a5c3",
+          "requestTimeUTC": "2026-10-25T23:11:30.305Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        },
+        {
+          "requestIdentitySHA256": "e2884626a869af6cb7a31aa74fbfe166bc7ff512ed0e9d513dfdce9b72c96092",
+          "requestTimeUTC": "2026-10-25T23:11:30.521Z",
+          "method": "POST",
+          "status": 200,
+          "role": "repeat action",
+          "providerAcceptanceLogLines": 0,
+          "otherApplicationLogLines": 0
+        }
+      ],
+      "successfulProviderAcceptances": 1,
+      "repeatMutationRequests": 2,
+      "repeatRequestsHadEmptyApplicationLogs": true
+    }
+  ],
+  "separateMainFlowAcceptance": {
+    "phase": "late invitation-response",
+    "method": "PUT",
+    "status": 200,
+    "requestTimeUTC": "2026-10-25T23:05:37.075Z",
+    "requestIdentitySHA256": "fcc9be2fc5553fe3b6d1e9091dd906e8493c72cb4c2c446cd1d9b7678b6abfa3",
+    "providerAcceptances": 1,
+    "includedInOwnedPushCaseSix": false
+  },
+  "interpretation": {
+    "providerMeaning": "The inspected sendApnsNotification implementation writes this success line only after the Preview-topic APNs request returns HTTP200. These are six successful Apple provider acceptances; Preview topic fallback may also include an initial ordinary-topic mismatch request, so this is not a total outbound HTTP-request count.",
+    "notificationDelivery": "Actual foreground, background and cold-launch presentation/taps are established by the separate physical UI evidence, not inferred from HTTP200 or these logs.",
+    "deduplication": "In this bounded two-plan run, the two repeat publish calls and two repeat cancel calls for each case return200 with empty application logs and no additional provider acceptance. Combined with the row-locked idempotent source guard and unchanged business snapshots, this validates the tested retries. It is not a universal transport exactly-once guarantee, delivery audit for unregistered users, or proof about delayed/off-window attempts.",
+    "requestIdentity": "Each provider entry belongs to the same exact request identity as the corresponding private owned plan phase. No trace/parent field was available; correlation uses the log record request ID, exact private path, deployment and bounded time."
+  },
+  "registrationLogoutObservation": {
+    "windowUTC": {
+      "since": "2026-10-25T23:12:00Z",
+      "until": "2026-10-25T23:13:00Z"
+    },
+    "observations": [
+      {
+        "endpointRole": "register",
+        "observedRequests": 8,
+        "requests": [
+          {
+            "requestIdentitySHA256": "b44623d39633d29b47808e685acefa5fb46c82491025967d6632a345b4bc2a98",
+            "requestTimeUTC": "2026-10-25T23:12:11.722Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "3284591d209a441c24c0b8114643a1080eb6b93ddddf67bf553ec89548b2d224",
+            "requestTimeUTC": "2026-10-25T23:12:11.989Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "09520e873e191105d76e7cddc183daf197864d8120dc29fee613e75adc9aafcc",
+            "requestTimeUTC": "2026-10-25T23:12:40.328Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "55b78aaf99584e4891b451c2ab8661d474f1543fafab134c23925ead154b91cd",
+            "requestTimeUTC": "2026-10-25T23:12:40.625Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "dcebc4ab8791a1750702c7f491885a04d54aecc8a7f545a3b9a4bd943fe0890d",
+            "requestTimeUTC": "2026-10-25T23:12:42.662Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "dd010cad77eb681bea7cdd37f1e8d14b6eeee29131b86eeb861af6f359cfc8e3",
+            "requestTimeUTC": "2026-10-25T23:12:42.911Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "5b9c8abf7f997727bb5c23b1d4a349be0834654f599ad1c1b7efbca3e901092d",
+            "requestTimeUTC": "2026-10-25T23:12:56.849Z",
+            "method": "POST",
+            "status": 201
+          },
+          {
+            "requestIdentitySHA256": "19d4f79fe011d07167b3e86e46d5b57efb129747a591414b2ebb873e7df6d865",
+            "requestTimeUTC": "2026-10-25T23:12:57.202Z",
+            "method": "POST",
+            "status": 201
+          }
+        ]
+      },
+      {
+        "endpointRole": "logout",
+        "observedRequests": 1,
+        "requests": [
+          {
+            "requestIdentitySHA256": "536bb464f21b112ac805a7933b07b4c2a38db5a2ffbf4fee17e4423c6660ac57",
+            "requestTimeUTC": "2026-10-25T23:12:29.672Z",
+            "method": "POST",
+            "status": 200
+          }
+        ]
+      }
+    ],
+    "scope": "Observed HTTP request metadata only. No request body, user/account identity, APNs token or database row was read. Registration ownership transfer and logout deletion follow the reviewed authenticated handlers, but these status codes alone do not independently prove exact stored ownership/deletion. The physical cleanup test and final account401/link404 evidence establish their respective separate scopes."
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "preparedAt": "2026-10-25T22:35:33.538166+00:00",
+  "baseline": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+  "baselineFiles": 1395,
+  "allBaselineFileSHA1Matched": true,
+  "preserved": 1393,
+  "overlaid": [
+    {
+      "path": "lib/time-polls/notifications.ts",
+      "baselineSHA1": "6fbd33ce9c57b6b80908187500dbecdc0dbda8a6",
+      "overlaySHA1": "8ae23c1303461e432bfdb4ca59ef52824078e992",
+      "overlaySHA256": "f8f63a8015ba02d603dc18d353eedc62714a2ecb68a891f05b12b56ab45106c0",
+      "bytes": 3834
+    },
+    {
+      "path": "lib/api/v1/time-poll-service.ts",
+      "baselineSHA1": "25cc6c7af358028a5c1be7a6c6643ff04e12beac",
+      "overlaySHA1": "2a72fc17e620c91a0db8b2f78325fd0fe7d37880",
+      "overlaySHA256": "a8da8af92cef0d76cc4404e168a5507899505ddd46521e89a7848c5fc3a93fc2",
+      "bytes": 33869
+    }
+  ],
+  "added": [
+    ".sideseat-plan-push229-source.json"
+  ],
+  "expectedUploadedFiles": 1396,
+  "sourceBaseCommit": "689b43b15bc354e5e4741acffa407cca02264e4d",
+  "context": "/tmp/sideseat-plan-push229-release",
+  "expectedManifest": "release-expected-upload-manifest.json",
+  "sourceMarkerSHA256": "2d96604a70d54561e439e6ea5537683c35ae9844423c0eb3a21724e9f2da2cf9",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "cliVersion": "54.4.1",
+  "targetForNextStep": "production --skip-domain",
+  "migrationsSkipped": true,
+  "activityReleaseHook": "none",
+  "productionEnvPulled": false,
+  "deploymentCreated": false,
+  "promotionPerformed": false,
+  "liveAliasesRemainBaseline": [
+    "api.sideseat.de",
+    "www.sideseat.de",
+    "sideseat.de"
+  ],
+  "commandsPreparedNotRun": [
+    [
+      "vercel",
+      "project",
+      "inspect",
+      "--non-interactive",
+      "--cwd",
+      "/tmp/sideseat-plan-push229-release"
+    ],
+    [
+      "vercel",
+      "deploy",
+      "--prod",
+      "--skip-domain",
+      "--yes",
+      "--scope",
+      "baichus-projects",
+      "--build-env",
+      "SKIP_DATABASE_MIGRATIONS=1",
+      "--build-env",
+      "SIDESEAT_ACTIVITY_RELEASE=none",
+      "--cwd",
+      "/tmp/sideseat-plan-push229-release"
+    ]
+  ]
+}

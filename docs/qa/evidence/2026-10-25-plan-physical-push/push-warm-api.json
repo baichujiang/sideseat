@@ -1,0 +1,261 @@
+{
+  "passed": true,
+  "scope": "warm",
+  "executionSurface": "Explicitly selected physical iPhone 14 Plus; real APNs only",
+  "nativeBuild": "229",
+  "mainPlanWasNotMutated": true,
+  "notificationsAreNotInferredFromHTTPResponses": true,
+  "checks": [
+    {
+      "phase": "foreground-ready",
+      "case": "warm",
+      "action": "owner shared one new contact card; real plan_invite dispatch scheduled",
+      "actualPhase": "COLLECTING",
+      "invitationVersion": 0,
+      "peerStatus": null,
+      "chosenStart": null,
+      "chosenEnd": null,
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:15.876Z"
+    },
+    {
+      "phase": "foreground-share-opened",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "COLLECTING",
+      "invitationVersion": 0,
+      "peerStatus": null,
+      "chosenStart": null,
+      "chosenEnd": null,
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:19.741Z"
+    },
+    {
+      "phase": "background-invitation-ready",
+      "case": "warm",
+      "action": "owner chose final time and invited only the prepared peer; real time_poll_invitation dispatch scheduled",
+      "actualPhase": "INVITING",
+      "invitationVersion": 1,
+      "peerStatus": "INVITED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:20.953Z"
+    },
+    {
+      "phase": "background-invitation-opened",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "INVITING",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:31.604Z"
+    },
+    {
+      "phase": "peer-accepted",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "INVITING",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:32.541Z"
+    },
+    {
+      "phase": "background-publication-ready",
+      "case": "warm",
+      "action": "owner explicitly published accepted roster; real time_poll_confirmed dispatch scheduled",
+      "actualPhase": "CONFIRMED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:33.897Z"
+    },
+    {
+      "phase": "background-publication-opened",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "CONFIRMED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:09:44.185Z"
+    },
+    {
+      "phase": "published-calendar-verified",
+      "case": "warm",
+      "action": "duplicate publish requests preserve exact Calendar rows and unchanged business state; notification dedup requires server dispatch-log review",
+      "actualPhase": "CONFIRMED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:10:00.120Z"
+    },
+    {
+      "phase": "foreground-cancellation-ready",
+      "case": "warm",
+      "action": "owner cancelled current-version plan; real plan_canceled dispatch scheduled",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:10:05.950Z"
+    },
+    {
+      "phase": "foreground-cancellation-opened",
+      "case": "warm",
+      "action": "duplicate cancel requests preserve cancellation and zero Calendar rows; notification dedup requires server dispatch-log review",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:10:12.500Z"
+    },
+    {
+      "phase": "cancelled-calendar-verified",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:10:27.725Z"
+    },
+    {
+      "phase": "warm-case-complete",
+      "case": "warm",
+      "action": "read-only verification",
+      "actualPhase": "CANCELLED",
+      "invitationVersion": 1,
+      "peerStatus": "ACCEPTED",
+      "chosenStart": "2026-10-28T08:00:00.000Z",
+      "chosenEnd": "2026-10-28T09:00:00.000Z",
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "at": "2026-10-25T23:10:28.366Z"
+    }
+  ],
+  "duplicateNotificationScope": "Business state/unique Calendars checked; dispatch exactly-once needs server logs. A short period without another banner is insufficient.",
+  "segments": [
+    {
+      "log": "push-warm.log",
+      "phases": [
+        "foreground-ready",
+        "foreground-share-opened",
+        "background-invitation-ready",
+        "background-invitation-opened",
+        "peer-accepted",
+        "background-publication-ready",
+        "background-publication-opened",
+        "published-calendar-verified",
+        "foreground-cancellation-ready",
+        "foreground-cancellation-opened",
+        "cancelled-calendar-verified",
+        "warm-case-complete"
+      ],
+      "completed": true
+    }
+  ],
+  "failure": null,
+  "at": "2026-10-25T23:10:31.131Z"
+}

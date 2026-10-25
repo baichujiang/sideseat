@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "ownedGeneratedContextsRemoved": 3,
+  "removedContextNames": [
+    "sideseat229-runner",
+    "sideseat229-source",
+    "sideseat-plan-push229-release"
+  ],
+  "removedStandalonePrivateConfigAndAccessFiles": 6,
+  "privateFixtureRemovedAfterSixAccountsAndSevenPlansRevoked": true,
+  "rootActiveLocalConfigurationPreserved": true,
+  "sharedBuildOutputsAndExistingSimulatorPreserved": true,
+  "privateRawDiagnosticsRetainedMode": "0700 directories / 0600 files",
+  "noNewSimulatorCreated": true,
+  "finalPublicSecretScanPending": false,
+  "at": "2026-10-25T23:16:29.260837+00:00",
+  "finalPublicSecretScan": "public-privacy-scan.json",
+  "privateScanPatternFileRemoved": true
+}

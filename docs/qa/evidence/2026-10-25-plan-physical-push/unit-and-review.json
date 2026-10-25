@@ -1,0 +1,36 @@
+{
+  "productCommit": "03ccd83f0ecb16b1467fdab72379f50f65cd5218",
+  "nativeUnit": {
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "suites": 3,
+    "seconds": 4.286
+  },
+  "timePollDomainAndNotificationUnit": {
+    "passed": 22,
+    "failed": 0,
+    "seconds": 3.886601791
+  },
+  "typescript": {
+    "exitCode": 0,
+    "originalThreeFixtureTypeErrorsRemovedWithoutProductChanges": true,
+    "unrelatedExistingTsconfigPreserved": true
+  },
+  "independentReview": {
+    "role": "read-only precision code review",
+    "result": "No material findings.",
+    "ranSixNotificationTests": true,
+    "scope": "First cancellation recipient/version/blocks/idempotence; shared versus private foreground routing; existing detail refresh; DEBUG-only separate persistent QA Keychain and end-mode restoration.",
+    "limitation": "Physical APNs delivery and cold startup require actual device UI runtime evidence."
+  },
+  "initialBuildRepair": "Copied active generated project was stale and omitted SSActionButtonStyle. Regenerated frozen project from current project.yml; no archived code or product source workaround; final build and unit tests pass.",
+  "at": "2026-10-25T22:47:16.155575+00:00",
+  "apnsAndStorekitConfiguration": {
+    "passed": 24,
+    "failed": 0,
+    "suites": 5,
+    "durationMs": 226.920625,
+    "scope": "Existing APNs environment/topic and native release configuration tests. Unit-stub accepted log is not real delivery evidence."
+  }
+}

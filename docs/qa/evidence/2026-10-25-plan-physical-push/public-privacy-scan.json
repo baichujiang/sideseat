@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "publicTextFilesScanned": 27,
+  "privateFixtureValuePatternsChecked": 30,
+  "filesContainingExactPrivateValuesOrJWT": 0,
+  "actualSafePNGsOriginalSHA256Verified": 83,
+  "privateSystemScreensExcluded": 4,
+  "imagePrivacyReview": "images-review.json",
+  "privateFixtureAlreadyDeleted": true,
+  "at": "2026-10-25T23:20:08.814295+00:00",
+  "finalAfterDocumentationPatternScan": {
+    "passed": true,
+    "publicTextFiles": 28,
+    "patterns": "JWT and exact disposable-account identifier shape; final docs contain only verified public report facts.",
+    "at": "2026-10-25T23:22:33.490326+00:00"
+  }
+}

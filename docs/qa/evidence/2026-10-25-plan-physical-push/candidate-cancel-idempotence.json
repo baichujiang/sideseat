@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "candidate": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "repeatedNewRequests": 2,
+  "mainPlanWasNotMutated": true,
+  "assertionScope": "Runtime explicitly compares phase and updatedAt across new-key retries. The direct canceledAt identity assertion is also covered by the service unit test.",
+  "updatedAtStable": true,
+  "cancelledAtScope": "Not exposed by the public plan DTO. Service unit verifies the original canceledAt object is preserved; runtime verifies unchanged updatedAt/phase across new-key retries."
+}

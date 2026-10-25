@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "physicalDevice": {
+    "model": "iPhone 14 Plus",
+    "udid": "00008110-001A69110CC1401E",
+    "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "osVersion": "26.6.1"
+  },
+  "preview": {
+    "bundle": "app.sideseat.mobile.preview",
+    "build": "229",
+    "normalProcessID": 10092,
+    "arguments": [],
+    "environmentOnlyTERM": true,
+    "installedExecutableMatchesActualProcess": true
+  },
+  "ordinaryAppBuild": "97",
+  "preexistingFlow222RunnerPreserved": true,
+  "ownedFlow229RunnerRemoved": true,
+  "qaCredentialCleanup": {
+    "realSettingsLogoutPassed": true,
+    "qaDomainColdRelaunchShowsSignedOutWithoutOverride": true,
+    "persistentQaMarkerEnded": true,
+    "normalDomainOrdinaryLaunchReady": true,
+    "identityOfNormalDomainNotReadOrClaimed": true,
+    "onePhysicalTestSeconds": 40.801,
+    "markers": [
+      "qa-settings-logout-completed",
+      "qa-domain-cold-relaunch-signed-out",
+      "normal-domain-ordinary-launch-ready"
+    ],
+    "networkLogoutRowRemovalScope": "HTTP logout proof is separate; database device-row deletion is not directly queried."
+  },
+  "newSideSeatDeviceReportCount": 0,
+  "at": "2026-10-25T23:14:16.353851+00:00"
+}
