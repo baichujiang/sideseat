@@ -1,0 +1,776 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-25T15:14:19.143918+00:00",
+  "reviewer": "inline_roster_pixels",
+  "batch": "Preview221 final focused / owner + participant / zh-Hans normal + de AccessibilityXXXL / light / CONFIRMED",
+  "source_index": "/tmp/sideseat221-private/roster-final-images/index.json",
+  "summary": {
+    "captures": 20,
+    "unique_sha256": 12,
+    "unique_original_pngs_actually_viewed": 12,
+    "original_detail_used_for_all_unique_images": true,
+    "duplicate_captures_reusing_sha_review": 8,
+    "all_source_hashes_verified": true,
+    "unique_product_visual_pass": 12,
+    "unique_confirmed_product_visual_failures": 0,
+    "unique_with_local_system_overlay_limits": 4,
+    "all_four_role_locale_size_combinations_reviewed": true,
+    "participant_confirmed_last_person_complete": "通过。普通中文及德文最大字号均有最后一人 Ming8a5c 的完整姓名、绿色勾、完整已接受/Angenommen、完整行/段落下缘位于固定footer上方的像素证据。",
+    "inline_position": "通过。名单直接位于邀请回应/Einladungsantworten计数及进度条之后；大字号允许先后滚动查看回应标题和名单。",
+    "you_marker": "通过。participant 的你/Du标在Lin8a5c后；owner 的你/Du标在Ming8a5c后。",
+    "fixed_footer": "通过。四组各自的主要操作均完整可见；participant 最大字号说明分行且两动作完整；不要求名单和所有上文首屏同时显示。",
+    "system_overlay": "12个unique均有AssistiveTouch。中文participant第一人状态在名单图被局部覆盖，但summary图提供同角色无遮挡状态；德文owner第一人状态末尾有局部系统覆盖，姓名/绿色勾及最后一人无盖，完整德文状态字形在participant图无遮挡。",
+    "test_pass_used_as_pixel_evidence": false,
+    "modified_files": [
+      "/tmp/sideseat221-private/roster-final-visual-review.json"
+    ]
+  },
+  "combination_evidence": [
+    {
+      "role": "participant",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "result": "pass",
+      "roster_and_last_person_files": [
+        "inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+        "inline-roster-owner-row-participant-zh-Hans-light-normal.png"
+      ],
+      "first_person_unoccluded_status_file": "inline-roster-summary-participant-zh-Hans-light-normal.png",
+      "observed_roster": [
+        {
+          "name": "Lin8a5c",
+          "you": true,
+          "status": "已接受"
+        },
+        {
+          "name": "Ming8a5c",
+          "you": false,
+          "status": "已接受"
+        }
+      ],
+      "last_person_fully_above_footer": true,
+      "footer_actions": [
+        "去日历查看",
+        "我无法参加"
+      ],
+      "system_overlay_limit": "名单截图第一行状态局部被系统浮层盖住，summary截图补齐同角色无遮挡证据。"
+    },
+    {
+      "role": "participant",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "result": "pass",
+      "roster_and_last_person_files": [
+        "inline-roster-continuous-01-participant-de-light-system-max.png",
+        "inline-roster-owner-row-participant-de-light-system-max.png"
+      ],
+      "first_person_unoccluded_status_file": "inline-roster-continuous-01-participant-de-light-system-max.png",
+      "observed_roster": [
+        {
+          "name": "Lin8a5c",
+          "you": true,
+          "you_text": "Du",
+          "status": "Angenommen"
+        },
+        {
+          "name": "Ming8a5c",
+          "you": false,
+          "status": "Angenommen"
+        }
+      ],
+      "last_person_fully_above_footer": true,
+      "footer_actions": [
+        "Im Kalender ansehen",
+        "Ich kann nicht teilnehmen"
+      ],
+      "system_overlay_limit": "浮层在footer文案右侧留白，名单两人及动作无遮挡。"
+    },
+    {
+      "role": "owner",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "result": "pass",
+      "roster_and_last_person_files": [
+        "inline-roster-continuous-01-owner-zh-Hans-light-normal.png"
+      ],
+      "first_person_unoccluded_status_file": "inline-roster-continuous-01-owner-zh-Hans-light-normal.png",
+      "observed_roster": [
+        {
+          "name": "Lin8a5c",
+          "you": false,
+          "status": "已接受"
+        },
+        {
+          "name": "Ming8a5c",
+          "you": true,
+          "status": "已接受"
+        }
+      ],
+      "last_person_fully_above_footer": true,
+      "footer_actions": [
+        "去日历查看"
+      ],
+      "system_overlay_limit": "浮层覆盖进度条末端，名单完整无遮挡。"
+    },
+    {
+      "role": "owner",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "result": "pass_with_system_overlay_limit",
+      "roster_and_last_person_files": [
+        "inline-roster-continuous-01-owner-de-light-system-max.png",
+        "inline-roster-owner-row-owner-de-light-system-max.png"
+      ],
+      "first_person_unoccluded_status_file_in_same_role": null,
+      "same_de_text_unoccluded_in_other_role": "inline-roster-continuous-01-participant-de-light-system-max.png",
+      "observed_roster": [
+        {
+          "name": "Lin8a5c",
+          "you": false,
+          "status": "Angenommen",
+          "status_tail_partially_system_occluded": true
+        },
+        {
+          "name": "Ming8a5c",
+          "you": true,
+          "you_text": "Du",
+          "status": "Angenommen",
+          "status_tail_partially_system_occluded": false
+        }
+      ],
+      "last_person_fully_above_footer": true,
+      "footer_actions": [
+        "Im Kalender ansehen"
+      ],
+      "system_overlay_limit": "Lin状态词末尾局部由OS浮层覆盖；姓名及绿色勾完整，Ming Du整段与footer无遮挡。不将跨角色截图冒充同角色无遮挡证据。"
+    }
+  ],
+  "closure_of_previous_full_review_limits": [
+    {
+      "finding_id": "EVIDENCE-002",
+      "previous_scope": "participant CONFIRMED 最后一人完整像素缺失",
+      "status": "closed_by_final_focused_images",
+      "evidence": [
+        "inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+        "inline-roster-owner-row-participant-zh-Hans-light-normal.png",
+        "inline-roster-continuous-01-participant-de-light-system-max.png",
+        "inline-roster-owner-row-participant-de-light-system-max.png"
+      ],
+      "conclusion": "同一CONFIRMED页面的后续滚动位置完整显示最后一行/段落，固定footer未阻止其完整入镜。"
+    },
+    {
+      "finding_id": "EVIDENCE-001",
+      "previous_scope": "participant INVITING pending 最后一人完整像素缺失",
+      "status": "not_retested_in_this_confirmed_batch",
+      "conclusion": "本批全部为CONFIRMED，不以这些已接受截图冒充pending阶段的完整截图；原full报告中的该捕获范围限制仍保留。"
+    }
+  ],
+  "findings": [
+    {
+      "id": "FINAL-PASS-001",
+      "classification": "verified_pixel_evidence",
+      "observation": "participant CONFIRMED 最后一人能完整进入固定footer上方的可见区域：中文普通字号、德文AccessibilityXXXL均已逐原图验证。"
+    },
+    {
+      "id": "FINAL-OS-001",
+      "classification": "system_overlay",
+      "product_defect_confirmed": false,
+      "observation": "中文participant名单图的Lin已接受局部被AssistiveTouch覆盖；summary同角色图为该姓名/你的标记/状态提供无遮挡补充。"
+    },
+    {
+      "id": "FINAL-OS-002",
+      "classification": "system_overlay",
+      "product_defect_confirmed": false,
+      "observation": "德文owner名单图的Lin状态词Angenommen末尾部分位于AssistiveTouch之下；该owner行姓名和绿色勾完整，Ming Du整段完整无遮挡。德文participant图中的相同状态文本无遮挡，但未捕获owner视角该局部完全无遮挡的独立图。"
+    }
+  ],
+  "limitations": [
+    "只修改本review JSON；未修改产品、测试、设备设置或原capture结果。",
+    "12 unique均实际以view_image(detail=original)查看，20captures中相同SHA复用；文件名和测试Passed没有代替像素验收。",
+    "任务提供德文system-max为真实AccessibilityXXXL配置；截图中可见对应巨大动态字号，但仅靠PNG不能独立读取操作系统字号设置。",
+    "本批为CONFIRMED聚焦验收；INVITING/pending和其余全流程由此前full批次覆盖，本批不扩充这些阶段的证据。",
+    "静态截图证明滚动后内容完整入镜与固定footer边界，不独立证明具体滚动手势的执行过程。",
+    "系统浮层遮住的局部原像素无法直接验收，已按图和角色分别记录；没有已批准历史基准图的逐像素差异比较。"
+  ],
+  "images": [
+    {
+      "file": "inline-roster-continuous-01-participant-de-light-system-max.png",
+      "sha256": "7c44e53ed99f6ba64fa2923923f22ae2e2618edd26e35486345077a56a0099ce",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-continuous-01-participant-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-continuous-01-participant-de-light-system-max_0_9F1C67A5-2D63-4106-B86C-BEAA4F216101.png",
+          "file": "inline-roster-continuous-01-participant-de-light-system-max.png",
+          "originalExportedFile": "B8A58808-AAB9-4CD8-A5E2-BBF4249589DB.png"
+        },
+        {
+          "capture": "inline-roster-peer-row-participant-de-light-system-max_0_78919F29-FA44-4304-9370-E9512E85B94F.png",
+          "file": "inline-roster-peer-row-participant-de-light-system-max.png",
+          "originalExportedFile": "1BE56C8A-900A-43BB-8360-37EADE25E9AF.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 名单滚动位置",
+      "observations": [
+        "可见“2 von 2 haben zugesagt”两行计数及完整进度条，名单直接接在进度条下。",
+        "第一人 Lin8a5c 后有灰色 Du；第二人 Ming8a5c 没有 Du，归属正确。",
+        "最大字号以每人姓名一行、绿色勾及 Angenommen 另起一行呈现；两人完整段落均在固定 footer 上方，无文字裁切、重叠或尾行被 footer 压住。",
+        "Ming8a5c 的头像、完整姓名、绿色勾、完整 Angenommen 以及段落下边缘均入镜，补齐最后一人完整显示证据。",
+        "固定 footer 的 Alles ist bestätigt、Mit Sideseat-Kalendern synchronisiert 自然分行，Im Kalender ansehen 和 Ich kann nicht teilnehmen 完整可见。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "you_marker": "Lin8a5c Du",
+      "overlay_region": "约 x1077–1257、y1810–1989；位于固定 footer 的 Mit Sideseat- 行右侧留白，没有盖住该行文字、名单或操作。",
+      "unoccluded_evidence": [
+        "本图两个人名、Du、两个 Angenommen 及全部 footer 操作均有无遮挡像素。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-owner-row-participant-de-light-system-max.png",
+      "sha256": "c41d9f8e4e6db95e01b85e94a09eaf350b4ca172955be0ffa200bccb85018525",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-owner-row-participant-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-owner-row-participant-de-light-system-max_0_FBA2A72A-72B2-4883-B726-71CC6CA0E2E9.png",
+          "file": "inline-roster-owner-row-participant-de-light-system-max.png",
+          "originalExportedFile": "070C2343-5DE7-42B7-8B52-3E852E147D59.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 最后一人定位后",
+      "observations": [
+        "与 continuous 图相比右侧出现滚动指示条，内容滚动位置相近。",
+        "Lin8a5c Du 和 Ming8a5c 两人的姓名与 Angenommen 分段完整清楚；最后一人段落完整显示在固定 footer 上方。",
+        "固定 footer 位置与文字保持稳定；两项操作完整。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "you_marker": "Lin8a5c Du",
+      "overlay_region": "约 x1077–1257、y1810–1989；footer 文字右侧留白，不盖名单或动作。",
+      "unoccluded_evidence": [
+        "本图两人姓名、Du、状态与最后一人段落下缘均无遮挡。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-summary-participant-de-light-system-max.png",
+      "sha256": "d014a8502e1a57ccf3123e06600efb3954a3dd64a7a1e69d8cc4db75267b1c5e",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-summary-participant-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-summary-participant-de-light-system-max_0_399C7F9D-7EF0-40DB-8CDF-096E0908077F.png",
+          "file": "inline-roster-summary-participant-de-light-system-max.png",
+          "originalExportedFile": "FD3FAC67-0828-428F-A1C7-262C4BAEAA4A.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 回应进度位置",
+      "observations": [
+        "Einladungs- / antworten 正常分成两行，完整“2 von 2 haben zugesagt”再分两行，未在横向被截断。",
+        "进度条位于 footer 上缘前；此滚动位置不含名单姓名，姓名完整性依据另两张名单原图。",
+        "固定 footer 与名单图保持同一高度，全部说明与两项动作清楚。"
+      ],
+      "full_roster_rows": [],
+      "unoccluded_full_roster_rows": [],
+      "overlay_region": "约 x1077–1257、y1810–1989；footer 的 Mit Sideseat- 行右侧留白。",
+      "unoccluded_evidence": [
+        "回应标题、2/2计数和 footer 操作无遮挡。",
+        "inline-roster-continuous-01-participant-de-light-system-max.png 提供两人完整名单段落。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": null,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-confirmed-entry-participant-de-light-system-max.png",
+      "sha256": "dd04b0be9e45d7cba34313c88a42044a2d61c2aa9aeeb98355e5803b1698de52",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-confirmed-entry-participant-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-confirmed-entry-participant-de-light-system-max_0_83E2ABFA-79C7-4FD1-97B7-AA953AD29D9D.png",
+          "file": "inline-roster-confirmed-entry-participant-de-light-system-max.png",
+          "originalExportedFile": "2D8D2087-0512-42A0-AD8B-7A0E31CD9AB7.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 详情进入位置",
+      "observations": [
+        "计划名 Contact plan / 8a5c1174 分两行且完整；Bestätigt、图书馆二楼、Mo. Okt. 26 与23:00–24:00均可读。",
+        "时间表继续向下延伸进滚动区域；当前图不含名单，不将其当作名单像素证据。",
+        "固定 footer 从相同位置开始，确认说明和日历/无法参加动作完整。"
+      ],
+      "full_roster_rows": [],
+      "unoccluded_full_roster_rows": [],
+      "overlay_region": "约 x1077–1257、y1810–1989；footer 文案右侧留白，未盖已显示正文。",
+      "unoccluded_evidence": [
+        "计划名、确认状态、地点、首日日期时刻与全部 footer 动作无遮挡。",
+        "inline-roster-continuous-01-participant-de-light-system-max.png 与 inline-roster-owner-row-participant-de-light-system-max.png 提供名单完整证据。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": null,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+      "sha256": "0d2a7ee572c28bd76497ef8a524a9b5f42d51e9d05810c5d66a0c9a346d68baf",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-continuous-01-participant-zh-Hans-light-normal_0_16908D7A-F65E-4D77-B9C6-7C0764F96A80.png",
+          "file": "inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+          "originalExportedFile": "73A6FCE0-8E37-4EEE-AC3B-7B589CE5C4E1.png"
+        },
+        {
+          "capture": "inline-roster-peer-row-participant-zh-Hans-light-normal_0_211F5F1D-8059-4B54-90DB-532A634872DC.png",
+          "file": "inline-roster-peer-row-participant-zh-Hans-light-normal.png",
+          "originalExportedFile": "75F82056-0924-4E41-AB29-FFF85DB7978E.png"
+        }
+      ],
+      "outcome": "pass_with_system_overlay_limit",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "view": "CONFIRMED 名单滚动位置",
+      "observations": [
+        "邀请回应、2/2 人已确认与进度条完整；名单直接接在其下。",
+        "Lin8a5c 后有灰色“你”；Ming8a5c 没有“你”，两行姓名、头像和行分段完整。",
+        "最后一人 Ming8a5c 的整行、绿色勾、已接受完整位于 footer 上方。",
+        "第一人右侧绿色勾和已接受有部分像素被系统 AssistiveTouch 覆盖，不能将本图该局部视作无遮挡证据。",
+        "footer 的安排已确认、已同步到 Sideseat 日历、去日历查看、我无法参加完整。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Ming8a5c"
+      ],
+      "you_marker": "Lin8a5c 你",
+      "overlay_region": "约 x1077–1257、y1810–1989；覆盖第一行 Lin8a5c 右侧已接受状态与勾的部分区域，姓名与“你”未被盖。",
+      "unoccluded_evidence": [
+        "本图 Ming8a5c 整行状态完全无遮挡。",
+        "inline-roster-summary-participant-zh-Hans-light-normal.png 的第一行 Lin8a5c、你、绿色勾和已接受均无遮挡；与本图形成同角色跨截图补充。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-owner-row-participant-zh-Hans-light-normal.png",
+      "sha256": "5f273f0638e5aefb11c16efae79b18bc18dd50ce29ec5588a73071e8864aafc0",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-owner-row-participant-zh-Hans-light-normal.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-owner-row-participant-zh-Hans-light-normal_0_02305FAD-2ADD-4A0C-A888-FAD166EC1947.png",
+          "file": "inline-roster-owner-row-participant-zh-Hans-light-normal.png",
+          "originalExportedFile": "C27A341D-62BA-4AA3-8C15-EF3A70EA330E.png"
+        }
+      ],
+      "outcome": "pass_with_system_overlay_limit",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "view": "CONFIRMED 最后一人定位后",
+      "observations": [
+        "右侧滚动指示条可见；两人的完整行和最后一人下缘显示在固定 footer 上方。",
+        "Ming8a5c 的姓名、绿色勾、已接受完整无遮挡；Lin8a5c 与“你”清楚，右侧状态受到同一系统浮层覆盖。",
+        "固定 footer 位置与 continuous 图相同，全部动作完整可见。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Ming8a5c"
+      ],
+      "you_marker": "Lin8a5c 你",
+      "overlay_region": "约 x1077–1257、y1810–1989；第一行右侧已接受和勾的一部分。",
+      "unoccluded_evidence": [
+        "本图最后一人 Ming8a5c 完整且无遮挡。",
+        "inline-roster-summary-participant-zh-Hans-light-normal.png 提供第一人完整无遮挡状态。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-summary-participant-zh-Hans-light-normal.png",
+      "sha256": "44d74d57aead5b456368c6e36da6c9e43d869a3c4e7c812a614bc44cefc8849a",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-summary-participant-zh-Hans-light-normal.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-summary-participant-zh-Hans-light-normal_0_C5F05E09-51A6-49FD-B3AC-D36F597C45AF.png",
+          "file": "inline-roster-summary-participant-zh-Hans-light-normal.png",
+          "originalExportedFile": "CF36110B-03BD-47D8-9BD1-4DE82D40BDCE.png"
+        },
+        {
+          "capture": "inline-roster-confirmed-entry-participant-zh-Hans-light-normal_0_A2E7CA18-D260-4D37-8C8F-6BB37F206381.png",
+          "file": "inline-roster-confirmed-entry-participant-zh-Hans-light-normal.png",
+          "originalExportedFile": "4AB8C930-6EF8-456B-9259-B2BAED19CA2D.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "participant",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "view": "CONFIRMED 回应进度/详情进入位置",
+      "observations": [
+        "完整计划名、已确认、地点与两张跨日时段卡片清楚。",
+        "邀请回应、2/2计数和进度条下可见第一行 Lin8a5c 你、绿色勾与已接受完整无遮挡。",
+        "当前滚动位置第二行不在 footer 上方，不能单独证明最后一人完整；另两张同角色名单图已补齐。",
+        "固定 footer 的四项文字与操作均完整。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Lin8a5c"
+      ],
+      "you_marker": "Lin8a5c 你",
+      "overlay_region": "约 x1077–1257、y1810–1989；回应进度条右端及其上方留白，没有覆盖第一行状态。",
+      "unoccluded_evidence": [
+        "Lin8a5c 的姓名、你、绿色勾与已接受在本图完整无遮挡。",
+        "inline-roster-continuous-01-participant-zh-Hans-light-normal.png 和 inline-roster-owner-row-participant-zh-Hans-light-normal.png 提供最后一人完整无遮挡证据。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": false,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-continuous-01-owner-de-light-system-max.png",
+      "sha256": "c6bc61173db610ab316c71804b566f5449a18d081bd72881727311b1409cfb9a",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-continuous-01-owner-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-continuous-01-owner-de-light-system-max_0_CE7A6CB4-B033-4ABB-81B3-6C90DD4A1F80.png",
+          "file": "inline-roster-continuous-01-owner-de-light-system-max.png",
+          "originalExportedFile": "93CC2AEF-42E7-490E-B6C1-A3332019A066.png"
+        },
+        {
+          "capture": "inline-roster-peer-row-owner-de-light-system-max_0_B9B19596-D9F3-4DF8-8931-704C71F0D2EA.png",
+          "file": "inline-roster-peer-row-owner-de-light-system-max.png",
+          "originalExportedFile": "6821AACF-831A-415F-AFD1-D2313E1CC934.png"
+        }
+      ],
+      "outcome": "pass_with_system_overlay_limit",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "owner",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 名单滚动位置",
+      "observations": [
+        "Einladungs- / antworten、2 von 2 haben / zugesagt 与满进度条自然分行，名单直接在其下。",
+        "Lin8a5c 无 Du，Ming8a5c 后有灰色 Du；两个人的姓名、头像和姓名/状态分段完整。",
+        "两人均显示绿色勾及 Angenommen，Lin 状态词最右侧部分被 OS 浮层盖住；Ming 整段完整且无遮挡。",
+        "最后一人 Ming8a5c 的完整 Angenommen、段落下缘与 footer 有明确分界，没有被固定 footer 裁切。",
+        "固定 footer 的 Im Kalender ansehen 与右箭头完整可见。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Ming8a5c"
+      ],
+      "you_marker": "Ming8a5c Du",
+      "overlay_region": "约 x1077–1257、y1810–1989；盖住第一行 Lin8a5c 的 Angenommen 末尾局部，未盖绿色勾、姓名或最后一人。",
+      "unoccluded_evidence": [
+        "本图 Lin8a5c 姓名与绿色勾无遮挡；Ming8a5c Du 和完整 Angenommen 完全无遮挡。",
+        "inline-roster-continuous-01-participant-de-light-system-max.png 的 Lin8a5c 与 Angenommen 提供相同德文姓名/状态的完整无遮挡字形证据；此补充来自 participant 视角，并非 owner 独立无遮挡状态截图。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-owner-row-owner-de-light-system-max.png",
+      "sha256": "bb0961f4ce433e939eed915cc45c3de88139859965d453c9c0c7d5aec6d43de9",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-owner-row-owner-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-owner-row-owner-de-light-system-max_0_F62006B5-DB30-45EB-AC29-E72CAA260D97.png",
+          "file": "inline-roster-owner-row-owner-de-light-system-max.png",
+          "originalExportedFile": "3E09B6B3-7ACE-48A2-85A8-19B9A1195B13.png"
+        }
+      ],
+      "outcome": "pass_with_system_overlay_limit",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "owner",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 最后一人定位后",
+      "observations": [
+        "右侧滚动指示条可见；两人的姓名及状态分段布局与 continuous 图一致。",
+        "Ming8a5c Du 的整段、绿色勾、完整 Angenommen 与段落下缘均在 footer 以上且无遮挡。",
+        "Lin8a5c 的绿色勾和姓名完整，状态词末尾局部仍由 AssistiveTouch 覆盖。",
+        "Im Kalender ansehen 固定底栏完整，没有覆盖最后一人。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Ming8a5c"
+      ],
+      "you_marker": "Ming8a5c Du",
+      "overlay_region": "约 x1077–1257、y1810–1989；第一人 Angenommen 末尾局部。",
+      "unoccluded_evidence": [
+        "本图最后一人完整段落与 footer 均无遮挡。",
+        "inline-roster-continuous-01-participant-de-light-system-max.png 提供相同 Lin8a5c/Angenommen 的德文无遮挡字形，但 owner 视角该末尾局部没有额外无遮挡捕获。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-summary-owner-de-light-system-max.png",
+      "sha256": "a963de86d71989a88e8d8e0e7b1af3c78d0b7878a1de3e78d417503262486d5c",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-summary-owner-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-summary-owner-de-light-system-max_0_782F19CB-EAFD-4052-A5EF-7E08DED08ADD.png",
+          "file": "inline-roster-summary-owner-de-light-system-max.png",
+          "originalExportedFile": "C33071FC-1532-4FD4-8866-CA353D7F31FF.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "owner",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 回应进度位置",
+      "observations": [
+        "第二天00:00、00:30两段绿色受邀时段以及01:00结束后背景清楚。",
+        "Einladungs- / antworten 与2 von 2 haben / zugesagt自然换行，未横向裁切。",
+        "名单此时位于滚动区域下方，完整名单依据另外两张同角色图。",
+        "固定 Im Kalender ansehen footer 完整可见。"
+      ],
+      "full_roster_rows": [],
+      "unoccluded_full_roster_rows": [],
+      "overlay_region": "约 x1077–1257、y1810–1989；回应标题右侧留白及滚动条附近，未盖标题文字。",
+      "unoccluded_evidence": [
+        "时间表、回应标题、计数、footer 动作无遮挡。",
+        "inline-roster-continuous-01-owner-de-light-system-max.png 与 inline-roster-owner-row-owner-de-light-system-max.png 提供完整名单布局。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": null,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-confirmed-entry-owner-de-light-system-max.png",
+      "sha256": "5c06f97996576b0f13787e52e1f93e54c5c0d40544b4f61206b005b4118ff8c6",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-confirmed-entry-owner-de-light-system-max.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-confirmed-entry-owner-de-light-system-max_0_44AB76A1-CBD7-49C8-843A-C8146A427020.png",
+          "file": "inline-roster-confirmed-entry-owner-de-light-system-max.png",
+          "originalExportedFile": "4C55DE1D-726D-4296-94BA-6F9857FCAF4F.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "owner",
+      "locale": "de",
+      "text_size": "AccessibilityXXXL / system max (任务提供配置)",
+      "view": "CONFIRMED 详情进入位置",
+      "observations": [
+        "Contact plan / 8a5c1174 完整分两行；Bestätigt 状态与图书馆二楼地点完整。",
+        "Mo. Okt. 26、23:00–24:00、Eingeladene Zeit 图例和22:30/23:00时刻可读；绿色受邀时间显示清楚。",
+        "本图没有名单；滚动内容在固定底栏处继续，未将当前视口边界当作内容不可滚动。",
+        "固定 Im Kalender ansehen 与箭头完整可见。"
+      ],
+      "full_roster_rows": [],
+      "unoccluded_full_roster_rows": [],
+      "overlay_region": "约 x1077–1257、y1810–1989；22:30行右侧时格背景，未盖时间文字、状态、地点或 footer。",
+      "unoccluded_evidence": [
+        "计划名、确认状态、地点、首日日期时刻、图例和 footer 动作无遮挡。",
+        "inline-roster-continuous-01-owner-de-light-system-max.png 与 inline-roster-owner-row-owner-de-light-system-max.png 提供名单完整显示。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": null,
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "inline-roster-continuous-01-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "source_path": "/tmp/sideseat221-private/roster-final-images/inline-roster-continuous-01-owner-zh-Hans-light-normal.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "实际逐张调用 view_image，detail=original，按原始1284×2778 PNG查看；未用测试通过代替视觉检查。",
+      "captures": [
+        {
+          "capture": "inline-roster-continuous-01-owner-zh-Hans-light-normal_0_8DA577D2-3D2F-4157-A255-145725FAD607.png",
+          "file": "inline-roster-continuous-01-owner-zh-Hans-light-normal.png",
+          "originalExportedFile": "90015AD4-420A-4BA0-8EA7-B7E04F04D132.png"
+        },
+        {
+          "capture": "inline-roster-peer-row-owner-zh-Hans-light-normal_0_2042B6D9-8ADB-4520-AF77-E5F4C273DF7F.png",
+          "file": "inline-roster-peer-row-owner-zh-Hans-light-normal.png",
+          "originalExportedFile": "CC60169A-2565-4F13-BF71-D27AF1AD4AB6.png"
+        },
+        {
+          "capture": "inline-roster-owner-row-owner-zh-Hans-light-normal_0_3BC72D25-ADB5-4A14-8637-3063DAD9F192.png",
+          "file": "inline-roster-owner-row-owner-zh-Hans-light-normal.png",
+          "originalExportedFile": "5495EE91-47AF-42C7-95F6-D2E9954873C5.png"
+        },
+        {
+          "capture": "inline-roster-summary-owner-zh-Hans-light-normal_0_78C3EBEF-D568-42EA-8B8E-EDE9CD929C61.png",
+          "file": "inline-roster-summary-owner-zh-Hans-light-normal.png",
+          "originalExportedFile": "3D17C8F3-105B-47D9-85D6-2675C5418341.png"
+        },
+        {
+          "capture": "inline-roster-confirmed-entry-owner-zh-Hans-light-normal_0_9AC5C39A-EEF1-4B1A-8F6D-F5218B7DC838.png",
+          "file": "inline-roster-confirmed-entry-owner-zh-Hans-light-normal.png",
+          "originalExportedFile": "88C726DC-8B1E-4D8F-9411-183A7F545B45.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "confirmed_product_visual_defects": [],
+      "role": "owner",
+      "locale": "zh-Hans",
+      "text_size": "normal",
+      "view": "CONFIRMED 详情与完整名单",
+      "observations": [
+        "计划名、已确认、图书馆二楼及两张跨日时段卡片完整。",
+        "邀请回应与2/2 人已确认下直接显示两行名单。",
+        "Lin8a5c 无“你”，Ming8a5c 后标“你”；两行姓名、头像、绿色勾与已接受均完整无遮挡。",
+        "名单下已同步到 Sideseat 日历清楚；固定去日历查看和右箭头完整。",
+        "最后一人 Ming8a5c 的行下缘及同步说明均在固定 footer 上方，无遮挡或裁切。"
+      ],
+      "full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "unoccluded_full_roster_rows": [
+        "Lin8a5c",
+        "Ming8a5c"
+      ],
+      "you_marker": "Ming8a5c 你",
+      "overlay_region": "约 x1077–1257、y1810–1989；进度条右端与留白，没有盖名单姓名和状态。",
+      "unoccluded_evidence": [
+        "本图两人整行、你、绿色勾与已接受以及同步说明和 footer 操作均无遮挡。"
+      ],
+      "footer_visible": true,
+      "last_person_fully_above_footer": true,
+      "system_assistive_touch_present": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "reviewer": "independent read-only reviewer",
+  "result": "no material findings",
+  "scope": "Two active UI files: confirmation roster inline; existing participant rows and guest recovery reused.",
+  "details": [
+    "All invitation records remain visible without a selected filter. Existing selected-and-accepted count and all reply/publish/calendar predicates/requests stay.",
+    "Confirmation no longer owns a people-open state/button/sheet. Inline and sheet share one invitationRows expression.",
+    "Collecting-avatar entry and old collecting sheet remain. Owner-only old guest recovery entry, native confirmation/share and state stay.",
+    "No new business state, request, component or dependency; only UI presentation parameter and view composition."
+  ],
+  "sourceSHA256": {
+    "ios-native/SideSeat/Features/Chat/UnifiedPlanViews.swift": "63feb282ce8f30b66077602c2e3a44ba364b1e3ceef59bf7c6786ca2cb80a3b5",
+    "ios-native/SideSeat/Features/Chat/PlanDetailEditors.swift": "b05582bd09ee0a85e91ac18949856ab0ccd25cb53dc25c8c95701d41cd017097"
+  },
+  "canonicalPreservationChecks": {
+    "collectingRowsByteIdentical": true,
+    "recoveryButtonRequestAndRowFunctionsByteIdentical": true
+  },
+  "execution": "Actual final phone/API/pixel acceptance recorded separately; static review is not physical old-guest-recovery or all-state execution."
+}

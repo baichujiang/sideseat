@@ -1,0 +1,507 @@
+{
+  "result": "Accepted within the recorded native confirmation-roster scope",
+  "actualCaptures": 60,
+  "uniqueOriginalPixelHashes": 45,
+  "reviewMethod": "Every unique original in the detailed records actually opened with view_image; exact SHA duplicates reuse review. No images retouched.",
+  "groups": [
+    {
+      "stage": "full",
+      "captures": 40,
+      "unique": 33,
+      "review": "full-visual-review.json"
+    },
+    {
+      "stage": "roster-final",
+      "captures": 20,
+      "unique": 12,
+      "review": "roster-final-visual-review.json"
+    }
+  ],
+  "limits": [
+    "Full pending/confirmed participant per-row captures did not fully expose the second row; full accepted participant capture has both rows and final CONFIRMED supplement supplies complete normal/max rows for both roles.",
+    "OS AssistiveTouch overlays are separately recorded; no assertion of inspecting obscured pixels.",
+    "Final focused scope Chinese/light/normal and German/light/actual AccessibilityXXXL; no whole-App maximum-text or pure-manual performance claim."
+  ],
+  "images": [
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-calendar-result_0_1A91C72A-E9DB-4082-9C50-82E187A2C8CF.png",
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "2a890b12ec2e2ee02d09e8d72cf1449a95442508bfb8167883429d91aacd740b",
+      "originalExportedFile": "A3B118A9-B350-47E6-9F89-E3B29E15E1DF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_0479FC79-9C03-458A-AFB3-5384E423EEC5.png",
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "8c782ef09c68922f280a1859f699afd7711d5ba266142f4f65c444815b621559",
+      "originalExportedFile": "E844F42A-1AB7-4F27-8B96-0F200693BDD7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-confirmed-peer_0_8CA9F797-AAF6-4745-B64A-D1DE568EC655.png",
+      "file": "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+      "sha256": "e6ac0ff517f8a121a780c8d14c7f7470169e0c0679af123c03e060c120d72871",
+      "originalExportedFile": "B2531B72-761C-4368-9510-431584337120.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-confirmed-owner_0_0B762557-B4ED-4947-B547-A92985ABD695.png",
+      "file": "phone-first-plan-inline-roster-peer-confirmed-owner.png",
+      "sha256": "e6ac0ff517f8a121a780c8d14c7f7470169e0c0679af123c03e060c120d72871",
+      "originalExportedFile": "9F0541EB-2A85-4B28-8BC9-AF22F0267A40.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-confirmed-calendar-date-cross-midnight_0_E5577A75-C82D-43DD-B0E1-6BF218994A1D.png",
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "8e7851c6d6ec800ca6deb56b45b1f0c8c1fdd40cb380cc62761a88e9f17f2b59",
+      "originalExportedFile": "08CA05E9-D39F-4E7A-BBD1-E7EC5A2C7D70.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_A3ACF6CE-3665-4E2C-89E0-0AAA247A67FF.png",
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "b4f1da90725bea28ea678589dbc34a342e8e1ac6439787130ca214cb7d44ad49",
+      "originalExportedFile": "0E5D52D8-80D9-4330-A6CF-1BDCF1711DEC.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-confirmed-peer_0_C4C26D05-2FC2-4BA3-8AC0-6EBC09FD408E.png",
+      "file": "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+      "sha256": "a2f08e7ad1c9a67bbfe6eefae52f3c9f21bf0ff6b4eb64f07e803f2b186ae609",
+      "originalExportedFile": "987762A0-3005-4044-BFD7-7D7652A1F13A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-confirmed-owner_0_D3834E8A-1B2F-470B-BF5D-F561B49EB877.png",
+      "file": "phone-first-plan-inline-roster-owner-confirmed-owner.png",
+      "sha256": "a2f08e7ad1c9a67bbfe6eefae52f3c9f21bf0ff6b4eb64f07e803f2b186ae609",
+      "originalExportedFile": "9CD047F0-1DF3-43E1-990A-13982805FCA4.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-publish-plan-centered-confirm_0_540BA21D-9B80-4C8B-A733-0DE1807969BF.png",
+      "file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "sha256": "b708514bfe7063091ea96618555228ac786c5449c4e7b8f3652c2c1387da05c6",
+      "originalExportedFile": "20340BEF-E49B-46F2-BDF6-8446D050EEE5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-publish-plan-centered-cancel_0_8C0CEFCA-FAC6-4B15-81BB-8952384D3833.png",
+      "file": "phone-first-plan-publish-plan-centered-cancel.png",
+      "sha256": "b708514bfe7063091ea96618555228ac786c5449c4e7b8f3652c2c1387da05c6",
+      "originalExportedFile": "959F8E0B-E398-4E34-AD6A-07AAAA306ECA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-explicit-acceptance_0_4D1BAAF6-529D-4026-AD56-196E6DC9B410.png",
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "0de50f3b93d553aefff33bc432df96274e5ecd37c4ea40c1cc048de1d220e277",
+      "originalExportedFile": "0ABDE9F5-553C-4C45-ACC1-3F20AC5EA6D7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-accepted-peer_0_EE888A17-2EED-4CF3-801F-38B3B8E586C3.png",
+      "file": "phone-first-plan-inline-roster-peer-accepted-peer.png",
+      "sha256": "0de50f3b93d553aefff33bc432df96274e5ecd37c4ea40c1cc048de1d220e277",
+      "originalExportedFile": "0F6A9107-F30A-4EB9-B4E4-F3D5FB3702EF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-accepted-owner_0_9FA01B78-2F5D-48E3-80C0-E0ED73E14CA7.png",
+      "file": "phone-first-plan-inline-roster-peer-accepted-owner.png",
+      "sha256": "0de50f3b93d553aefff33bc432df96274e5ecd37c4ea40c1cc048de1d220e277",
+      "originalExportedFile": "CA84AB52-4E98-4729-8F18-3309680218EF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-invitation-continuous-across-midnight_0_521A072C-0BD7-4BAB-AEC1-AA252E5EC98C.png",
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "1f47a720529e19e0edccacdcb3c686e1f2a35e947572994f5a757e04de9d14e3",
+      "originalExportedFile": "41F4A500-FF15-41BE-9E05-2B768A841B5E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-INVITING_0_13C24046-A058-43D8-93C8-CAF53E83C489.png",
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "7ed0d213b2e3dac786cd33ec17cb675738ad1828f3d3f0376ef72eeb30838288",
+      "originalExportedFile": "FF8330B4-7A65-4CC3-86E3-EA8FC7C569CF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-inviting-peer_0_4146DBB1-78FA-4FB0-AFC3-578373468B03.png",
+      "file": "phone-first-plan-inline-roster-peer-inviting-peer.png",
+      "sha256": "be33f5a99d27d6181869db830e432667f0093bf5499a8548ead98fa7deba917f",
+      "originalExportedFile": "299CE52C-EF42-474B-B552-F7198F7C4DAA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-inviting-owner_0_F7845FFB-A5E5-49AA-AB74-E5BA2EE9D033.png",
+      "file": "phone-first-plan-inline-roster-peer-inviting-owner.png",
+      "sha256": "be33f5a99d27d6181869db830e432667f0093bf5499a8548ead98fa7deba917f",
+      "originalExportedFile": "EA8D6CEC-0C8B-45AE-A72F-745DAC46F8C8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_CBA71BFB-C665-4DE7-9960-9CE997BFFB67.png",
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "2ddeba30eef199cb2c948d4ea00b9e5e406394c8535cc1f25fc3752f23881272",
+      "originalExportedFile": "41E8DD24-0EE2-4D8B-84D9-9DE44B7D7295.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-cancel-plan-centered-keep_0_EE1CD59F-E250-422A-A92B-19F154928C62.png",
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "1e79f1f52d90c5da3b8155e775599431afa2063dd4d9802db77ab26dd2958cce",
+      "originalExportedFile": "429AA4EC-C16A-49C9-B005-D1572C7B85C0.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-INVITING_0_001A75F9-E432-4A3A-A8B3-1070A63282C9.png",
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "2f6efc8a56a6ba23a4eb6cac2234039d881711360fb374a40d4924444145a1c0",
+      "originalExportedFile": "E11B1D90-F113-4A73-96EF-C5613BCF3B6D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-inviting-peer_0_F1560C6D-2A8D-40E2-A4A0-966DF42454A7.png",
+      "file": "phone-first-plan-inline-roster-owner-inviting-peer.png",
+      "sha256": "ecbf3befab708d0cdfb26eb1a94db30af4336c7cc919aece8c3fbaca9fdb6da7",
+      "originalExportedFile": "73D1CE65-CF15-4763-8E50-E9D52D25456F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-inviting-owner_0_75A2A38E-C012-4C93-A65B-05AE7FC4F2D9.png",
+      "file": "phone-first-plan-inline-roster-owner-inviting-owner.png",
+      "sha256": "ecbf3befab708d0cdfb26eb1a94db30af4336c7cc919aece8c3fbaca9fdb6da7",
+      "originalExportedFile": "26D19CDA-A6FD-4414-AB12-B1B8C2204E3B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-review-final-invitees_0_ABBB9492-F3E0-4449-A784-0271A928E89F.png",
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "01d19bd365eef0b3661bb4920b742a89c940485d5f6ef469ac3ba3560035c4de",
+      "originalExportedFile": "BB5ABF76-6ED5-44A8-BCA5-CAB0D987971B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_F6627AD6-719F-46DB-A1FC-B3C07C1A8EF5.png",
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "7b1126c07bf76e3d13eedec5fa3c9bef523e3a0ae89b7f8e45c74db2c5bec8cb",
+      "originalExportedFile": "78406EA2-150B-476B-9404-2E9AFD6E2570.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cross-day-evening_0_AEFC7788-48C4-47C5-A984-DA93A397529B.png",
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "3de574e3fd9821540204e379c49aaebfe5514a9e9713766a31c47a50a86fc87e",
+      "originalExportedFile": "8D271C84-5F4B-4DED-A507-30D4222B7E8F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_B23550A7-A9B7-4FBD-896C-378BFB4D9248.png",
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "7a0ace9af243cf8c52a9bda54dc069f2a4a8a17b1736ceba2414afc59679b86d",
+      "originalExportedFile": "2F87101A-7F90-4338-B7B5-CF99F4205433.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-compact-responded-people_0_651AB3B1-9BFB-428F-8D09-16CD5989C3C8.png",
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "4d81735e91d44634fc4068f5a8d2c2fbe01e472ff35fb68edcf65dce7262c31c",
+      "originalExportedFile": "68BE8C40-B541-4BEF-8578-6CC9C30C8A67.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-peer-inline-availability_0_835879F8-DE06-46B4-BD3D-24FE509EF38C.png",
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "3a12c860a220637766760b796d31a8186c6e95a5d56ec664bfd71ce471f866e8",
+      "originalExportedFile": "C5D3B5A8-8F78-400B-9BF4-606889989E9B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_4FA44639-9C58-4B3F-B492-928CD6E6ABC0.png",
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "697161f72124b54074dae9027f5c4b86c2633ebac3919944eba6c4b2938e67a1",
+      "originalExportedFile": "3F1C1ED2-CA59-4DB2-B496-ECDA2BE40A68.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_D8902D9D-25AF-4F36-A56E-D681B1020BC8.png",
+      "file": "phone-first-plan-contacts-received-chat-card-46dcd090.png",
+      "sha256": "46dcd09060447f97254aad60e7b5d37ea79e30f9e134ee41cb98b2c9d1bd9214",
+      "originalExportedFile": "C2CA7EAE-AFEC-4E93-B3F5-8AE99622FADB.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_1427FD04-0608-48CE-A812-474886BBAB53.png",
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "15adac24573d464b84127eebb0f81abbec6d0eaea6ad5e4d2edda03ee31979c0",
+      "originalExportedFile": "8855FD6E-C28A-4296-9FEA-905C84586FF6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-select-and-send_0_0E68EA6A-1D5B-418A-BABD-DB2B0A6A9680.png",
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "58e7263eadc4dccb43f83eab0270e23700f037ae7d56d0c91242821b88b33a54",
+      "originalExportedFile": "9B0493D4-E5D7-4BD5-9E35-2B4926AD2A3D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_CEEAD7B1-E01F-42A9-9780-88C470693C93.png",
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "fd5785e7185bc7af71a937b7b46ae551734b242ff30f7b73385ad8a21000fa77",
+      "originalExportedFile": "5B914893-BF6C-4068-B5AE-076EE71CB9C6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_D6450E20-DD03-4F72-B960-74A645BD9B09.png",
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "38653e8dea00b16afe00b93d1a41baeb22df58f8c7767545fd2912f37670d25a",
+      "originalExportedFile": "1A90AFD2-08FF-4461-83AB-996B337F27D3.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-information-editing_0_28767837-E8C9-4679-8B41-DC030CD240DE.png",
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "7825780a11b92dc61875832e3cb32b36036b1ececde5595dc34c517e48a4eea5",
+      "originalExportedFile": "703EA1AB-5940-496D-8D6A-E28FA466FB5F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_9BB33FE1-835C-4F2D-B543-52930550C75D.png",
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "fae91179bb3543d5aaa836c7e2ce625d524dee1a71eca1bdd666b1a8608cd80e",
+      "originalExportedFile": "F9617409-91CF-4DF7-8D13-A06B036E99B5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_EE2EEA6C-896A-45E9-B8EB-895D49D73EE7.png",
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "38d8ca7970b6a5d9de0815269d69c5d2165577851464022e89b129a12b6cf5f2",
+      "originalExportedFile": "619DB937-9DDD-488B-B41B-35BBFC7F0571.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-delete-plan-centered-keep_0_AB097D7C-90A0-4612-913E-B1F40C6030C7.png",
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "9cdfec99fc3e0a0f2c0d1788703051ae1009d1b305075dce6cb27d3803265b2c",
+      "originalExportedFile": "9FF660BC-7E5E-4671-8B43-FAF8B5BBFA9B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-compact-empty-timetable_0_E2066AF8-7925-435A-BEC3-ABFEEB31ACA5.png",
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "616738310a5feab47ddd882b75e6158b28a433942c8e14fc7fbfbd218756e295",
+      "originalExportedFile": "1DB999AE-1EB7-437A-AED8-FD0BFA779E12.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-creation-information-without-timetable_0_16999EFB-8F2A-4C10-A7E3-C2B47B1CC1DB.png",
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "0c35dad0f0e043016c3628606994cd480d64b5bd2b65083a5799f501cf321d86",
+      "originalExportedFile": "08E944DA-9143-45B2-93F2-81E3FB10BD90.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-continuous-01-participant-de-light-system-max_0_9F1C67A5-2D63-4106-B86C-BEAA4F216101.png",
+      "file": "inline-roster-continuous-01-participant-de-light-system-max.png",
+      "sha256": "7c44e53ed99f6ba64fa2923923f22ae2e2618edd26e35486345077a56a0099ce",
+      "originalExportedFile": "B8A58808-AAB9-4CD8-A5E2-BBF4249589DB.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-peer-row-participant-de-light-system-max_0_78919F29-FA44-4304-9370-E9512E85B94F.png",
+      "file": "inline-roster-peer-row-participant-de-light-system-max.png",
+      "sha256": "7c44e53ed99f6ba64fa2923923f22ae2e2618edd26e35486345077a56a0099ce",
+      "originalExportedFile": "1BE56C8A-900A-43BB-8360-37EADE25E9AF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-owner-row-participant-de-light-system-max_0_FBA2A72A-72B2-4883-B726-71CC6CA0E2E9.png",
+      "file": "inline-roster-owner-row-participant-de-light-system-max.png",
+      "sha256": "c41d9f8e4e6db95e01b85e94a09eaf350b4ca172955be0ffa200bccb85018525",
+      "originalExportedFile": "070C2343-5DE7-42B7-8B52-3E852E147D59.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-summary-participant-de-light-system-max_0_399C7F9D-7EF0-40DB-8CDF-096E0908077F.png",
+      "file": "inline-roster-summary-participant-de-light-system-max.png",
+      "sha256": "d014a8502e1a57ccf3123e06600efb3954a3dd64a7a1e69d8cc4db75267b1c5e",
+      "originalExportedFile": "FD3FAC67-0828-428F-A1C7-262C4BAEAA4A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-confirmed-entry-participant-de-light-system-max_0_83E2ABFA-79C7-4FD1-97B7-AA953AD29D9D.png",
+      "file": "inline-roster-confirmed-entry-participant-de-light-system-max.png",
+      "sha256": "dd04b0be9e45d7cba34313c88a42044a2d61c2aa9aeeb98355e5803b1698de52",
+      "originalExportedFile": "2D8D2087-0512-42A0-AD8B-7A0E31CD9AB7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-continuous-01-participant-zh-Hans-light-normal_0_16908D7A-F65E-4D77-B9C6-7C0764F96A80.png",
+      "file": "inline-roster-continuous-01-participant-zh-Hans-light-normal.png",
+      "sha256": "0d2a7ee572c28bd76497ef8a524a9b5f42d51e9d05810c5d66a0c9a346d68baf",
+      "originalExportedFile": "73A6FCE0-8E37-4EEE-AC3B-7B589CE5C4E1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-peer-row-participant-zh-Hans-light-normal_0_211F5F1D-8059-4B54-90DB-532A634872DC.png",
+      "file": "inline-roster-peer-row-participant-zh-Hans-light-normal.png",
+      "sha256": "0d2a7ee572c28bd76497ef8a524a9b5f42d51e9d05810c5d66a0c9a346d68baf",
+      "originalExportedFile": "75F82056-0924-4E41-AB29-FFF85DB7978E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-owner-row-participant-zh-Hans-light-normal_0_02305FAD-2ADD-4A0C-A888-FAD166EC1947.png",
+      "file": "inline-roster-owner-row-participant-zh-Hans-light-normal.png",
+      "sha256": "5f273f0638e5aefb11c16efae79b18bc18dd50ce29ec5588a73071e8864aafc0",
+      "originalExportedFile": "C27A341D-62BA-4AA3-8C15-EF3A70EA330E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-summary-participant-zh-Hans-light-normal_0_C5F05E09-51A6-49FD-B3AC-D36F597C45AF.png",
+      "file": "inline-roster-summary-participant-zh-Hans-light-normal.png",
+      "sha256": "44d74d57aead5b456368c6e36da6c9e43d869a3c4e7c812a614bc44cefc8849a",
+      "originalExportedFile": "CF36110B-03BD-47D8-9BD1-4DE82D40BDCE.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-confirmed-entry-participant-zh-Hans-light-normal_0_A2E7CA18-D260-4D37-8C8F-6BB37F206381.png",
+      "file": "inline-roster-confirmed-entry-participant-zh-Hans-light-normal.png",
+      "sha256": "44d74d57aead5b456368c6e36da6c9e43d869a3c4e7c812a614bc44cefc8849a",
+      "originalExportedFile": "4AB8C930-6EF8-456B-9259-B2BAED19CA2D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-continuous-01-owner-de-light-system-max_0_CE7A6CB4-B033-4ABB-81B3-6C90DD4A1F80.png",
+      "file": "inline-roster-continuous-01-owner-de-light-system-max.png",
+      "sha256": "c6bc61173db610ab316c71804b566f5449a18d081bd72881727311b1409cfb9a",
+      "originalExportedFile": "93CC2AEF-42E7-490E-B6C1-A3332019A066.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-peer-row-owner-de-light-system-max_0_B9B19596-D9F3-4DF8-8931-704C71F0D2EA.png",
+      "file": "inline-roster-peer-row-owner-de-light-system-max.png",
+      "sha256": "c6bc61173db610ab316c71804b566f5449a18d081bd72881727311b1409cfb9a",
+      "originalExportedFile": "6821AACF-831A-415F-AFD1-D2313E1CC934.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-owner-row-owner-de-light-system-max_0_F62006B5-DB30-45EB-AC29-E72CAA260D97.png",
+      "file": "inline-roster-owner-row-owner-de-light-system-max.png",
+      "sha256": "bb0961f4ce433e939eed915cc45c3de88139859965d453c9c0c7d5aec6d43de9",
+      "originalExportedFile": "3E09B6B3-7ACE-48A2-85A8-19B9A1195B13.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-summary-owner-de-light-system-max_0_782F19CB-EAFD-4052-A5EF-7E08DED08ADD.png",
+      "file": "inline-roster-summary-owner-de-light-system-max.png",
+      "sha256": "a963de86d71989a88e8d8e0e7b1af3c78d0b7878a1de3e78d417503262486d5c",
+      "originalExportedFile": "C33071FC-1532-4FD4-8866-CA353D7F31FF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-confirmed-entry-owner-de-light-system-max_0_44AB76A1-CBD7-49C8-843A-C8146A427020.png",
+      "file": "inline-roster-confirmed-entry-owner-de-light-system-max.png",
+      "sha256": "5c06f97996576b0f13787e52e1f93e54c5c0d40544b4f61206b005b4118ff8c6",
+      "originalExportedFile": "4C55DE1D-726D-4296-94BA-6F9857FCAF4F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-continuous-01-owner-zh-Hans-light-normal_0_8DA577D2-3D2F-4157-A255-145725FAD607.png",
+      "file": "inline-roster-continuous-01-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "originalExportedFile": "90015AD4-420A-4BA0-8EA7-B7E04F04D132.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-peer-row-owner-zh-Hans-light-normal_0_2042B6D9-8ADB-4520-AF77-E5F4C273DF7F.png",
+      "file": "inline-roster-peer-row-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "originalExportedFile": "CC60169A-2565-4F13-BF71-D27AF1AD4AB6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-owner-row-owner-zh-Hans-light-normal_0_3BC72D25-ADB5-4A14-8637-3063DAD9F192.png",
+      "file": "inline-roster-owner-row-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "originalExportedFile": "5495EE91-47AF-42C7-95F6-D2E9954873C5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-summary-owner-zh-Hans-light-normal_0_78C3EBEF-D568-42EA-8B8E-EDE9CD929C61.png",
+      "file": "inline-roster-summary-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "originalExportedFile": "3D17C8F3-105B-47D9-85D6-2675C5418341.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "roster-final",
+      "capture": "inline-roster-confirmed-entry-owner-zh-Hans-light-normal_0_9AC5C39A-EEF1-4B1A-8F6D-F5218B7DC838.png",
+      "file": "inline-roster-confirmed-entry-owner-zh-Hans-light-normal.png",
+      "sha256": "2ec14940289e6d28b1b6c231e81ff13584e44ed1bf5dbde7d8dd12deea60e90f",
+      "originalExportedFile": "88C726DC-8B1E-4D8F-9411-183A7F545B45.png",
+      "associatedWithFailure": false
+    }
+  ]
+}

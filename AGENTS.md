@@ -35,8 +35,19 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is220 below. See web release/QA records.
-- Preview220 is the current installed development build, source ed8cb66ff5a0b327508442d0e86433c8e9c60312 pushed.
+  No native rebuild in that web stage; current native build is221 below. See web release/QA records.
+- Preview221 is the current installed development build, source 798374e1a8dd11db2ebd7a244ebf7f3292d1a2e2 pushed.
+  Confirmation displays all original invitation rows directly under reply progress;
+  shared rows preserve names/status/You and owner-only old guest recovery. Original
+  collecting sheet and invitation/publish/Calendar rules stay. Independent minimal
+  review passed. Frozen App full414.710s/eightAPI and final four role/text launches
+  132.712s passed. Initial focused helper touched footer; test-only viewport repair,
+  final four repeated. 60captures/45unique pixels reviewed; incomplete pending-row
+  captures and OS overlays retain scope. Final221 normalPID9591,268/Local/signature/
+  binaries and scoped compiled test sources match;97 retained.2accounts401/1link404;
+  Runner/private/generated contexts removed,new CPU resource reports1 Action none. No web/backend
+  release; historical guest recovery static preservation only. See221 QA/release.
+- Preview220 was the previous installed development build, source ed8cb66ff5a0b327508442d0e86433c8e9c60312 pushed.
   Ordinary Inbox menus stay near source; accessibility keeps the large scrolling
   panel. Six existing product prompts use the shared centered presentation;
   read-only Calendar opens large for accessibility. Confirmed dates use the

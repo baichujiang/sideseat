@@ -1,0 +1,23 @@
+{
+  "build": 221,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 268,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "d9416a405a554ba616041a38fcf59de4f88a2142ee70882592bfed80ed380e31",
+    "SideSeat Preview.debug.dylib": "82dfc249a79e668460ea06297300fcb036e0fd648fc81f59289369f191d0971b"
+  },
+  "testSourceSHA256": {
+    "InlineInvitationRosterPhoneUITests.swift": "aeeec238dca1e960cbdff13eac744fac735456a9958634a0982b2adfb16540ec",
+    "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c"
+  },
+  "backendReleased": false,
+  "webReleased": false,
+  "compiledPhoneTestSourceMatched": true,
+  "productFrozenDuringAllFinalAcceptance": true,
+  "productSourceCommit": "798374e1a8dd11db2ebd7a244ebf7f3292d1a2e2",
+  "trackedCommittedInputsVerified": 268,
+  "currentBranch": "codex/ios-uxui-20260922",
+  "sourcePushed": true
+}

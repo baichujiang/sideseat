@@ -1,0 +1,16 @@
+{
+  "oldFocusedSourceSHA256": "dcf8626ee954de1a05de17336747d60498f6d2b1c66f1af724170a4b51757e9e",
+  "initialFocusedResult": "roster.xcresult",
+  "initialFocusedDurationSeconds": 130.549,
+  "initialFocusedOutcome": "failed before fourth-combination participant German maximum-text summary and rows",
+  "completedPrefixes": [
+    "owner-zh-Hans-light-normal",
+    "owner-de-light-system-max",
+    "participant-zh-Hans-light-normal"
+  ],
+  "completedPrefixesScope": "independent print markers, row assertions and original screenshots; enclosing XCTest failed; no blanket final visual acceptance",
+  "cause": "drag used whole AX ScrollView frame, ignoring fixed footer; fourth-combination drag started y577.5 while participant German maximum footer began near y523, so it repeatedly touched the footer and never scrolled; entry pixels and video125s unchanged",
+  "repair": "pass actual content viewport to every drag and materialization, keep both endpoints inside; reserve20pt before first footer child, maintain complete-row bounds and44pt action assertions; source-only test repair, product frozen",
+  "focusedSourceSHA256": "aeeec238dca1e960cbdff13eac744fac735456a9958634a0982b2adfb16540ec",
+  "additionalTestFixes": "Continuous captures use actual row order (current person can be first), not name order; teardown uses same addTeardownBlock actor pattern as original full test."
+}

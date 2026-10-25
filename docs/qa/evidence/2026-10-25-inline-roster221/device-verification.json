@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-25T15:11:21.819030+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 221,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9591,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-155800.ips",
+      "lastModDate": "2026-10-25T14:58:00.000Z"
+    }
+  ],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "One disposable owner/participant live planning journey plus four read-only published-roster role/text launches. No real-user write.",
+  "disposableAccountsRemoved": 2,
+  "tokens401": 2,
+  "links404": 1,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "newTerminatingAppCrashReports": 0,
+  "resourceReportSummary": "resource-report-summary.json",
+  "privateFixtureRemoved": true,
+  "privateXctestrunFilesRemoved": 2,
+  "generatedRunnerAndBuildContextRemoved": true,
+  "isolatedAppSourceContextRemoved": true
+}

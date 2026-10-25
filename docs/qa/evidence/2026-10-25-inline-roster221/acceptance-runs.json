@@ -1,0 +1,67 @@
+{
+  "build": 221,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "sameFrozenProductForBothFinalRuns": true,
+  "passedCases": [
+    {
+      "run": "full",
+      "label": "Complete live native contact plan",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 414.71,
+      "xcresultSessionSeconds": 419.393,
+      "compiledTestSourceSHA256": {
+        "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c",
+        "InlineInvitationRosterPhoneUITests.swift": "dcf8626ee954de1a05de17336747d60498f6d2b1c66f1af724170a4b51757e9e"
+      }
+    },
+    {
+      "run": "roster-final",
+      "label": "Four read-only role/text roster launches",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 132.712,
+      "xcresultSessionSeconds": 136.843,
+      "compiledTestSourceSHA256": {
+        "InlineInvitationRosterPhoneUITests.swift": "aeeec238dca1e960cbdff13eac744fac735456a9958634a0982b2adfb16540ec",
+        "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c"
+      }
+    }
+  ],
+  "apiPhases": 8,
+  "preFinalRuns": [
+    {
+      "run": "roster",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "caseDurationSeconds": 130.549,
+      "failedLocation": "InlineInvitationRosterPhoneUITests.swift:161 revealFully(summary)",
+      "completedIndependentIterations": [
+        "owner/zh-Hans/light/normal",
+        "owner/de/light/actual AccessibilityXXXL",
+        "participant/zh-Hans/light/normal"
+      ],
+      "notCompleted": "participant/de/light/actual AccessibilityXXXL",
+      "diagnosis": "The drag helper used the AX ScrollView frame rather than the footer-excluded viewport. Touch start y577.5 landed in the fixed participant maximum-text footer (top approximately y523), so the summary did not scroll. Product scroll/readability was not proved by this failed iteration.",
+      "repairScope": "Only focused test helper touch coordinates and diagnostics; product frozen. Keep full row/window/44pt assertions.",
+      "initialCompiledTestSourceSHA256": {
+        "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c",
+        "InlineInvitationRosterPhoneUITests.swift": "dcf8626ee954de1a05de17336747d60498f6d2b1c66f1af724170a4b51757e9e"
+      }
+    }
+  ],
+  "testOnlyRepair": "roster-helper-repair.json",
+  "domainUnitTestsRepeated": false,
+  "reason": "UI composition only; invitation/publish/calendar algorithms and requests unchanged. Actual native integration and role/text geometry tested.",
+  "webReleased": false,
+  "backendReleased": false,
+  "legacyGuestRecoveryExecution": "Not repeated; original functions and collecting rows byte-identical plus static independent review."
+}

@@ -1,0 +1,1262 @@
+{
+  "schema_version": 1,
+  "reviewed_at_utc": "2026-10-25T15:07:48.324163+00:00",
+  "reviewer": "inline_roster_pixels",
+  "batch": "Preview221 full flow / ordinary text size / zh-Hans / light",
+  "source_index": "/tmp/sideseat221-private/full-images/index.json",
+  "summary": {
+    "captures": 40,
+    "unique_sha256": 33,
+    "unique_source_pngs_actually_viewed": 33,
+    "duplicate_captures_reusing_sha_review": 7,
+    "all_source_hashes_verified": true,
+    "unique_pass": 30,
+    "unique_pass_with_evidence_limits": 3,
+    "unique_confirmed_product_visual_failures": 0,
+    "visual_regression_conclusion": "在本批可见内容中未发现可确认的新视觉回归；无历史基准图逐像素对比，且部分参与者名单最后一行未完整入镜。",
+    "preview221_inline_roster_conclusion": "名单直接置于邀请回应进度条下，无需打开独立名单页。owner INVITING/CONFIRMED 及 participant accepted 两人姓名/状态/你的完整像素证据充分。participant pending 与 participant CONFIRMED 最后一人完整显示需追加截图证据。",
+    "bottom_actions": "所有无模态的确认页截图中，底部主要操作及相应次要操作均完整可见。",
+    "system_assistive_touch": "33 个 unique 均有 OS AssistiveTouch 浮层；覆盖位置逐图记录。该浮层不归类为产品渲染回归。",
+    "functional_test_results_used_as_pixel_evidence": false,
+    "modified_files": [
+      "/tmp/sideseat221-private/full-visual-review.json"
+    ]
+  },
+  "acceptance_checks": [
+    {
+      "check": "名单直接位于邀请回复进度下，免点开",
+      "result": "pass",
+      "basis": "5 个 inline-roster 状态的独立 SHA 均可见进度条下的内联名单。"
+    },
+    {
+      "check": "owner INVITING 的 pending/accepted/你/底部动作",
+      "result": "pass",
+      "basis": "ecbf3bef 图两行完整；Lin 待确认，Ming 你 已接受，正式发出完整。"
+    },
+    {
+      "check": "owner CONFIRMED 的 accepted/你/底部动作",
+      "result": "pass",
+      "basis": "a2f08e7a 图两行完整，Ming 标你，均已接受，去日历查看完整。"
+    },
+    {
+      "check": "participant accepted 的 accepted/你/底部动作",
+      "result": "pass",
+      "basis": "0de50f3b 图两行姓名状态完整，Lin 标你，等待发起人正式发出与无法参加完整。"
+    },
+    {
+      "check": "participant pending 的最后一人完整显示",
+      "result": "needs_additional_pixel_evidence",
+      "basis": "be33f5a9 的 peer/owner capture 相同；第二行在固定底栏交界处未完整入镜。不推断无法滚动。"
+    },
+    {
+      "check": "participant CONFIRMED 的最后一人完整显示",
+      "result": "needs_additional_pixel_evidence",
+      "basis": "e6ac0ff5 的 peer/owner capture 相同；仅第一行完整入镜。不推断无法滚动。"
+    },
+    {
+      "check": "全流程其余可见页面的明显布局/裁切/遮挡回归",
+      "result": "pass_with_scope_limits",
+      "basis": "已逐 unique 查看创建、空闲表、编辑、分享、联系人、聊天卡片、最终时间、邀请核对、弹窗、日历列表与搜索。未发现可确认产品视觉缺陷。"
+    }
+  ],
+  "findings": [
+    {
+      "id": "EVIDENCE-001",
+      "classification": "capture_coverage_limit",
+      "product_defect_confirmed": false,
+      "files": [
+        "phone-first-plan-inline-roster-peer-inviting-peer.png",
+        "phone-first-plan-inline-roster-peer-inviting-owner.png",
+        "phone-first-plan-invitation-continuous-across-midnight.png"
+      ],
+      "observation": "participant pending 截图中第二个名字/状态仅部分露出；对应逐人截图 SHA 相同。名单允许滚动，缺最后一行完整入镜证据不等于无法滚动。"
+    },
+    {
+      "id": "EVIDENCE-002",
+      "classification": "capture_coverage_limit",
+      "product_defect_confirmed": false,
+      "files": [
+        "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+        "phone-first-plan-inline-roster-peer-confirmed-owner.png"
+      ],
+      "observation": "participant CONFIRMED 中第一行完整，第二人未完整入镜；对应逐人截图 SHA 相同。需要后续聚焦截图补齐。"
+    },
+    {
+      "id": "OS-OVERLAY-001",
+      "classification": "system_overlay",
+      "product_defect_confirmed": false,
+      "observation": "全部33个unique含AssistiveTouch浮层，部分覆盖进度条尾端、时格或分享卡片右侧；主要动作与所核对名单文字仍可读。"
+    }
+  ],
+  "limitations": [
+    "本批仅普通字号、简体中文 zh-Hans、light；不包含最大辅助字号、德语或其他主题的验收。",
+    "仅基于提供的静态 capture，无设备交互、滚动复现、点击或触摸行为验收。",
+    "未将文件名、测试通过或 associatedWithFailure=false 视为像素内容正确的证据。",
+    "相同 SHA 的 capture 复用一次像素检查；40 captures 对应33unique，重复文件名不能增加视觉覆盖。",
+    "没有已批准历史基准图的逐像素差异比较，因此结论是本批可见界面无可确认明显回归。",
+    "未要求所有名单首屏同屏；固定底部操作条视为现有规则，只记录当前未完整入镜的行。",
+    "系统AssistiveTouch遮住的少量像素无法独立检查，已逐图记载。"
+  ],
+  "images": [
+    {
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "2a890b12ec2e2ee02d09e8d72cf1449a95442508bfb8167883429d91aacd740b",
+      "inspected_file": "phone-first-plan-contacts-calendar-result.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-calendar-result.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-calendar-result_0_1A91C72A-E9DB-4082-9C50-82E187A2C8CF.png",
+          "file": "phone-first-plan-contacts-calendar-result.png",
+          "originalExportedFile": "A3B118A9-B350-47E6-9F89-E3B29E15E1DF.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "日历搜索结果",
+      "observations": [
+        "搜索词完整显示 Contact plan 8a5c1174；结果标题、2026年10月26日23:00、图书馆二楼均清楚。",
+        "搜索框清除与关闭控件、键盘及搜索键无产品文字溢出。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于键盘底部，遮住少量键盘留白。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "8c782ef09c68922f280a1859f699afd7711d5ba266142f4f65c444815b621559",
+      "inspected_file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_0479FC79-9C03-458A-AFB3-5384E423EEC5.png",
+          "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+          "originalExportedFile": "E844F42A-1AB7-4F27-8B96-0F200693BDD7.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "参与者 CONFIRMED 分享计划",
+      "observations": [
+        "分享计划半屏卡片边界、标题、完整跨日日期与时刻清楚。",
+        "可见“分享网页链接”“复制链接”两项；没有 App 好友项。",
+        "背景已确认徽标及跨日时段布局整齐。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖复制链接卡片右侧留白，标签本身可读。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+      "sha256": "e6ac0ff517f8a121a780c8d14c7f7470169e0c0679af123c03e060c120d72871",
+      "inspected_file": "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-roster-peer-confirmed-peer.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-roster-peer-confirmed-peer_0_8CA9F797-AAF6-4745-B64A-D1DE568EC655.png",
+          "file": "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+          "originalExportedFile": "B2531B72-761C-4368-9510-431584337120.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-peer-confirmed-owner_0_0B762557-B4ED-4947-B547-A92985ABD695.png",
+          "file": "phone-first-plan-inline-roster-peer-confirmed-owner.png",
+          "originalExportedFile": "9F0541EB-2A85-4B28-8BC9-AF22F0267A40.png"
+        }
+      ],
+      "outcome": "pass_with_evidence_limits",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "UnifiedPlanConfirmationView / participant / CONFIRMED",
+      "observations": [
+        "“邀请回应”和“2/2 人已确认”进度条下方直接显示名单，无需另开名单页面。",
+        "第一行 Lin8a5c、灰色“你”、绿色勾与“已接受”完整可读。",
+        "底部“安排已确认”“已同步到 Sideseat 日历”“去日历查看”“我无法参加”均完整可见。",
+        "当前视口在第一行后进入固定底部操作区，第二行 Ming8a5c 未完整入镜。"
+      ],
+      "limitations": [
+        "该 SHA 对应 confirmed-peer 和 confirmed-owner 两个 capture，像素相同；两个文件名不能补足第二人的完整显示证据。",
+        "此批静态图无法判断继续滚动后是否可完整露出最后一行；不据此认定不可滚动或产品布局缺陷。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": true,
+            "status": "已接受"
+          }
+        ],
+        "last_row_full_pixel_evidence": false,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 覆盖进度条右端，未盖住已读姓名或底部动作。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "8e7851c6d6ec800ca6deb56b45b1f0c8c1fdd40cb380cc62761a88e9f17f2b59",
+      "inspected_file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-confirmed-calendar-date-cross-midnight_0_E5577A75-C82D-43DD-B0E1-6BF218994A1D.png",
+          "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+          "originalExportedFile": "08CA05E9-D39F-4E7A-BBD1-E7EC5A2C7D70.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "已确定计划列表",
+      "observations": [
+        "已确定标签选中；计划标题、已确认状态、Ming8a5c 发起均完整。",
+        "日期区清楚显示10月26日23:00，箭头连接10月27日01:00，跨日含义明确。",
+        "发起计划按钮与五项底部导航完整显示。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右侧大块留白，无重要内容遮挡。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "b4f1da90725bea28ea678589dbc34a342e8e1ac6439787130ca214cb7d44ad49",
+      "inspected_file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_A3ACF6CE-3665-4E2C-89E0-0AAA247A67FF.png",
+          "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+          "originalExportedFile": "0E5D52D8-80D9-4330-A6CF-1BDCF1711DEC.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner CONFIRMED 分享计划",
+      "observations": [
+        "标题与完整跨日日期不裁切。",
+        "App 好友卡片、分享网页链接和复制链接三项布局整齐且文字完整。",
+        "关闭勾位于卡片右上且可见。"
+      ],
+      "overlay": "系统 AssistiveTouch 部分覆盖 App 好友右侧箭头区域，属于系统浮层。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+      "sha256": "a2f08e7ad1c9a67bbfe6eefae52f3c9f21bf0ff6b4eb64f07e803f2b186ae609",
+      "inspected_file": "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-roster-owner-confirmed-peer.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-roster-owner-confirmed-peer_0_C4C26D05-2FC2-4BA3-8AC0-6EBC09FD408E.png",
+          "file": "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+          "originalExportedFile": "987762A0-3005-4044-BFD7-7D7652A1F13A.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-owner-confirmed-owner_0_D3834E8A-1B2F-470B-BF5D-F561B49EB877.png",
+          "file": "phone-first-plan-inline-roster-owner-confirmed-owner.png",
+          "originalExportedFile": "9CD047F0-1DF3-43E1-990A-13982805FCA4.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "UnifiedPlanConfirmationView / owner / CONFIRMED",
+      "observations": [
+        "“邀请回应”“2/2 人已确认”下直接显示两人名单。",
+        "Lin8a5c、绿色“已接受”完整；Ming8a5c、灰色“你”、绿色“已接受”完整。",
+        "两行分隔线、头像、姓名与右侧状态无相互重叠或文字裁切。",
+        "名单下面“已同步到 Sideseat 日历”清楚；固定底部“去日历查看”完整可见。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": false,
+            "status": "已接受"
+          },
+          {
+            "name": "Ming8a5c",
+            "you": true,
+            "status": "已接受"
+          }
+        ],
+        "last_row_full_pixel_evidence": true,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 覆盖进度条右端，未盖住名单文字。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "sha256": "b708514bfe7063091ea96618555228ac786c5449c4e7b8f3652c2c1387da05c6",
+      "inspected_file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-publish-plan-centered-confirm.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-publish-plan-centered-confirm_0_540BA21D-9B80-4C8B-A733-0DE1807969BF.png",
+          "file": "phone-first-plan-publish-plan-centered-confirm.png",
+          "originalExportedFile": "20340BEF-E49B-46F2-BDF6-8446D050EEE5.png"
+        },
+        {
+          "capture": "phone-first-plan-publish-plan-centered-cancel_0_8C0CEFCA-FAC6-4B15-81BB-8952384D3833.png",
+          "file": "phone-first-plan-publish-plan-centered-cancel.png",
+          "originalExportedFile": "959F8E0B-E398-4E34-AD6A-07AAAA306ECA.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "正式发出居中确认弹窗",
+      "observations": [
+        "居中弹窗的纸飞机图标、标题“正式发出这次安排?”、2位已接受者（含你）说明均完整。",
+        "取消和正式发出两按钮左右分列、宽度一致、文字无溢出。",
+        "灰色遮罩范围一致；背景名单两行可见且“你”标在 Ming8a5c 后。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于弹窗下方背景进度条末端，未遮挡弹窗按钮。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "0de50f3b93d553aefff33bc432df96274e5ecd37c4ea40c1cc048de1d220e277",
+      "inspected_file": "phone-first-plan-inline-roster-peer-accepted-peer.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-roster-peer-accepted-peer.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-explicit-acceptance_0_4D1BAAF6-529D-4026-AD56-196E6DC9B410.png",
+          "file": "phone-first-plan-contacts-explicit-acceptance.png",
+          "originalExportedFile": "0ABDE9F5-553C-4C45-ACC1-3F20AC5EA6D7.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-peer-accepted-peer_0_EE888A17-2EED-4CF3-801F-38B3B8E586C3.png",
+          "file": "phone-first-plan-inline-roster-peer-accepted-peer.png",
+          "originalExportedFile": "0F6A9107-F30A-4EB9-B4E4-F3D5FB3702EF.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-peer-accepted-owner_0_9FA01B78-2F5D-48E3-80C0-E0ED73E14CA7.png",
+          "file": "phone-first-plan-inline-roster-peer-accepted-owner.png",
+          "originalExportedFile": "CA84AB52-4E98-4729-8F18-3309680218EF.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "UnifiedPlanConfirmationView / participant / INVITING / accepted",
+      "observations": [
+        "顶部“待发起人正式发出”；名单直接在“邀请回应”“2/2 人已确认”下。",
+        "Lin8a5c 后有灰色“你”，Lin8a5c 与 Ming8a5c 两行均显示绿色勾及“已接受”，文字和头像完整。",
+        "底栏“待发起人正式发出”“你已接受，等待发起人正式发出。”及“我无法参加”完整可见。",
+        "名单下的说明只露出顶部，处于滚动内容与固定底栏交界；两个人的姓名和状态未被截断。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": true,
+            "status": "已接受"
+          },
+          {
+            "name": "Ming8a5c",
+            "you": false,
+            "status": "已接受"
+          }
+        ],
+        "last_row_full_pixel_evidence": true,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 覆盖进度条右端，名单文字清楚。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "1f47a720529e19e0edccacdcb3c686e1f2a35e947572994f5a757e04de9d14e3",
+      "inspected_file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-invitation-continuous-across-midnight.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-invitation-continuous-across-midnight_0_521A072C-0BD7-4BAB-AEC1-AA252E5EC98C.png",
+          "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+          "originalExportedFile": "41F4A500-FF15-41BE-9E05-2B768A841B5E.png"
+        }
+      ],
+      "outcome": "pass_with_evidence_limits",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "参与者待确认 / 跨日邀请",
+      "observations": [
+        "周一10月26日23:00–24:00与周二10月27日00:00–01:00分成两张完整卡片，绿色受邀时间边界连续。",
+        "“邀请回应”“1/2 人已确认”与半条深色进度清楚。",
+        "第一行 Lin8a5c、灰色“你”、时钟及“待确认”完整；第二行 Ming8a5c/已接受在固定底栏交界处只露出上部。",
+        "底部提问、确认参加主按钮、我无法参加完整。"
+      ],
+      "limitations": [
+        "当前截图没有第二人完整像素；仅静态截图不能判断下滚后的显示，未认定产品无法滚动。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": true,
+            "status": "待确认"
+          }
+        ],
+        "last_row_full_pixel_evidence": false,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 覆盖进度条右端。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "7ed0d213b2e3dac786cd33ec17cb675738ad1828f3d3f0376ef72eeb30838288",
+      "inspected_file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-participant-INVITING.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-participant-INVITING_0_13C24046-A058-43D8-93C8-CAF53E83C489.png",
+          "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+          "originalExportedFile": "FF8330B4-7A65-4CC3-86E3-EA8FC7C569CF.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "participant INVITING 分享计划",
+      "observations": [
+        "分享计划标题、计划名和跨日日期完整。",
+        "可见分享网页链接、复制链接，未显示 App 好友项。",
+        "卡片底部及圆角无内容截断。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖复制链接卡片右侧留白，标签可读。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-roster-peer-inviting-peer.png",
+      "sha256": "be33f5a99d27d6181869db830e432667f0093bf5499a8548ead98fa7deba917f",
+      "inspected_file": "phone-first-plan-inline-roster-peer-inviting-peer.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-roster-peer-inviting-peer.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-roster-peer-inviting-peer_0_4146DBB1-78FA-4FB0-AFC3-578373468B03.png",
+          "file": "phone-first-plan-inline-roster-peer-inviting-peer.png",
+          "originalExportedFile": "299CE52C-EF42-474B-B552-F7198F7C4DAA.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-peer-inviting-owner_0_F7845FFB-A5E5-49AA-AB74-E5BA2EE9D033.png",
+          "file": "phone-first-plan-inline-roster-peer-inviting-owner.png",
+          "originalExportedFile": "EA8D6CEC-0C8B-45AE-A72F-745DAC46F8C8.png"
+        }
+      ],
+      "outcome": "pass_with_evidence_limits",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "UnifiedPlanConfirmationView / participant / INVITING / pending",
+      "observations": [
+        "顶部“待你确认”；名单直接在“邀请回应”“1/2 人已确认”与进度条下。",
+        "Lin8a5c 后标灰色“你”，右侧时钟和“待确认”完整。",
+        "第二行 Ming8a5c 及绿色“已接受”只露出上部，底部固定确认面板位于其前。",
+        "“这个时间，你方便吗?”、“确认参加”、“我无法参加”完整清楚。"
+      ],
+      "limitations": [
+        "该 SHA 同时用于 inviting-peer、inviting-owner capture，连续截图没有新增最后一人完整显示证据。",
+        "名单不要求首屏全员同屏；此处只记录未滚到完整最后一行，不推断无法滚动。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": true,
+            "status": "待确认"
+          }
+        ],
+        "last_row_full_pixel_evidence": false,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 位于进度条右端，不遮第一行姓名和待确认状态。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "2ddeba30eef199cb2c948d4ea00b9e5e406394c8535cc1f25fc3752f23881272",
+      "inspected_file": "phone-first-plan-contacts-received-chat-card.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-received-chat-card.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-received-chat-card_0_CBA71BFB-C665-4DE7-9960-9CE997BFFB67.png",
+          "file": "phone-first-plan-contacts-received-chat-card.png",
+          "originalExportedFile": "41E8DD24-0EE2-4D8B-84D9-9DE44B7D7295.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "聊天中收到正式邀请卡片",
+      "observations": [
+        "聊天对象 Ming8a5c、消息泡和邀请卡片均清楚。",
+        "卡片标题完整，跨日日期自然换两行，待你确认与查看邀请均无截断。",
+        "底部消息输入框、加计划图标和发送箭头完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右侧留白，没有遮住卡片。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "1e79f1f52d90c5da3b8155e775599431afa2063dd4d9802db77ab26dd2958cce",
+      "inspected_file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-cancel-plan-centered-keep.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-cancel-plan-centered-keep_0_EE1CD59F-E250-422A-A92B-19F154928C62.png",
+          "file": "phone-first-plan-cancel-plan-centered-keep.png",
+          "originalExportedFile": "429AA4EC-C16A-49C9-B005-D1572C7B85C0.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "取消计划居中确认弹窗",
+      "observations": [
+        "取消图标、标题“为所有人取消这个计划?”、两行说明完整居中。",
+        "保留计划和取消计划两按钮文字完整，危险操作红色明确。",
+        "弹窗未与系统浮层或固定底部按钮重叠。"
+      ],
+      "overlay": "系统 AssistiveTouch 在弹窗外背景进度条右端。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "2f6efc8a56a6ba23a4eb6cac2234039d881711360fb374a40d4924444145a1c0",
+      "inspected_file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-owner-INVITING.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-owner-INVITING_0_001A75F9-E432-4A3A-A8B3-1070A63282C9.png",
+          "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+          "originalExportedFile": "E11B1D90-F113-4A73-96EF-C5613BCF3B6D.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner INVITING 分享计划",
+      "observations": [
+        "分享计划名及完整跨日日期清楚。",
+        "App 好友卡片、分享网页链接、复制链接布局一致且文字不裁切。",
+        "右上完成勾可见。"
+      ],
+      "overlay": "系统 AssistiveTouch 部分覆盖 App 好友右侧箭头，属于系统浮层。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-roster-owner-inviting-peer.png",
+      "sha256": "ecbf3befab708d0cdfb26eb1a94db30af4336c7cc919aece8c3fbaca9fdb6da7",
+      "inspected_file": "phone-first-plan-inline-roster-owner-inviting-peer.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-roster-owner-inviting-peer.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-roster-owner-inviting-peer_0_F1560C6D-2A8D-40E2-A4A0-966DF42454A7.png",
+          "file": "phone-first-plan-inline-roster-owner-inviting-peer.png",
+          "originalExportedFile": "73D1CE65-CF15-4763-8E50-E9D52D25456F.png"
+        },
+        {
+          "capture": "phone-first-plan-inline-roster-owner-inviting-owner_0_75A2A38E-C012-4C93-A65B-05AE7FC4F2D9.png",
+          "file": "phone-first-plan-inline-roster-owner-inviting-owner.png",
+          "originalExportedFile": "26D19CDA-A6FD-4414-AB12-B1B8C2204E3B.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "UnifiedPlanConfirmationView / owner / INVITING / pending",
+      "observations": [
+        "顶部“待你正式发出”；“邀请回应”“1/2 人已确认”下直接显示完整两人名单。",
+        "Lin8a5c 右侧为时钟“待确认”；Ming8a5c 后有“你”，右侧绿色勾“已接受”，语义和归属清楚。",
+        "两行姓名、头像、状态、分隔线均完整；名单下说明完整。",
+        "固定底栏提示准备好就能正式发出、主按钮“正式发出”均完整可见。"
+      ],
+      "roster": {
+        "inline_below_progress": true,
+        "visible_full_rows": [
+          {
+            "name": "Lin8a5c",
+            "you": false,
+            "status": "待确认"
+          },
+          {
+            "name": "Ming8a5c",
+            "you": true,
+            "status": "已接受"
+          }
+        ],
+        "last_row_full_pixel_evidence": true,
+        "bottom_actions_visible": true
+      },
+      "overlay": "系统 AssistiveTouch 覆盖进度条右端，未盖住姓名与状态。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "01d19bd365eef0b3661bb4920b742a89c940485d5f6ef469ac3ba3560035c4de",
+      "inspected_file": "phone-first-plan-contacts-review-final-invitees.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-review-final-invitees.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-review-final-invitees_0_ABBB9492-F3E0-4449-A784-0271A928E89F.png",
+          "file": "phone-first-plan-contacts-review-final-invitees.png",
+          "originalExportedFile": "BB5ABF76-6ED5-44A8-BCA5-CAB0D987971B.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "核对邀请名单",
+      "observations": [
+        "活动名、图书馆二楼、完整跨日最终时间和 Europe/Berlin 均清楚。",
+        "Ming8a5c 和 Lin8a5c 两个参与者行与部分时段未征集空闲提示完整。",
+        "邀请朋友区域向下延伸到滚动视口外；固定底栏“将邀请2人（含你）”及“发出邀请”完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖第二行右下留白与分隔线，未盖姓名。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "7b1126c07bf76e3d13eedec5fa3c9bef523e3a0ae89b7f8e45c74db2c5bec8cb",
+      "inspected_file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-final-cross-day-morning-and-summary.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_F6627AD6-719F-46DB-A1FC-B3C07C1A8EF5.png",
+          "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+          "originalExportedFile": "78406EA2-150B-476B-9404-2E9AFD6E2570.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "最终时间 / 跨日凌晨与汇总",
+      "observations": [
+        "选择最终时间标题、活动名、地点、说明与2人已填写均清楚。",
+        "周二10月27日00:00和00:30两个橙色选择格边界清楚。",
+        "底部10月26日至27日23:00–01:00、2小时与下一步确认邀请名单完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四02:00–02:30格，属于系统浮层。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "3de574e3fd9821540204e379c49aaebfe5514a9e9713766a31c47a50a86fc87e",
+      "inspected_file": "phone-first-plan-final-cross-day-evening.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-final-cross-day-evening.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-final-cross-day-evening_0_AEFC7788-48C4-47C5-A984-DA93A397529B.png",
+          "file": "phone-first-plan-final-cross-day-evening.png",
+          "originalExportedFile": "8D271C84-5F4B-4DED-A507-30D4222B7E8F.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "最终时间 / 跨日夜间",
+      "observations": [
+        "周一10月26日23:00、23:30两个橙色格清楚，其他列无选择。",
+        "图例、填写人数、说明均无换行挤压。",
+        "底部10月26日至27日23:00–00:00、1小时与下一步按钮完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四22:30–23:00附近格。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "7a0ace9af243cf8c52a9bda54dc069f2a4a8a17b1736ceba2414afc59679b86d",
+      "inspected_file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_B23550A7-A9B7-4FBD-896C-378BFB4D9248.png",
+          "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+          "originalExportedFile": "2F87101A-7F90-4338-B7B5-CF99F4205433.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "最终时间 / 09:00–10:00选择",
+      "observations": [
+        "周一09:00和09:30为绿色已填空闲并叠橙色最终选择边框，两个计数2和勾清楚。",
+        "其余时格0与时间标签排列整齐。",
+        "底栏10月26日09:00–10:00、1小时与下一步按钮完整；截图只证明当前选择视觉，不证明手势历史。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四11:00–11:30格。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "4d81735e91d44634fc4068f5a8d2c2fbe01e472ff35fb68edcf65dce7262c31c",
+      "inspected_file": "phone-first-plan-compact-responded-people.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-compact-responded-people.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-compact-responded-people_0_651AB3B1-9BFB-428F-8D09-16CD5989C3C8.png",
+          "file": "phone-first-plan-compact-responded-people.png",
+          "originalExportedFile": "68BE8C40-B541-4BEF-8578-6CC9C30C8A67.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "参与者与进度",
+      "observations": [
+        "标题、计划名和2人已填写完整。",
+        "Ming8a5c 与 Lin8a5c 两行的已提交空闲绿色状态完整；灰色“你”只跟随 Lin8a5c。",
+        "说明“填写有空，还不代表确认参加。”完整，卡片无裁切。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右侧下方留白。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "3a12c860a220637766760b796d31a8186c6e95a5d56ec664bfd71ce471f866e8",
+      "inspected_file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-peer-inline-availability.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-peer-inline-availability_0_835879F8-DE06-46B4-BD3D-24FE509EF38C.png",
+          "file": "phone-first-plan-contacts-peer-inline-availability.png",
+          "originalExportedFile": "C5D3B5A8-8F78-400B-9BF4-606889989E9B.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "参与者已提交空闲",
+      "observations": [
+        "计划名、地点、日期范围、Europe/Berlin、2人已填写与两头像完整。",
+        "周一09:00和09:30绿色选择格、计数2清楚。",
+        "底部已提交空闲、已选1天1小时、等待发起人的邀请完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四12:30附近格。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "697161f72124b54074dae9027f5c4b86c2633ebac3919944eba6c4b2938e67a1",
+      "inspected_file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_4FA44639-9C58-4B3F-B492-928CD6E6ABC0.png",
+          "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+          "originalExportedFile": "3F1C1ED2-CA59-4DB2-B496-ECDA2BE40A68.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "participant COLLECTING 分享计划",
+      "observations": [
+        "分享卡片标题、计划名完整；分享网页链接与复制链接两按钮整齐。",
+        "未见 App 好友项；背景时格与收集空闲阶段信息清楚。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖复制链接右侧部分区域，文字仍可读。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card-46dcd090.png",
+      "sha256": "46dcd09060447f97254aad60e7b5d37ea79e30f9e134ee41cb98b2c9d1bd9214",
+      "inspected_file": "phone-first-plan-contacts-received-chat-card-46dcd090.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-received-chat-card-46dcd090.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-received-chat-card_0_D8902D9D-25AF-4F36-A56E-D681B1020BC8.png",
+          "file": "phone-first-plan-contacts-received-chat-card-46dcd090.png",
+          "originalExportedFile": "C2CA7EAE-AFEC-4E93-B3F5-8AE99622FADB.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "聊天中收到空闲征集卡片",
+      "observations": [
+        "计划卡片名完整，“待你选空闲”“填写我的空闲”清楚。",
+        "聊天气泡、联系人头部和底部输入区域无重叠。",
+        "此图是收集空闲卡片，与另一邀请卡片不同，已单独查看。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右侧留白。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "15adac24573d464b84127eebb0f81abbec6d0eaea6ad5e4d2edda03ee31979c0",
+      "inspected_file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_1427FD04-0608-48CE-A812-474886BBAB53.png",
+          "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+          "originalExportedFile": "8855FD6E-C28A-4296-9FEA-905C84586FF6.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner 已提交空闲 / 发送后",
+      "observations": [
+        "计划名、图书馆二楼与1人已填写清楚。",
+        "周一09:00和09:30绿色选择格保留，计数1完整。",
+        "已提交空闲、已选1天1小时与选择最终时间按钮均完整；静态图不证明发送前后的因果。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四12:00–12:30格附近。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "58e7263eadc4dccb43f83eab0270e23700f037ae7d56d0c91242821b88b33a54",
+      "inspected_file": "phone-first-plan-contacts-select-and-send.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-select-and-send.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-select-and-send_0_0E68EA6A-1D5B-418A-BABD-DB2B0A6A9680.png",
+          "file": "phone-first-plan-contacts-select-and-send.png",
+          "originalExportedFile": "9B0493D4-E5D7-4BD5-9E35-2B4926AD2A3D.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "邀请联系人",
+      "observations": [
+        "邀请联系人标题、计划名和 Lin8a5c 已选标记完整。",
+        "说明文字完整，底部“发送给1位联系人”主按钮和搜索联系人框均清楚。",
+        "未出现姓名或按钮文案溢出。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右侧空白。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "fd5785e7185bc7af71a937b7b46ae551734b242ff30f7b73385ad8a21000fa77",
+      "inspected_file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_CEEAD7B1-E01F-42A9-9780-88C470693C93.png",
+          "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+          "originalExportedFile": "5B914893-BF6C-4068-B5AE-076EE71CB9C6.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner COLLECTING 已提交 / 分享计划",
+      "observations": [
+        "分享计划标题、计划名、App 好友卡片及两种链接分享按钮完整。",
+        "背景可见1人已填写和两格绿色已提交空闲。",
+        "完成勾、App好友右侧箭头可见，卡片无溢出。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖 App 好友卡片右下边缘及其下留白，箭头与文字仍可读。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "38653e8dea00b16afe00b93d1a41baeb22df58f8c7767545fd2912f37670d25a",
+      "inspected_file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-information-saved-draft-preserved.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_D6450E20-DD03-4F72-B960-74A645BD9B09.png",
+          "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+          "originalExportedFile": "1A90AFD2-08FF-4461-83AB-996B337F27D3.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "信息保存后 / 未提交空闲草稿",
+      "observations": [
+        "计划名与图书馆二楼完整，标题与地点后的编辑铅笔清楚。",
+        "0人已填写；周一09:00、09:30草稿勾选与边框可见。",
+        "底部未提交、已选1天1小时、提交并分享和选择最终时间完整。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四12:00–12:30格附近。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "7825780a11b92dc61875832e3cb32b36036b1ececde5595dc34c517e48a4eea5",
+      "inspected_file": "phone-first-plan-inline-information-editing.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-inline-information-editing.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-inline-information-editing_0_28767837-E8C9-4679-8B41-DC030CD240DE.png",
+          "file": "phone-first-plan-inline-information-editing.png",
+          "originalExportedFile": "703EA1AB-5940-496D-8D6A-E28FA466FB5F.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "内联编辑活动信息 / 键盘展开",
+      "observations": [
+        "活动名称字段完整显示 Contact plan 8a5c1174；地点字段图书馆二楼与插入光标完整。",
+        "取消、保存按钮完整清楚，位于键盘以上。",
+        "键盘遮住下方时间表属于输入态；日期范围、0人已填写和上方已选格仍可见。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于键盘底部留白，不遮编辑字段或保存按钮。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "fae91179bb3543d5aaa836c7e2ce625d524dee1a71eca1bdd666b1a8608cd80e",
+      "inspected_file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_9BB33FE1-835C-4F2D-B543-52930550C75D.png",
+          "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+          "originalExportedFile": "F9617409-91CF-4DF7-8D13-A06B036E99B5.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner 未提交 / 空闲选择",
+      "observations": [
+        "活动名、可选地点、日期与0人已填写清楚。",
+        "周一09:00、09:30有绿色边框和勾，其他时格0排列整齐。",
+        "底部未提交、已选1天1小时、提交并分享与选择最终时间完整；截图不证明此前手势或无撤销行为。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四12:00–12:30格附近。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "38d8ca7970b6a5d9de0815269d69c5d2165577851464022e89b129a12b6cf5f2",
+      "inspected_file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_EE2EEA6C-896A-45E9-B8EB-895D49D73EE7.png",
+          "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+          "originalExportedFile": "619DB937-9DDD-488B-B41B-35BBFC7F0571.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "owner COLLECTING 填写前 / 分享计划",
+      "observations": [
+        "分享计划标题、活动名完整；App 好友卡片与两种链接分享控件清楚。",
+        "背景0人已填写与未选择的时格布局一致。",
+        "完成勾、App好友右侧箭头、按钮文字不裁切。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于 App 好友卡片右下与下方留白，未遮按钮文字。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "9cdfec99fc3e0a0f2c0d1788703051ae1009d1b305075dce6cb27d3803265b2c",
+      "inspected_file": "phone-first-plan-delete-plan-centered-keep.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-delete-plan-centered-keep.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-delete-plan-centered-keep_0_AB097D7C-90A0-4612-913E-B1F40C6030C7.png",
+          "file": "phone-first-plan-delete-plan-centered-keep.png",
+          "originalExportedFile": "9FF660BC-7E5E-4671-8B43-FAF8B5BBFA9B.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "删除征集居中确认弹窗",
+      "observations": [
+        "垃圾桶图标、删除这份征集及所有答复标题、删除计划及所有人空闲填写说明完整。",
+        "保留计划与删除征集两按钮完整，危险动作红色明确。",
+        "弹窗居中，未与系统浮层重叠。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于弹窗外背景时格。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "616738310a5feab47ddd882b75e6158b28a433942c8e14fc7fbfbd218756e295",
+      "inspected_file": "phone-first-plan-compact-empty-timetable.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-compact-empty-timetable.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-compact-empty-timetable_0_E2066AF8-7925-435A-BEC3-ABFEEB31ACA5.png",
+          "file": "phone-first-plan-compact-empty-timetable.png",
+          "originalExportedFile": "1DB999AE-1EB7-437A-AED8-FD0BFA779E12.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "空白时间表 / 未提交",
+      "observations": [
+        "标题、可选地点、候选日期、Europe/Berlin与0人已填写完整。",
+        "四列日期和时格网格对齐，计数0清楚。",
+        "底部未提交、已选0天0小时、禁用提交并分享及选择最终时间可见。"
+      ],
+      "overlay": "系统 AssistiveTouch 覆盖周四12:00–12:30格附近。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    },
+    {
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "0c35dad0f0e043016c3628606994cd480d64b5bd2b65083a5799f501cf321d86",
+      "inspected_file": "phone-first-plan-creation-information-without-timetable.png",
+      "source_path": "/tmp/sideseat221-private/full-images/phone-first-plan-creation-information-without-timetable.png",
+      "source_dimensions_px": {
+        "width": 1284,
+        "height": 2778
+      },
+      "review_method": "用 view_image 单独查看原始 PNG 文件；未用测试断言或拼图代替视觉查看。",
+      "captures": [
+        {
+          "capture": "phone-first-plan-creation-information-without-timetable_0_16999EFB-8F2A-4C10-A7E3-C2B47B1CC1DB.png",
+          "file": "phone-first-plan-creation-information-without-timetable.png",
+          "originalExportedFile": "08E944DA-9143-45B2-93F2-81E3FB10BD90.png"
+        }
+      ],
+      "outcome": "pass",
+      "pass": true,
+      "fail": false,
+      "pass_fail_scope": "pass 表示截图内可检查的产品内容未发现可确认视觉缺陷；不将未入镜内容判为已验收。",
+      "screen": "发起计划信息页",
+      "observations": [
+        "活动草稿名完整，地点可选、候选日期、每天09:00–17:00和Europe/Berlin均清楚。",
+        "让朋友提议活动复选框未选；信息卡片内没有时间表网格。",
+        "底部“下一步：填写空闲”完整，关闭按钮与拖拽条清楚。"
+      ],
+      "overlay": "系统 AssistiveTouch 位于右下方留白，不盖信息或下一步。",
+      "confirmed_product_visual_defects": [],
+      "system_assistive_touch_present": true
+    }
+  ]
+}
