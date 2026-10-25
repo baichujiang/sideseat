@@ -36,7 +36,7 @@ test("DST repeated hour has distinct cells and actual UTC intervals", () => {
 });
 
 test("recommendations cover the entire activity duration and keep unfilled invitees visible", () => {
-  const slots = buildPollSlots({ title: "Dinner", timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 660 });
+  const slots = buildPollSlots({ timeZone: "Europe/Berlin", dates: ["2026-10-16"], startMinute: 540, endMinute: 660 });
   const people = Array.from({ length: 5 }, (_, n) => ({ id: String(n), displayName: String(n), isMe: n === 0, slotIds: n === 4 ? [0, 1] : [0, 1, 2, 3] }));
   const fullHour = summarizePoll(slots, people, 60, 5);
   assert.equal(fullHour.maximum, 4);

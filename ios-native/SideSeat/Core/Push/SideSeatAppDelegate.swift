@@ -25,6 +25,12 @@ struct ForegroundPushNotice: Equatable, Sendable {
         kind == "plan_accepted" || kind == "plan_canceled" || kind == "time_poll_confirmed"
     }
 
+    var isDirectPlanCancellation: Bool {
+        guard kind == "plan_canceled" else { return false }
+        let path = URL(string: navigationURL ?? "")?.path ?? ""
+        return !path.hasPrefix("/time-polls/")
+    }
+
     var isMutualOpportunity: Bool {
         kind == "mutual_opportunity"
     }

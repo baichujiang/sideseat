@@ -4,7 +4,7 @@ import { availabilityCells } from "../../lib/time-polls/browser-types";
 import { buildPollSlots } from "../../lib/time-polls/domain";
 
 test("half-hour cells keep every persisted quarter ID and legacy boundary", () => {
-  const slots = buildPollSlots({ title: "Study", timeZone: "Europe/Berlin", dates: ["2026-10-20", "2026-10-21"], startMinute: 555, endMinute: 660 });
+  const slots = buildPollSlots({ timeZone: "Europe/Berlin", dates: ["2026-10-20", "2026-10-21"], startMinute: 555, endMinute: 660 });
   const cells = availabilityCells(slots);
   assert.equal(cells.length, 8);
   assert.deepEqual(cells.flatMap((cell) => cell.slotIds), slots.map((slot) => slot.id));
@@ -16,7 +16,7 @@ test("half-hour cells keep every persisted quarter ID and legacy boundary", () =
 
 test("a full-day grid is half as tall and repeated DST times remain separate", () => {
   for (const date of ["2026-03-29", "2026-10-25", "2026-10-26"]) {
-    const slots = buildPollSlots({ title: "Study", timeZone: "Europe/Berlin", dates: [date], startMinute: 0, endMinute: 1440 });
+    const slots = buildPollSlots({ timeZone: "Europe/Berlin", dates: [date], startMinute: 0, endMinute: 1440 });
     const cells = availabilityCells(slots);
     assert.equal(cells.length, slots.length / 2);
     assert.equal(new Set(cells.map((cell) => cell.row)).size, cells.length);

@@ -455,6 +455,10 @@ struct TimePollDetailView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.load(session: session) } }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
+            guard store.canMutate else { return }
+            Task { await store.load(session: session) }
+        }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
             if let expiry = store.poll?.expirationDate, now < expiry, expiry <= date { now = date }
         }

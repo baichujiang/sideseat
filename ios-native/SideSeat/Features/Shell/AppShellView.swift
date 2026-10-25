@@ -182,7 +182,7 @@ struct AppShellView: View {
             Task { await inboxStore.load(using: session) }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatForegroundPushReceived)) { note in
-            if let notice = note.object as? ForegroundPushNotice, notice.kind == "plan_canceled" {
+            if let notice = note.object as? ForegroundPushNotice, notice.isDirectPlanCancellation {
                 Task { await cancellationNotices.refresh(using: session) }
                 return
             }

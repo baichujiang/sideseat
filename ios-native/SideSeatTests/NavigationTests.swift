@@ -376,6 +376,34 @@ struct NavigationTests {
         #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 0)
     }
 
+    @Test("Shared-plan cancellations keep the foreground banner and refresh Plans and Calendar")
+    @MainActor
+    func sharedPlanCancellationPush() async {
+        let token = String(repeating: "c", count: 32)
+        for url in ["/time-polls/" + token, "https://sideseat.de/time-polls/" + token] {
+            let notice = ForegroundPushNotice(title: "A plan was cancelled", body: "Dinner",
+                url: url, userInfo: ["kind": "plan_canceled", "timePollToken": token])
+            #expect(notice.isPlanUpdate && notice.updatesCalendar)
+            #expect(!notice.isDirectPlanCancellation)
+            #expect(DeepLinkRouter.route(forPath: URL(string: notice.navigationURL!)!.path) == .timePoll(token: token))
+            let probe = NavigationNotificationProbe()
+            let observers = [Notification.Name.sideSeatPlansNeedsRefresh, .sideSeatCalendarNeedsRefresh].map { name in
+                NotificationCenter.default.addObserver(forName: name, object: nil, queue: nil) { probe.record($0.name) }
+            }
+            SideSeatAppDelegate.refreshAppState(for: notice)
+            for _ in 0..<10 where probe.count(for: .sideSeatCalendarNeedsRefresh) == 0 { await Task.yield() }
+            observers.forEach { NotificationCenter.default.removeObserver($0) }
+            #expect(probe.count(for: .sideSeatPlansNeedsRefresh) == 1)
+            #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 1)
+        }
+        let directURLs: [String?] = ["/connections/connection-123", "https://sideseat.de/connections/connection-123", nil]
+        for url in directURLs {
+            let notice = ForegroundPushNotice(title: "Plan cancelled", body: "Dinner", url: url,
+                userInfo: ["kind": "plan_canceled", "connectionId": "connection-123"])
+            #expect(notice.isDirectPlanCancellation)
+        }
+    }
+
     @Test("Native plan cards preserve readable fallback and accept only supported plan URLs")
     func nativeContactPlanMessage() {
         let token = String(repeating: "b", count: 32)

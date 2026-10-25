@@ -39,8 +39,18 @@ final class AppContainer {
             let apiClient = APIClient(environment: environment)
             let credentialStore: any CredentialStore
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--ui-testing-ephemeral-credentials") {
+            let arguments = ProcessInfo.processInfo.arguments
+            let qaCredentialsKey = "sideseat.ui-testing-persistent-qa-credentials"
+            if arguments.contains("--ui-testing-end-persistent-qa-credentials") {
+                UserDefaults.standard.removeObject(forKey: qaCredentialsKey)
+            } else if arguments.contains("--ui-testing-persistent-qa-credentials") {
+                UserDefaults.standard.set(true, forKey: qaCredentialsKey)
+            }
+            if arguments.contains("--ui-testing-ephemeral-credentials") {
                 credentialStore = EphemeralCredentialStore()
+            } else if UserDefaults.standard.bool(forKey: qaCredentialsKey) {
+                // Notification cold launches have no test arguments; keep the owner's session separate.
+                credentialStore = KeychainCredentialStore(service: environment.bundleIdentifier + ".ui-testing")
             } else {
                 credentialStore = ResilientCredentialStore(service: environment.bundleIdentifier)
             }

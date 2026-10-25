@@ -45,3 +45,25 @@ export function schedulePublishedPollNotification(token: string, recipientIds: s
     }));
   });
 }
+
+/** Only the selected formal invitees at cancellation receive this alert. */
+export function scheduleCancelledPollNotification(token: string, version: number, recipientIds: string[]) {
+  after(async () => {
+    const poll = await prisma.timePoll.findUnique({ where: { token }, select: {
+      title: true, phase: true, creatorId: true, invitationVersion: true,
+      invitations: { where: { userId: { in: recipientIds }, selected: true, status: { in: ["INVITED", "ACCEPTED"] }, version }, select: { userId: true } },
+    } });
+    if (poll?.phase !== "CANCELLED" || poll.invitationVersion !== version) return;
+    await Promise.all(poll.invitations.map(async person => {
+      if (!person.userId || person.userId === poll.creatorId) return;
+      const blocked = await prisma.block.findFirst({ where: { OR: [
+        { blockerId: poll.creatorId, blockedId: person.userId }, { blockerId: person.userId, blockedId: poll.creatorId },
+      ] }, select: { id: true } });
+      if (blocked) return;
+      await notifyUserPush(person.userId, {
+        title: "A plan was cancelled", body: poll.title, url: `/time-polls/${token}`,
+        threadId: `time-poll:${token}`, category: "PLAN_UPDATE", data: { kind: "plan_canceled", timePollToken: token },
+      });
+    }));
+  });
+}

@@ -8,7 +8,7 @@ import { v1Error } from "@/lib/api/v1/http";
 import { buildPollSlots, isPollInvitationWindow, createTimePollSchema, saveTimePollResponseSchema, summarizePoll, sendPollInvitationsSchema, respondPollInvitationSchema, suggestPollActivitySchema, updateTimePollDetailsSchema, pollActivityInterestSchema, type PollSlot } from "@/lib/time-polls/domain";
 import { hasPlanningBlock, lockPollPlan } from "@/lib/time-polls/planning";
 import { timePollExpiresAt, timePollPhase } from "@/lib/time-polls/lifecycle";
-import { schedulePollInvitationNotification, schedulePublishedPollNotification } from "@/lib/time-polls/notifications";
+import { schedulePollInvitationNotification, schedulePublishedPollNotification, scheduleCancelledPollNotification } from "@/lib/time-polls/notifications";
 
 export class TimePollError extends Error {
   constructor(readonly status: number, message: string) { super(message); }
@@ -314,13 +314,20 @@ export async function renameTimePollParticipant(token: string, actor: TimePollAc
 
 export async function cancelPollPlan(token: string, userId: string, version: number, appOrigin: string) {
   await accessiblePoll(token, userId);
+  let recipients: string[] = [];
   await prisma.$transaction(async (tx) => {
     const poll = await lockPollPlan(tx, token, userId);
     if (!poll || poll.creatorId !== userId) throw new TimePollError(404, "Plan unavailable.");
     if (poll.invitationVersion !== version) throw new TimePollError(409, "This plan changed. Reopen it.");
+    if (poll.phase === "CANCELLED") return;
+    if (["INVITING", "CONFIRMED"].includes(poll.phase)) {
+      recipients = poll.invitations.flatMap(person => person.selected && person.version === version
+        && ["INVITED", "ACCEPTED"].includes(person.status) && person.userId && person.userId !== userId ? [person.userId] : []);
+    }
     await tx.timePoll.update({ where: { id: poll.id }, data: { phase: "CANCELLED", canceledAt: new Date() } });
     await tx.calendarEntry.deleteMany({ where: { timePollId: poll.id } });
   });
+  if (recipients.length) scheduleCancelledPollNotification(token, version, recipients);
   return getTimePoll(token, userId, appOrigin);
 }
 
