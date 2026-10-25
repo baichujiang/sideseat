@@ -1,0 +1,8 @@
+{
+  "onlyTwoMenuLabelLookupsChanged": true,
+  "unchangedInputs": 267,
+  "totalInputs": 268,
+  "changedInput": "ios-native/SideSeat/Features/Together/TogetherRootView.swift",
+  "handlersIDsConditionsAndOtherProductBytesUnchanged": true,
+  "testSourceUnchangedForFinalRerun": true
+}

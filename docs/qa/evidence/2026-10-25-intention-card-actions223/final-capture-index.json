@@ -1,0 +1,256 @@
+{
+  "basis": "Final223 after two-label Menu repair",
+  "captures": 32,
+  "uniqueSHA256": 25,
+  "directVisualScope": [
+    "intent223-ui-intent-coffee-header-zh-Hans-light-normal.png",
+    "intent223-ui-intent-coffee-menu-zh-Hans-light-normal.png",
+    "intent223-ui-intent-sports-menu-zh-Hans-light-normal.png",
+    "intent223-ui-intent-study-menu-zh-Hans-light-normal.png",
+    "intent223-paused-callback.png",
+    "intent223-delete-cancel-prompt.png",
+    "intent223-ui-intent-coffee-menu-de-light-system-max.png",
+    "intent223-ui-intent-sports-menu-de-light-system-max.png",
+    "intent223-ui-intent-study-menu-de-light-system-max.png",
+    "intent223-ui-intent-coffee-finding-action-de-light-system-max.png"
+  ],
+  "publishedOriginals": [
+    "final/intent223-ui-intent-coffee-header-zh-Hans-light-normal.png",
+    "final/intent223-ui-intent-coffee-menu-zh-Hans-light-normal.png",
+    "final/intent223-ui-intent-sports-menu-zh-Hans-light-normal.png",
+    "final/intent223-ui-intent-study-menu-zh-Hans-light-normal.png",
+    "final/intent223-paused-callback.png",
+    "final/intent223-delete-cancel-prompt.png",
+    "final/intent223-ui-intent-coffee-menu-de-light-system-max.png",
+    "final/intent223-ui-intent-sports-menu-de-light-system-max.png",
+    "final/intent223-ui-intent-study-menu-de-light-system-max.png",
+    "final/intent223-ui-intent-coffee-finding-action-de-light-system-max.png"
+  ],
+  "allCaptures": [
+    {
+      "capture": "intent223-ui-intent-study-menu-zh-Hans-light-normal_0_1A538003-E350-4B20-A485-700A3FAA04A1.png",
+      "file": "intent223-ui-intent-study-menu-zh-Hans-light-normal.png",
+      "sha256": "d19ffc92c6f505c372be0cf5a23ded63cddb1db4173edb7a0b1dd71b7e0c428c",
+      "originalExportedFile": "75B0B1C6-7A67-49CD-9B76-6B9F4FEC8BEC.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-zh-Hans-light-normal_0_3EEAAFA7-7A69-4361-A38F-8FE5E493C14B.png",
+      "file": "intent223-ui-intent-study-finding-action-zh-Hans-light-normal.png",
+      "sha256": "969de884b708d4518e7bbf118212a04d722f7047a73e29432093333b759135b7",
+      "originalExportedFile": "7838AACF-E380-4E03-991A-4E8D7FA704B1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-zh-Hans-light-normal_0_4772075F-8A07-40A6-B982-FFE8F34FEF5C.png",
+      "file": "intent223-ui-intent-study-header-zh-Hans-light-normal.png",
+      "sha256": "969de884b708d4518e7bbf118212a04d722f7047a73e29432093333b759135b7",
+      "originalExportedFile": "82064B78-E941-4A17-9652-A2C4CA6A0A09.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-zh-Hans-light-normal_0_85C4DB17-2856-40DA-9B13-0F11EA89205E.png",
+      "file": "intent223-ui-intent-sports-menu-zh-Hans-light-normal.png",
+      "sha256": "9917fabfc986ef834e93d2b25ec1e0281c42d10e1f0ba56fcbb4de3dbed80138",
+      "originalExportedFile": "F6C5DA5D-1424-4635-B67D-B6CFF8A521D2.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-zh-Hans-light-normal_0_D563657D-550D-40B8-8FA6-23CA1168FDB9.png",
+      "file": "intent223-ui-intent-sports-finding-action-zh-Hans-light-normal.png",
+      "sha256": "69bd393e55f405aa05761993529310589a79c96a92f0aee4d78c296eb699dbcf",
+      "originalExportedFile": "D46EB7B1-3BD8-4D00-ABB0-632174F6E8DD.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-zh-Hans-light-normal_0_5E47F4DA-29F2-4906-96FB-D73E251A27BA.png",
+      "file": "intent223-ui-intent-sports-header-zh-Hans-light-normal.png",
+      "sha256": "69bd393e55f405aa05761993529310589a79c96a92f0aee4d78c296eb699dbcf",
+      "originalExportedFile": "CBD0B69A-45BA-4788-BC26-3829061E34F6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal_0_DDF3C72E-BA0B-456A-A172-184DEC39F47B.png",
+      "file": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal.png",
+      "sha256": "95ca87db7c8d1e7af66c2f6d0f890f220ca2db3d914c125e6fdad3ea594d9500",
+      "originalExportedFile": "9C1B279B-522F-45F2-B555-651F64403473.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-zh-Hans-light-normal_0_2A37D1DC-7230-4C5A-92CA-E4E20AB7198A.png",
+      "file": "intent223-ui-intent-coffee-finding-action-zh-Hans-light-normal.png",
+      "sha256": "6cd371d0610ab43d7addc0bb8d8e6ca6e569295280e5194f5ebbe66ab32a6f40",
+      "originalExportedFile": "821B15A7-1B42-4FAA-A53F-AC66B7F41277.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-zh-Hans-light-normal_0_B6EC8C0B-A537-439B-9DB9-B8278B07C4FE.png",
+      "file": "intent223-ui-intent-coffee-header-zh-Hans-light-normal.png",
+      "sha256": "6cd371d0610ab43d7addc0bb8d8e6ca6e569295280e5194f5ebbe66ab32a6f40",
+      "originalExportedFile": "929AFFB7-1D37-4004-960E-02ECDA892C67.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-deleted-only-selected-fixture_0_8D31FFF5-3247-4089-AD38-7738CF6F101C.png",
+      "file": "intent223-deleted-only-selected-fixture.png",
+      "sha256": "892fd5405f008b09b93d1ab8944369788bebab36eb3995352fef29b277c066e3",
+      "originalExportedFile": "112FCEEF-39B5-44AD-9559-7ADB0AB1B03E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-delete-cancel-prompt_0_3FB9DAC0-C709-4B3D-B1B5-5B4FE6F3F7CF.png",
+      "file": "intent223-delete-cancel-prompt.png",
+      "sha256": "3891509c27e4461bf15bc2c7e5b444ea8f6958af895a7a07353e1c77f9455179",
+      "originalExportedFile": "B43E4F20-83E1-4312-88D8-A03D898EC94C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-paused-edit-saved_0_7C16E0D5-8074-4826-9A32-2DDA063AE10D.png",
+      "file": "intent223-paused-edit-saved.png",
+      "sha256": "09c9c1d171865db6b84a4779ee397778c5afd4938ca699ed22b1b70a3d11f3cb",
+      "originalExportedFile": "5C059950-FF0B-4B4B-8952-6B4ACEF1C4C5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-paused-callback_0_55CF4D65-E16C-4F9F-B32F-D6FEB8D467BD.png",
+      "file": "intent223-paused-callback.png",
+      "sha256": "09c9c1d171865db6b84a4779ee397778c5afd4938ca699ed22b1b70a3d11f3cb",
+      "originalExportedFile": "A1CA4D56-1F10-4812-893C-FDED7F32C74B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-menu-de-light-system-max_0_A5D94C6A-EDE2-4AB8-BCF1-F7FBC607A759.png",
+      "file": "intent223-ui-intent-study-menu-de-light-system-max.png",
+      "sha256": "545d3155ff9850ec1db0fa63107aca22c9260b06c6448c181ed31c98666ab141",
+      "originalExportedFile": "1BB4B449-7FED-42AD-9EBB-2AFCDC510205.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-de-light-system-max_0_F4160135-6D9E-430C-90D9-C44487438D66.png",
+      "file": "intent223-ui-intent-study-finding-action-de-light-system-max.png",
+      "sha256": "613e10307a8142774a36be89c2ad6b06061110ce83e178beb0348b05733faee1",
+      "originalExportedFile": "40E7B357-396B-433C-9268-F17473DDD21F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-5-de-light-system-max_0_4A5544F8-4F85-4198-9860-9094BE5CE15A.png",
+      "file": "intent223-ui-intent-study-text-segment-5-de-light-system-max.png",
+      "sha256": "613e10307a8142774a36be89c2ad6b06061110ce83e178beb0348b05733faee1",
+      "originalExportedFile": "CF7F0EEB-CEE7-46B1-ACD4-E102C7EFECA1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-4-de-light-system-max_0_6D9584B9-A4BD-4768-8757-8BE5DC049E7F.png",
+      "file": "intent223-ui-intent-study-text-segment-4-de-light-system-max.png",
+      "sha256": "59ae34c648799a5d34bd3ea6277fb08cbbbae0b4fc10e7a71e24177aafe33362",
+      "originalExportedFile": "73181D0C-3230-465F-A1D3-599CDEE15C55.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-2-de-light-system-max_0_F2849D9B-331F-4D1C-89C9-888F4B2D9293.png",
+      "file": "intent223-ui-intent-study-text-segment-2-de-light-system-max.png",
+      "sha256": "c056e1b8fe0366467694308a820200a3b76d7ed7b026905d6f75a4fd09cadd3e",
+      "originalExportedFile": "3B2F217C-23E6-4757-AB32-504A9FCC717D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-1-de-light-system-max_0_554EA842-AB5E-4171-89BF-789281BA8446.png",
+      "file": "intent223-ui-intent-study-text-segment-1-de-light-system-max.png",
+      "sha256": "0c3f06d646b1f5bb5377ab79895ecf778294f778d62355011e989bc631291777",
+      "originalExportedFile": "E2B8A1D8-52A8-4040-92E6-D58BEC0CE284.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-de-light-system-max_0_26876DD8-9AB3-46F9-8FE5-73267089DEAB.png",
+      "file": "intent223-ui-intent-study-header-de-light-system-max.png",
+      "sha256": "ed3c88d19e40433fe9f2d9f837c708bbfac3416dad3752ce63f8241c48ec554b",
+      "originalExportedFile": "8F2FA656-EFBC-40E2-AC6F-C35D46ED6D89.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-de-light-system-max_0_32093A8E-262B-4E3A-A362-1E978450EE32.png",
+      "file": "intent223-ui-intent-sports-menu-de-light-system-max.png",
+      "sha256": "423e8f90a308d46a617fab1533c170830d2a1726ba714c30f9bd1010ade92b93",
+      "originalExportedFile": "752F35BC-DC24-4263-956C-2B66A53D1D03.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-de-light-system-max_0_F785BA0E-9940-4694-9D52-01D21AD4A4DE.png",
+      "file": "intent223-ui-intent-sports-finding-action-de-light-system-max.png",
+      "sha256": "76ba67f476f19e4fa1cc260875a3cecaeab405c105408524a16e52a06537caa6",
+      "originalExportedFile": "179A5FAA-238E-418C-B3E9-EC01DE0E1F76.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-5-de-light-system-max_0_D5F4F56D-3E1F-47A3-8901-9CBA2361F605.png",
+      "file": "intent223-ui-intent-sports-text-segment-5-de-light-system-max.png",
+      "sha256": "76ba67f476f19e4fa1cc260875a3cecaeab405c105408524a16e52a06537caa6",
+      "originalExportedFile": "067CE400-D675-4D2A-8D4F-41D4EB06456A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-2-de-light-system-max_0_1831A859-FACC-4F29-B693-85CFEF117000.png",
+      "file": "intent223-ui-intent-sports-text-segment-2-de-light-system-max.png",
+      "sha256": "7091be52a3008518d6ebb2ec358f1920b1ecda2cb02cc0cd8433c517bdfc36ae",
+      "originalExportedFile": "07783B8E-2BE9-4FB9-9472-54439ADEEA97.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-1-de-light-system-max_0_3C5450D5-1700-4DC9-8C70-5CFBD53925FD.png",
+      "file": "intent223-ui-intent-sports-text-segment-1-de-light-system-max.png",
+      "sha256": "5045f9ac7fd1172dde1c9811cd11869ad5e236efb804a8010ca7c2c9926a7c2b",
+      "originalExportedFile": "D07BF390-5804-4598-8C16-8ED9799CF795.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-de-light-system-max_0_B498A99D-E7CF-400C-A1FC-B50493BA87BB.png",
+      "file": "intent223-ui-intent-sports-header-de-light-system-max.png",
+      "sha256": "41cce6cc7b0e004c1391db27ee41751812c4e2a920b05324962577c6aeb312d7",
+      "originalExportedFile": "ED7186C0-84A4-49BA-898A-D07F87167141.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-de-light-system-max_0_F08DE972-61E7-4591-9D19-FA76230B7706.png",
+      "file": "intent223-ui-intent-coffee-menu-de-light-system-max.png",
+      "sha256": "1147619ae003b45e17de6b90659c24577ba33da9d3645aa684beac9f905d667d",
+      "originalExportedFile": "39988A3E-4658-47CF-A486-71B686ED7F68.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-de-light-system-max_0_0EB6A352-1943-4671-A922-9F94EBB0A91D.png",
+      "file": "intent223-ui-intent-coffee-finding-action-de-light-system-max.png",
+      "sha256": "361b13454262c22b7b1df36908c41a2105124e8ec54082415939ee5c68877065",
+      "originalExportedFile": "D8AF181D-0301-4928-B47F-6FA7DE59A12F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-5-de-light-system-max_0_52905D4E-C167-414C-B549-A03AE6983E0D.png",
+      "file": "intent223-ui-intent-coffee-text-segment-5-de-light-system-max.png",
+      "sha256": "361b13454262c22b7b1df36908c41a2105124e8ec54082415939ee5c68877065",
+      "originalExportedFile": "094708B3-BE7F-4A08-83B1-9DF15D0BE926.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-2-de-light-system-max_0_8FB6F4F6-61D2-4008-81AA-B1B9C3EE6760.png",
+      "file": "intent223-ui-intent-coffee-text-segment-2-de-light-system-max.png",
+      "sha256": "7ebecb194c586850bc1a9f1b0f0fe817fd6f80e68dd980839162200bb4090e7e",
+      "originalExportedFile": "BC8058AD-6DFF-4CB8-B71A-FD3FF2E4AECF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-1-de-light-system-max_0_20DB25E2-A421-4AE4-B218-050FEB26D56A.png",
+      "file": "intent223-ui-intent-coffee-text-segment-1-de-light-system-max.png",
+      "sha256": "38d72991626a30b1d9a3889caef5d0f1b72be6386bef7587a6b8ee9af879479f",
+      "originalExportedFile": "29ABAFFE-7306-4BDC-8C03-A96306BE8786.png",
+      "associatedWithFailure": false
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-de-light-system-max_0_980C2813-03F8-427C-AECF-3A74ADCDEE34.png",
+      "file": "intent223-ui-intent-coffee-header-de-light-system-max.png",
+      "sha256": "b5bcb768388115ae8e3023bc6251e4db845c6cea4bd440e75e1a830ceaf2a00d",
+      "originalExportedFile": "1B052702-9BCC-4553-9B35-4DBE69776236.png",
+      "associatedWithFailure": false
+    }
+  ],
+  "unreviewedNewPixelsScope": "Other final images retain automated geometry/OCR and initial full-body visual review; only the two Menu labels changed, independently checked. No claim of viewing every final image."
+}

@@ -1,0 +1,71 @@
+{
+  "directlyReviewedOriginals": 6,
+  "records": [
+    {
+      "capture": "intent223-ui-intent-coffee-header-zh-Hans-light-normal_0_B6EC8C0B-A537-439B-9DB9-B8278B07C4FE.png",
+      "file": "intent223-ui-intent-coffee-header-zh-Hans-light-normal.png",
+      "sha256": "6cd371d0610ab43d7addc0bb8d8e6ca6e569295280e5194f5ebbe66ab32a6f40",
+      "originalExportedFile": "929AFFB7-1D37-4004-960E-02ECDA892C67.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal_0_DDF3C72E-BA0B-456A-A172-184DEC39F47B.png",
+      "file": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal.png",
+      "sha256": "95ca87db7c8d1e7af66c2f6d0f890f220ca2db3d914c125e6fdad3ea594d9500",
+      "originalExportedFile": "9C1B279B-522F-45F2-B555-651F64403473.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-zh-Hans-light-normal_0_85C4DB17-2856-40DA-9B13-0F11EA89205E.png",
+      "file": "intent223-ui-intent-sports-menu-zh-Hans-light-normal.png",
+      "sha256": "9917fabfc986ef834e93d2b25ec1e0281c42d10e1f0ba56fcbb4de3dbed80138",
+      "originalExportedFile": "F6C5DA5D-1424-4635-B67D-B6CFF8A521D2.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    },
+    {
+      "capture": "intent223-ui-intent-study-menu-zh-Hans-light-normal_0_1A538003-E350-4B20-A485-700A3FAA04A1.png",
+      "file": "intent223-ui-intent-study-menu-zh-Hans-light-normal.png",
+      "sha256": "d19ffc92c6f505c372be0cf5a23ded63cddb1db4173edb7a0b1dd71b7e0c428c",
+      "originalExportedFile": "75B0B1C6-7A67-49CD-9B76-6B9F4FEC8BEC.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    },
+    {
+      "capture": "intent223-paused-callback_0_55CF4D65-E16C-4F9F-B32F-D6FEB8D467BD.png",
+      "file": "intent223-paused-callback.png",
+      "sha256": "09c9c1d171865db6b84a4779ee397778c5afd4938ca699ed22b1b70a3d11f3cb",
+      "originalExportedFile": "A1CA4D56-1F10-4812-893C-FDED7F32C74B.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    },
+    {
+      "capture": "intent223-delete-cancel-prompt_0_3FB9DAC0-C709-4B3D-B1B5-5B4FE6F3F7CF.png",
+      "file": "intent223-delete-cancel-prompt.png",
+      "sha256": "3891509c27e4461bf15bc2c7e5b444ea8f6958af895a7a07353e1c77f9455179",
+      "originalExportedFile": "B43E4F20-83E1-4312-88D8-A03D898EC94C.png",
+      "associatedWithFailure": false,
+      "result": "pass within visible capture scope",
+      "reviewedOriginal": true,
+      "reviewer": "root",
+      "observations": "Short contextual menu labels complete; footer and original centered delete confirmation clear. AssistiveTouch remains system-owned. Other callback snapshots are not claimed newly visually reviewed."
+    }
+  ]
+}

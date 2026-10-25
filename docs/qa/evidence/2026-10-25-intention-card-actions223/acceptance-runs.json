@@ -1,0 +1,80 @@
+{
+  "previewBuild": 223,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "fixtureScope": "Existing active in-memory fixtures only. Pause/edit/resume/delete callbacks and layout; sharing verifies original loopback failure/recovery, not live share-link success or system share delivery. No live matching/Calendar/API journey repeat.",
+  "testOnlyRepairs": [
+    {
+      "run": "intent-card-focused",
+      "result": "interrupted after first status assertion failure",
+      "reason": "Generic Label query read Image accessibility name instead of visible status text.",
+      "repair": "Target StaticText with exact status and reveal in viewport."
+    },
+    {
+      "run": "intent-normal-final",
+      "result": "failed at native-menu size assertion",
+      "seconds": 32.289,
+      "reason": "Native iOS menu row is42pt; test imposed custom44pt rule.",
+      "repair": "Keep custom controls44pt; allow native menu standard size, verify visibility and nonoverlap."
+    }
+  ],
+  "sameFrozenAppThroughAllTests": false,
+  "testSourceSHA256": "6e74c78d892d940dad31a1b7313600814697c71e50ac08ee75f904b32acda682",
+  "initialFourLayoutAndCallbackSuite": {
+    "tests": 5,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 486.055,
+    "cases": [
+      {
+        "case": "testChineseDarkSystemMaximumCards",
+        "seconds": 114.131,
+        "result": "passed"
+      },
+      {
+        "case": "testChineseLightNormalCards",
+        "seconds": 82.58,
+        "result": "passed"
+      },
+      {
+        "case": "testFixturePauseEditResumeShareAndDeleteCallbacks",
+        "seconds": 60.409,
+        "result": "passed"
+      },
+      {
+        "case": "testGermanDarkNormalCards",
+        "seconds": 83.294,
+        "result": "passed"
+      },
+      {
+        "case": "testGermanLightSystemMaximumCards",
+        "seconds": 145.64,
+        "result": "passed"
+      }
+    ]
+  },
+  "productRepair": "Exactly two localized Menu labels Edit/Delete; other267 source inputs and every other product byte match. Final targeted results will be recorded separately.",
+  "finalTargetedSuite": {
+    "tests": 3,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 300.058,
+    "cases": [
+      {
+        "case": "testChineseLightNormalCards",
+        "seconds": 84.224,
+        "result": "passed"
+      },
+      {
+        "case": "testFixturePauseEditResumeShareAndDeleteCallbacks",
+        "seconds": 61.762,
+        "result": "passed"
+      },
+      {
+        "case": "testGermanLightSystemMaximumCards",
+        "seconds": 154.072,
+        "result": "passed"
+      }
+    ]
+  },
+  "sameFrozenFinalAppForThreeTargetedCases": true
+}

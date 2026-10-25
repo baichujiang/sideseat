@@ -35,8 +35,21 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is222 below. See web release/QA records.
-- Preview222 is the current installed development build, source e0744e6bc57798248b710d5c9bc507498ea1e8af pushed.
+  No native rebuild in that web stage; current native build is223 below. See web release/QA records.
+- Preview223 is the current installed development build, source 43b1833579127b67d51bf7f7db9801d5bba09644 pushed.
+  My intentions uses a real title/More row and separate status/time, footer Share
+  leading and Pause/Resume trailing; accessibility stacks. Original callbacks,
+  state/gate, sharing/deletion/terminal/timing rules stay. Independent minimal
+  review passed. Initial four layouts+callback5/486.055s passed; visual German
+  Menu word break fixed by two shorter localization lookups only, other267 inputs
+  and all other bytes preserved. Final same-App normal/max/callback3/300.058s
+  passed. Initial53captures/43unique reviewed; final10 originals targeted, remaining
+  body carry-over and OS/cross-screen limits explicit. Frozen source/268/Local/
+  signature/binaries/test source verified, final normal223 PID9693,97 retained.
+  Active memory fixtures and loopback-share failure only; no real business write
+  or backend/web release. Runner/temporary Local contexts removed,new App reports0.
+  See223 QA/release.
+- Preview222 was the previous installed development build, source e0744e6bc57798248b710d5c9bc507498ea1e8af pushed.
   Plan entry keeps one detail surface: existing card title/date/time plus static
   timetable placeholder until the authoritative GET completes. One token-scoped
   navigation summary clears on return/reset; history append and no-preview entries

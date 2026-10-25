@@ -1,0 +1,311 @@
+{
+  "reviewer": "independent-german-visual-review",
+  "scope": "同行 → 我的意愿卡片；仅 index.json 中 file 含 -de- 的截图，暗色普通字号与浅色真实系统最大字号。未检查中文或行为实现。",
+  "sourceIndex": "/tmp/sideseat223-private/final-images/index.json",
+  "captureCount": 27,
+  "uniqueOriginalCount": 22,
+  "duplicateCount": 5,
+  "method": "22 个 unique SHA256 原图均逐张调用 view_image(detail: original) 直接观察；没有用拼图、缩略图、OCR 或测试通过代替视觉结论。5 张完全同 hash 的截图明确复用结论。",
+  "result": "普通字号卡片布局清楚；真实系统最大字号通过纵排与连续滚动保持内容、动作可达，没有观察到产品卡片文字横向硬裁切或按钮相互覆盖。最大字号原生菜单的长德语编辑文案存在碎词换行，建议缩短。",
+  "findings": [
+    {
+      "id": "de-max-native-menu-long-word-wrap",
+      "severity": "minor-visual",
+      "files": [
+        "intent223-ui-intent-study-menu-de-light-system-max.png",
+        "intent223-ui-intent-sports-menu-de-light-system-max.png",
+        "intent223-ui-intent-coffee-menu-de-light-system-max.png"
+      ],
+      "observation": "Wochenwunsch bearbeiten 被原生菜单拆为 Wochenwuns / ch bearbeiten；虽然完整可读，碎行不理想。",
+      "recommendation": "菜单已有卡片上下文，可使用短标签 Bearbeiten（保持原编辑动作），避免该长复合词。"
+    },
+    {
+      "id": "os-assistive-touch-overlay",
+      "severity": "evidence-limitation",
+      "observation": "iOS AssistiveTouch 灰圆点出现在右边中下部，有的截图覆盖恢复尾字或正文边缘。该层不是产品按钮或卡片轮廓。结合相邻滚动截面可核对内容。"
+    }
+  ],
+  "limitations": [
+    "仅为所列27张真机图的静态视觉复核，不代替点击/请求/持久化行为测试。",
+    "最大字号单屏显示不完卡片，结论基于 header、text-segment、finding-action 连续截图共同观察，不将上下视窗截面认作产品裁切。",
+    "普通字号原生菜单有磨砂背景/边框；这些是 iOS 系统弹层，不属于给所有产品按钮加轮廓。",
+    "不对未出现的结束/过期卡片、分享系统面板或其他语言主题作结论。"
+  ],
+  "captures": [
+    {
+      "capture": "intent223-ui-intent-study-menu-de-dark-normal_0_8585F06A-BDAA-446B-A4A4-87119C2DE9DC.png",
+      "file": "intent223-ui-intent-study-menu-de-dark-normal.png",
+      "sha256": "6e92d75776679dc4e40b89572460193a3a9275d8274ecbde15f4c7462b0909fa",
+      "originalExportedFile": "46323947-13B5-4825-BF38-18DC356ECA6F.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "原生菜单位于 study 卡片右侧区域；编辑分两行按词换行，删除红色清楚。菜单覆盖正文属于打开状态，边缘未超屏。底层卡片分享左、暂停右可见。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-de-dark-normal_0_AD12654C-79C2-436A-8657-3A3F54107DA5.png",
+      "file": "intent223-ui-intent-study-finding-action-de-dark-normal.png",
+      "sha256": "5aa394f725089680d14a8a822abf44f82bb362d4be60bc4c8474f23df544b9e1",
+      "originalExportedFile": "41607F35-4DCC-49C7-8504-FB5F01FF6C30.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 完整卡片可见：图示、分类/标题与右侧省略号有空间；灰状态、时间、说明、分隔线及分享左/暂停右彼此独立。上方 sports 恢复动作对比清楚。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-de-dark-normal_0_1A551E77-D458-40CE-9265-4A61C53CE14C.png",
+      "file": "intent223-ui-intent-study-header-de-dark-normal.png",
+      "sha256": "5aa394f725089680d14a8a822abf44f82bb362d4be60bc4c8474f23df544b9e1",
+      "originalExportedFile": "297B6A09-6872-4B98-AD68-1D8E3D4C12B1.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "intent223-ui-intent-study-finding-action-de-dark-normal.png",
+      "conclusion": "像素内容与已逐张查看的原图完全一致，复用该图结论。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-de-dark-normal_0_18CBDF4C-9B1D-41A7-9D12-9E1A0E3B0428.png",
+      "file": "intent223-ui-intent-sports-menu-de-dark-normal.png",
+      "sha256": "e8c25b0e2fddb9e807569bfedbb933103a63871eb00d764f573e8c0186405865",
+      "originalExportedFile": "396B550D-71EB-4C19-8C74-07E0E2A39A0C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 省略号打开原生菜单，两个条目清楚；菜单覆盖目标标题附近而不超屏，底层恢复操作位于右下。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-de-dark-normal_0_24CD6AE3-4A2D-4CD5-8D17-182F1F8B483C.png",
+      "file": "intent223-ui-intent-sports-finding-action-de-dark-normal.png",
+      "sha256": "a4c8317f1df3f48d787763326de630c9473890f3adf7cd942b334f93971bd2ec",
+      "originalExportedFile": "AF4B981C-4CDB-4DD0-9C3F-F8372121A668.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 与 sports 两张完整卡片显示：普通字号德语 footer 横排不挤压，分享保持低调，暂停柔和灰底，恢复高对比。标题、状态、时间与说明可读。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-de-dark-normal_0_2FFD6BB7-C3D3-4E93-8ABA-3441FCFB5197.png",
+      "file": "intent223-ui-intent-sports-header-de-dark-normal.png",
+      "sha256": "a4c8317f1df3f48d787763326de630c9473890f3adf7cd942b334f93971bd2ec",
+      "originalExportedFile": "37E7FADD-536B-4B46-9E68-474337472230.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "intent223-ui-intent-sports-finding-action-de-dark-normal.png",
+      "conclusion": "像素内容与已逐张查看的原图完全一致，复用该图结论。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-de-dark-normal_0_6C7C6DFD-4DEC-412C-9FC7-A461FD60C297.png",
+      "file": "intent223-ui-intent-coffee-menu-de-dark-normal.png",
+      "sha256": "039ca3d1ca4aea3a22d6420964a16aca30a1c114714d6840f5c71318b88cff96",
+      "originalExportedFile": "D11842A5-0764-4405-BABF-22E62FAEEA4E.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 菜单在该卡片右侧区域，编辑/删除分开且可读；原生菜单遮罩正文属于临时系统层。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-de-dark-normal_0_8AE5391A-88E8-4A87-95A4-6E5E4566B855.png",
+      "file": "intent223-ui-intent-coffee-finding-action-de-dark-normal.png",
+      "sha256": "a4c8317f1df3f48d787763326de630c9473890f3adf7cd942b334f93971bd2ec",
+      "originalExportedFile": "4774D68E-12CB-401E-A2E5-EF86DEBECFF6.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "intent223-ui-intent-sports-finding-action-de-dark-normal.png",
+      "conclusion": "像素内容与已逐张查看的原图完全一致，复用该图结论。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-de-dark-normal_0_83AE5CA6-570B-4F79-B8DA-CD2F7B926D54.png",
+      "file": "intent223-ui-intent-coffee-header-de-dark-normal.png",
+      "sha256": "c7dc6c0a36194d6e996aa4f1731096c3f217ca4e6e0b5ac9a89f540d05598b23",
+      "originalExportedFile": "6744523F-53F4-490D-9BA4-AEE75BC5D4FB.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 完整卡片及 sports 大部分可见；顶部 artwork/title 与 ellipsis 无重叠，status 独立，页脚分享与暂停位置清楚。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-menu-de-light-system-max_0_178B1588-08D2-43B4-A0AC-A25ED5AC3435.png",
+      "file": "intent223-ui-intent-study-menu-de-light-system-max.png",
+      "sha256": "41cabf2124a88d53547103a281815930dd8b6074ebcef68ee3ade84635e9da05",
+      "originalExportedFile": "DADFEDA0-1DE0-4403-86E3-09C934C9F1FB.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "真实系统最大字号原生菜单完整留在屏内，删除完整；长编辑词 Wochenwunsch 被系统拆为 Wochenwuns / ch bearbeiten，记录为可改进的长词碎行。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-de-light-system-max_0_AB0BE499-E5D7-4E75-B30A-1E240F158CFF.png",
+      "file": "intent223-ui-intent-study-finding-action-de-light-system-max.png",
+      "sha256": "1c1df8206bdd6884dcb10c7780ed25ce802b5f22b3ec48bd6d007170c584e1e2",
+      "originalExportedFile": "540310D0-69B1-43F0-A49B-F4612F437303.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 末段说明完整，分享与暂停纵向排列且均可读，暂停两行按词换行，按钮无文字溢出；顶部是滚动穿过状态的截面。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-5-de-light-system-max_0_F8725DF7-CA8B-4FB3-B7C2-9EB06B8DAD94.png",
+      "file": "intent223-ui-intent-study-text-segment-5-de-light-system-max.png",
+      "sha256": "1c1df8206bdd6884dcb10c7780ed25ce802b5f22b3ec48bd6d007170c584e1e2",
+      "originalExportedFile": "525A2E4D-0B8A-412D-AE75-DA49B9F7EB9E.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "intent223-ui-intent-study-finding-action-de-light-system-max.png",
+      "conclusion": "像素内容与已逐张查看的原图完全一致，复用该图结论。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-2-de-light-system-max_0_CDC40E9B-C7CE-495B-9540-7303B70BA6CF.png",
+      "file": "intent223-ui-intent-study-text-segment-2-de-light-system-max.png",
+      "sha256": "524e8857683819e4f85a6260813d8715f0866473b5e80b4c0b918eb7d123b226",
+      "originalExportedFile": "3A77CC21-20EB-441D-9505-A8E47ED165DD.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 卡片抬头、分类、Library study、未寻找状态与时间都可读；标题按完整单词换行，ellipsis 位于右上独立位置。下方正文延续到后续截图。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-1-de-light-system-max_0_4635FF3E-729F-444C-B262-B4555C50E17E.png",
+      "file": "intent223-ui-intent-study-text-segment-1-de-light-system-max.png",
+      "sha256": "2cdbcbeb04292ec4808d30ceef1f6122e4d96885c4d9d88c62431649aef69639",
+      "originalExportedFile": "3B15BCA3-1B80-41EA-A439-1C7F67E0D661.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 时间到完整说明再到分享的连续中段可读；顶部 title/status 为滚动截面，后续 finding-action 覆盖 footer 完整态。"
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-de-light-system-max_0_16CA3842-B965-4E63-94FB-3F6E9DFB0CC1.png",
+      "file": "intent223-ui-intent-study-header-de-light-system-max.png",
+      "sha256": "765c4e428cfd122a35e8616550841c1f3df299d3891aafb9eb585a0effe48d0a",
+      "originalExportedFile": "C625B866-66D0-4D33-8E5C-01D1C7637284.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 抬头从 artwork/ellipsis 到分类、标题、状态、时间连续可读。大字号采用纵排，没有横向互压。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-de-light-system-max_0_631A8B90-F766-4DCB-B184-63501B6F0227.png",
+      "file": "intent223-ui-intent-sports-menu-de-light-system-max.png",
+      "sha256": "da8d3414fd2b88214d7ff0890b5747cd77e316fb606b38a3f12d6726bbd13e39",
+      "originalExportedFile": "455AC979-3D61-4866-B6B3-EC6BC8A5B39C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 原生菜单完整屏内；编辑文案出现同一德语长词碎行，删除两行可读；菜单本身覆盖底层正文为系统正常弹层。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-de-light-system-max_0_B7B29862-6AAD-42B8-934C-42410C8B19D7.png",
+      "file": "intent223-ui-intent-sports-finding-action-de-light-system-max.png",
+      "sha256": "8df48baae6054e32e6fe5e5dd567c02fdcf3189eabc839d1e5d770ab1ec40fcc",
+      "originalExportedFile": "4B447FB9-D929-4EE1-B77A-E36147BE9F6F.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 末段说明与恢复按钮完整落在卡片内，恢复两行按词换行，深色底白字对比高；AssistiveTouch 圆点局部覆盖尾字，另一个滚动截面可核对该文案完整。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-5-de-light-system-max_0_8CB4DF09-1251-4EBB-98F4-AA8011107690.png",
+      "file": "intent223-ui-intent-sports-text-segment-5-de-light-system-max.png",
+      "sha256": "f6cdad0e727316e6f8300e7a045ef7720a7ec3636aad608808f59935d2fc19ee",
+      "originalExportedFile": "81ECC0B6-7925-459C-A16C-58E25F098B6C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "与 sports finding-action 几乎相同但右侧滚动条可见，属于独立 hash 已实际查看；正文/恢复布局不变，AssistiveTouch 遮盖同一区域。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-2-de-light-system-max_0_0603DC5F-7BE2-420D-88B5-9ECD5270BE5B.png",
+      "file": "intent223-ui-intent-sports-text-segment-2-de-light-system-max.png",
+      "sha256": "3da2af9fdeb057e0848c4996e64e92bd61d185e75baeac6d46f1af17a8fda551",
+      "originalExportedFile": "7D2214CE-4193-4604-8779-FB8616DF5A3C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "上张 coffee 的暂停尾部及 sports 抬头/状态/时间/说明前段连续可读，ellipsis 与 artwork 横向独立，Badminton 未被碎切。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-1-de-light-system-max_0_2A565BA9-2003-4172-81A3-3C8CB9792FBC.png",
+      "file": "intent223-ui-intent-sports-text-segment-1-de-light-system-max.png",
+      "sha256": "94b7e0bacecd55f25768990061eb6cede9e2f617fa650075c6f0de5ca1386260",
+      "originalExportedFile": "0ABF1412-D9A2-4F8B-AE43-A30C5D89DD91.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 状态、时间、整段说明和恢复文字清楚，无内容硬裁切；按钮底边在滚动视窗底部截面，后续 finding-action 显示完整外形。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-de-light-system-max_0_ABD9654E-278B-4149-A69F-68546B459660.png",
+      "file": "intent223-ui-intent-sports-header-de-light-system-max.png",
+      "sha256": "d70f7d5ad656a50c7d5cb929f4ba4357d2b9f02a8f43a6045e16bb11d3660d1a",
+      "originalExportedFile": "39945DC6-3A3F-45A2-83F7-4315D1ADE18A.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 抬头/状态/时间完整；上方 coffee 页脚为正常滚动截面，纵排动作保持独立，没有按钮叠在状态旁。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-de-light-system-max_0_A27AD9B7-681A-47F2-9B2C-DE23709763E4.png",
+      "file": "intent223-ui-intent-coffee-menu-de-light-system-max.png",
+      "sha256": "0ed2b5aa19d6e3c6e2fa1413275f33e9004e1ea697bfb027f411aa9b7cc909a0",
+      "originalExportedFile": "8E551237-6659-4EB1-BA58-68EC4394AF18.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 原生菜单完整屏内；编辑长词碎行同其他 max 菜单，删除可读。菜单遮挡底层卡片属于打开状态，AssistiveTouch 在右缘。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-de-light-system-max_0_5586BEBC-8AAB-4921-9FFC-566F9A5DE06F.png",
+      "file": "intent223-ui-intent-coffee-finding-action-de-light-system-max.png",
+      "sha256": "b5b3061efabd3f14af39782949b5d3c0fe6983c44b88d1a40972792416540e19",
+      "originalExportedFile": "B37C9AA1-D13B-49B0-A895-9C2106218479.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 状态、时间、完整说明、分享、暂停连贯可读；分享左对齐、暂停下一行靠右，按钮两行按词换行且文字在填充区域内。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-5-de-light-system-max_0_137C98F5-4560-4DA9-A6AC-C72717125190.png",
+      "file": "intent223-ui-intent-coffee-text-segment-5-de-light-system-max.png",
+      "sha256": "b5b3061efabd3f14af39782949b5d3c0fe6983c44b88d1a40972792416540e19",
+      "originalExportedFile": "A93AB28E-3B2D-4DD2-9FEA-71BE53F57AB1.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "intent223-ui-intent-coffee-finding-action-de-light-system-max.png",
+      "conclusion": "像素内容与已逐张查看的原图完全一致，复用该图结论。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-2-de-light-system-max_0_526DB670-E298-4683-880D-74527030A361.png",
+      "file": "intent223-ui-intent-coffee-text-segment-2-de-light-system-max.png",
+      "sha256": "bb13e0522635e5c44acd58df1992e60ffa32ca7e16a1319cfdfdc9050d03a667",
+      "originalExportedFile": "47FE1454-4291-4247-AE05-BF135F49498E.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee artwork/ellipsis、Kaffee、Coffee after class、寻找状态与起止时间完整可读；时间整行 17:45–19:45 保持连续。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-1-de-light-system-max_0_91A35327-BE99-45C8-A104-5D7A064B7721.png",
+      "file": "intent223-ui-intent-coffee-text-segment-1-de-light-system-max.png",
+      "sha256": "6f63c193cd7fe0ffac4e0df0dab8123b151ad67d43bfe8f57141075c55c1d6dd",
+      "originalExportedFile": "E8F8E713-ED2C-43FB-A042-9BC123E77268.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee title 尾段到 status、time、完整说明及两个 footer 操作连续可读；暂停底部为滚动截面，finding-action 覆盖完整按钮。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-de-light-system-max_0_641B5A65-E604-4420-9BA6-3B51174FE49C.png",
+      "file": "intent223-ui-intent-coffee-header-de-light-system-max.png",
+      "sha256": "eeeccaa41f1ef4501c70e941384b4f18d14d4e40dda76ec05772edaa4854d10d",
+      "originalExportedFile": "8F63450B-4F44-48BC-BA98-8A1F2E5416C1.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee header 在最大字号转纵排，分类、标题、状态、起止时间都清楚；ellipsis 仍位于顶部右侧，正文向下可滚动。"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "build": 223,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 268,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "7399e976053b2947f7a598edad858520e8e6e4af4549963717543c15d07cf100",
+    "SideSeat Preview.debug.dylib": "d9e8f8245f1e24305cd47a8dcc398ff905be2270cacd5806a0089a16e8b9d4ee"
+  },
+  "testSourceSHA256": {
+    "IntentionCardActionsPhoneUITests.swift": "6e74c78d892d940dad31a1b7313600814697c71e50ac08ee75f904b32acda682"
+  },
+  "backendReleased": false,
+  "webReleased": false,
+  "compiledPhoneTestSourceMatched": true,
+  "productFrozenDuringAllFinalAcceptance": true,
+  "sourceCommit": "43b1833579127b67d51bf7f7db9801d5bba09644",
+  "finalAcceptanceScope": "Three final same-App targeted cases; initial four-layout suite is separately recorded before the two Menu label repair.",
+  "otherProductInputsPreservedAfterLabelRepair": 267
+}

@@ -1,0 +1,12 @@
+{
+  "runnerRemovedFromPhone": true,
+  "generatedRunnerRemoved": true,
+  "generatedAppSourceAndPrivateLocalCopyRemoved": true,
+  "qaAccountsCreated": 0,
+  "realUserBusinessWrites": 0,
+  "newShareLinksCreated": 0,
+  "qaArgumentsRemovedByNormalLaunch": true,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentsMode": "0700",
+  "sourceCommit": "43b1833579127b67d51bf7f7db9801d5bba09644"
+}

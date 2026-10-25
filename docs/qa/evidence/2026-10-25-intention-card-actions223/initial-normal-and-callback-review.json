@@ -1,0 +1,217 @@
+{
+  "scope": "Chinese light normal and complete fixture callback captures",
+  "uniqueOriginalsReviewed": 10,
+  "captures": 13,
+  "reviewer": "root",
+  "findings": [],
+  "images": [
+    {
+      "capture": "intent223-ui-intent-study-menu-zh-Hans-light-normal_0_7BA6A9C7-0D84-48B0-86F2-234687E0162B.png",
+      "file": "intent223-ui-intent-study-menu-zh-Hans-light-normal.png",
+      "sha256": "093de8fd5260092010bcf735c3375b22431289d9e322fb369fccf27cdf81e340",
+      "originalExportedFile": "CEF523CB-5F5E-4417-A076-8EFFD786B0B9.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-zh-Hans-light-normal_0_F22F3445-B2BB-48C5-B9F9-07DDE39D9767.png",
+      "file": "intent223-ui-intent-study-finding-action-zh-Hans-light-normal.png",
+      "sha256": "e2fc35b937242e0d8ce2584d06b75802962acf44a6de10b9c1fdd4f17403378b",
+      "originalExportedFile": "386286B8-AE42-4B99-BBBC-E4295ECF61C7.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-zh-Hans-light-normal_0_7FC54942-0759-417C-8519-1FAEC8A8C0C7.png",
+      "file": "intent223-ui-intent-study-header-zh-Hans-light-normal.png",
+      "sha256": "e2fc35b937242e0d8ce2584d06b75802962acf44a6de10b9c1fdd4f17403378b",
+      "originalExportedFile": "D46677C0-048D-46B0-8A89-4136A5C0E18F.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": false,
+      "samePixelReviewAs": "intent223-ui-intent-study-finding-action-zh-Hans-light-normal.png",
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-zh-Hans-light-normal_0_B62F1BCC-8749-4410-A104-608988455027.png",
+      "file": "intent223-ui-intent-sports-menu-zh-Hans-light-normal.png",
+      "sha256": "caab839b190fa008c050164f180f4c655b508adb2b5cab43a5f223596b234d0d",
+      "originalExportedFile": "22C67C64-94E3-4B6D-A1C9-2422ADF4B7D8.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-zh-Hans-light-normal_0_07A754A1-605B-4627-8E86-1E41FF6CF143.png",
+      "file": "intent223-ui-intent-sports-finding-action-zh-Hans-light-normal.png",
+      "sha256": "b855f52ba14680427e240fd68fa6c672874681412ac0f3ccf88503fd12e77429",
+      "originalExportedFile": "2609ED39-2321-4A9A-B7F2-E20FABE934FC.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-zh-Hans-light-normal_0_C5B36EC5-2205-43C7-8B78-DA345A44600E.png",
+      "file": "intent223-ui-intent-sports-header-zh-Hans-light-normal.png",
+      "sha256": "eb79570a61c01b53cc7756a0e2b90285700639c573d1c6552cbc7b4fc6f74cf1",
+      "originalExportedFile": "4CF72C52-1FD3-447D-95D5-02AD9394AFD0.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal_0_4900C603-9B59-4001-B980-563182C43B52.png",
+      "file": "intent223-ui-intent-coffee-menu-zh-Hans-light-normal.png",
+      "sha256": "6c08e2c71d5a4eeb5df562f12a909820bf91d745de7b3944ae857c941a778e12",
+      "originalExportedFile": "1A13A099-A651-4EA3-9486-1009E51B828D.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-zh-Hans-light-normal_0_FE6A023A-5C05-4791-8522-898E3A073627.png",
+      "file": "intent223-ui-intent-coffee-finding-action-zh-Hans-light-normal.png",
+      "sha256": "eb79570a61c01b53cc7756a0e2b90285700639c573d1c6552cbc7b4fc6f74cf1",
+      "originalExportedFile": "BE641351-537A-466D-86E0-A7408E8AC7D4.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": false,
+      "samePixelReviewAs": "intent223-ui-intent-sports-header-zh-Hans-light-normal.png",
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-zh-Hans-light-normal_0_A54E038A-E600-452B-846A-57D01B844BAF.png",
+      "file": "intent223-ui-intent-coffee-header-zh-Hans-light-normal.png",
+      "sha256": "eb79570a61c01b53cc7756a0e2b90285700639c573d1c6552cbc7b4fc6f74cf1",
+      "originalExportedFile": "5C63893A-8E98-4ECF-94CA-829E1B827911.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": false,
+      "samePixelReviewAs": "intent223-ui-intent-sports-header-zh-Hans-light-normal.png",
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-deleted-only-selected-fixture_0_B45707F7-49FB-48F7-91D9-71DDC5594C6B.png",
+      "file": "intent223-deleted-only-selected-fixture.png",
+      "sha256": "20ed1290b5861f95066f65948806e89f4690232d04918bb9b640f961b63857e2",
+      "originalExportedFile": "84621FAB-0DA1-4E21-9207-CED04AB62438.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-delete-cancel-prompt_0_A95050E3-3784-4287-8BFA-AA55E533691B.png",
+      "file": "intent223-delete-cancel-prompt.png",
+      "sha256": "4cb84516dc80f692957a2282b644dfb6909e190ae8b27b62be2e0cce4352595e",
+      "originalExportedFile": "2AE01DF8-0AAB-40C4-AC6F-C2DC75A91A33.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-paused-edit-saved_0_A4C3234D-AB37-4C16-9730-0D17A57C8410.png",
+      "file": "intent223-paused-edit-saved.png",
+      "sha256": "3cee130bd569c0ec789970a6652affe880e900cee4bc1e03c9290fadb3dda72c",
+      "originalExportedFile": "2E98A3FE-4C0D-4A34-AD90-5446E3D6037D.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    },
+    {
+      "capture": "intent223-paused-callback_0_130CA77D-EF12-415D-81BE-5346964C06AC.png",
+      "file": "intent223-paused-callback.png",
+      "sha256": "69525ff51e4564c67c54a9f6238f05745e42fc47431893206dcc07dbbfe6f69c",
+      "originalExportedFile": "39A227D5-6DAE-454A-800D-12EFDCF06D06.png",
+      "associatedWithFailure": false,
+      "result": "pass within capture scope",
+      "reviewedOriginal": true,
+      "samePixelReviewAs": null,
+      "observations": [
+        "Header and More occupy distinct layout space; footer Share left and Pause/Resume right are readable.",
+        "Status, time and existing explanation are distinct; paused state exposes a solid Resume.",
+        "Native menus are anchored at the card; delete uses the existing centered confirmation.",
+        "System AssistiveTouch is retained; offscreen portions of adjacent cards are checked in other captures."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "reviewer": "independent-german-final-menu-review",
+  "scope": "最终 223：只直接查看三个德语真实系统最大字号菜单，以及一张 coffee finding-action 正文/页脚代表图。",
+  "sourceIndex": "/tmp/sideseat223-private/menu-final-images/index.json",
+  "directlyViewedCaptureCount": 4,
+  "directlyViewedUniqueCount": 4,
+  "firstPassReview": "/tmp/sideseat223-private/german-visual-review.json",
+  "firstPassPreserved": true,
+  "result": "首次复核发现的德语菜单长词碎行已在这三张最终菜单图中修复；Bearbeiten / Löschen 均单行完整，菜单定位在屏内。代表正文/页脚未见回归。",
+  "findingResolution": {
+    "id": "de-max-native-menu-long-word-wrap",
+    "status": "resolved-in-three-final-menu-originals",
+    "before": "Wochenwuns / ch bearbeiten",
+    "after": "Bearbeiten；Löschen",
+    "behaviorClaim": "只作视觉结论，菜单 handler/ID 及 callback 回归由 Root 的实现与定向测试证据覆盖。"
+  },
+  "retainedEvidence": "其余 body 沿用首轮 27 张德语截图（22 unique）的逐张原图视觉复核。Root 提供范围证据：267 inputs 不变、唯一变化文件仅两处菜单标签，卡片其余字节不变。本 reviewer 未独立复核该 source 证据，不把它描述为全部最终新图已逐张实看。",
+  "limitations": [
+    "最终批次只直接查看列出的 4 张图，没有直接重看 index 中其他新截图。",
+    "静态视觉复核不代替真机点击、持久化或请求测试；定向三例通过由 Root 提供。",
+    "iOS AssistiveTouch 圆点仍在右侧，属于系统覆盖层；这四张未挡住菜单文案或代表 footer 文案。",
+    "系统最大字号单屏显示不完整卡片，首轮连续滚动正文证据保留。"
+  ],
+  "captures": [
+    {
+      "capture": "intent223-ui-intent-study-menu-de-light-system-max_0_A5D94C6A-EDE2-4AB8-BCF1-F7FBC607A759.png",
+      "file": "intent223-ui-intent-study-menu-de-light-system-max.png",
+      "sha256": "545d3155ff9850ec1db0fa63107aca22c9260b06c6448c181ed31c98666ab141",
+      "originalExportedFile": "1BB4B449-7FED-42AD-9EBB-2AFCDC510205.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "Bearbeiten 和 Löschen 均单行完整显示，无碎词换行，无文字或菜单边界裁切；原生菜单位于对应卡片区域，完整留在屏幕可视范围内，磨砂遮盖底层正文属于系统打开状态。"
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-de-light-system-max_0_32093A8E-262B-4E3A-A362-1E978450EE32.png",
+      "file": "intent223-ui-intent-sports-menu-de-light-system-max.png",
+      "sha256": "423e8f90a308d46a617fab1533c170830d2a1726ba714c30f9bd1010ade92b93",
+      "originalExportedFile": "752F35BC-DC24-4263-956C-2B66A53D1D03.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "Bearbeiten 和 Löschen 均单行完整显示，无碎词换行，无文字或菜单边界裁切；原生菜单位于对应卡片区域，完整留在屏幕可视范围内，磨砂遮盖底层正文属于系统打开状态。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-de-light-system-max_0_F08DE972-61E7-4591-9D19-FA76230B7706.png",
+      "file": "intent223-ui-intent-coffee-menu-de-light-system-max.png",
+      "sha256": "1147619ae003b45e17de6b90659c24577ba33da9d3645aa684beac9f905d667d",
+      "originalExportedFile": "39988A3E-4658-47CF-A486-71B686ED7F68.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "Bearbeiten 和 Löschen 均单行完整显示，无碎词换行，无文字或菜单边界裁切；原生菜单位于对应卡片区域，完整留在屏幕可视范围内，磨砂遮盖底层正文属于系统打开状态。"
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-de-light-system-max_0_0EB6A352-1943-4671-A922-9F94EBB0A91D.png",
+      "file": "intent223-ui-intent-coffee-finding-action-de-light-system-max.png",
+      "sha256": "361b13454262c22b7b1df36908c41a2105124e8ec54082415939ee5c68877065",
+      "originalExportedFile": "D8AF181D-0301-4928-B47F-6FA7DE59A12F.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "最大字号 coffee 正文、时间、状态和说明连续可读，分享左对齐、暂停下一行靠右；两行暂停文案按词换行，填充区容纳完整文字，未见相互覆盖。页脚结构保持首轮已审设计。"
+    }
+  ]
+}

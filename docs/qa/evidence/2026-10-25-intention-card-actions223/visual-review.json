@@ -1,0 +1,30 @@
+{
+  "initial": {
+    "captures": 53,
+    "uniqueOriginalsReviewed": 43,
+    "reports": [
+      "initial-normal-and-callback-review.json",
+      "initial-chinese-max-review.json",
+      "initial-german-review.json"
+    ],
+    "finding": "German accessibility-maximum Menu label fragmented a word. Fixed by two existing shorter localization lookups."
+  },
+  "final": {
+    "captures": 32,
+    "uniqueCaptures": 25,
+    "directlyViewedOriginals": 10,
+    "reports": [
+      "final-normal-and-callback-review.json",
+      "final-german-menu-review.json"
+    ],
+    "verdict": "Short Menu labels complete in Chinese normal and German actual maximum; representative card body/footer and original delete prompt clear.",
+    "remainingFinalPixels": "Automated geometry/OCR and initial body visual acceptance carried using exact two-label-only proof; not claimed newly visually inspected."
+  },
+  "scopeLimits": [
+    "Active in-memory fixtures, no real-user cards.",
+    "Accessibility cards require continuous scrolling; not every whole card appears in one image.",
+    "AssistiveTouch is an OS overlay; occluded text is checked in other first-suite frames.",
+    "Native iOS Menu controls use the system font/row metrics. Own card controls retain44pt.",
+    "No full-App, live matching, successful share delivery, invitation or Calendar repeat claim."
+  ]
+}

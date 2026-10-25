@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-25T16:58:04.878696+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 223,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9693,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "Existing active in-memory intention fixtures, loopback unavailable share response, no real account or business write. Initial four layout combinations plus one complete journey; final two-label menu repair rechecks Chinese normal, German actual maximum and the complete callback journey.",
+  "disposableAccountsCreated": 0,
+  "realUserBusinessWrites": 0,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700"
+}

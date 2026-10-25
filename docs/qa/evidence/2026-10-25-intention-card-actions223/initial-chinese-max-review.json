@@ -1,0 +1,289 @@
+{
+  "scope": "Preview223既有离线UI fixture，中文深色真实系统最大字号；仅index.json中-zh-Hans-dark-system-max截图。",
+  "sourceIndex": "/tmp/sideseat223-private/final-images/index.json",
+  "captureCount": 13,
+  "uniqueSHA256Count": 11,
+  "uniqueOriginalsDirectlyViewed": 11,
+  "duplicateCaptures": 2,
+  "sha256VerifiedForEveryCapture": true,
+  "overallVerdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+  "summary": "11种原图逐张查看。所采用的可见卡片文字完整，Coffee after class及Library study保持英文完整单词；中文说明按字符自然换行，无省略号截断、字形裁切或产品层文字重叠。最大字号底部分享与暂停/恢复分开纵排，右侧暂停/恢复可由连续段读全；编辑/删除菜单两项完整。未发现要求修改产品的视觉缺陷。",
+  "continuousCoverage": [
+    {
+      "card": "coffee",
+      "sequence": [
+        "coffee-header",
+        "coffee-text-segment-1",
+        "coffee-finding-action",
+        "sports-header"
+      ],
+      "conclusion": "前三张以共同标题/状态/时间/说明形成重叠连续段；最后一张无OS覆盖地补足咖啡卡分享及暂停按钮，不把单张finding-action当作无遮挡整卡。"
+    },
+    {
+      "card": "sports",
+      "sequence": [
+        "sports-header",
+        "sports-finding-action",
+        "study-header"
+      ],
+      "conclusion": "类别/标题/状态与正文段重叠；study-header显示前一暂停卡说明和完整无OS覆盖恢复按钮。"
+    },
+    {
+      "card": "study",
+      "sequence": [
+        "study-header",
+        "study-text-segment-1",
+        "study-finding-action"
+      ],
+      "conclusion": "卡头与后续全文段重叠；后两张分别显示完整可见文字与底部两项动作，卡框上缘仍按视口边缘限制记录。"
+    }
+  ],
+  "globalLimitations": [
+    "每张截图均有设备AssistiveTouch圆；咖啡及运动finding-action按钮最右侧被半透明覆盖。相同按钮在随后的另一原图中已完整无遮挡显示；逐图限制保留。",
+    "最大字号使部分卡跨屏；仅由实际重叠滚动段验证，不宣称所有卡都能单屏完整显示。",
+    "原生菜单打开时的系统模糊与遮挡是本图范围限制，不用被模糊正文作可读性证据。",
+    "这是既有fixture的视觉检查，不证明真实账号API、后台匹配、整个App最大字号或人工性能。"
+  ],
+  "records": [
+    {
+      "capture": "intent223-ui-intent-study-menu-zh-Hans-dark-system-max_0_334745E2-CD49-4681-9EE2-E0BCB9A067A2.png",
+      "file": "intent223-ui-intent-study-menu-zh-Hans-dark-system-max.png",
+      "sha256": "3ec81eb23860f31ee0a3afc204ca2e356453d196cbd95036d2da12043011bd98",
+      "originalExportedFile": "2C9B0523-9FCA-437F-95FF-FD8CB5843C4D.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "学习卡原生菜单编辑本周意愿与删除意愿完整可读，红色删除与普通编辑区分清楚，两行没有叠字或截断。",
+      "limitations": [
+        "菜单按系统行为模糊并覆盖学习卡头、标题及部分状态，本图不用于验证其正文。",
+        "AssistiveTouch圆位于菜单下方右侧空白，未覆盖菜单项；底部卡动作未进入本图。"
+      ],
+      "continuityWith": [
+        "study-text-segment-1",
+        "study-finding-action"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-study-finding-action-zh-Hans-dark-system-max_0_C330E5DA-AA05-48A7-AAE0-473DF4EAB923.png",
+      "file": "intent223-ui-intent-study-finding-action-zh-Hans-dark-system-max.png",
+      "sha256": "d4f7dd9d89bdb57db70c2b8ca516801f7dfae4f3bf15f5ce40626fa8b48ab443",
+      "originalExportedFile": "708818A2-FE34-49FF-A08A-403C1CFCED1A.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "学习卡类别、标题、尚未寻找状态、时间、完整说明及分享/暂停寻找的整行文字均可读；按钮各自独立，未被底导航覆盖。Library与study各在一行且均为完整单词。",
+      "limitations": [
+        "顶部卡片外框被固定分栏压在视口边缘，不能宣称整卡外框完整；所有采用的文字与按钮均完整。",
+        "AssistiveTouch圆位于说明右侧空白，无被其覆盖的操作文字。"
+      ],
+      "continuityWith": [
+        "study-text-segment-1"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-study-text-segment-1-zh-Hans-dark-system-max_0_131690AB-F682-4AC2-8293-BEB1BFE1E990.png",
+      "file": "intent223-ui-intent-study-text-segment-1-zh-Hans-dark-system-max.png",
+      "sha256": "5a89d2ddca0833639a57334be4d1f7490f5aeecbb4465e1066bfa385aaadf084",
+      "originalExportedFile": "14AB1305-0922-45AE-A589-BD1E0536B549.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "学习卡从图标、完整类别、Library / study、尚未寻找、时间待商议、这条已保存的意愿尚未参与寻找说明到分享/暂停寻找均清楚可读。正文未出现字形截断或省略号，底部两动作纵排并与底导航留有空隙。",
+      "limitations": [
+        "卡片最上缘靠近固定分栏，按实际可见文字和动作判定，不扩大为所有外框像素完全在视口内。",
+        "AssistiveTouch圆位于说明右侧空白，没有遮住完整说明或两项底部动作。"
+      ],
+      "continuityWith": [
+        "study-header",
+        "study-finding-action"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-study-header-zh-Hans-dark-system-max_0_1167D795-7082-4F98-9308-F4F8137621FB.png",
+      "file": "intent223-ui-intent-study-header-zh-Hans-dark-system-max.png",
+      "sha256": "01fe01db5e2782272320830cdfb8627ecca7eb294edd282ff8a63e633fe9b996",
+      "originalExportedFile": "B7CBD848-6394-4550-A0A3-023A96A98A3D.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "学习图标、一起学同样内容、Library / study两完整英文单词、尚未寻找状态可读。上方暂停卡完整恢复寻找在本图无遮挡，补足sports-finding-action的OS覆盖限制。",
+      "limitations": [
+        "学习卡时间、说明与动作位于视口下方，仅按卡头段判定。",
+        "上方暂停卡时间被固定分栏裁切；只采用完整暂停说明与恢复按钮段。",
+        "AssistiveTouch圆位于Library右侧空白，未覆盖标题文字。"
+      ],
+      "continuityWith": [
+        "sports-finding-action",
+        "study-text-segment-1"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-menu-zh-Hans-dark-system-max_0_72231B8F-DB60-4554-8D46-0FD6F2EEA601.png",
+      "file": "intent223-ui-intent-sports-menu-zh-Hans-dark-system-max.png",
+      "sha256": "de64856814f60e2d368c038b763e96a724c11c03d1ec972ab2fb74eb55588f58",
+      "originalExportedFile": "A8A0CF1F-EAB2-432F-B0A1-3408C75156B6.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "暂停卡原生菜单编辑本周意愿和删除意愿两行完整，未截断、未发生单字挤列；原卡主体按系统行为模糊。上方咖啡卡尾的暂停寻找完整且无遮挡。",
+      "limitations": [
+        "菜单遮住暂停卡头与状态，不能验证被模糊区域。",
+        "下方暂停说明末行在底导航处裁去，完整说明见sports-finding-action。",
+        "AssistiveTouch圆位于菜单右下边缘，但不覆盖两项菜单文字。"
+      ],
+      "continuityWith": [
+        "sports-finding-action"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-finding-action-zh-Hans-dark-system-max_0_5B7EB792-622A-41C6-8E7C-26636EC2781F.png",
+      "file": "intent223-ui-intent-sports-finding-action-zh-Hans-dark-system-max.png",
+      "sha256": "722f5d5a37e5f03e18b4630d672609f7e83a0f98d28d9623e9defd577ea0a636",
+      "originalExportedFile": "28322486-6884-4362-9795-D3640A2FB289.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "羽毛球类别、完整标题、已暂停、时间待商议、完整暂停说明、独立浅底恢复寻找均在内容区可读。恢复动作与正文分隔清楚，保持右对齐且位于底导航之上。",
+      "limitations": [
+        "顶部运动插图被固定分栏裁去一部分；本图主要验证正文与恢复动作。",
+        "AssistiveTouch圆覆盖恢复按钮最右侧部分，不能仅据此图称末字无遮挡；study-header显示同一暂停卡尾的完整恢复寻找且无遮挡。",
+        "下一张学习卡只出现上部，其下方不在本图验证范围。"
+      ],
+      "continuityWith": [
+        "sports-header",
+        "study-header"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-text-segment-1-zh-Hans-dark-system-max_0_4DC732E7-C10F-4EBC-A216-C4CFD4DD4272.png",
+      "file": "intent223-ui-intent-sports-text-segment-1-zh-Hans-dark-system-max.png",
+      "sha256": "722f5d5a37e5f03e18b4630d672609f7e83a0f98d28d9623e9defd577ea0a636",
+      "originalExportedFile": "7701C093-C4ED-43FD-BD34-D5FAB8D07480.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐文件SHA256复算一致，复用已直接查看的同像素原图结论",
+      "directlyViewed": false,
+      "samePixelsAs": "intent223-ui-intent-sports-finding-action-zh-Hans-dark-system-max.png",
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "与intent223-ui-intent-sports-finding-action-zh-Hans-dark-system-max.png逐字节SHA256相同，采用其可见结论及全部取景/OS浮层限制。",
+      "limitations": [
+        "本文件为相同像素重复capture，不计为另一个独立可见位置或额外视觉覆盖。"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-sports-header-zh-Hans-dark-system-max_0_70F2A0AF-5219-454D-BE3B-B732CCBD9CD7.png",
+      "file": "intent223-ui-intent-sports-header-zh-Hans-dark-system-max.png",
+      "sha256": "e28ebe3efbee2332c14dae90de292011c8a6ad7b5d94f57cc8571c44eec506f1",
+      "originalExportedFile": "EDE4F005-B4DD-4E00-A5D0-B8EDC5024DD4.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "运动图标、类别、羽毛球标题与已暂停状态完整清楚；菜单点位在独立的右侧空白。上方同屏保留咖啡卡尾，分享及完整暂停寻找此时无遮挡，补足coffee-finding-action的OS覆盖限制。",
+      "limitations": [
+        "羽毛球卡时间与说明仍在视口下方，不能由此图称整张暂停卡完整。",
+        "前一咖啡卡时间在顶部被固定分栏裁去，只采用其完整说明与底部动作部分。",
+        "AssistiveTouch圆在羽毛球标题右侧空白，不覆盖本图采用的文字。"
+      ],
+      "continuityWith": [
+        "coffee-finding-action",
+        "sports-finding-action"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-menu-zh-Hans-dark-system-max_0_5C194A77-9EEA-4A81-99D3-C42D35C78FB3.png",
+      "file": "intent223-ui-intent-coffee-menu-zh-Hans-dark-system-max.png",
+      "sha256": "8ca28b0bb446bb11ecf295f0833150beb81713f58682b11e0667c56a6e9d4816",
+      "originalExportedFile": "B7207B87-5FE0-4DAD-A06E-6CA06C4BF0F6.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "原生菜单两项编辑本周意愿、删除意愿完整可读，字号足够大，行间与红色删除层级清楚。菜单位于窗口内，没有产品文本挤到菜单外。",
+      "limitations": [
+        "打开菜单按原生行为模糊并覆盖卡头；不能以此图判断被遮盖的卡头。",
+        "底部说明行接近底导航边界；菜单主项已完整，整卡正文完整性须引用其他图。",
+        "AssistiveTouch圆覆盖菜单下方时间范围最右侧部分，菜单项本身没有被盖住。"
+      ],
+      "continuityWith": [
+        "coffee-text-segment-1"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-finding-action-zh-Hans-dark-system-max_0_50D03607-0AD8-4EEA-98B3-FA9CBA4493B0.png",
+      "file": "intent223-ui-intent-coffee-finding-action-zh-Hans-dark-system-max.png",
+      "sha256": "b66e396403eaede760caf924afea04a811c84c9a03532e72c8c20836f9ff88ac",
+      "originalExportedFile": "2D451F1D-1A15-46AC-8D88-9DDA544189AA.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "时间、完整寻找说明、分隔线、分享与右下暂停寻找均已滚至底导航之上。分享与暂停在最大字号下纵向分开，卡尾有清楚留白，没有互相重叠。",
+      "limitations": [
+        "卡头位于视口上方，正在寻找徽章上缘被固定分栏裁去，不能用此图补充完整卡头。",
+        "AssistiveTouch半透明圆覆盖暂停按钮最右侧部分，末字区域在本图不能作为无覆盖像素证据；sports-header显示同一咖啡卡尾完整且无遮挡。"
+      ],
+      "continuityWith": [
+        "coffee-text-segment-1",
+        "sports-header"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-5-zh-Hans-dark-system-max_0_E226F76F-3EDB-41D5-B862-732783BE3905.png",
+      "file": "intent223-ui-intent-coffee-text-segment-5-zh-Hans-dark-system-max.png",
+      "sha256": "b66e396403eaede760caf924afea04a811c84c9a03532e72c8c20836f9ff88ac",
+      "originalExportedFile": "6A1ED229-B277-4C2E-B77B-85E8AA28966F.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐文件SHA256复算一致，复用已直接查看的同像素原图结论",
+      "directlyViewed": false,
+      "samePixelsAs": "intent223-ui-intent-coffee-finding-action-zh-Hans-dark-system-max.png",
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "与intent223-ui-intent-coffee-finding-action-zh-Hans-dark-system-max.png逐字节SHA256相同，采用其可见结论及全部取景/OS浮层限制。",
+      "limitations": [
+        "本文件为相同像素重复capture，不计为另一个独立可见位置或额外视觉覆盖。"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-text-segment-1-zh-Hans-dark-system-max_0_6D85DD05-D5E9-4E54-A93A-BD0A05DB74AB.png",
+      "file": "intent223-ui-intent-coffee-text-segment-1-zh-Hans-dark-system-max.png",
+      "sha256": "3d3137a94ad22e1edfff1c5f45b62caa85cee255baacba110d6cbdbc0f3e9cf7",
+      "originalExportedFile": "C46421F6-F05C-4EEF-8E6A-87962D72523A.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "从咖啡图标、类别、完整英文标题、状态到明天17:39–19:39与SideSeat完整说明均可读。时间范围完整在一行，说明按中文字符正常换行，未发现字体裁切或产品层互相覆盖。",
+      "limitations": [
+        "底部分享动作仅见上沿，暂停动作未见；该图只证明正文段。",
+        "AssistiveTouch圆接近正文右侧外缘，所读正文未被盖住；不据此推断其下方操作无遮挡。"
+      ],
+      "continuityWith": [
+        "coffee-header",
+        "coffee-finding-action"
+      ]
+    },
+    {
+      "capture": "intent223-ui-intent-coffee-header-zh-Hans-dark-system-max_0_E945D965-0A6D-40A5-8016-02B5CA8F6790.png",
+      "file": "intent223-ui-intent-coffee-header-zh-Hans-dark-system-max.png",
+      "sha256": "5cf104a314c436cd72b028af39bb54689c2bcf9ee9148106ac3eb88232877705",
+      "originalExportedFile": "C00C5A60-A1BC-4546-9971-8B7AE93E3173.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "逐张view_image，detail=original；原图1284×2778；未使用拼图替代",
+      "directlyViewed": true,
+      "verdict": "PASS_WITH_EXPLICIT_SCOPE_LIMITS",
+      "visibleConclusion": "咖啡图标、类别、右上省略号菜单、完整标题Coffee after / class及正在寻找状态可读。三个英文单词完整保留，未出现单词拆碎、文字与菜单重叠或省略号截断。",
+      "limitations": [
+        "仅卡片上段；时间、说明及底部动作未出现在本图，不能据此称整卡可见。",
+        "右侧AssistiveTouch圆位于标题右侧空白，没有覆盖本图所判定的标题文字。"
+      ],
+      "continuityWith": [
+        "coffee-text-segment-1"
+      ]
+    }
+  ]
+}
