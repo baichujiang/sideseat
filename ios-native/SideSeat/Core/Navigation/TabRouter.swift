@@ -4,15 +4,28 @@ import SwiftUI
 @MainActor
 @Observable
 final class RouterPath {
-    var path: [AppRoute] = []
+    var path: [AppRoute] = [] {
+        didSet {
+            if let preview = timePollPreview, !path.contains(.timePoll(token: preview.token)) {
+                timePollPreview = nil
+            }
+        }
+    }
+    private(set) var timePollPreview: NativeTimePollList.Item?
 
-    func navigate(to route: AppRoute) {
+    func navigate(to route: AppRoute, preview: NativeTimePollList.Item? = nil) {
+        timePollPreview = preview.flatMap { route == .timePoll(token: $0.token) ? $0 : nil }
         path.append(route)
     }
 
     /// Shared plans always sit one level above the Plans root.
-    func openPlan(token: String) {
+    func openPlan(token: String, preview: NativeTimePollList.Item? = nil) {
+        timePollPreview = preview?.token == token ? preview : nil
         path = [.timePoll(token: token)]
+    }
+
+    func planPreview(for token: String) -> NativeTimePollList.Item? {
+        timePollPreview?.token == token ? timePollPreview : nil
     }
 
     func replaceTop(with route: AppRoute) {
@@ -20,6 +33,7 @@ final class RouterPath {
     }
 
     func reset() {
+        timePollPreview = nil
         path.removeAll()
     }
 }

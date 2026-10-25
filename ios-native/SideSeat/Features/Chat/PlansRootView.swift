@@ -363,7 +363,7 @@ struct PlansRootView: View {
         }
         return Button {
             scrollPositions.capture(selectedSection)
-            router.openPlan(token: plan.token)
+            router.openPlan(token: plan.token, preview: plan)
         } label: {
             PlanOverviewLabel(title: plan.title, presentation: plan.presentation(at: now), style: style,
                 start: plan.chosenStart, end: plan.chosenEnd, timeZone: plan.timeZone,
@@ -404,7 +404,7 @@ struct PlansRootView: View {
     private func coordinatedCard(_ plan: NativeTimePollList.Item) -> some View {
         let phase = plan.planningPhase(at: now)
         let presentation = plan.presentation(at: now)
-        return Button { scrollPositions.capture(selectedSection); router.navigate(to: .timePoll(token: plan.token)) } label: {
+        return Button { scrollPositions.capture(selectedSection); router.navigate(to: .timePoll(token: plan.token), preview: plan) } label: {
             SSFlowCard {
                 PlanCardHeading(title: plan.title, presentation: presentation,
                     context: AppLocalization.string(plan.isOwner == true ? "Organized by you" : "Shared plan"))

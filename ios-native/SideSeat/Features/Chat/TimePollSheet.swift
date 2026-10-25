@@ -305,6 +305,7 @@ struct TimePollCreateView: View {
 
 struct TimePollDetailView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(RouterPath.self) private var router: RouterPath?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -362,7 +363,7 @@ struct TimePollDetailView: View {
                 ContentUnavailableView {
                     Label("Couldn't load the poll", systemImage: "wifi.exclamationmark")
                 } description: { Text(error) } actions: { Button("Retry") { Task { await store.load(session: session) } } }
-            } else { Spacer(); ProgressView(); Spacer() }
+            } else { loadingSurface }
         }
         .padding(.top, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.bg)
@@ -463,6 +464,53 @@ struct TimePollDetailView: View {
         poll.planningPhase == "COLLECTING" && !poll.hasFixedTime && !choosingAgain && !pickingFinalTime
     }
 
+    private var loadingSurface: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
+                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                    if let preview = router?.planPreview(for: store.token) {
+                        Text(preview.title).font(.title2.bold())
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("time-poll-loading-title")
+                        Group {
+                            if let start = preview.chosenStart, let end = preview.chosenEnd {
+                                PlanCardSchedule(start: start, end: end, timeZone: preview.timeZone)
+                            } else {
+                                Text(dateRange(preview.dates) + " · " + preview.timeZone)
+                                    .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }.accessibilityIdentifier("time-poll-loading-dates")
+                    } else {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(SideSeatTheme.separator.opacity(0.5)).frame(width: 200, height: 28)
+                            .accessibilityHidden(true)
+                    }
+                }
+                VStack(spacing: 0) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(SideSeatTheme.separator.opacity(0.4)).frame(height: 24)
+                        .padding(SideSeatTheme.spaceMD)
+                    ForEach(0..<6) { _ in
+                        Divider()
+                        HStack(spacing: 0) {
+                            ForEach(0..<4) { column in
+                                if column > 0 { Divider() }
+                                Color.clear.frame(maxWidth: .infinity)
+                            }
+                        }.frame(height: 44)
+                    }
+                }
+                .background(SideSeatTheme.surface)
+                .clipShape(RoundedRectangle(cornerRadius: SideSeatTheme.cardRadius))
+                .accessibilityHidden(true)
+            }.padding(.horizontal, SideSeatTheme.screenHorizontal)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Loading plan")
+        .accessibilityIdentifier("time-poll-loading")
+    }
+
     private func collectionSurface(_ poll: NativeTimePoll) -> some View {
         ScrollViewReader { reader in
             ScrollView {
@@ -474,7 +522,7 @@ struct TimePollDetailView: View {
                     } else {
                         PlanAdaptiveRow {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                                Text(dateRange(poll) + (poll.planningPhase == "COLLECTING" ? "" : "\n" + poll.timeZone))
+                                Text(dateRange(poll.dates) + (poll.planningPhase == "COLLECTING" ? "" : "\n" + poll.timeZone))
                                     .accessibilityIdentifier("time-poll-date-range")
                                 if poll.planningPhase == "COLLECTING" {
                                     let status = poll.presentation(at: now).status
@@ -521,7 +569,7 @@ struct TimePollDetailView: View {
                 PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle, showsSuggestion: $editingActivity)
             }
             if poll.hasFixedTime {
-                Text(dateRange(poll) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                Text(dateRange(poll.dates) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
             }
         }.padding(.horizontal, SideSeatTheme.screenHorizontal)
@@ -649,10 +697,10 @@ struct TimePollDetailView: View {
         return String(format: AppLocalization.string("%d days · %@ hours selected"), Set(slots.map(\.date)).count, formatter.string(from: NSNumber(value: hours)) ?? String(hours))
     }
 
-    private func dateRange(_ poll: NativeTimePoll) -> String {
+    private func dateRange(_ dates: [String]) -> String {
         let input = DateFormatter(); input.locale = Locale(identifier: "en_US_POSIX"); input.dateFormat = "yyyy-MM-dd"
         let output = DateFormatter(); output.locale = AppLocalization.selectedLanguage.locale; output.setLocalizedDateFormatFromTemplate("MMMd")
-        let labels = poll.dates.compactMap { input.date(from: $0).map { output.string(from: $0) } }
+        let labels = dates.compactMap { input.date(from: $0).map { output.string(from: $0) } }
         guard let first = labels.first, let last = labels.last else { return "" }
         return labels.count == 1 ? first : "\(first) – \(last)"
     }

@@ -16,6 +16,56 @@ struct NavigationTests {
         #expect(router.path.isEmpty)
     }
 
+    @MainActor @Test("Plan previews are token scoped and disappear after native back navigation")
+    func planPreviewFollowsTheCurrentEntry() throws {
+        let first = try planPreview(token: "first", title: "First plan")
+        let second = try planPreview(token: "second", title: "Second plan")
+        let router = RouterPath()
+        router.openPlan(token: first.token, preview: first)
+        #expect(router.planPreview(for: first.token)?.title == first.title)
+        #expect(router.planPreview(for: second.token) == nil)
+        router.path.removeLast()
+        #expect(router.timePollPreview == nil)
+        router.openPlan(token: second.token, preview: second)
+        #expect(router.path == [.timePoll(token: second.token)])
+        #expect(router.planPreview(for: second.token)?.title == second.title)
+        #expect(router.planPreview(for: first.token) == nil)
+        router.openPlan(token: first.token)
+        #expect(router.timePollPreview == nil)
+        router.openPlan(token: first.token, preview: second)
+        #expect(router.timePollPreview == nil)
+    }
+
+    @MainActor @Test("History previews preserve the original append path and clear on pop, replacement and reset")
+    func historyPlanPreviewRetainsNavigationSemantics() throws {
+        let preview = try planPreview(token: "history", title: "History plan")
+        let router = RouterPath()
+        router.navigate(to: .planHistory)
+        router.navigate(to: .timePoll(token: preview.token), preview: preview)
+        #expect(router.path == [.planHistory, .timePoll(token: preview.token)])
+        #expect(router.planPreview(for: preview.token)?.title == preview.title)
+        router.path = [.planHistory]
+        #expect(router.timePollPreview == nil)
+        router.navigate(to: .timePoll(token: preview.token), preview: preview)
+        router.replaceTop(with: .settings)
+        #expect(router.timePollPreview == nil)
+        router.openPlan(token: preview.token, preview: preview)
+        router.reset()
+        #expect(router.path.isEmpty && router.timePollPreview == nil)
+        router.navigate(to: .settings, preview: preview)
+        #expect(router.timePollPreview == nil)
+    }
+
+    private func planPreview(token: String, title: String) throws -> NativeTimePollList.Item {
+        let data = try JSONSerialization.data(withJSONObject: [
+            "token": token, "title": title, "timeZone": "Europe/Berlin", "dates": ["2026-11-01"],
+            "updatedAt": "2026-10-25T12:00:00Z", "shareUrl": "https://sideseat.de/time-polls/" + token,
+            "phase": "COLLECTING",
+        ])
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(NativeTimePollList.Item.self, from: data)
+    }
+
     @Test("Section paging needs deliberate horizontal travel and never wraps")
     func sectionPagingBoundariesAndDirection() {
         func target(_ index: Int, _ dx: CGFloat, _ dy: CGFloat = 0, velocity: CGFloat = 0) -> Int {

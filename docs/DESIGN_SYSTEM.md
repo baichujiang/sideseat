@@ -64,6 +64,12 @@ do not add an expand or separate people-list step here. The collecting stage
 keeps its compact avatar summary and existing participant sheet. Existing guest
 recovery actions stay with their corresponding records and permissions.
 
+Opening a shared plan keeps one detail surface. While its first request is in
+flight, show the tapped card's existing title and date/time summary above a static
+timetable placeholder, instead of a separate full-page spinner. Navigation-only
+summaries are scoped to that plan token and cleared on return. Editing, sharing
+and invitation actions appear only after the authoritative detail has loaded.
+
 Confirmed Plan cards use a typographic calendar date: small localized month and
 weekday above a large day, with the existing complete start/end time below.
 Cross-day endpoints, year and timezone remain available, and accessibility keeps
