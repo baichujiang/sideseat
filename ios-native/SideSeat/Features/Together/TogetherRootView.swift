@@ -1583,7 +1583,15 @@ private struct WeeklyIntentCard: View {
                 HStack(alignment: .top, spacing: SideSeatTheme.spaceXS) {
                     Button(action: onEdit) {
                         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-                            Label(categoryTitle, systemImage: intent.topic.systemImage)
+                            HStack(spacing: SideSeatTheme.spaceXS) {
+                                Image(systemName: intent.topic.systemImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 26, height: 26)
+                                    .accessibilityHidden(true)
+                                Text(categoryTitle)
+                                    .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.9)
+                            }
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(SideSeatTheme.Together.categoryInk(for: intent.topic))
                                 .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
