@@ -198,28 +198,23 @@ private struct TogetherAssignmentFailureView: View {
 }
 
 enum TogetherSection: String, CaseIterable, Identifiable, Sendable {
-    case intentions, recommendations, bookmarks
+    case recommendations, bookmarks
     var id: Self { self }
 
     var title: String {
         switch self {
         case .recommendations: AppLocalization.string("Together recommendations")
-        case .intentions: AppLocalization.string("My intentions")
         case .bookmarks: AppLocalization.string("Saved intentions")
         }
     }
 
     var compactTitle: String {
         switch self {
-        case .intentions: AppLocalization.string("Intentions (section)")
         case .recommendations: AppLocalization.string("Together recommendations")
         case .bookmarks: AppLocalization.string("Saved (section)")
         }
     }
 
-    static func initial(hasIntentions: Bool, hasOpportunities: Bool, hasLegacySession: Bool) -> Self {
-        hasIntentions || hasOpportunities || hasLegacySession ? .recommendations : .intentions
-    }
 }
 
 private struct TogetherHomeView: View {
@@ -236,8 +231,7 @@ private struct TogetherHomeView: View {
     @State private var showsExpiredIntentions = false
     @State private var showsSectionPicker = false
     @State private var selectedSection: TogetherSection = .recommendations
-    @State private var resolvedInitialSection = false
-    @State private var createdIntentionRevision = 0
+    @State private var intentionFocusRevision = 0
     @State private var publishedIntentID: String?
     @State private var exploreStore = ExploreIntentStore()
     @State private var hasRequestedMoreRecommendations = false
@@ -254,43 +248,43 @@ private struct TogetherHomeView: View {
     private var exploreEnabled: Bool {
         clientConfiguration.configuration?.isFeatureEnabled("v2ExploreIntents") == true
     }
-    private var sectionSelection: Binding<TogetherSection> {
-        Binding(get: { selectedSection }, set: {
-            selectedSection = $0
-            resolvedInitialSection = true
-        })
-    }
-
     private func consumeRebooking() {
         guard let plan = PlanRebookingLaunch.shared.plan else { return }
         PlanRebookingLaunch.shared.plan = nil
-        sectionSelection.wrappedValue = .intentions
+        selectedSection = .recommendations
         presentedEditor = .init(id: "rebook-" + plan.id, intent: nil, rebookingPlan: plan)
     }
 
     private func consumePublication() async {
         guard let id = IntentionPublicationLaunch.shared.intentID else { return }
         IntentionPublicationLaunch.shared.intentID = nil
-        sectionSelection.wrappedValue = .intentions
+        selectedSection = .recommendations
         publishedIntentID = id
         await loadContent()
-        createdIntentionRevision += 1
+        intentionFocusRevision += 1
     }
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
             VStack(spacing: 0) {
-                sectionPicker(at: context.date)
+                sectionPicker
                     .padding(.horizontal, SideSeatTheme.screenHorizontal)
                     .background(SideSeatTheme.bgGrouped)
 
-                SSSectionPager(sections: TogetherSection.allCases, selection: sectionSelection) { section in
+                SSSectionPager(sections: TogetherSection.allCases, selection: $selectedSection) { section in
                     ScrollViewReader { scrollProxy in
                         ScrollView {
                             VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
                                 switch section {
-                                case .intentions: intentSection(at: context.date)
-                                case .recommendations: recommendationsSection(at: context.date)
+                                case .recommendations:
+                                    intentSection(at: context.date)
+                                        .id("together-intentions-top")
+                                    Text(AppLocalization.string("Together recommendations"))
+                                        .font(.headline)
+                                        .foregroundStyle(SideSeatTheme.Together.ink)
+                                        .accessibilityAddTraits(.isHeader)
+                                        .accessibilityIdentifier("together-recommendations-heading")
+                                    recommendationsSection(at: context.date)
                                 case .bookmarks: savedOpportunitySection
                                 }
                             }
@@ -303,8 +297,8 @@ private struct TogetherHomeView: View {
                             savedWhileBrowsingIDs.removeAll()
                             await loadContent()
                         }
-                        .onChange(of: createdIntentionRevision) { _, _ in
-                            if section == .intentions {
+                        .onChange(of: intentionFocusRevision) { _, _ in
+                            if section == .recommendations {
                                 scrollProxy.scrollTo("together-intentions-top", anchor: .top)
                             }
                         }
@@ -391,10 +385,10 @@ private struct TogetherHomeView: View {
                     exploreVisible: exploreEnabled ? exploreVisible : nil, note: note, using: session
                 )
                 if saved {
-                    sectionSelection.wrappedValue = .intentions
+                    selectedSection = .recommendations
                     if presentation.intent == nil {
                         publishedIntentID = store.lastSavedIntentID
-                        createdIntentionRevision += 1
+                        intentionFocusRevision += 1
                     }
                     presentedEditor = nil
                     await refreshOpportunitiesAfterIntentChange()
@@ -407,18 +401,18 @@ private struct TogetherHomeView: View {
         .accessibilityIdentifier("together-home")
     }
 
-    private func sectionPicker(at now: Date) -> some View {
+    private var sectionPicker: some View {
         Group {
             if dynamicTypeSize.isAccessibilitySize {
-                sectionMenu(at: now)
+                sectionMenu
             } else {
                 ViewThatFits(in: .horizontal) {
                     SSRootTabs(items: TogetherSection.allCases.map { section in
                         SSRootTabItem(id: section, title: LocalizedStringKey(section.title),
                             accessibilityID: "together-tab-\(section.rawValue)",
-                            accessibilityLabel: sectionTitle(section, at: now))
-                    }, selection: sectionSelection)
-                    sectionMenu(at: now)
+                            accessibilityLabel: section.title)
+                    }, selection: $selectedSection)
+                    sectionMenu
                 }
             }
         }
@@ -430,7 +424,7 @@ private struct TogetherHomeView: View {
             NavigationStack {
                 List(TogetherSection.allCases) { section in
                     Button {
-                        sectionSelection.wrappedValue = section
+                        selectedSection = section
                         showsSectionPicker = false
                     } label: {
                         HStack(spacing: SideSeatTheme.spaceSM) {
@@ -446,7 +440,7 @@ private struct TogetherHomeView: View {
                         .foregroundStyle(SideSeatTheme.utilityAction)
                         .contentShape(Rectangle())
                     }
-                    .accessibilityLabel(sectionTitle(section, at: now))
+                    .accessibilityLabel(section.title)
                     .accessibilityAddTraits(section == selectedSection ? .isSelected : [])
                     .accessibilityIdentifier("together-tab-\(section.rawValue)")
                 }
@@ -465,7 +459,7 @@ private struct TogetherHomeView: View {
         }
     }
 
-    private func sectionMenu(at now: Date) -> some View {
+    private var sectionMenu: some View {
         Button { showsSectionPicker = true } label: {
             HStack(spacing: SideSeatTheme.spaceSM) {
                 Text(selectedSection.compactTitle)
@@ -489,14 +483,9 @@ private struct TogetherHomeView: View {
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(AppLocalization.string("Together sections"))
-        .accessibilityValue(sectionTitle(selectedSection, at: now))
+        .accessibilityValue(selectedSection.title)
         .accessibilityHint(AppLocalization.string("Choose a section"))
         .accessibilityIdentifier("together-section-menu")
-    }
-
-    private func sectionTitle(_ section: TogetherSection, at now: Date) -> String {
-        let count = findingCount(at: now)
-        return section == .intentions && count > 0 ? "\(section.title) \(count)" : section.title
     }
 
     private func status(for intent: NativeWeeklyIntent, at now: Date) -> TogetherIntentStatus {
@@ -519,13 +508,14 @@ private struct TogetherHomeView: View {
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(SideSeatTheme.utilityAction)
-            .padding(.vertical, SideSeatTheme.spaceSM)
+            .padding(.horizontal, SideSeatTheme.spaceMD)
             .frame(minWidth: 44, maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil,
-                minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .trailing)
+                minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .center)
+            .background(SideSeatTheme.fillTertiary, in: Capsule())
             .contentShape(Rectangle())
             .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
         }
-        .buttonStyle(SSActionButtonStyle())
+        .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(AppLocalization.string("Add an intention"))
         .accessibilityIdentifier("together-add-intent")
         .disabled(store.isCreating || store.isLoading)
@@ -546,21 +536,16 @@ private struct TogetherHomeView: View {
                         ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
                         : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
                     headingLayout {
-                        Text(AppLocalization.string("What I want to do"))
-                            .font(.title3.weight(.semibold))
+                        Text(AppLocalization.string("My intentions"))
+                            .font(.headline)
                             .foregroundStyle(SideSeatTheme.Together.ink)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .accessibilityAddTraits(.isHeader)
                             .accessibilityIdentifier("together-intentions-heading")
-                        if !current.isEmpty { addIntentionButton }
+                        addIntentionButton
                     }
-                    Text(AppLocalization.string("Your activities, timing and finding status, all in one place."))
-                        .font(.subheadline)
-                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .id("together-intentions-top")
             }
 
             if let publishedIntentID, store.intents.contains(where: { $0.id == publishedIntentID }) {
@@ -568,17 +553,6 @@ private struct TogetherHomeView: View {
                     Label("Intention published", systemImage: "checkmark.circle")
                         .font(.subheadline.weight(.medium))
                         .fixedSize(horizontal: false, vertical: true)
-                    Button {
-                        sectionSelection.wrappedValue = .recommendations
-                        self.publishedIntentID = nil
-                    } label: {
-                        Text("View recommendations")
-                            .font(.subheadline.weight(.medium))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .frame(minHeight: 44)
-                    }
-                    .foregroundStyle(SideSeatTheme.utilityAction)
-                    .accessibilityIdentifier("together-view-recommendations")
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("together-publication-success")
@@ -620,27 +594,48 @@ private struct TogetherHomeView: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("together-set-intent")
             } else {
-                ForEach(current) { intent in
-                    WeeklyIntentCard(
-                        intent: intent, status: status(for: intent, at: now),
-                        isWorking: store.mutatingIDs.contains(intent.id),
-                        onEdit: { presentedEditor = .edit(intent) },
-                        onTogglePause: {
-                            Task {
-                                if await store.setPaused(!intent.isPaused, intent: intent,
-                                    automaticMatching: automaticMatchingEnabled, using: session) {
-                                    if publishedIntentID == intent.id { publishedIntentID = nil }
-                                    await refreshOpportunitiesAfterIntentChange()
-                                }
-                            }
-                        },
-                        onDelete: {
-                            Task {
-                                let changed = await store.end(intent, using: session)
-                                if changed { await refreshOpportunitiesAfterIntentChange() }
+                ScrollViewReader { railProxy in
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
+                            ForEach(current) { intent in
+                                WeeklyIntentCard(
+                                    intent: intent, status: status(for: intent, at: now),
+                                    isWorking: store.mutatingIDs.contains(intent.id),
+                                    onEdit: { presentedEditor = .edit(intent) },
+                                    onTogglePause: {
+                                        Task {
+                                            if await store.setPaused(!intent.isPaused, intent: intent,
+                                                automaticMatching: automaticMatchingEnabled, using: session) {
+                                                if publishedIntentID == intent.id { publishedIntentID = nil }
+                                                await refreshOpportunitiesAfterIntentChange()
+                                            }
+                                        }
+                                    },
+                                    onDelete: {
+                                        Task {
+                                            let changed = await store.end(intent, using: session)
+                                            if changed { await refreshOpportunitiesAfterIntentChange() }
+                                        }
+                                    }, compact: true
+                                )
+                                .containerRelativeFrame(.horizontal,
+                                    count: dynamicTypeSize >= .xxxLarge ? 1 : 2,
+                                    spacing: SideSeatTheme.spaceMD)
+                                .id(intent.id)
                             }
                         }
-                    )
+                        .scrollTargetLayout()
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollTargetBehavior(.viewAligned)
+                    .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                    .background(SSPageSwipeExclusion())
+                    .accessibilityIdentifier("together-intention-rail")
+                    .onChange(of: intentionFocusRevision) { _, _ in
+                        if let publishedIntentID {
+                            railProxy.scrollTo(publishedIntentID, anchor: .leading)
+                        }
+                    }
                 }
                 if let issue = store.issue { loadFailure(issue: issue) }
             }
@@ -953,7 +948,7 @@ private struct TogetherHomeView: View {
                     Text("Save an intention to find it here later.")
                 } actions: {
                     Button(AppLocalization.string("View recommendations")) {
-                        sectionSelection.wrappedValue = .recommendations
+                        selectedSection = .recommendations
                     }
                     .buttonStyle(.borderedProminent)
                     .frame(minHeight: 44)
@@ -1010,12 +1005,12 @@ private struct TogetherHomeView: View {
                         action: findMoreRecommendations)
                     SSSecondaryButton(title: AppLocalization.string("View my intentions"),
                         accessibilityID: "together-discovery-empty-action") {
-                        sectionSelection.wrappedValue = .intentions
+                        intentionFocusRevision += 1
                     }
                 } else {
                     SSPrimaryButton(title: AppLocalization.string("View my intentions"),
                         fill: .product, height: 48, accessibilityID: "together-discovery-empty-action") {
-                        sectionSelection.wrappedValue = .intentions
+                        intentionFocusRevision += 1
                     }
                 }
             }
@@ -1097,12 +1092,6 @@ private struct TogetherHomeView: View {
             await refreshOpportunitiesAfterIntentChange()
         }
         await exploration
-        if !resolvedInitialSection, store.hasLoaded, store.issue == nil, opportunityStore.issue == nil {
-            selectedSection = TogetherSection.initial(hasIntentions: !store.intents.isEmpty,
-                hasOpportunities: !opportunityStore.opportunities.isEmpty || !exploreStore.intents.isEmpty,
-                hasLegacySession: matchingSessionStore.session.isMatching(at: Date()))
-            resolvedInitialSection = true
-        }
     }
 
     private func loadExploration() async {
@@ -1488,6 +1477,7 @@ private struct WeeklyIntentCard: View {
     @State private var shareIssue: String?
 
     @State private var confirmsDelete = false
+    @State private var showsActions = false
     @State private var showsAllTimes = false
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let intent: NativeWeeklyIntent
@@ -1497,11 +1487,15 @@ private struct WeeklyIntentCard: View {
     var onTogglePause: (() -> Void)? = nil
     let onDelete: () -> Void
     var onRepeat: (() -> Void)? = nil
+    var compact = false
 
     private var isTerminal: Bool { status == .ended || status == .expired }
 
     var body: some View {
-        cardContent
+        Group {
+            if compact { compactCardContent }
+            else { cardContent }
+        }
         .contentShape(RoundedRectangle(cornerRadius: SideSeatTheme.Together.cardRadius))
         .onTapGesture {
             if !isTerminal { onEdit() }
@@ -1560,25 +1554,7 @@ private struct WeeklyIntentCard: View {
                         .buttonStyle(.plain)
                         .accessibilityHint(AppLocalization.string("Edit intention"))
                         .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
-                    Menu {
-                        Button(action: onEdit) {
-                            Label(AppLocalization.string("Edit"), systemImage: "pencil")
-                        }
-                        .accessibilityIdentifier("weekly-intent-menu-edit-\(intent.id)")
-                        Button(role: .destructive) { confirmsDelete = true } label: {
-                            Label(AppLocalization.string("Delete"), systemImage: "trash")
-                        }
-                        .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
-                    } label: {
-                        Image(systemName: "ellipsis")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
-                    .accessibilityLabel(AppLocalization.string("More"))
-                    .accessibilityIdentifier("weekly-intent-menu-\(intent.id)")
+                    moreMenu
                 }
             }
             .padding(.horizontal, SideSeatTheme.Together.cardPadding)
@@ -1599,6 +1575,165 @@ private struct WeeklyIntentCard: View {
                     .padding(.vertical, SideSeatTheme.spaceSM)
             }
         }
+    }
+
+    private var compactCardContent: some View {
+        SSFlowCard(contentPadding: SideSeatTheme.spaceMD, contentSpacing: 0) {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                HStack(alignment: .top, spacing: SideSeatTheme.spaceXS) {
+                    Button(action: onEdit) {
+                        VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                            Label(categoryTitle, systemImage: intent.topic.systemImage)
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(SideSeatTheme.Together.categoryInk(for: intent.topic))
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                            Text(intent.activityTitle)
+                                .font(.headline)
+                                .foregroundStyle(SideSeatTheme.textPrimary)
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+                        .contentShape(Rectangle())
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("\(intent.activityTitle), \(categoryTitle)")
+                        .accessibilityIdentifier("weekly-intent-header-\(intent.id)")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint(AppLocalization.string("Edit intention"))
+                    .accessibilityIdentifier("weekly-intent-edit-\(intent.id)")
+                    .disabled(isTerminal)
+                    if !isTerminal { moreMenu }
+                }
+
+                Spacer(minLength: 0)
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(compactTimeSummary)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel(fullTimeSummary)
+                        .accessibilityIdentifier("weekly-intent-compact-time-\(intent.id)")
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("weekly-intent-timing-\(intent.id)")
+
+                Label(status.title, systemImage: status.symbol)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(status == .finding ? SideSeatTheme.statusSuccessText : SideSeatTheme.textSecondaryStrong)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityHint(status.detail)
+                    .accessibilityIdentifier("weekly-intent-status-\(intent.id)")
+            }
+            .frame(minHeight: dynamicTypeSize.isAccessibilitySize ? nil : 156, alignment: .topLeading)
+        }
+    }
+
+    private var categoryTitle: String {
+        intent.topic == .study ? intent.effectiveTogetherMode.studyTitle : intent.topic.title
+    }
+
+    private var compactTimeSummary: String {
+        if let timing = intent.timePreference, timing.kind != "EXACT" { return timing.summary }
+        let windows = intent.relevantTimeWindows().sorted { $0.startAt < $1.startAt }
+        guard let first = windows.first else { return AppLocalization.string("Time to discuss") }
+        let remaining = windows.count > 1 ? " · +\(windows.count - 1)" : ""
+        return windowSummary(first) + remaining
+    }
+
+    private var fullTimeSummary: String {
+        if let timing = intent.timePreference, timing.kind != "EXACT" { return timing.summary }
+        let windows = intent.relevantTimeWindows().sorted { $0.startAt < $1.startAt }
+        return windows.isEmpty ? AppLocalization.string("Time to discuss")
+            : windows.map(windowSummary).joined(separator: "; ")
+    }
+
+    private var moreMenu: some View {
+        Group {
+            if compact && dynamicTypeSize.isAccessibilitySize {
+                Button { showsActions = true } label: { moreLabel }
+                    .ssActionPrompt(
+                        isPresented: $showsActions,
+                        title: AppLocalization.string("More"),
+                        systemImage: "ellipsis",
+                        dismissOnTapOutside: true,
+                        accessibilityIdentifier: "weekly-intent-actions-prompt-\(intent.id)"
+                    ) { accessibleActions }
+            } else {
+                nativeMoreMenu
+            }
+        }
+        .buttonStyle(SSActionButtonStyle(horizontalPadding: 0, size: .icon))
+        .accessibilityLabel(AppLocalization.string("More"))
+        .accessibilityIdentifier("weekly-intent-menu-\(intent.id)")
+    }
+
+    private var accessibleActions: [SSActionPromptAction] {
+        var actions = [
+            SSActionPromptAction(id: "weekly-intent-menu-edit-\(intent.id)",
+                title: AppLocalization.string("Edit"), perform: onEdit),
+        ]
+        if intent.status == "ACTIVE", !preparingShare {
+            actions.append(SSActionPromptAction(id: "weekly-intent-share-\(intent.id)",
+                title: AppLocalization.string("Share")) {
+                Task { await shareIntention() }
+            })
+        }
+        if let onTogglePause {
+            actions.append(SSActionPromptAction(id: "weekly-intent-toggle-pause-\(intent.id)",
+                title: AppLocalization.string(intent.isPaused ? "Resume intention" : "Pause intention"),
+                perform: onTogglePause))
+        }
+        actions.append(SSActionPromptAction(id: "weekly-intent-delete-\(intent.id)",
+            title: AppLocalization.string("Delete"), role: .destructive) {
+            confirmsDelete = true
+        })
+        actions.append(SSActionPromptAction(id: "weekly-intent-actions-cancel-\(intent.id)",
+            title: AppLocalization.string("Cancel"), role: .cancel) {})
+        return actions
+    }
+
+    private var nativeMoreMenu: some View {
+        Menu {
+            Button(action: onEdit) {
+                Label(AppLocalization.string("Edit"), systemImage: "pencil")
+            }
+            .accessibilityIdentifier("weekly-intent-menu-edit-\(intent.id)")
+            if compact {
+                if intent.status == "ACTIVE" {
+                    Button {
+                        Task { await shareIntention() }
+                    } label: {
+                        Label(AppLocalization.string("Share"), systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(preparingShare)
+                    .accessibilityLabel(AppLocalization.string("Share intention"))
+                    .accessibilityIdentifier("weekly-intent-share-\(intent.id)")
+                }
+                if let onTogglePause {
+                    Button(action: onTogglePause) {
+                        Label(AppLocalization.string(intent.isPaused ? "Resume intention" : "Pause intention"),
+                              systemImage: intent.isPaused ? "play.fill" : "pause.fill")
+                    }
+                    .accessibilityIdentifier("weekly-intent-toggle-pause-\(intent.id)")
+                }
+            }
+            Button(role: .destructive) { confirmsDelete = true } label: {
+                Label(AppLocalization.string("Delete"), systemImage: "trash")
+            }
+            .accessibilityIdentifier("weekly-intent-delete-\(intent.id)")
+        } label: { moreLabel }
+    }
+
+    private var moreLabel: some View {
+        Image(systemName: "ellipsis")
+            .font(.body.weight(.semibold))
+            .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
     }
 
     private var cardHeader: some View {

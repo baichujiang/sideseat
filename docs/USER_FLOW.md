@@ -2,7 +2,7 @@
 
 **Status:** One-to-one v1.0 contract retained; approved manual planning follows the current flow below
 
-**Last updated:** 2026-10-24
+**Last updated:** 2026-10-25
 
 **Governing product:** [Product](./PRODUCT.md)
 
@@ -349,17 +349,13 @@ Do not restore the old Discover feed as an implicit fallback.
 
 ## 2. Create an Intent
 
-Together initially explains one action:
-
-```text
-近期你想和同学一起做什么？
-[添加想做的事]
-```
-
-With current intentions, the compact + Add text action sits beside "What I want
-to do" in the content heading, without a background or border and with a minimum
-44-point touch target. The empty state shows only Add an intention, including when a returning user has completed their previous intentions.
-The Together navigation bar has no creation action.
+Together opens Recommendations with My intentions at the top and person
+recommendations below. With current intentions, a compact + Add text action sits
+beside the intention heading, with a single soft capsule fill and a minimum
+44-point touch target. An empty intention section shows Your next activity,
+one Add action and brief guidance; recommendations remain below, including when
+a returning user has completed their previous intentions. The Together navigation
+bar has no creation action.
 
 The user may create several independent Intents. One Intent contains one concrete
 activity and a timing preference. Default: time to discuss. A compact Time row
@@ -374,8 +370,9 @@ Current editor behavior:
   bottom action publishes or saves;
 - the Time section lists every selected date/weekday and time range. Its Modify
   action opens the time sheet to adjust, add or remove slots; undecided timing
-  stays a compact row. Published own-intention cards show two slots initially
-  with an inline action to expand or collapse the rest;
+  stays a compact row. Current compact intention cards show a saved timing
+  summary, with a count when more exact windows exist; the editor retains every
+  window. Expanded expired-history cards retain their time expansion;
 - Plan again prefills the original weekday/local time and duration next calendar
   week. The user can adjust it or return to undecided timing before publishing;
 - choose Coffee, Study, Sports, Explore, Food or Events;
@@ -388,30 +385,38 @@ Current editor behavior:
 - exact time input advances in 15-minute increments; after choosing a start,
   the default end becomes 30 minutes later, with a 30-minute minimum duration;
 - flexible and undecided timing never fabricate an exact start/end;
-- publishing returns to Together and automatically starts finding company, after
-  explicit disclosure; saving a paused intention keeps it paused.
+- publishing returns to the combined Recommendations page, scrolls to My
+  intentions and brings the new card into view; finding company starts after
+  explicit disclosure, and saving a paused intention keeps it paused. Publication
+  needs no separate View recommendations action.
 
-Delivered Opportunities lead the Together page. Published intentions show
-“Finding company automatically”; no separate Start/48-hour countdown appears.
+Delivered Opportunities follow My intentions on the Together page. Published
+intentions show their actual finding status; no separate Start/48-hour countdown
+appears when automatic matching is enabled.
 The initial empty state leads with publishing an activity. The top-right Plans entry provides a direct route
 to coordination and history. Recent Plans on Together contain unanswered private
 Outcome prompts; saved answers remain editable in Plans history or conversation.
 
-In My intentions, tapping a current card or its title opens its existing editor.
-The title and top-right More menu use separate layout space; More contains Edit
-and Delete. Delete retains its confirmation and cancellation, and only confirming
-removes the selected intention and stops new matching. Existing conversations and
+My intentions uses a horizontal row of compact cards: two across at ordinary
+text sizes, one wider card at xxxLarge and accessibility sizes. Ordinary cards
+are about 180 points high; large text can increase their height. Each card shows
+category, activity name, a brief saved timing summary and actual finding status.
+Full time windows, notes and course records remain in its existing editor.
+Tapping a current card or its title opens that editor. The separate 44-point More
+control opens a native menu at ordinary text sizes. At accessibility sizes it
+uses the existing scrollable action panel with Cancel. Both retain Edit, Share
+(only for ACTIVE intentions), Pause/Resume and Delete under the original rules.
+Delete retains its confirmation and cancellation, and only confirming removes
+the selected intention and stops new matching. Existing conversations and
 confirmed Plans remain unchanged.
 
-Status is an information row above the saved timing and note. A separate footer
-places Share on the left (only for ACTIVE intentions) and Pause/Resume on the
-right. Pause uses a quiet secondary fill; Resume uses the primary fill. At
-accessibility sizes these actions stack and body text retains the system font size.
 Pausing does not delete the intention, and editing/saving a paused intention keeps
 it paused. Resume follows the current automatic-matching gate; ACTIVE alone does
-not imply that matching is running. Expired/ended cards remain read-only, with the
-existing Plan again action where offered. The original sharing request, busy state,
-time expansion, expiry, matching and compatibility contracts remain unchanged.
+not imply that matching is running. Expired history retains its full read-only
+cards, time expansion and existing Plan again action. The original sharing
+request, busy state, expiry, matching and compatibility contracts remain unchanged.
+This 2026-10-25 native layout supersedes the previous separate My intentions page
+and own-card footer actions.
 
 ## 3. Automatic matching
 
@@ -455,18 +460,26 @@ Each unoccupied Intent may have one current Opportunity. There is no global
 Feasible opportunities are ordered by activity fit, with oldest-first ties.
 A lower score does not prevent delivery; no eligible active peer still means no match.
 
-### Together page layout (2026-09-26)
+### Native Together page layout (2026-10-25)
 
-The page order is **My intentions / Recommendations / Saved intentions**.
-The native page keeps a horizontal selector when the complete labels fit. At
-accessibility text sizes or narrower widths, one button shows the current section
-and opens a section sheet; selection and each page's scroll position are retained.
-The sheet exposes the full section names and selected state to accessibility.
-An empty My intentions page shows one brief heading, a short **Add** action with
-the full **Add an intention** accessibility label, then explanatory text. It does
-not repeat the active-intentions heading or reduce the user's text size.
-Recommendations initially shows personalized opportunities, without a finding-status
-explanation. A **Find more recommendations** button at the bottom explicitly searches
+The two sections are **Recommendations / Saved intentions**. Recommendations
+contains My intentions first, followed by the existing full-size person cards.
+More intention cards scroll horizontally in the same row; they do not add rows
+above recommendations. The native page keeps its horizontal selector when the
+complete labels fit. At accessibility text sizes or narrower widths, one button
+shows the current section and opens a section sheet; selection and each section's
+scroll position are retained. The sheet exposes full section names and selected
+state to accessibility.
+
+An empty My intentions section has one brief heading, an **Add** action with the
+full **Add an intention** accessibility label, then explanatory text. It does not
+repeat the active-intentions heading or reduce the user's text size. Empty
+recommendations retain their real loading/empty/error state; **View my intentions**
+scrolls to the top of this same page. Cards are not a recommendation filter:
+existing personalized and additional recommendations keep their eligibility,
+including records without a viewer intention ID.
+
+A **Find more recommendations** button at the bottom explicitly searches
 for additional public intentions. Results appear in the same feed, with no separate
 “More intentions” heading, search/filter panel, or upgrade panel. The button becomes
 **Search again**, refreshing this supplementary result set rather than paginating.
@@ -483,8 +496,9 @@ entered explicitly. An explicit refresh or new search can replace the result set
 and omit already saved cards. A successfully sent message removes the card from recommendations
 and exploration; eligible cards refill the requested result set up to its access
 limit. Demonstration cards have disabled contact/save controls.
-Saved intentions contains private heart bookmarks, an empty state and removal.
-My intentions keeps its existing editing and deletion behavior.
+Saved intentions remains the separate section for private heart bookmarks,
+its empty state and removal. Current intention editing and deletion keep their
+existing callbacks and rules.
 
 ## 5. Save an intention or send a message
 
@@ -761,9 +775,11 @@ The new intention starts with the Plan title and an unambiguous activity categor
 when available. Custom Plan types require an explicit category choice. Time
 starts undecided; old dates, participants, messages and private notes are not
 copied. The user reviews the public-intention disclosure before publishing.
-Cancel returns to the same Plan/chat without writing. Successful publication opens
-My intentions with the newly published card and a **View recommendations** action;
-recommendations keep their real loading/empty state. Original history is retained.
+Cancel returns to the same Plan/chat without writing. Successful publication
+opens Recommendations, scrolls to My intentions and brings the newly published
+card into view. Recommendations follow on the same page with their real
+loading/empty state; no View recommendations step is required. Original history
+is retained.
 
 This does not expose ENDED intentions as a history list: deleted and consumed
 intentions currently share that state.

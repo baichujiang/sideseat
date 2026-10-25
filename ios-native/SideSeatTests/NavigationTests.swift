@@ -83,13 +83,9 @@ struct NavigationTests {
         #expect(target(1, -45, velocity: 700) == 1)
     }
 
-    @Test("Together task tabs have a stable order and a useful first section")
+    @Test("Together combines intentions with recommendations before saved intentions")
     func togetherTaskNavigation() {
-        #expect(TogetherSection.allCases == [.intentions, .recommendations, .bookmarks])
-        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: false, hasLegacySession: false) == .intentions)
-        #expect(TogetherSection.initial(hasIntentions: true, hasOpportunities: false, hasLegacySession: false) == .recommendations)
-        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: true, hasLegacySession: false) == .recommendations)
-        #expect(TogetherSection.initial(hasIntentions: false, hasOpportunities: false, hasLegacySession: true) == .recommendations)
+        #expect(TogetherSection.allCases == [.recommendations, .bookmarks])
     }
 
     @Test("App shell exposes the new product navigation in its exact order")

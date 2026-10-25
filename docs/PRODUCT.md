@@ -2,9 +2,34 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-25
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
+
+**2026-10-25 owner-approved native Together layout:**
+Together has two sections: **Recommendations / Saved intentions**. Recommendations
+opens with **My intentions**, followed by the existing person recommendation
+cards. Current intentions use a horizontally scrolling row of compact cards, two
+across at ordinary text sizes; xxxLarge and accessibility sizes use one wider
+card and permit additional height. Each card shows category, activity name,
+actual saved timing summary and actual finding status. Tapping edits it; More
+opens a native menu at ordinary text sizes and the existing scrollable action
+panel with Cancel at accessibility sizes. Both offer Edit, ACTIVE-only Share,
+Pause/Resume and the existing confirmed Delete action under the original rules.
+Expired history retains its full cards and Plan again action.
+
+Publication returns to this combined page, scrolls to My intentions and brings
+the new card into view. No View recommendations step is required. View my
+intentions from an empty recommendation state scrolls to the same section;
+recommendations remain available below an empty intention section. Full timing,
+notes and course records stay in the editor. Matching, publication consent,
+privacy, bookmarks, messaging and feature gates retain their existing rules;
+this layout does not filter all recommendations by a selected intention or
+require every recommendation to have a viewer intention ID.
+
+This native amendment supersedes the earlier three-section layout and own-card
+footer placement. It does not change the browser layout or certify a release;
+installation and verification belong in the release records.
 
 **2026-09-26 owner-approved interaction amendment (local implementation):**
 Together uses My intentions → Recommendations → Saved intentions. A private heart
