@@ -57,6 +57,16 @@ branch. No workflow, submission, identity, invitation-version or Calendar rule
 changes. Browser acceptance and source preservation are recorded in the
 [web QA](./qa/2026-10-24-share-status-metadata.md).
 
+## Whole-card entry — Preview 218
+
+Overview cards omit the redundant filled action label and its task-only layout.
+All three card styles reuse the existing people/progress footer and lightweight
+chevron. The whole card already is a single Button: collecting manual plans
+open their original timetable; other phases and conversation plans retain their
+original detail routes. Full AX descriptions still include the action title.
+There is no new gesture, nested button, state, request or rule. See
+[218 QA](./qa/2026-10-25-card-entry.md).
+
 ## Card actions and content — Preview 217
 
 Native plan overview cards omit synthesized right-side photos, category art and

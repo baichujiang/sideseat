@@ -718,27 +718,11 @@ private struct PlanOverviewLabel: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if style == .task {
-                ViewThatFits(in: .horizontal) {
-                    if !typeSize.isAccessibilitySize {
-                        HStack(spacing: SideSeatTheme.spaceSM) {
-                            peopleSummary.fixedSize(horizontal: true, vertical: false)
-                            Spacer(minLength: 0)
-                            action.fixedSize(horizontal: true, vertical: false)
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                        peopleSummary
-                        action.frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                }
-            } else {
-                HStack(spacing: SideSeatTheme.spaceSM) {
-                    peopleSummary
-                    if !typeSize.isAccessibilitySize {
-                        Spacer(minLength: 0)
-                        chevron
-                    }
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                peopleSummary
+                if !typeSize.isAccessibilitySize {
+                    Spacer(minLength: 0)
+                    chevron
                 }
             }
         }
@@ -748,18 +732,6 @@ private struct PlanOverviewLabel: View {
     private var peopleSummary: some View {
         PlanHomePeople(people: people, text: progress ?? context)
             .lineLimit(typeSize.isAccessibilitySize ? nil : 1)
-    }
-
-    private var action: some View {
-        Text(presentation.cardActionTitle)
-            .font(.footnote.weight(.semibold))
-            .fixedSize(horizontal: false, vertical: true)
-            .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-            .padding(.horizontal, SideSeatTheme.spaceSM)
-            .padding(.vertical, SideSeatTheme.spaceXS)
-            .frame(minHeight: 32, alignment: .leading)
-            .background(SideSeatTheme.ProductAction.fill,
-                        in: RoundedRectangle(cornerRadius: SideSeatTheme.controlRadius))
     }
 
     private var waitingSummary: String {
