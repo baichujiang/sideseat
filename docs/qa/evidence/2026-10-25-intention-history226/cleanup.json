@@ -1,0 +1,16 @@
+{
+  "runnerDeviceUninstalled": true,
+  "temporaryRunnerContextRemoved": true,
+  "temporarySourceContainingLocalRemoved": true,
+  "removedGeneratedContexts": [
+    "sideseat226-runner",
+    "sideseat195-source"
+  ],
+  "rawFilesMode": "0600",
+  "rawDirectoriesMode": "0700",
+  "disposableAccountsCreated": 0,
+  "realBusinessWrites": 0,
+  "baselineOrdinaryAppPreserved": 97,
+  "newSideSeatReports": 0,
+  "existingBuildCachesRetained": true
+}

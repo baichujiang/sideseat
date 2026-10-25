@@ -1,0 +1,322 @@
+[
+  {
+    "capture": "history226-original-history-retained-after-publication-zh_0_9A2B9D5E-91FF-4155-A409-E024055A0BBD.png",
+    "file": "history226-original-history-retained-after-publication-zh.png",
+    "sha256": "43752ed7700091f69ca4989c61fa1b8eee3c53003d0641ce8202322b30672765",
+    "originalExportedFile": "C2C78D2C-FCD5-4E2E-ACEF-797127D377E5.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_2A47DB3D-171B-4900-944F-58BCDE984D82.png",
+    "file": "history226-me-history-entry.png",
+    "sha256": "4667cbd78f9114c7f5f4a6b93a8270ebb76cf7275611cf0fea131894780bbeda",
+    "originalExportedFile": "0C02C5E1-93E9-4691-84A8-52BEF9EEECD2.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-repeat-published-and-focused-at-home-zh_0_0A9C5360-B380-480D-B76C-6DFECD48FE42.png",
+    "file": "history226-repeat-published-and-focused-at-home-zh.png",
+    "sha256": "e666ee874371e444c151c782cc7e85a3018a64a63432d09e4208ddcc25cc10c3",
+    "originalExportedFile": "C5FC54BD-DE20-42D6-AD83-90AF9A400FE8.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_A6A6FFDA-A93D-4B5B-8943-D5E950A8D406.png",
+    "file": "history226-me-history-entry-cb8095a9.png",
+    "sha256": "cb8095a99926e0309594b6eca6bb4f392cd08f0f841ede0b7f82b72cb8009f9e",
+    "originalExportedFile": "5AAB3234-8799-4714-A409-C62719D80B60.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-prefilled-future-picker-zh_0_D94D463E-8A19-4FA7-8FE0-A4FF7D617696.png",
+    "file": "history226-prefilled-future-picker-zh.png",
+    "sha256": "74aaa9fa85e98da65bf4a2c26d44d644fb33d9ffb63bc2cd665dee5746f7ba51",
+    "originalExportedFile": "417D159E-3A51-45DD-BB44-55EAA01D35AF.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-original-expired-time-zh_0_EDB69E1D-A04E-4A2C-81B6-F3A83726068F.png",
+    "file": "history226-original-expired-time-zh.png",
+    "sha256": "d85c6ef2e9937a720aa1758f659d6f20ce3a77d9dfea2ae314474b83afde247d",
+    "originalExportedFile": "17C15D3D-CF18-44FD-9238-ECBAC0D21C08.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_0D0124C2-5513-4364-A0DA-19170BCBB810.png",
+    "file": "history226-me-history-entry-d2f78765.png",
+    "sha256": "d2f78765317ebe62989eb3f649e4a85bdc6d302432684931e19c1f7420a2e374",
+    "originalExportedFile": "9A90173F-C390-4448-98ED-95AEFBAEF78F.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-0_0_719A2334-9E41-4E11-9B13-DF81A4A2FF8B.png",
+    "file": "history226-continuous-scroll-me-intention-history-0.png",
+    "sha256": "d2f78765317ebe62989eb3f649e4a85bdc6d302432684931e19c1f7420a2e374",
+    "originalExportedFile": "8F79CBFE-F7B8-41E2-96B4-2BDE35AE6AC4.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_B7338274-0F84-437D-98AB-C5B2396E95CE.png",
+    "file": "history226-me-history-entry-9144aba8.png",
+    "sha256": "9144aba8fbb59c08b0181ad1b260fc1e96db553d2a6938b2ca7406c45713cacc",
+    "originalExportedFile": "4B00177C-27C8-40CD-9DE9-B959CB3B946D.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+  },
+  {
+    "capture": "history226-published-undecided-record-reopened-zh_0_180ACF70-C048-487C-A0D7-3583D553A9F6.png",
+    "file": "history226-published-undecided-record-reopened-zh.png",
+    "sha256": "611e57c7e4fa2bab0ce47a50e97a8f5f290138447390e3eb947d192dabe0d518",
+    "originalExportedFile": "0B7EFBC8-C2B4-4DC7-99DF-E77DF5A22567.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+  },
+  {
+    "capture": "history226-repeat-time-cleared-before-publishing-zh_0_6514D9FF-AFA5-458C-95C9-E07F2CF3956F.png",
+    "file": "history226-repeat-time-cleared-before-publishing-zh.png",
+    "sha256": "cd2916df449c22e3fdce9362bb10bc55673553accca162976d9ae70f27b5c000",
+    "originalExportedFile": "ECE758A4-8F76-4A1E-81E3-64A8513DBA82.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_A9657262-3D02-4E44-8DF5-7A3F30A457A0.png",
+    "file": "history226-me-history-entry-efaca5bf.png",
+    "sha256": "efaca5bfaf48c34173bb12ccd69ec136f948e3660ae6573ef76ecad03126dcc5",
+    "originalExportedFile": "F624AB81-2429-4330-827C-107D53B510EF.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-0_0_587515D6-3C62-41B0-9BC4-A21BFE5BA1DF.png",
+    "file": "history226-continuous-scroll-me-intention-history-0-efaca5bf.png",
+    "sha256": "efaca5bfaf48c34173bb12ccd69ec136f948e3660ae6573ef76ecad03126dcc5",
+    "originalExportedFile": "6C2898F7-B882-4C51-BC70-B4A289A3C964.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+  },
+  {
+    "capture": "history226-empty-history-returned-to-me-zh_0_6DC6773D-5CA7-4DC9-BD8B-2EEACB39CECF.png",
+    "file": "history226-empty-history-returned-to-me-zh.png",
+    "sha256": "9144aba8fbb59c08b0181ad1b260fc1e96db553d2a6938b2ca7406c45713cacc",
+    "originalExportedFile": "38B59743-E01E-4282-A861-5C8430CBF11F.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+  },
+  {
+    "capture": "history226-empty-history-zh_0_E4F85249-9AB1-4509-852B-A5D61EB99C9B.png",
+    "file": "history226-empty-history-zh.png",
+    "sha256": "d67f94168c27111d980ba4fc0c0e92a51d743bfa1a6fc6e4f24d5e4c2475e304",
+    "originalExportedFile": "EDA81F1B-B3C8-4CB4-95C0-A7D4D29D22FC.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_0081B232-CDAB-46C4-AF57-1A59588AA090.png",
+    "file": "history226-me-history-entry-bc2c0cdf.png",
+    "sha256": "bc2c0cdf7a1a5bd6653c956b9b1199ed3ff031eb5e401d2d0c23b793645e0d66",
+    "originalExportedFile": "139131EF-C33A-40B5-B321-DD5C69D48D1F.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-0_0_BB3CB4EC-2867-4092-BDE4-4690024392A1.png",
+    "file": "history226-continuous-scroll-me-intention-history-0-bc2c0cdf.png",
+    "sha256": "bc2c0cdf7a1a5bd6653c956b9b1199ed3ff031eb5e401d2d0c23b793645e0d66",
+    "originalExportedFile": "0AD357B4-95B5-4E2E-8CE3-A419820374E5.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+  },
+  {
+    "capture": "history226-entry-after-return-de-system-max_0_CB028BC1-9903-4B30-9F0A-04D54C664452.png",
+    "file": "history226-entry-after-return-de-system-max.png",
+    "sha256": "73d4f9cc2eff7723e13e215da8db45c75bf6692b406fe2d6d02aa21fb39e63ed",
+    "originalExportedFile": "8FA71D72-C38D-49F2-A6AB-FB09D985CDC6.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-repeat-cancel-stays-in-history-de-system-max_0_B20BDE92-6E2B-4924-9296-77A44DAD6F6F.png",
+    "file": "history226-repeat-cancel-stays-in-history-de-system-max.png",
+    "sha256": "2de94fb5b306863be6d93183600fa69aa3ad9dfbded70cc50b9c9b23fa90257c",
+    "originalExportedFile": "0501A8A1-B104-4A2C-B3FD-E4ABA87C3FB7.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-original-repeat-editor-de-system-max_0_1FE28879-5EDE-4BCB-BAD2-81FF690DC8D0.png",
+    "file": "history226-original-repeat-editor-de-system-max.png",
+    "sha256": "84bc779e716aec8f65cd04055cc30e7f9e0419b4f3f597dcdc824277fcb537a0",
+    "originalExportedFile": "079B80E9-7D1D-485A-B639-C86CD8C4C85E.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-repeat-action-visible-de-system-max_0_38C2BFFB-B995-4B5B-B9D3-D699A2719CAF.png",
+    "file": "history226-repeat-action-visible-de-system-max.png",
+    "sha256": "2de94fb5b306863be6d93183600fa69aa3ad9dfbded70cc50b9c9b23fa90257c",
+    "originalExportedFile": "089ACFE8-6817-43E2-82E0-E19FF5E2FF35.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-6-de-system-max_0_8989D34E-7BD3-4825-9944-FB172CBC92F9.png",
+    "file": "history226-expired-card-readable-segment-6-de-system-max.png",
+    "sha256": "a523219e05531285579d1be700ac1a74e998bd874c6e84a886eb3e8a00e9499f",
+    "originalExportedFile": "98066D21-B713-4D9B-994B-7FC42E7E8080.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-continuous-scroll--0_0_4D654760-F246-4ACF-AF6E-EE9F79607450.png",
+    "file": "history226-continuous-scroll--0.png",
+    "sha256": "a1939c829b17a3363fbc2634331691cc3538aab4a3fd337f97fb12bdb0836722",
+    "originalExportedFile": "6F0B3CA0-9A3B-4244-B2AF-8642AF4CB7FF.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-5-de-system-max_0_3C187D50-7A2F-4C0C-A7DD-514E65488801.png",
+    "file": "history226-expired-card-readable-segment-5-de-system-max.png",
+    "sha256": "63c4f0ec89c5db09057f62a854ebc502eeff3b6eb72622b416dbd62a849148bb",
+    "originalExportedFile": "26E88DB3-9DBA-4B6C-B4FD-81469FBC83BC.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-4-de-system-max_0_6294C315-B894-45BD-9752-A720E6B6EB9E.png",
+    "file": "history226-expired-card-readable-segment-4-de-system-max.png",
+    "sha256": "63c4f0ec89c5db09057f62a854ebc502eeff3b6eb72622b416dbd62a849148bb",
+    "originalExportedFile": "BACFEBE5-07A3-43C9-8CC2-2C998CC8994C.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-3-de-system-max_0_CF60F99F-4686-4E76-B253-ECDFFB690900.png",
+    "file": "history226-expired-card-readable-segment-3-de-system-max.png",
+    "sha256": "cc79ce3bd648dd018a4a02381a8d50935e775887b8d21945aef2ff346fab9ad5",
+    "originalExportedFile": "A9C85552-B21A-4DC5-81B0-8BA9A6EA8EB3.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-2-de-system-max_0_E4CD842F-E305-4C26-B17E-26B94117B893.png",
+    "file": "history226-expired-card-readable-segment-2-de-system-max.png",
+    "sha256": "cc79ce3bd648dd018a4a02381a8d50935e775887b8d21945aef2ff346fab9ad5",
+    "originalExportedFile": "F27CEC3F-7C4B-489D-B3EC-14864236ED6B.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-1-de-system-max_0_9B434A67-FABD-48A4-BA1B-7BF36B0A2943.png",
+    "file": "history226-expired-card-readable-segment-1-de-system-max.png",
+    "sha256": "09a11ab8ed63060b6ffa554f6211cfc186d3cb7f640cfef58fafc8cb7f98490a",
+    "originalExportedFile": "68E8B424-F779-4A85-AC05-8AF2E132BB23.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-expired-card-readable-segment-0-de-system-max_0_29F87B13-A601-4569-8A54-7E956B95FED8.png",
+    "file": "history226-expired-card-readable-segment-0-de-system-max.png",
+    "sha256": "09a11ab8ed63060b6ffa554f6211cfc186d3cb7f640cfef58fafc8cb7f98490a",
+    "originalExportedFile": "D3E6D766-824D-4A52-8141-9D7B735F98C0.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_A13B75C0-D4BE-4CB0-925A-4FBAB0A1FC6B.png",
+    "file": "history226-me-history-entry-b494ba14.png",
+    "sha256": "b494ba14a34c3ad001bfc3d145c71107ec4499600cb2feffe508bd33dc1824cb",
+    "originalExportedFile": "6200E745-6907-4BB4-89AB-FF2D9A622B55.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-3_0_748FCFC7-61DF-47D2-8D57-6E4ED3A9CF5C.png",
+    "file": "history226-continuous-scroll-me-intention-history-3.png",
+    "sha256": "13e4b396d82e6c61e7560eeb74e0e9d4c436d53e845beca3b3c264bbb4143c56",
+    "originalExportedFile": "10368839-5D73-4AD2-BAC7-8D607E00AF70.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-2_0_D01D20D5-02A2-44BD-A47A-B435C0B44AA0.png",
+    "file": "history226-continuous-scroll-me-intention-history-2.png",
+    "sha256": "db0ef429110736467ef2fd97a25bbbc7a553be8f441a3c245908ab21ca6a1c5e",
+    "originalExportedFile": "531778EB-AB06-4267-9CAB-5AD6633F8B90.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-1_0_844E6F85-2F88-4721-A735-0B106B0DF666.png",
+    "file": "history226-continuous-scroll-me-intention-history-1.png",
+    "sha256": "733c22b5027545fe638226dd3e458e9fe15e884c32d41aa5f9c3cf91fbad406d",
+    "originalExportedFile": "BD8489AD-1AEC-4BD6-93E9-10DAA4D6A1BB.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-0_0_CF05F8CD-2802-4B32-9879-137FA49597A4.png",
+    "file": "history226-continuous-scroll-me-intention-history-0-b7658e36.png",
+    "sha256": "b7658e36cc1db87be4f05331727fdbfa1d91d9f0a0d1b259ec9f3a2484641ab7",
+    "originalExportedFile": "A6D18D95-16BF-49E2-A683-87976B62074A.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack()"
+  },
+  {
+    "capture": "history226-post-publication-tab-roundtrip-keeps-new-root-card_0_003E1206-F6B8-4851-B5D6-38A00371D6D7.png",
+    "file": "history226-post-publication-tab-roundtrip-keeps-new-root-card.png",
+    "sha256": "1f61338c7686e6a72be765cb0df3db5c8181f0dc3131312a7823e415cb32d7e7",
+    "originalExportedFile": "6354662D-0E28-4C9C-A43A-FBC086F43BE7.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  },
+  {
+    "capture": "history226-publication-resets-retained-child-and-focuses-new-card_0_FBB138D4-57C3-497E-85B6-9F9DF04D6F05.png",
+    "file": "history226-publication-resets-retained-child-and-focuses-new-card.png",
+    "sha256": "120f63cf07fb6d2fdfd49262a3f368bb686ee566b0ba8e983aa9afe7467ff1f5",
+    "originalExportedFile": "1A5ADF12-87CC-4B56-AD30-98BA4D9B7C26.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  },
+  {
+    "capture": "history226-me-history-entry_0_F846CD56-C200-4486-9559-4106D1C7ECC7.png",
+    "file": "history226-me-history-entry-f5ccdcb9.png",
+    "sha256": "f5ccdcb909e9f1572d643d0a62e76236450e206d122b6e32fc4a2cee12a5c6fa",
+    "originalExportedFile": "ECEFA4B4-553B-4877-ACC4-C71C5B97FF6E.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  },
+  {
+    "capture": "history226-continuous-scroll-me-intention-history-0_0_4153FF32-EF7C-4E26-814D-75BEB7ABBA4F.png",
+    "file": "history226-continuous-scroll-me-intention-history-0-f5ccdcb9.png",
+    "sha256": "f5ccdcb909e9f1572d643d0a62e76236450e206d122b6e32fc4a2cee12a5c6fa",
+    "originalExportedFile": "45D07664-25F9-4BF0-A1FB-19FC2BA8C76E.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  },
+  {
+    "capture": "history226-ordinary-tab-roundtrip-preserves-existing-child_0_432EA2B6-5B34-4153-9E23-C292FD7E658D.png",
+    "file": "history226-ordinary-tab-roundtrip-preserves-existing-child.png",
+    "sha256": "9d47a2ff983e880d17d4073d55cfb82ae4a979185fbd44b9cb8c81a8fadc6493",
+    "originalExportedFile": "3C08A8F0-00DD-4FD8-BA06-56886F3D29C8.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  },
+  {
+    "capture": "history226-retained-together-child-and-back-before-publication_0_99581CC1-5019-4048-904D-27F602A93574.png",
+    "file": "history226-retained-together-child-and-back-before-publication.png",
+    "sha256": "a1c46f2a9424b7b42b39d8c9f5eabba765cb4aa932c15edb1c971ac5831eacff",
+    "originalExportedFile": "AF0A7B91-E1C0-461D-A321-26EC123F1626.png",
+    "associatedWithFailure": false,
+    "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+  }
+]

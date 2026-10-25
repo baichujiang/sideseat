@@ -35,8 +35,23 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is225 below. See web release/QA records.
-- Preview225 is the current installed development build, source 0b0f81c72db468c7351464f517cb518c213c01ee pushed.
+  No native rebuild in that web stage; current native build is226 below. See web release/QA records.
+- Preview226 is the current installed development build, source f3d62a23714dbee63197ad7db54c153f1d515bb6 pushed.
+  Together removes only the expired-history expansion. Me → History section →
+  Intention history owns the original read-only cards and repeat flow, behind the
+  existing gate. Records/expiry selection/GET/template rules stay; cancel remains
+  in history, publication closes the editor and opens Together root/new card.
+  Target-router reset also clears retained child routes on this handoff while
+  ordinary tab switching preserves them. Independent minimal review passed.
+  Final same-frozen-App five focused cases passed227.236s,0fail/skip; earlier
+  Navigation27/0.038s predates the final router reset, route/test bytes unchanged.
+  40captures/31unique pixels reviewed; OS/viewport/old-Me/partial-editor limits
+  explicit. Normal226 PID9918,268/Local/signature/binaries/compiled test source
+  match commit, ordinary97 retained. Existing memory fixtures only,0accounts/
+  real writes; no backend/web release or online/full-App flow claim. Runner and
+  temporary Local contexts removed,new App reports0. See [226 QA](docs/qa/2026-10-25-intention-history.md)
+  and [release](docs/releases/2026-10-25-preview226-intention-history.md).
+- Preview225 was the previous installed development build, source 0b0f81c72db468c7351464f517cb518c213c01ee pushed.
   Compact intention category uses its existing symbol at26pt,4pt text spacing and
   bounded secondary-text fit; accessibility text stays full size/multiline. Only
   the category declaration changes, callbacks/rules and all outside bytes stay.

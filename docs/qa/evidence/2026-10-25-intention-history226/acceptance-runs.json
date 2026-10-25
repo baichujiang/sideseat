@@ -1,0 +1,79 @@
+{
+  "finalPhone": {
+    "sameFrozenApp": true,
+    "cases": [
+      {
+        "case": "testChineseHistoryCancelAndPublishFutureRepeat",
+        "seconds": 63.309,
+        "result": "passed"
+      },
+      {
+        "case": "testChineseRepeatCanPublishUndecidedAndReopen",
+        "seconds": 47.87,
+        "result": "passed"
+      },
+      {
+        "case": "testEmptyHistoryCanReturnToMe",
+        "seconds": 22.111,
+        "result": "passed"
+      },
+      {
+        "case": "testGermanActualMaximumHistoryReadOnlyRepeatCancelAndBack",
+        "seconds": 46.44,
+        "result": "passed"
+      },
+      {
+        "case": "testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState",
+        "seconds": 47.506,
+        "result": "passed"
+      }
+    ],
+    "suiteSeconds": 227.236,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "device": {
+      "architecture": "arm64",
+      "deviceId": "00008110-001A69110CC1401E",
+      "deviceName": "iPhone (4)",
+      "modelName": "iPhone 14 Plus",
+      "osBuildNumber": "23G83",
+      "osVersion": "26.6.1",
+      "platform": "iOS"
+    },
+    "compiledSourceSHA256": {
+      "IntentionHistoryPhoneUITests.swift": "d741f82134cabb1b4c3069a424607cb6f14977e87996b60975c606382b3b7e0e"
+    },
+    "fixtureScope": "Active DEBUG in-memory fixtures, same simulated backend shared between page stores; no real accounts or online business writes."
+  },
+  "navigationUnit": {
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0,
+    "suiteSeconds": 0.038,
+    "scope": "Navigation route/policy tests; earlier226 App basis before final TabRouter environment/reset and DEBUG seed. Route enum and NavigationTests bytes unchanged after this run. Final phone five covers the later navigation fix.",
+    "device": {
+      "architecture": "arm64",
+      "deviceId": "AEBD816E-53A7-4012-B76A-FEF82CF02A6B",
+      "deviceName": "SideSeat UX QA",
+      "modelName": "iPhone 17 Pro",
+      "osBuildNumber": "23F77",
+      "osVersion": "26.5",
+      "platform": "iOS Simulator"
+    }
+  },
+  "initialPhone": {
+    "passed": 4,
+    "failed": 0,
+    "suiteSeconds": 178.403,
+    "scope": "Initial226 before target-stack fix and retained-child fifth test. Not final acceptance basis.34 captures/24 unique, only3 root spot checks, no complete initial visual acceptance."
+  },
+  "unchangedFlowsNotRepeated": [
+    "online matching/API journey",
+    "web/browser",
+    "invitation and Calendar",
+    "unrelated unit/domain suites"
+  ],
+  "accountsCreated": 0,
+  "realBusinessWrites": 0
+}

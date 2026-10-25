@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-25T20:02:18.861393+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 226,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9918,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "Existing active in-memory intention/opportunity fixtures; no real account or business write. Five focused cases cover home entry removal, Me history entry/read-only records, repeat cancellation/future prefill/publication returning to visible new card and original history retention, time-undecided creation/reopen, empty/back, actual German maximum layout and retained-target navigation reset without changing ordinary tab preservation. Shared DEBUG fixture backend only; no matching or online API write.",
+  "disposableAccountsCreated": 0,
+  "realUserBusinessWrites": 0,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "sourceCommit": "f3d62a23714dbee63197ad7db54c153f1d515bb6",
+  "pushedBranch": "codex/ios-uxui-20260922",
+  "sourceCommitInputsMatched": true,
+  "temporaryRunnerContextRemoved": true,
+  "temporarySourceContainingLocalRemoved": true,
+  "rawEvidencePermissionsApplied": true
+}

@@ -1,0 +1,516 @@
+{
+  "stage": 226,
+  "reviewer": "history_visual_normal",
+  "method": "逐张调用 view_image(detail=original) 查看 final-images 内原始 PNG；按 SHA-256 去重并按 testCase 识别测试归属。未使用蒙太奇或 AX 代替像素检查。",
+  "scope": "最终冻结 Preview226 在默认 iPhone 14 Plus 上，四条普通中文测试对应截图；不包含由另一检查员负责的德语最大字号测试。",
+  "captureCount": 23,
+  "uniqueImageCount": 18,
+  "inputHashValidationPassed": true,
+  "conclusion": "已查全部 18 张不同原图。未发现此次新增意愿历史、管理入口、空态或发布返回首页的视觉阻断。",
+  "materialFindings": [],
+  "limits": [
+    "系统 AssistiveTouch 在多图中位于右侧，遮挡 Me 意愿历史行右箭头、部分既有空推荐说明或旧探索卡片按钮；应用文字和新主要操作未因此出现布局错误。",
+    "Me 页面截图位于滚动中下段，顶部既有主题行被视口截断；不据此声称 Me 屏外内容已验证。",
+    "旧探索列表第二张卡片和更下方内容是部分滚动截面，截图不足以证明其全部内容及底部避让；这属于保留目标路由回归截图，不是此次新历史 UI。",
+    "只能证明这些固定数据、语言、当前字号和可见视口；真实服务数据、所有长文本与最大字号另有范围，不在本报告内。"
+  ],
+  "reviewedUniqueImages": [
+    {
+      "capture": "history226-original-history-retained-after-publication-zh_0_9A2B9D5E-91FF-4155-A409-E024055A0BBD.png",
+      "file": "history226-original-history-retained-after-publication-zh.png",
+      "sha256": "43752ed7700091f69ca4989c61fa1b8eee3c53003d0641ce8202322b30672765",
+      "originalExportedFile": "C2C78D2C-FCD5-4E2E-ACEF-797127D377E5.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-original-history-retained-after-publication-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "标题、返回、旧意愿的类别图标/名称、已过期状态、原日期起止时间、说明和“再约一次”完整可读；新历史容器未切断卡片或按钮。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_2A47DB3D-171B-4900-944F-58BCDE984D82.png",
+      "file": "history226-me-history-entry.png",
+      "sha256": "4667cbd78f9114c7f5f4a6b93a8270ebb76cf7275611cf0fea131894780bbeda",
+      "originalExportedFile": "0C02C5E1-93E9-4691-84A8-52BEF9EEECD2.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-repeat-published-and-focused-at-home-zh_0_0A9C5360-B380-480D-B76C-6DFECD48FE42.png",
+      "file": "history226-repeat-published-and-focused-at-home-zh.png",
+      "sha256": "e666ee874371e444c151c782cc7e85a3018a64a63432d09e4208ddcc25cc10c3",
+      "originalExportedFile": "C5FC54BD-DE20-42D6-AD83-90AF9A400FE8.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-repeat-published-and-focused-at-home-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "再次发布后是“同行 / 推荐”首页，新增意愿卡及发布时间状态可读，没有旧子页面返回按钮；首页截图无“已过期”入口。既有空推荐文案尾部被系统 AssistiveTouch 局部遮挡。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_A6A6FFDA-A93D-4B5B-8943-D5E950A8D406.png",
+      "file": "history226-me-history-entry-cb8095a9.png",
+      "sha256": "cb8095a99926e0309594b6eca6bb4f392cd08f0f841ede0b7f82b72cb8009f9e",
+      "originalExportedFile": "5AAB3234-8799-4714-A409-C62719D80B60.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-cb8095a9.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-prefilled-future-picker-zh_0_D94D463E-8A19-4FA7-8FE0-A4FF7D617696.png",
+      "file": "history226-prefilled-future-picker-zh.png",
+      "sha256": "74aaa9fa85e98da65bf4a2c26d44d644fb33d9ffb63bc2cd665dee5746f7ba51",
+      "originalExportedFile": "417D159E-3A51-45DD-BB44-55EAA01D35AF.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-prefilled-future-picker-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "复用时间选择器的开始/结束日期、时间、添加其他时间、暂不确定、顶部关闭/确认完整可见。仅评价当前截图，未据此判断全部日期边界。"
+    },
+    {
+      "capture": "history226-original-expired-time-zh_0_EDB69E1D-A04E-4A2C-81B6-F3A83726068F.png",
+      "file": "history226-original-expired-time-zh.png",
+      "sha256": "d85c6ef2e9937a720aa1758f659d6f20ce3a77d9dfea2ae314474b83afde247d",
+      "originalExportedFile": "17C15D3D-CF18-44FD-9238-ECBAC0D21C08.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-original-expired-time-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "标题、返回、旧意愿的类别图标/名称、已过期状态、原日期起止时间、说明和“再约一次”完整可读；新历史容器未切断卡片或按钮。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_0D0124C2-5513-4364-A0DA-19170BCBB810.png",
+      "file": "history226-me-history-entry-d2f78765.png",
+      "sha256": "d2f78765317ebe62989eb3f649e4a85bdc6d302432684931e19c1f7420a2e374",
+      "originalExportedFile": "9A90173F-C390-4448-98ED-95AEFBAEF78F.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-d2f78765.png",
+        "history226-continuous-scroll-me-intention-history-0.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_B7338274-0F84-437D-98AB-C5B2396E95CE.png",
+      "file": "history226-me-history-entry-9144aba8.png",
+      "sha256": "9144aba8fbb59c08b0181ad1b260fc1e96db553d2a6938b2ca7406c45713cacc",
+      "originalExportedFile": "4B00177C-27C8-40CD-9DE9-B959CB3B946D.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-9144aba8.png",
+        "history226-empty-history-returned-to-me-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-published-undecided-record-reopened-zh_0_180ACF70-C048-487C-A0D7-3583D553A9F6.png",
+      "file": "history226-published-undecided-record-reopened-zh.png",
+      "sha256": "611e57c7e4fa2bab0ce47a50e97a8f5f290138447390e3eb947d192dabe0d518",
+      "originalExportedFile": "0B7EFBC8-C2B4-4DC7-99DF-E77DF5A22567.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-published-undecided-record-reopened-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "复用编辑器的活动分类、原活动名、待定时间行、加入推荐和保存修改均可见，无新增裁切。"
+    },
+    {
+      "capture": "history226-repeat-time-cleared-before-publishing-zh_0_6514D9FF-AFA5-458C-95C9-E07F2CF3956F.png",
+      "file": "history226-repeat-time-cleared-before-publishing-zh.png",
+      "sha256": "cd2916df449c22e3fdce9362bb10bc55673553accca162976d9ae70f27b5c000",
+      "originalExportedFile": "ECE758A4-8F76-4A1E-81E3-64A8513DBA82.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-repeat-time-cleared-before-publishing-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "“再约一次”复用编辑器显示原活动名、待定时间、新意愿保留旧聊天说明和底部发布按钮；主要操作未被覆盖。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_A9657262-3D02-4E44-8DF5-7A3F30A457A0.png",
+      "file": "history226-me-history-entry-efaca5bf.png",
+      "sha256": "efaca5bfaf48c34173bb12ccd69ec136f948e3660ae6573ef76ecad03126dcc5",
+      "originalExportedFile": "F624AB81-2429-4330-827C-107D53B510EF.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-efaca5bf.png",
+        "history226-continuous-scroll-me-intention-history-0-efaca5bf.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-empty-history-zh_0_E4F85249-9AB1-4509-852B-A5D61EB99C9B.png",
+      "file": "history226-empty-history-zh.png",
+      "sha256": "d67f94168c27111d980ba4fc0c0e92a51d743bfa1a6fc6e4f24d5e4c2475e304",
+      "originalExportedFile": "EDA81F1B-B3C8-4CB4-95C0-A7D4D29D22FC.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-empty-history-zh.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "“意愿历史”标题、返回及灰色历史图标/“暂无过期意愿”空态居中且未重叠；Me 标签选中。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_0081B232-CDAB-46C4-AF57-1A59588AA090.png",
+      "file": "history226-me-history-entry-bc2c0cdf.png",
+      "sha256": "bc2c0cdf7a1a5bd6653c956b9b1199ed3ff031eb5e401d2d0c23b793645e0d66",
+      "originalExportedFile": "139131EF-C33A-40B5-B321-DD5C69D48D1F.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-bc2c0cdf.png",
+        "history226-continuous-scroll-me-intention-history-0-bc2c0cdf.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-post-publication-tab-roundtrip-keeps-new-root-card_0_003E1206-F6B8-4851-B5D6-38A00371D6D7.png",
+      "file": "history226-post-publication-tab-roundtrip-keeps-new-root-card.png",
+      "sha256": "1f61338c7686e6a72be765cb0df3db5c8181f0dc3131312a7823e415cb32d7e7",
+      "originalExportedFile": "6354662D-0E28-4C9C-A43A-FBC086F43BE7.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-post-publication-tab-roundtrip-keeps-new-root-card.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "再次发布后是“同行 / 推荐”首页，新增意愿卡及发布时间状态可读，没有旧子页面返回按钮；首页截图无“已过期”入口。既有空推荐文案尾部被系统 AssistiveTouch 局部遮挡。"
+    },
+    {
+      "capture": "history226-publication-resets-retained-child-and-focuses-new-card_0_FBB138D4-57C3-497E-85B6-9F9DF04D6F05.png",
+      "file": "history226-publication-resets-retained-child-and-focuses-new-card.png",
+      "sha256": "120f63cf07fb6d2fdfd49262a3f368bb686ee566b0ba8e983aa9afe7467ff1f5",
+      "originalExportedFile": "1A5ADF12-87CC-4B56-AD30-98BA4D9B7C26.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-publication-resets-retained-child-and-focuses-new-card.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "再次发布后是“同行 / 推荐”首页，新增意愿卡及发布时间状态可读，没有旧子页面返回按钮；首页截图无“已过期”入口。既有空推荐文案尾部被系统 AssistiveTouch 局部遮挡。"
+    },
+    {
+      "capture": "history226-me-history-entry_0_F846CD56-C200-4486-9559-4106D1C7ECC7.png",
+      "file": "history226-me-history-entry-f5ccdcb9.png",
+      "sha256": "f5ccdcb909e9f1572d643d0a62e76236450e206d122b6e32fc4a2cee12a5c6fa",
+      "originalExportedFile": "ECEFA4B4-553B-4877-ACC4-C71C5B97FF6E.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-me-history-entry-f5ccdcb9.png",
+        "history226-continuous-scroll-me-intention-history-0-f5ccdcb9.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "新增“历史 / 意愿历史”管理行在隐私和设置之间，与相邻图标、文本、圆角管理行对齐；文字完整。图中系统 AssistiveTouch 覆盖右侧箭头，未将其误判为应用重叠。屏顶原主题行是滚动截面。"
+    },
+    {
+      "capture": "history226-ordinary-tab-roundtrip-preserves-existing-child_0_432EA2B6-5B34-4153-9E23-C292FD7E658D.png",
+      "file": "history226-ordinary-tab-roundtrip-preserves-existing-child.png",
+      "sha256": "9d47a2ff983e880d17d4073d55cfb82ae4a979185fbd44b9cb8c81a8fadc6493",
+      "originalExportedFile": "3C08A8F0-00DD-4FD8-BA06-56886F3D29C8.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-ordinary-tab-roundtrip-preserves-existing-child.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "保留的“探索活动意向”子页面及返回可见，普通标签往返前后仍是同一子页面；旧列表底部是滚动截面，第二张旧卡部分在悬浮底栏后方，未验证屏外内容。"
+    },
+    {
+      "capture": "history226-retained-together-child-and-back-before-publication_0_99581CC1-5019-4048-904D-27F602A93574.png",
+      "file": "history226-retained-together-child-and-back-before-publication.png",
+      "sha256": "a1c46f2a9424b7b42b39d8c9f5eabba765cb4aa932c15edb1c971ac5831eacff",
+      "originalExportedFile": "AF0A7B91-E1C0-461D-A321-26EC123F1626.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "allCaptureAliases": [
+        "history226-retained-together-child-and-back-before-publication.png"
+      ],
+      "review": "pass_with_scope_limits",
+      "observation": "保留的“探索活动意向”子页面及返回可见，普通标签往返前后仍是同一子页面；旧列表底部是滚动截面，第二张旧卡部分在悬浮底栏后方，未验证屏外内容。"
+    }
+  ],
+  "inputCaptures": [
+    {
+      "capture": "history226-original-history-retained-after-publication-zh_0_9A2B9D5E-91FF-4155-A409-E024055A0BBD.png",
+      "file": "history226-original-history-retained-after-publication-zh.png",
+      "sha256": "43752ed7700091f69ca4989c61fa1b8eee3c53003d0641ce8202322b30672765",
+      "originalExportedFile": "C2C78D2C-FCD5-4E2E-ACEF-797127D377E5.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_2A47DB3D-171B-4900-944F-58BCDE984D82.png",
+      "file": "history226-me-history-entry.png",
+      "sha256": "4667cbd78f9114c7f5f4a6b93a8270ebb76cf7275611cf0fea131894780bbeda",
+      "originalExportedFile": "0C02C5E1-93E9-4691-84A8-52BEF9EEECD2.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-repeat-published-and-focused-at-home-zh_0_0A9C5360-B380-480D-B76C-6DFECD48FE42.png",
+      "file": "history226-repeat-published-and-focused-at-home-zh.png",
+      "sha256": "e666ee874371e444c151c782cc7e85a3018a64a63432d09e4208ddcc25cc10c3",
+      "originalExportedFile": "C5FC54BD-DE20-42D6-AD83-90AF9A400FE8.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_A6A6FFDA-A93D-4B5B-8943-D5E950A8D406.png",
+      "file": "history226-me-history-entry-cb8095a9.png",
+      "sha256": "cb8095a99926e0309594b6eca6bb4f392cd08f0f841ede0b7f82b72cb8009f9e",
+      "originalExportedFile": "5AAB3234-8799-4714-A409-C62719D80B60.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-prefilled-future-picker-zh_0_D94D463E-8A19-4FA7-8FE0-A4FF7D617696.png",
+      "file": "history226-prefilled-future-picker-zh.png",
+      "sha256": "74aaa9fa85e98da65bf4a2c26d44d644fb33d9ffb63bc2cd665dee5746f7ba51",
+      "originalExportedFile": "417D159E-3A51-45DD-BB44-55EAA01D35AF.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-original-expired-time-zh_0_EDB69E1D-A04E-4A2C-81B6-F3A83726068F.png",
+      "file": "history226-original-expired-time-zh.png",
+      "sha256": "d85c6ef2e9937a720aa1758f659d6f20ce3a77d9dfea2ae314474b83afde247d",
+      "originalExportedFile": "17C15D3D-CF18-44FD-9238-ECBAC0D21C08.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_0D0124C2-5513-4364-A0DA-19170BCBB810.png",
+      "file": "history226-me-history-entry-d2f78765.png",
+      "sha256": "d2f78765317ebe62989eb3f649e4a85bdc6d302432684931e19c1f7420a2e374",
+      "originalExportedFile": "9A90173F-C390-4448-98ED-95AEFBAEF78F.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-continuous-scroll-me-intention-history-0_0_719A2334-9E41-4E11-9B13-DF81A4A2FF8B.png",
+      "file": "history226-continuous-scroll-me-intention-history-0.png",
+      "sha256": "d2f78765317ebe62989eb3f649e4a85bdc6d302432684931e19c1f7420a2e374",
+      "originalExportedFile": "8F79CBFE-F7B8-41E2-96B4-2BDE35AE6AC4.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseHistoryCancelAndPublishFutureRepeat()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_B7338274-0F84-437D-98AB-C5B2396E95CE.png",
+      "file": "history226-me-history-entry-9144aba8.png",
+      "sha256": "9144aba8fbb59c08b0181ad1b260fc1e96db553d2a6938b2ca7406c45713cacc",
+      "originalExportedFile": "4B00177C-27C8-40CD-9DE9-B959CB3B946D.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+    },
+    {
+      "capture": "history226-published-undecided-record-reopened-zh_0_180ACF70-C048-487C-A0D7-3583D553A9F6.png",
+      "file": "history226-published-undecided-record-reopened-zh.png",
+      "sha256": "611e57c7e4fa2bab0ce47a50e97a8f5f290138447390e3eb947d192dabe0d518",
+      "originalExportedFile": "0B7EFBC8-C2B4-4DC7-99DF-E77DF5A22567.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+    },
+    {
+      "capture": "history226-repeat-time-cleared-before-publishing-zh_0_6514D9FF-AFA5-458C-95C9-E07F2CF3956F.png",
+      "file": "history226-repeat-time-cleared-before-publishing-zh.png",
+      "sha256": "cd2916df449c22e3fdce9362bb10bc55673553accca162976d9ae70f27b5c000",
+      "originalExportedFile": "ECE758A4-8F76-4A1E-81E3-64A8513DBA82.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_A9657262-3D02-4E44-8DF5-7A3F30A457A0.png",
+      "file": "history226-me-history-entry-efaca5bf.png",
+      "sha256": "efaca5bfaf48c34173bb12ccd69ec136f948e3660ae6573ef76ecad03126dcc5",
+      "originalExportedFile": "F624AB81-2429-4330-827C-107D53B510EF.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+    },
+    {
+      "capture": "history226-continuous-scroll-me-intention-history-0_0_587515D6-3C62-41B0-9BC4-A21BFE5BA1DF.png",
+      "file": "history226-continuous-scroll-me-intention-history-0-efaca5bf.png",
+      "sha256": "efaca5bfaf48c34173bb12ccd69ec136f948e3660ae6573ef76ecad03126dcc5",
+      "originalExportedFile": "6C2898F7-B882-4C51-BC70-B4A289A3C964.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testChineseRepeatCanPublishUndecidedAndReopen()"
+    },
+    {
+      "capture": "history226-empty-history-returned-to-me-zh_0_6DC6773D-5CA7-4DC9-BD8B-2EEACB39CECF.png",
+      "file": "history226-empty-history-returned-to-me-zh.png",
+      "sha256": "9144aba8fbb59c08b0181ad1b260fc1e96db553d2a6938b2ca7406c45713cacc",
+      "originalExportedFile": "38B59743-E01E-4282-A861-5C8430CBF11F.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+    },
+    {
+      "capture": "history226-empty-history-zh_0_E4F85249-9AB1-4509-852B-A5D61EB99C9B.png",
+      "file": "history226-empty-history-zh.png",
+      "sha256": "d67f94168c27111d980ba4fc0c0e92a51d743bfa1a6fc6e4f24d5e4c2475e304",
+      "originalExportedFile": "EDA81F1B-B3C8-4CB4-95C0-A7D4D29D22FC.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_0081B232-CDAB-46C4-AF57-1A59588AA090.png",
+      "file": "history226-me-history-entry-bc2c0cdf.png",
+      "sha256": "bc2c0cdf7a1a5bd6653c956b9b1199ed3ff031eb5e401d2d0c23b793645e0d66",
+      "originalExportedFile": "139131EF-C33A-40B5-B321-DD5C69D48D1F.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+    },
+    {
+      "capture": "history226-continuous-scroll-me-intention-history-0_0_BB3CB4EC-2867-4092-BDE4-4690024392A1.png",
+      "file": "history226-continuous-scroll-me-intention-history-0-bc2c0cdf.png",
+      "sha256": "bc2c0cdf7a1a5bd6653c956b9b1199ed3ff031eb5e401d2d0c23b793645e0d66",
+      "originalExportedFile": "0AD357B4-95B5-4E2E-8CE3-A419820374E5.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testEmptyHistoryCanReturnToMe()"
+    },
+    {
+      "capture": "history226-post-publication-tab-roundtrip-keeps-new-root-card_0_003E1206-F6B8-4851-B5D6-38A00371D6D7.png",
+      "file": "history226-post-publication-tab-roundtrip-keeps-new-root-card.png",
+      "sha256": "1f61338c7686e6a72be765cb0df3db5c8181f0dc3131312a7823e415cb32d7e7",
+      "originalExportedFile": "6354662D-0E28-4C9C-A43A-FBC086F43BE7.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    },
+    {
+      "capture": "history226-publication-resets-retained-child-and-focuses-new-card_0_FBB138D4-57C3-497E-85B6-9F9DF04D6F05.png",
+      "file": "history226-publication-resets-retained-child-and-focuses-new-card.png",
+      "sha256": "120f63cf07fb6d2fdfd49262a3f368bb686ee566b0ba8e983aa9afe7467ff1f5",
+      "originalExportedFile": "1A5ADF12-87CC-4B56-AD30-98BA4D9B7C26.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    },
+    {
+      "capture": "history226-me-history-entry_0_F846CD56-C200-4486-9559-4106D1C7ECC7.png",
+      "file": "history226-me-history-entry-f5ccdcb9.png",
+      "sha256": "f5ccdcb909e9f1572d643d0a62e76236450e206d122b6e32fc4a2cee12a5c6fa",
+      "originalExportedFile": "ECEFA4B4-553B-4877-ACC4-C71C5B97FF6E.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    },
+    {
+      "capture": "history226-continuous-scroll-me-intention-history-0_0_4153FF32-EF7C-4E26-814D-75BEB7ABBA4F.png",
+      "file": "history226-continuous-scroll-me-intention-history-0-f5ccdcb9.png",
+      "sha256": "f5ccdcb909e9f1572d643d0a62e76236450e206d122b6e32fc4a2cee12a5c6fa",
+      "originalExportedFile": "45D07664-25F9-4BF0-A1FB-19FC2BA8C76E.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    },
+    {
+      "capture": "history226-ordinary-tab-roundtrip-preserves-existing-child_0_432EA2B6-5B34-4153-9E23-C292FD7E658D.png",
+      "file": "history226-ordinary-tab-roundtrip-preserves-existing-child.png",
+      "sha256": "9d47a2ff983e880d17d4073d55cfb82ae4a979185fbd44b9cb8c81a8fadc6493",
+      "originalExportedFile": "3C08A8F0-00DD-4FD8-BA06-56886F3D29C8.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    },
+    {
+      "capture": "history226-retained-together-child-and-back-before-publication_0_99581CC1-5019-4048-904D-27F602A93574.png",
+      "file": "history226-retained-together-child-and-back-before-publication.png",
+      "sha256": "a1c46f2a9424b7b42b39d8c9f5eabba765cb4aa932c15edb1c971ac5831eacff",
+      "originalExportedFile": "AF0A7B91-E1C0-461D-A321-26EC123F1626.png",
+      "associatedWithFailure": false,
+      "testCase": "IntentionHistoryPhoneUITests/testPublicationClearsRetainedTogetherChildAndOrdinaryTabsKeepTheirState()"
+    }
+  ]
+}

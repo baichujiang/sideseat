@@ -1,0 +1,17 @@
+{
+  "status": "passed_with_scope_limits",
+  "captures": 40,
+  "uniqueOriginalPixels": 31,
+  "source": "Final frozen Preview226 phone xcresult exports; originals indexed with testCase manifest identity.",
+  "reviewReports": [
+    "visual-normal-final.json",
+    "visual-max-final.json"
+  ],
+  "method": "All31 SHA-unique original PNGs viewed directly by independent visual reviewers; exact duplicates reuse SHA review. No montage/AX-only acceptance.",
+  "limits": [
+    "OS AssistiveTouch overlays",
+    "Me/old Explore/editor screenshots include ordinary viewport cuts; offscreen content not claimed",
+    "History card maximum-text continuous segments cover target full labels and repeat action; no whole-App or intermediate-font claim"
+  ],
+  "findings": []
+}
