@@ -14,8 +14,13 @@ final class WeeklyIntentStore {
     private(set) var lastSavedIntentID: String?
 
     #if DEBUG
-    private var hasInstalledFixtures = false
-    private var createdFixtureCount = 0
+    private struct LocalFixtureSnapshot {
+        var intents: [NativeWeeklyIntent]
+        var expiredIntents: [NativeWeeklyIntent]
+        var createdCount = 0
+    }
+    // Separate page stores read the same process-local fixture backend.
+    private static var localFixtureSnapshot: LocalFixtureSnapshot?
     private var usesLocalFixtures: Bool {
         let arguments = ProcessInfo.processInfo.arguments
         return arguments.contains("--ui-testing-intent-card-states")
@@ -33,8 +38,7 @@ final class WeeklyIntentStore {
 
         #if DEBUG
         if usesLocalFixtures {
-            if !hasInstalledFixtures {
-                hasInstalledFixtures = true
+            if Self.localFixtureSnapshot == nil {
                 if ProcessInfo.processInfo.arguments.contains("--ui-testing-expired-intention") {
                     expiredIntents = [Self.cardFixture(id: "ui-intent-expired", topic: .coffee,
                         title: "Coffee after class", status: "EXPIRED", published: true)]
@@ -52,6 +56,11 @@ final class WeeklyIntentStore {
                         pausedAt: nil, endedAt: nil, createdAt: Date(), updatedAt: Date(),
                         timePreference: NativeIntentTimePreference(kind: "UNDECIDED"), automaticMatching: true, exploreVisible: true)]
                 }
+                Self.localFixtureSnapshot = LocalFixtureSnapshot(intents: intents, expiredIntents: expiredIntents)
+            }
+            if let snapshot = Self.localFixtureSnapshot {
+                intents = snapshot.intents
+                expiredIntents = snapshot.expiredIntents
             }
             hasLoaded = true
             return
@@ -130,8 +139,10 @@ final class WeeklyIntentStore {
             if let existingIntent {
                 id = existingIntent.id
             } else {
-                createdFixtureCount += 1
-                id = createdFixtureCount == 1 ? "ui-intent-created" : "ui-intent-created-\(createdFixtureCount)"
+                var snapshot = Self.localFixtureSnapshot ?? LocalFixtureSnapshot(intents: intents, expiredIntents: expiredIntents)
+                snapshot.createdCount += 1
+                Self.localFixtureSnapshot = snapshot
+                id = snapshot.createdCount == 1 ? "ui-intent-created" : "ui-intent-created-\(snapshot.createdCount)"
             }
             let now = Date()
             let existingCourse = existingIntent?.courseId == submittedCourseID ? existingIntent?.course : nil
@@ -279,7 +290,12 @@ final class WeeklyIntentStore {
         defer { mutatingIDs.remove(intent.id) }
         #if DEBUG
         if usesLocalFixtures {
+            if let snapshot = Self.localFixtureSnapshot {
+                intents = snapshot.intents
+                expiredIntents = snapshot.expiredIntents
+            }
             intents.removeAll { $0.id == intent.id }
+            Self.localFixtureSnapshot?.intents = intents
             return true
         }
         #endif
@@ -321,6 +337,12 @@ final class WeeklyIntentStore {
     #endif
 
     private func upsert(_ intent: NativeWeeklyIntent) {
+        #if DEBUG
+        if usesLocalFixtures, let snapshot = Self.localFixtureSnapshot {
+            intents = snapshot.intents
+            expiredIntents = snapshot.expiredIntents
+        }
+        #endif
         if intent.status == "ENDED" || intent.status == "EXPIRED" {
             intents.removeAll { $0.id == intent.id }
         } else if let index = intents.firstIndex(where: { $0.id == intent.id }) {
@@ -328,6 +350,12 @@ final class WeeklyIntentStore {
         } else {
             intents.insert(intent, at: 0)
         }
+        #if DEBUG
+        if usesLocalFixtures {
+            Self.localFixtureSnapshot?.intents = intents
+            Self.localFixtureSnapshot?.expiredIntents = expiredIntents
+        }
+        #endif
     }
 }
 

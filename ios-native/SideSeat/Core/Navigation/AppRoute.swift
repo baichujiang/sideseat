@@ -32,6 +32,7 @@ enum AppRoute: Hashable, Sendable {
     case contacts
     case plans
     case planHistory
+    case intentionHistory
     case exploreIntents
     case settings
     case blockedUsers
@@ -80,6 +81,7 @@ enum MVPRoutePolicy {
              .archivedCourses,
              .plans,
              .planHistory,
+             .intentionHistory,
              .exploreIntents,
              .settings,
              .blockedUsers,
@@ -113,7 +115,7 @@ enum MVPRoutePolicy {
 
     static func tab(for route: AppRoute) -> AppTab {
         switch route {
-        case .courses, .archivedCourses, .course:
+        case .courses, .archivedCourses, .course, .intentionHistory:
             return .me
         case .plans, .planHistory, .timePoll:
             return .plans

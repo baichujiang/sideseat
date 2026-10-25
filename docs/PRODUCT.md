@@ -16,7 +16,8 @@ actual saved timing summary and actual finding status. Tapping edits it; More
 opens a native menu at ordinary text sizes and the existing scrollable action
 panel with Cancel at accessibility sizes. Both offer Edit, ACTIVE-only Share,
 Pause/Resume and the existing confirmed Delete action under the original rules.
-Expired history retains its full cards and Plan again action.
+Expired records are managed in Me's Intention history, under the history
+placement amendment below; they no longer expand within Recommendations.
 
 Publication returns to this combined page, scrolls to My intentions and brings
 the new card into view. No View recommendations step is required. View my
@@ -30,6 +31,23 @@ require every recommendation to have a viewer intention ID.
 This native amendment supersedes the earlier three-section layout and own-card
 footer placement. It does not change the browser layout or certify a release;
 installation and verification belong in the release records.
+
+**2026-10-25 owner-approved intention history placement (Preview 226 contract):**
+Together Recommendations retains current intentions and recommendations, with
+Saved intentions as its second section. It has no expired-intention expansion.
+Expired records are neither deleted nor migrated: **Me → History section →
+Intention history** owns their viewing and Plan again action, behind the existing
+weekly-intention feature gate. This is a dedicated Me route, not a unified
+History page; Plans history and retained compatibility surfaces stay separate.
+
+The history page reuses full read-only intention cards and the original expiry
+selection, timing expansion, description, status and repeat template. It reads
+and refreshes through the existing weekly-intents API. Repeating publishes a
+new intention ID after review; cancellation leaves the user in history. After
+successful publication, the editor closes before the existing handoff opens
+Together and locates the new current card. Returning to Me starts at its root.
+This supersedes the Preview 224/225 inline expired-history placement without
+changing records, endpoints, matching or publication consent.
 
 **2026-09-26 owner-approved interaction amendment (local implementation):**
 Together uses My intentions → Recommendations → Saved intentions. A private heart

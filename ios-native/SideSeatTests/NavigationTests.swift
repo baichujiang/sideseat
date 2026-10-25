@@ -88,6 +88,13 @@ struct NavigationTests {
         #expect(TogetherSection.allCases == [.recommendations, .bookmarks])
     }
 
+    @Test("Intention history belongs to Me and leaves plan history in Plans")
+    func intentionHistoryRoute() {
+        #expect(MVPRoutePolicy.disposition(for: .intentionHistory) == .allowed)
+        #expect(MVPRoutePolicy.tab(for: .intentionHistory) == .me)
+        #expect(MVPRoutePolicy.tab(for: .planHistory) == .plans)
+    }
+
     @Test("App shell exposes the new product navigation in its exact order")
     func appShellTabOrder() {
         #expect(AppShellNavigation.tabs.map(\.tab) == [.discover, .plans, .home, .chats, .me])

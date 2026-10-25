@@ -372,7 +372,7 @@ Current editor behavior:
   action opens the time sheet to adjust, add or remove slots; undecided timing
   stays a compact row. Current compact intention cards show a saved timing
   summary, with a count when more exact windows exist; the editor retains every
-  window. Expanded expired-history cards retain their time expansion;
+  window. Full cards in Me's Intention history retain their time expansion;
 - Plan again prefills the original weekday/local time and duration next calendar
   week. The user can adjust it or return to undecided timing before publishing;
 - choose Coffee, Study, Sports, Explore, Food or Events;
@@ -412,11 +412,40 @@ confirmed Plans remain unchanged.
 
 Pausing does not delete the intention, and editing/saving a paused intention keeps
 it paused. Resume follows the current automatic-matching gate; ACTIVE alone does
-not imply that matching is running. Expired history retains its full read-only
-cards, time expansion and existing Plan again action. The original sharing
-request, busy state, expiry, matching and compatibility contracts remain unchanged.
+not imply that matching is running. Expired cards are shown only through
+Me's Intention history, with full read-only cards, time expansion and the existing
+Plan again action. They no longer form an expandable block on Together. The
+original sharing request, busy state, expiry, matching and compatibility contracts
+remain unchanged.
 This 2026-10-25 native layout supersedes the previous separate My intentions page
 and own-card footer actions.
+
+### Expired intention history — Preview 226 contract
+
+Together Recommendations shows current intentions and the existing recommendation
+feed; Saved intentions remains its second section. The earlier Preview 224/225
+expired-history expansion is removed from this home page. Expired records are
+retained without deletion or migration.
+
+Open **Me → History section → Intention history**. This entry follows the
+weekly-intention feature gate, and its dedicated route belongs to Me. There is
+no unified History page: it does not combine Plans history data or reactivate
+retained MVP compatibility screens. Opening and refreshing use the existing
+weekly-intents GET, with no new endpoint or lifecycle rule.
+
+History preserves the original expired-record selection: payload expiredIntents
+have priority; supplement them with IDs from the current list whose expiresAt
+or EXPIRED status makes them expired, excluding ENDED records and duplicate IDs.
+Each record uses its original full read-only card: category, activity, time-window
+expansion, description, status and Plan again. It offers no current-intention
+edit, share, pause or delete controls.
+
+Plan again opens the existing template editor with the activity and future time
+windows. Review and publish performs the original POST and creates a new ID;
+it does not modify or reactivate the expired record. Cancel leaves the history
+page in place. On success, the editor dismisses before the existing publication
+handoff opens Together Recommendations, scrolls to My intentions and locates the
+new card in its horizontal row. Returning to Me opens its root page.
 
 ## 3. Automatic matching
 
@@ -463,9 +492,10 @@ A lower score does not prevent delivery; no eligible active peer still means no 
 ### Native Together page layout (2026-10-25)
 
 The two sections are **Recommendations / Saved intentions**. Recommendations
-contains My intentions first, followed by the existing full-size person cards.
-More intention cards scroll horizontally in the same row; they do not add rows
-above recommendations. The native page keeps its horizontal selector when the
+contains current My intentions first, followed by the existing full-size person
+cards. Expired records have no expansion here; Me's Intention history owns them.
+More current intention cards scroll horizontally in the same row; they do not add
+rows above recommendations. The native page keeps its horizontal selector when the
 complete labels fit. At accessibility text sizes or narrower widths, one button
 shows the current section and opens a section sheet; selection and each section's
 scroll position are retained. The sheet exposes full section names and selected

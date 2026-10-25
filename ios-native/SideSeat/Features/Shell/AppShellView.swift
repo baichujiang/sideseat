@@ -84,6 +84,11 @@ struct AppShellView: View {
                 .home
             }
         _selectedTab = State(initialValue: initialTab)
+        if arguments.contains("--ui-testing-retained-together-route") {
+            let seededRouters = TabRouter()
+            seededRouters.router(for: .discover).navigate(to: .exploreIntents)
+            _routers = State(initialValue: seededRouters)
+        }
         #endif
     }
 
@@ -121,6 +126,7 @@ struct AppShellView: View {
 
     var body: some View {
         notificationAwareSurface
+        .environment(routers)
         .task {
             routePendingDeepLink()
         }
@@ -450,6 +456,8 @@ private extension View {
                     PlansRootView()
                 case .planHistory:
                     PlansRootView(isHistory: true)
+                case .intentionHistory:
+                    IntentionHistoryView()
                 case .exploreIntents:
                     if readinessProfile.profile?.readiness?.ready == true {
                         ExploreIntentListView()

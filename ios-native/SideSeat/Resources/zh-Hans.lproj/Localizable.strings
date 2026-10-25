@@ -3214,3 +3214,10 @@
 "Submit and share" = "提交并分享";
 
 "%d dates" = "%d 天可选";
+
+"History" = "历史";
+"Intention history" = "意愿历史";
+"No past intentions" = "暂无过期意愿";
+"Could not load intentions" = "暂时无法加载意愿";
+
+"Loading intentions" = "正在加载意愿";

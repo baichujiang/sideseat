@@ -116,6 +116,16 @@ struct MeRootView: View {
                             }
                         }
 
+                        if ActionToPlanV2Store.shared.isWeeklyIntentEnabled {
+                            SSManagementSection(title: AppLocalization.string("History"), accessibilityID: "me-section-history") {
+                                SSManagementRow(title: AppLocalization.string("Intention history"),
+                                    systemImage: "clock.arrow.circlepath", showDivider: false,
+                                    accessibilityID: "me-intention-history") {
+                                    router.navigate(to: .intentionHistory)
+                                }
+                            }
+                        }
+
                         SSManagementSection(
                             title: AppLocalization.string("Settings"),
                             accessibilityID: "me-section-settings"

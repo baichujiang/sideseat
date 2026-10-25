@@ -228,7 +228,6 @@ private struct TogetherHomeView: View {
     @State private var opportunityStore = MutualOpportunityStore()
     @State private var v2Store = ActionToPlanV2Store.shared
     @State private var presentedEditor: WeeklyIntentEditorPresentation?
-    @State private var showsExpiredIntentions = false
     @State private var showsSectionPicker = false
     @State private var selectedSection: TogetherSection = .recommendations
     @State private var intentionFocusRevision = 0
@@ -527,9 +526,6 @@ private struct TogetherHomeView: View {
             unavailableSection
         } else {
             let current = store.intents.filter { status(for: $0, at: now) != .expired }
-            let expired = store.expiredIntents + store.intents.filter { candidate in
-                status(for: candidate, at: now) == .expired && !store.expiredIntents.contains(where: { $0.id == candidate.id })
-            }
             if !current.isEmpty {
                 VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     let headingLayout = dynamicTypeSize.isAccessibilitySize
@@ -638,30 +634,6 @@ private struct TogetherHomeView: View {
                     }
                 }
                 if let issue = store.issue { loadFailure(issue: issue) }
-            }
-            if !expired.isEmpty {
-                Button {
-                    withAnimation { showsExpiredIntentions.toggle() }
-                } label: {
-                    HStack {
-                        Text("\(AppLocalization.string("Expired")) · \(expired.count)")
-                        Spacer()
-                        Image(systemName: showsExpiredIntentions ? "chevron.up" : "chevron.down")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .frame(minHeight: 44)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(SSActionButtonStyle(horizontalPadding: 12))
-                .accessibilityIdentifier("weekly-intent-expired-history")
-                if showsExpiredIntentions {
-                    ForEach(expired) { intent in
-                        WeeklyIntentCard(intent: intent, status: .expired, isWorking: false,
-                            onEdit: {}, onDelete: {},
-                            onRepeat: { presentedEditor = .repeatIntent(intent) })
-                            .padding(.top, SideSeatTheme.spaceSM)
-                    }
-                }
             }
         }
     }
@@ -1465,6 +1437,95 @@ struct OpportunityMessageComposer: View {
             }
         }
 
+    }
+}
+
+struct IntentionHistoryView: View {
+    @Environment(SessionStore.self) private var session
+    @Environment(ClientConfigurationStore.self) private var clientConfiguration
+    @Environment(DeepLinkRouter.self) private var deepLinkRouter
+    @Environment(TabRouter.self) private var routers
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var store = WeeklyIntentStore()
+    @State private var presentedEditor: WeeklyIntentEditorPresentation?
+    @State private var publishedIntentID: String?
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let expired = store.expiredIntents + store.intents.filter { intent in
+                TogetherIntentStatus(intent: intent, matchingEnabled: false,
+                    automaticMatchingEnabled: false, legacySessionActive: false, now: context.date) == .expired
+                    && !store.expiredIntents.contains(where: { $0.id == intent.id })
+            }
+            ScrollView {
+                VStack(spacing: SideSeatTheme.spaceMD) {
+                    if !store.hasLoaded && store.issue == nil {
+                        SSLoadingState("Loading intentions")
+                            .frame(minHeight: 240)
+                    } else if let issue = store.issue, expired.isEmpty {
+                        ContentUnavailableView {
+                            Label("Could not load intentions", systemImage: "exclamationmark.triangle")
+                        } description: {
+                            Text(issue)
+                        } actions: {
+                            Button("Try again") { Task { await store.load(using: session) } }
+                                .frame(minHeight: 44)
+                        }
+                    } else if expired.isEmpty {
+                        ContentUnavailableView("No past intentions", systemImage: "clock.arrow.circlepath")
+                            .frame(minHeight: 300)
+                            .accessibilityIdentifier("intention-history-empty")
+                    } else {
+                        ForEach(expired) { intent in
+                            WeeklyIntentCard(intent: intent, status: .expired, isWorking: false,
+                                onEdit: {}, onDelete: {},
+                                onRepeat: { presentedEditor = .repeatIntent(intent) })
+                        }
+                    }
+                }
+                .padding(.horizontal, SideSeatTheme.screenHorizontal)
+                .padding(.top, SideSeatTheme.spaceMD)
+                .padding(.bottom, SideSeatTheme.rootScrollBottomClearance)
+            }
+            .accessibilityIdentifier("intention-history-list")
+        }
+        .background(SideSeatTheme.bgGrouped)
+        .navigationTitle(AppLocalization.string("Intention history"))
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await store.load(using: session) }
+        .refreshable { await store.load(using: session) }
+        .sheet(item: $presentedEditor, onDismiss: {
+            guard let id = publishedIntentID else { return }
+            publishedIntentID = nil
+            IntentionPublicationLaunch.shared.intentID = id
+            routers.router(for: .me).reset()
+            routers.router(for: .discover).reset()
+            deepLinkRouter.handleAppPath("/together")
+        }) { presentation in
+            WeeklyIntentEditorView(intent: nil, template: presentation.template, saveIssue: store.issue) {
+                topic, activityText, sportTag, sportOtherNote, togetherMode, studyGoal,
+                courseId, timeWindows, timePreference, exploreVisible, note in
+                let config = clientConfiguration.configuration
+                let saved = await store.save(
+                    intent: nil, topic: topic, activityText: activityText,
+                    sportTag: sportTag, sportOtherNote: sportOtherNote,
+                    togetherMode: togetherMode, studyGoal: studyGoal, courseId: courseId,
+                    timeWindows: timeWindows, timePreference: timePreference,
+                    automaticMatching: ActionToPlanV2Store.shared.isMutualOpportunityEnabled
+                        && config?.isFeatureEnabled("v2AutomaticMatching") == true,
+                    exploreVisible: config?.isFeatureEnabled("v2ExploreIntents") == true ? exploreVisible : nil,
+                    note: note, using: session
+                )
+                if saved {
+                    publishedIntentID = store.lastSavedIntentID
+                    presentedEditor = nil
+                }
+                return saved
+            }
+            .dynamicTypeSize(dynamicTypeSize)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("intention-history")
     }
 }
 
