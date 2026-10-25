@@ -25,18 +25,12 @@ import XCTest
     override func setUpWithError() throws { continueAfterFailure = false }
 
     func testOwnerFiveParticipantsAvailabilityInvitationAndCalendar() throws {
-        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_JSON"]
-        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires six disposable real accounts from the Mac.")
-        let data = raw!.hasPrefix("{") ? Data(raw!.utf8) : try Data(contentsOf: URL(fileURLWithPath: raw!))
-        fixture = try JSONDecoder().decode(Fixture.self, from: data)
-        XCTAssertEqual(Set(fixture.accounts.map(\.role)), Set(["owner", "peer1", "peer2", "peer3", "peer4", "peer5"]))
-        XCTAssertEqual(fixture.connections.count, 5)
+        try loadFixture()
         let owner = account("owner")
-        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
 
         launch(owner)
         plansTab().tap()
-        let create = app.buttons["plans-create-primary"]
+        let create = app.buttons.matching(NSPredicate(format: "identifier IN %@", ["plans-create-primary", "plans-create-unified"])).firstMatch
         XCTAssertTrue(create.waitForExistence(timeout: 25)); assertTarget(create); create.tap()
         let title = app.descendants(matching: .any)["time-poll-title"].firstMatch
         XCTAssertTrue(title.waitForExistence(timeout: 10)); title.tap(); title.typeText(fixture.title + "\n")
@@ -108,11 +102,66 @@ import XCTest
         submitAvailability(); capture("07-peer3-edited-only-own-response"); phase("peer3-edited")
         app.buttons["time-poll-cell-2"].tap(); submitAvailability(); phase("peer3-restored")
 
+        completeInvitationAndCalendar()
+    }
+
+    func testContinueInvitationAndCalendarAfterSixRealSubmissions() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_CONTINUE"] != "1",
+            "Requires an explicitly verified six-response plan after a test-only interruption.")
+        try loadFixture()
+        completeInvitationAndCalendar()
+    }
+
+    func testContinueRepliesAndCalendarAfterFormalInvitations() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_CONTINUE"] != "1",
+            "Requires an explicitly verified invited six-person plan after a test-only interruption.")
+        try loadFixture()
+        completeRepliesAndCalendar()
+    }
+
+    func testContinuePublicationAndCalendarAfterMixedReplies() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_CONTINUE"] != "1",
+            "Requires an explicitly verified six-person mixed-reply plan after a test-only interruption.")
+        try loadFixture()
+        completePublicationAndCalendar()
+    }
+
+    func testContinueCalendarsAfterOrganizerPublished() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_CONTINUE"] != "1",
+            "Requires an explicitly verified published six-person plan after a test-only interruption.")
+        try loadFixture()
+        completeCalendarAfterPublication()
+    }
+
+    func testVerifyCalendarsAfterParticipantWithdrawal() throws {
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_CONTINUE"] != "1",
+            "Requires an explicitly verified participant withdrawal after a test-only interruption.")
+        try loadFixture()
+        completeFinalCalendarVerification()
+    }
+
+    private func loadFixture() throws {
+        let raw = ProcessInfo.processInfo.environment["SIDESEAT_PLAN_SIX_JSON"]
+        try XCTSkipIf(raw == nil || raw!.isEmpty, "Requires six disposable real accounts from the Mac.")
+        let data = raw!.hasPrefix("{") ? Data(raw!.utf8) : try Data(contentsOf: URL(fileURLWithPath: raw!))
+        fixture = try JSONDecoder().decode(Fixture.self, from: data)
+        XCTAssertEqual(Set(fixture.accounts.map(\.role)), Set(["owner", "peer1", "peer2", "peer3", "peer4", "peer5"]))
+        XCTAssertEqual(fixture.connections.count, 5)
+        addTeardownBlock { [self] in MainActor.assumeIsolated { app?.terminate() } }
+
+    }
+
+    private func completeInvitationAndCalendar() {
+        let owner = account("owner")
         launch(owner); openListCard()
+        // A test interruption may leave the per-plan final-time draft open.
+        if app.buttons["time-poll-cancel-final"].exists { app.buttons["time-poll-cancel-final"].tap() }
         XCTAssertTrue(app.buttons["plan-people-open"].label.contains("6 人已填写"))
         XCTAssertTrue(app.buttons["plan-people-open"].label.contains("+3"))
         capture("08-six-responses-compact-avatar-summary")
         app.buttons["unified-plan-invite-window"].tap()
+        if app.buttons["time-poll-reset-final"].exists { app.buttons["time-poll-reset-final"].tap() }
+        reveal(app.buttons["time-poll-cell-0"], in: app.scrollViews["time-poll-final-scroll"])
         verifyFinalSelectionRules()
         selectCrossDayFinalTime()
         let review = app.buttons["unified-plan-review-roster"]
@@ -131,6 +180,7 @@ import XCTest
         verifyReviewRoster()
         app.buttons["unified-plan-send-invitations"].tap()
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 25))
+        XCTAssertTrue(app.descendants(matching: .any)["unified-plan-phase"].firstMatch.label.contains("待你正式发出"))
         verifyInlineRoster(stage: "owner-invited", acceptedRoles: ["owner"], declinedRoles: [])
         capture("10-owner-can-publish-with-five-pending"); phase("invited")
 
@@ -139,14 +189,20 @@ import XCTest
         verifyInvitedTimetable(stage: "owner-zh-maximum")
         verifyInlineRoster(stage: "owner-zh-maximum", acceptedRoles: ["owner"], declinedRoles: [])
 
+        completeRepliesAndCalendar()
+    }
+
+    private func completeRepliesAndCalendar() {
         for index in 1...3 {
             let role = "peer\(index)"
             launch(account(role)); openChatCard(role: role, action: "查看邀请")
             if index == 1 { verifyInvitedTimetable(stage: "peer1-invited") }
             let accept = app.buttons["unified-plan-accept"]
+            XCTAssertTrue(app.descendants(matching: .any)["unified-plan-phase"].firstMatch.label.contains("待你确认"))
             assertTarget(accept); accept.tap()
             XCTAssertTrue(app.staticTexts["unified-plan-accepted-status"].waitForExistence(timeout: 20))
             XCTAssertFalse(app.buttons["plan-view-calendar"].exists)
+            XCTAssertTrue(app.descendants(matching: .any)["unified-plan-phase"].firstMatch.label.contains("待发起人正式发出"))
             capture("11-\(role)-accepted-waiting-for-publish"); phase("\(role)-accepted")
         }
         launch(account("peer4")); openListCard()
@@ -158,8 +214,14 @@ import XCTest
         app.buttons["unified-plan-decline"].tap()
         waitEnabled(app.buttons["unified-plan-decline"], false)
         XCTAssertTrue(app.buttons["unified-plan-accept"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any)["unified-plan-phase"].firstMatch.label.contains("你已回复无法参加"))
         capture("13-peer5-declined"); phase("peer5-declined")
 
+        completePublicationAndCalendar()
+    }
+
+    private func completePublicationAndCalendar() {
+        let owner = account("owner")
         launch(owner, language: "de", maximum: true); openListCard()
         verifyInlineRoster(stage: "owner-de-maximum-mixed-replies", acceptedRoles: ["owner", "peer1", "peer2", "peer3"], declinedRoles: ["peer5"])
         let publish = app.buttons["unified-plan-publish"]
@@ -173,6 +235,11 @@ import XCTest
         XCTAssertTrue(app.buttons["plan-view-calendar"].waitForExistence(timeout: 25))
         capture("16-owner-published-before-all-replies"); phase("published")
 
+        completeCalendarAfterPublication()
+    }
+
+    private func completeCalendarAfterPublication() {
+        let owner = account("owner")
         launch(owner); openListCard(confirmed: true); verifyCalendar(role: "owner")
         launch(account("peer1")); openListCard(confirmed: true); verifyCalendar(role: "peer1")
         phase("calendar-verified")
@@ -192,8 +259,16 @@ import XCTest
         XCTAssertFalse(app.buttons["plan-view-calendar"].exists)
         XCTAssertTrue(app.buttons["unified-plan-accept"].isEnabled)
         capture("18-peer2-withdrawn-calendar-action-removed"); phase("peer2-withdrawn")
+        completeFinalCalendarVerification()
+    }
+
+    private func completeFinalCalendarVerification() {
+        // Start from a fresh authenticated root instead of a plan detail sheet.
+        launch(account("peer2"))
         verifyCalendarSearchHasNoResult(role: "peer2-withdrawn")
-        launch(owner); openListCard(confirmed: true)
+        launch(account("peer5"))
+        verifyCalendarSearchHasNoResult(role: "peer5-declined")
+        launch(account("owner")); openListCard(confirmed: true)
         verifyInlineRoster(stage: "owner-final-mixed-replies", acceptedRoles: ["owner", "peer1", "peer3", "peer4"], declinedRoles: ["peer2", "peer5"])
         phase("final-calendar-verified")
     }
@@ -203,12 +278,18 @@ import XCTest
     private func launch(_ account: Account, language: String = "zh-Hans", maximum: Bool = false) {
         app?.terminate(); self.language = language
         app = XCUIApplication(bundleIdentifier: fixture.bundle)
-        app.launchArguments = ["--ui-testing-authenticated", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
-            "--ui-testing-time-poll-live", "--ui-testing-language=\(language)", "--ui-testing-appearance=light",
+        app.launchArguments = ["--ui-testing-signed-out", "--ui-testing-ephemeral-credentials", "--ui-testing-skip-tutorial",
+            "--ui-testing-language=\(language)", "--ui-testing-appearance=light",
             "-UIPreferredContentSizeCategoryName", maximum ? "UICTContentSizeCategoryAccessibilityXXXL" : "UICTContentSizeCategoryL"]
         if maximum { app.launchArguments.append("--ui-testing-dynamic-type-accessibility") }
-        app.launchEnvironment = ["SIDESEAT_QA_ACCESS_TOKEN": account.accessToken]
-        app.launch(); XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
+        app.launchEnvironment = [:]
+        app.launch()
+        let identifier = app.textFields["login-identifier"]
+        XCTAssertTrue(identifier.waitForExistence(timeout: 20)); identifier.tap(); identifier.typeText(account.identifier)
+        let password = app.secureTextFields["login-password"]
+        password.tap(); password.typeText(account.password)
+        app.buttons["login-submit"].tap()
+        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 30))
     }
 
     private func plansTab() -> XCUIElement { app.tabBars.buttons[language == "de" ? "Pläne" : "计划"] }
@@ -217,7 +298,7 @@ import XCTest
         plansTab().tap()
         if confirmed { app.buttons["plans-tab-upcoming"].tap() }
         let card = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-coordinated-' AND label CONTAINS %@", fixture.title)).firstMatch
-        XCTAssertTrue(card.waitForExistence(timeout: 25)); reveal(card, in: app.scrollViews.firstMatch); card.tap()
+        XCTAssertTrue(card.waitForExistence(timeout: 25)); card.tap()
         XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 25))
         XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
     }
@@ -231,8 +312,10 @@ import XCTest
             .containing(.staticText, identifier: fixture.title).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 25))
         XCTAssertTrue(card.staticTexts[action].waitForExistence(timeout: 10))
-        capture("chat-card-\(role)-\(action == "查看邀请" ? "invitation" : "availability")"); card.tap()
+        card.tap()
         XCTAssertTrue(app.staticTexts["time-poll-detail-title"].waitForExistence(timeout: 25))
+        XCTAssertEqual(app.staticTexts["time-poll-detail-title"].label, fixture.title)
+        capture("chat-entry-\(role)-\(action == "查看邀请" ? "invitation" : "availability")-detail")
     }
 
     private func submitAvailability() {
@@ -271,10 +354,12 @@ import XCTest
             app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@ AND label CONTAINS %@", date, clock)).firstMatch
         }
         let night = cell(dates[0], "23:00–23:30"), midnight = cell(dates[0], "23:30–00:00")
+        for _ in 0..<3 { viewport.swipeUp(velocity: .fast) }
         reveal(night, in: viewport); reveal(midnight, in: viewport)
         night.press(forDuration: 0.5, thenDragTo: midnight)
         XCTAssertTrue(night.isSelected && midnight.isSelected); capture("final-cross-midnight-evening")
         let morning = cell(dates[1], "00:00–00:30"), end = cell(dates[1], "00:30–01:00")
+        for _ in 0..<3 { viewport.swipeDown(velocity: .fast) }
         reveal(morning, in: viewport); reveal(end, in: viewport)
         morning.press(forDuration: 0.5, thenDragTo: end)
         XCTAssertTrue(morning.isSelected && end.isSelected); assertFinalClock("23:00", "01:00")
@@ -345,9 +430,16 @@ import XCTest
         XCTAssertTrue(window.insetBy(dx: 8, dy: 8).contains(prompt.frame))
         XCTAssertEqual(prompt.frame.midX, window.midX, accuracy: 4)
         XCTAssertTrue(prompt.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "4")).firstMatch.exists)
+        capture(captureName + "-message")
+        let confirm = app.buttons["unified-plan-publish-confirm"]
+        let scroll = prompt.scrollViews.firstMatch
+        for _ in 0..<8 where !confirm.isHittable {
+            if scroll.exists { scroll.swipeUp(velocity: .slow) }
+            else { prompt.swipeUp(velocity: .slow) }
+        }
         assertTarget(app.buttons["unified-plan-publish-cancel"])
-        assertTarget(app.buttons["unified-plan-publish-confirm"])
-        capture(captureName)
+        assertTarget(confirm)
+        capture(captureName + "-actions")
     }
 
     private func verifyCalendar(role: String) {
@@ -356,9 +448,16 @@ import XCTest
         XCTAssertTrue(app.tabBars.buttons["日历"].isSelected)
         let result = searchCalendar()
         XCTAssertTrue(result.waitForExistence(timeout: 25)); capture("calendar-\(role)-exact-plan-result"); result.tap()
+        let detail = app.descendants(matching: .any)["calendar-readonly-detail"].firstMatch
+        XCTAssertTrue(detail.waitForExistence(timeout: 15))
+        let list = app.collectionViews.firstMatch.exists ? app.collectionViews.firstMatch : app.tables.firstMatch
+        XCTAssertTrue(list.waitForExistence(timeout: 10))
         let manage = app.buttons["calendar-manage-plan"]
-        reveal(manage, in: app.scrollViews.firstMatch); assertTarget(manage)
-        capture("calendar-\(role)-entry-manage-plan"); manage.tap()
+        // List does not materialize later rows until the medium detail is scrolled.
+        for _ in 0..<10 where !manage.exists || !manage.isHittable { list.swipeUp(velocity: .slow) }
+        assertTarget(manage)
+        capture("calendar-\(role)-entry-manage-plan")
+        manage.tap()
         XCTAssertTrue(app.staticTexts["unified-plan-confirmation-count"].waitForExistence(timeout: 20))
         XCTAssertTrue(app.buttons["plan-view-calendar"].exists)
     }
@@ -388,7 +487,7 @@ import XCTest
         XCTAssertTrue(element.waitForExistence(timeout: 15))
         let scroll = proposedScroll.exists ? proposedScroll : app.scrollViews.firstMatch
         let lower = top ?? max(scroll.exists ? scroll.frame.minY : 0, app.navigationBars.firstMatch.frame.maxY + 2)
-        let upper = bottom ?? min(scroll.exists ? scroll.frame.maxY : app.frame.maxY, app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY) - 4
+        let upper = bottom ?? min(scroll.exists ? scroll.frame.maxY : app.frame.maxY, app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY) + 0.5
         for _ in 0..<28 {
             if element.isHittable && element.frame.minY >= lower && element.frame.maxY <= upper { break }
             let distance = min(CGFloat(180), max(CGFloat(48), element.frame.minY < lower ? lower - element.frame.minY : element.frame.maxY - upper))

@@ -1,4 +1,4 @@
-// Current COLLECT flow: six disposable accounts, real phone actions, read-only API observation.
+// Current COLLECT flow: six disposable accounts, real native App actions, read-only API observation.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -192,6 +192,15 @@ export async function verifyPhase(f, phase) {
     const included = published ? ['owner', 'peer1', 'peer3', ...(atLeast('peer2-withdrawn') ? [] : ['peer2']), ...(atLeast('peer4-late-accepted') ? ['peer4'] : [])] : [];
     assertCalendarRows(p, ordered, result, included);
     calendar = { counts: Object.fromEntries(ordered.map((a, n) => [a.role, result.rows[n].length])), windowStart: result.windowStart, windowEnd: result.windowEnd };
+    if (phase === 'calendar-verified' || phase === 'final-calendar-verified') {
+      const rows = await Promise.all(ordered.map(async account => {
+        const found = await call('/api/v1/calendar/search?q=' + encodeURIComponent(p.title), account);
+        return found.results.filter(entry => entry.timePollToken === p.token);
+      }));
+      assertCalendarRows(p, ordered, { rows }, included);
+      calendar.searchCounts = Object.fromEntries(ordered.map((a, n) => [a.role, rows[n].length]));
+      calendar.searchPreservesPlanIdentityTimesAndAcceptedCompanions = true;
+    }
   }
   return { phase, actualPhase: p.phase, submitted: responses, ownSlots: Object.fromEntries(roles.map((role, n) => [role, views[n].mySlotIds])),
     invitationVersion: p.invitationVersion, invitationStatuses: p.invitations.map(i => ({ displayName: i.displayName, status: i.status, selected: i.selected })),
@@ -223,27 +232,50 @@ async function prepare() {
   f.readyAt = new Date().toISOString(); await persist(f);
   console.log('Prepared six disposable accounts and five accepted two-way test contacts. Credentials remain private.');
 }
-async function observe(f, logPath) {
-  assert(logPath, 'observe requires the phone test log path');
-  const checks = [], seen = new Set(); let failure;
+async function observe(f, logPath, resumeAfter) {
+  assert(logPath, 'observe requires the native UI test log path');
+  let checks = [], continuationVerification;
+  const executionSurface = process.env.SIDESEAT_QA_UI_SURFACE || 'unspecified native device';
+  const segments = [];
+  if (resumeAfter) {
+    assert(phases.includes(resumeAfter), 'Resume only after a defined observed phase.');
+    const previous = JSON.parse(await fs.readFile(path.join(out, 'phone-api.json'), 'utf8'));
+    assert.equal(previous.executionSurface, executionSurface, 'Continuation must use the same execution surface.');
+    assert.deepEqual(previous.checks.map(c => c.phase), phases.slice(0, phases.indexOf(resumeAfter) + 1));
+    checks = previous.checks;
+    // Read the same live plan again before any continuation UI mutation.
+    continuationVerification = await verifyPhase(f, resumeAfter);
+    segments.push(...(previous.segments || []));
+    if (!segments.length) segments.push({ log: 'six-user-real-auth.log', completedPhases: checks.map(c => c.phase), nativeBuild: '227', enclosingTestPassed: false, reason: 'Test scroll helper required margin beyond fully visible final grid row.' });
+  }
+  const priorCount = checks.length;
+  const seen = new Set(checks.map(c => c.phase)); let failure, testCompleted = false;
+  const context = () => ({ executionSurface, resumedAfter: resumeAfter || null, continuationVerification,
+    segments: [...segments, { log: path.basename(logPath), completedPhases: checks.slice(priorCount).map(c => c.phase), nativeBuild: process.env.SIDESEAT_QA_UI_BUILD || 'unspecified', enclosingTestPassed: !failure && testCompleted && checks.length === phases.length }] });
   try {
     const deadline = Date.now() + 45 * 60_000;
-    while (checks.length < phases.length && Date.now() < deadline) {
+    while (Date.now() < deadline) {
       const log = await fs.readFile(logPath, 'utf8').catch(() => '');
       for (const [, phase] of log.matchAll(/PLAN_SIX_PHASE ([a-z0-9-]+)/g)) {
         assert(phases.includes(phase), 'Phone logged an unknown six participant phase.');
         if (seen.has(phase)) continue;
         assert.equal(phase, phases[checks.length], 'Phone phases must run once in the defined order.');
         checks.push(await verifyPhase(f, phase)); seen.add(phase);
-        await evidence('phone-api.json', { passed: false, source: 'real API; phone owns all main business mutations', checks });
+        await evidence('phone-api.json', { passed: false, source: 'real API; native App UI owns all main business mutations', ...context(), checks });
         console.log(`PLAN_SIX_API verified ${phase}`);
       }
-      if (/\*\* TEST (?:EXECUTE )?FAILED \*\*/.test(log)) throw new Error('Phone test failed; partial read-only checks retained.');
+      if (/\*\* TEST (?:EXECUTE )?FAILED \*\*/.test(log)) throw new Error('Native UI test failed; partial read-only checks retained.');
+      if (/\*\* TEST (?:EXECUTE )?SUCCEEDED \*\*/.test(log)) {
+        assert(!/Executed 0 tests/.test(log), 'No native UI test executed.');
+        assert.equal(checks.length, phases.length, 'Native UI run ended before the complete observed flow.');
+        testCompleted = true; break;
+      }
       await sleep(200);
     }
-    assert.equal(checks.length, phases.length, 'All six participant phone phases must be observed.');
+    assert.equal(checks.length, phases.length, 'All six participant native UI phases must be observed.');
+    assert(testCompleted, 'Native UI test must finish successfully.');
   } catch (cause) { failure = cause; }
-  await evidence('phone-api.json', { passed: !failure, source: 'real API; phone owns all main business mutations', expectedPhases: phases, checks, failure: failure?.message ?? null });
+  await evidence('phone-api.json', { passed: !failure, source: 'real API; native App UI owns all main business mutations', ...context(), expectedPhases: phases, checks, failure: failure?.message ?? null });
   if (failure) throw failure;
 }
 async function cleanup(f) {
@@ -280,7 +312,7 @@ async function main() {
   const [mode, argument] = process.argv.slice(2);
   if (mode === 'prepare') return prepare();
   const f = await readFixture();
-  if (mode === 'observe') return observe(f, argument);
+  if (mode === 'observe') return observe(f, argument, process.argv[4]);
   if (mode === 'verify') { const result = await verifyPhase(f, argument || 'final-calendar-verified'); await evidence(`verify-${argument || 'final-calendar-verified'}.json`, { passed: true, check: result }); console.log('Six participant snapshot verified.'); return; }
   if (mode === 'cleanup') return cleanup(f);
   if (mode === 'edges' || mode === 'capacity') {

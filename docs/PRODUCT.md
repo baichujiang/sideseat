@@ -73,6 +73,15 @@ separate follow-up integrations; the membership badge does not certify them.
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
 
+**2026-10-25 invitation-capacity presentation correction:**
+App and share pages use selected invitations as reserved places in the existing
+fixed-capacity mode, including pending replies. Acceptance counts remain the
+confirmation progress and Calendar membership. Selected invitees retain reply
+controls when full; unselected link viewers can join only with a free place before
+the start. A fixed-capacity decline releases the place, without changing closed
+rosters, invitation versions or organizer publication. This corrects client
+presentation to the existing server contract; it introduces no new flow or rule.
+
 **2026-10-15 owner-approved unified planning amendment:**
 Plans owns manual coordination from availability collection through individual
 confirmation and Calendar projection. A creator can collect availability first or

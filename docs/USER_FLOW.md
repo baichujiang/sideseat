@@ -23,6 +23,12 @@ account participants receive notifications and SideSeat Calendar entries; guests
 view the final arrangement on the shared page. Activity ideas must be decided
 before formal invitations are sent.
 
+For fixed-capacity share invitations, selected pending invitees reserve their
+places. They can still reply when full; an unselected link viewer sees a full
+message and the final timetable, and can confirm only after a place is released
+and before the activity starts. Confirmation progress and published Calendars
+continue to count accepted people only.
+
 The canonical selection, guest/record compatibility and consent contract is in
 [Unified plans](./UNIFIED_PLANS.md#current-manual-plan-flow--2026-10-24).
 Actual releases and verification scopes are in [Deployed state](./DEPLOYED_STATE.md).

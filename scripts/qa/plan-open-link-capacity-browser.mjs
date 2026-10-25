@@ -3,7 +3,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { call, calendars, persist, readFixture, route, out } from './plan-six-participant-phone.mjs';
 
@@ -26,16 +27,22 @@ const f = await readFixture();
 const owner = f.accounts.find(a => a.role === 'owner');
 const peer1 = f.accounts.find(a => a.role === 'peer1');
 assert(owner && peer1 && f.accounts.length === 6, 'Use the six owned test accounts.');
-const variants = [
+const supportedVariants = [
   { name: '390-zh-light', width: 390, height: 844, zh: true, colorScheme: 'light', fontSize: 16 },
   { name: '320-en-dark-20px', width: 320, height: 812, zh: false, colorScheme: 'dark', fontSize: 20 },
   { name: '1440-en-light', width: 1440, height: 1000, zh: false, colorScheme: 'light', fontSize: 16 },
-].slice(0, baseline ? 1 : 3);
+];
+const variantFilter = process.env.SIDESEAT_QA_BROWSER_VARIANT;
+assert(!variantFilter || supportedVariants.some(v => v.name === variantFilter), 'Use a known viewport variant.');
+const variants = (baseline ? supportedVariants.slice(0, 1) : supportedVariants).filter(v => !variantFilter || v.name === variantFilter);
+assert(variants.length > 0, 'At least one supported variant must run.');
+const harnessSHA256 = createHash('sha256').update(await fs.readFile(fileURLToPath(import.meta.url))).digest('hex');
 const checks = [], screenshots = [], actionTextBounds = [];
 let currentStep = 'launch', failure, browser;
 const contexts = [];
 const report = async passed => fs.writeFile(resultPath, JSON.stringify({
   passed, stage, engine: engineName, baseline, origin, realNetwork: true,
+  harnessSHA256, selectedVariants: variants.map(v => v.name), variantFilter: variantFilter ?? null,
   scope: 'Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI',
   checks, screenshots, actionTextBounds, failure: failure ? { step: currentStep, message: 'Verification failed; private diagnostics retained.' } : null,
   completedAt: new Date().toISOString(),
@@ -144,12 +151,37 @@ async function target(locator) {
 }
 
 async function capture(page, v, name, focus) {
-  if (focus) await focus.scrollIntoViewIfNeeded();
+  let focusViewport = null;
+  if (focus) {
+    await focus.scrollIntoViewIfNeeded();
+    focusViewport = await focus.evaluate(element => {
+      const footerSelector = 'div.fixed.inset-x-0.bottom-0';
+      const footer = element.closest(footerSelector);
+      const fixedTops = [...document.querySelectorAll(footerSelector)].map(el => el.getBoundingClientRect().top);
+      const safeBottom = footer ? innerHeight - 4 : Math.min(innerHeight, ...fixedTops) - 12;
+      const safeTop = 8;
+      const fits = element.getBoundingClientRect().height <= safeBottom - safeTop;
+      document.documentElement.style.scrollBehavior = 'auto';
+      if (fits && !footer) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const rect = element.getBoundingClientRect();
+          const delta = rect.bottom > safeBottom ? rect.bottom - safeBottom : rect.top < safeTop ? rect.top - safeTop : 0;
+          if (!delta) break;
+          window.scrollBy(0, delta);
+        }
+      }
+      const rect = element.getBoundingClientRect();
+      return { safeTop, safeBottom, fits, inFixedFooter: !!footer,
+        top: rect.top, bottom: rect.bottom, height: rect.height };
+    });
+    if (focusViewport.fits) assert(focusViewport.top >= focusViewport.safeTop - 1
+      && focusViewport.bottom <= focusViewport.safeBottom + 1, 'The captured focus must be fully above the fixed reply footer.');
+  }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   assert(overflow <= 1, 'No page-level horizontal overflow.');
   const file = `${runName}-${v.name}-${name}.png`;
   await page.screenshot({ path: path.join(out, file), fullPage: false });
-  screenshots.push({ file, variant: v.name, state: name, viewport: { width: v.width, height: v.height }, fontSize: v.fontSize });
+  screenshots.push({ file, variant: v.name, state: name, viewport: { width: v.width, height: v.height }, fontSize: v.fontSize, focusViewport });
 }
 
 async function fullState(guest, v, name) {

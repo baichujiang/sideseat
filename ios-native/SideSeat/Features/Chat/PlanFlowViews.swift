@@ -475,11 +475,13 @@ struct PlanDetailHeading: View {
     }
 
     private var status: some View {
-        PlanStatusBadge(status: poll.presentation(at: Date()).status,
-            needsYou: poll.presentation(at: Date()).nextStep.needsYou, identifier: statusIdentifier,
-            titleOverride: poll.planningPhase == "INVITING" ? AppLocalization.string(poll.isOwner
-                ? "Ready to send final plan" : poll.allInvitations.contains { $0.isMe && $0.status == "ACCEPTED" }
-                ? "Waiting for the organizer to send" : "Your confirmation needed") : nil)
+        let presentation = poll.presentation(at: Date())
+        return PlanStatusBadge(status: presentation.status,
+            needsYou: presentation.nextStep.needsYou, identifier: statusIdentifier,
+            titleOverride: poll.planningPhase == "INVITING"
+                ? (presentation.viewerHasConfirmed && presentation.nextStep == .waitForReplies
+                    ? AppLocalization.string("Waiting for the organizer to send") : presentation.cardStatusTitle)
+                : nil)
     }
 
     @ViewBuilder private var metadata: some View {

@@ -43,6 +43,20 @@ The Preview-numbered sections below describe dated changes; newer amendments
 supersede older descriptions. They are not additional current entry paths or
 fresh acceptance claims.
 
+## Invitation capacity consistency — 2026-10-25
+
+A fixed-capacity share link counts every selected invitee as a reserved place,
+including pending invitations. Acceptance alone drives confirmation progress and
+published Calendar membership, not remaining capacity. A selected invitee keeps
+the reply controls even when the plan is full; an unselected link viewer may join
+only while a place remains and before the activity starts. A decline in this
+existing fixed-capacity mode releases that place; if it fills again, the declined
+viewer cannot reclaim it without another free place. Full viewers can still read
+the final timetable and contact the organizer. Closed-roster selection, invitation
+versions, organizer-triggered publication and accepted-only unique Calendars stay.
+This aligns App list/detail and share-page presentation with existing server rules;
+it does not add a new planning branch or change existing records.
+
 ## Share page collection metadata — 2026-10-24
 
 The shared browser page uses title, independent location, candidate date range,
