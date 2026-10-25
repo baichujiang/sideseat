@@ -36,7 +36,21 @@
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
   No native rebuild in that web stage; current native build is218 below. See web release/QA records.
-- Preview218 is the current installed development build, source 144edd48f92927e95892c6408f361484722e2e2a pushed.
+- Preview219 is the current installed development build, source e7e0a2ef1819d079c6f96d7883352536eb6affd6 pushed.
+  Five native roots share canvas, centered title, light section tabs, white cards
+  and neutral actions; native TabView, lower-right Plans create and original flows
+  stay. Compact chrome is locally capped; body stays true system maximum.
+  Message name/date hierarchy, month metadata, accepted footer and Calendar DST
+  forward/inverse conversion are corrected. Independent final review passed.
+  Unit54/5suites0.069s; full370.779s/eight API and four-combination688.415s passed
+  on the frozen basis. Final one-line weekday identity repair preserves other267
+  inputs, focused four-combination90.022s passed; full flow not repeated after
+  metadata-only repair.93captures/88unique original pixels reviewed; scopes and
+  system-overlay limits recorded. Final219 normalPID9158,268/Local/signature/
+  binaries match source,97 retained.4QA accounts401/2links404; Runner/private
+  launch files/generated contexts removed.2new CPU resource reports actionnone,
+  no manual-performance claim. No backend/web release; see219 QA/release.
+- Preview218 was the previous installed development build, source 144edd48f92927e95892c6408f361484722e2e2a pushed.
   Duplicate filled inner action label/task-only layout removed; all card styles
   reuse people/progress and lightweight chevron. Original parent Button/route and
   full AX action description stay: collecting manual plans open original timetable,

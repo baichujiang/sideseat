@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-25T02:53:16.931434+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 219,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9158,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-025410.ips",
+      "lastModDate": "2026-10-25T01:54:10.000Z"
+    },
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-033135.ips",
+      "lastModDate": "2026-10-25T02:31:35.000Z"
+    }
+  ],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFinalBinary": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "Controlled offline UI layouts plus two disposable owner/participant live planning journeys; actual cleanup records retained separately. No real-user write.",
+  "disposableAccountsRemoved": 4,
+  "tokens401": 4,
+  "links404": 2,
+  "disposableFixtureRetainedForFinalAcceptance": false,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "newAppReportsClassification": {
+    "cpuResourceReports": 2,
+    "actionTaken": "none",
+    "newTerminationReportObserved": false,
+    "scope": "Reports occurred in automated plan interaction windows and include accessibility sampling. No causal or pure-manual performance conclusion is claimed."
+  },
+  "privateCredentialLaunchConfigurationsRemoved": 2,
+  "localGeneratedRunnerAndUnitContextsRemoved": true,
+  "privateLaunchFilesRemoved": true
+}

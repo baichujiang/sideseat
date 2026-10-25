@@ -1,0 +1,39 @@
+{
+  "reports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-025410.ips",
+      "fields": {
+        "Date/Time": "2026-10-25 02:52:05.397 +0100",
+        "End time": "2026-10-25 02:54:04.644 +0100",
+        "Data Source": "Microstackshots",
+        "Command": "SideSeat Preview",
+        "Event": "cpu usage",
+        "Action taken": "none",
+        "CPU": "90 seconds cpu time over 121 seconds (74% cpu average), exceeding limit of 50% cpu over 180 seconds",
+        "Duration": "121.46s",
+        "Start time": "2026-10-25 02:52:15.725 +0100"
+      },
+      "containsXCTest": false,
+      "containsAccessibility": true
+    },
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-033135.ips",
+      "fields": {
+        "Date/Time": "2026-10-25 03:29:30.424 +0100",
+        "End time": "2026-10-25 03:31:29.259 +0100",
+        "Data Source": "Microstackshots",
+        "Command": "SideSeat Preview",
+        "Event": "cpu usage",
+        "Action taken": "none",
+        "CPU": "90 seconds cpu time over 121 seconds (74% cpu average), exceeding limit of 50% cpu over 180 seconds",
+        "Duration": "121.27s",
+        "Start time": "2026-10-25 03:29:34.168 +0100"
+      },
+      "containsXCTest": false,
+      "containsAccessibility": true
+    }
+  ],
+  "newReports": 2,
+  "notApplicationTermination": true,
+  "manualPerformanceConclusion": false
+}

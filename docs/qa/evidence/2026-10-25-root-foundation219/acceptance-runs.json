@@ -1,0 +1,129 @@
+{
+  "build": 219,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "fullFlowAndRootMatrixSharedFrozenBinary": true,
+  "finalMetadataOnlyRepair": "weekday-repair.json",
+  "preFinalRuns": [
+    {
+      "label": "Initial section accessibility",
+      "role": "superseded",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 138.583,
+      "xcresultSessionSeconds": 144.604,
+      "scopeOrReason": "Failed Calendar child identifiers; product contains accessibility children after repair."
+    },
+    {
+      "label": "Initial native-search test handling",
+      "role": "superseded",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 161.945,
+      "xcresultSessionSeconds": 166.869,
+      "scopeOrReason": "Failed while sheet native search was active; test closes system search before product Done, App unchanged for that repair."
+    },
+    {
+      "label": "First live native flow",
+      "role": "pre-final",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 370.801,
+      "xcresultSessionSeconds": 374.734,
+      "scopeOrReason": "Eight API phases passed; actual screenshots identified incorrect accepted-participant footer, fixed before final run."
+    },
+    {
+      "label": "Pre-final four-combination matrix",
+      "role": "visual rejected",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 688.816,
+      "xcresultSessionSeconds": 692.866,
+      "scopeOrReason": "Automatic checks passed but actual maximum-text images found clipped dates, split root labels and oversized tools; calendar DST geometry was also corrected. This is not final acceptance."
+    }
+  ],
+  "finalPhoneRuns": [
+    {
+      "label": "Final complete live native plan flow",
+      "role": "full-and-matrix-baseline",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 370.779,
+      "xcresultSessionSeconds": 374.958,
+      "productPackage": "before-weekday-header-only-repair"
+    },
+    {
+      "label": "Root and subpage matrix before weekday-header repair",
+      "role": "full-and-matrix-baseline",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 688.415,
+      "xcresultSessionSeconds": 692.447,
+      "productPackage": "before-weekday-header-only-repair"
+    },
+    {
+      "label": "Final month weekday header supplement",
+      "role": "final-metadata-repair",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 90.022,
+      "xcresultSessionSeconds": 94.2,
+      "productPackage": "final-weekday-header-only-repair"
+    }
+  ],
+  "finalUnit": {
+    "result": "Passed",
+    "totalTests": 54,
+    "passed": 54,
+    "failed": 0,
+    "skipped": 0,
+    "expectedFailures": 0,
+    "suiteCount": 5,
+    "swiftTestingSeconds": 0.069,
+    "xcresultSessionSeconds": 27.52,
+    "resultBundle": "/tmp/sideseat219-private/dst-unit-final.xcresult"
+  },
+  "apiPhases": 8,
+  "scope": {
+    "matrix": [
+      "Chinese light standard",
+      "German light actual system AccessibilityXXXL",
+      "Chinese dark standard",
+      "German dark actual system AccessibilityXXXL"
+    ],
+    "allFourCombinations": "Five centered root titles, original native five tabs, original actions/44pt, root section selection retained, final reachable plan segment and fixed create avoidance.",
+    "twoLightCombinations": "Creation cancel; greetings, notifications, search clear/cancel; Calendar Month/Day/Week/search/connections/categories; profile edit cancel/settings back.",
+    "fullFlow": "Create candidate dates, owner submit/share to an App friend, friend submit, cross-midnight23:00-01:00 final review, explicit invitation, participant accepts, organizer sends and both unique exact Calendar entries.",
+    "darkSubpagesRepeated": false,
+    "wholeAppMaximumTextOrManualPerformanceClaim": false
+  },
+  "finalActualCaptures": 93,
+  "finalUniquePixels": 88,
+  "unrelatedWorkPreserved": [
+    "tsconfig.json"
+  ],
+  "backendReleased": false,
+  "webReleased": false,
+  "individuallyReviewedUniqueOriginalPixelSets": 88,
+  "reviewedCaptureRecords": 93
+}

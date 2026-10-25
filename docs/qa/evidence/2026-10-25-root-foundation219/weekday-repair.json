@@ -1,0 +1,33 @@
+{
+  "scope": "One-line visual metadata identity repair over the frozen App used by successful full flow and four-combination root matrix.",
+  "changedProductInputs": [
+    "ios-native/SideSeat/Features/Home/HomeDateStripView.swift"
+  ],
+  "unchangedProductInputsVerified": 267,
+  "previousSHA256": "b9aa8a4576dfe5b3dc8f6a572a685bda0ec5498967de15fe00fa8766f6d7f65b",
+  "finalSHA256": "1bf390308baa4e94e8f8f1ea8a97b98fc1332aa3e200b8e8e103fd52bfe58aae",
+  "removedLine": "ForEach(weekdayLabels, id: \\.self) { label in",
+  "addedLine": "ForEach(Array(weekdayLabels.enumerated()), id: \\.offset) { _, label in",
+  "basisBinarySHA256": {
+    "SideSeat Preview": "41e86a2ed2b8f35b7e8a0b0da316826c39c08306b8b511b898ac144920dc4c7c",
+    "SideSeat Preview.debug.dylib": "efc7cdff5601f8505c9ece323e3fb6b51ebb6591cc502c9f2b2ac1d8336fc46a"
+  },
+  "finalBinarySHA256": {
+    "SideSeat Preview": "56f22be747f5043b6cd63084f50824b66f44e8e9eae698011498a2e772789421",
+    "SideSeat Preview.debug.dylib": "3135df1b66b0272bafef8f309290f008129e82f7cfe956ae95653606ba7aad41"
+  },
+  "businessStateRequestRoutingOrCalendarTimingChanges": false,
+  "originalFullFlowAndRootMatrixScopeRetained": true,
+  "fullFlowRepeatedAfterThisMetadataOnlyRepair": false,
+  "supplementalPhoneTest": "testMonthWeekdayHeadersAcrossAppearanceAndTextSizes",
+  "supplementalVisualReview": {
+    "passed": true,
+    "captures": 8,
+    "uniqueOriginalPixelsReviewed": 4,
+    "exactDuplicateSHAReuse": true,
+    "weekdayColumnsComplete": 7,
+    "fourAppearanceTextCombinations": true,
+    "monthDayMonthReturnStable": true
+  },
+  "supplementalTestSeconds": 90.022
+}

@@ -1,0 +1,911 @@
+{
+  "build": 219,
+  "scope": "Frozen full-flow/root-matrix App, followed by one-line month weekday identity repair with final four-combination8-image supplement.267 other product inputs unchanged; live flow not repeated after metadata-only repair.",
+  "finalVisualAccepted": true,
+  "finalUniqueOriginalPixels": 88,
+  "allFinalUniqueOriginalsIndividuallyViewed": true,
+  "originalReviewMethod": "Actual unique PNGs viewed one at a time with detail original. Final initial/returned exact duplicates reuse the same SHA-verified original review.",
+  "reviewAssignments": {
+    "foundation_notes": "13 live-flow originals plus22 Chinese light matrix originals",
+    "foundation_layout_review": "12 live-flow originals plus22 German light actual-maximum matrix originals plus4 unique final month originals/8 captures",
+    "root_surface_inventory": "16 dark matrix originals"
+  },
+  "criteria": [
+    "Shared root title, canvas, surfaces, spacing and native tab bar remain consistent",
+    "Compact fixed root labels do not split into broken words",
+    "Fixed month metadata keeps visible complete dates",
+    "Message decorative symbols remain compact and full-size input text remains editable",
+    "Accessibility conversation names and dates have separate readable hierarchy",
+    "Day/week visible clock geometry agrees with event clock labels; final month header has all7 weekday columns",
+    "Accepted participant header and footer both indicate organizer send",
+    "Live cross-midnight final selection, invitation highlighter and original share-role permissions remain clear"
+  ],
+  "limitations": [
+    "Offline plan error banner is fixture/network-override evidence, not live root loading success",
+    "Long maximum-text cards are scrollable; the root test proves the final reachable segment and fixed controls, not whole-card visibility in one screen",
+    "Dark scope is roots/fixed areas/retained sections, not repeated dark subpage journeys",
+    "Seven-column compact event title summaries may wrap/ellipsis; complete event-title readability is not claimed",
+    "Calendar live search result screenshot shows start only; exact end/unique entries verified through API",
+    "System AssistiveTouch covers local right-edge content; obscured pixels excluded from visible acceptance",
+    "Native settings picker may abbreviate current value; not a whole-App maximum-text certification",
+    "Maximum offscreen-event overlay did not trigger in final images; cap verified in source, no corresponding pixel acceptance claim",
+    "With keyboard open at maximum text, message empty-state body is outside visible region; native clear and cancel remain visible",
+    "Native Calendar search empty-state title may abbreviate at maximum text",
+    "No pure-manual performance claim"
+  ],
+  "images": [
+    {
+      "capture": "phone-first-plan-contacts-calendar-result_0_0A6AB171-F318-4F32-A3BC-A12A715F7DD0.png",
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "959b9dbe46d545dbdcd5fd28a95d56531cd0996c7b3538a14d59224d29e1c85f",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "limitation": "Screenshot shows Calendar search result start time only; precise end and uniqueness verified by final live API.",
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_58DCBDBE-9BE1-45B2-BCAC-785DA91ABF6E.png",
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "0580f6967c0a3c8480f540bc7e80c2a7d9f4b1b1e6373f95a33ccfba9f90c5ef",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_60B6F733-5FAB-4B31-B990-BED829BF425B.png",
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "9cad2a9616ca4eb508a4babefabc51e3635c9da9b946b6ba263268ec427001ba",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-explicit-acceptance_0_F651E20C-B816-401C-A87C-16CC36E49E65.png",
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "bdd5a7d5ec22e54e11bde27d861712a2ce52e96fcebae376bdcea08a9aa9e673",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-invitation-continuous-across-midnight_0_570413E2-DFAB-4155-A491-3BAA8A09135E.png",
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "9ae19f030afc5c7c39906b2a40c35fa62066e3ce7aa6c1aa32a913cabf96525b",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-participant-INVITING_0_3F133C9F-CD11-4237-BDAE-93FB56F24C3D.png",
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "7eb48c088aa8008b9d3da4905d04d0c8646c110961c1b8888755f88ce7e6aaa2",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-received-chat-card_0_FB62FAF6-EC2E-4145-BAE5-FE92B2E03D19.png",
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "a7b3fdae66e95e3598884a5b803cbf71f4866beadffe5c224b4ba474249667cb",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-owner-INVITING_0_6BAD9237-511A-471E-A90F-7B55E78081B5.png",
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "f747ebd34a2aabb4cfe0810d2645e09d883cc78b282084a806f8fcad49d6f932",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-review-final-invitees_0_47D9B753-7D22-4045-A564-9945F4B229A1.png",
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "45c3222fe8f6d2f1f4db56fb7ab36bab1da9c4b458b7986c38c06d18f5111c49",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_9B65EE22-781F-4DC2-A8B2-0F8D6ABF1A91.png",
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "91b09c3e4baab878cfd2f9ab1e8cfc29d4f72ad1e169c0959ccc2389647bbd33",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-final-cross-day-evening_0_B4CD1509-C80A-4C33-BD23-216A84339791.png",
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "52f7ab19678f9197f6b818cd09ea80f8ad3f23bb1c1174241641a4dcd3933d59",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_F20116DA-BDE1-4E2C-938E-961D9B33FC26.png",
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "08b8252ac1293ef6b3e18732fc1432c8841aa3057d33286d3fd84bc6c1dea29c",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-compact-responded-people_0_7FDAA9B7-56CE-4888-B119-C6EC205865D2.png",
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "f9c85c0a95ad785c8e429d339c8bff16e75579e1b8c29b1804f537df32925b67",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-peer-inline-availability_0_2559992E-3B00-4D9F-98D2-5C2CE47FA587.png",
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "6b991f364a8366f93be0a82c1249ec385478d90da0d0f12f6d78ce5d1f2d9bcf",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_DD318C42-580C-4A5C-A5C6-E4741DFEE406.png",
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "7bf11fe5b45e8da563323a574ae77fa3e8eed9388317343c04c5561504e731f0",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-received-chat-card_0_8AED6293-E546-4C46-80B8-BCBAF207AD2D.png",
+      "file": "phone-first-plan-contacts-received-chat-card-5d08f825.png",
+      "sha256": "5d08f825ba7ae22f1094d004bcbc015fe8db9338c34a935a7b858dd0a34e9105",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_3FC7CE74-0FEF-4959-8AF1-A8583612F356.png",
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "37d7032f0d554244e56c74d4972c0bfd6cea6ad2aa499a113afca2baaafe63ab",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-select-and-send_0_B4186C7E-D8EA-47FC-94CA-4693671FEED0.png",
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "77d9d26086f2bf5ee459dfb305eb8ccc663284c29c1e5b938fefaf85b40a4e47",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_57A58F99-EA26-420E-9D32-724957890F6C.png",
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "0aca9a25b414dc62f4fa608450e5d6634e18d43652215dc692354918a35be38e",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_51D3B6EB-FB1A-4D26-9502-94F0633C8741.png",
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "36ce2036ce0cbc4e281e35ead79aaa87fed37f07f1e802a0418d4b03f65ff028",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-inline-information-editing_0_93A7399E-8B43-469B-BEC4-B5BB54AACDFE.png",
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "4a1d2087039a6856669d5c3c1e3f3c9a7af06d233f2b8ea1ce0419aec4d04bf8",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_C6634558-E090-4D40-8D57-CFCFF0DB7D33.png",
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "36f5ad1cf389063a137bd5f8f62fec711bf4b47918d4de90d614572fe9a94b93",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_C38F4CAE-6FBC-4FBF-96FC-8FA88B7BFDFA.png",
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "fa2f4d9ce2647469488c94ba00a203e6b749c1804fc95831a82f9f060aa577fd",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-compact-empty-timetable_0_38C4B1E6-4DB7-4D9D-B488-146BB19DC22A.png",
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "594a5b86fb0e2fb27f52c734d146ed340a9835babd2e6fcb5c45d451c5acf950",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "phone-first-plan-creation-information-without-timetable_0_EE93A0DA-967B-414B-80D5-FD2ADF74FBD5.png",
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "ecae32747158d957f666e94e5f94fe95ac5c57522c5122da3cd6d49518dbf6e7",
+      "group": "final complete live native flow, Chinese light standard",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-roots-returned-de-dark-system-max_0_085DA53D-6AAD-4F2A-A5AB-8B4C4778A0E4.png",
+      "file": "foundation219-roots-returned-de-dark-system-max.png",
+      "sha256": "6976f1d77dc38e25edea52355d23f357ca6fcbd47a97ff818f66c0ee43692c4f",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-de-dark-system-max_0_57221FFB-4316-4B80-8CBD-CB673CB2137C.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-de-dark-system-max.png",
+      "sha256": "90728dd6a48f5e548bfbe4a0daf65e42843893aa6cee3f17ba531dfb0eaee354",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-de-dark-system-max_0_A632E110-94AE-4BA0-8654-5DB01FE9AE41.png",
+      "file": "foundation219-together-selection-retained-de-dark-system-max.png",
+      "sha256": "dd26c6359a0b807d41f35dcb90806c93ac394747a7e9a669256c676413811893",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-4-de-dark-system-max_0_17C9AE20-C7D9-407B-BC35-6998FE5C07D5.png",
+      "file": "foundation219-root-4-de-dark-system-max.png",
+      "sha256": "6717fef5be4d9cd4e32143556a15676386d1afa282c09a58e14ac2461b4e3908",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-3-de-dark-system-max_0_649DB9D1-88A0-4D89-AFF9-C6612FF878BF.png",
+      "file": "foundation219-root-3-de-dark-system-max.png",
+      "sha256": "afd9caae39577ade488a2168ff483624afa6c9aefe3e6048f9f3fd2485152df5",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-2-de-dark-system-max_0_B02BF4A1-F3CD-46BD-8DBC-81F139BC9717.png",
+      "file": "foundation219-root-2-de-dark-system-max.png",
+      "sha256": "910645a5ebe35332def14cbaddd59bf84a1080a85469ef137fff19b7aa2b1230",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-1-de-dark-system-max_0_148EC24D-72A3-4B4A-B071-052A5085691F.png",
+      "file": "foundation219-root-1-de-dark-system-max.png",
+      "sha256": "c6bf8d769f8e1b8e0d4b68bb8c9128050a41084a3d65c4a7bc5374d4562aa745",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-0-de-dark-system-max_0_C3B15607-6FFC-45DA-9992-573344F480EA.png",
+      "file": "foundation219-root-0-de-dark-system-max.png",
+      "sha256": "37ece469db77a0f81f00fc83dbe7b1787b7a2ceed4ba5da5faedc5ab7c6f84f2",
+      "group": "German dark actual AccessibilityXXXL",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-roots-returned-zh-Hans-dark-normal_0_12935339-E293-4D34-BE44-A1D00B6E0832.png",
+      "file": "foundation219-roots-returned-zh-Hans-dark-normal.png",
+      "sha256": "8d95f57e72ec7ca0bf4fb3af3872c95b712b7ebe5d41ccd279d260e6b5219fba",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-dark-normal_0_FA114487-2363-4321-9733-85F42D780FA1.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-dark-normal.png",
+      "sha256": "623a033e8883c18aa546f621c0d30d5c8a53899fc7086b2e8a5df64a07d04aa1",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-zh-Hans-dark-normal_0_FE7FE6D4-F82F-42EF-A774-E718F08EBF46.png",
+      "file": "foundation219-together-selection-retained-zh-Hans-dark-normal.png",
+      "sha256": "8d95f57e72ec7ca0bf4fb3af3872c95b712b7ebe5d41ccd279d260e6b5219fba",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-4-zh-Hans-dark-normal_0_AD208629-0560-462F-B4D0-B63CE79949E0.png",
+      "file": "foundation219-root-4-zh-Hans-dark-normal.png",
+      "sha256": "599faa4edafa3d80e8ad455d3109da767200a87ba06361420851f6cdfc31056e",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-3-zh-Hans-dark-normal_0_116B5C0F-9237-4E84-A797-46B5F1966C13.png",
+      "file": "foundation219-root-3-zh-Hans-dark-normal.png",
+      "sha256": "069a041469309f115dd5256f9ca27c66e224119dd983b3e727ccc0c378d4760e",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-2-zh-Hans-dark-normal_0_B1D94856-C3A7-47D7-BA77-E015AF5F3E11.png",
+      "file": "foundation219-root-2-zh-Hans-dark-normal.png",
+      "sha256": "f58c8c6186d54e78fe618c33a359644e5604bba92b27ea5df7a57a0b9c319532",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-1-zh-Hans-dark-normal_0_449CA189-5A9B-4503-971D-8D49C69C70EB.png",
+      "file": "foundation219-root-1-zh-Hans-dark-normal.png",
+      "sha256": "000f7755dfcb39183b2298713a810d63862ac1dab64d9ca9d854a76792de01f8",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-0-zh-Hans-dark-normal_0_93F125D5-DE23-4537-A873-EDC03C752A69.png",
+      "file": "foundation219-root-0-zh-Hans-dark-normal.png",
+      "sha256": "4ddd77cfdd7b9607ff558eb609431eb37403f251f512d0e6c5bff796bf9ef575",
+      "group": "Chinese dark standard",
+      "reviewer": "root_surface_inventory",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-roots-returned-zh-Hans-light-normal_0_E1F0D09C-D830-4299-903C-15B78CDFC362.png",
+      "file": "foundation219-roots-returned-zh-Hans-light-normal.png",
+      "sha256": "3c36b57219017318161a2a155ab094fb0dfdacae43a4bd75dfafafecac1ab020",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-settings-without-changes-zh-Hans-light-normal_0_ECC00C39-FC76-41E1-B872-D6796FC5F478.png",
+      "file": "foundation219-settings-without-changes-zh-Hans-light-normal.png",
+      "sha256": "544fa476d74d6e97e174e37603e8b2e9f65fdbd9cf4008074f9adf581de3ed85",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-me-last-settings-row-zh-Hans-light-normal_0_270E8DC2-0763-45C5-A12C-8E75A1361A2E.png",
+      "file": "foundation219-me-last-settings-row-zh-Hans-light-normal.png",
+      "sha256": "0b51ea36e1e578812a038e9c817e26ae2126eda66b4e6522f01de94902200b37",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-profile-edit-without-submission-zh-Hans-light-normal_0_D6504408-81F4-47DD-90EE-4A53E1881E44.png",
+      "file": "foundation219-profile-edit-without-submission-zh-Hans-light-normal.png",
+      "sha256": "8665b768878cd8d0ac7e15f411235f387f9713d6fcfeed99bc6620c209ca7991",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-categories-read-only-zh-Hans-light-normal_0_9DA646AE-9B12-4FBD-A260-7E31CE29E01F.png",
+      "file": "foundation219-calendar-categories-read-only-zh-Hans-light-normal.png",
+      "sha256": "30dd7fa6c4ad7b4843e8265f44b208cc26c31dd2ac645062069776e2fe9d39c7",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-connections-read-only-zh-Hans-light-normal_0_1021C1EF-50D5-4ACD-9D83-21118CB143E2.png",
+      "file": "foundation219-calendar-connections-read-only-zh-Hans-light-normal.png",
+      "sha256": "c8651c6432b33d35fe5ad20b111857473e4232ac5445288d3d6f8df012d6ac03",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-search-inactive-before-dismiss-zh-Hans-light-normal_0_7A099D33-FD9B-4576-BDBF-F231729BB1BE.png",
+      "file": "foundation219-calendar-search-inactive-before-dismiss-zh-Hans-light-normal.png",
+      "sha256": "9db23f80badf77e2904d57b8fa81a3f984dd959ecaf05acc8121532eac7e06b2",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-search-read-only-zh-Hans-light-normal_0_8120E31F-8A18-4117-9EBD-11E2442F5A0F.png",
+      "file": "foundation219-calendar-search-read-only-zh-Hans-light-normal.png",
+      "sha256": "26b28668ffdcf1f8a73053adfc690ee6c69570dd2e4a76e351e95b84f080ee7a",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-week-zh-Hans-light-normal_0_DAB30B37-A4F7-4611-9C6C-F7E2008046A8.png",
+      "file": "foundation219-calendar-week-zh-Hans-light-normal.png",
+      "sha256": "c441190320f5a6ce044ddb6246ff85ac5b01223a9c940df8124fe425d60bc970",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-day-zh-Hans-light-normal_0_435E672A-C435-4E3E-BC1F-E3A4DDF1C528.png",
+      "file": "foundation219-calendar-day-zh-Hans-light-normal.png",
+      "sha256": "da0a44e56f8fd9e10585f6ea76bdea77329d3d5464f03d776e9a331f2d1f5c48",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-month-zh-Hans-light-normal_0_DB7F4F69-F786-4F1C-827B-030715FFDCE2.png",
+      "file": "foundation219-calendar-month-zh-Hans-light-normal.png",
+      "sha256": "3e182a6a5ec7bbc9fb594d5011923c8344bb809cb26ca102073fd0d88a20c1fc",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair",
+      "supersededMonthHeader": "Final8-image month supplement supersedes weekday header pixels; initial German header had3 missing duplicate-symbol columns."
+    },
+    {
+      "capture": "foundation219-messages-search-clear-zh-Hans-light-normal_0_76CA86BC-A500-4164-B93B-F9ED1F79AF9C.png",
+      "file": "foundation219-messages-search-clear-zh-Hans-light-normal.png",
+      "sha256": "f977304bc21cac5788601a208e3401257e3c745e1a86071efe4db55264937adc",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-greetings-read-only-zh-Hans-light-normal_0_C75DCF5B-A18D-4619-8029-728D684AD5BC.png",
+      "file": "foundation219-greetings-read-only-zh-Hans-light-normal.png",
+      "sha256": "5cd9d06308e74f63ea012d3ef46d8d8a2bdb917b24e57b108c27075a410e43fa",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-notifications-read-only-zh-Hans-light-normal_0_973E1864-2222-4335-93FF-25DFB82F8B56.png",
+      "file": "foundation219-notifications-read-only-zh-Hans-light-normal.png",
+      "sha256": "f0b57c9884467c659af994f949c251d667b1e1c1143249f03f5db7a22f134748",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plan-creation-read-only-zh-Hans-light-normal_0_42D2BE44-495E-4A0B-91B9-86BED9BEF5AD.png",
+      "file": "foundation219-plan-creation-read-only-zh-Hans-light-normal.png",
+      "sha256": "3116046fe6570df60c7c8ce29621eafa03eb274336db05b59f5fba3dedc3764d",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-light-normal_0_8ACDE3D6-A9A7-4058-9E9A-DD688D7A9AD3.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-light-normal.png",
+      "sha256": "8796c26a69e88e2ca7092a14798e1dadfec9edd70b449f4a51e98d93b636ea40",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-zh-Hans-light-normal_0_FC43D4B7-0AEC-4800-9F99-C08A795008FF.png",
+      "file": "foundation219-together-selection-retained-zh-Hans-light-normal.png",
+      "sha256": "dae08f2f7c07ee421ac8c3caa1ee16ec9f1988da19fb29c30f8a8ab1b358d2f0",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-4-zh-Hans-light-normal_0_F33F39CB-E9B6-4BC7-B805-69059CCCEA82.png",
+      "file": "foundation219-root-4-zh-Hans-light-normal.png",
+      "sha256": "9a61e74d3b2595101da51c71219eaf8ae7d46f23c6f25647865d8f74bc41f4ef",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-3-zh-Hans-light-normal_0_8D7C3D12-D84F-416B-8987-78665769A81F.png",
+      "file": "foundation219-root-3-zh-Hans-light-normal.png",
+      "sha256": "7e16b32eedcff6dcf145c37a4305fbad6cfd6325e36b3b64356d95aa9fa0f01f",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-2-zh-Hans-light-normal_0_B3B2356B-EADA-46C4-AAD6-5C629041D105.png",
+      "file": "foundation219-root-2-zh-Hans-light-normal.png",
+      "sha256": "bbcca6843d99aa18f2df073358e0bc1f790ca9a4805c2819beb3e35527e8ecb3",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-1-zh-Hans-light-normal_0_6C3047DA-FC18-44B0-891F-9E1AED14D42A.png",
+      "file": "foundation219-root-1-zh-Hans-light-normal.png",
+      "sha256": "f189fda67d94b5e74d37115f352c88ad9d2c2400f60c870aa83cd9dd747d41ae",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-0-zh-Hans-light-normal_0_2227C466-D0C4-49EE-8A7E-2841C6D75C18.png",
+      "file": "foundation219-root-0-zh-Hans-light-normal.png",
+      "sha256": "de8367d2d214dd16a0852ff3698fe757243be528c6237a6f2bc93c4d26790c3a",
+      "group": "Chinese light standard",
+      "reviewer": "foundation_notes",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-roots-returned-de-light-system-max_0_2900A12B-008E-4B69-9B46-23EB183C3A4A.png",
+      "file": "foundation219-roots-returned-de-light-system-max.png",
+      "sha256": "9cc3d8b99227b9121ff172ade896cc97b57ff565c1b2f684fb858da2db66a878",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-settings-without-changes-de-light-system-max_0_1EB7B030-B09F-4087-A72A-8357479DB570.png",
+      "file": "foundation219-settings-without-changes-de-light-system-max.png",
+      "sha256": "d362c0a0e6de93a8a3c61124a4d2fe6e086aee91b0082ff0a737d2cc9fd13927",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-me-last-settings-row-de-light-system-max_0_000835A6-002F-4E4A-B724-9B3441291B29.png",
+      "file": "foundation219-me-last-settings-row-de-light-system-max.png",
+      "sha256": "c5b3a70bc889bc74a9e3d3df55fc2a8f62ecc075c192391aba61723cb6c887fe",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-profile-edit-without-submission-de-light-system-max_0_2108556D-5F59-4EDE-8B57-7B3090D13106.png",
+      "file": "foundation219-profile-edit-without-submission-de-light-system-max.png",
+      "sha256": "30ceb3a5eb8db60c0966877b1e6bb90d7257644ed7ad44bfebebed60e2345f93",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-categories-read-only-de-light-system-max_0_83C2F1DA-8023-4986-8502-0B5E0BC1AFAB.png",
+      "file": "foundation219-calendar-categories-read-only-de-light-system-max.png",
+      "sha256": "4f49d37a44eb74ea224057692799882fa567bbb0c6e1359a752e665cdf4993b5",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-connections-read-only-de-light-system-max_0_9D23CD98-E035-4BFB-8817-188A73E7A4D4.png",
+      "file": "foundation219-calendar-connections-read-only-de-light-system-max.png",
+      "sha256": "d5fceabcaba50614ced880fbaf3283d4de4b894230c84879a98608c796f853a1",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-search-inactive-before-dismiss-de-light-system-max_0_A83B6E00-A640-49B3-AAC0-116C2FB2AE75.png",
+      "file": "foundation219-calendar-search-inactive-before-dismiss-de-light-system-max.png",
+      "sha256": "75c8c42efe4caaec8e038d51fe6206f52bc35ea0f7af76e6c1b0db47e6586006",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-search-read-only-de-light-system-max_0_B0F1C0C3-ECFE-4F69-8289-75C0719BBA6C.png",
+      "file": "foundation219-calendar-search-read-only-de-light-system-max.png",
+      "sha256": "7bcfb0b2ed8031c122b0dc9e25b27c5dbde9b7daae47e71e5d38caf03947d0ac",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-week-de-light-system-max_0_7F94308E-7A1B-42DD-8D41-4205C569352A.png",
+      "file": "foundation219-calendar-week-de-light-system-max.png",
+      "sha256": "117ed7ced2cd9b7b3697146e674f4f7cc1b436ee6aa0f88184895d94f38ccd31",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-day-de-light-system-max_0_FE454878-F50A-4A5A-AC17-38EC6D097BDD.png",
+      "file": "foundation219-calendar-day-de-light-system-max.png",
+      "sha256": "e8e6e013decb289493a89ce94153807c36131487db2b97391913532f8e664594",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-calendar-month-de-light-system-max_0_EFD02D52-5903-495B-BE20-E13E09EF7E9C.png",
+      "file": "foundation219-calendar-month-de-light-system-max.png",
+      "sha256": "21bedd3fb1ff3d11f686bcfa6259ec9a4c73420a8113d31f1c8d23e4c1262b2d",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair",
+      "supersededMonthHeader": "Final8-image month supplement supersedes weekday header pixels; initial German header had3 missing duplicate-symbol columns."
+    },
+    {
+      "capture": "foundation219-messages-search-clear-de-light-system-max_0_02CEC949-332B-441A-9346-B9ACDADFFDEC.png",
+      "file": "foundation219-messages-search-clear-de-light-system-max.png",
+      "sha256": "9036f761eec0250a6b77e5db6e454fff2c556f2c850f725bfbbd6ccbd10205d3",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-greetings-read-only-de-light-system-max_0_B3891518-AE12-422A-841F-ACE147337676.png",
+      "file": "foundation219-greetings-read-only-de-light-system-max.png",
+      "sha256": "c1db8837f6b92a1479343fb16dc7bbebf807f580458ba4acb6ff41ecc1a33544",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-notifications-read-only-de-light-system-max_0_E96557A6-E0EF-4E05-93DE-207E007B99FC.png",
+      "file": "foundation219-notifications-read-only-de-light-system-max.png",
+      "sha256": "babe764d4a2cabe0849f5b893d01c59e170c83678b3f0b6f429138ee4156fad5",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plan-creation-read-only-de-light-system-max_0_85C3FEAD-65CC-4062-9949-2FF6BC215411.png",
+      "file": "foundation219-plan-creation-read-only-de-light-system-max.png",
+      "sha256": "2460e288a621b8c0fc7e52c86ffab1b54482098680186267721905ef56e74afc",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-de-light-system-max_0_4358A250-42F3-4E1B-A08B-F95738D6A158.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-de-light-system-max.png",
+      "sha256": "48078d834a235823c2ab9a6567a782342ec1bc60a0131d6d56c9faebe0f2c7f2",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-de-light-system-max_0_4C712EAD-E6A3-4BED-A22F-E3920ABC7695.png",
+      "file": "foundation219-together-selection-retained-de-light-system-max.png",
+      "sha256": "07b3fec5af534bc5e79fdbfc48388ecf1c0caef3be2bf61b2f60b6340dc28ad0",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-4-de-light-system-max_0_A8B20DE2-00CA-4893-A4CA-5814D71E9551.png",
+      "file": "foundation219-root-4-de-light-system-max.png",
+      "sha256": "5a4f0ddff89c02501a0ef2d56f06e38e47f4199a45b92c650a6db4ac26a36941",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-3-de-light-system-max_0_A1C7FEEB-F6B9-49E9-9A41-645A6C959550.png",
+      "file": "foundation219-root-3-de-light-system-max.png",
+      "sha256": "814a4d29282ab4fae1586f3ab8151605ddc34bd52347c72db8ddc4e22c084c1f",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-2-de-light-system-max_0_9CAE8CC4-3407-4C88-8341-80BC4E5B491C.png",
+      "file": "foundation219-root-2-de-light-system-max.png",
+      "sha256": "444e6a59e1860c77e37ad2b5717edca62ff90490498debfe03964d88eaf66364",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-1-de-light-system-max_0_3FEE45BA-25D8-409F-9B00-06B160E3C2CD.png",
+      "file": "foundation219-root-1-de-light-system-max.png",
+      "sha256": "ee0c2452237cad7651da1336d0f78de4d8ff06e5855721f8a993565ae3b67c69",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-root-0-de-light-system-max_0_AF4577DB-A3E9-43A8-AEC6-F173D1E19B01.png",
+      "file": "foundation219-root-0-de-light-system-max.png",
+      "sha256": "6e28252b6d7dcd36f8b00041b328a8ee66e8234feeace9c92b13e629dcbee42f",
+      "group": "German light actual AccessibilityXXXL",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "full-and-root-matrix-before-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-month-headers-returned-de-dark-system-max_0_C24CBDC5-9378-4CCC-9AD2-5EA22652ADB8.png",
+      "file": "foundation219-month-headers-returned-de-dark-system-max.png",
+      "sha256": "bf1692fa33e3e23c1b73898b660d746744f2e3c24acae1b39f3db34df86662f3",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "final-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-month-headers-initial-de-dark-system-max_0_94DAE134-99C4-4CB9-BC62-95D7383E228F.png",
+      "file": "foundation219-month-headers-initial-de-dark-system-max.png",
+      "sha256": "bf1692fa33e3e23c1b73898b660d746744f2e3c24acae1b39f3db34df86662f3",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": false,
+      "package": "final-weekday-header-only-repair",
+      "exactDuplicateReviewReuseSHA256": "bf1692fa33e3e23c1b73898b660d746744f2e3c24acae1b39f3db34df86662f3"
+    },
+    {
+      "capture": "foundation219-month-headers-returned-zh-Hans-dark-normal_0_2A1173E9-F01F-4A53-8E3E-87CE1EF08524.png",
+      "file": "foundation219-month-headers-returned-zh-Hans-dark-normal.png",
+      "sha256": "d6485848b08f8823ceaa09de9998607a7aae1aa647c03a0e44b33ebe3e3ea65e",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "final-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-month-headers-initial-zh-Hans-dark-normal_0_E63BFF49-377E-4974-B13C-64B6A95EC750.png",
+      "file": "foundation219-month-headers-initial-zh-Hans-dark-normal.png",
+      "sha256": "d6485848b08f8823ceaa09de9998607a7aae1aa647c03a0e44b33ebe3e3ea65e",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": false,
+      "package": "final-weekday-header-only-repair",
+      "exactDuplicateReviewReuseSHA256": "d6485848b08f8823ceaa09de9998607a7aae1aa647c03a0e44b33ebe3e3ea65e"
+    },
+    {
+      "capture": "foundation219-month-headers-returned-zh-Hans-light-normal_0_3C623A24-8783-458B-9704-665FA839517F.png",
+      "file": "foundation219-month-headers-returned-zh-Hans-light-normal.png",
+      "sha256": "12a1fb6c741c7dacb6baf476c9e1f9420df542cf72c4571cbb4ae5ad9f2ef93f",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "final-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-month-headers-initial-zh-Hans-light-normal_0_86E5A35A-6F07-4A05-9C37-A37F63EA4339.png",
+      "file": "foundation219-month-headers-initial-zh-Hans-light-normal.png",
+      "sha256": "12a1fb6c741c7dacb6baf476c9e1f9420df542cf72c4571cbb4ae5ad9f2ef93f",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": false,
+      "package": "final-weekday-header-only-repair",
+      "exactDuplicateReviewReuseSHA256": "12a1fb6c741c7dacb6baf476c9e1f9420df542cf72c4571cbb4ae5ad9f2ef93f"
+    },
+    {
+      "capture": "foundation219-month-headers-returned-de-light-system-max_0_6217CA47-3960-47C1-8D2F-D58EA2177FBC.png",
+      "file": "foundation219-month-headers-returned-de-light-system-max.png",
+      "sha256": "e69139a4a15fa71f5bb2a22b0238e7a772e13cb6333b410a5685b62b2c810f7d",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": true,
+      "package": "final-weekday-header-only-repair"
+    },
+    {
+      "capture": "foundation219-month-headers-initial-de-light-system-max_0_53B2918C-664D-4B8B-932D-9D657F8A7FB9.png",
+      "file": "foundation219-month-headers-initial-de-light-system-max.png",
+      "sha256": "e69139a4a15fa71f5bb2a22b0238e7a772e13cb6333b410a5685b62b2c810f7d",
+      "group": "Final month header, four language/theme/text combinations, initial and returned",
+      "reviewer": "foundation_layout_review",
+      "originalIndividuallyViewed": false,
+      "package": "final-weekday-header-only-repair",
+      "exactDuplicateReviewReuseSHA256": "e69139a4a15fa71f5bb2a22b0238e7a772e13cb6333b410a5685b62b2c810f7d"
+    }
+  ],
+  "savedRepresentativeOriginals": {
+    "foundation219-root-0-zh-Hans-light-normal.png": "together-normal.png",
+    "foundation219-root-0-de-dark-system-max.png": "together-dark-max.png",
+    "foundation219-root-1-zh-Hans-light-normal.png": "plans-normal.png",
+    "foundation219-root-1-de-dark-system-max.png": "plans-dark-max.png",
+    "foundation219-root-2-zh-Hans-light-normal.png": "calendar-normal.png",
+    "foundation219-root-2-de-dark-system-max.png": "calendar-dark-max.png",
+    "foundation219-root-3-zh-Hans-light-normal.png": "messages-normal.png",
+    "foundation219-root-3-de-dark-system-max.png": "messages-dark-max.png",
+    "foundation219-root-4-zh-Hans-light-normal.png": "me-normal.png",
+    "foundation219-root-4-de-dark-system-max.png": "me-dark-max.png",
+    "foundation219-calendar-day-zh-Hans-light-normal.png": "calendar-day-dst.png",
+    "foundation219-calendar-week-zh-Hans-light-normal.png": "calendar-week-dst.png",
+    "foundation219-root-3-de-light-system-max.png": "messages-max.png",
+    "foundation219-messages-search-clear-de-light-system-max.png": "messages-search-max.png"
+  },
+  "savedFinalWeekdayRepairOriginals": {
+    "foundation219-month-headers-returned-de-dark-system-max.png": "month-final-de-dark-system-max.png",
+    "foundation219-month-headers-returned-zh-Hans-dark-normal.png": "month-final-zh-Hans-dark-normal.png",
+    "foundation219-month-headers-returned-zh-Hans-light-normal.png": "month-final-zh-Hans-light-normal.png",
+    "foundation219-month-headers-returned-de-light-system-max.png": "month-final-de-light-system-max.png"
+  },
+  "productDeltaRecord": "weekday-repair.json",
+  "additionalSavedFullFlowOriginals": [
+    "accepted-waiting-organizer.png",
+    "invitation-cross-midnight.png"
+  ],
+  "preFinalVisualRejectedRecord": "pre-final-visual-findings.json",
+  "finalReviewedCaptureRecords": 93
+}

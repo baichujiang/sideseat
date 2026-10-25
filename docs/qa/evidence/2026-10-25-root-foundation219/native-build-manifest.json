@@ -1,0 +1,33 @@
+{
+  "build": 219,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 268,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "56f22be747f5043b6cd63084f50824b66f44e8e9eae698011498a2e772789421",
+    "SideSeat Preview.debug.dylib": "3135df1b66b0272bafef8f309290f008129e82f7cfe956ae95653606ba7aad41"
+  },
+  "testSourceSHA256": {
+    "RootFoundationPhoneUITests.swift": "1ed119399f341cb634fa75725111a6f6300bdc68e344532a36c47cf496d2f6f5",
+    "PlanFirstUsePhoneUITests.swift": "e3b0351721347d4cbc8bdcd1fcf4fc25ccfd0510399b252f9d4db695f26344bc"
+  },
+  "backendReleased": false,
+  "webReleased": false,
+  "compiledPhoneTestSourceMatched": true,
+  "fullFlowAndRootMatrixSharedFrozenBinaryBeforeWeekdayRepair": true,
+  "finalWeekdayHeaderOnlyRepair": "weekday-repair.json",
+  "testSourceSHA256ByRun": {
+    "fullFlowAndRootMatrix": {
+      "RootFoundationPhoneUITests.swift": "57918cb50edb9dd5d939247cf20a54152abc75a7e65a393e8e99429f4ea19329",
+      "PlanFirstUsePhoneUITests.swift": "e3b0351721347d4cbc8bdcd1fcf4fc25ccfd0510399b252f9d4db695f26344bc"
+    },
+    "finalMonthSupplement": {
+      "RootFoundationPhoneUITests.swift": "1ed119399f341cb634fa75725111a6f6300bdc68e344532a36c47cf496d2f6f5",
+      "PlanFirstUsePhoneUITests.swift": "e3b0351721347d4cbc8bdcd1fcf4fc25ccfd0510399b252f9d4db695f26344bc"
+    }
+  },
+  "sourceCommit": "e7e0a2ef1819d079c6f96d7883352536eb6affd6",
+  "sourcePushed": true,
+  "all268CommittedSourceInputsVerified": true
+}

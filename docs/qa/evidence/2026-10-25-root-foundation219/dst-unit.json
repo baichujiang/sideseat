@@ -1,0 +1,96 @@
+{
+  "checkedAt": "2026-10-25T02:28:22.243823+00:00",
+  "scope": "Native day/week wall-clock coordinates and inverse slot/move/resize conversion; current active source copied into a separate Simulator host project. No physical-device operation by this unit run.",
+  "finalRun": {
+    "result": "Passed",
+    "totalTests": 54,
+    "passed": 54,
+    "failed": 0,
+    "skipped": 0,
+    "expectedFailures": 0,
+    "suiteCount": 5,
+    "swiftTestingSeconds": 0.069,
+    "xcresultSessionSeconds": 27.52,
+    "resultBundle": "/tmp/sideseat219-private/dst-unit-final.xcresult"
+  },
+  "initialRun": {
+    "passed": 53,
+    "failed": 0,
+    "suiteCount": 5,
+    "swiftTestingSeconds": 0.076,
+    "superseded": true,
+    "reason": "Independent review identified fold-spanning resize endpoint deltas missing from the initial regression coverage. Production conversion was corrected and the seventh new DST test was added before the final full five-suite rerun."
+  },
+  "executedSuites": [
+    "CalendarDayTimelineTests",
+    "CalendarEventTimingTests",
+    "CalendarTimelineScrollAnchorTests",
+    "CalendarAllDayStyleTests",
+    "HomeWeekWindowTests"
+  ],
+  "newDSTRegressionMethods": [
+    "wallClockPlacementAcrossSeasons",
+    "lastClockHourAcrossSeasons",
+    "repeatedHourPlacements",
+    "gridClockConversionAcrossSeasons",
+    "repeatedHourClockConversion",
+    "springGapClockConversion",
+    "foldResizeUsesRealEndpointDelta"
+  ],
+  "coveredBoundaries": [
+    "Berlin autumn, spring and ordinary 03:01-04:01 cards use clock coordinates181-241 and retain original event instants",
+    "23:30-to-next-day00:30 clips to1410-1440 then0-30, including the autumn final hour",
+    "Two repeated02:15-02:45 events retain distinct instants and separate visual lanes",
+    "A fold-spanning02:45+02 to02:15+01 interval remains visible; ending exactly at the fold is clipped correctly",
+    "Blank-slot minute210 maps to03:30 on all three days; minute1440 is the next calendar midnight; negative minute crosses to the preceding calendar day",
+    "First/second repeated-hour edit references retain their UTC offset; unchanged endpoints retain their original seconds",
+    "Missing spring02:30 advances by Foundation nextTime to03:00",
+    "Production shiftedDate helper applies resize targets125/185 relative to displayed120/180 to the actual02:45+02/02:15+01 endpoints, yielding02:50+02/02:20+01; midnight-end minus5 remains23:55 on the original day; cross-day movement retains local endpoint clock"
+  ],
+  "repeatedHourSemantics": {
+    "axis": "Existing fixed24-hour wall-clock grid; no25-hour axis or extra repeated-hour row was introduced.",
+    "newEmptySlots": "The first occurrence is chosen when the local hour repeats.",
+    "edits": "The reference endpoint UTC offset is retained when the target clock time repeats; a zero-delta edit on the same day retains the exact original Date, including seconds. Move and both resize endpoints share real-endpoint clock plus displayed delta conversion, including endpoint calendar-day offset.",
+    "projection": "Repeated-hour events stay distinct and can share visual clock coordinates in separate lanes. An interval spanning the backward transition uses the bounding clock range it covers, without altering its source start/end.",
+    "springGap": "A nonexistent clock time advances to the next valid local time through Calendar.MatchingPolicy.nextTime.",
+    "moveDuration": "Week move retains the existing actual elapsed end-start duration; invitation and stored-event contracts are unchanged."
+  },
+  "sourceSHA256": {
+    "ios-native/SideSeat/Features/Calendar/CalendarDayTimelineView.swift": "dea67c0a4753cbcd4c12b2d804a3e379497593e68d42d8a6c780a39df0ae62ef",
+    "ios-native/SideSeat/Features/Home/HomeWeekTimetableView.swift": "b8d289b66e2c84801b87e63c7e7481cc83a501ba2310afb119c43e0f4641ad5e",
+    "ios-native/SideSeatTests/CalendarDayTimelineTests.swift": "25d82dd30f6eaa3ebd86c3123ac9b372cb9ab7c81e05c8bdaac2cdfd826888cf"
+  },
+  "activeAndIsolatedSourceHashesMatchedAfterFinalRun": true,
+  "command": [
+    "xcodebuild",
+    "test",
+    "-project",
+    "/tmp/sideseat219-dst-source/ios-native/SideSeat.xcodeproj",
+    "-scheme",
+    "SideSeat-Development",
+    "-destination",
+    "platform=iOS Simulator,id=386193D3-AB27-41F4-8B13-4DB3ACEE3907",
+    "-derivedDataPath",
+    "/tmp/sideseat219-dst-unit-build",
+    "-clonedSourcePackagesDirPath",
+    "/tmp/sideseat179-build/SourcePackages",
+    "-disableAutomaticPackageResolution",
+    "-only-testing:SideSeatTests/CalendarDayTimelineTests",
+    "-only-testing:SideSeatTests/CalendarEventTimingTests",
+    "-only-testing:SideSeatTests/CalendarTimelineScrollAnchorTests",
+    "-only-testing:SideSeatTests/CalendarAllDayStyleTests",
+    "-only-testing:SideSeatTests/HomeWeekWindowTests",
+    "-resultBundlePath",
+    "/tmp/sideseat219-private/dst-unit-final.xcresult"
+  ],
+  "privacy": {
+    "rawLog": "/tmp/sideseat219-private/dst-unit-final.log",
+    "rawLogMode": "0600",
+    "resultDirectoryMode": "0700",
+    "privateLocalConfigurationNotPublished": true
+  },
+  "notClaimed": [
+    "This unit run is not physical-device UI acceptance or an end-to-end invitation/API flow.",
+    "The fixed24-hour axis does not display two separate repeated-hour rows."
+  ]
+}

@@ -1,0 +1,327 @@
+{
+  "scope": "Pre-final package after automated four-combination pass; visual review rejected maximum-text acceptance and identified DST geometry defect. Not final acceptance.",
+  "automatedDurationSeconds": 688.816,
+  "captures": 60,
+  "uniqueOriginalPixels": 60,
+  "allUniqueOriginalsIndividuallyReviewed": true,
+  "reviewAssignments": {
+    "foundation_layout_review": "22 German light real-system-maximum originals",
+    "foundation_notes": "22 Chinese light standard originals",
+    "root_surface_inventory": "16 dark originals"
+  },
+  "findings": [
+    "Maximum root-section labels split words",
+    "Maximum fixed seven-column month dates ellipsized",
+    "Maximum message decorative icons and search height excessive; timestamps squeeze names",
+    "Maximum calendar offscreen-event overlay excessive",
+    "Day/week event position uses elapsed minutes on a fixed wall-clock axis during DST change"
+  ],
+  "limitations": [
+    "Offline fixtures are not live account-load acceptance",
+    "Long maximum cards use actual reachable visible segments",
+    "AssistiveTouch-obscured pixels excluded",
+    "Seven-column full event-title readability not claimed"
+  ],
+  "images": [
+    {
+      "capture": "foundation219-roots-returned-de-dark-system-max_0_E0CFC31E-20A5-4AB2-9B2E-2B4DC759EEB0.png",
+      "file": "foundation219-roots-returned-de-dark-system-max.png",
+      "sha256": "42cff0ead0c193aa52204d35ad58758231c7916cc15b287c051a7450e567991c"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-de-dark-system-max_0_99992EEF-A212-4015-B300-B4455338F79A.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-de-dark-system-max.png",
+      "sha256": "5e04616e849cb1adfc18461dac1aca1777d7a9015ce2c8b0f1422dd20f9de7df"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-de-dark-system-max_0_E43802A4-1B2F-4C1E-8726-4407BF5688F6.png",
+      "file": "foundation219-together-selection-retained-de-dark-system-max.png",
+      "sha256": "dc1ae76767826a0db2a439760b785c7f7a8f005f9fb4b189cd9b5a26c14828f0"
+    },
+    {
+      "capture": "foundation219-root-4-de-dark-system-max_0_66BF970D-74BB-45FA-9665-B46B76998BCA.png",
+      "file": "foundation219-root-4-de-dark-system-max.png",
+      "sha256": "f19d78907d399464f4a0fc935890ada04705c4b9cc17f2c428a98eba8f4ea6ad"
+    },
+    {
+      "capture": "foundation219-root-3-de-dark-system-max_0_B73A3F1C-4A5D-4872-A708-429F29A6236B.png",
+      "file": "foundation219-root-3-de-dark-system-max.png",
+      "sha256": "7e772dc32f173a46dbd766e1b7cba9cd551a57e583fd8861b187918c971def51"
+    },
+    {
+      "capture": "foundation219-root-2-de-dark-system-max_0_6431E0A9-AD96-4B26-B6D1-481A771201BB.png",
+      "file": "foundation219-root-2-de-dark-system-max.png",
+      "sha256": "50b44156db14f8e95eae44349049c0404283519ca5cf74afe649061aa1bd6ec0"
+    },
+    {
+      "capture": "foundation219-root-1-de-dark-system-max_0_00D4E8F6-059F-465D-BE01-1097D72F32C9.png",
+      "file": "foundation219-root-1-de-dark-system-max.png",
+      "sha256": "72de507656247dbe84a482f00f46a299b89d0c8ac2c8171f71e5eaef60653131"
+    },
+    {
+      "capture": "foundation219-root-0-de-dark-system-max_0_C7506163-034C-49E2-8A62-608B06329994.png",
+      "file": "foundation219-root-0-de-dark-system-max.png",
+      "sha256": "4a3dff7152802ddff8a6dce6df64245583cb7098fafd67d164f22ad729352db9"
+    },
+    {
+      "capture": "foundation219-roots-returned-zh-Hans-dark-normal_0_DBF889CE-22CC-4F8C-8F0E-E1ADBE779B51.png",
+      "file": "foundation219-roots-returned-zh-Hans-dark-normal.png",
+      "sha256": "174b24fc4ab7a21fcacae15cd8f3cd69fe0469e5d5de43ae404119c8c300587e"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-dark-normal_0_E313F601-F309-4681-B9A6-931710525C65.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-dark-normal.png",
+      "sha256": "08c2768f22d07c16cdf340337746d40fba59aa06151287fb44ed10b9d4cc5b7d"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-zh-Hans-dark-normal_0_5025CF13-5C6E-4012-878A-339A91F8B9AE.png",
+      "file": "foundation219-together-selection-retained-zh-Hans-dark-normal.png",
+      "sha256": "62f491091c2e5a8ab70e8b884f3cc52c32f86f6f354f24899c8079b78787d3ae"
+    },
+    {
+      "capture": "foundation219-root-4-zh-Hans-dark-normal_0_80226841-06A0-4296-B024-D8FC99B85FC4.png",
+      "file": "foundation219-root-4-zh-Hans-dark-normal.png",
+      "sha256": "e810397d00e0f03b4005fae06322ab9fbc3e48c1fa7a03304bcbe545d9e768fd"
+    },
+    {
+      "capture": "foundation219-root-3-zh-Hans-dark-normal_0_F3122FE8-B525-4D09-9806-6242E0309A9B.png",
+      "file": "foundation219-root-3-zh-Hans-dark-normal.png",
+      "sha256": "8ec25ab4377ca9e87dd86fd74f651710a748c61aebc2e8da36f028c56954250f"
+    },
+    {
+      "capture": "foundation219-root-2-zh-Hans-dark-normal_0_DE72520E-F3EB-4E99-9EF2-0A40B849BD99.png",
+      "file": "foundation219-root-2-zh-Hans-dark-normal.png",
+      "sha256": "71aab6154f379468c0a0c7960ae5144bf0b7f11416fd122518e5ed633d48c771"
+    },
+    {
+      "capture": "foundation219-root-1-zh-Hans-dark-normal_0_D5D7D917-FBB2-44A3-A8D3-A2E6C445FDE0.png",
+      "file": "foundation219-root-1-zh-Hans-dark-normal.png",
+      "sha256": "ffc4c45e4f1f98c9ef79a4e317a8638823282828f2c7db2e11f4573da832deda"
+    },
+    {
+      "capture": "foundation219-root-0-zh-Hans-dark-normal_0_F91255A5-83DE-4ED5-9C61-98B82CE57D43.png",
+      "file": "foundation219-root-0-zh-Hans-dark-normal.png",
+      "sha256": "7eaa18f6315138b767172bfa95d8ad9eb28a522e4dc0d2f0af672decd0c01b40"
+    },
+    {
+      "capture": "foundation219-roots-returned-zh-Hans-light-normal_0_4971C6C7-B5F9-4991-9FF2-F98E8A795260.png",
+      "file": "foundation219-roots-returned-zh-Hans-light-normal.png",
+      "sha256": "dc125edd127b7544607a599d92c04d65e6ce92e33417f0d6f7f141124d38a17c"
+    },
+    {
+      "capture": "foundation219-settings-without-changes-zh-Hans-light-normal_0_2576016B-0BA9-4B42-8ED8-31D8209FA9B6.png",
+      "file": "foundation219-settings-without-changes-zh-Hans-light-normal.png",
+      "sha256": "3b2c39f02870e102866dc661e543352071fa55e2afc17f2a5df23cf729c3664a"
+    },
+    {
+      "capture": "foundation219-me-last-settings-row-zh-Hans-light-normal_0_67010A0F-8ACF-4D85-9307-AF7E3A075AB0.png",
+      "file": "foundation219-me-last-settings-row-zh-Hans-light-normal.png",
+      "sha256": "fefd7b4c814c5279e19bef761e9ce2fe39f2039c9ba346eb9b1b26070833adc9"
+    },
+    {
+      "capture": "foundation219-profile-edit-without-submission-zh-Hans-light-normal_0_AD11E044-2351-404E-B44B-FE9F232F071D.png",
+      "file": "foundation219-profile-edit-without-submission-zh-Hans-light-normal.png",
+      "sha256": "1f57c42a2ac227f483e5220611449f3011139684c95c4a0e6efa3832fb334e61"
+    },
+    {
+      "capture": "foundation219-calendar-categories-read-only-zh-Hans-light-normal_0_2FD9081D-61E5-445D-B90E-6378D5E9D4B8.png",
+      "file": "foundation219-calendar-categories-read-only-zh-Hans-light-normal.png",
+      "sha256": "06f7335812e769ecfca96853c25800f0a0097931948b713bffe7c294a5dc21df"
+    },
+    {
+      "capture": "foundation219-calendar-connections-read-only-zh-Hans-light-normal_0_548CF26B-9B78-4206-BB29-8C8E97CD8942.png",
+      "file": "foundation219-calendar-connections-read-only-zh-Hans-light-normal.png",
+      "sha256": "d457b7022eda5356ba68a936233374bd6a1bace26a6a394727f8b6c935a93edb"
+    },
+    {
+      "capture": "foundation219-calendar-search-inactive-before-dismiss-zh-Hans-light-normal_0_F0136B11-FAD8-416F-899D-A5C5B09DCB7F.png",
+      "file": "foundation219-calendar-search-inactive-before-dismiss-zh-Hans-light-normal.png",
+      "sha256": "d22e500bbb757494cc680a4b9238b97c8ad12599b08ec84f3217c336ad2393e4"
+    },
+    {
+      "capture": "foundation219-calendar-search-read-only-zh-Hans-light-normal_0_B9B98353-81FB-4B99-AD95-DE4B805B971B.png",
+      "file": "foundation219-calendar-search-read-only-zh-Hans-light-normal.png",
+      "sha256": "59c8a84a3c54260e27c3eb3e1738ecabfc437583d16595bbc1d6eaa44ca47089"
+    },
+    {
+      "capture": "foundation219-calendar-week-zh-Hans-light-normal_0_9FE95D56-99CC-4BE0-AFBB-0542AF7C3DDB.png",
+      "file": "foundation219-calendar-week-zh-Hans-light-normal.png",
+      "sha256": "8c213020367f64d86a1453d36d40d883dee00af719bfeadd5045e3d1a5132e5e"
+    },
+    {
+      "capture": "foundation219-calendar-day-zh-Hans-light-normal_0_6B2DA9D8-EDCD-4ABE-ADDE-CEB4320A7613.png",
+      "file": "foundation219-calendar-day-zh-Hans-light-normal.png",
+      "sha256": "95841a9b09a3386b9ea16b6a3cc9ca5866637e290cb5fa71cf6c5a2e7bb35965"
+    },
+    {
+      "capture": "foundation219-calendar-month-zh-Hans-light-normal_0_9613C671-04B3-4CE6-BEA9-FF5785E7B51E.png",
+      "file": "foundation219-calendar-month-zh-Hans-light-normal.png",
+      "sha256": "f7c9efa894c6b40eb64446f4dba58a06e12acf030f801e43824d8a4501cb81af"
+    },
+    {
+      "capture": "foundation219-messages-search-clear-zh-Hans-light-normal_0_A8CF8A63-A2DC-4283-87F4-B9D24A0DF7A7.png",
+      "file": "foundation219-messages-search-clear-zh-Hans-light-normal.png",
+      "sha256": "96653b193725536fe13d9a08245f1a33c1b105d4e47d1e4214eadae925b673f5"
+    },
+    {
+      "capture": "foundation219-greetings-read-only-zh-Hans-light-normal_0_D10C7A0C-12A2-43B4-828B-319626583147.png",
+      "file": "foundation219-greetings-read-only-zh-Hans-light-normal.png",
+      "sha256": "dce2fe163210ac12e0dbf8f818d388184d698fe730815d88ac01b4d571a6682c"
+    },
+    {
+      "capture": "foundation219-notifications-read-only-zh-Hans-light-normal_0_3450BDAD-A78B-45F0-AECD-1C6B39731C85.png",
+      "file": "foundation219-notifications-read-only-zh-Hans-light-normal.png",
+      "sha256": "fc630de992c48e0a1897d2c635b6dc676ee47b1026467dd4f89097946f972900"
+    },
+    {
+      "capture": "foundation219-plan-creation-read-only-zh-Hans-light-normal_0_CFCD90E0-9B10-49AB-B9E4-90964CAF4940.png",
+      "file": "foundation219-plan-creation-read-only-zh-Hans-light-normal.png",
+      "sha256": "23e89c35f5688725a5c8e187d411af914fa01073cd2bdd9d7b42a769e720d7ca"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-light-normal_0_8D46D1C2-6568-460B-86F4-CAF3B73A3F69.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-zh-Hans-light-normal.png",
+      "sha256": "281fdc87988b752ac4e3f655a6e57623a3e23f82a21d69d9150d9079d166665b"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-zh-Hans-light-normal_0_5038807F-E696-4F10-8787-66FD78EB9A13.png",
+      "file": "foundation219-together-selection-retained-zh-Hans-light-normal.png",
+      "sha256": "1e698429c017393f8d1dd44b030a8c00b333db34a71545bf32f1fd101f7d90db"
+    },
+    {
+      "capture": "foundation219-root-4-zh-Hans-light-normal_0_3E02673F-7325-4679-8B3F-E45763AD1D75.png",
+      "file": "foundation219-root-4-zh-Hans-light-normal.png",
+      "sha256": "eb0d1ce09d6933f8533fc9ae6f8c44f8e48ec17a7211186f3385710b148b25ad"
+    },
+    {
+      "capture": "foundation219-root-3-zh-Hans-light-normal_0_555ADA61-1B9C-4D57-B4B0-10844A2B0C94.png",
+      "file": "foundation219-root-3-zh-Hans-light-normal.png",
+      "sha256": "49fe060cb3a6363af419d23727f93792836f283bbe3400c7e2fc73054991043d"
+    },
+    {
+      "capture": "foundation219-root-2-zh-Hans-light-normal_0_13C7FB7A-30D0-4F37-92AC-98D83858F77B.png",
+      "file": "foundation219-root-2-zh-Hans-light-normal.png",
+      "sha256": "34cf7215656c704f498d686757214073176a33c0653b87f0ab51a01257f586fe"
+    },
+    {
+      "capture": "foundation219-root-1-zh-Hans-light-normal_0_A38E476D-42D6-4528-A00B-8F4A773B924F.png",
+      "file": "foundation219-root-1-zh-Hans-light-normal.png",
+      "sha256": "94eb1ca9b56cbcfb77d01dd60894ec69319699b20e51f26da8af0906b90791a8"
+    },
+    {
+      "capture": "foundation219-root-0-zh-Hans-light-normal_0_3E15E70F-5FFB-4464-A5DF-DFC178DC42CD.png",
+      "file": "foundation219-root-0-zh-Hans-light-normal.png",
+      "sha256": "dcd6e9db9dfb2a8a8f92c9e06757b3c60ddb1deff4e6af757a631c466589787c"
+    },
+    {
+      "capture": "foundation219-roots-returned-de-light-system-max_0_1135F0EF-7BF3-4F35-BFE1-5B3BAE3EE4E3.png",
+      "file": "foundation219-roots-returned-de-light-system-max.png",
+      "sha256": "67e8e5ab017b14764eead9e262a9a86db96efe45cc309e4a822c99da17e5d14f"
+    },
+    {
+      "capture": "foundation219-settings-without-changes-de-light-system-max_0_93EF3BA9-438B-4DA5-A8DF-56A27A9669AF.png",
+      "file": "foundation219-settings-without-changes-de-light-system-max.png",
+      "sha256": "e9e0b046c2ef23b9ba3abcf35561f69a46edf5c983d8cc74833730493f517f60"
+    },
+    {
+      "capture": "foundation219-me-last-settings-row-de-light-system-max_0_7DFA0437-95A7-4D96-9311-B6D3C44B31CF.png",
+      "file": "foundation219-me-last-settings-row-de-light-system-max.png",
+      "sha256": "ca36396d2f590a7ac9e0aeeb2e9eaf6f1d4c66df70c195b62fc1521483b36233"
+    },
+    {
+      "capture": "foundation219-profile-edit-without-submission-de-light-system-max_0_808B62B8-411E-40DC-94CE-923D0C65AF18.png",
+      "file": "foundation219-profile-edit-without-submission-de-light-system-max.png",
+      "sha256": "9f3b940e6d446379efdc7655ee41debd05592ef413d3fb08400f17edbba9fabc"
+    },
+    {
+      "capture": "foundation219-calendar-categories-read-only-de-light-system-max_0_3D77730A-8941-43A4-B4AD-F6B95547E9D6.png",
+      "file": "foundation219-calendar-categories-read-only-de-light-system-max.png",
+      "sha256": "746246521b0350e17063d2a87bb3467d6101b20a907c56eb32895d21f94048ab"
+    },
+    {
+      "capture": "foundation219-calendar-connections-read-only-de-light-system-max_0_0676C076-E960-4297-A421-4CEC17D9AC62.png",
+      "file": "foundation219-calendar-connections-read-only-de-light-system-max.png",
+      "sha256": "401c3ebc230c55766be7f9ef32257726ceafb3772170c3b8adcef40c3aac6666"
+    },
+    {
+      "capture": "foundation219-calendar-search-inactive-before-dismiss-de-light-system-max_0_4B527A73-D39E-4452-80FC-9DE98A8E0B13.png",
+      "file": "foundation219-calendar-search-inactive-before-dismiss-de-light-system-max.png",
+      "sha256": "5c8e30debed86f01e521f3dc9311172217f7800ff588f8c7b2e8c415ca2bad14"
+    },
+    {
+      "capture": "foundation219-calendar-search-read-only-de-light-system-max_0_72B5D100-E8CE-4B1A-9E3E-FB3F332CF9DA.png",
+      "file": "foundation219-calendar-search-read-only-de-light-system-max.png",
+      "sha256": "ea70330477695c211f7d36c4698edd63c48a92cbfbd55d06573792cea2d6b5d3"
+    },
+    {
+      "capture": "foundation219-calendar-week-de-light-system-max_0_EB2FAADB-C81C-4B00-81C6-DA549B83892D.png",
+      "file": "foundation219-calendar-week-de-light-system-max.png",
+      "sha256": "dd322fadad4e5812fccf65c429fd9b7642224b8fdefacffad2e35a00dc4d9fc9"
+    },
+    {
+      "capture": "foundation219-calendar-day-de-light-system-max_0_6C8D973D-15B4-49C0-987B-50B55452A9BF.png",
+      "file": "foundation219-calendar-day-de-light-system-max.png",
+      "sha256": "d200d7be5bc12f3cfe1092d5cd8e92dc2ddf3c4c0ebe600ea4b1d841f08e4fee"
+    },
+    {
+      "capture": "foundation219-calendar-month-de-light-system-max_0_B690D25B-1706-4DB0-81CE-C922FAD1E30F.png",
+      "file": "foundation219-calendar-month-de-light-system-max.png",
+      "sha256": "ca7d15d528cb3100fd0d958430f42939b3b025d63e077883bd7a929f677b7b35"
+    },
+    {
+      "capture": "foundation219-messages-search-clear-de-light-system-max_0_77DDFDD7-504D-48F9-A824-6BFC7963B86B.png",
+      "file": "foundation219-messages-search-clear-de-light-system-max.png",
+      "sha256": "e7bfb06d81372653fecd825fc0502c2bd69558c5171018921dfae1b1c42a89eb"
+    },
+    {
+      "capture": "foundation219-greetings-read-only-de-light-system-max_0_8A87E387-DC81-4248-A432-A08E31716CDE.png",
+      "file": "foundation219-greetings-read-only-de-light-system-max.png",
+      "sha256": "98ccf600ca95354ed19251aa01ef79aa3fd4896301bef7520a960881a151f03d"
+    },
+    {
+      "capture": "foundation219-notifications-read-only-de-light-system-max_0_F679DCF2-E28C-4DB2-BF84-CB847DB4A4B5.png",
+      "file": "foundation219-notifications-read-only-de-light-system-max.png",
+      "sha256": "26a5211bbf2e87ad6dc330c6f973032600dd6487e18401f7fe348b1fec27f9f6"
+    },
+    {
+      "capture": "foundation219-plan-creation-read-only-de-light-system-max_0_367249BF-D85C-4B04-8605-D48677D104AA.png",
+      "file": "foundation219-plan-creation-read-only-de-light-system-max.png",
+      "sha256": "ab7be711a4f8f88c172d85e3d342e46c5a146d8dd53e162f587530a699d29405"
+    },
+    {
+      "capture": "foundation219-plans-last-visible-segment-and-fixed-actions-de-light-system-max_0_24C03A39-9144-49A0-907D-A202827B7123.png",
+      "file": "foundation219-plans-last-visible-segment-and-fixed-actions-de-light-system-max.png",
+      "sha256": "a8280018cb8adeb693d1ef22ca51688955a88f4b098dba4c79903e481318dbf7"
+    },
+    {
+      "capture": "foundation219-together-selection-retained-de-light-system-max_0_9D246A92-8E2A-4FCA-B4D2-430A1D9227DB.png",
+      "file": "foundation219-together-selection-retained-de-light-system-max.png",
+      "sha256": "286948dddb154cb128d91c07d61d4ae4a7c958aa7db2c8e98b0d8a92c722b71c"
+    },
+    {
+      "capture": "foundation219-root-4-de-light-system-max_0_144D04B7-D151-4C8E-9974-822C9F7674B5.png",
+      "file": "foundation219-root-4-de-light-system-max.png",
+      "sha256": "f60c62ffd012d661a50fd1e7f59223b23071742cef2c502f602c683235ea4c5a"
+    },
+    {
+      "capture": "foundation219-root-3-de-light-system-max_0_53756280-575B-44B8-AF55-B9D0B20CA56D.png",
+      "file": "foundation219-root-3-de-light-system-max.png",
+      "sha256": "a25852b114082ddb01839bffd20ebf37e4bca11ee8a6aee64d9e69d6190606f3"
+    },
+    {
+      "capture": "foundation219-root-2-de-light-system-max_0_8CB4CAE0-C045-4C28-A011-4B553C759914.png",
+      "file": "foundation219-root-2-de-light-system-max.png",
+      "sha256": "fe218d1f56fc8140762970425dd076f19878af6247ac4a6c5b715bac490fecb6"
+    },
+    {
+      "capture": "foundation219-root-1-de-light-system-max_0_EAAFBCB2-D4BD-4245-8C91-6EA0FD76B029.png",
+      "file": "foundation219-root-1-de-light-system-max.png",
+      "sha256": "3a62115c334bcc876ccdc4cf8d63dbb22f2be3f90df1739da7963115fec346e4"
+    },
+    {
+      "capture": "foundation219-root-0-de-light-system-max_0_2E98E50A-766B-4342-BBDD-4780C5FDEB86.png",
+      "file": "foundation219-root-0-de-light-system-max.png",
+      "sha256": "ac4b4124dd67c9dbe2efbfd0101af9d043de48b621797054b95857d0955d02cf"
+    }
+  ]
+}
