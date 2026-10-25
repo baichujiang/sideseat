@@ -1,0 +1,107 @@
+[
+  {
+    "capture": "combined224-recommendation-de-light-system-max_0_4082D58E-DFA0-4BE5-8D6B-D344DFA30463.png",
+    "file": "combined224-recommendation-de-light-system-max.png",
+    "sha256": "26b64eacf5bbb95236c77f49a67f9c06ded114752f0badf8fabf99d873d77ed3",
+    "originalExportedFile": "A14BF0A5-8540-48BE-8EC2-052FCFC5611F.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-unpublished-tile-de-light-system-max_0_1BAF9873-499C-4793-A876-462EF90499E0.png",
+    "file": "combined224-unpublished-tile-de-light-system-max.png",
+    "sha256": "8387fc7c18f90f1101980dc4fbe94f26c5f1c6072b0622fbdda29dcfb6723da8",
+    "originalExportedFile": "3B911EA7-F844-46B5-8E9D-D56678ED3907.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-paused-tile-de-light-system-max_0_03E46A69-E399-4102-BE95-19DFAD5EDEBE.png",
+    "file": "combined224-paused-tile-de-light-system-max.png",
+    "sha256": "6b1242ddbeec6086e8e6ebf3c2b2eea8bba6f7cb7adcdbbfb93de933b3e85ea8",
+    "originalExportedFile": "EE726202-7584-491A-937C-1F8C9E86F5A4.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-delete-cancel-visible-de-light-system-max_0_14D1BB77-1D89-4EB4-A2C4-B08ABBBBB40B.png",
+    "file": "combined224-panel-delete-cancel-visible-de-light-system-max.png",
+    "sha256": "e2f0a26fb760338297c374aad812f4e7732dd56955a22ab42362cb5612b7cfd5",
+    "originalExportedFile": "15E1E9AC-5D75-413F-9591-C9A2EE45ED3F.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0_0_6979D3DD-526E-499B-BEE3-82C76FA92223.png",
+    "file": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0.png",
+    "sha256": "e2f0a26fb760338297c374aad812f4e7732dd56955a22ab42362cb5612b7cfd5",
+    "originalExportedFile": "2F08ADA9-BB4F-4C4E-8EFC-15C30AB5D5F6.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-opened-original-delete-prompt-de-light-system-max_0_C3093428-519C-4A72-823A-85380FBED4CC.png",
+    "file": "combined224-panel-opened-original-delete-prompt-de-light-system-max.png",
+    "sha256": "967b9fb2b09a266bf11f46b57445942049ac0c1f163e4564ddb76dc118ea9c2e",
+    "originalExportedFile": "B7C2662C-6398-4EE2-BA0A-50CA84A61D9F.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-edit-opened-original-editor-de-light-system-max_0_E24B4FD2-31FF-4AA7-8047-CCE66C8B6016.png",
+    "file": "combined224-panel-edit-opened-original-editor-de-light-system-max.png",
+    "sha256": "fccca9125b15cda86142a70f43ae5fa0bc47ed94f527fb47a17f1635348576e6",
+    "originalExportedFile": "368F1DE4-B8B5-47E4-BB82-3C9DC5EBB5C2.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-actions-cancel-de-light-system-max_0_F7F8779C-E99E-404A-A17B-1703C8DD221D.png",
+    "file": "combined224-actions-panel-actions-cancel-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "00512F15-3BD0-446D-A13C-8B7CB70AC2C0.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-delete-de-light-system-max_0_2D6C988A-C15D-4895-917E-4C95A273BBE7.png",
+    "file": "combined224-actions-panel-delete-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "5BB14C5E-614E-4744-B1A0-453EC4B2024C.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-toggle-pause-de-light-system-max_0_73F3793D-2D4A-43B5-88ED-1EB73D58B52A.png",
+    "file": "combined224-actions-panel-toggle-pause-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "E61AE74C-E704-4989-A2E9-6F991F934A9C.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-share-de-light-system-max_0_C846352F-1922-4403-B44F-FC760E0BA75D.png",
+    "file": "combined224-actions-panel-share-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "05FA9E70-F0D7-4850-933E-81C7C27B9D41.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-menu-edit-de-light-system-max_0_05DF6A1A-0495-430D-8493-B1B8255EFE82.png",
+    "file": "combined224-actions-panel-menu-edit-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "8B52699D-E307-4E36-9D5E-43BBCCFEFB4B.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-top-de-light-system-max_0_54069BB8-179D-469B-AD6B-5250DA0D58E8.png",
+    "file": "combined224-actions-panel-top-de-light-system-max.png",
+    "sha256": "10011492dbcea1fd672e675163dfa8fd23af75a6762e2a32ad6e68315e89ec01",
+    "originalExportedFile": "63332ADD-E0B6-4257-B8AE-97F7090047BC.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-first-status-de-light-system-max_0_F7024A48-3C29-4466-AF67-08F0AA57EE2E.png",
+    "file": "combined224-first-status-de-light-system-max.png",
+    "sha256": "a2a16ce8b8a287cbe6dfbae19a5fcce5725dbc55281c3e35a5a182dd96cf32a7",
+    "originalExportedFile": "644A6A82-5005-4471-AA0F-479F8B0AA45F.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-first-title-de-light-system-max_0_F94CCE0D-753F-4AAB-B24F-DAD966CFAA09.png",
+    "file": "combined224-first-title-de-light-system-max.png",
+    "sha256": "a2a16ce8b8a287cbe6dfbae19a5fcce5725dbc55281c3e35a5a182dd96cf32a7",
+    "originalExportedFile": "8EB67CC6-26C2-4D8C-9F15-7655B1755A2C.png",
+    "associatedWithFailure": false
+  }
+]

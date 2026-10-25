@@ -1,0 +1,15 @@
+{
+  "verdict": "No material findings",
+  "independentReviewer": "intent_card_review",
+  "baseline": "343fcc7186bab219ba9653f7478b63a1adecaa15",
+  "unchangedBusinessFiles": [
+    "ios-native/SideSeat/Features/Together/WeeklyIntentStore.swift",
+    "ios-native/SideSeat/Features/Together/WeeklyIntentModels.swift"
+  ],
+  "scope": "Two-section parent routing, horizontal rail/native pager exclusion, compact card, new-card vertical/horizontal focus, terminal guard, single-layer44pt Add, final native Menu/accessibility scrolling-panel split. Existing callbacks/store/request/gates retained. One local UI presentation bool added for shared scrolling prompt.",
+  "finalSupplement": "Shared prompt dismisses before its existing170ms delayed callback; no added timing/state framework. A small action declaration duplication across two presentations is clearer than a generalized abstraction. Final device tests verify all action targets and edit/delete transitions.",
+  "newBusinessState": false,
+  "newRequest": false,
+  "newDependency": false,
+  "finalDecorativeTrim": "Only four optional accessibility action icons omitted; IDs, roles, titles and callbacks unchanged. Exact byte scope recorded; final maximum device case validates all text and transitions."
+}

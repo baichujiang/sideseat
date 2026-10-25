@@ -1,0 +1,445 @@
+{
+  "reviewedAtUTC": "2026-10-25T18:07:47.374147+00:00",
+  "scope": "Read-only physical-device pixel review of every non-de-light-system-max PNG in accessible-final-images. No source files or device state changed.",
+  "sourceIndex": "/tmp/sideseat224-private/accessible-final-images/index.json",
+  "method": "Each of 14 unique PNGs was displayed individually with view_image(detail=original); hash-identical capture files reused that pixel inspection. No contact sheet and no accessibility hierarchy were used as substitutes for image inspection.",
+  "captureCount": 17,
+  "uniquePNGCount": 14,
+  "duplicateCaptureCount": 3,
+  "allAssignedDirectoryPNGsAccountedFor": true,
+  "allAssignedHashesVerified": true,
+  "excludedGermanCaptureCount": 4,
+  "materialIssueCount": 0,
+  "materialIssues": [],
+  "overallResult": "No material layout defects found in the actually visible, unobscured pixels of the 17 assigned captures / 14 unique PNGs.",
+  "globalLimitations": [
+    "A screenshot is one viewport. Offscreen rail cards, offscreen vertical content, modal-covered pixels and AssistiveTouch-covered pixels are not visually established by AX or by successful test assertions.",
+    "Every unique image contains system AssistiveTouch. No reviewed frame contains the software keyboard; keyboard-present layouts are outside this pixel evidence.",
+    "This corpus visibly covers Chinese ordinary layout and Chinese extreme Dynamic Type empty-recommendation return states. It does not independently establish other languages, dark appearance, xxxLarge or accessibility1 pixels; exact configuration claims require their own screenshot evidence. German maximum-size captures are assigned to another reviewer and deliberately excluded.",
+    "The created-fourth capture shows Quick coffee at the start of the visible rail. Focus movement, four stored records, edit persistence, selected-record deletion, and action execution remain behavioral claims requiring test evidence rather than a static pixel image alone.",
+    "The supplied passing test durations were not re-run or independently audited in this read-only pixel task."
+  ],
+  "images": [
+    {
+      "file": "combined224-created-fourth-tile-focused.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-created-fourth-tile-focused.png",
+      "sha256": "ffbce7ec082bbf7b2f79c222b064fc15f1f48b49d43e41ea9ef0b22b30adb2f1",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-created-fourth-tile-focused_0_AF32A691-6D8A-4047-A88B-C5A82593817A.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-created-fourth-tile-focused.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：推荐/我的收藏页签、我的意愿标题与添加、发布成功提示、横向意愿卡左侧 Quick coffee 与右侧 Coffee after class、Mia 推荐卡及底部导航。",
+      "observations": [
+        "创建后的 Quick coffee 在可视横排首位完整显示；第二张 Coffee after class 两行完整显示。",
+        "两卡分类、标题、More、时间待商议/明天时段、正在寻找状态之间留白充分，无文字或控件相互覆盖。",
+        "下方推荐卡显示 Mia、活动、时间、学校、语言、说明、详情、收藏和打招呼。"
+      ],
+      "specificLimitations": [
+        "静态截图证明新卡可见及其位置，不能独立证明 VoiceOver 焦点/交互焦点已转移。",
+        "四张意愿未同时入镜，另外两张在横向屏外；不能把此帧当成四卡全部像素完整。",
+        "AssistiveTouch 覆盖推荐卡右侧学校/语言行附近的留白区域。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-saved-recommendation-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-saved-recommendation-zh-Hans-light-normal.png",
+      "sha256": "891c4cfa45b62192f8f665babea1b42a4cf4f6b4cb566f5c5ec3d5a34ae62697",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-saved-recommendation-zh-Hans-light-normal_0_25135DA3-5E01-4552-9D5D-2D3D034DB0C2.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-saved-recommendation-zh-Hans-light-normal.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号我的收藏页签，Mia 收藏卡完整显示，底部导航。",
+      "observations": [
+        "推荐和我的收藏两栏清楚，收藏栏有选中下划线。",
+        "Mia 名称、认证、活动、时间、学校、语言、两行说明、实心收藏心及打招呼按钮均可见且分离。"
+      ],
+      "specificLimitations": [
+        "本帧不显示推荐栏中的我的意愿横排。",
+        "AssistiveTouch 位于收藏卡下方右侧空白处；其覆盖区不可审看。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-bookmark-saved-before-section-change.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-bookmark-saved-before-section-change.png",
+      "sha256": "53ca26471a091a1bd00d5db28216c101b037f3c710153ad2aa6601cc3ebcd83a",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-bookmark-saved-before-section-change_0_604ED865-B968-4BA5-B3AF-1DD13C618A85.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-bookmark-saved-before-section-change.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：羽毛球与 Library study 双卡、Mia 推荐卡、已收藏仅自己可见提示、底部导航。",
+      "observations": [
+        "两卡分别显示已暂停和尚未寻找，时间待商议及 More 清楚，无标题冲突。",
+        "推荐卡实心心形及已收藏提示同时可见；提示文本完整。"
+      ],
+      "specificLimitations": [
+        "横排当前已向后移动，Coffee 卡在横向屏外。",
+        "底部收藏反馈提示临时覆盖心形背景的下缘与推荐卡底缘，不能由此审定未遮挡时该局部的像素；提示自身没有截断。",
+        "AssistiveTouch 覆盖推荐卡右侧留白。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-recommendation-same-page-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-recommendation-same-page-zh-Hans-light-normal.png",
+      "sha256": "70ae91f93cd953a74a770a7439be1780f8a92783dd4e44733d6941e22088cc94",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-recommendation-same-page-zh-Hans-light-normal_0_8E5111D3-12C3-4EF5-9CC6-EC8326513DAC.png",
+        "combined224-third-tile-zh-Hans-light-normal_0_E09759C7-A048-4B4C-8120-625BA5FF6E2D.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-recommendation-same-page-zh-Hans-light-normal.png",
+        "combined224-third-tile-zh-Hans-light-normal.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：羽毛球与 Library study 两张近方形意愿卡，Mia 推荐人员卡与底部导航。",
+      "observations": [
+        "羽毛球/Library study 标题完整；分类、More、时间待商议、已暂停/尚未寻找各自清楚。",
+        "意愿横排与推荐人员卡在同页呈现，推荐卡信息与操作可见。"
+      ],
+      "specificLimitations": [
+        "Coffee 卡在横向屏外；此图只证明当前两张可视卡。",
+        "AssistiveTouch 覆盖推荐卡右侧留白，受遮挡区域不可审看。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+      "sha256": "019bb213462db9b631ebd053322b097e4a94836203f287276a6d7812e029d07e",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-two-tiles-and-recommendation-zh-Hans-light-normal_0_235E067F-06DA-4562-801B-EECFDFA20A5C.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：Coffee after class 与羽毛球双卡、Mia 推荐卡及底部导航。",
+      "observations": [
+        "Coffee after class 两行标题与右上 More 分离；明天 19:00–21:00 与正在寻找清楚。",
+        "羽毛球、时间待商议和已暂停清楚；两张近方卡在一排并存。",
+        "下方推荐卡完整到详情、收藏、打招呼操作，无与横排相撞。"
+      ],
+      "specificLimitations": [
+        "第三张意愿在横向屏外。",
+        "AssistiveTouch 覆盖推荐卡右侧留白；其覆盖区不可审看。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-created-intention-at-top-of-combined-page.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-created-intention-at-top-of-combined-page.png",
+      "sha256": "7afacdc9ef55a6327e04639e6bc80cecadb7b51c3603808f8d882d612853f587",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-created-intention-at-top-of-combined-page_0_00C12850-B2F9-41DD-AC16-35BCE2CBD30B.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-created-intention-at-top-of-combined-page.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：发布成功提示、单张 Coffee after class 卡、Mia 推荐卡和底部导航。",
+      "observations": [
+        "发布成功反馈显示在意愿标题下方；单卡标题、More、时间待商议和正在寻找完整。",
+        "创建后仍在推荐组合页面，并显示下方推荐人员卡。"
+      ],
+      "specificLimitations": [
+        "只见一张已创建意愿卡；此帧不证明多卡交互。",
+        "AssistiveTouch 位于推荐卡右侧时间/学校区域的留白；其覆盖区不可审看。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-empty-intentions-with-recommendation.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-empty-intentions-with-recommendation.png",
+      "sha256": "5ccac477f84905d72d18570b1d178fc08a859d9167a0ffb6b7c2d41878552fd0",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-empty-intentions-with-recommendation_0_F4CC9A54-EB15-4353-8950-C2E62E5BE052.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-empty-intentions-with-recommendation.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：接下来想做什么、添加主按钮、说明、推荐标题与 Mia 推荐卡；底部导航。",
+      "observations": [
+        "没有个人意愿卡时仍显示推荐人员卡。",
+        "空意愿添加按钮和说明清楚；下方推荐信息、详情、收藏心形可见。"
+      ],
+      "specificLimitations": [
+        "AssistiveTouch 实际覆盖打个招呼按钮右侧及部分文字附近；不能把按钮该区域当作无遮挡像素通过。",
+        "本帧不证明打招呼按钮的点击结果或完整触摸区域。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-empty-recommendations-returned-to-rail.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-empty-recommendations-returned-to-rail.png",
+      "sha256": "7184376cac712408ed3399ffed4a90530816842ccbd3c5895f7bd03baf01a097",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-empty-recommendations-returned-to-rail_0_CB9D068F-9EFA-44AF-8897-4AF4AA854075.png",
+        "combined224-empty-recommendations-after-return-diagnostic_0_006C7AD8-1CD3-468A-8C8F-0F2FE9B320E1.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-empty-recommendations-returned-to-rail.png",
+        "combined224-empty-recommendations-after-return-diagnostic.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文最大字号推荐栏顶端：我的意愿标题、添加宽按钮、完整 Coffee after class 宽卡；下方仅推荐标题与空推荐图标/后续内容上缘。",
+      "observations": [
+        "返回后的取景回到意愿区；宽卡类别/More 一行分离，Coffee after class 两行完整。",
+        "明天 19:01–21:01 时间和正在寻找状态完整，无相互碰撞。",
+        "我的意愿、添加、意愿卡、推荐区域按纵向顺序排布。"
+      ],
+      "specificLimitations": [
+        "这是顶部取景，空推荐正文与查看我的意愿按钮在当前帧下方；不能声称该帧包含整个页面。",
+        "AssistiveTouch 覆盖意愿卡右下内边距/推荐区域右侧留白；文字仍可读，覆盖区本身不可审看。",
+        "静态帧证明返回后的位置；按钮触发过程和滚动动画不由像素帧独立证明。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-empty-recommendations-action-below-rail.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-empty-recommendations-action-below-rail.png",
+      "sha256": "824291589a508104e3f3a83508bf238857ee834845bad049b080753f3a0e989a",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-empty-recommendations-action-below-rail_0_A3244977-6148-4F7A-B16A-A72BE5BA81BB.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-empty-recommendations-action-below-rail.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文最大字号推荐栏滚动到空推荐区：推荐标题、空态图标、暂时没有新推荐、说明与查看我的意愿主按钮；底部导航。",
+      "observations": [
+        "空态标题与说明正常换行，主按钮完整入镜且文本未截断。",
+        "说明清楚显示仍有 1 个意愿正在寻找；空态与按钮留白充分。"
+      ],
+      "specificLimitations": [
+        "上方意愿横排已经在屏外，本帧不是顶部取景。",
+        "AssistiveTouch 位于说明右侧边缘附近；覆盖区不可审看，当前正文仍可读。",
+        "动态字号设置不能从文件名和像素尺寸精确重建；此帧可确认实际极大字号排版。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-only-selected-intention-deleted.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-only-selected-intention-deleted.png",
+      "sha256": "2eb002b8bacea6a0641e7e06c9add8b7800dd3ea5e63dc29fea2186eb7d75c4b",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-only-selected-intention-deleted_0_AE522B72-7C66-495E-B1F1-B4D04AD32B4D.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-only-selected-intention-deleted.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：剩余羽毛球与 Library study 两张意愿卡、Mia 推荐卡及底部导航。",
+      "observations": [
+        "删除后取景中两张剩余意愿保持完整，已暂停和尚未寻找清楚。",
+        "意愿区域和下方推荐区域均显示正常，无空洞、溢出或菜单残留。"
+      ],
+      "specificLimitations": [
+        "静态截图只能证明剩余可见卡；被删条目的身份及仅删除该条目的数据事实需测试结果支持，不能由像素独立证明。",
+        "AssistiveTouch 覆盖推荐卡右侧留白。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-original-delete-confirmation.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-original-delete-confirmation.png",
+      "sha256": "79bbd8334203adeb2448734793477db989cfc999b276b552195045802b53202e",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-original-delete-confirmation_0_5D1F2BDD-F7D9-42E5-890A-F9DB7AA3FDF8.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-original-delete-confirmation.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号删除确认弹窗，背景为变暗的双意愿卡和推荐卡。",
+      "observations": [
+        "删除图标、删除这个意愿标题、两行后果说明、取消与删除按钮均完整可见。",
+        "弹窗各元素不碰撞，取消和红色删除动作清晰分离。"
+      ],
+      "specificLimitations": [
+        "模态弹窗遮挡背景意愿卡时间/状态和推荐卡上部，背景被遮区域不可据此帧验收。",
+        "AssistiveTouch 位于弹窗外右下方背景区域。",
+        "静态帧不证明取消或确认后的实际数据变化。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-original-share-loopback-error.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-original-share-loopback-error.png",
+      "sha256": "8e7ac307aa0f08ae6244de15d975a45310fa01638b1e79b989b747bf12105368",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-original-share-loopback-error_0_DFC14DDC-BD1B-49CA-87D0-DF800CA29796.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-original-share-loopback-error.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号分享意愿错误弹窗，背景为变暗的双卡与推荐卡。",
+      "observations": [
+        "警告图标、分享意愿标题、英文网络失败两行说明、好按钮均完整显示。",
+        "错误文本无截断或与按钮碰撞；英文错误处于中文标题/按钮中，属于此帧真实可见文本。"
+      ],
+      "specificLimitations": [
+        "错误弹窗遮挡背景内容；不可用背景 AX 元素声称被挡内容的像素完整。",
+        "该帧显示错误呈现，不证明真实网络/分享请求或外部接收结果。",
+        "AssistiveTouch 位于弹窗外右下背景区域。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-edit-save-retains-paused.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-edit-save-retains-paused.png",
+      "sha256": "09e0d0536015a6faa9aaaff9bb06465a51087a4da8572e5cdcb906499185bb2e",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-edit-save-retains-paused_0_CDDC984B-060C-4487-8595-CD6DE1521EF2.png",
+        "combined224-paused-through-menu_0_5B76ECA1-5053-42C0-BD67-9A2FF06DBA52.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-edit-save-retains-paused.png",
+        "combined224-paused-through-menu.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号推荐页：Coffee after class 与羽毛球双卡，均显示已暂停，下方 Mia 推荐卡及底部导航。",
+      "observations": [
+        "Coffee after class 标题、明天时段、已暂停和 More 分离；右卡时间待商议及已暂停完整。",
+        "保存后最终可见状态为已暂停，推荐卡布局完整。"
+      ],
+      "specificLimitations": [
+        "与 paused-through-menu 同一哈希；截图自身不能区分通过菜单暂停和编辑保存两个过程，也不显示编辑表单。",
+        "AssistiveTouch 覆盖推荐卡右侧留白。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    },
+    {
+      "file": "combined224-add-opens-original-editor.png",
+      "path": "/tmp/sideseat224-private/accessible-final-images/combined224-add-opens-original-editor.png",
+      "sha256": "37d352efed7fb9c0406b59c7121c930c85a5c47ba694d9a35c9a93099f36fd6d",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "capturesCovered": [
+        "combined224-add-opens-original-editor_0_51E04C4D-5D0A-42C5-AFFB-D8C029D74F3D.png"
+      ],
+      "filesCoveredByIdenticalPixels": [
+        "combined224-add-opens-original-editor.png"
+      ],
+      "result": "no_material_issue_in_visible_pixels",
+      "visibleScope": "中文普通字号添加意愿编辑器全屏 sheet：关闭、六类活动网格、描述占位、时间设置、说明及底部发布意愿按钮。",
+      "observations": [
+        "原添加编辑器各项完整显示，咖啡选中标记清楚。",
+        "时间行左右文本与箭头分离；发布意愿按钮在底部完整可见。"
+      ],
+      "specificLimitations": [
+        "本帧是未输入文本、无键盘的添加表单；不能据此验收键盘开启时的输入、滚动或编辑既有意愿表单。",
+        "AssistiveTouch 位于说明下方右侧空白区域。"
+      ],
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true
+    }
+  ]
+}

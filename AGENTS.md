@@ -35,8 +35,24 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is223 below. See web release/QA records.
-- Preview223 is the current installed development build, source 43b1833579127b67d51bf7f7db9801d5bba09644 pushed.
+  No native rebuild in that web stage; current native build is224 below. See web release/QA records.
+- Preview224 is the current installed development build, source 9b5de67b04ff7572a841896d41267a47af640c5a pushed.
+  Together combines own intentions above recommendations with Saved as the second
+  section. Ordinary rail shows two compact cards; xxxLarge+ uses one wider card.
+  Tap edits, More retains original actions; accessibility reuses the scrolling
+  action prompt. Creation focuses the new tile on the same page. Stores/models,
+  requests, matching/gates/history and records stay. Independent minimal review
+  passed. Navigation26/0.060s; four independent phone paths completed57.701/
+  28.432/18.576/81.197s. Final only four optional accessibility action icons removed;
+  other267 inputs and code outside that block identical, final German actual-max
+  case84.385s passed. Do not claim a final same-binary five-case suite; initial
+  harness failures, rejected system-menu cap and source scopes are documented.
+  32captures/22unique original pixels reviewed, OS/viewport/old-confirmation limits
+  explicit. Final normal224 PID9822,268/Local/signature/binaries/compiled test source
+  match commit, ordinary97 retained. Existing memory fixtures/share failure only,
+  no real business writes/backend/web release. Runner/temporary Local removed,
+  new App reports0. See224 QA/release.
+- Preview223 was the previous installed development build, source 43b1833579127b67d51bf7f7db9801d5bba09644 pushed.
   My intentions uses a real title/More row and separate status/time, footer Share
   leading and Pause/Resume trailing; accessibility stacks. Original callbacks,
   state/gate, sharing/deletion/terminal/timing rules stay. Independent minimal

@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-25T18:08:18.585931+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 224,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9822,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": false,
+  "finalOnlyChange": "Four optional icons omitted from accessibility-only action panel;267 other inputs and all code outside that declaration block byte-identical. Four independent paths passed before this local decorative repair; final German maximum case reran in full.",
+  "strictSignatureReverified": true,
+  "testFixtureScope": "Existing active in-memory intention/opportunity fixtures; no real account or business write. Final five phone cases cover combined normal/max layout, horizontal rail/pager separation, saved roundtrip, creation and both return paths, original pause/edit/resume/share-failure/delete callbacks.",
+  "disposableAccountsCreated": 0,
+  "realUserBusinessWrites": 0,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "sourceCommit": "9b5de67b04ff7572a841896d41267a47af640c5a",
+  "pushedBranch": "codex/ios-uxui-20260922",
+  "sourceCommitInputsMatched": true,
+  "generatedRunnerContextRemoved": true,
+  "temporaryLocalSourceContextRemoved": true
+}

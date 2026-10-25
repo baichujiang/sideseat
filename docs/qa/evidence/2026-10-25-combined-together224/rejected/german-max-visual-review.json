@@ -1,0 +1,102 @@
+{
+  "reviewer": "independent-german-max-224-visual-review",
+  "scope": "224 合并页第二批，仅 6 张 file 含 -de-light-system-max 的真机截图。只读视觉复核，不涉及产品/测试/设备/服务修改。",
+  "sourceIndex": "/tmp/sideseat224-private/second-images/index.json",
+  "captureCount": 6,
+  "uniqueOriginalCount": 5,
+  "duplicateCount": 1,
+  "method": "5 个 unique SHA256 均直接逐张 view_image(detail: original) 查看，无拼图/OCR/缩略图推断。1 张 exact SHA256 重复明确复用。",
+  "result": "needs-menu-clipping-fix",
+  "findings": [
+    {
+      "id": "de-max-four-action-menu-delete-clipped",
+      "severity": "needs-fix",
+      "file": "combined224-first-menu-de-light-system-max.png",
+      "observation": "最下方 Löschen 项下半字形被屏底/Tab 区裁掉，无法在该原图读全。前三项无碎词，不能把测试通过当作整个菜单视觉通过。",
+      "recommendation": "给真实最大字号的四项动作菜单一个屏内可滚动的呈现，或采用可容纳屏高的菜单字号策略，保留行为与ID后再定向截图核验。"
+    },
+    {
+      "id": "de-max-rail-card-density",
+      "severity": "visual-observation",
+      "files": [
+        "combined224-paused-tile-de-light-system-max.png",
+        "combined224-first-status-de-light-system-max.png"
+      ],
+      "observation": "短分类/标题的卡片在标题与时间之间留白明显；信息完整但密度较疏，不构成文字裁切。是否由同轨等高适配最长分类引起只是静态图推测。"
+    }
+  ],
+  "positiveObservations": [
+    "单宽小卡的分类、标题、真实时间、三种状态文字均在所取景范围内可读，未见标题与右上菜单重叠。",
+    "推荐标题及 Mia 推荐卡抬头可见，可以证明滚动到达推荐区域。",
+    "菜单 Bearbeiten / Teilen / Suche pausieren 未碎词或横向裁切；删除项屏底裁切单独记录。"
+  ],
+  "limitations": [
+    "不能从这6张静态图证明横滑手势/菜单点击/数据请求行为；Root 的case通过为另行提供的行为证据。",
+    "推荐截图仅覆盖 Mia 卡片上部，未看整张推荐卡，不声称完整推荐卡或整App已验收。",
+    "iOS AssistiveTouch 圆点是系统覆盖层，在截图右中部，局部遮挡或靠近菜单/时间边缘；它不解释屏底删除项裁切。",
+    "本批不覆盖普通字号、其他语言/主题、空推荐回顶位置。"
+  ],
+  "captures": [
+    {
+      "capture": "combined224-recommendation-de-light-system-max_0_52FC114C-6CFD-4EA7-8753-4F3BA1B6ABF0.png",
+      "file": "combined224-recommendation-de-light-system-max.png",
+      "sha256": "6cfbe001980c964968de1cbcb24aaa0abc4d7830b47e880c18be580c5522806c",
+      "originalExportedFile": "117C0F5D-BED7-439F-A33F-DB1F440B23C5.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 小卡尾部和下方 Für dich 推荐标题可见，Mia 推荐卡抬头、头像、认证及 Basketball 标题可读。只取景推荐卡上部，不能证明其下方时间/动作完整；AssistiveTouch 覆盖右上菜单附近。"
+    },
+    {
+      "capture": "combined224-unpublished-tile-de-light-system-max_0_2770D234-8386-44C2-83D6-33E8F06B4213.png",
+      "file": "combined224-unpublished-tile-de-light-system-max.png",
+      "sha256": "7cdcb5548bcb5d93d0c105c249079385f2ed6bdf5b708e10a7091fa1f38275a1",
+      "originalExportedFile": "F063779B-0B7B-42D3-96B6-1A9B5FA9506B.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "单宽 study tile 显示完整：分类按完整德语词分行，Library study 单行，Zeit noch offen、Noch keine Suche 均完整，右上省略号无相互覆盖。下方推荐标题初部出现在视窗底。"
+    },
+    {
+      "capture": "combined224-paused-tile-de-light-system-max_0_3C0D8FDD-7C07-471B-983D-222D52A77A9F.png",
+      "file": "combined224-paused-tile-de-light-system-max.png",
+      "sha256": "3351b13467b4cf645b62466c680a1ae10d583f92cb5b0a621705a121e5a27aa6",
+      "originalExportedFile": "8C54ED73-050B-456A-9A6F-79EE492F862A.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "单宽 paused sports tile 的 Sport / Badminton / Zeit noch offen / Pausiert 均完整，右上菜单位置独立。标题与时间之间有很大的留白，密度较疏；同轨 study 长分类撑高的布局效果属推测，不能仅靠静态截图确定实现原因。"
+    },
+    {
+      "capture": "combined224-first-menu-de-light-system-max_0_C5D38F71-CA0B-4FF7-BD08-EAB004D7CE4E.png",
+      "file": "combined224-first-menu-de-light-system-max.png",
+      "sha256": "cdfa24e94d61626ea4e7bd5dea9b8ae753e6cd50a46ff3581f98e6863226cce4",
+      "originalExportedFile": "512E9A77-B3DD-4EEC-8790-16115E1D1624.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "四项原生菜单前三项 Bearbeiten、Teilen、Suche pausieren 完整可读，暂停按词两行而非碎词。最下方 Löschen 仅上半字形露出，被屏底/Tab 区域裁切，无法在该截图读全，需修复后定向复核；AssistiveTouch 在中右并非该裁切原因。"
+    },
+    {
+      "capture": "combined224-first-status-de-light-system-max_0_C69BA514-BB7F-41C4-8A2A-9D696015F982.png",
+      "file": "combined224-first-status-de-light-system-max.png",
+      "sha256": "f729db3e436f02d9069b4f977c8e31067197f8236e2b5cad04787c998ee586f8",
+      "originalExportedFile": "356C6B33-800A-4529-A6E0-A2B6364B8BF9.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 单宽卡完整：Kaffee、Coffee after class 按完整词换行，真实时间 Morgen · 18:43– /20:43 分两行但值完整，Suche aktiv 可读；右侧 AssistiveTouch 临近起始时间尾部，整段内容仍可辨。标题至时间留白明显。"
+    },
+    {
+      "capture": "combined224-first-title-de-light-system-max_0_6AB09106-DDF9-410C-BCF9-CF50F4643A34.png",
+      "file": "combined224-first-title-de-light-system-max.png",
+      "sha256": "f729db3e436f02d9069b4f977c8e31067197f8236e2b5cad04787c998ee586f8",
+      "originalExportedFile": "3DAF378B-42B4-48AC-B764-DEEC8804F281.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-first-status-de-light-system-max.png",
+      "conclusion": "与已逐张 original 查看图完全相同 SHA256，明确复用该图结论，不重复计入 unique 实看。"
+    }
+  ]
+}

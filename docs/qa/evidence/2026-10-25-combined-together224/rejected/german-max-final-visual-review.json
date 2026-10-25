@@ -1,0 +1,96 @@
+{
+  "reviewer": "independent-german-max-224-menu-fit-final-visual-review",
+  "scope": "最终 Menu 局部字号修正候选包的6张德语/浅色/真实系统最大字号截图；5个unique逐张原图实看。",
+  "sourceIndex": "/tmp/sideseat224-private/menu-fit-final-images/index.json",
+  "captureCount": 6,
+  "uniqueOriginalCount": 5,
+  "duplicateCount": 1,
+  "result": "needs-menu-clipping-fix-still-reproduced",
+  "previousReview": "/tmp/sideseat224-private/german-max-visual-review.json",
+  "comparison": "旧 finding de-max-four-action-menu-delete-clipped 仍在新图复现，尚未关闭。",
+  "findings": [
+    {
+      "id": "de-max-four-action-menu-delete-clipped",
+      "status": "still-reproduced",
+      "severity": "needs-fix",
+      "file": "combined224-first-menu-de-light-system-max.png",
+      "sha256": "2a112d27ca9957b43c20c9e025ec177710f8eeffe47a0b04fc357162476ae681",
+      "observation": "菜单底部 Löschen 下半字形仍被视窗底部/Tab 区裁掉；前三项完整，没有德语碎词。",
+      "sourceScopeNote": "Root 提供实现信息为 moreMenu 局部 dynamicTypeSize(...xxxLarge)；本次只读像素观察不能确认 modifier 是否传递到原生菜单，但最终实际图显示该问题未解决。"
+    },
+    {
+      "id": "de-max-rail-card-density",
+      "severity": "visual-observation",
+      "observation": "coffee 和 sports 标题与底部时间之间保留明显留白，内容仍完整可读。"
+    }
+  ],
+  "limitations": [
+    "只检查列出的6captures/5unique，不声称整App或整张推荐卡已看全。",
+    "本报告为静态实际像素结论，不以测试通过替代菜单完整性。",
+    "iOS AssistiveTouch 是系统覆盖层，在屏幕右中部，不能解释屏底删除项裁切。",
+    "正文仍真实最大字号可见；菜单修正效果不成立，需另外修复并拍照核验。"
+  ],
+  "captures": [
+    {
+      "capture": "combined224-recommendation-de-light-system-max_0_B701BF48-F924-412F-8CF1-6D7651AAD930.png",
+      "file": "combined224-recommendation-de-light-system-max.png",
+      "sha256": "8f1db61440e5c7240c14cc8276c9668872109932ae88de9f3268aa764e61a1f3",
+      "originalExportedFile": "ACC132E2-B4EB-4CCA-88F2-DCA4ED9B15AE.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "推荐区域可达：study 小卡尾部与 Für dich 标题、Mia 头像/姓名/认证和 Basketball 主题可见。推荐卡下半不在单图取景内，不能据此判断完整推荐卡。AssistiveTouch 遮住推荐卡右上菜单局部。"
+    },
+    {
+      "capture": "combined224-unpublished-tile-de-light-system-max_0_4C357C19-CEB4-486D-B661-1794682EFBD9.png",
+      "file": "combined224-unpublished-tile-de-light-system-max.png",
+      "sha256": "05867aa326f3f67da3a822dc0d84efa22e71fdb61f2c3869f6d68d854e6874f5",
+      "originalExportedFile": "30FA86C6-A8ED-419F-A910-238204DB4023.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study 分类按完整单词纵排，Library study、Zeit noch offen、Noch keine Suche 均完整，右上省略号独立，未见横向裁切。"
+    },
+    {
+      "capture": "combined224-paused-tile-de-light-system-max_0_6349B9BC-CFCA-43E1-8F88-2B620A5AB2D3.png",
+      "file": "combined224-paused-tile-de-light-system-max.png",
+      "sha256": "eb513dcbf16666f11350ba306a33da7e21390dabd2c0e1f149c038903a825c7f",
+      "originalExportedFile": "98FFBA4A-1841-4BA0-B5E4-5A14BC08204C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports 的 Sport / Badminton / Zeit noch offen / Pausiert 均完整，右上省略号独立。标题与时间之间留白仍明显，是密度观察，非文字裁切。"
+    },
+    {
+      "capture": "combined224-first-menu-de-light-system-max_0_DA30612E-6941-4135-ABFE-8AB65B005A5E.png",
+      "file": "combined224-first-menu-de-light-system-max.png",
+      "sha256": "2a112d27ca9957b43c20c9e025ec177710f8eeffe47a0b04fc357162476ae681",
+      "originalExportedFile": "39C2CE08-4B6A-4495-BCA0-D6B1A6136FE2.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "四项原生菜单仍有底部裁切：Bearbeiten、Teilen、Suche pausieren 完整，Löschen 只露出上部字形，下半被屏底/Tab 区裁掉。menu-fit 最终图未解决前次 finding，不能判四项完整。"
+    },
+    {
+      "capture": "combined224-first-status-de-light-system-max_0_BD85EE1C-ECF3-4132-8DC2-87D56C107C49.png",
+      "file": "combined224-first-status-de-light-system-max.png",
+      "sha256": "51c7e1607228579270f948b7219104a232330afac00f306ab18b94dfe4d01e23",
+      "originalExportedFile": "C6FB6E78-C8E6-4A2C-A3C6-4E8E255DFA7C.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee 分类/标题完整，真实时间 Morgen · 18:52– /20:52 两行完整，Suche aktiv 清楚；正文保持极大字号，右侧系统 AssistiveTouch 未遮住关键状态。"
+    },
+    {
+      "capture": "combined224-first-title-de-light-system-max_0_C0271852-DB91-463C-975C-235C6749EA8E.png",
+      "file": "combined224-first-title-de-light-system-max.png",
+      "sha256": "51c7e1607228579270f948b7219104a232330afac00f306ab18b94dfe4d01e23",
+      "originalExportedFile": "283A304B-A061-4BDE-A339-7A53E26ADBEE.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-first-status-de-light-system-max.png",
+      "conclusion": "相同 SHA256，复用已直接查看的原图结论。"
+    }
+  ]
+}

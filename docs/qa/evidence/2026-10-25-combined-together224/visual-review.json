@@ -1,0 +1,21 @@
+{
+  "verdict": "Scoped visual acceptance passed; initial clipped system menu rejected and repaired.",
+  "captureCount": 32,
+  "uniquePixelCount": 22,
+  "method": "Every22 unique original PNG individually inspected; exact duplicate SHA reuses that image inspection. No montage/AX-only substitute.",
+  "ordinaryAndChineseMax": {
+    "captures": 17,
+    "uniquePixels": 14,
+    "report": "visual-review-normal.json",
+    "path": "final/"
+  },
+  "finalGermanActualSystemMax": {
+    "captures": 15,
+    "uniquePixels": 8,
+    "report": "visual-review-max.json",
+    "path": "final-max/"
+  },
+  "limits": "Per-image viewport, AssistiveTouch, original editor/confirmation and recommendation visible segments are explicit in reports. No dark, intermediate-font, whole-App max-text or manual performance claim. Existing confirmation trash/title tightness remains a nonblocking pre-existing detail.",
+  "rejectedEvidence": "rejected/system-menu-clipped-before-panel.png",
+  "behavioralClaims": "Creation focus, callbacks and cancelled return proven by completed phone cases; not inferred from still images. Source difference proof is final-source-change-scope.json."
+}

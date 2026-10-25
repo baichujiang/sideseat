@@ -1,0 +1,10 @@
+{
+  "beforeSourceSHA256": "6efd3f00b0a4faf39b016d7d06ea8415785b339e77019b243413a14bc554c83e",
+  "finalSourceSHA256": "f20a5827ef99233cafca19e9b484ccd10bf6629e68550f1e84e6e17f1409887e",
+  "trackedInputs": 268,
+  "unchangedInputs": 267,
+  "onlyChange": "Remove four optional systemImage arguments from accessibility-only compact action declarations to avoid glyph/text overlap. No callback/title/role/ID change.",
+  "outsideAccessibilityActionsByteIdentical": true,
+  "ordinaryMenuAndAllFourOtherPhonePathsByteIdentical": true,
+  "unitNavigationContractUnchanged": true
+}

@@ -1,0 +1,164 @@
+{
+  "unit": {
+    "name": "NavigationTests",
+    "tests": 26,
+    "seconds": 0.06,
+    "passed": true,
+    "scope": "Two-section enum/router and navigation. Before later UI-only menu/focus/terminal/Add changes; tested navigation contract unchanged. Not presented as a final-binary unit rerun."
+  },
+  "phoneRuns": [
+    {
+      "name": "combined-final",
+      "tests": [
+        {
+          "case": "testChineseNormalCombinedTilesRecommendationsAndSaved",
+          "outcome": "failed",
+          "seconds": 35.529
+        },
+        {
+          "case": "testEmptyIntentionsKeepRecommendationsAndAddEntry",
+          "outcome": "passed",
+          "seconds": 27.686
+        },
+        {
+          "case": "testEmptyRecommendationsReturnToExistingIntentionRail",
+          "outcome": "failed",
+          "seconds": 9.881
+        },
+        {
+          "case": "testFixtureCreateEditPauseResumeShareAndDelete",
+          "outcome": "passed",
+          "seconds": 81.374
+        },
+        {
+          "case": "testGermanActualSystemMaximumSingleReadableTile",
+          "outcome": "passed",
+          "seconds": 38.126
+        }
+      ],
+      "interrupted": false,
+      "acceptedAsFinal": false,
+      "notes": "Initial source/Runner: saved-page outer AX ID overridden by single-child container; correct bookmark leaf proves actual saved mutation. Empty-return precondition did not scroll offscreen. Runner copy omitted fourth-create assertion. Not final acceptance."
+    },
+    {
+      "name": "combined-acceptance",
+      "tests": [
+        {
+          "case": "testChineseNormalCombinedTilesRecommendationsAndSaved",
+          "outcome": "passed",
+          "seconds": 57.903
+        },
+        {
+          "case": "testEmptyIntentionsKeepRecommendationsAndAddEntry",
+          "outcome": "passed",
+          "seconds": 28.321
+        },
+        {
+          "case": "testEmptyRecommendationsReturnToExistingIntentionRail",
+          "outcome": "failed",
+          "seconds": 17.947
+        },
+        {
+          "case": "testFixtureCreateEditPauseResumeShareAndDelete",
+          "outcome": "passed",
+          "seconds": 80.975
+        },
+        {
+          "case": "testGermanActualSystemMaximumSingleReadableTile",
+          "outcome": "passed",
+          "seconds": 38.715
+        }
+      ],
+      "interrupted": false,
+      "acceptedAsFinal": false,
+      "notes": "Terminal guard/Add44/focus source, before menu panel repair. Four paths passed; empty-return helper rejected 4pt scrollTop alignment despite actual full glyphs. German AX assertions passed but actual image review rejected clipped Delete."
+    },
+    {
+      "name": "return-probe",
+      "tests": [
+        {
+          "case": "testEmptyRecommendationsReturnToExistingIntentionRail",
+          "outcome": "failed",
+          "seconds": 20.148
+        }
+      ],
+      "interrupted": false,
+      "acceptedAsFinal": false,
+      "notes": "Diagnostic only. Heading y153 equals actual list top153; helper safety viewport started157. No App change to scrollTo required; test boundary repaired."
+    },
+    {
+      "name": "menu-fit-final",
+      "tests": [
+        {
+          "case": "testGermanActualSystemMaximumSingleReadableTile",
+          "outcome": "passed",
+          "seconds": 39.59
+        }
+      ],
+      "interrupted": false,
+      "acceptedAsFinal": false,
+      "notes": "Local dynamicTypeSize cap did not repair the actual system menu; passing XCTest is not visual acceptance. Five unique German images all reviewed and clipping reproduced. Cap removed and existing scrolling panel used for accessibility sizes."
+    },
+    {
+      "name": "combined-delivery-final",
+      "tests": [],
+      "interrupted": true,
+      "acceptedAsFinal": false,
+      "notes": "Interrupted before any completed case after visual rejection of capped system Menu. Not adopted acceptance."
+    },
+    {
+      "name": "combined-accessible-final",
+      "tests": [
+        {
+          "case": "testChineseNormalCombinedTilesRecommendationsAndSaved",
+          "outcome": "passed",
+          "seconds": 57.701
+        },
+        {
+          "case": "testEmptyIntentionsKeepRecommendationsAndAddEntry",
+          "outcome": "passed",
+          "seconds": 28.432
+        },
+        {
+          "case": "testEmptyRecommendationsReturnToExistingIntentionRail",
+          "outcome": "passed",
+          "seconds": 18.576
+        },
+        {
+          "case": "testFixtureCreateEditPauseResumeShareAndDelete",
+          "outcome": "passed",
+          "seconds": 81.197
+        },
+        {
+          "case": "testGermanActualSystemMaximumSingleReadableTile",
+          "outcome": "failed",
+          "seconds": 24.543
+        }
+      ],
+      "acceptedCompletedCases": [
+        "testChineseNormalCombinedTilesRecommendationsAndSaved",
+        "testEmptyIntentionsKeepRecommendationsAndAddEntry",
+        "testEmptyRecommendationsReturnToExistingIntentionRail",
+        "testFixtureCreateEditPauseResumeShareAndDelete"
+      ],
+      "overallPassed": false,
+      "notes": "Four independent paths completed successfully. German stopped at share OCR QTeilen because decorative icon touched text in the new accessibility panel. Only four optional panel icons removed afterward; these four paths and all other code are byte-identical."
+    },
+    {
+      "name": "german-panel-text-final",
+      "tests": [
+        {
+          "case": "testGermanActualSystemMaximumSingleReadableTile",
+          "outcome": "passed",
+          "seconds": 84.385
+        }
+      ],
+      "acceptedAsFinal": true,
+      "compiledTestSourceSHA256": {
+        "CombinedTogetherPhoneUITests.swift": "d09af4385248e135408d2048f08762b90f7fca23b576e51aaf11e1c2232ed4f4"
+      },
+      "notes": "Final binary after accessibility-only four-icon removal. Entire German maximum case passed, including all actions and editor/delete transitions. The four completed paths above were not redundantly repeated after the local decorative change; full same-binary five-case suite is not claimed."
+    }
+  ],
+  "fixtureScope": "Existing active in-memory fixtures; API override loopback port9; no real account/business write. Sharing tests original error recovery only, not online link generation/system delivery. No unchanged matching, plan/invitation/Calendar API, domain or browser repeat."
+}
