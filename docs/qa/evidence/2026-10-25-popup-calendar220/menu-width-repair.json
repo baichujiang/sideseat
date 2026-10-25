@@ -1,0 +1,19 @@
+{
+  "reason": "Actual ordinary Chinese Inbox menu split four-character actions in the initial132pt width.",
+  "productDifference": "Only automatic Inbox anchored target minimumMenuWidth132(default)\u2192180; shared maximum204 and geometry/callbacks remain.",
+  "changedInput": "ios-native/SideSeat/Core/Design/Components/SSViewModifiers.swift",
+  "beforeSHA256": "ba127d549984d859a4cf6cb6b0bc7ba25845a8bba36bd5cdd326d8faf5ebf6df",
+  "finalSHA256": "17f80649fbf4ce48dca9ce54ccd8ffb3a3e916d79b675ef68838b8ca478e5385",
+  "otherProductInputsByteIdentical": 267,
+  "completeChangedFileOutsideOneArgumentByteIdentical": true,
+  "baselineScope": [
+    "Complete live plan flow384.819s/eight API",
+    "Confirmed-card four combinations87.098s",
+    "Both independent ordinary prompt/Calendar variants completed within popup-delivery run; overallcasefailed at later maximum lazy row lookup."
+  ],
+  "finalSupplementScope": [
+    "Ordinary Chinese/German object menus",
+    "Chinese/German actual-maximum object menus and product prompts/Calendar detail"
+  ],
+  "executionResults": "See acceptance-runs.json. These scopes must not be presented as one identical binary across all runs."
+}

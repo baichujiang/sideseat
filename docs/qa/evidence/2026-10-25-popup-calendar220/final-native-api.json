@@ -1,0 +1,290 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "phase": "contacts-created",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 9bdc022a",
+      "location": null,
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 0,
+      "ownerSlots": [],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:14:51.771Z"
+    },
+    {
+      "phase": "contacts-owner-submitted",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 0,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:15:32.537Z"
+    },
+    {
+      "phase": "contacts-delivered",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 1,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:15:47.358Z"
+    },
+    {
+      "phase": "contacts-peer-submitted",
+      "actualPhase": "COLLECTING",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "invitationVersion": 0,
+      "cardCount": 1,
+      "accepted": 0,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:16:29.994Z"
+    },
+    {
+      "phase": "contacts-formal-invitation",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "chosenStart": "2026-10-26T22:00:00.000Z",
+      "chosenEnd": "2026-10-27T00:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 1,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:18:53.703Z"
+    },
+    {
+      "phase": "contacts-peer-accepted",
+      "actualPhase": "INVITING",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "chosenStart": "2026-10-26T22:00:00.000Z",
+      "chosenEnd": "2026-10-27T00:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        0,
+        0
+      ],
+      "at": "2026-10-25T12:19:35.762Z"
+    },
+    {
+      "phase": "contacts-published",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "chosenStart": "2026-10-26T22:00:00.000Z",
+      "chosenEnd": "2026-10-27T00:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-25T12:20:07.222Z"
+    },
+    {
+      "phase": "contacts-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "title": "Contact plan 9bdc022a",
+      "location": "图书馆二楼",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "responses": 2,
+      "ownerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peerSlots": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "chosenStart": "2026-10-26T22:00:00.000Z",
+      "chosenEnd": "2026-10-27T00:00:00.000Z",
+      "invitationVersion": 1,
+      "cardCount": 1,
+      "accepted": 2,
+      "calendars": [
+        1,
+        1
+      ],
+      "at": "2026-10-25T12:20:36.458Z"
+    }
+  ],
+  "failure": null
+}

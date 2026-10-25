@@ -1,0 +1,24 @@
+{
+  "newAppReportCount": 1,
+  "comparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "reports": [
+    {
+      "name": "SideSeat Preview.cpu_resource-2026-10-25-131843.ips",
+      "lastModDate": "2026-10-25T12:18:43.000Z",
+      "classification": "CPU resource report; no termination action",
+      "selectedReportFields": {
+        "Date/Time": "2026-10-25 13:16:38.972 +0100",
+        "Event": "cpu usage",
+        "Action taken": "none",
+        "CPU": "90 seconds cpu time over 121 seconds (74% cpu average), exceeding limit of 50% cpu over 180 seconds",
+        "Duration": "121.01s",
+        "Version": "1.0.0 (220)"
+      }
+    }
+  ],
+  "scope": "Occurred within automated test activity. Reports do not establish pure-manual performance or a causal connection to the UI changes. No process-termination report among this stage new App reports.",
+  "reverifiedAfterFinalIconSupplement": true
+}

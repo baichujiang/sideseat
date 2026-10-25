@@ -1,0 +1,23 @@
+{
+  "privateXctestrunAndGeneratedContextNamesRemoved": [
+    "popup-final.xctestrun",
+    "menus-final.xctestrun",
+    "popup-de-final.xctestrun",
+    "popup.xctestrun",
+    "full.xctestrun",
+    "appearance-final.xctestrun",
+    "popup-max-final.xctestrun",
+    "popup-safearea.xctestrun",
+    "popup-repaired.xctestrun",
+    "popup-delivery.xctestrun",
+    "sideseat220-runner",
+    "sideseat220-runner-build",
+    "sideseat220-full-runner",
+    "sideseat220-full-runner-build",
+    "sideseat195-source"
+  ],
+  "disposableCredentialFixtureAbsent": true,
+  "deviceRunnerRemoved": true,
+  "logsAndRawResultsPrivateModes": "dirs0700/files0600",
+  "preserved": "Final raw test results/review proofs and shared pre-existing build/SPM caches; ordinary app97."
+}

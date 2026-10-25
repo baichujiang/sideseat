@@ -1,0 +1,17 @@
+{
+  "scope": "Source inventory of the five active root pages and directly associated plan/date/share/participant/calendar detail presentations; not an exhaustive physical-device run of every App popup.",
+  "changed": [
+    "Automatic Inbox object-action menu: anchored near source at ordinary text, scrollable large panel at accessibility sizes.",
+    "Existing product confirmations: final publish, plan cancellation, plan deletion, weekly-intention deletion, weekly-intention share error, appearance draft discard.",
+    "Read-only Calendar detail accessibility detent."
+  ],
+  "retained": [
+    "Continuous create/edit forms use large sheets.",
+    "Candidate-date choice stays inline in creation; per-day time menus stay beside their buttons.",
+    "Share sheet keeps medium/large at regular text and large at accessibility sizes.",
+    "Explicit Calendar blank-time/region operations retain their bottom panel.",
+    "System share, permission and native input presentations stay native."
+  ],
+  "boundary": "Frozen archives and retained compatibility are not reexposed, migrated or removed. Compatibility TapOrLongPress modifier remains byte-identical to HEAD; old link/recovery code is not evidence of a new reachable entry.",
+  "executionEvidence": "Separate acceptance-runs and original image review records; this inventory is read-only source evidence."
+}

@@ -1,0 +1,420 @@
+{
+  "stage": "Preview220 product prompt placement and confirmed-card calendar typography",
+  "reviewer": "center_product_confirmations",
+  "reviewDate": "2026-10-25",
+  "sourceIndex": "/tmp/sideseat220-private/full-images/index.json",
+  "result": "pass_with_recorded_scope",
+  "actualCaptureCount": 30,
+  "uniqueOriginalPixelsActuallyViewed": 29,
+  "exactSha256DuplicateReuses": 1,
+  "needsProductFix": false,
+  "reviewBasis": "Every unique original PNG was actually opened with view_image. UI test or API pass was not substituted for visual inspection. Only one byte-identical publish confirmation capture reused the same SHA256 review.",
+  "designComparison": {
+    "reference": "docs/designs/2026-10-25-root-foundation-v1/screenshots/plans.png",
+    "referenceActuallyViewed": true,
+    "actualImage": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+    "result": "matches_approved_typographic_calendar_hierarchy",
+    "observation": "The approved design uses a typographic calendar: small month/weekday, prominent day number, subordinate time. It has no colored month strip or separate calendar background. The new cross-midnight card preserves this hierarchy and adds readable full end date/time; no extra box is required.",
+    "initialDesignQuestionResolved": true
+  },
+  "limitations": [
+    "These full-flow images show Chinese regular text in light appearance. They do not establish maximum-text, dark-mode or whole-App visual acceptance.",
+    "AssistiveTouch appears in the original phone captures. Each row records its actual coverage; covered grid/corner pixels are excluded from full visual claims.",
+    "A screenshot proves the visible state, not action execution, persistence, server semantics or calendar uniqueness; those require the separately recorded native/API evidence.",
+    "Offscreen content and content naturally covered by a presented sheet or system keyboard are outside each image visual scope."
+  ],
+  "findings": [],
+  "images": [
+    {
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "74bcbdac7e6d4c85f356194c603d2ebf9b6484865daa2ce3f66e65dc0a44a88e",
+      "capture": "phone-first-plan-contacts-calendar-result_0_BD360098-86CF-429B-B033-C78D82B0DC78.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "日历搜索结果完整显示精确活动名、2026年10月26日23:00及图书馆二楼；搜索/清空/关闭及结果箭头完整。",
+      "osOverlayLimit": "系统搜索键盘占下半屏，AssistiveTouch在键盘底部；只验可见搜索结果，不用此图证明完整日历几何或结束时刻。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "5308383e77d9bfc501f8023b173f635e38bce5244efb51c5a7e3c3c59601d91f",
+      "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_AD685D7F-B248-4FBC-AF0B-2D22EAC06FA0.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "已确认参与者分享面板显示活动名/完整跨日时间、网页分享/复制；未出现App好友权限入口；背景已确认状态与受邀时段可见。",
+      "osOverlayLimit": "AssistiveTouch覆盖复制按钮右侧非文字区域；受邀第二天内容被分享面板自然遮挡，只验可见范围。"
+    },
+    {
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "048be059e8546331da0a3ef81f816b23377a9310b81f2b46d1a0c72d0f150dd3",
+      "capture": "phone-first-plan-confirmed-calendar-date-cross-midnight_0_ED431E4F-7DE5-4069-BEE8-E38A1D0FFD2E.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "已确定卡按批准的排版日历显示：小10月·周一、大26、23:00、向下箭头连接完整10月27日/01:00；活动名、已确认、发起者头像/姓名、整卡箭头完整。与冻结设计小月份/星期→大日→时间的层级一致，无需独立色带底板。",
+      "osOverlayLimit": "AssistiveTouch位于页面右侧空白区，不遮挡确认卡；顶部两分栏、右下发起和系统五项TabBar均可见。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "70b20dffbd02e3bf2318f20deab13c77a769afaa167a757eb22833e8f54927de",
+      "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_2508011B-34F7-4AB0-BAFD-42EB2E514B56.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "已确认发起者分享面板完整展示活动名和跨午夜日期时间；App好友、网页/复制均可见；背景已确认状态与首日受邀高亮清楚。",
+      "osOverlayLimit": "AssistiveTouch覆盖App好友行最右箭头/边缘；第二天时间表被分享面板自然遮挡，未据此声称背景全表通过。"
+    },
+    {
+      "file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "sha256": "0160bbcee5b18f32fe52c3614cd7f1da855981a1ad750ad6f0953e3e38b27561",
+      "capture": "phone-first-plan-publish-plan-centered-confirm_0_1C4EC731-8523-49D3-8F57-7CCFAB5A52CC.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "正式发出确认卡居中，完整显示正式发出这次安排、将向2位已接受者发送且未回复/拒绝者不通知的说明；取消/正式发出两按钮文字完整。",
+      "osOverlayLimit": "AssistiveTouch位于卡外右下背景“谁会参加”行；新确认卡无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-publish-plan-centered-cancel.png",
+      "sha256": "0160bbcee5b18f32fe52c3614cd7f1da855981a1ad750ad6f0953e3e38b27561",
+      "capture": "phone-first-plan-publish-plan-centered-cancel_0_2421F226-98C3-4055-9625-65EA8CC95342.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "reusesVisualReviewOf": "phone-first-plan-publish-plan-centered-confirm.png",
+      "actualVisualScope": "正式发出确认卡居中，完整显示正式发出这次安排、将向2位已接受者发送且未回复/拒绝者不通知的说明；取消/正式发出两按钮文字完整。",
+      "osOverlayLimit": "AssistiveTouch位于卡外右下背景“谁会参加”行；新确认卡无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "06a1d6e4969f0763ee40f56c56b88c12a9c75d691c77c76387bfad37b9994d15",
+      "capture": "phone-first-plan-contacts-explicit-acceptance_0_529D2632-14A3-4750-A4B8-DE38D04BAF3C.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "接受后状态与底栏都正确显示待发起人正式发出；2/2确认和两天高亮完整，确认参加按钮消失且无法参加入口仍在。",
+      "osOverlayLimit": "AssistiveTouch覆盖“谁会参加”行右侧局部；已接受状态和底部说明/拒绝动作完整可见。"
+    },
+    {
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "7f85ad25f8afe27cf7cc6272aa2cdea33f30a282385a6610f755d1d03c65e1cb",
+      "capture": "phone-first-plan-invitation-continuous-across-midnight_0_63E44DF7-C240-4C03-9ACE-496E00D37878.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "两天受邀时间表分别显示周一23:00至24:00、周二00:00至01:00；浅绿连续高亮与表头右侧图例清楚；1/2确认、确认参加和无法参加完整。",
+      "osOverlayLimit": "AssistiveTouch覆盖背景“谁会参加”行右端局部；两天高亮块、日期时间、参与回应底栏均无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "7d2d3989664310b25ca1d3ac346f63e58424cafb588a3cdfb1d27c8c9078f912",
+      "capture": "phone-first-plan-share-permissions-participant-INVITING_0_23C91AB0-4181-4AA9-BA69-159647F38F2A.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "参与者邀请阶段分享面板保留完整跨午夜日期时间、网页分享和复制入口，无App好友权限入口；背景状态待你确认清楚。",
+      "osOverlayLimit": "AssistiveTouch覆盖复制按钮右侧非文字区域；分享卡名称/时间/文字无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "c39780f38dc0c3c777c2d643d057d2d829f123299242dd03e6ea79a1d6b5c2a8",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_0572CA50-49F3-4616-957E-555B783EA9F1.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "聊天邀请卡活动名完整；跨午夜日期时间完整分两行显示，待你确认/查看邀请明确；输入栏完整。",
+      "osOverlayLimit": "AssistiveTouch处于聊天空白区，未遮挡邀请卡/输入栏。"
+    },
+    {
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "fd7cc99f2e86d1951e4519be702946b3df9310d394145d95639890201c56f5fc",
+      "capture": "phone-first-plan-cancel-plan-centered-keep_0_56F20ABC-A29B-4C16-8419-2D548D16AAF5.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "取消计划确认卡位于屏幕中部，图标、完整标题/两行说明、保留计划与取消计划左右按钮均完整，无重叠。",
+      "osOverlayLimit": "AssistiveTouch在确认卡外的背景“谁会参加”附近；确认卡无遮挡，背景覆盖不作为完整验收。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "42267d141182c865d277e88742abc935c80723bedf42696ea91b56291573f9f7",
+      "capture": "phone-first-plan-share-permissions-owner-INVITING_0_19934256-B73B-46A3-B221-9021FE8C28BA.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "邀请阶段发起者分享面板名称/完整跨日日期时间完整；App好友与分享网页/复制入口均保留；背景受邀两天时间表分段可见。",
+      "osOverlayLimit": "AssistiveTouch覆盖App好友行最右侧箭头/边缘部分；主要标签及网页/复制动作可见；背景下半被分享面板自然遮挡。"
+    },
+    {
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "a41c6fd4d1629f5de60d5848bfce4dc844584a317ecb2e2a0843249233fcba7e",
+      "capture": "phone-first-plan-contacts-review-final-invitees_0_F14D5A87-7C72-440F-919C-6E41A1257ACE.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "核对邀请页显示完整活动/地点、2026/10/26 23:00至2026/10/27 01:00、Europe/Berlin、调整时间、两参与者和将邀请2人/发出邀请底栏。",
+      "osOverlayLimit": "AssistiveTouch覆盖参与者卡右下部分空白/分隔线；参与者姓名、状态和底部发送动作仍可见；更下方邀请朋友段在视口外不作完整声明。"
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "24c797e590438a6bfe887180a401b86365fd4ee284e16cd600a26e47770b9a69",
+      "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_C6D8F970-C54C-4939-AF1A-A45DA3646026.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "跨午夜晨间视口选中周二00:00/00:30，保留琥珀选择；摘要完整显示10月26日至27日、23:00至01:00、2小时，下一步按钮完整。",
+      "osOverlayLimit": "AssistiveTouch覆盖周四02:00至02:30附近网格；周二选择与完整摘要无遮挡；周一晚间在另一张原图核对。"
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "4daf21f1eefee9009cbc02658f960f526c2769a651b0888a1522fff3d47bcd82",
+      "capture": "phone-first-plan-final-cross-day-evening_0_52DDB7CA-ECC5-4870-8D91-7A8F2AA3B8FE.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "最终时间晚间视口明确选中周一23:00/23:30两个琥珀格；超出原收集范围以横杠显示；底部23:00至00:00/1小时可读。",
+      "osOverlayLimit": "AssistiveTouch覆盖周四22:30至23:00附近网格；选中周一时段无遮挡；只验晚间可见网格。"
+    },
+    {
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "b08acba5068086677297e4f41fe380a4e49c5ac326f6b0d4ff9750bc1c1b48f8",
+      "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_A44FD960-6004-4955-97B7-03B2845B0DBE.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "最终时间模式有琥珀色说明/图例；周一两格以琥珀描边/方勾区别个人绿色勾；底部09:00至10:00、1小时及下一步完整。",
+      "osOverlayLimit": "AssistiveTouch覆盖周四11:00至11:30附近网格；周一选择与底栏无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "68470a61da81332ac80b8b1e0f1ed345f4d7d110ac4ab98b917ff6dca107ad1b",
+      "capture": "phone-first-plan-compact-responded-people_0_4E7981D7-4B2D-4B4E-A197-7E294D98A2EB.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "参与者与进度表完整显示计划名、2人已填写、两人姓名/已提交空闲、本人标识和填写不等于参加提示。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，不覆盖人员信息。"
+    },
+    {
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "dc7fd8bfca6c074b617a85ed156be57384af7f36f43ec9f44ecfa90f951d3231",
+      "capture": "phone-first-plan-contacts-peer-inline-availability_0_B125A417-6B52-471F-837E-6AAEF4B9E38C.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "参与者已提交后显示2人已填写及两头像；周一计数2/绿色勾、已提交空闲与等待发起人的邀请清楚。",
+      "osOverlayLimit": "AssistiveTouch覆盖右侧周四12:30附近网格；周一所选时段与底栏无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "1f10a0571f44dcf750d93d9e88f5b83ccafcbaa75f8a5281e05b0b6b08e3d3b5",
+      "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_8B889DF4-4A1A-4E26-ABF8-B304AB26D55F.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "参与者分享面板无App好友行，仅分享网页链接/复制链接；名称与底部两个入口文字完整。",
+      "osOverlayLimit": "AssistiveTouch覆盖复制链接按钮右侧非文字区域；该系统浮标覆盖部分不作为产品布局问题。"
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card-0f72c63f.png",
+      "sha256": "0f72c63f98e474074efc36d270e29d385ebda0806e36f0c47e5b636acf410342",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_335CBC96-86EC-4215-BD19-F298AE5E16CE.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "收集阶段聊天卡仅保留活动名、待你选空闲与填写我的空闲入口，间距足够；上下消息与输入栏完整。",
+      "osOverlayLimit": "AssistiveTouch处于聊天空白区，不遮挡卡片。"
+    },
+    {
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "c2bfdb89cfa2c1070db05f11c99b2a8ba3fc65f7791811964e7928a5cd1989eb",
+      "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_0641728F-B74A-492A-B970-F7D590123E98.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "发送后仍显示1人已填写、周一绿色勾/计数1；已提交空闲与选择最终时间底栏完整。",
+      "osOverlayLimit": "AssistiveTouch覆盖右侧周四部分网格；周一保存结果无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "20fd247356b18c22f9f2a03e3f1bdc416a00868d8e31a4e3f1e93c972c56e7c1",
+      "capture": "phone-first-plan-contacts-select-and-send_0_A6E8EED0-303C-4FC6-A600-130804918003.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "邀请联系人面板显示活动名、完整联系人头像/姓名、选中勾；底部发送给1位联系人和搜索完整。",
+      "osOverlayLimit": "AssistiveTouch处于右侧列表空白区，不遮挡联系人或发送动作。"
+    },
+    {
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "07c8f661c5a9d87c234ef93423214022c29f1afe5dab5e6d326b7d54a64f111b",
+      "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_0DDAEB0D-1603-4036-9596-FBC21742D4A5.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "提交后背景变为1人已填写、周一格计数1；分享面板的标题、App好友、网页分享/复制入口清楚。",
+      "osOverlayLimit": "AssistiveTouch覆盖App好友行右侧局部边缘/下方空白；可见标签与链接按钮完整。"
+    },
+    {
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "d618cdc090bffe82813701945c582e0637083e4f24d166939560d8a8a88bdcd2",
+      "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_64AA097B-4084-4903-AED9-BCD014AC43AA.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "地点已显示图书馆二楼；名称、地点、日期、人数与空闲块完整；未提交草稿/1天1小时和提交并分享仍可见。",
+      "osOverlayLimit": "AssistiveTouch遮挡右侧周四部分网格；周一草稿块和底部动作无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "89b53cc0df278d1d8906e758762b2b18819c069a0d606ebf22864990150270f4",
+      "capture": "phone-first-plan-inline-information-editing_0_A5F8AFC5-5FC3-45A8-B8C6-9C378ADEF665.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "活动名称与地点均有固定标签和完整输入值；取消/保存处于键盘上方可见区域；选中空闲仍可见，未与键盘相撞。",
+      "osOverlayLimit": "系统中文键盘/候选栏占据下半屏，AssistiveTouch位于键盘区域；只验键盘上方的产品编辑信息/动作，非整张时间表。"
+    },
+    {
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "6f2550d019e14a7f6e76e61079718bfb5520a9415947e7fcb3f9c94cb4f7380e",
+      "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_2CCA2611-015B-446C-AB35-6B8B8AC68CBB.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "周一09:00和09:30绿色描边/圆勾明确；底栏已选1天1小时与提交并分享完整；未显示撤回按钮。",
+      "osOverlayLimit": "AssistiveTouch 遮挡周四部分12:00至12:30网格，所选周一时段无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "cf194581c25480fae7a7a48d575f4a62e90b2b04cde795d41aeb693703feaeaa",
+      "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_5C1E1C6F-0D8B-4EF8-B6C6-9B9325EC12A4.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "分享面板从底部展开，抬头/完成、活动名称、App好友、网页分享、复制链接完整；背景明确为未填写空闲状态。",
+      "osOverlayLimit": "AssistiveTouch 覆盖App好友行右侧边缘/下方局部；标签与两个链接动作均可见，未将被覆盖的边缘像素算作完整通过。"
+    },
+    {
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "3ed6aaa3bb84dc0092b3fb610baf9e3ea9f70419410ac0d668a07dbcfc7cb9d3",
+      "capture": "phone-first-plan-delete-plan-centered-keep_0_7E9D4312-DA2B-491F-B50F-1E8C85E9B705.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "删除确认卡位于屏幕中部；图标、标题、完整后果说明、保留计划与删除征集按钮均在卡内，按钮文字无裁切。",
+      "osOverlayLimit": "AssistiveTouch 位于确认卡之外的右下背景网格；产品确认卡自身无遮挡。"
+    },
+    {
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "39d7ea765a4f908bccf58f31b38cd6ce25d4bc3868c27e404b20cdd23ed3ad90",
+      "capture": "phone-first-plan-compact-empty-timetable_0_11B267DF-6291-41C8-9980-1F29F501FCDC.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "活动名/分享/地点层级清楚；日期、收集空闲、0人已填写与人员入口彼此留空；可见网格与未提交双操作底栏完整。",
+      "osOverlayLimit": "AssistiveTouch 遮挡右侧周四部分12:00至12:30网格；这部分不作为完整网格视觉通过。"
+    },
+    {
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "4c04885975c620e76e92caa156271cbafb571057dfe15e6d0ead0b741ae35003",
+      "capture": "phone-first-plan-creation-information-without-timetable_0_490A4D84-5CB9-4C1F-9975-70C918316F59.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "活动名称与地点在上方统一白卡；候选日期、每日时间、时区和活动建议开关完整；底部下一步完整，未出现时间表预览。",
+      "osOverlayLimit": "AssistiveTouch 位于右侧空白区，未遮挡信息与底部动作。"
+    }
+  ]
+}

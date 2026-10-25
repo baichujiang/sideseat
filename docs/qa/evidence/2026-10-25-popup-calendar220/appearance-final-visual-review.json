@@ -1,0 +1,70 @@
+{
+  "stage": "Preview220 final German maximum appearance-discard optional-icon repair",
+  "reviewer": "center_product_confirmations",
+  "reviewDate": "2026-10-25",
+  "sourceIndex": "/tmp/sideseat220-private/appearance-final-images/index.json",
+  "result": "pass_with_recorded_scope",
+  "needsProductFix": false,
+  "actualCaptureCount": 3,
+  "uniqueOriginalPixelsActuallyViewed": 2,
+  "exactSha256DuplicateReuses": 1,
+  "executionScope": {
+    "caseName": "testMaximumGermanAppearanceDiscardActions",
+    "caseDurationSeconds": 73.918,
+    "caseResultReported": "Passed",
+    "combination": "de light actual system AccessibilityXXXL",
+    "sourceScope": "Final package after removing only the optional trash systemImage argument from appearance-discard action. Title, role and callback unchanged; provenance difference recorded separately.",
+    "scope": "Narrow final appearance prompt and keep/discard/reopen behavior, not a rerun of all four popup combinations or unchanged full invitation flow."
+  },
+  "resolvedFindings": [
+    {
+      "id": "german-max-new-discard-action-single-n",
+      "status": "closed_by_final_original_pixel_review",
+      "priorReview": "popup-de-final-visual-review.json",
+      "priorTwoActionCapturesRemain": "visual_rejected_new_discard_action_word_fragmentation",
+      "newEvidence": "Both final action captures have the same SHA256 b7a4f11e1cbf8c6bb34f0d31bdc51ea192189e916a8b8da55d1e8ba0d13ead3e. Actual original pixels show Änderungen and verwerfen as two complete words on separate lines, with both actions visible. The final restore original shows classic selected andSave disabled."
+    }
+  ],
+  "limitations": [
+    "Both unique final originals were actually opened with view_image; one byte-identical action capture reuses SHA256 review. No original image changed.",
+    "The old two German fragmented-label images remain rejected historical evidence; this final supplement does not relabel them as accepted.",
+    "This review closes only the new appearance-discard fragmentation. Other accepted previous popup/date scopes retain their recorded source differences and limits.",
+    "44pt targets, actual keep/discard/persistence/close behavior are execution evidence, not inferred from pixels. AssistiveTouch coverage and original setting-picker ellipsis remain scoped."
+  ],
+  "images": [
+    {
+      "capture": "popup220-appearance-discard-restored-de-light-system-max_0_0BBA02F5-40CE-481B-B09A-4D051966C03A.png",
+      "file": "popup220-appearance-discard-restored-de-light-system-max.png",
+      "sha256": "094ad9892b7310db46e054f71adcdde6a96ac9a07b68d862d2ca434ea25d3eb0",
+      "originalExportedFile": "6578EA94-2AE0-4037-9758-111D869E3C12.png",
+      "associatedWithFailure": false,
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "丢弃重开后Klassisch行打勾、Rosé未选、Speichern灰禁用，确认卡已消失；真实最大字号正文可滚动，符合未保存修改被丢弃的执行结果。",
+      "osOverlayLimit": "AssistiveTouch位于右侧分组间空白；经典勾/玫瑰未选/保存禁用无遮挡。原App-Design选择值中间省略保持，本图不作全设置文字完整声明。"
+    },
+    {
+      "capture": "popup220-appearance-discard-action-1-de-light-system-max_0_666DC686-2C84-4A23-B71E-3065B2AD13C9.png",
+      "file": "popup220-appearance-discard-action-1-de-light-system-max.png",
+      "sha256": "b7a4f11e1cbf8c6bb34f0d31bdc51ea192189e916a8b8da55d1e8ba0d13ead3e",
+      "originalExportedFile": "FC13B707-56AC-4E86-86F7-93BD4F5DD693.png",
+      "associatedWithFailure": false,
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "最终丢弃确认卡安全区居中；标题Änderungen/verwerfen?完整，Weiter/bearbeiten按整词两行；红色动作移除可选trash后显示完整Änderungen第一行、verwerfen第二行，不再出现单独n。两按钮均完整在视口内。背景Rosé勾与可用Speichern说明原修改尚未提前清除。",
+      "osOverlayLimit": "AssistiveTouch覆盖红按钮最右空白边缘；完整Änderungen/verwerfen文字和继续编辑文字仍清楚。被系统浮标覆盖的边缘像素不计完整可见声明。"
+    },
+    {
+      "capture": "popup220-appearance-discard-action-0-de-light-system-max_0_E2462DA7-AB58-418A-82D4-977A70938BC6.png",
+      "file": "popup220-appearance-discard-action-0-de-light-system-max.png",
+      "sha256": "b7a4f11e1cbf8c6bb34f0d31bdc51ea192189e916a8b8da55d1e8ba0d13ead3e",
+      "originalExportedFile": "08C84101-358C-4163-859F-C246B0D14817.png",
+      "associatedWithFailure": false,
+      "result": "pass_with_recorded_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "最终丢弃确认卡安全区居中；标题Änderungen/verwerfen?完整，Weiter/bearbeiten按整词两行；红色动作移除可选trash后显示完整Änderungen第一行、verwerfen第二行，不再出现单独n。两按钮均完整在视口内。背景Rosé勾与可用Speichern说明原修改尚未提前清除。",
+      "osOverlayLimit": "AssistiveTouch覆盖红按钮最右空白边缘；完整Änderungen/verwerfen文字和继续编辑文字仍清楚。被系统浮标覆盖的边缘像素不计完整可见声明。",
+      "reusesVisualReviewOf": "popup220-appearance-discard-action-1-de-light-system-max.png"
+    }
+  ]
+}

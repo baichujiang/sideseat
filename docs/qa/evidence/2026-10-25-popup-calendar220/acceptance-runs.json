@@ -1,0 +1,169 @@
+{
+  "build": 220,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "scopedPassedCases": [
+    {
+      "label": "Complete live native plan",
+      "productBasis": "baseline",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 384.819,
+      "xcresultSessionSeconds": 393.156
+    },
+    {
+      "label": "Confirmed card four combinations",
+      "productBasis": "baseline",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 87.098,
+      "xcresultSessionSeconds": 91.08
+    },
+    {
+      "label": "Final ordinary menus two combinations",
+      "productBasis": "menu-width",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 55.091,
+      "xcresultSessionSeconds": 59.086
+    },
+    {
+      "label": "German actual maximum whole popup flow before icon repair",
+      "productBasis": "menu-width",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 200.712,
+      "xcresultSessionSeconds": 204.692
+    },
+    {
+      "label": "Final German maximum appearance visual repair",
+      "productBasis": "final-icon",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 73.918,
+      "xcresultSessionSeconds": 77.594
+    }
+  ],
+  "completedIndependentPrefixes": [
+    {
+      "enclosingRun": "popup-delivery",
+      "enclosingCaseResult": "Failed",
+      "caseDurationSeconds": 295.314,
+      "completedIterations": [
+        "zh-Hans/light/ordinary",
+        "de/dark/ordinary"
+      ],
+      "adoptedScope": "Confirmations/appearance/Calendar; narrow menus visually rejected then repaired separately.",
+      "productBasis": "baseline"
+    },
+    {
+      "enclosingRun": "popup-max-final",
+      "enclosingCaseResult": "Failed",
+      "caseDurationSeconds": 263.121,
+      "completedIterations": [
+        "zh-Hans/dark/actual AccessibilityXXXL"
+      ],
+      "adoptedScope": "Whole popup/appearance/Calendar iteration; later German helper failure does not invalidate the independent completed iteration.",
+      "productBasis": "menu-width"
+    }
+  ],
+  "preFinalRuns": [
+    {
+      "label": "popup",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 22.12,
+      "xcresultSessionSeconds": 26.07,
+      "scopeOrReason": "Direct-conversation test incorrectly required group/course-only Hide action; precise original direct read/pin rules retained.",
+      "productBinaryChanged": false
+    },
+    {
+      "label": "popup-final",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 38.686,
+      "xcresultSessionSeconds": 42.718,
+      "scopeOrReason": "Offline layout fixture lacked its existing weekly-intent feature flag; product correctly showed not enabled.",
+      "productBinaryChanged": false
+    },
+    {
+      "label": "popup-repaired",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 37.086,
+      "xcresultSessionSeconds": 41.141,
+      "scopeOrReason": "Test compared safe-area centered prompt to physical-window center within3pt; actual6.5pt asymmetry was correct. Test now bounds by observed system top region, no device constants.",
+      "productBinaryChanged": false
+    },
+    {
+      "label": "popup-safearea",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 128.819,
+      "xcresultSessionSeconds": 133.198,
+      "scopeOrReason": "All ordinary Chinese product menu/prompt/appearance checks and read-only dates passed; test incorrectly required native transformed medium-sheet Done AX width>=44 (actual42.356). Original screenshot verified correct foreground system control. Only this native Done uses hittable/in-window/actual-dismissal checks; custom product44pt guards stay.",
+      "productBinaryChanged": false
+    },
+    {
+      "label": "popup-delivery",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 295.314,
+      "xcresultSessionSeconds": 300.441,
+      "scopeOrReason": "Both independent ordinary-text variants fully completed, then Chinese actual-maximum first menu completed; stopped when a virtualized last Inbox row was queried before materialization. Exact-row bounded scrolling test repair only. Ordinary prefix screenshots retained explicitly; not a passed whole test case. Remaining maximum variants resumed separately on same product.",
+      "productBinaryChanged": false
+    },
+    {
+      "label": "popup-max-final",
+      "result": "Failed",
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "expectedFailures": 0,
+      "caseDurationSeconds": 263.121,
+      "xcresultSessionSeconds": 268.578,
+      "scopeOrReason": "Independent Chinese actual-maximum iteration completed; German actual-maximum Inbox completed, then the prompt correctly became ScrollView itself for longer German text. Helper incorrectly searched only its descendants for a ScrollView. Exact self-or-descendant repair; no product change. Completed Chinese prefix accepted separately, not a passed whole case. German remaining scope resumed separately.",
+      "productPackage": "final-menu-width",
+      "productBinaryChanged": false
+    }
+  ],
+  "visualRepairs": [
+    "menu-width-repair.json",
+    "appearance-icon-repair.json"
+  ],
+  "unchangedScopesNotRepeatedAfterDecorativeRepairs": true,
+  "allAdoptedScopesAndOriginsExplicit": true,
+  "apiPhases": 8,
+  "domainUnitTestsRepeated": false,
+  "webReleased": false,
+  "backendReleased": false
+}

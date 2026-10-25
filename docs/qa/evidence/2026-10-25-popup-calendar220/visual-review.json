@@ -1,0 +1,928 @@
+{
+  "result": "Accepted for the recorded popup/date scope after two visual repairs",
+  "actualAdoptedCaptures": 94,
+  "uniqueOriginalPixelHashes": 74,
+  "reviewMethod": "Every unique original in each detailed review was opened with view_image; exact SHA duplicates reuse review. No screenshot retouched.",
+  "groups": [
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "adoptedCaptures": 30,
+      "uniqueOriginalPixels": 29,
+      "detailedOriginalReview": "full-visual-review.json"
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "adoptedCaptures": 10,
+      "uniqueOriginalPixels": 10,
+      "detailedOriginalReview": "card-visual-review.json"
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "adoptedCaptures": 18,
+      "uniqueOriginalPixels": 12,
+      "detailedOriginalReview": "popup-normal-visual-review.json"
+    },
+    {
+      "stage": "ordinary-menus",
+      "productBasis": "menu-width",
+      "adoptedCaptures": 4,
+      "uniqueOriginalPixels": 4,
+      "detailedOriginalReview": "menus-final-visual-review.json"
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "adoptedCaptures": 15,
+      "uniqueOriginalPixels": 8,
+      "detailedOriginalReview": "popup-max-zh-visual-review.json"
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "adoptedCaptures": 14,
+      "uniqueOriginalPixels": 9,
+      "detailedOriginalReview": "popup-de-final-visual-review.json"
+    },
+    {
+      "stage": "german-appearance",
+      "productBasis": "final-icon",
+      "adoptedCaptures": 3,
+      "uniqueOriginalPixels": 2,
+      "detailedOriginalReview": "appearance-final-visual-review.json"
+    }
+  ],
+  "excludedInitialCaptures": {
+    "ordinaryNarrowMenus": 4,
+    "germanDiscardFragmentedWord": 2
+  },
+  "scope": "Completed independent ordinary/Chinese-maximum prefixes are explicitly separate from their failed enclosing test cases. Final ordinary-menu and German-maximum green tests plus final appearance-only green supplement close all new visual findings. System overlays and old toolbar/icon limitations remain in per-image records.",
+  "images": [
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-calendar-result_0_BD360098-86CF-429B-B033-C78D82B0DC78.png",
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "74bcbdac7e6d4c85f356194c603d2ebf9b6484865daa2ce3f66e65dc0a44a88e",
+      "originalExportedFile": "1DD74CA0-E7F7-4D14-B0B7-C7F3D756F30E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_AD685D7F-B248-4FBC-AF0B-2D22EAC06FA0.png",
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "5308383e77d9bfc501f8023b173f635e38bce5244efb51c5a7e3c3c59601d91f",
+      "originalExportedFile": "BA1BA4BD-12DB-4C8A-BD32-94A33C47B74E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-confirmed-calendar-date-cross-midnight_0_ED431E4F-7DE5-4069-BEE8-E38A1D0FFD2E.png",
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "048be059e8546331da0a3ef81f816b23377a9310b81f2b46d1a0c72d0f150dd3",
+      "originalExportedFile": "7C56E7EE-6A77-4A83-AB99-7D4C284C8612.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_2508011B-34F7-4AB0-BAFD-42EB2E514B56.png",
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "70b20dffbd02e3bf2318f20deab13c77a769afaa167a757eb22833e8f54927de",
+      "originalExportedFile": "27FAAAC6-B955-409D-91E6-9AFD5DA8D258.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-publish-plan-centered-confirm_0_1C4EC731-8523-49D3-8F57-7CCFAB5A52CC.png",
+      "file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "sha256": "0160bbcee5b18f32fe52c3614cd7f1da855981a1ad750ad6f0953e3e38b27561",
+      "originalExportedFile": "ADAEE1F4-3A17-4E4D-8A9B-1F5C439E1A70.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-publish-plan-centered-cancel_0_2421F226-98C3-4055-9625-65EA8CC95342.png",
+      "file": "phone-first-plan-publish-plan-centered-cancel.png",
+      "sha256": "0160bbcee5b18f32fe52c3614cd7f1da855981a1ad750ad6f0953e3e38b27561",
+      "originalExportedFile": "0079A1F8-8D0C-4EED-B8A2-C345931A5EC8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-explicit-acceptance_0_529D2632-14A3-4750-A4B8-DE38D04BAF3C.png",
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "06a1d6e4969f0763ee40f56c56b88c12a9c75d691c77c76387bfad37b9994d15",
+      "originalExportedFile": "A917E931-5BE7-4997-8E39-78A9D04EECF3.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-invitation-continuous-across-midnight_0_63E44DF7-C240-4C03-9ACE-496E00D37878.png",
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "7f85ad25f8afe27cf7cc6272aa2cdea33f30a282385a6610f755d1d03c65e1cb",
+      "originalExportedFile": "89C2C63B-9472-4529-8850-215F269AC38D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-participant-INVITING_0_23C91AB0-4181-4AA9-BA69-159647F38F2A.png",
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "7d2d3989664310b25ca1d3ac346f63e58424cafb588a3cdfb1d27c8c9078f912",
+      "originalExportedFile": "A4635E0D-D89A-4903-98E1-FFFBDE87C749.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_0572CA50-49F3-4616-957E-555B783EA9F1.png",
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "c39780f38dc0c3c777c2d643d057d2d829f123299242dd03e6ea79a1d6b5c2a8",
+      "originalExportedFile": "B21CF51B-A2F0-446B-9AEE-33C53038C49F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-cancel-plan-centered-keep_0_56F20ABC-A29B-4C16-8419-2D548D16AAF5.png",
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "fd7cc99f2e86d1951e4519be702946b3df9310d394145d95639890201c56f5fc",
+      "originalExportedFile": "F764985B-E751-4023-803C-50C272D73DA1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-owner-INVITING_0_19934256-B73B-46A3-B221-9021FE8C28BA.png",
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "42267d141182c865d277e88742abc935c80723bedf42696ea91b56291573f9f7",
+      "originalExportedFile": "488DDF49-7563-4974-AD78-9E51F6681F04.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-review-final-invitees_0_F14D5A87-7C72-440F-919C-6E41A1257ACE.png",
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "a41c6fd4d1629f5de60d5848bfce4dc844584a317ecb2e2a0843249233fcba7e",
+      "originalExportedFile": "38092135-5C57-450F-AFE1-151F66F13307.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_C6D8F970-C54C-4939-AF1A-A45DA3646026.png",
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "24c797e590438a6bfe887180a401b86365fd4ee284e16cd600a26e47770b9a69",
+      "originalExportedFile": "E0FA8FB0-DEA5-4AC8-9AE9-C629A260E10D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-final-cross-day-evening_0_52DDB7CA-ECC5-4870-8D91-7A8F2AA3B8FE.png",
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "4daf21f1eefee9009cbc02658f960f526c2769a651b0888a1522fff3d47bcd82",
+      "originalExportedFile": "1925DB99-C2EF-40A4-94BE-7BC20AC76F56.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_A44FD960-6004-4955-97B7-03B2845B0DBE.png",
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "b08acba5068086677297e4f41fe380a4e49c5ac326f6b0d4ff9750bc1c1b48f8",
+      "originalExportedFile": "F3866E87-2088-4309-BC91-8602E6C0CD22.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-compact-responded-people_0_4E7981D7-4B2D-4B4E-A197-7E294D98A2EB.png",
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "68470a61da81332ac80b8b1e0f1ed345f4d7d110ac4ab98b917ff6dca107ad1b",
+      "originalExportedFile": "EF519C67-A3E5-4B15-8780-4BEBD08FA699.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-peer-inline-availability_0_B125A417-6B52-471F-837E-6AAEF4B9E38C.png",
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "dc7fd8bfca6c074b617a85ed156be57384af7f36f43ec9f44ecfa90f951d3231",
+      "originalExportedFile": "576D64AF-C78A-4D34-8715-36F9DF366516.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_8B889DF4-4A1A-4E26-ABF8-B304AB26D55F.png",
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "1f10a0571f44dcf750d93d9e88f5b83ccafcbaa75f8a5281e05b0b6b08e3d3b5",
+      "originalExportedFile": "23531FE0-445B-41ED-BCB4-F733FE1B1279.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_335CBC96-86EC-4215-BD19-F298AE5E16CE.png",
+      "file": "phone-first-plan-contacts-received-chat-card-0f72c63f.png",
+      "sha256": "0f72c63f98e474074efc36d270e29d385ebda0806e36f0c47e5b636acf410342",
+      "originalExportedFile": "90027236-4596-40C9-97C4-3A5171810A65.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_0641728F-B74A-492A-B970-F7D590123E98.png",
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "c2bfdb89cfa2c1070db05f11c99b2a8ba3fc65f7791811964e7928a5cd1989eb",
+      "originalExportedFile": "D1A43EB8-A754-4B5A-B764-F5C5361B48CF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-select-and-send_0_A6E8EED0-303C-4FC6-A600-130804918003.png",
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "20fd247356b18c22f9f2a03e3f1bdc416a00868d8e31a4e3f1e93c972c56e7c1",
+      "originalExportedFile": "8D107524-BB0E-4BD0-817E-C26806422E2A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_0DDAEB0D-1603-4036-9596-FBC21742D4A5.png",
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "07c8f661c5a9d87c234ef93423214022c29f1afe5dab5e6d326b7d54a64f111b",
+      "originalExportedFile": "5EE42404-589E-4DED-BD37-0F5BDB0B5643.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_64AA097B-4084-4903-AED9-BCD014AC43AA.png",
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "d618cdc090bffe82813701945c582e0637083e4f24d166939560d8a8a88bdcd2",
+      "originalExportedFile": "80038223-1C19-4B5A-A4FF-463A706686BB.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-inline-information-editing_0_A5F8AFC5-5FC3-45A8-B8C6-9C378ADEF665.png",
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "89b53cc0df278d1d8906e758762b2b18819c069a0d606ebf22864990150270f4",
+      "originalExportedFile": "72680A28-6867-4F74-923E-F9C2391BE70C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_2CCA2611-015B-446C-AB35-6B8B8AC68CBB.png",
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "6f2550d019e14a7f6e76e61079718bfb5520a9415947e7fcb3f9c94cb4f7380e",
+      "originalExportedFile": "25CE61DC-8C16-4C7C-993D-088B7FEB7BA5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_5C1E1C6F-0D8B-4EF8-B6C6-9B9325EC12A4.png",
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "cf194581c25480fae7a7a48d575f4a62e90b2b04cde795d41aeb693703feaeaa",
+      "originalExportedFile": "B6D4DF62-FB8C-4BBB-9310-2E8BDCE38124.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-delete-plan-centered-keep_0_7E9D4312-DA2B-491F-B50F-1E8C85E9B705.png",
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "3ed6aaa3bb84dc0092b3fb610baf9e3ea9f70419410ac0d668a07dbcfc7cb9d3",
+      "originalExportedFile": "DDA744BF-7D28-4998-904A-10F1EEB8249B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-compact-empty-timetable_0_11B267DF-6291-41C8-9980-1F29F501FCDC.png",
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "39d7ea765a4f908bccf58f31b38cd6ce25d4bc3868c27e404b20cdd23ed3ad90",
+      "originalExportedFile": "72365AB3-E2C7-4E60-8925-462A036E4A39.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "productBasis": "baseline",
+      "capture": "phone-first-plan-creation-information-without-timetable_0_490A4D84-5CB9-4C1F-9975-70C918316F59.png",
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "4c04885975c620e76e92caa156271cbafb571057dfe15e6d0ead0b741ae35003",
+      "originalExportedFile": "CE0A640E-1D3E-4C28-B28D-B2ADAA0BAF2E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-original-route-de-light-system-max_0_B3169690-3806-405B-9447-02D29807AA70.png",
+      "file": "popup220-confirmed-original-route-de-light-system-max.png",
+      "sha256": "f2add8fd7c373f34ab33481b7c34934b7fd100517eca78ab33d4f8b874db3db4",
+      "originalExportedFile": "4A55509E-F43C-4665-B0AF-356E31E13532.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-de-light-system-max-part-2_0_EB7EAE41-82ED-4DD4-9D85-A901523F76EE.png",
+      "file": "popup220-confirmed-calendar-card-de-light-system-max-part-2.png",
+      "sha256": "83699e60aaff6f4e49bbfbf36747e301c04192e8982d161e6693ffe1d399343a",
+      "originalExportedFile": "24A992E3-CEBF-414C-B635-5ADBAB275509.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-de-light-system-max-part-1_0_ED2144C6-99D2-4022-A658-BA4990633F6B.png",
+      "file": "popup220-confirmed-calendar-card-de-light-system-max-part-1.png",
+      "sha256": "1335051638a37d2aa3e6ed12f6052f842d5a6065dca2f8bb187a908441285b5f",
+      "originalExportedFile": "1B25AC2C-AD95-48FB-A3F3-CD468234CACC.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-original-route-zh-Hans-dark-system-max_0_A9F3646E-9493-4565-9EB4-6C0BD66CD779.png",
+      "file": "popup220-confirmed-original-route-zh-Hans-dark-system-max.png",
+      "sha256": "8c8d9d52d1731dcc79efff1ba694b40c591848491f82daba39051dfa504b6320",
+      "originalExportedFile": "A11A14AA-932D-49AE-A136-054CED7D2406.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-2_0_96C08775-F2D3-4431-8CF6-E04982574BBA.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-2.png",
+      "sha256": "445de91843a70944884f8fa2daee24e54469936e7c2495cfe341c614f7651d58",
+      "originalExportedFile": "3997B3F3-0FF6-48FF-BC7E-4D36C569B868.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-1_0_702178E6-AE5C-49E6-A0ED-1253F97380B6.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-1.png",
+      "sha256": "29cf949108a3c70adefa3e9a6745b11128349ce6f7560555c4e4202a6e9fa805",
+      "originalExportedFile": "D4F8DD39-A4C0-4983-BC26-387A072DDFD1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-original-route-de-dark-normal_0_FA224D3D-2907-44DE-86C0-E1567C533354.png",
+      "file": "popup220-confirmed-original-route-de-dark-normal.png",
+      "sha256": "5fb6aa2489f508fd38a24ffeac18da59187a5cf088305535de5b7415883c13fd",
+      "originalExportedFile": "93B5ECA8-0669-47D3-8711-0F22B1661F7F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-de-dark-normal_0_DA6A4FDC-71C0-4B2E-825A-4DF5C67EF004.png",
+      "file": "popup220-confirmed-calendar-card-de-dark-normal.png",
+      "sha256": "64b042371972cfc38c96d7f3ce52220b2cd348d5f11921a539cf14b62e87f45a",
+      "originalExportedFile": "D6980E89-A3CF-49FD-9F13-51788432EBD2.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-original-route-zh-Hans-light-normal_0_8F972CEC-0448-4F31-B9B3-243ED0B1D8B8.png",
+      "file": "popup220-confirmed-original-route-zh-Hans-light-normal.png",
+      "sha256": "573c1b10db3d6a3be032f20e57942f317d6dcf51dd3f8bfbadd8f394f5af0e67",
+      "originalExportedFile": "E0006952-D188-42B9-AAD4-6E60277D83DC.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "card",
+      "productBasis": "baseline",
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-light-normal_0_53A98BAB-3BEF-414B-8854-8FCEE5D8E854.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-light-normal.png",
+      "sha256": "120cb83c5a5f222d4df2bbdb77f4b628aba4f178c0a82de239ad773b8d11f82c",
+      "originalExportedFile": "76490574-2111-4819-8F7C-A748FDF68AA3.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-calendar-readonly-end-de-dark-normal_0_D619C465-3815-4E8C-8498-F8510AED03F7.png",
+      "file": "popup220-calendar-readonly-end-de-dark-normal.png",
+      "sha256": "de96a9d8019f8df13ec731b2e6f14ffe34d850588835188fb690175940354dd4",
+      "originalExportedFile": "41A220C1-805D-4FF9-A357-42611E02EB8A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-calendar-readonly-detent-and-start-de-dark-normal_0_70FA624C-4A79-4634-8C40-77E55C4D48FA.png",
+      "file": "popup220-calendar-readonly-detent-and-start-de-dark-normal.png",
+      "sha256": "d0b96a148a181d648202bb5a0c32a4370741e6f9440cf3aba1acb3a8cf921fc2",
+      "originalExportedFile": "F195A77D-F00A-43B2-BDD4-BC414093E30F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-restored-de-dark-normal_0_80729D9E-F693-4854-BD69-7F1F74147040.png",
+      "file": "popup220-appearance-discard-restored-de-dark-normal.png",
+      "sha256": "412d610e5b858e2b9918db73aabd5527cee4eeae68bcd6d6aa99866383218975",
+      "originalExportedFile": "654FBD47-337B-409B-BDE0-685A4F365AB0.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-action-1-de-dark-normal_0_0DD9A30A-07D3-474E-8B4E-F551E4F03E44.png",
+      "file": "popup220-appearance-discard-action-1-de-dark-normal.png",
+      "sha256": "a93ea6a519864bce60da72855176d7820802e3f578812efc163c7cd3426ef3d1",
+      "originalExportedFile": "45935AF7-5AF6-4552-B3F5-5E351308D89E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-action-0-de-dark-normal_0_A98270FA-E04A-4371-8799-F5C7B7989290.png",
+      "file": "popup220-appearance-discard-action-0-de-dark-normal.png",
+      "sha256": "a93ea6a519864bce60da72855176d7820802e3f578812efc163c7cd3426ef3d1",
+      "originalExportedFile": "90B07186-2E0C-4D50-B610-E9C1EF31210D.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-share-error-attempt-2-de-dark-normal_0_037364A5-594F-46A7-9E90-AF6E8447DF54.png",
+      "file": "popup220-intention-share-error-attempt-2-de-dark-normal.png",
+      "sha256": "d61239e174220d6e5d47bdc4ce25a5d993614da348831336cbc4c3d0051e9345",
+      "originalExportedFile": "5880F155-3761-44D7-A73E-7F7CCB0215E9.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-share-error-attempt-1-de-dark-normal_0_2643D47F-AB8B-4F7E-ADBD-1F8633D58268.png",
+      "file": "popup220-intention-share-error-attempt-1-de-dark-normal.png",
+      "sha256": "d61239e174220d6e5d47bdc4ce25a5d993614da348831336cbc4c3d0051e9345",
+      "originalExportedFile": "1590DD5B-22C5-4449-B22B-66F03BB3BCDA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-delete-action-1-de-dark-normal_0_F54AB3F2-BAF6-495F-95BA-6105A4A3CFEE.png",
+      "file": "popup220-intention-delete-action-1-de-dark-normal.png",
+      "sha256": "4dc9d0d366ee450c95b737404e43ae7f8dffc2c8c55e48fbc5d38bd6188d7a1f",
+      "originalExportedFile": "85EDE3DB-C055-481D-92BC-6DCDC7DE10DD.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-delete-action-0-de-dark-normal_0_AD5A467F-B91C-4127-B542-B1F3D3C149FA.png",
+      "file": "popup220-intention-delete-action-0-de-dark-normal.png",
+      "sha256": "4dc9d0d366ee450c95b737404e43ae7f8dffc2c8c55e48fbc5d38bd6188d7a1f",
+      "originalExportedFile": "F0717105-5992-4D4B-8D9E-B6A2F97C7215.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-calendar-readonly-end-zh-Hans-light-normal_0_27A513B1-BAA1-4310-ABB0-45BFE91E12CA.png",
+      "file": "popup220-calendar-readonly-end-zh-Hans-light-normal.png",
+      "sha256": "a08fbfd8aaf32576313aa5153c5a7164d75101fbbbbc682e2b4bfc2a29c9c56e",
+      "originalExportedFile": "2B053E6A-7E7C-4391-9415-B5EED88F6B24.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-calendar-readonly-detent-and-start-zh-Hans-light-normal_0_B1F1119F-25A4-4C55-AFAB-02A14FEECE83.png",
+      "file": "popup220-calendar-readonly-detent-and-start-zh-Hans-light-normal.png",
+      "sha256": "186687b6692987273d37c5f7960890c6662ecb5d097e8e0638c77a92cbfdb55a",
+      "originalExportedFile": "C792B03B-F38E-4A9A-847D-7EAF22316762.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-restored-zh-Hans-light-normal_0_7D95004B-5545-47D9-91E9-0D1E9FC9F498.png",
+      "file": "popup220-appearance-discard-restored-zh-Hans-light-normal.png",
+      "sha256": "c5c131d362bea8a97702eacec5342f502ab8806a1885a664cc9bf7d0a3d185f1",
+      "originalExportedFile": "3559EEF0-A7C1-4100-BACC-11AAE0F46498.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-action-1-zh-Hans-light-normal_0_B198AE05-4D46-423F-B2C2-577570D3AF17.png",
+      "file": "popup220-appearance-discard-action-1-zh-Hans-light-normal.png",
+      "sha256": "2dd13e46fb473af92ffd1c7a47bac791ca1a6733b8487d58697de8745d5dbaa6",
+      "originalExportedFile": "A7E2E646-3273-446F-A16B-B28CBCFB7B34.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-appearance-discard-action-0-zh-Hans-light-normal_0_8718B256-8570-4924-BAEB-FEC16CB0E10A.png",
+      "file": "popup220-appearance-discard-action-0-zh-Hans-light-normal.png",
+      "sha256": "2dd13e46fb473af92ffd1c7a47bac791ca1a6733b8487d58697de8745d5dbaa6",
+      "originalExportedFile": "A7D9D0F4-9003-4A5B-B3A0-D0DF3D08E686.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-share-error-attempt-2-zh-Hans-light-normal_0_093DB986-5499-4A42-A606-5536B7FF7B0F.png",
+      "file": "popup220-intention-share-error-attempt-2-zh-Hans-light-normal.png",
+      "sha256": "235bcc5bbce0b254306e32329529666e9332c5d7eb6bc0d16ff578ca663071e8",
+      "originalExportedFile": "456C986E-4750-43C2-AB19-C2348C2FCC3C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-share-error-attempt-1-zh-Hans-light-normal_0_CC9CA87F-472C-4D9A-A877-6AC6D99F7FF4.png",
+      "file": "popup220-intention-share-error-attempt-1-zh-Hans-light-normal.png",
+      "sha256": "235bcc5bbce0b254306e32329529666e9332c5d7eb6bc0d16ff578ca663071e8",
+      "originalExportedFile": "40DF8C71-F85E-4B20-8877-700C473470EA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-delete-action-1-zh-Hans-light-normal_0_A1B89453-0349-401C-81A0-913D9FC3C39F.png",
+      "file": "popup220-intention-delete-action-1-zh-Hans-light-normal.png",
+      "sha256": "25978fd0ad1cab2bd7a119531a64c0c14f6aa942a5558acb8f203d470c02539a",
+      "originalExportedFile": "4BE420D1-C965-4C27-95D5-48EA9B536747.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-prompts",
+      "productBasis": "baseline",
+      "capture": "popup220-intention-delete-action-0-zh-Hans-light-normal_0_E07EA0A2-0722-4DCE-9167-30DBE107C900.png",
+      "file": "popup220-intention-delete-action-0-zh-Hans-light-normal.png",
+      "sha256": "25978fd0ad1cab2bd7a119531a64c0c14f6aa942a5558acb8f203d470c02539a",
+      "originalExportedFile": "0D188C14-9EB5-46AB-B6F0-70226C10BB7A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-menus",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-anchored-ui-connection-nora-de-dark-normal_0_C1D65856-6819-4009-BE47-47948AA39E13.png",
+      "file": "popup220-inbox-anchored-ui-connection-nora-de-dark-normal.png",
+      "sha256": "9038993fe3d4acb3d89f6d066d48a6545ec0a57c1507a56610bc5d369cf66e75",
+      "originalExportedFile": "F3AEC48F-694A-487A-A395-10988EEBE0AE.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-menus",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-anchored-ui-connection-de-dark-normal_0_D15ADD3B-BC9D-42D8-932D-36AA52803C44.png",
+      "file": "popup220-inbox-anchored-ui-connection-de-dark-normal.png",
+      "sha256": "ef0dfef4d4c9043f67420e280e679bea4e76f4bb9c142570ffa54bd3ff215a9e",
+      "originalExportedFile": "9391DA48-528C-401F-A6BB-1004579344DA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-menus",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-anchored-ui-connection-nora-zh-Hans-light-normal_0_162A1D05-3C39-4698-A13E-94BB5EA767D8.png",
+      "file": "popup220-inbox-anchored-ui-connection-nora-zh-Hans-light-normal.png",
+      "sha256": "45f562ca58724ea73c3155022ceb6c08036ff84726619cc27e21539256f7b934",
+      "originalExportedFile": "DB2AEDFF-1A96-41EC-B431-A0D0F82F8BD3.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "ordinary-menus",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-anchored-ui-connection-zh-Hans-light-normal_0_235001C9-ED34-4810-905C-97F8E905D60A.png",
+      "file": "popup220-inbox-anchored-ui-connection-zh-Hans-light-normal.png",
+      "sha256": "6800e94c57818f005181375a3d401b010cd10c8a575efb15b51695fdf9bef187",
+      "originalExportedFile": "BE1E99EF-A4D9-4FBA-BA0B-78D1B0484FA4.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-calendar-readonly-end-zh-Hans-dark-system-max_0_2159B4DA-9D82-4A9D-A23E-7A3B6B968767.png",
+      "file": "popup220-calendar-readonly-end-zh-Hans-dark-system-max.png",
+      "sha256": "2ae01a8886101cd7fe258ecf3cfa3fcc79a84ab607801bd1c065344e8706f2e4",
+      "originalExportedFile": "3B0D776B-50FE-4CAC-B926-97D1A12ACEE8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-calendar-readonly-detent-and-start-zh-Hans-dark-system-max_0_68ED297F-CF21-4EA1-9F96-1A0987167C40.png",
+      "file": "popup220-calendar-readonly-detent-and-start-zh-Hans-dark-system-max.png",
+      "sha256": "057d180de1cbf8102bf7f38f3a334c93c5b0bf9ca243d909e7f62f87ff8cdb78",
+      "originalExportedFile": "04896A36-9656-4308-86B0-B6B5E43885D1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-appearance-discard-restored-zh-Hans-dark-system-max_0_B72F6E8B-5B6A-402E-B9A6-88090DFA4A28.png",
+      "file": "popup220-appearance-discard-restored-zh-Hans-dark-system-max.png",
+      "sha256": "260e98881fbc01ca1ffb3594636bbd60247a649e358fdd85d859d7c582952dab",
+      "originalExportedFile": "8DFA4B66-D3C5-48CE-B0AE-51E19BD7D5D9.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-appearance-discard-action-1-zh-Hans-dark-system-max_0_EA86DB02-2C82-45A7-85CF-D58CD72D94AC.png",
+      "file": "popup220-appearance-discard-action-1-zh-Hans-dark-system-max.png",
+      "sha256": "f6146b2efffe3073b033d37d7619066d5c0d12d1c3c42847131449915f6ac682",
+      "originalExportedFile": "912E47E9-6259-43C4-AF6E-41716E49CEE1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-appearance-discard-action-0-zh-Hans-dark-system-max_0_D7F7D47D-F861-429A-8D4F-9064E63F1ACB.png",
+      "file": "popup220-appearance-discard-action-0-zh-Hans-dark-system-max.png",
+      "sha256": "f6146b2efffe3073b033d37d7619066d5c0d12d1c3c42847131449915f6ac682",
+      "originalExportedFile": "B3135664-D769-4F4F-9362-16EFDF221EA6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-share-error-attempt-2-zh-Hans-dark-system-max_0_715CE4AB-5F1F-48F8-95F2-AA2469D74193.png",
+      "file": "popup220-intention-share-error-attempt-2-zh-Hans-dark-system-max.png",
+      "sha256": "3e40d0187bcaff2228f8e3af47531133366b52ccb064b30a19558e6413e0989f",
+      "originalExportedFile": "4D366B7F-7A01-4FC7-AB7B-3D37104285C8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-share-error-attempt-1-zh-Hans-dark-system-max_0_F616A8A8-F228-4D12-BCF2-E3904656F696.png",
+      "file": "popup220-intention-share-error-attempt-1-zh-Hans-dark-system-max.png",
+      "sha256": "3e40d0187bcaff2228f8e3af47531133366b52ccb064b30a19558e6413e0989f",
+      "originalExportedFile": "82DEF4C2-A28B-4FCE-8D9C-35586C0E6A45.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-delete-action-1-zh-Hans-dark-system-max_0_75B9B8EA-9D7A-4738-811B-D4C170EAD233.png",
+      "file": "popup220-intention-delete-action-1-zh-Hans-dark-system-max.png",
+      "sha256": "ebb9d873386454e179f3cc33ff9473eaa7eb37f56debf88a938163d55e5a77c8",
+      "originalExportedFile": "45A92F48-E9C2-4267-BC27-9ABB1B1CDE3F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-delete-action-0-zh-Hans-dark-system-max_0_6C05CCDD-B9F3-4FC2-ADCB-31F3080E947B.png",
+      "file": "popup220-intention-delete-action-0-zh-Hans-dark-system-max.png",
+      "sha256": "ebb9d873386454e179f3cc33ff9473eaa7eb37f56debf88a938163d55e5a77c8",
+      "originalExportedFile": "3E02CF1C-8776-4914-85BB-5C071EB90853.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max_0_3F31DB95-0EAB-45D6-A309-73DD2389729B.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "4C2B6A4B-8A42-4276-BD8B-86494FDF0CDA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-zh-Hans-dark-system-max_0_B478274E-63E4-4DE1-842C-71D2B1743B3F.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "9ED38EC7-91CD-4404-9E14-7966CF78261E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-zh-Hans-dark-system-max_0_3AC64202-A7B3-4A2F-B74F-EC1933DE56F8.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "05023B8A-B5E1-4FB0-8F83-5B2637D470E6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max_0_E6DFA56F-61A0-4285-8A05-7D6E88AE3792.png",
+      "file": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "16542561-3225-4BED-9D94-1A2633F27F25.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-zh-Hans-dark-system-max_0_4F564614-70F1-49A7-9772-B493BCDEEEA1.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "A1CEA474-A9A1-4276-959A-C776C4920B3E.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "chinese-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-zh-Hans-dark-system-max_0_75275982-3C5E-4A35-9C03-B8268E36D748.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "CB4D58A4-6B7E-4637-9F8F-5E996B367D1A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-calendar-readonly-end-de-light-system-max_0_0128D7F9-CDD8-4BB4-ABA8-5EA5321073EA.png",
+      "file": "popup220-calendar-readonly-end-de-light-system-max.png",
+      "sha256": "04f83afb61110123ba2a275cf306e1aacc39f6967a3e570f18d063926ab59d96",
+      "originalExportedFile": "784F759D-EA1A-451E-8135-778C62CCD179.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-calendar-readonly-detent-and-start-de-light-system-max_0_F90B3418-948A-4983-B7B0-0D3C0F6DA5A0.png",
+      "file": "popup220-calendar-readonly-detent-and-start-de-light-system-max.png",
+      "sha256": "2a4c7ea06b533faaf7daab4164a672bb02886998ce1a4e79200992624e7496ba",
+      "originalExportedFile": "714556BB-AC7F-4EB3-AD6C-423D49C79AAA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-appearance-discard-restored-de-light-system-max_0_A25CA29A-AB44-4B37-9352-C55BC068F3EF.png",
+      "file": "popup220-appearance-discard-restored-de-light-system-max.png",
+      "sha256": "38312058459efae1dcdd1b1401b5233c2a92bcae1914a235592289bd810d75c9",
+      "originalExportedFile": "A19BBE67-FE48-45D2-8E1B-D0725034E764.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-share-error-attempt-2-de-light-system-max_0_07D28DFB-BDEE-4DE7-AFC4-513DA5F6D6D9.png",
+      "file": "popup220-intention-share-error-attempt-2-de-light-system-max.png",
+      "sha256": "efc4e2fe33e4e4f86e7f86d8e720e8a61007a187f5799e4f39baac82bbee2117",
+      "originalExportedFile": "7F2A1346-0C36-4B89-A9C4-CF69CFF7DF76.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-share-error-attempt-1-de-light-system-max_0_E69E94EA-DAC0-4F96-A87A-BB32D5486983.png",
+      "file": "popup220-intention-share-error-attempt-1-de-light-system-max.png",
+      "sha256": "efc4e2fe33e4e4f86e7f86d8e720e8a61007a187f5799e4f39baac82bbee2117",
+      "originalExportedFile": "0237EEBC-8E08-4AA7-96E6-8B147BBDFEA6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-delete-action-1-de-light-system-max_0_656EC3A1-FF98-44F0-86E7-408D5E419143.png",
+      "file": "popup220-intention-delete-action-1-de-light-system-max.png",
+      "sha256": "80132ae7afe5bce22283aa5630ee326f0cae16f27aeef685a8c55afcb7a39350",
+      "originalExportedFile": "2D10518B-5E9B-4E4A-B305-07D0CD33FA40.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-delete-action-0-de-light-system-max_0_A97A5A4B-1A1B-44A2-94CA-DFCE31A314BB.png",
+      "file": "popup220-intention-delete-action-0-de-light-system-max.png",
+      "sha256": "d09127530eefcada3671be3412c3b9522975692ffaca277ef42f1eaac6492947",
+      "originalExportedFile": "09778681-E4CD-4D5E-953E-C6321E114E92.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-intention-delete-initial-scroll-content-de-light-system-max_0_170FAD32-3F1A-490B-AF7D-6F09D3D2CAB4.png",
+      "file": "popup220-intention-delete-initial-scroll-content-de-light-system-max.png",
+      "sha256": "00b5cb10c8723b8c60c488ff51f4e879e92fbc7476b0c9be17aee04091cdefc2",
+      "originalExportedFile": "4A7432CD-57C0-4B0B-AE84-C8EB92A76A1C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-de-light-system-max_0_78FE7D84-11D6-4A11-9C84-F7877B108D50.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-de-light-system-max.png",
+      "sha256": "812155625cdf234e1f210050b99e05b61b80183035f55e0ecc8e42c8d462b6b0",
+      "originalExportedFile": "94796DA9-B1EB-4156-9E57-9AC5896CC061.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-de-light-system-max_0_C56785FC-EEEF-4999-82C6-FAB9A6E0A31C.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-de-light-system-max.png",
+      "sha256": "812155625cdf234e1f210050b99e05b61b80183035f55e0ecc8e42c8d462b6b0",
+      "originalExportedFile": "98C8C328-B6B0-4045-9C86-9ADBFFF92A19.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-de-light-system-max_0_AC1EBC4A-5A1A-435E-B2D8-536530A76C90.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-de-light-system-max.png",
+      "sha256": "812155625cdf234e1f210050b99e05b61b80183035f55e0ecc8e42c8d462b6b0",
+      "originalExportedFile": "D2F1D1A8-3ECB-44DC-BF83-4EBC823E9AC1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-de-light-system-max_0_EE7EFDD0-9DEA-42F7-B475-BD16AD246B24.png",
+      "file": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-de-light-system-max.png",
+      "sha256": "ab388dc0eb4f67f78723dc098cdcda7932020eb8b4146d232a779e6f3a3dae2b",
+      "originalExportedFile": "C8EF2F71-A45A-485B-8A12-398C7CC04FD7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-de-light-system-max_0_9CFEBEBF-5314-4A0C-93C9-CDBD391935C0.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-de-light-system-max.png",
+      "sha256": "ab388dc0eb4f67f78723dc098cdcda7932020eb8b4146d232a779e6f3a3dae2b",
+      "originalExportedFile": "3F065FF9-CB28-4598-9732-6C3A3ED95489.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-maximum",
+      "productBasis": "menu-width",
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-de-light-system-max_0_C442DD07-45EB-4CD4-BCDD-F6AFEFDAEAEB.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-de-light-system-max.png",
+      "sha256": "ab388dc0eb4f67f78723dc098cdcda7932020eb8b4146d232a779e6f3a3dae2b",
+      "originalExportedFile": "54DAF9E8-B6BB-48C9-A207-C4EF70BB8CB0.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-appearance",
+      "productBasis": "final-icon",
+      "capture": "popup220-appearance-discard-restored-de-light-system-max_0_0BBA02F5-40CE-481B-B09A-4D051966C03A.png",
+      "file": "popup220-appearance-discard-restored-de-light-system-max.png",
+      "sha256": "094ad9892b7310db46e054f71adcdde6a96ac9a07b68d862d2ca434ea25d3eb0",
+      "originalExportedFile": "6578EA94-2AE0-4037-9758-111D869E3C12.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-appearance",
+      "productBasis": "final-icon",
+      "capture": "popup220-appearance-discard-action-1-de-light-system-max_0_666DC686-2C84-4A23-B71E-3065B2AD13C9.png",
+      "file": "popup220-appearance-discard-action-1-de-light-system-max.png",
+      "sha256": "b7a4f11e1cbf8c6bb34f0d31bdc51ea192189e916a8b8da55d1e8ba0d13ead3e",
+      "originalExportedFile": "FC13B707-56AC-4E86-86F7-93BD4F5DD693.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "german-appearance",
+      "productBasis": "final-icon",
+      "capture": "popup220-appearance-discard-action-0-de-light-system-max_0_E2462DA7-AB58-418A-82D4-977A70938BC6.png",
+      "file": "popup220-appearance-discard-action-0-de-light-system-max.png",
+      "sha256": "b7a4f11e1cbf8c6bb34f0d31bdc51ea192189e916a8b8da55d1e8ba0d13ead3e",
+      "originalExportedFile": "08C84101-358C-4163-859F-C246B0D14817.png",
+      "associatedWithFailure": false
+    }
+  ],
+  "resolvedNewVisualFindings": [
+    {
+      "id": "normal-chinese-inbox-menu-width",
+      "initialReview": "popup-normal-visual-review.json",
+      "initialCapturesExcluded": 4,
+      "repair": "menu-width-repair.json",
+      "acceptedFinalReview": "menus-final-visual-review.json",
+      "status": "closed"
+    },
+    {
+      "id": "german-max-new-discard-action-single-n",
+      "initialReview": "popup-de-final-visual-review.json",
+      "initialCapturesExcluded": 2,
+      "repair": "appearance-icon-repair.json",
+      "acceptedFinalReview": "appearance-final-visual-review.json",
+      "status": "closed"
+    }
+  ]
+}

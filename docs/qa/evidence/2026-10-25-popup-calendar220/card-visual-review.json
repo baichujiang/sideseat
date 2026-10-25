@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "stage": "Preview220 confirmed calendar-card focused acceptance",
+  "reviewedAt": "2026-10-25T12:24:14.319085+00:00",
+  "reviewer": "/root/confirmed_calendar_date",
+  "imageCount": 10,
+  "uniqueOriginalPixelHashes": 10,
+  "reviewMethod": "All 10 original exported PNGs opened with view_image, inspected individually, and SHA-256 checked against index.json. No image edited, cropped, composited, or regenerated.",
+  "result": "PASS for the confirmed-card calendar hierarchy and original whole-card navigation destination in the four supplied appearance/text combinations, with explicit limits below.",
+  "combinations": [
+    "zh-Hans light normal",
+    "de dark normal",
+    "zh-Hans dark actual AccessibilityXXXL",
+    "de light actual AccessibilityXXXL"
+  ],
+  "confirmedCardCaptureCount": 6,
+  "originalRouteCaptureCount": 4,
+  "limitations": [
+    "The fixtures intentionally display network connection failed/retry above the confirmed card; screenshots establish fixture layout rather than live backend success.",
+    "Maximum-font confirmed cards are inspected using two continuous vertical segments each; the card is not asserted to fit the screen in one frame.",
+    "Original route screenshots prove the existing destination only; they do not constitute full private-chat maximum-font or whole-app localization acceptance.",
+    "Device AssistiveTouch appears in the screenshots and remains an OS-controlled overlay.",
+    "This screenshot set contains the same-day 27 October 18:00–19:30 fixture. Cross-day/year/zone preservation is supported by unchanged rendering branches and separate source/date-format verification, not new cross-day/year/zone pixels in these 10 captures."
+  ],
+  "existingOutOfScopeObservations": [
+    {
+      "file": "popup220-confirmed-original-route-de-dark-normal.png",
+      "observation": "The original private-chat “Neue Zeit vorschlagen” action wraps the final n onto a separate line. This component was not changed by the confirmed-card date work; no claim of complete German private-chat layout acceptance."
+    }
+  ],
+  "images": [
+    {
+      "capture": "popup220-confirmed-original-route-de-light-system-max_0_B3169690-3806-405B-9447-02D29807AA70.png",
+      "file": "popup220-confirmed-original-route-de-light-system-max.png",
+      "sha256": "f2add8fd7c373f34ab33481b7c34934b7fd100517eca78ab33d4f8b874db3db4",
+      "originalExportedFile": "4A55509E-F43C-4665-B0AF-356E31E13532.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS FOR ROUTE SCOPE: screenshot is the original private conversation after tapping the confirmed overview card, with existing conversation header, messages and composer visible.",
+      "scope": "Navigation destination only. This capture does not establish a full private-conversation plan card maximum-font visual acceptance, full invitation behavior, or calendar data correctness.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-de-light-system-max-part-2_0_EB7EAE41-82ED-4DD4-9D85-A901523F76EE.png",
+      "file": "popup220-confirmed-calendar-card-de-light-system-max-part-2.png",
+      "sha256": "83699e60aaff6f4e49bbfbf36747e301c04192e8982d161e6693ffe1d399343a",
+      "originalExportedFile": "24A992E3-CEBF-414C-B635-5ADBAB275509.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: second continuous viewport segment shows the full calendar date hierarchy, complete 18:00–19:30, activity name, status, location and participant/avatar through the rounded card bottom; no clipped card text or horizontal overflow.",
+      "scope": "True system AccessibilityXXXL, confirmed card accepted over its two continuous scroll segments, not a claim that the entire card fits a single viewport. The fixed create dock/native tab bar and device AssistiveTouch are present; no missing field is inferred from first-segment scrolling.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-de-light-system-max-part-1_0_ED2144C6-99D2-4022-A658-BA4990633F6B.png",
+      "file": "popup220-confirmed-calendar-card-de-light-system-max-part-1.png",
+      "sha256": "1335051638a37d2aa3e6ed12f6052f842d5a6065dca2f8bb187a908441285b5f",
+      "originalExportedFile": "1B25AC2C-AD95-48FB-A3F3-CD468234CACC.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: first continuous viewport segment shows localized month/weekday, prominent 27, complete 18:00–19:30, activity name and status. Card uses the original accessibility vertical layout; lower content is completed in the paired second segment.",
+      "scope": "True system AccessibilityXXXL, confirmed card accepted over its two continuous scroll segments, not a claim that the entire card fits a single viewport. The fixed create dock/native tab bar and device AssistiveTouch are present; no missing field is inferred from first-segment scrolling.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-original-route-zh-Hans-dark-system-max_0_A9F3646E-9493-4565-9EB4-6C0BD66CD779.png",
+      "file": "popup220-confirmed-original-route-zh-Hans-dark-system-max.png",
+      "sha256": "8c8d9d52d1731dcc79efff1ba694b40c591848491f82daba39051dfa504b6320",
+      "originalExportedFile": "A11A14AA-932D-49AE-A136-054CED7D2406.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS FOR ROUTE SCOPE: screenshot is the original private conversation after tapping the confirmed overview card, with existing conversation header, messages and composer visible.",
+      "scope": "Navigation destination only. This capture does not establish a full private-conversation plan card maximum-font visual acceptance, full invitation behavior, or calendar data correctness.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-2_0_96C08775-F2D3-4431-8CF6-E04982574BBA.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-2.png",
+      "sha256": "445de91843a70944884f8fa2daee24e54469936e7c2495cfe341c614f7651d58",
+      "originalExportedFile": "3997B3F3-0FF6-48FF-BC7E-4D36C569B868.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: second continuous viewport segment shows the full calendar date hierarchy, complete 18:00–19:30, activity name, status, location and participant/avatar through the rounded card bottom; no clipped card text or horizontal overflow.",
+      "scope": "True system AccessibilityXXXL, confirmed card accepted over its two continuous scroll segments, not a claim that the entire card fits a single viewport. The fixed create dock/native tab bar and device AssistiveTouch are present; no missing field is inferred from first-segment scrolling.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-1_0_702178E6-AE5C-49E6-A0ED-1253F97380B6.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-dark-system-max-part-1.png",
+      "sha256": "29cf949108a3c70adefa3e9a6745b11128349ce6f7560555c4e4202a6e9fa805",
+      "originalExportedFile": "D4F8DD39-A4C0-4983-BC26-387A072DDFD1.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: first continuous viewport segment shows localized month/weekday, prominent 27, complete 18:00–19:30, activity name and status. Card uses the original accessibility vertical layout; lower content is completed in the paired second segment.",
+      "scope": "True system AccessibilityXXXL, confirmed card accepted over its two continuous scroll segments, not a claim that the entire card fits a single viewport. The fixed create dock/native tab bar and device AssistiveTouch are present; no missing field is inferred from first-segment scrolling.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-original-route-de-dark-normal_0_FA224D3D-2907-44DE-86C0-E1567C533354.png",
+      "file": "popup220-confirmed-original-route-de-dark-normal.png",
+      "sha256": "5fb6aa2489f508fd38a24ffeac18da59187a5cf088305535de5b7415883c13fd",
+      "originalExportedFile": "93B5ECA8-0669-47D3-8711-0F22B1661F7F.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS FOR ROUTE SCOPE: screenshot is the original private conversation after tapping the confirmed overview card, with existing conversation header, messages and composer visible. Existing unrelated German proposal action wraps “vorschlagen” with the final n on a separate line; record retained as an out-of-scope original chat layout finding.",
+      "scope": "Navigation destination only. This capture does not establish a full private-conversation plan card maximum-font visual acceptance, full invitation behavior, or calendar data correctness.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-de-dark-normal_0_DA6A4FDC-71C0-4B2E-825A-4DF5C67EF004.png",
+      "file": "popup220-confirmed-calendar-card-de-dark-normal.png",
+      "sha256": "64b042371972cfc38c96d7f3ce52220b2cd348d5f11921a539cf14b62e87f45a",
+      "originalExportedFile": "D6980E89-A3CF-49FD-9F13-51788432EBD2.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: small localized month/weekday, prominent 27, and complete 18:00–19:30 form a clear calendar hierarchy in the leading column; activity name, status, location, participant and whole-card chevron are legible without overlap.",
+      "scope": "Confirmed-card rendering at normal Dynamic Type. The original offline fixture network error/retry state is visible above the card and is not a live-network acceptance result.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-original-route-zh-Hans-light-normal_0_8F972CEC-0448-4F31-B9B3-243ED0B1D8B8.png",
+      "file": "popup220-confirmed-original-route-zh-Hans-light-normal.png",
+      "sha256": "573c1b10db3d6a3be032f20e57942f317d6dcf51dd3f8bfbadd8f394f5af0e67",
+      "originalExportedFile": "E0006952-D188-42B9-AAD4-6E60277D83DC.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS FOR ROUTE SCOPE: screenshot is the original private conversation after tapping the confirmed overview card, with existing conversation header, messages and composer visible.",
+      "scope": "Navigation destination only. This capture does not establish a full private-conversation plan card maximum-font visual acceptance, full invitation behavior, or calendar data correctness.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    },
+    {
+      "capture": "popup220-confirmed-calendar-card-zh-Hans-light-normal_0_53A98BAB-3BEF-414B-8854-8FCEE5D8E854.png",
+      "file": "popup220-confirmed-calendar-card-zh-Hans-light-normal.png",
+      "sha256": "120cb83c5a5f222d4df2bbdb77f4b628aba4f178c0a82de239ad773b8d11f82c",
+      "originalExportedFile": "76490574-2111-4819-8F7C-A748FDF68AA3.png",
+      "associatedWithFailure": false,
+      "reviewedOriginalPixels": true,
+      "sha256Verified": true,
+      "conclusion": "PASS: small localized month/weekday, prominent 27, and complete 18:00–19:30 form a clear calendar hierarchy in the leading column; activity name, status, location, participant and whole-card chevron are legible without overlap.",
+      "scope": "Confirmed-card rendering at normal Dynamic Type. The original offline fixture network error/retry state is visible above the card and is not a live-network acceptance result.",
+      "systemOverlay": "Device AssistiveTouch appears at the right edge in these original captures. It is an OS overlay, not application drawing; no whole-device overlay-free claim."
+    }
+  ]
+}

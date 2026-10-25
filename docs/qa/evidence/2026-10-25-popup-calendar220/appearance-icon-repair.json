@@ -1,0 +1,11 @@
+{
+  "reason": "Actual German AccessibilityXXXL discard action split \u00c4nderungen as \u00c4nderunge/n because of decorative trash icon.",
+  "productDifference": "Only remove optional trash image from appearance-discard action; text, role, callback, bindings and component unchanged. Regular compact actions already did not render the icon.",
+  "changedInput": "ios-native/SideSeat/Features/Profile/ProfileAppearance.swift",
+  "beforeSHA256": "d5d3a66fd757b4b5f40c3ec6c76f3961ebc2e260646dd2ff420156473966cec0",
+  "finalSHA256": "9ca0830230a969fdb9b88038c649856a1252d6404105931671345b5852b15a17",
+  "otherProductInputsByteIdentical": 267,
+  "completeChangedFileOutsideOneArgumentByteIdentical": true,
+  "finalSupplement": "testMaximumGermanAppearanceDiscardActions; execution and original review recorded separately.",
+  "repeatScope": "Full plan/card/menus/other prompts unchanged; no unnecessary full journey repeat after decorative icon removal."
+}

@@ -1,0 +1,86 @@
+{
+  "stage": "Preview220 final automatic Inbox menu minimum width180 acceptance",
+  "reviewer": "center_product_confirmations",
+  "reviewDate": "2026-10-25",
+  "sourceIndex": "/tmp/sideseat220-private/menus-final-images/index.json",
+  "result": "pass_with_recorded_scope",
+  "needsProductFix": false,
+  "actualCaptureCount": 4,
+  "uniqueOriginalPixelsActuallyViewed": 4,
+  "exactSha256DuplicateReuses": 0,
+  "executionScope": {
+    "finalFocusedMenusCaseDurationSeconds": 55.091,
+    "caseResultReported": "passed",
+    "combinations": [
+      "zh-Hans light normal",
+      "de dark normal"
+    ],
+    "sourceScope": "Final package after the one-argument menu minimum width repair; original baseline full-flow/prompt/card evidence and exact other267-input preservation are recorded separately."
+  },
+  "resolvedFindings": [
+    {
+      "id": "normal-chinese-inbox-menu-width",
+      "status": "closed_by_final_original_pixel_review",
+      "priorReview": "popup-normal-visual-review.json",
+      "priorFourMenuCapturesRemain": "initial_visual_rejected_not_final_acceptance",
+      "actualFixEvidence": "Both final Chinese menus show 标为已读 on one complete line; the first also shows 取消置顶 on one complete line. German uses complete-word wrapping without clipping. All four menus remain adjacent to their highlighted source cards and within screen bounds."
+    }
+  ],
+  "limitations": [
+    "All4 unique final original PNGs were actually opened with view_image; no image was altered, combined, cropped or substituted.",
+    "This review accepts only ordinary-text Chinese-light/German-dark Inbox menu presentation. Maximum-text popup checks are separate and were still running when this review was written.",
+    "AssistiveTouch is an OS overlay; its background/card-edge coverage is recorded per image and excluded from complete visibility claims.",
+    "Rendered pixels establish placement and text visibility. Gesture,44pt custom action bounds and callbacks depend on the separate focused execution evidence, not screenshot inference.",
+    "The old4 narrow-menu captures remain rejected initial evidence; this review does not relabel them as final acceptance."
+  ],
+  "images": [
+    {
+      "capture": "popup220-inbox-anchored-ui-connection-nora-de-dark-normal_0_C1D65856-6819-4009-BE47-47948AA39E13.png",
+      "file": "popup220-inbox-anchored-ui-connection-nora-de-dark-normal.png",
+      "sha256": "9038993fe3d4acb3d89f6d066d48a6545ec0a57c1507a56610bc5d369cf66e75",
+      "originalExportedFile": "F3AEC48F-694A-487A-A395-10988EEBE0AE.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "actual_original_png_view_image",
+      "sha256Verified": true,
+      "result": "pass_with_recorded_scope",
+      "actualVisualScope": "深色末个会话高亮，菜单位于源卡上方；“Als gelesen / markieren”完整分词，“Anheften”完整单行，图标/文字不重叠，弹出位置保留原卡关联且不越底栏。",
+      "osOverlayLimit": "AssistiveTouch位于菜单外右侧背景/源卡上缘部分；菜单两动作无遮挡，系统覆盖源卡边缘部分不计完整像素验收。"
+    },
+    {
+      "capture": "popup220-inbox-anchored-ui-connection-de-dark-normal_0_D15ADD3B-BC9D-42D8-932D-36AA52803C44.png",
+      "file": "popup220-inbox-anchored-ui-connection-de-dark-normal.png",
+      "sha256": "ef0dfef4d4c9043f67420e280e679bea4e76f4bb9c142570ffa54bd3ff215a9e",
+      "originalExportedFile": "9391DA48-528C-401F-A6BB-1004579344DA.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "actual_original_png_view_image",
+      "sha256Verified": true,
+      "result": "pass_with_recorded_scope",
+      "actualVisualScope": "深色首个会话高亮，菜单与其上缘相邻；“Als gelesen / markieren”按完整单词自然分为两行，“Lösen”单行，左右内边距足够，未越屏或碰到底栏。",
+      "osOverlayLimit": "AssistiveTouch在菜单外右下背景，不遮挡菜单或源卡姓名/摘要。"
+    },
+    {
+      "capture": "popup220-inbox-anchored-ui-connection-nora-zh-Hans-light-normal_0_162A1D05-3C39-4698-A13E-94BB5EA767D8.png",
+      "file": "popup220-inbox-anchored-ui-connection-nora-zh-Hans-light-normal.png",
+      "sha256": "45f562ca58724ea73c3155022ceb6c08036ff84726619cc27e21539256f7b934",
+      "originalExportedFile": "DB2AEDFF-1A96-41EC-B431-A0D0F82F8BD3.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "actual_original_png_view_image",
+      "sha256Verified": true,
+      "result": "pass_with_recorded_scope",
+      "actualVisualScope": "末个诺拉会话高亮，菜单位于源卡上方；“标为已读”“置顶”均完整单行。菜单仍靠近原卡，没有移到全局中心，也未压住系统底部导航。",
+      "osOverlayLimit": "AssistiveTouch位于菜单外右侧背景/源卡上缘部分；菜单文字和两操作无遮挡，覆盖的源卡边缘不计完整像素验收。"
+    },
+    {
+      "capture": "popup220-inbox-anchored-ui-connection-zh-Hans-light-normal_0_235001C9-ED34-4810-905C-97F8E905D60A.png",
+      "file": "popup220-inbox-anchored-ui-connection-zh-Hans-light-normal.png",
+      "sha256": "6800e94c57818f005181375a3d401b010cd10c8a575efb15b51695fdf9bef187",
+      "originalExportedFile": "BE1E99EF-A4D9-4FBA-BA0B-78D1B0484FA4.png",
+      "associatedWithFailure": false,
+      "reviewMethod": "actual_original_png_view_image",
+      "sha256Verified": true,
+      "result": "pass_with_recorded_scope",
+      "actualVisualScope": "首个米娜会话高亮，菜单贴在源卡上方并保留小间隔；“标为已读”“取消置顶”均完整单行，图标/分隔线/文字有足够内边距，无屏边或底栏溢出。",
+      "osOverlayLimit": "AssistiveTouch在右侧萨拉行附近背景，不遮挡新菜单或源卡主要内容。"
+    }
+  ]
+}

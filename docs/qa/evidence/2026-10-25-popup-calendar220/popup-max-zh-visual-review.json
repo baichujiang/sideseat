@@ -1,0 +1,214 @@
+{
+  "stage": "Preview220 Chinese actual maximum text popup presentation, final180 menu-width package",
+  "reviewer": "center_product_confirmations",
+  "reviewDate": "2026-10-25",
+  "sourceIndex": "/tmp/sideseat220-private/popup-max-zh-images/index.json",
+  "result": "pass_for_recorded_placement_content_reachability_and_discard_scope_with_existing_visual_limits",
+  "needsNewProductPositionFix": false,
+  "actualCaptureCount": 15,
+  "uniqueOriginalPixelsActuallyViewed": 8,
+  "exactSha256DuplicateReuses": 7,
+  "combination": "zh-Hans dark actual system AccessibilityXXXL",
+  "executionScope": {
+    "originRun": "max-final",
+    "wholeCaseDurationSeconds": 263.121,
+    "wholeCaseResult": "failed in later German iteration because test helper searched descendants for ScrollView while SSActionPrompt itself was the accessible ScrollView",
+    "wholeCaseClaimedPassed": false,
+    "completedChineseIteration": "Independent Chinese launch, both object menus and all rows, deletion/share-error confirmations, appearance keep/discard/restore and large Calendar start/end scrolling, then terminate completed before the later German helper failure.",
+    "productChangedForThatFailure": false,
+    "sourcePackage": "Same final180-width frozen App as final ordinary-menu acceptance; German group requires separate supplemental execution."
+  },
+  "actualVisualChecks": [
+    "Both large object panels show complete read/pin-or-unpin/cancel rows.",
+    "Global confirmation cards use safe-area centering; complete Chinese title/message/actions fit in the visible card.",
+    "Unsaved appearance is still selected beneath confirmation, and reopening after discard restores classic plus disabled Save.",
+    "Calendar chooses the large detent and complete start/end dates remain readable across the actual scroll pair."
+  ],
+  "existingVisualLimits": [
+    "The preserved maximum-text object panel icons are very large and close to the first action character; only placement, complete labels and action reachability are accepted here, not a general icon-spacing redesign.",
+    "The existing native Calendar Edit toolbar wraps Chinese 编/辑. Its original date icons are also large/close to the begin/end labels. These are outside complete toolbar/date-component typography acceptance.",
+    "Custom prompt action icons grow with text and can sit close to labels; labels themselves are complete in these originals. No claim of complete maximum-font icon-spacing polish."
+  ],
+  "limitations": [
+    "All8 unique original PNGs were actually opened with view_image;7 exact SHA256 duplicates reuse matching original pixel reviews. No image was altered.",
+    "This Chinese-dark actual-maximum iteration is valid completed scope, but the263.121s aggregate case failed later; it is not relabeled Passed.",
+    "44pt custom hit targets and actual keep/discard/close outcomes are execution assertions reported separately, not inferred from screenshot font size.",
+    "AssistiveTouch-covered card-edge/blank pixels and all offscreen content are excluded from complete visibility claims.",
+    "Global centering follows the system safe-area context;6.5pt physical-window asymmetry alone is not treated as a position defect.",
+    "The offline share failure is intentional fixture presentation, not a live share/API success result; German maximum, whole-App and full-header layout are separate."
+  ],
+  "images": [
+    {
+      "capture": "popup220-calendar-readonly-end-zh-Hans-dark-system-max_0_2159B4DA-9D82-4A9D-A23E-7A3B6B968767.png",
+      "file": "popup220-calendar-readonly-end-zh-Hans-dark-system-max.png",
+      "sha256": "2ae01a8886101cd7fe258ecf3cfa3fcc79a84ab607801bd1c065344e8706f2e4",
+      "originalExportedFile": "3B0D776B-50FE-4CAC-B926-97D1A12ACEE8.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "large详情已真实上滚，开始13:58与结束14:58完整位于视口，底部露出持续时间段，说明结束可滚到且非被中等面板截断；固定Done/旧toolbar仍可见。",
+      "osOverlayLimit": "AssistiveTouch在开始时间右侧空白，日期文字无遮挡；旧编/辑换行与原图标/标签紧邻不作为全header/全日期组件美化通过。"
+    },
+    {
+      "capture": "popup220-calendar-readonly-detent-and-start-zh-Hans-dark-system-max_0_68ED297F-CF21-4EA1-9F96-1A0987167C40.png",
+      "file": "popup220-calendar-readonly-detent-and-start-zh-Hans-dark-system-max.png",
+      "sha256": "057d180de1cbf8102bf7f38f3a334c93c5b0bf9ca243d909e7f62f87ff8cdb78",
+      "originalExportedFile": "04896A36-9656-4308-86B0-B6B5E43885D1.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "日历只读详情采用large展开；活动Weekly planning/个人日程、开始2026年10月25日13:58、结束2026年10月25日14:58均可见，日期按两行完整显示。右上原编辑toolbar逐字换行；原日期图标与开始/结束标签距离紧，单列原排版限制。",
+      "osOverlayLimit": "AssistiveTouch在开始日期右侧近屏边处，主要日期/时间文字完整；下方屏外时长与其他字段不在首张范围。"
+    },
+    {
+      "capture": "popup220-appearance-discard-restored-zh-Hans-dark-system-max_0_B72F6E8B-5B6A-402E-B9A6-88090DFA4A28.png",
+      "file": "popup220-appearance-discard-restored-zh-Hans-dark-system-max.png",
+      "sha256": "260e98881fbc01ca1ffb3594636bbd60247a649e358fdd85d859d7c582952dab",
+      "originalExportedFile": "8DFA4B66-D3C5-48CE-B0AE-51E19BD7D5D9.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "丢弃后重开显示经典勾、玫瑰未选，保存灰禁用；应用主题/个人配色正文仍保持真实系统最大字且可滚动，未残留确认卡。",
+      "osOverlayLimit": "AssistiveTouch在右侧段落/分组间空白，经典勾与保存禁用无遮挡；上方滚出屏的资料字段不算缺失或完整验收。"
+    },
+    {
+      "capture": "popup220-appearance-discard-action-1-zh-Hans-dark-system-max_0_EA86DB02-2C82-45A7-85CF-D58CD72D94AC.png",
+      "file": "popup220-appearance-discard-action-1-zh-Hans-dark-system-max.png",
+      "sha256": "f6146b2efffe3073b033d37d7619066d5c0d12d1c3c42847131449915f6ac682",
+      "originalExportedFile": "912E47E9-6259-43C4-AF6E-41716E49CEE1.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "个性化Sheet上的放弃更改确认在全局安全区中部，标题、继续编辑、带垃圾桶的放弃更改动作均完整纵排；背景玫瑰仍打勾，未保存更改未被提前清除。",
+      "osOverlayLimit": "AssistiveTouch位于确认卡右下边缘外与少量边界区域，不遮挡操作文字。动作图标随大字放大，图文距离偏紧，不作通用图标间距验收。"
+    },
+    {
+      "capture": "popup220-appearance-discard-action-0-zh-Hans-dark-system-max_0_D7F7D47D-F861-429A-8D4F-9064E63F1ACB.png",
+      "file": "popup220-appearance-discard-action-0-zh-Hans-dark-system-max.png",
+      "sha256": "f6146b2efffe3073b033d37d7619066d5c0d12d1c3c42847131449915f6ac682",
+      "originalExportedFile": "B3135664-D769-4F4F-9362-16EFDF221EA6.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "个性化Sheet上的放弃更改确认在全局安全区中部，标题、继续编辑、带垃圾桶的放弃更改动作均完整纵排；背景玫瑰仍打勾，未保存更改未被提前清除。",
+      "osOverlayLimit": "AssistiveTouch位于确认卡右下边缘外与少量边界区域，不遮挡操作文字。动作图标随大字放大，图文距离偏紧，不作通用图标间距验收。",
+      "reusesVisualReviewOf": "popup220-appearance-discard-action-1-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-intention-share-error-attempt-2-zh-Hans-dark-system-max_0_715CE4AB-5F1F-48F8-95F2-AA2469D74193.png",
+      "file": "popup220-intention-share-error-attempt-2-zh-Hans-dark-system-max.png",
+      "sha256": "3e40d0187bcaff2228f8e3af47531133366b52ccb064b30a19558e6413e0989f",
+      "originalExportedFile": "4D366B7F-7A01-4FC7-AB7B-3D37104285C8.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "分享意愿错误卡居中，完整原英文网络错误按整词换行，中文好按钮完整；没有在较小源卡附近挤出狭窄弹框。",
+      "osOverlayLimit": "AssistiveTouch覆盖好按钮右上空白部分；标题/错误正文/好文字均无遮挡。原NSError英文不作整App本地化结论。"
+    },
+    {
+      "capture": "popup220-intention-share-error-attempt-1-zh-Hans-dark-system-max_0_F616A8A8-F228-4D12-BCF2-E3904656F696.png",
+      "file": "popup220-intention-share-error-attempt-1-zh-Hans-dark-system-max.png",
+      "sha256": "3e40d0187bcaff2228f8e3af47531133366b52ccb064b30a19558e6413e0989f",
+      "originalExportedFile": "82DEF4C2-A28B-4FCE-8D9C-35586C0E6A45.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "分享意愿错误卡居中，完整原英文网络错误按整词换行，中文好按钮完整；没有在较小源卡附近挤出狭窄弹框。",
+      "osOverlayLimit": "AssistiveTouch覆盖好按钮右上空白部分；标题/错误正文/好文字均无遮挡。原NSError英文不作整App本地化结论。",
+      "reusesVisualReviewOf": "popup220-intention-share-error-attempt-2-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-intention-delete-action-1-zh-Hans-dark-system-max_0_75B9B8EA-9D7A-4738-811B-D4C170EAD233.png",
+      "file": "popup220-intention-delete-action-1-zh-Hans-dark-system-max.png",
+      "sha256": "ebb9d873386454e179f3cc33ff9473eaa7eb37f56debf88a938163d55e5a77c8",
+      "originalExportedFile": "45A92F48-E9C2-4267-BC27-9ABB1B1CDE3F.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "删除确认按全局安全区居中，标题删除这个意愿、完整五行说明均可读；取消与带垃圾桶图标的删除动作纵排完整，没有按钮出屏或文案截断。",
+      "osOverlayLimit": "AssistiveTouch覆盖取消按钮右侧空白边缘，取消文字/删除图标与文字无遮挡；不对系统覆盖边缘作完整像素声明。"
+    },
+    {
+      "capture": "popup220-intention-delete-action-0-zh-Hans-dark-system-max_0_6C05CCDD-B9F3-4FC2-ADCB-31F3080E947B.png",
+      "file": "popup220-intention-delete-action-0-zh-Hans-dark-system-max.png",
+      "sha256": "ebb9d873386454e179f3cc33ff9473eaa7eb37f56debf88a938163d55e5a77c8",
+      "originalExportedFile": "3E02CF1C-8776-4914-85BB-5C071EB90853.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "删除确认按全局安全区居中，标题删除这个意愿、完整五行说明均可读；取消与带垃圾桶图标的删除动作纵排完整，没有按钮出屏或文案截断。",
+      "osOverlayLimit": "AssistiveTouch覆盖取消按钮右侧空白边缘，取消文字/删除图标与文字无遮挡；不对系统覆盖边缘作完整像素声明。",
+      "reusesVisualReviewOf": "popup220-intention-delete-action-1-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max_0_3F31DB95-0EAB-45D6-A309-73DD2389729B.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "4C2B6A4B-8A42-4276-BD8B-86494FDF0CDA.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "末个诺拉对象的large面板姓名、标为已读、置顶、取消均完整可见，行文字无裁切，面板不压到屏边外；与首行保持相同大面板规则。图标与文字偏紧作为原样式限制。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，不遮挡任何菜单动作。"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-zh-Hans-dark-system-max_0_B478274E-63E4-4DE1-842C-71D2B1743B3F.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-pin-menu-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "9ED38EC7-91CD-4404-9E14-7966CF78261E.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "末个诺拉对象的large面板姓名、标为已读、置顶、取消均完整可见，行文字无裁切，面板不压到屏边外；与首行保持相同大面板规则。图标与文字偏紧作为原样式限制。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，不遮挡任何菜单动作。",
+      "reusesVisualReviewOf": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-zh-Hans-dark-system-max_0_3AC64202-A7B3-4A2F-B74F-EC1933DE56F8.png",
+      "file": "popup220-inbox-large-panel-ui-connection-nora-inbox-row-ui-connection-nora-read-menu-zh-Hans-dark-system-max.png",
+      "sha256": "921f26fe1247d8fd9bd86afda1549fd55607fc140856c9562bea0257e2ef3547",
+      "originalExportedFile": "05023B8A-B5E1-4FB0-8F83-5B2637D470E6.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "末个诺拉对象的large面板姓名、标为已读、置顶、取消均完整可见，行文字无裁切，面板不压到屏边外；与首行保持相同大面板规则。图标与文字偏紧作为原样式限制。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，不遮挡任何菜单动作。",
+      "reusesVisualReviewOf": "popup220-inbox-large-panel-ui-connection-nora-long-press-menu-cancel-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max_0_E6DFA56F-61A0-4285-8A05-7D6E88AE3792.png",
+      "file": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "16542561-3225-4BED-9D94-1A2633F27F25.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "actual_original_png_view_image",
+      "actualVisualScope": "米娜对象操作在large面板呈现，姓名、标为已读、取消置顶、取消均在同一视口完整可见，三行操作均不出屏；大面板保持真实系统最大字号。信封/图钉随字放大，图标与首字距离偏紧，作为原大面板图标间距限制保留，不宣称已美化整个面板。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，三项菜单动作无遮挡。"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-zh-Hans-dark-system-max_0_4F564614-70F1-49A7-9772-B493BCDEEEA1.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-pin-menu-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "A1CEA474-A9A1-4276-959A-C776C4920B3E.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "米娜对象操作在large面板呈现，姓名、标为已读、取消置顶、取消均在同一视口完整可见，三行操作均不出屏；大面板保持真实系统最大字号。信封/图钉随字放大，图标与首字距离偏紧，作为原大面板图标间距限制保留，不宣称已美化整个面板。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，三项菜单动作无遮挡。",
+      "reusesVisualReviewOf": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max.png"
+    },
+    {
+      "capture": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-zh-Hans-dark-system-max_0_75275982-3C5E-4A35-9C03-B8268E36D748.png",
+      "file": "popup220-inbox-large-panel-ui-connection-inbox-row-ui-connection-read-menu-zh-Hans-dark-system-max.png",
+      "sha256": "bc3ea9c60f3ebc2b59e994d6a0723ea2b293e498e51166ccf1d412e622714f03",
+      "originalExportedFile": "CB4D58A4-6B7E-4637-9F8F-5E996B367D1A.png",
+      "associatedWithFailure": false,
+      "result": "pass_for_recorded_placement_and_complete_visible_content_scope",
+      "reviewMethod": "exact_sha256_pixel_reuse",
+      "actualVisualScope": "米娜对象操作在large面板呈现，姓名、标为已读、取消置顶、取消均在同一视口完整可见，三行操作均不出屏；大面板保持真实系统最大字号。信封/图钉随字放大，图标与首字距离偏紧，作为原大面板图标间距限制保留，不宣称已美化整个面板。",
+      "osOverlayLimit": "AssistiveTouch位于右下空白区，三项菜单动作无遮挡。",
+      "reusesVisualReviewOf": "popup220-inbox-large-panel-ui-connection-long-press-menu-cancel-zh-Hans-dark-system-max.png"
+    }
+  ]
+}

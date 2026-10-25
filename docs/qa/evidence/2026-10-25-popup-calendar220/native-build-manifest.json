@@ -1,0 +1,67 @@
+{
+  "build": 220,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 268,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "62c74de0a0e1f364ed6ccc09c64aaf07762ddc2fc46933070ee43547e3237e1f",
+    "SideSeat Preview.debug.dylib": "ee4a4e5dd4ddeb4b983d22fb8b239deabeafbb8dd1ea0d6ba3def24308cbc544"
+  },
+  "testSourceSHA256": {
+    "PopupAndConfirmedCardPhoneUITests.swift": "825a8d96cc2a6c3d81815a052c6c07dd25d1b66e842df1362e34ba2e0629d3e2",
+    "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+    "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+  },
+  "backendReleased": false,
+  "webReleased": false,
+  "finalCompiledAppearancePhoneTestSourceMatched": true,
+  "testSourceSHA256ByRun": {
+    "fullFlowBaseline": {
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2"
+    },
+    "confirmedCalendarCardBaseline": {
+      "PopupAndConfirmedCardPhoneUITests.swift": "fbbcff42c8991e83a51b0ddd80033d82857da889288559f6a535c8a8bb6e2e1a",
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+      "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+    },
+    "ordinaryPromptsCompletedPrefix": {
+      "PopupAndConfirmedCardPhoneUITests.swift": "ea0d4e2d733c3304258eaa5f567333d11793286c5b571e3e21e08b0725733fd7",
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+      "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+    },
+    "finalOrdinaryMenusAndChineseMaximum": {
+      "PopupAndConfirmedCardPhoneUITests.swift": "a01d3f708cd62990d16d64f9e8df5c4d5497174ff0632b5c028990bf9875bdd6",
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+      "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+    },
+    "germanMaximumBeforeIconRepair": {
+      "PopupAndConfirmedCardPhoneUITests.swift": "f5af5dd2c9128f8e459e81b0c324dee4a35609a5ee44f4ee06cfedd285595d90",
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+      "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+    },
+    "finalGermanAppearance": {
+      "PopupAndConfirmedCardPhoneUITests.swift": "825a8d96cc2a6c3d81815a052c6c07dd25d1b66e842df1362e34ba2e0629d3e2",
+      "PlanFirstUsePhoneUITests.swift": "b59987894a4cbe703400d9ffe37d7a39af63a0698b667696b379fc8278bcc7c2",
+      "PlanStatePresentationUITests.swift": "54aa68cca2ac74a43f334ef70ec75082c983de25dfc436bbf1b06cf77d54ce1c"
+    }
+  },
+  "menuAndMaximumBeforeDiscardIconRepair": true,
+  "finalAppearanceIconRepair": "appearance-icon-repair.json",
+  "finalAppearanceAndDeliveredBinaryMatch": true,
+  "menuWidthStageBinarySHA256": {
+    "SideSeat Preview": "012e012d34ac65852040eaa1afcfc1997719f9f697bbcee696a8eafcf256156b",
+    "SideSeat Preview.debug.dylib": "66cf1278677e42dc0033cbcdd105cccb63ad686c2a332d3ec015fec0ea61be80"
+  },
+  "finalMenuWidthRepair": "menu-width-repair.json",
+  "fullFlowCardAndOrdinaryPromptBaselineBeforeMenuWidthRepair": true,
+  "baselineBinarySHA256": {
+    "SideSeat Preview": "3198d53253296c71bd3b942aad5621cfbb9674f510a1eea93a8194238f0d50c9",
+    "SideSeat Preview.debug.dylib": "2212c3ff80d557592f0814d7a51f2488e70c6082a2ce1ad9465563696e198148"
+  },
+  "sourceCommit": "ed8cb66ff5a0b327508442d0e86433c8e9c60312",
+  "sourceCommitPushed": true,
+  "committedProductInputsVerified": 268,
+  "finalCommittedTestSourcesMatched": true,
+  "strictSignatureAndFinalBinaryReverifiedAfterCommit": true
+}

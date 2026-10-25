@@ -35,8 +35,24 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is218 below. See web release/QA records.
-- Preview219 is the current installed development build, source e7e0a2ef1819d079c6f96d7883352536eb6affd6 pushed.
+  No native rebuild in that web stage; current native build is220 below. See web release/QA records.
+- Preview220 is the current installed development build, source ed8cb66ff5a0b327508442d0e86433c8e9c60312 pushed.
+  Ordinary Inbox menus stay near source; accessibility keeps the large scrolling
+  panel. Six existing product prompts use the shared centered presentation;
+  read-only Calendar opens large for accessibility. Confirmed dates use the
+  approved small month/weekday, large day and complete clocks; original routes,
+  compatibility, invitation and Calendar rules stay. Independent minimal review
+  passed. Full384.819s/eightAPI and card four-combination87.098s passed on baseline.
+  Ordinary/Chinese-max completed independent prefixes are distinguished from
+  failed enclosing harness cases. Final menu-width55.091s, German-max200.712s and
+  discard-icon73.918s supplements passed; two argument-only repairs/source bases
+  remain explicit, no unrelated full repeat.94adopted captures/74unique originals
+  reviewed; initial visual rejects and OS/old-toolbar/icon limitations recorded.
+  Final220 normalPID9516,268/Local/signature/binaries and final test source match
+  commit,97 retained.2QAaccounts401/1link404;Runner/private configs/generated
+  contexts cleaned.1new CPU resource report Actionnone, no manual-performance
+  claim. No web/backend release; see220 QA/release.
+- Preview219 was the previous installed development build, source e7e0a2ef1819d079c6f96d7883352536eb6affd6 pushed.
   Five native roots share canvas, centered title, light section tabs, white cards
   and neutral actions; native TabView, lower-right Plans create and original flows
   stay. Compact chrome is locally capped; body stays true system maximum.
