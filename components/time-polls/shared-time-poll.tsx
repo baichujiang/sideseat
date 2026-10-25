@@ -24,9 +24,13 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
   const choosingActivity = collecting && poll?.activitySelection?.isOpen === true;
   const closed = poll?.phase === "CANCELLED" || poll?.phase === "EXPIRED" || (poll?.phase === "CONFIRMED" && !!poll.chosenStart && Date.parse(poll.chosenStart) <= Date.now());
   const mine = poll?.invitations.find((person) => person.isMe);
-  const included = mine?.selected || poll?.planningMode === "FIXED";
   const accepted = poll?.invitations.filter((person) => person.selected && person.status === "ACCEPTED").length ?? 0;
-  const target = poll?.planningMode === "FIXED" ? poll.expectedCount : poll?.invitations.filter((person) => person.selected).length;
+  const occupied = poll?.invitations.filter((person) => person.selected).length ?? 0;
+  const target = poll?.planningMode === "FIXED" ? poll.expectedCount ?? 2 : occupied;
+  const remaining = Math.max(0, target - occupied);
+  const fullForViewer = poll?.planningMode === "FIXED" && !mine?.selected && remaining === 0;
+  const included = mine?.selected || (poll?.planningMode === "FIXED" && remaining > 0);
+  const fullMessage = zh ? "当前名额已满，请联系发起人。" : "This plan is full. Contact the organizer.";
   const people = collecting || (poll?.phase === "EXPIRED" && !poll.chosenStart) ? poll.participants : poll?.invitations;
   const disabled = busy || saving;
   const choosingName = !poll?.viewerId || editingName || switchingParticipant;
@@ -50,7 +54,7 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
     const first = formatter.format(new Date(start)), last = formatter.format(new Date(end));
     return pollDate(first, zh) + " · " + pollClock(start, poll!.timeZone) + "–" + (first === last ? "" : pollDate(last, zh) + " · ") + pollClock(end, poll!.timeZone);
   };
-  const currentTask = choosingName
+  const currentTask = fullForViewer && !closed ? fullMessage : choosingName
     ? (zh ? "填个名字，就能在这里参与。" : "Enter your name to take part here.")
     : collecting
       ? fixedTime
@@ -148,7 +152,8 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
               </section> : null}
               {poll.phase === "EXPIRED" ? <p role="status" className="text-sm leading-6 text-muted-foreground">{zh ? "这次安排在确认前已过期，没有加入任何人的日历。请联系发起人重新约时间。" : "This plan expired before confirmation. No calendar entries were added. Ask the organizer to arrange another time."}</p> : poll.phase === "CANCELLED" ? <p className="text-sm text-muted-foreground">{zh ? "发起人已取消这次安排，请联系对方重新约时间。" : "This activity was cancelled. Contact the organizer to arrange another time."}</p> : <>
                 <p className={"inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium " + styles.phase}><Users className="h-4 w-4" aria-hidden />{accepted}/{target ?? 0} {zh ? "人已确认" : "confirmed"}</p>
-                {poll.phase === "CONFIRMED" && mine?.status === "ACCEPTED" ? <><p className="text-sm leading-6">{zh ? "发起人已正式发出，你已接受参加。按上面的时间地点参加即可。" : "The organizer sent the final plan and you accepted. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>
+                {poll.planningMode === "FIXED" && remaining > 0 ? <p className="text-sm leading-6 text-muted-foreground" data-testid="plan-invitation-remaining">{zh ? `还有 ${remaining} 个名额` : remaining === 1 ? "1 place available" : `${remaining} places available`}</p> : null}
+                {fullForViewer ? <p className="text-sm leading-6 text-muted-foreground" data-testid="plan-invitation-full">{fullMessage}</p> : poll.phase === "CONFIRMED" && mine?.status === "ACCEPTED" ? <><p className="text-sm leading-6">{zh ? "发起人已正式发出，你已接受参加。按上面的时间地点参加即可。" : "The organizer sent the final plan and you accepted. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>
                   <p className="text-sm leading-6">{mine?.status === "ACCEPTED" ? (zh ? "你已接受。由发起人决定何时正式发出，无需等待所有人回复。" : "You accepted. The organizer decides when to send the final plan, without waiting for everyone.") : (zh ? "现在确认的是上面的具体安排，请看好日期、时间和地点后回复。" : "You're confirming the specific arrangement above. Check the date, time and place before replying.")}</p>
                   <p className="text-sm leading-6 text-muted-foreground">{zh ? "发起人可随时正式发出，只通知已接受者并同步他们的 SideSeat 日历。未回复或拒绝不会阻塞；发出后仍可在开始前接受。" : "The organizer can send at any time. Only accepted participants are notified and added to their SideSeat calendars. You may still accept before the activity starts."}</p>
                 </> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "你尚未接受这次邀请，不会收到成行通知，也不会加入日历。你填写的空闲仍然保留。" : "You have not accepted this invitation, so you won't receive the final alert or a calendar entry. Your availability is saved."}</p> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "请先填写上面的名字，再回复这次邀请。" : "Enter your name above to reply to this invitation."}</p>}

@@ -63,7 +63,13 @@ struct NativeTimePoll: Decodable, Sendable {
     }
     var planningPhase: String { planningPhase(at: Date()) }
     var allInvitations: [Invitation] { invitations ?? [] }
-    var targetCount: Int { planningMode == "FIXED" ? expectedCount ?? 2 : allInvitations.filter(\.selected).count }
+    var occupiedCount: Int { allInvitations.filter(\.selected).count }
+    var targetCount: Int { planningMode == "FIXED" ? expectedCount ?? 2 : occupiedCount }
+    var remainingCount: Int { max(0, targetCount - occupiedCount) }
+    func canReplyToInvitation(at now: Date) -> Bool {
+        ["INVITING", "CONFIRMED"].contains(planningPhase(at: now)) && (chosenStart ?? .distantPast) > now && !isOwner
+            && (allInvitations.first(where: \.isMe)?.selected == true || planningMode == "FIXED" && remainingCount > 0)
+    }
     struct Invitation: Decodable, Sendable, Identifiable {
         let id: String
         let displayName: String

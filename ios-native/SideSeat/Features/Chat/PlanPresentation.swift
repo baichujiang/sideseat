@@ -80,7 +80,7 @@ struct PlanPresentation: Sendable {
     }
 
     static func manual(phase: String, isOwner: Bool, didRespond: Bool, respondedCount: Int,
-                       myStatus: String?, isIncluded: Bool, fixed: Bool, accepted: Int, target: Int,
+                       myStatus: String?, isIncluded: Bool, fixed: Bool, occupied: Int, target: Int,
                        start: Date?, end: Date?, now: Date, activity: NativePlanActivity? = nil) -> Self {
         if phase == "COLLECTING", fixed {
             return Self(status: .choosingActivity,
@@ -104,6 +104,8 @@ struct PlanPresentation: Sendable {
         }
         let step: PlanNextStep
         let detail: String.LocalizationValue
+        let openLinkPlace = fixed && !isIncluded && occupied < target
+        let fullForViewer = fixed && !isOwner && !isIncluded && occupied >= target
         switch status {
         case .findingTime:
             if isOwner {
@@ -113,7 +115,10 @@ struct PlanPresentation: Sendable {
             }
             detail = "Filling in free time doesn't confirm attendance."
         case .awaitingConfirmation:
-            if myStatus == "DECLINED" {
+            if fullForViewer {
+                step = .notIncluded
+                detail = "This plan is full. Contact the organizer."
+            } else if myStatus == "DECLINED" && !openLinkPlace {
                 step = .declined
                 detail = "Your reply is saved. You have not confirmed attendance."
             } else if isOwner {
@@ -122,7 +127,7 @@ struct PlanPresentation: Sendable {
             } else if myStatus == "ACCEPTED" && isIncluded {
                 step = .waitForReplies
                 detail = "You accepted. Waiting for the organizer to send the final plan."
-            } else if (isIncluded && myStatus == "INVITED") || (fixed && accepted < target && myStatus == nil) {
+            } else if (isIncluded && myStatus == "INVITED") || openLinkPlace {
                 step = .confirm
                 detail = "Accept, decline, or reply later. Only accepted participants join the final plan."
             } else {
@@ -133,10 +138,13 @@ struct PlanPresentation: Sendable {
             if isOwner || (isIncluded && myStatus == "ACCEPTED") {
                 step = .viewCalendar
                 detail = "Synced to Sideseat calendars"
-            } else if myStatus == "DECLINED" {
+            } else if fullForViewer && start.map({ $0 > now }) == true {
+                step = .notIncluded
+                detail = "This plan is full. Contact the organizer."
+            } else if myStatus == "DECLINED" && !(openLinkPlace && start.map({ $0 > now }) == true) {
                 step = .declined
                 detail = "Your reply is saved. You have not confirmed attendance."
-            } else if start.map({ $0 > now }) == true && ((isIncluded && myStatus == "INVITED") || (fixed && accepted < target)) {
+            } else if start.map({ $0 > now }) == true && ((isIncluded && myStatus == "INVITED") || openLinkPlace) {
                 step = .confirm
                 detail = "The organizer sent the final plan. You can still accept before it starts."
             } else {
@@ -213,8 +221,7 @@ extension NativeTimePoll {
         return .manual(phase: planningPhase(at: now), isOwner: isOwner, didRespond: didRespond,
                        respondedCount: participants.count, myStatus: mine?.status,
                        isIncluded: isOwner || mine?.selected == true, fixed: planningMode == "FIXED",
-                       accepted: allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count,
-                       target: targetCount, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
+                       occupied: occupiedCount, target: targetCount, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }
 
@@ -223,7 +230,8 @@ extension NativeTimePollList.Item {
         .manual(phase: planningPhase(at: now), isOwner: isOwner == true, didRespond: didRespond == true,
                 respondedCount: respondedCount ?? 0, myStatus: myInvitationStatus,
                 isIncluded: isOwner == true || isIncluded != false, fixed: planningMode == "FIXED",
-                accepted: acceptedCount ?? 0, target: confirmationTarget, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
+                occupied: invitedCount ?? 0, target: confirmationTarget,
+                start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }
 

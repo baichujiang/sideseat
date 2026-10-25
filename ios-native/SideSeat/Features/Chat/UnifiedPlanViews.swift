@@ -236,10 +236,7 @@ struct UnifiedPlanConfirmationView: View {
     private var mine: NativeTimePoll.Invitation? { poll.allInvitations.first(where: \.isMe) }
     private var accepted: Int { poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count }
     private var presentation: PlanPresentation { poll.presentation(at: Date()) }
-    private var canReply: Bool {
-        ["INVITING", "CONFIRMED"].contains(poll.planningPhase) && (poll.chosenStart ?? .distantPast) > Date() && !poll.isOwner && (mine?.selected == true
-            || poll.planningMode == "FIXED" && accepted < poll.targetCount && (mine == nil || mine?.status == "DECLINED"))
-    }
+    private var canReply: Bool { poll.canReplyToInvitation(at: Date()) }
 
     var body: some View {
         ScrollViewReader { reader in
@@ -263,8 +260,8 @@ struct UnifiedPlanConfirmationView: View {
                     ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
                         .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
                     PlanPeopleView(poll: poll, isInline: true)
-                    if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.targetCount > poll.allInvitations.count {
-                        Text(String(format: AppLocalization.string("%d places still open"), poll.targetCount - poll.allInvitations.count))
+                    if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.remainingCount > 0 {
+                        Text(String(format: AppLocalization.string("%d places still open"), poll.remainingCount))
                             .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
                     Label(calendarExplanation, systemImage: poll.planningPhase == "CONFIRMED" && included ? "calendar.badge.checkmark" : "info.circle")
@@ -349,7 +346,11 @@ struct UnifiedPlanConfirmationView: View {
     }
     private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }
     private var calendarExplanation: String {
-        AppLocalization.string(poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed."
+        if poll.planningMode == "FIXED", !poll.isOwner, mine?.selected != true, poll.remainingCount == 0,
+           ["INVITING", "CONFIRMED"].contains(poll.planningPhase), (poll.chosenStart ?? .distantPast) > Date() {
+            return AppLocalization.string("This plan is full. Contact the organizer.")
+        }
+        return AppLocalization.string(poll.planningPhase == "CANCELLED" ? "This plan is cancelled. Its calendar entries have been removed."
             : poll.planningPhase == "CONFIRMED" ? (included ? "Synced to Sideseat calendars" : "Only accepted participants have this plan in their calendars.")
             : "The organizer can send at any time. Only accepted participants are notified and added to calendars.")
     }

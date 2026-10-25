@@ -4,6 +4,49 @@ import Testing
 
 @Suite("Native time polls")
 struct TimePollTests {
+    @Test("Pending invitees reserve link places; declining frees a place without counting shared or declined rows")
+    func invitationCapacityAndReplyEligibility() throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2030-10-16T06:00:00Z"))
+        func poll(phase: String, mine: String? = nil, selected: Bool = false,
+                  reserved: Bool = true, owner: Bool = false, mode: String = "FIXED") throws -> NativeTimePoll {
+            var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+            object["phase"] = phase; object["planningMode"] = mode; object["expectedCount"] = 2; object["isOwner"] = owner
+            object["chosenStart"] = "2030-10-16T07:00:00Z"; object["chosenEnd"] = "2030-10-16T08:00:00Z"
+            var invitations: [[String: Any]] = [["id": "owner", "displayName": "Owner", "status": "ACCEPTED", "selected": true, "isMe": owner]]
+            if reserved { invitations.append(["id": "peer", "displayName": "Peer", "status": "INVITED", "selected": true, "isMe": false]) }
+            if let mine { invitations.append(["id": "viewer", "displayName": "Viewer", "status": mine, "selected": selected, "isMe": true]) }
+            object["invitations"] = invitations
+            let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object))
+        }
+        for phase in ["INVITING", "CONFIRMED"] {
+            let full = try poll(phase: phase)
+            #expect(full.occupiedCount == 2 && full.remainingCount == 0)
+            #expect(full.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count == 1)
+            #expect(!full.canReplyToInvitation(at: now))
+            #expect(full.presentation(at: now).nextStep == .notIncluded)
+            for status: String? in [nil, "SHARED", "DECLINED"] {
+                let free = try poll(phase: phase, mine: status, reserved: false)
+                #expect(free.occupiedCount == 1 && free.remainingCount == 1)
+                #expect(free.canReplyToInvitation(at: now))
+                #expect(free.presentation(at: now).nextStep == .confirm)
+                let refilled = try poll(phase: phase, mine: status)
+                #expect(!refilled.canReplyToInvitation(at: now))
+                #expect(refilled.presentation(at: now).detail == AppLocalization.string("This plan is full. Contact the organizer."))
+            }
+            for status in ["INVITED", "ACCEPTED"] {
+                let invited = try poll(phase: phase, mine: status, selected: true, reserved: false)
+                #expect(invited.remainingCount == 0 && invited.canReplyToInvitation(at: now))
+            }
+            #expect(try !poll(phase: phase, owner: true).canReplyToInvitation(at: now))
+            #expect(try !poll(phase: phase, mine: "SHARED", reserved: false, mode: "COLLECT").canReplyToInvitation(at: now))
+        }
+        for phase in ["CANCELLED", "EXPIRED", "COLLECTING"] {
+            #expect(try !poll(phase: phase, mine: "INVITED", selected: true, reserved: false).canReplyToInvitation(at: now))
+        }
+        #expect(try !poll(phase: "CONFIRMED", reserved: false).canReplyToInvitation(at: now.addingTimeInterval(3600)))
+    }
+
     @Test("Picker and default components share one day identity and can be removed")
     func candidateDateIdentity() throws {
         var calendar = Calendar(identifier: .gregorian)

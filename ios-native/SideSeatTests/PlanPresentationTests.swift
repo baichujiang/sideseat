@@ -21,9 +21,9 @@ struct PlanPresentationTests {
 
     private func manual(_ phase: String = "INVITING", owner: Bool = false,
                         reply: String? = "INVITED", included: Bool = true,
-                        fixed: Bool = false, end: Date? = nil) -> PlanPresentation {
+                        fixed: Bool = false, occupied: Int = 1, end: Date? = nil) -> PlanPresentation {
         .manual(phase: phase, isOwner: owner, didRespond: true, respondedCount: 2,
-                myStatus: reply, isIncluded: included, fixed: fixed, accepted: 1, target: 2,
+                myStatus: reply, isIncluded: included, fixed: fixed, occupied: occupied, target: 2,
                 start: now.addingTimeInterval(3600), end: end ?? now.addingTimeInterval(7200), now: now)
     }
 
@@ -51,6 +51,45 @@ struct PlanPresentationTests {
     func fixedAndRosterRemainDistinct() {
         #expect(manual(reply: nil, included: false, fixed: true).nextStep == .confirm)
         #expect(manual(reply: nil, included: false).nextStep == .notIncluded)
+    }
+
+    @Test("Reserved invitation places control open-link guidance before and after publication")
+    func openLinkCapacityGuidance() {
+        for phase in ["INVITING", "CONFIRMED"] {
+            for status: String? in [nil, "SHARED", "DECLINED"] {
+                let full = manual(phase, reply: status, included: false, fixed: true, occupied: 2)
+                #expect(full.nextStep == .notIncluded && !full.nextStep.needsYou)
+                #expect(full.detail == AppLocalization.string("This plan is full. Contact the organizer."))
+                #expect(full.cardStatusTitle != AppLocalization.string("Your confirmation needed"))
+                #expect(manual(phase, reply: status, included: false, fixed: true, occupied: 1).nextStep == .confirm)
+            }
+            #expect(manual(phase, reply: "INVITED", fixed: true, occupied: 2).nextStep == .confirm)
+            #expect(manual(phase, reply: "ACCEPTED", fixed: true, occupied: 2).nextStep
+                == (phase == "INVITING" ? .waitForReplies : .viewCalendar))
+            #expect(manual(phase, owner: true, fixed: true, occupied: 2).nextStep
+                == (phase == "INVITING" ? .publishPlan : .viewCalendar))
+            #expect(manual(phase, reply: "DECLINED", included: false, occupied: 1).nextStep == .declined)
+            #expect(manual(phase, reply: nil, included: false, occupied: 1).nextStep == .notIncluded)
+        }
+    }
+
+    @Test("Overview capacity uses selected invitations even when only the organizer has accepted")
+    func overviewReservedCapacity() throws {
+        for phase in ["INVITING", "CONFIRMED"] {
+            for occupied in [1, 2] {
+                let payload: [String: Any] = [
+                    "token": "plan", "title": "Dinner", "timeZone": "Europe/Berlin", "dates": [],
+                    "updatedAt": now.ISO8601Format(), "shareUrl": "https://www.sideseat.de/time-polls/plan",
+                    "phase": phase, "planningMode": "FIXED", "expectedCount": 2,
+                    "acceptedCount": 1, "invitedCount": occupied, "isOwner": false, "isIncluded": false,
+                    "chosenStart": now.addingTimeInterval(3600).ISO8601Format(),
+                    "chosenEnd": now.addingTimeInterval(7200).ISO8601Format(),
+                ]
+                let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+                let item = try decoder.decode(NativeTimePollList.Item.self, from: JSONSerialization.data(withJSONObject: payload))
+                #expect(item.presentation(at: now).nextStep == (occupied == 2 ? .notIncluded : .confirm))
+            }
+        }
     }
 
     @Test("Only confirmed participants get Calendar guidance; elapsed time never creates attendance feedback for manual plans")
@@ -106,7 +145,7 @@ struct PlanPresentationTests {
     func organizerAvailabilityFirst() {
         func present(responded: Bool, count: Int) -> PlanPresentation {
             .manual(phase: "COLLECTING", isOwner: true, didRespond: responded, respondedCount: count,
-                    myStatus: nil, isIncluded: true, fixed: false, accepted: 0, target: 0,
+                    myStatus: nil, isIncluded: true, fixed: false, occupied: 0, target: 0,
                     start: nil, end: nil, now: now)
         }
         for count in [0, 1, 2] {
@@ -241,7 +280,7 @@ struct PlanPresentationTests {
         let open = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 2, hasParticipated: true)
         func present(owner: Bool, activity: NativePlanActivity, phase: String = "COLLECTING") -> PlanPresentation {
             .manual(phase: phase, isOwner: owner, didRespond: false, respondedCount: 0, myStatus: nil,
-                    isIncluded: owner, fixed: false, accepted: 0, target: 0, start: nil, end: nil, now: now, activity: activity)
+                    isIncluded: owner, fixed: false, occupied: 0, target: 0, start: nil, end: nil, now: now, activity: activity)
         }
         #expect(present(owner: true, activity: open).nextStep == .fillAvailability)
         #expect(present(owner: true, activity: open).status == .choosingActivity)
@@ -257,7 +296,7 @@ struct PlanPresentationTests {
         let empty = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 0, hasParticipated: false)
         for owner in [true, false] {
             let value = PlanPresentation.manual(phase: "COLLECTING", isOwner: owner, didRespond: false,
-                respondedCount: 0, myStatus: nil, isIncluded: owner, fixed: false, accepted: 0, target: 0,
+                respondedCount: 0, myStatus: nil, isIncluded: owner, fixed: false, occupied: 0, target: 0,
                 start: nil, end: nil, now: now, activity: empty)
             #expect(value.nextStep == .fillAvailability)
             #expect(value.nextStep.needsYou)
@@ -269,7 +308,7 @@ struct PlanPresentationTests {
         let activity = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 2, hasParticipated: true)
         func present(owner: Bool, responded: Bool, count: Int) -> PlanPresentation {
             .manual(phase: "COLLECTING", isOwner: owner, didRespond: responded, respondedCount: count,
-                    myStatus: nil, isIncluded: owner, fixed: false, accepted: 0, target: 0,
+                    myStatus: nil, isIncluded: owner, fixed: false, occupied: 0, target: 0,
                     start: nil, end: nil, now: now, activity: activity)
         }
         #expect(present(owner: false, responded: false, count: 1).nextStep == .fillAvailability)
@@ -284,7 +323,7 @@ struct PlanPresentationTests {
         let activity = NativePlanActivity(topic: "Weekend", isOpen: true, selectedIdeaId: nil, ideaCount: 0, hasParticipated: false)
         func present(_ owner: Bool) -> PlanPresentation {
             .manual(phase: "COLLECTING", isOwner: owner, didRespond: false, respondedCount: 0,
-                    myStatus: nil, isIncluded: owner, fixed: true, accepted: 0, target: 3,
+                    myStatus: nil, isIncluded: owner, fixed: true, occupied: 0, target: 3,
                     start: now.addingTimeInterval(3600), end: now.addingTimeInterval(7200), now: now, activity: activity)
         }
         #expect(present(true).nextStep == .chooseActivity)
