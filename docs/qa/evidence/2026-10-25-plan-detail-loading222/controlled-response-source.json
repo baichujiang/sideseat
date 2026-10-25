@@ -1,0 +1,28 @@
+{
+  "capturedAt": "2026-10-25T16:12:19.445Z",
+  "scope": "Controlled response delivery using current disposable QA API snapshots; no Runner public-network requests",
+  "requests": [
+    {
+      "kind": "list-filtered-to-two-current-plans",
+      "status": 200,
+      "bytes": 1426,
+      "sha256": "d4d6cb4fd2f48f21e62409bcafea5d1473207d1d0ba73f5aac30e8d1ea0af681"
+    },
+    {
+      "kind": "collecting",
+      "status": 200,
+      "bytes": 13499,
+      "sha256": "3a464f7efcfb469bf0ec862f43ec8ca7e72dd42534b847a7288d953128629b00"
+    },
+    {
+      "kind": "confirmed",
+      "status": 200,
+      "bytes": 31482,
+      "sha256": "f3d74e44a3eeffbe1fcd81518f84b621768d9a41ced03f25d2d3543b45bbac98"
+    }
+  ],
+  "phasesVerified": [
+    "COLLECTING",
+    "CONFIRMED"
+  ]
+}

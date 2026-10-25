@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-25T16:20:13.113512+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 222,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9656,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "One disposable owner/participant native journey, plus one collecting plan. Controlled initial-GET delay/failure/retry and no-preview entry are read-only against these two QA tokens. No real-user business action.",
+  "disposableAccountsRemoved": 2,
+  "tokens401": 2,
+  "links404": 2,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "privateFixturesRemoved": true,
+  "privateXctestrunFilesRemoved": 4,
+  "generatedRunnerAndBuildContextRemoved": true,
+  "isolatedAppSourceContextRemoved": true,
+  "newTerminatingAppCrashReports": 0
+}

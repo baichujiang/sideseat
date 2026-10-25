@@ -1,0 +1,76 @@
+{
+  "build": 222,
+  "deviceUDID": "00008110-001A69110CC1401E",
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "passedRuns": [
+    {
+      "run": "full",
+      "result": "Passed",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "case": "testNativeContactCardCreateFillInviteConfirmAndCalendar",
+          "durationSeconds": 410.714
+        }
+      ],
+      "compiledExecutedSourceSHA256": {
+        "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c"
+      }
+    },
+    {
+      "run": "focused-final",
+      "result": "Passed",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "case": "testCollectingAndConfirmedFastAndSlowEntryAtNormalAndMaximumText",
+          "durationSeconds": 122.952
+        },
+        {
+          "case": "testDeepLinkWithoutCardSummaryUsesNeutralNoninteractivePlaceholder",
+          "durationSeconds": 26.853
+        },
+        {
+          "case": "testFailureRetryAndBackToAnotherPlanNeverReuseThePreviousSummary",
+          "durationSeconds": 101.008
+        }
+      ],
+      "compiledExecutedSourceSHA256": {
+        "PlanDetailLoadingPhoneUITests.swift": "2d8580b2d1cf78e05c6c1ac796e6283f86ad07e743db004f2d6e62ae916e85ac"
+      }
+    }
+  ],
+  "navigationUnitTests": 26,
+  "unitEvidence": "navigation-unit.json",
+  "liveAPIPhases": 8,
+  "focusedTransport": "Test-Runner-only loopback read server. Three actual Mac-read QA response snapshots, explicit two-token/auth allowlist, held initial GET/500/Retry; no product transport hook and no Runner public-network dependency. Full run uses actual live API directly.",
+  "focusedLayoutVariants": [
+    "English/light/normal",
+    "English/dark/actual AccessibilityXXXL"
+  ],
+  "focusedScopes": [
+    "Collecting and confirmed card fast entry, held three-second initial GET, complete response",
+    "Initial read failure, existing Retry behavior, back/another/reentry summary isolation",
+    "No-summary deep-link neutral placeholder"
+  ],
+  "preFinalFailure": {
+    "sourceSHA256": "48438b4d8ffb5a7b786f1ad86f5bec1697aca66257e6140a0d3d215bddce02eb",
+    "exitCode": 65,
+    "testDurationsSeconds": [
+      28.284,
+      31.895,
+      28.392
+    ],
+    "outcome": "Three focused cases failed in their test harness before authorized plan responses could load.",
+    "cause": "Runner URLSession outbound HTTPS failed with NSURLErrorDomain -1009; NWPath reported unsatisfied (Denied over Wi-Fi interface). App-to-Runner loopback and the controlled gate were reached.",
+    "repairScope": "Test-only replay of Mac-captured current disposable QA responses; the frozen App is unchanged.",
+    "acceptance": false
+  },
+  "productChangedForTestHarnessRepair": false,
+  "webReleased": false,
+  "backendReleased": false
+}

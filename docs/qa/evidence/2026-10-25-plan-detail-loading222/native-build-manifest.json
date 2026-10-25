@@ -1,0 +1,27 @@
+{
+  "build": 222,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "trackedInputsVerified": 268,
+  "privateLocalConfigurationMatched": true,
+  "strictSignatureVerified": true,
+  "binarySHA256": {
+    "SideSeat Preview": "78bc8f37221a75e72f3c2225a738304268c007b4c28ec0b2e0f8916684ad80ff",
+    "SideSeat Preview.debug.dylib": "cc781439f41543b406a4fd9fe67a2938d8e21efc79b803eb91f40ee789c343aa"
+  },
+  "testSourceSHA256": {
+    "PlanFirstUsePhoneUITests.swift": "1533773365cb5b6f53cfed10a34135cc18d4367a59c41c15e76a3069b6ce3c9c",
+    "PlanDetailLoadingPhoneUITests.swift": "2d8580b2d1cf78e05c6c1ac796e6283f86ad07e743db004f2d6e62ae916e85ac"
+  },
+  "backendReleased": false,
+  "webReleased": false,
+  "compiledPhoneTestSourceMatched": true,
+  "productFrozenDuringAllFinalAcceptance": true,
+  "productSourceCommit": "e0744e6bc57798248b710d5c9bc507498ea1e8af",
+  "trackedCommittedInputsVerified": 268,
+  "sourcePushed": true,
+  "currentBranch": "codex/ios-uxui-20260922",
+  "navigationUnitSourceSHA256": {
+    "ios-native/SideSeatTests/NavigationTests.swift": "fb1c3d31bd26b5dd513dd2bc950f097168193cac8692efca836cda6abacedfdb",
+    "ios-native/SideSeat/Core/Navigation/TabRouter.swift": "49662d257c2b8b9466fe8fdd5549eff5edd42fa3e1725f8f66315ee904b0597b"
+  }
+}

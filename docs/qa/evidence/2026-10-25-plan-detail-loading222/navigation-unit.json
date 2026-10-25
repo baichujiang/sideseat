@@ -1,0 +1,18 @@
+{
+  "result": "Passed",
+  "passed": 26,
+  "failed": 0,
+  "skipped": 0,
+  "swiftTestingDurationSeconds": 0.035,
+  "suite": "Navigation",
+  "destination": "Existing iPhone17Pro Simulator, separate from physical14Plus acceptance",
+  "sourceSHA256": {
+    "ios-native/SideSeatTests/NavigationTests.swift": "fb1c3d31bd26b5dd513dd2bc950f097168193cac8692efca836cda6abacedfdb",
+    "ios-native/SideSeat/Core/Navigation/TabRouter.swift": "49662d257c2b8b9466fe8fdd5549eff5edd42fa3e1725f8f66315ee904b0597b"
+  },
+  "newScope": [
+    "Summary token matching; native pop and another/no-preview entry cleanup",
+    "History append, replacement, reset and non-plan mismatch clearing"
+  ],
+  "unchangedOtherDomainTestsRepeated": false
+}

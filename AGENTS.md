@@ -35,8 +35,20 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is221 below. See web release/QA records.
-- Preview221 is the current installed development build, source 798374e1a8dd11db2ebd7a244ebf7f3292d1a2e2 pushed.
+  No native rebuild in that web stage; current native build is222 below. See web release/QA records.
+- Preview222 is the current installed development build, source e0744e6bc57798248b710d5c9bc507498ea1e8af pushed.
+  Plan entry keeps one detail surface: existing card title/date/time plus static
+  timetable placeholder until the authoritative GET completes. One token-scoped
+  navigation summary clears on return/reset; history append and no-preview entries
+  preserved. No prefetch/cache/new business request; original rules stay. Independent
+  minimal review passed. Navigation26/0.035s, same frozen App live full410.714s/eightAPI
+  and controlled initial-GET three cases 122.952／26.853／101.008s passed. Initial Runner Wi-Fi denial
+  was test-only repaired via freshly captured QA responses; transport scope explicit.
+  66captures/50unique pixels reviewed, OS/capture limits recorded. Final222
+  normalPID9656,268/Local/signature/binaries and scoped test sources match;97 retained.
+  2accounts401/2links404,Runner/private/generated contexts cleaned,new App reports0.
+  No web/backend release. See222 QA/release.
+- Preview221 was the previous installed development build, source 798374e1a8dd11db2ebd7a244ebf7f3292d1a2e2 pushed.
   Confirmation displays all original invitation rows directly under reply progress;
   shared rows preserve names/status/You and owner-only old guest recovery. Original
   collecting sheet and invitation/publish/Calendar rules stay. Independent minimal

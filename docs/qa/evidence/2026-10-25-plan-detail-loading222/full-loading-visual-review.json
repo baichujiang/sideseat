@@ -1,0 +1,426 @@
+{
+  "report": "Preview222 Full App稳定流程原图视觉复核",
+  "sourceIndex": "/tmp/sideseat222-private/full-images/index.json",
+  "method": "实际调用view_image按原始1284×2778 PNG逐一查看33个unique SHA；40条capture按相同SHA复用，未以测试Passed替代像素检查。",
+  "captures": 40,
+  "uniqueImages": 33,
+  "viewedUniqueImages": 33,
+  "duplicateCaptures": 7,
+  "shaVerification": "33个实际查看文件SHA与index一致",
+  "appearance": "普通中文、浅色、iPhone 14 Plus",
+  "verdict": "可见稳定态通过，加载修复在本批未覆盖",
+  "visibleRegressionCount": 0,
+  "loadingFixVisualVerdict": "未入镜：没有静态时间表loading placeholder或点卡到详情的加载瞬间，须用单独held-GET批次验收；不能从本批宣称spinner修复通过。",
+  "summary": "可见完整流程节点的标题/地点、跨午夜时间表、邀请与确认状态、owner及已接受peer两人名单、确认/正式发出/日历等底部动作未见布局异常。",
+  "scopeLimits": [
+    "仅普通中文浅色截图；未覆盖最大动态字体、深色、其他语言或其他尺寸，不构成max验收。",
+    "静态截图不能证明转场连续性、交互响应或业务结果；上述结果仅为像素可见性。",
+    "participant INVITING/CONFIRMED部分逐人capture同SHA，且当前视口的末行未完整入镜；仅记录取景限制，不推断不可滚动。",
+    "所有unique图可见OS AssistiveTouch，逐图记录其位置和遮挡。"
+  ],
+  "images": [
+    {
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "dddb6d4e7308ae456e425303a7955cea937ba7423cb9944809c65cdc5411b6c7",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-calendar-result.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "日历搜索结果标题、10月26日23:00及地点完整可读。",
+      "limit": "系统键盘已展开；只验收当前搜索结果。",
+      "assistiveTouch": "位于键盘底部空白区，未遮搜索结果。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "caada6db74ef9a8349d1f47122dce008cf4bf0b9e9dc25b3e0af2da800e5b8ee",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-participant-CONFIRMED.png"
+      ],
+      "result": "pass_visible",
+      "observation": "参与者已确认分享页：跨日日期完整，网页分享及复制链接两项清楚。",
+      "limit": null,
+      "assistiveTouch": "遮复制链接卡片右侧空白，未遮文案。"
+    },
+    {
+      "file": "phone-first-plan-inline-roster-peer-confirmed-owner.png",
+      "sha256": "decf8b2549696abd7e0693855bb50fa9a959fe1cfb0403feea6a10563224a146",
+      "captureCount": 2,
+      "sameShaFiles": [
+        "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+        "phone-first-plan-inline-roster-peer-confirmed-owner.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "两段跨午夜受邀时间表、2/2确认、Lin已接受及日历/无法参加底部动作清楚。",
+      "limit": "当前截图只完整显示名单第一行，Ming末行未入镜；同SHA逐人捕获不能证明末行完整，也不证明不可滚动。",
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "31d872e07b7e7d1e16672b397b4bcbb1ab46dd086dff74e0388e72ee6347aff7",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-confirmed-calendar-date-cross-midnight.png"
+      ],
+      "result": "pass_visible",
+      "observation": "已确定列表卡片完整显示26日23:00至27日01:00，标题、发起人及底栏正常。",
+      "limit": null,
+      "assistiveTouch": "位于内容空白区。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "4d348b31e1ff2ecd48df2723822666e5ffbcd42ec722290e6491e331b6a4fa95",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-owner-CONFIRMED.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人已确认分享页包含App好友、网页分享、复制链接，跨日日期完整。",
+      "limit": null,
+      "assistiveTouch": "遮App好友行右侧箭头区域。"
+    },
+    {
+      "file": "phone-first-plan-inline-roster-owner-confirmed-owner.png",
+      "sha256": "8252901f77b046ed28134ba9cb13dfa02ae7497514c9d7e77c9940325fb2ba5f",
+      "captureCount": 2,
+      "sameShaFiles": [
+        "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+        "phone-first-plan-inline-roster-owner-confirmed-owner.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人已确认页两个人名和已接受状态完整，跨日两段时间表、日历同步说明及日历动作正常。",
+      "limit": null,
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-publish-plan-centered-cancel.png",
+      "sha256": "10936c52c3a3ce119d15f9c2747ad92016fb0c8dbf4203cd4e1bfd51933f8bd2",
+      "captureCount": 2,
+      "sameShaFiles": [
+        "phone-first-plan-publish-plan-centered-confirm.png",
+        "phone-first-plan-publish-plan-centered-cancel.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "正式发出确认弹窗居中，说明、取消/正式发出按钮完整可读。",
+      "limit": "confirm与cancel捕获同SHA，仅表示同一个弹窗画面。",
+      "assistiveTouch": "位于弹窗外的背景进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-inline-roster-peer-accepted-owner.png",
+      "sha256": "dc29392ffb99587c2b3bdebbd00ecce6bfcef574d7f209f2cc1538362380c335",
+      "captureCount": 3,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-explicit-acceptance.png",
+        "phone-first-plan-inline-roster-peer-accepted-peer.png",
+        "phone-first-plan-inline-roster-peer-accepted-owner.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "参与者接受后两人名单、2/2进度、等待正式发出提示及无法参加动作完整可读。",
+      "limit": "底栏上方的附加说明仅部分入镜；两行名单及状态均可见。",
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "bf8a4f80b120f9beb7eef683c3927b35ef6bbffb6182a0f83673148a8a095708",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-invitation-continuous-across-midnight.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "待确认邀请页两段时间表连续跨日，1/2进度及确认参加/无法参加动作清楚。",
+      "limit": "Ming末行被当前取景的固定底栏截去下部；不据此判断滚动能力。",
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "d1b766e9fc87b29ceb014cf696aec715983c1d3d1df9cbb2888af47b2fd867d8",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-participant-INVITING.png"
+      ],
+      "result": "pass_visible",
+      "observation": "参与者待确认分享页仅网页分享/复制链接，标题和跨日日期完整。",
+      "limit": null,
+      "assistiveTouch": "遮复制链接卡片右侧空白。"
+    },
+    {
+      "file": "phone-first-plan-inline-roster-peer-inviting-owner.png",
+      "sha256": "1bee3c7561a889020970ac5d87baf9191baaaa83f369ebcaaeb4087e71625787",
+      "captureCount": 2,
+      "sameShaFiles": [
+        "phone-first-plan-inline-roster-peer-inviting-peer.png",
+        "phone-first-plan-inline-roster-peer-inviting-owner.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "参与者待确认页Lin待确认、1/2进度、两段时间表及底部确认/拒绝动作清楚。",
+      "limit": "Ming末行下部未完整入镜；逐人捕获同SHA，不代表已验收末行或不可滚动。",
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "465bb51e6131c1e6a08071264cb8f10277fd4a66ac7365161838b67348faba21",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-received-chat-card.png"
+      ],
+      "result": "pass_visible",
+      "observation": "聊天邀请卡片标题、跨日日期换行、待你确认及查看邀请入口完整可读。",
+      "limit": null,
+      "assistiveTouch": "位于聊天空白区。"
+    },
+    {
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "aaa325dfd480e70691d4d1fc9e9e7175d25933bb2b7baf383e3ee6b382ef3c63",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-cancel-plan-centered-keep.png"
+      ],
+      "result": "pass_visible",
+      "observation": "取消计划确认弹窗居中，说明与保留/取消两个按钮完整，无裁切。",
+      "limit": null,
+      "assistiveTouch": "位于弹窗外的背景进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "f9d6309d5e3497547390148c21c08ae7193365d9197858325cfeaa3a61bfd048",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-owner-INVITING.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人待正式发出分享页，App好友与两个外部分享动作、跨日日期完整。",
+      "limit": null,
+      "assistiveTouch": "遮App好友行右侧箭头区域。"
+    },
+    {
+      "file": "phone-first-plan-inline-roster-owner-inviting-owner.png",
+      "sha256": "477d97df0085ebadd71db93a4faf8fb960fd1ae7591c6042c7c87a27149677b3",
+      "captureCount": 2,
+      "sameShaFiles": [
+        "phone-first-plan-inline-roster-owner-inviting-peer.png",
+        "phone-first-plan-inline-roster-owner-inviting-owner.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人邀请页两人名单完整，Lin待确认、Ming已接受及1/2进度一致，正式发出底部动作清楚。",
+      "limit": null,
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "6ae880da27728a6aa6ed8c4266e71be49f41e7e1543fa7dc2147fdbbe6c517a7",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-review-final-invitees.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "核对邀请页标题地点、跨日最终时间和时区、两名勾选者及含自己2人/发出邀请底栏清楚。",
+      "limit": "邀请朋友后续区域在当前视口下方，未验收其完整内容。",
+      "assistiveTouch": "遮第二行右下分隔线附近，未遮人名和主要状态。"
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "0525a6b49f167224852fd2be5ac182a31f0083cf648cd973ba6d5e0efb0fce6e",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-final-cross-day-morning-and-summary.png"
+      ],
+      "result": "pass_visible",
+      "observation": "最终时间凌晨段周二00:00/00:30选中，底部汇总26至27日23:00–01:00、2小时及下一步清楚。",
+      "limit": null,
+      "assistiveTouch": "遮周四02:00–02:30附近时间格局部。"
+    },
+    {
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "3fc35b05a08bcb90bb532cba148f431e9d762e76dda2df493fd6ec8052934270",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-final-cross-day-evening.png"
+      ],
+      "result": "pass_visible",
+      "observation": "最终时间晚间段周一23:00/23:30选中，23:00–00:00、1小时汇总及下一步完整。",
+      "limit": null,
+      "assistiveTouch": "遮周四22:30–23:00附近时间格局部。"
+    },
+    {
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "6cbea8b06e4683cabde1aa5e60b219b120b981f080b5d0caa830e3a166b20a10",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-final-cells-tap-cancel-drag-erase.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "最终时间09:00/09:30格同时显示我的时间、2人及最终选择标识，1小时汇总和下一步正常。",
+      "limit": "单帧只验收当前结果，不独立证明点选/拖动/擦除过程。",
+      "assistiveTouch": "遮周四11:00–11:30附近时间格局部。"
+    },
+    {
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "a5285390fc9312638d697c7af72c8db231895d5cd40d776cc52a63d4a110ef2a",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-compact-responded-people.png"
+      ],
+      "result": "pass_visible",
+      "observation": "参与者进度页Ming/Lin两行均完整显示已提交空闲，2人已填写和填写不等于确认提示清楚。",
+      "limit": null,
+      "assistiveTouch": "位于内容空白区。"
+    },
+    {
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "576b323f3dda58e31da452fe5e36495d2ddffb3c1d8b9ac948f173aa5ae2da67",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-peer-inline-availability.png"
+      ],
+      "result": "pass_visible",
+      "observation": "参与者收集页09:00/09:30自选两格与2人计数完整，底部已提交1天1小时及等待邀请提示正常。",
+      "limit": null,
+      "assistiveTouch": "遮周四12:30–13:00附近计数格局部。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "465a818cc104fe9ff729a77c7785a3db1e6105d1d53af72e8b6cb745d2310fec",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-participant-COLLECTING.png"
+      ],
+      "result": "pass_visible",
+      "observation": "参与者收集状态分享页仅两个外部分享动作，标题及背景1人已填写清楚。",
+      "limit": null,
+      "assistiveTouch": "遮复制链接卡片右侧空白。"
+    },
+    {
+      "file": "phone-first-plan-contacts-received-chat-card-a7238751.png",
+      "sha256": "a72387518e09b0cf366c940336e7b32dd92b89e41856eee1743b95d16d7545b4",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-received-chat-card-a7238751.png"
+      ],
+      "result": "pass_visible",
+      "observation": "聊天收集卡片标题、待你选空闲及填写我的空闲入口完整可读。",
+      "limit": null,
+      "assistiveTouch": "位于聊天空白区。"
+    },
+    {
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "edfdc0ab34dd8d06cf3f881ccd032a3b2ed8c208165f914048c45fdba8afd8e8",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-submitted-availability-kept-after-send.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发送后发起人已选09:00/09:30及1人计数保留，底部已提交1天1小时、选择最终时间动作清楚。",
+      "limit": null,
+      "assistiveTouch": "遮周四12:00–12:30附近计数格局部。"
+    },
+    {
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "72c14db1a1ffd112c10a5d54119acd38576c545d191096929241aa3f513d9434",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-select-and-send.png"
+      ],
+      "result": "pass_visible",
+      "observation": "邀请联系人页Lin勾选、发送给1位联系人按钮和搜索栏完整。",
+      "limit": null,
+      "assistiveTouch": "位于联系人内容空白区。"
+    },
+    {
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "185ee4612fa3b553bce3742330f47f6432ac720ab866d1dc8f88df58d9d06b09",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-contacts-owner-submitted-and-share-open.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人提交后分享页App好友与网页/复制动作清楚，背景所选时间格仍可见。",
+      "limit": null,
+      "assistiveTouch": "遮App好友卡片右下边缘及其下空白，主要文案可读。"
+    },
+    {
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "9e1e5bd64f2e95343df721f8c5ebe9f1041f72e674d04c04545f732d627cf4cd",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-inline-information-saved-draft-preserved.png"
+      ],
+      "result": "pass_visible",
+      "observation": "信息保存后标题/地点清楚，09:00/09:30草稿格仍选中，未提交1天1小时与两个底部动作完整。",
+      "limit": null,
+      "assistiveTouch": "遮周四12:00–12:30附近计数格局部。"
+    },
+    {
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "b57d321981001302b904ae570d38516cd88e6482e3f2c0f29a9b3557c64f4abe",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-inline-information-editing.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "内联编辑的活动名、地点、取消/保存按钮和上方草稿选择完整可见，键盘未遮保存动作。",
+      "limit": "键盘遮住下方时间表和底部动作；此图只覆盖编辑状态。",
+      "assistiveTouch": "位于系统键盘底部空白区。"
+    },
+    {
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "09588aa21d2c890b03c7219fa4482c971ad52136ada6b4641ddf542d002fc5d2",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png"
+      ],
+      "result": "pass_visible_with_limit",
+      "observation": "空闲草稿页09:00/09:30两格、未提交1天1小时、提交并分享及选择最终时间正常；未见撤销条。",
+      "limit": "单帧不能独立证明点选/拖动/擦除过程。",
+      "assistiveTouch": "遮周四12:00–12:30附近计数格局部。"
+    },
+    {
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "dba4148a056408e552caf7d1dd568272f44481bba0d2efad9ab5613c941d3fdd",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起人未填写时分享页App好友及两个外部动作清楚，背景0人已填写、空表正常。",
+      "limit": null,
+      "assistiveTouch": "遮App好友卡片右下边缘及其下空白。"
+    },
+    {
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "c0c35938fcdf87d899358a63bdff01b01d0e038e6c949ed619b304c83923897a",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-delete-plan-centered-keep.png"
+      ],
+      "result": "pass_visible",
+      "observation": "删除征集确认弹窗居中，标题说明、保留计划/删除征集按钮完整可读。",
+      "limit": null,
+      "assistiveTouch": "位于弹窗外的周四12:00–12:30附近背景格。"
+    },
+    {
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "523cb5ee2507da45b462a8a9807e5016b7015fab459544bf6f76ff57743c05c0",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-compact-empty-timetable.png"
+      ],
+      "result": "pass_visible",
+      "observation": "空时间表0人已填写、0天0小时、禁用提交及选择最终时间按钮布局完整。",
+      "limit": null,
+      "assistiveTouch": "遮周四12:00–12:30附近计数格局部。"
+    },
+    {
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "42afe299c0e484f6b5a1e618d22fb693a46d063fbf8782bdf313f78ef0372211",
+      "captureCount": 1,
+      "sameShaFiles": [
+        "phone-first-plan-creation-information-without-timetable.png"
+      ],
+      "result": "pass_visible",
+      "observation": "发起计划页活动名、候选日期、每日09:00–17:00及时区、提议活动选项和下一步完整，无时间表混入。",
+      "limit": null,
+      "assistiveTouch": "位于内容空白区。"
+    }
+  ]
+}

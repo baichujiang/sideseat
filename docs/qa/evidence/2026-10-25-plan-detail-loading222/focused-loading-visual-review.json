@@ -1,0 +1,253 @@
+{
+  "report": "Preview222 focused最终加载态原图视觉复核",
+  "sourceIndex": "/tmp/sideseat222-private/focused-final-images/index.json",
+  "method": "实际逐一view_image查看17个unique SHA的原始1284×2778 PNG；26条capture按SHA复用。实际文件SHA均与index一致，未用测试Passed替代像素验收。",
+  "captures": 26,
+  "uniqueImages": 17,
+  "viewedUniqueImages": 17,
+  "duplicateCaptures": 9,
+  "appearance": "英文界面：normal-light与本批指定的真systemmax-dark；可见字重/字号和深浅外观相符。",
+  "verdict": "加载可见状态通过；最大字体成功详情的完整视口覆盖有限",
+  "loadingVisibleIssues": 0,
+  "summary": "候选与确定加载页均保留各自真实标题、日期/时段和Europe/Berlin，metadata普通及最大字体完整可读；四组slow-start/held各同SHA，支持所拍端点为静态占位。未见独立spinner或提前出现业务动作。无摘要入口中性，另一计划及重入未见旧内容残留。错误页面中性且Retry可读。",
+  "focusedSourceLimit": "按任务提供的测试背景，本批为Runner设备回环只读server回放Mac本轮实际3个GET快照及受控延迟/500；不是本报告独立验证实时上游全链的证据。未混入早期公网WiFiDenied图片。",
+  "limits": [
+    "静态capture只能证明所拍帧；未逐帧视频验收转场。",
+    "failed/retry分别同SHA，只覆盖两次错误页画面，未独立拍到Retry点击后的瞬时加载态。",
+    "最大字体成功候选页日期行在当前滚动位置被固定底栏部分截去，时间表未入镜；最大字体成功确定页只见首日表格上部。两者不构成完整成功页/完整名单的最大字体验收，也不据此推断不可滚动。",
+    "最大字体确定加载页metadata全部可读，但表格占位下部超出当前视口。",
+    "所有unique均有OS AssistiveTouch，逐图单列遮挡。"
+  ],
+  "images": [
+    {
+      "file": "loading-fast-confirmed-maximum.png",
+      "sha256": "6f372a8de6fe373c085a3a4f1e60d944d17fca44a8526d1ea07e83c51705a373",
+      "sameShaFiles": [
+        "loading-slow-complete-confirmed-maximum.png",
+        "loading-fast-confirmed-maximum.png"
+      ],
+      "captureCount": 2,
+      "state": "success",
+      "result": "pass_visible_with_limit",
+      "observation": "最大字体深色成功页标题完整两行，Confirmed、地点、26日23:00–24:00首段时间表及View in Calendar清楚。",
+      "limit": "当前视口只显示首日表格上部；第二日与名单未入镜，不能宣称完整最大字体成功页验收。",
+      "assistiveTouch": "位于时间表右侧色块，未遮时间标签或日历按钮。"
+    },
+    {
+      "file": "loading-slow-start-confirmed-maximum.png",
+      "sha256": "18353463a47650073e8b5fb547aaa4d3adf65026a8cb5e519e90486742096d80",
+      "sameShaFiles": [
+        "loading-slow-held-confirmed-maximum.png",
+        "loading-slow-start-confirmed-maximum.png"
+      ],
+      "captureCount": 2,
+      "state": "summary_loading",
+      "result": "pass_visible_with_limit",
+      "observation": "最大字体深色占位：Contact plan 036b0f90、26至27日、11:00 PM–1:00 AM、Europe/Berlin均完整换行可读；无独立spinner、状态徽章或业务动作。",
+      "limit": "长metadata使静态表格下部超出当前视口；metadata未裁切或重叠。",
+      "assistiveTouch": "遮占位表头右侧局部。"
+    },
+    {
+      "file": "loading-fast-collecting-maximum.png",
+      "sha256": "9ef5d67f1f11973cd809813f3d10bb051cba02ab7f2e829699470e9a912182af",
+      "sameShaFiles": [
+        "loading-slow-complete-collecting-maximum.png",
+        "loading-fast-collecting-maximum.png"
+      ],
+      "captureCount": 2,
+      "state": "success",
+      "result": "pass_visible_with_limit",
+      "observation": "最大字体深色成功页长标题与长地点换行可读，Not submitted、0 days/0 hours、禁用Submit及Choose final time底栏清楚。",
+      "limit": "当前位置日期行下部被固定底栏截去，时间表与时区尚未入镜；只验收可见区域，不据单帧判断滚动能力。",
+      "assistiveTouch": "位于地点末行右侧/分隔线处，未遮主要动作。"
+    },
+    {
+      "file": "loading-slow-start-collecting-maximum.png",
+      "sha256": "67224317463e923a187cbcfe1e632b357100bfb03b99db5329828ab1fc48203e",
+      "sameShaFiles": [
+        "loading-slow-held-collecting-maximum.png",
+        "loading-slow-start-collecting-maximum.png"
+      ],
+      "captureCount": 2,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "最大字体深色候选占位：Weekend study and coffee 7b50f7三行完整，Oct 28–Oct 29及Europe/Berlin完整；表格占位清楚，无spinner或提前业务动作。",
+      "limit": null,
+      "assistiveTouch": "遮静态表格右侧局部。"
+    },
+    {
+      "file": "loading-slow-complete-confirmed-normal.png",
+      "sha256": "5441453924805947fbae498049fbaf940744120c46517e18378897ae2b315651",
+      "sameShaFiles": [
+        "loading-slow-complete-confirmed-normal.png"
+      ],
+      "captureCount": 1,
+      "state": "success",
+      "result": "pass_visible",
+      "observation": "普通浅色慢请求完成：标题、Confirmed、跨午夜两段时间表、2/2两人接受名单及日历底部动作完整，无残留占位。",
+      "limit": null,
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "loading-slow-start-confirmed-normal.png",
+      "sha256": "f6f3d5f21aed0bc755d3c789d28dca108f8a824c27124de7eda34686a8ae7840",
+      "sameShaFiles": [
+        "loading-slow-held-confirmed-normal.png",
+        "loading-slow-start-confirmed-normal.png"
+      ],
+      "captureCount": 2,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "普通浅色确定占位：标题、26至27日、11:00 PM–1:00 AM、Europe/Berlin完整；静态空表无独立spinner或业务动作。",
+      "limit": null,
+      "assistiveTouch": "位于占位表下方空白区。"
+    },
+    {
+      "file": "loading-fast-confirmed-normal.png",
+      "sha256": "64c53e66475ce4adb9a1f8f226c36b893515e6605e93d42b50564c475807658f",
+      "sameShaFiles": [
+        "loading-fast-confirmed-normal.png"
+      ],
+      "captureCount": 1,
+      "state": "success",
+      "result": "pass_visible",
+      "observation": "普通浅色快速成功页两段跨日表格、两名Accepted及View in Calendar清楚，与慢完成可见内容一致。",
+      "limit": null,
+      "assistiveTouch": "遮确认进度条右端。"
+    },
+    {
+      "file": "loading-fast-collecting-normal.png",
+      "sha256": "c3e047b58f9110d6c8e698d1411e7aaa8a6abc908808bcb2b27237c7c7cb4873",
+      "sameShaFiles": [
+        "loading-slow-complete-collecting-normal.png",
+        "loading-fast-collecting-normal.png"
+      ],
+      "captureCount": 2,
+      "state": "success",
+      "result": "pass_visible",
+      "observation": "普通浅色候选成功页标题地点、Oct 28–Oct 29、Europe/Berlin、0人回应、两日时间表和底部禁用提交/选择最终时间完整。",
+      "limit": null,
+      "assistiveTouch": "位于周四11:30–12:00附近表格右侧，计数仍可见。"
+    },
+    {
+      "file": "loading-slow-start-collecting-normal.png",
+      "sha256": "4e0a68ccab51ca00dd66f7af72223f0b32ed5db1e522ad0f9f4a979a8d7eb5e5",
+      "sameShaFiles": [
+        "loading-slow-held-collecting-normal.png",
+        "loading-slow-start-collecting-normal.png"
+      ],
+      "captureCount": 2,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "普通浅色候选占位标题完整单行，Oct 28–Oct 29及Europe/Berlin清楚；静态表格无spinner、参与人数或底部业务动作误显。",
+      "limit": null,
+      "assistiveTouch": "位于占位表下方空白区。"
+    },
+    {
+      "file": "loading-neutral-deep-link-maximum.png",
+      "sha256": "d7302c9b0de27098c637187aadd73b9ed22848ab70a099e972b1243e3bddd192",
+      "sameShaFiles": [
+        "loading-neutral-deep-link-maximum.png"
+      ],
+      "captureCount": 1,
+      "state": "neutral_loading",
+      "result": "pass_visible",
+      "observation": "最大字体深色无摘要入口仅中性标题条及静态表格，无虚构标题/日期、旧计划信息、spinner或业务动作。",
+      "limit": null,
+      "assistiveTouch": "位于内容空白区。"
+    },
+    {
+      "file": "loading-neutral-deep-link-normal.png",
+      "sha256": "32bb2d543dc971a53a1980026c42fb1319a529b504d97afbdf44ce682902b118",
+      "sameShaFiles": [
+        "loading-neutral-deep-link-normal.png"
+      ],
+      "captureCount": 1,
+      "state": "neutral_loading",
+      "result": "pass_visible",
+      "observation": "普通浅色无摘要入口仅中性标题条与静态表格，无旧标题/日期、独立spinner或提前业务动作。",
+      "limit": null,
+      "assistiveTouch": "位于内容空白区。"
+    },
+    {
+      "file": "loading-reentry-maximum.png",
+      "sha256": "53a8782620a128a2c9220cd2cbc01d21da276da3b166b42fd4746ed8708788af",
+      "sameShaFiles": [
+        "loading-reentry-maximum.png"
+      ],
+      "captureCount": 1,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "最大字体深色重入正确恢复候选标题、Oct 28–Oct 29和Europe/Berlin，静态占位无错误页或另一计划残留。",
+      "limit": null,
+      "assistiveTouch": "遮静态表格右侧局部。"
+    },
+    {
+      "file": "loading-another-plan-maximum.png",
+      "sha256": "2063fab0d1343a885ae7e610016cbe0fd7113837c4f065d84736797b0a445318",
+      "sameShaFiles": [
+        "loading-another-plan-maximum.png"
+      ],
+      "captureCount": 1,
+      "state": "summary_loading",
+      "result": "pass_visible_with_limit",
+      "observation": "最大字体深色切换另一计划正确显示Contact plan 036b0f90及26至27日23:00–01:00/Europe/Berlin，无之前候选标题或动作残留。",
+      "limit": "静态表格下部在当前视口外；metadata全部可读。",
+      "assistiveTouch": "遮占位表头右侧局部。"
+    },
+    {
+      "file": "loading-failed-maximum.png",
+      "sha256": "8595df972e4aeede91fc21fa7be7e9bd3817c0db198095283174b25b7b467f5f",
+      "sameShaFiles": [
+        "loading-retry-maximum.png",
+        "loading-failed-maximum.png"
+      ],
+      "captureCount": 2,
+      "state": "error",
+      "result": "pass_visible_with_limit",
+      "observation": "最大字体深色错误页图标、Couldn't load the poll、受控错误说明及Retry清楚，无旧计划/占位/业务动作残留。",
+      "limit": "failed与retry同SHA，只证明两次捕获均为此错误页，未覆盖点击Retry后的瞬时加载过程。",
+      "assistiveTouch": "部分遮错误说明第二行右侧QA边缘；Retry未遮。"
+    },
+    {
+      "file": "loading-reentry-normal.png",
+      "sha256": "591e0927b2864d7dfb88f3093d818c2a44900a7f8446d784d9b477daf4b7265e",
+      "sameShaFiles": [
+        "loading-reentry-normal.png"
+      ],
+      "captureCount": 1,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "普通浅色重入正确显示候选标题、Oct 28–Oct 29/Europe/Berlin与静态表格，无前一计划或错误状态残留。",
+      "limit": null,
+      "assistiveTouch": "位于占位表下方空白区。"
+    },
+    {
+      "file": "loading-another-plan-normal.png",
+      "sha256": "3733ee8751cfa183b87a4c8d973e60d27ced24885945f9b8c97350189dfdd62e",
+      "sameShaFiles": [
+        "loading-another-plan-normal.png"
+      ],
+      "captureCount": 1,
+      "state": "summary_loading",
+      "result": "pass_visible",
+      "observation": "普通浅色另一计划显示Contact plan 036b0f90、26至27日、11:00 PM–1:00 AM及Europe/Berlin，未残留候选计划内容。",
+      "limit": null,
+      "assistiveTouch": "位于占位表下方空白区。"
+    },
+    {
+      "file": "loading-failed-normal.png",
+      "sha256": "d52501bbb1b1f7d9f60e62301fcef0f7fffb3210fac48c871314891236801cb7",
+      "sameShaFiles": [
+        "loading-retry-normal.png",
+        "loading-failed-normal.png"
+      ],
+      "captureCount": 2,
+      "state": "error",
+      "result": "pass_visible_with_limit",
+      "observation": "普通浅色错误页标题、受控错误说明和Retry完整，无旧计划、占位或业务动作残留。",
+      "limit": "failed与retry同SHA，未捕获Retry点击后的瞬时加载态。",
+      "assistiveTouch": "位于错误文案下方右侧空白区。"
+    }
+  ]
+}

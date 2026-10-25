@@ -1,0 +1,555 @@
+{
+  "result": "Accepted within the recorded plan-entry loading scope",
+  "actualCaptures": 66,
+  "uniqueOriginalPixelHashes": 50,
+  "method": "Every unique original was actually opened with view_image. Exact SHA duplicates reuse review. No image edited.",
+  "groups": [
+    {
+      "stage": "full",
+      "captures": 40,
+      "unique": 33,
+      "review": "full-loading-visual-review.json"
+    },
+    {
+      "stage": "focused-final",
+      "captures": 26,
+      "unique": 17,
+      "review": "focused-loading-visual-review.json"
+    }
+  ],
+  "limits": [
+    "Full stable-state captures alone cannot prove the transient-loading repair; the held-GET final focused captures verify that state.",
+    "AssistiveTouch occlusion and full participant-roster last-row capture limits are explicit in detailed reviews.",
+    "No whole-App maximum-font, all-language or pure-manual performance claim."
+  ],
+  "images": [
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-calendar-result_0_679AB170-A247-4D9C-A8D0-B0D88658E599.png",
+      "file": "phone-first-plan-contacts-calendar-result.png",
+      "sha256": "dddb6d4e7308ae456e425303a7955cea937ba7423cb9944809c65cdc5411b6c7",
+      "originalExportedFile": "C7CCA955-9402-4160-8F3F-C2FD2C243A4F.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-CONFIRMED_0_DA0B58E6-DC42-4123-90C0-F06317F5C1A9.png",
+      "file": "phone-first-plan-share-permissions-participant-CONFIRMED.png",
+      "sha256": "caada6db74ef9a8349d1f47122dce008cf4bf0b9e9dc25b3e0af2da800e5b8ee",
+      "originalExportedFile": "3319F3E0-4860-4703-86F9-2594549DA532.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-confirmed-peer_0_0F463071-D957-4698-931F-C4AAEEC39272.png",
+      "file": "phone-first-plan-inline-roster-peer-confirmed-peer.png",
+      "sha256": "decf8b2549696abd7e0693855bb50fa9a959fe1cfb0403feea6a10563224a146",
+      "originalExportedFile": "568A5BB9-DF99-4C26-876C-FA0308B76CDB.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-confirmed-owner_0_8C025791-2E90-4246-A8FB-23543BD53E4B.png",
+      "file": "phone-first-plan-inline-roster-peer-confirmed-owner.png",
+      "sha256": "decf8b2549696abd7e0693855bb50fa9a959fe1cfb0403feea6a10563224a146",
+      "originalExportedFile": "F46D1BF0-4354-48A2-B409-BDFCF5B75101.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-confirmed-calendar-date-cross-midnight_0_A85B9BE9-184D-4CE2-8BED-783B7427EACA.png",
+      "file": "phone-first-plan-confirmed-calendar-date-cross-midnight.png",
+      "sha256": "31d872e07b7e7d1e16672b397b4bcbb1ab46dd086dff74e0388e72ee6347aff7",
+      "originalExportedFile": "B954A282-17EF-406E-B296-5D059AB60563.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-CONFIRMED_0_08F47618-7040-4471-9982-F6EE31436E08.png",
+      "file": "phone-first-plan-share-permissions-owner-CONFIRMED.png",
+      "sha256": "4d348b31e1ff2ecd48df2723822666e5ffbcd42ec722290e6491e331b6a4fa95",
+      "originalExportedFile": "8EE38D14-13A0-40DC-B993-A08F9F2FE607.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-confirmed-peer_0_D0053BB7-52B9-458E-BC07-7A2AA97F6477.png",
+      "file": "phone-first-plan-inline-roster-owner-confirmed-peer.png",
+      "sha256": "8252901f77b046ed28134ba9cb13dfa02ae7497514c9d7e77c9940325fb2ba5f",
+      "originalExportedFile": "2F2DBAA6-703B-47B4-9D68-796F654C6825.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-confirmed-owner_0_BC8CFF20-D45A-4FA4-86F8-57CAEF9C70E7.png",
+      "file": "phone-first-plan-inline-roster-owner-confirmed-owner.png",
+      "sha256": "8252901f77b046ed28134ba9cb13dfa02ae7497514c9d7e77c9940325fb2ba5f",
+      "originalExportedFile": "2716ECD1-7189-4279-AB9B-829C20DB47D2.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-publish-plan-centered-confirm_0_5E742392-2C48-496A-8C0E-4921B64847F9.png",
+      "file": "phone-first-plan-publish-plan-centered-confirm.png",
+      "sha256": "10936c52c3a3ce119d15f9c2747ad92016fb0c8dbf4203cd4e1bfd51933f8bd2",
+      "originalExportedFile": "33035148-C802-48C2-946B-80D406E5B5DF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-publish-plan-centered-cancel_0_657F2343-86E2-4FCD-97A4-1D2DC5790004.png",
+      "file": "phone-first-plan-publish-plan-centered-cancel.png",
+      "sha256": "10936c52c3a3ce119d15f9c2747ad92016fb0c8dbf4203cd4e1bfd51933f8bd2",
+      "originalExportedFile": "7F38B469-11F3-4E02-A8B0-10AA1E9D45E7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-explicit-acceptance_0_6B7F8681-C748-4EDB-A3D1-6F729C256128.png",
+      "file": "phone-first-plan-contacts-explicit-acceptance.png",
+      "sha256": "dc29392ffb99587c2b3bdebbd00ecce6bfcef574d7f209f2cc1538362380c335",
+      "originalExportedFile": "5843C337-3B12-44F6-905E-FBC2ABB22513.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-accepted-peer_0_B438ED93-8EB5-41ED-A780-AD84DD84BE63.png",
+      "file": "phone-first-plan-inline-roster-peer-accepted-peer.png",
+      "sha256": "dc29392ffb99587c2b3bdebbd00ecce6bfcef574d7f209f2cc1538362380c335",
+      "originalExportedFile": "FDD80E6C-736B-4F71-9C37-9D3C7878A0E5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-accepted-owner_0_7E92BCAC-810C-4017-97CA-060946A1A488.png",
+      "file": "phone-first-plan-inline-roster-peer-accepted-owner.png",
+      "sha256": "dc29392ffb99587c2b3bdebbd00ecce6bfcef574d7f209f2cc1538362380c335",
+      "originalExportedFile": "8376AC4A-933A-4220-94D7-E23B67662EB6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-invitation-continuous-across-midnight_0_FE56CF62-5345-4345-8A23-F8F613ACD0E4.png",
+      "file": "phone-first-plan-invitation-continuous-across-midnight.png",
+      "sha256": "bf8a4f80b120f9beb7eef683c3927b35ef6bbffb6182a0f83673148a8a095708",
+      "originalExportedFile": "5E739391-A6D0-433D-8482-B2AB7096C5FE.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-INVITING_0_C5348F15-3636-4A6F-AF71-CE911A4BB2D1.png",
+      "file": "phone-first-plan-share-permissions-participant-INVITING.png",
+      "sha256": "d1b766e9fc87b29ceb014cf696aec715983c1d3d1df9cbb2888af47b2fd867d8",
+      "originalExportedFile": "01F6D33F-E698-4AA9-9C28-752542C4BFB9.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-inviting-peer_0_CF5807B2-788E-4CA4-917E-647D274D1C8F.png",
+      "file": "phone-first-plan-inline-roster-peer-inviting-peer.png",
+      "sha256": "1bee3c7561a889020970ac5d87baf9191baaaa83f369ebcaaeb4087e71625787",
+      "originalExportedFile": "C7D728E8-FFAA-453C-AC22-FCF2E5F7F287.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-peer-inviting-owner_0_719057AE-0065-4B6C-956F-DF8D8DD6163E.png",
+      "file": "phone-first-plan-inline-roster-peer-inviting-owner.png",
+      "sha256": "1bee3c7561a889020970ac5d87baf9191baaaa83f369ebcaaeb4087e71625787",
+      "originalExportedFile": "5B10BF5C-7995-4285-98F1-4D359C7702F9.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_56A161C4-4036-4692-B20F-DE4BD151DAA9.png",
+      "file": "phone-first-plan-contacts-received-chat-card.png",
+      "sha256": "465bb51e6131c1e6a08071264cb8f10277fd4a66ac7365161838b67348faba21",
+      "originalExportedFile": "6CA87514-AB75-415F-ABE8-7319F53FACD8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-cancel-plan-centered-keep_0_A07DF46B-0833-49B5-9E52-4790BDCC2A74.png",
+      "file": "phone-first-plan-cancel-plan-centered-keep.png",
+      "sha256": "aaa325dfd480e70691d4d1fc9e9e7175d25933bb2b7baf383e3ee6b382ef3c63",
+      "originalExportedFile": "28D1B160-EB0E-4BD7-8EC8-154D246C5626.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-INVITING_0_64396655-8490-4937-B515-AD369E7FAF9B.png",
+      "file": "phone-first-plan-share-permissions-owner-INVITING.png",
+      "sha256": "f9d6309d5e3497547390148c21c08ae7193365d9197858325cfeaa3a61bfd048",
+      "originalExportedFile": "6EA0BEAD-1F38-4EAA-8844-E569567CDDA1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-inviting-peer_0_D92A0D76-1B1A-4441-ACFA-9D5CCC3F171A.png",
+      "file": "phone-first-plan-inline-roster-owner-inviting-peer.png",
+      "sha256": "477d97df0085ebadd71db93a4faf8fb960fd1ae7591c6042c7c87a27149677b3",
+      "originalExportedFile": "98DDCBF7-300B-4061-9BFB-B1E2AFAB68AF.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-roster-owner-inviting-owner_0_7D8123B1-9EC3-46C3-99A1-4040429F15E8.png",
+      "file": "phone-first-plan-inline-roster-owner-inviting-owner.png",
+      "sha256": "477d97df0085ebadd71db93a4faf8fb960fd1ae7591c6042c7c87a27149677b3",
+      "originalExportedFile": "B2312481-5C7F-46F0-9D90-ABC425BA25D8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-review-final-invitees_0_8ED15771-7EE7-4F0F-8CAE-AF53AB2B5A13.png",
+      "file": "phone-first-plan-contacts-review-final-invitees.png",
+      "sha256": "6ae880da27728a6aa6ed8c4266e71be49f41e7e1543fa7dc2147fdbbe6c517a7",
+      "originalExportedFile": "182628E3-FDD5-44C0-B43D-43A9F78324A5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cross-day-morning-and-summary_0_158704BA-801E-4860-A3C1-EF28509DF260.png",
+      "file": "phone-first-plan-final-cross-day-morning-and-summary.png",
+      "sha256": "0525a6b49f167224852fd2be5ac182a31f0083cf648cd973ba6d5e0efb0fce6e",
+      "originalExportedFile": "56AE4FEA-ECA1-4833-9D11-42C08CBDF7AA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cross-day-evening_0_59D5A493-174E-48D2-BCCE-60E547FA1197.png",
+      "file": "phone-first-plan-final-cross-day-evening.png",
+      "sha256": "3fc35b05a08bcb90bb532cba148f431e9d762e76dda2df493fd6ec8052934270",
+      "originalExportedFile": "7E97CA25-81FD-4B68-8BFA-6BB38FFA8100.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-final-cells-tap-cancel-drag-erase_0_3849E10D-B637-4781-8F53-F7D58EDCABEA.png",
+      "file": "phone-first-plan-final-cells-tap-cancel-drag-erase.png",
+      "sha256": "6cbea8b06e4683cabde1aa5e60b219b120b981f080b5d0caa830e3a166b20a10",
+      "originalExportedFile": "A957BF4F-8EE2-464C-9AD7-799D96274463.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-compact-responded-people_0_C6D87622-E0F2-430B-B302-6B022EAB4A74.png",
+      "file": "phone-first-plan-compact-responded-people.png",
+      "sha256": "a5285390fc9312638d697c7af72c8db231895d5cd40d776cc52a63d4a110ef2a",
+      "originalExportedFile": "7ED5BC5B-8046-4E60-A4A7-12157AE72D6B.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-peer-inline-availability_0_A13F6BF1-2ACB-4787-9AE6-6BEB2D8C7760.png",
+      "file": "phone-first-plan-contacts-peer-inline-availability.png",
+      "sha256": "576b323f3dda58e31da452fe5e36495d2ddffb3c1d8b9ac948f173aa5ae2da67",
+      "originalExportedFile": "CAB03BA9-B1EC-4EF3-A07A-424F9F3F68BC.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-participant-COLLECTING_0_57CBEF2D-9501-4B4C-8F1C-1B4953E6CF2E.png",
+      "file": "phone-first-plan-share-permissions-participant-COLLECTING.png",
+      "sha256": "465a818cc104fe9ff729a77c7785a3db1e6105d1d53af72e8b6cb745d2310fec",
+      "originalExportedFile": "B6AE4B5D-0101-4466-9CD1-B801366BD3BA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-received-chat-card_0_729DEFDA-DB09-4A96-BCC6-C6A7A53FE756.png",
+      "file": "phone-first-plan-contacts-received-chat-card-a7238751.png",
+      "sha256": "a72387518e09b0cf366c940336e7b32dd92b89e41856eee1743b95d16d7545b4",
+      "originalExportedFile": "9A4C7266-9EEE-4E51-B550-7BCB5A1FED18.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-submitted-availability-kept-after-send_0_A0573CFB-475C-4DAD-A2C2-0FB1260E5DCE.png",
+      "file": "phone-first-plan-contacts-submitted-availability-kept-after-send.png",
+      "sha256": "edfdc0ab34dd8d06cf3f881ccd032a3b2ed8c208165f914048c45fdba8afd8e8",
+      "originalExportedFile": "A8BAB89F-B991-43C2-A84E-C809268CB8C9.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-select-and-send_0_B3CBC603-2C35-40C4-BBB1-26EBD9883AD6.png",
+      "file": "phone-first-plan-contacts-select-and-send.png",
+      "sha256": "72c14db1a1ffd112c10a5d54119acd38576c545d191096929241aa3f513d9434",
+      "originalExportedFile": "22B05118-DF60-4D02-8782-98791E381AAB.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-contacts-owner-submitted-and-share-open_0_0187B0C7-2B7C-4AB8-A83F-DF255D099226.png",
+      "file": "phone-first-plan-contacts-owner-submitted-and-share-open.png",
+      "sha256": "185ee4612fa3b553bce3742330f47f6432ac720ab866d1dc8f88df58d9d06b09",
+      "originalExportedFile": "ADED6225-3FC2-4B32-A3DF-8474DE872B64.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-information-saved-draft-preserved_0_6FFC7725-AE8F-4DCF-8F97-7B3B14F38DC0.png",
+      "file": "phone-first-plan-inline-information-saved-draft-preserved.png",
+      "sha256": "9e1e5bd64f2e95343df721f8c5ebe9f1041f72e674d04c04545f732d627cf4cd",
+      "originalExportedFile": "C28363CD-A9F3-41BC-9087-FC353D5D2CF1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-inline-information-editing_0_73FA76A6-3F1A-4AE8-8541-6AAC8BF7CE01.png",
+      "file": "phone-first-plan-inline-information-editing.png",
+      "sha256": "b57d321981001302b904ae570d38516cd88e6482e3f2c0f29a9b3557c64f4abe",
+      "originalExportedFile": "A63C8F95-6860-4F7E-97DF-23A3353CD12C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo_0_CCE3673C-DCD5-4C84-906D-EAEB634FAF28.png",
+      "file": "phone-first-plan-availability-tap-cancel-drag-erase-no-undo.png",
+      "sha256": "09588aa21d2c890b03c7219fa4482c971ad52136ada6b4641ddf542d002fc5d2",
+      "originalExportedFile": "58CFDA08-851F-4313-ABFC-7E3F69A25312.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING_0_773817D7-C3EE-4945-822E-127A634CC253.png",
+      "file": "phone-first-plan-share-permissions-owner-COLLECTING-BEFORE-FILLING.png",
+      "sha256": "dba4148a056408e552caf7d1dd568272f44481bba0d2efad9ab5613c941d3fdd",
+      "originalExportedFile": "BC5ECC89-428A-4B60-BF72-AA055BB15238.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-delete-plan-centered-keep_0_84D8FE30-10F3-4C10-95E3-634035313908.png",
+      "file": "phone-first-plan-delete-plan-centered-keep.png",
+      "sha256": "c0c35938fcdf87d899358a63bdff01b01d0e038e6c949ed619b304c83923897a",
+      "originalExportedFile": "A47CA046-FBAB-4F1C-8863-1C94EA096ECA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-compact-empty-timetable_0_42C7BBBA-674E-4181-A627-498A143FDA6F.png",
+      "file": "phone-first-plan-compact-empty-timetable.png",
+      "sha256": "523cb5ee2507da45b462a8a9807e5016b7015fab459544bf6f76ff57743c05c0",
+      "originalExportedFile": "FD383B38-6E4D-4D69-AC66-3F6A7515A027.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "full",
+      "capture": "phone-first-plan-creation-information-without-timetable_0_BF09E377-BF84-44F7-ABE6-15CB1CC5ED94.png",
+      "file": "phone-first-plan-creation-information-without-timetable.png",
+      "sha256": "42afe299c0e484f6b5a1e618d22fb693a46d063fbf8782bdf313f78ef0372211",
+      "originalExportedFile": "E30E01BB-FACE-434C-8B49-37DEF75505B6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-complete-confirmed-maximum_0_A5244282-4C52-4784-BBCA-394D3C1C1199.png",
+      "file": "loading-slow-complete-confirmed-maximum.png",
+      "sha256": "6f372a8de6fe373c085a3a4f1e60d944d17fca44a8526d1ea07e83c51705a373",
+      "originalExportedFile": "A0D27431-C789-427E-9258-7B0CF1CA4E31.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-held-confirmed-maximum_0_326DED6F-42CB-4FAD-9A7E-319877B18A2A.png",
+      "file": "loading-slow-held-confirmed-maximum.png",
+      "sha256": "18353463a47650073e8b5fb547aaa4d3adf65026a8cb5e519e90486742096d80",
+      "originalExportedFile": "F779ABB4-637C-44C9-8ECD-91A04959BD88.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-start-confirmed-maximum_0_D343CC2A-C4BB-40D7-AB72-5B22FFE8DDD0.png",
+      "file": "loading-slow-start-confirmed-maximum.png",
+      "sha256": "18353463a47650073e8b5fb547aaa4d3adf65026a8cb5e519e90486742096d80",
+      "originalExportedFile": "1AC48784-27BC-4F63-BB88-B3C9CF8600F6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-fast-confirmed-maximum_0_DC953DA1-7547-49B5-829A-D7774DC06F79.png",
+      "file": "loading-fast-confirmed-maximum.png",
+      "sha256": "6f372a8de6fe373c085a3a4f1e60d944d17fca44a8526d1ea07e83c51705a373",
+      "originalExportedFile": "D6BB7D54-99F8-48F6-8290-563A813C8BA1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-complete-collecting-maximum_0_C8EF0EF0-244D-46FC-90B2-F6A0D891A080.png",
+      "file": "loading-slow-complete-collecting-maximum.png",
+      "sha256": "9ef5d67f1f11973cd809813f3d10bb051cba02ab7f2e829699470e9a912182af",
+      "originalExportedFile": "CCE3E6F6-716B-45A3-AFB5-15B0F69246FE.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-held-collecting-maximum_0_885F6F7E-FE60-4C05-B6EF-DE21BAB1B1F1.png",
+      "file": "loading-slow-held-collecting-maximum.png",
+      "sha256": "67224317463e923a187cbcfe1e632b357100bfb03b99db5329828ab1fc48203e",
+      "originalExportedFile": "8FDB9F20-71F8-4654-BD68-A73F1BD560C6.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-start-collecting-maximum_0_E5F7E13E-627D-4FCD-92C3-3BD735AE7567.png",
+      "file": "loading-slow-start-collecting-maximum.png",
+      "sha256": "67224317463e923a187cbcfe1e632b357100bfb03b99db5329828ab1fc48203e",
+      "originalExportedFile": "47203374-AF22-4DE8-BAE5-52A4F415B599.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-fast-collecting-maximum_0_B945321B-4321-41E1-9E78-2BC21C0112F4.png",
+      "file": "loading-fast-collecting-maximum.png",
+      "sha256": "9ef5d67f1f11973cd809813f3d10bb051cba02ab7f2e829699470e9a912182af",
+      "originalExportedFile": "25D2F9C1-9A7E-4048-92DC-4D49BD92656C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-complete-confirmed-normal_0_CFD93557-ADB7-4078-90FC-8BBB6E4E85ED.png",
+      "file": "loading-slow-complete-confirmed-normal.png",
+      "sha256": "5441453924805947fbae498049fbaf940744120c46517e18378897ae2b315651",
+      "originalExportedFile": "8F4A9304-616F-4D42-AB48-A983FFBC68C2.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-held-confirmed-normal_0_5AFA3701-A650-4024-9E90-764AF565F4AB.png",
+      "file": "loading-slow-held-confirmed-normal.png",
+      "sha256": "f6f3d5f21aed0bc755d3c789d28dca108f8a824c27124de7eda34686a8ae7840",
+      "originalExportedFile": "9A0B8C2D-85DB-494F-BC6C-004A23CC19E7.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-start-confirmed-normal_0_62A791DC-1808-4527-B6A8-DAE461A44C4A.png",
+      "file": "loading-slow-start-confirmed-normal.png",
+      "sha256": "f6f3d5f21aed0bc755d3c789d28dca108f8a824c27124de7eda34686a8ae7840",
+      "originalExportedFile": "8F4879AF-AB90-45BA-893D-7C99AE9C4645.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-fast-confirmed-normal_0_8D4BF53D-2821-4495-A895-21994F8A6CFE.png",
+      "file": "loading-fast-confirmed-normal.png",
+      "sha256": "64c53e66475ce4adb9a1f8f226c36b893515e6605e93d42b50564c475807658f",
+      "originalExportedFile": "EA9062CE-7C71-4B21-AA92-A103A485BF1C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-complete-collecting-normal_0_A5053E4B-F599-4007-B341-DFEADCC966B9.png",
+      "file": "loading-slow-complete-collecting-normal.png",
+      "sha256": "c3e047b58f9110d6c8e698d1411e7aaa8a6abc908808bcb2b27237c7c7cb4873",
+      "originalExportedFile": "A5AE5633-46E6-4933-9562-B870F69107E5.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-held-collecting-normal_0_CC969A11-8599-40C9-8779-AC662009ECA0.png",
+      "file": "loading-slow-held-collecting-normal.png",
+      "sha256": "4e0a68ccab51ca00dd66f7af72223f0b32ed5db1e522ad0f9f4a979a8d7eb5e5",
+      "originalExportedFile": "75A9710F-C155-48CE-9781-7B62E9721E41.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-slow-start-collecting-normal_0_0830C69D-BDC8-4036-B120-B336BDCD3F3E.png",
+      "file": "loading-slow-start-collecting-normal.png",
+      "sha256": "4e0a68ccab51ca00dd66f7af72223f0b32ed5db1e522ad0f9f4a979a8d7eb5e5",
+      "originalExportedFile": "83654F7B-98BD-4211-B765-D49118106FCA.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-fast-collecting-normal_0_DE42CD3E-673B-4033-814D-573E79DA3563.png",
+      "file": "loading-fast-collecting-normal.png",
+      "sha256": "c3e047b58f9110d6c8e698d1411e7aaa8a6abc908808bcb2b27237c7c7cb4873",
+      "originalExportedFile": "AC9095DB-EAC9-4ADC-9430-FC32ADB3E43A.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-neutral-deep-link-maximum_0_D84453CB-7291-4E77-A001-A24762740750.png",
+      "file": "loading-neutral-deep-link-maximum.png",
+      "sha256": "d7302c9b0de27098c637187aadd73b9ed22848ab70a099e972b1243e3bddd192",
+      "originalExportedFile": "35DDFE54-7EE0-449E-A45E-808BDD324D86.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-neutral-deep-link-normal_0_D2894432-206E-41DC-8679-BE6183C7738D.png",
+      "file": "loading-neutral-deep-link-normal.png",
+      "sha256": "32bb2d543dc971a53a1980026c42fb1319a529b504d97afbdf44ce682902b118",
+      "originalExportedFile": "6EA70680-4EE1-45B3-BAD7-CFBB8D763595.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-reentry-maximum_0_82BF6C2A-C442-453D-8453-ACEC1978D0DD.png",
+      "file": "loading-reentry-maximum.png",
+      "sha256": "53a8782620a128a2c9220cd2cbc01d21da276da3b166b42fd4746ed8708788af",
+      "originalExportedFile": "10E5BEF6-DBB8-4AC6-8C6C-9B2B6B7290B8.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-another-plan-maximum_0_854EA5DD-B546-4238-B928-9FEC0B8A4B6A.png",
+      "file": "loading-another-plan-maximum.png",
+      "sha256": "2063fab0d1343a885ae7e610016cbe0fd7113837c4f065d84736797b0a445318",
+      "originalExportedFile": "C16D5155-4297-4ED7-A021-6526937DC832.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-retry-maximum_0_86098B4F-603B-422E-8195-87795C691995.png",
+      "file": "loading-retry-maximum.png",
+      "sha256": "8595df972e4aeede91fc21fa7be7e9bd3817c0db198095283174b25b7b467f5f",
+      "originalExportedFile": "F8ABEAAA-8A9B-4A2F-91AA-86392E0A50F1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-failed-maximum_0_0D0202F7-5A55-47CF-8BBA-92FE9C25F7D8.png",
+      "file": "loading-failed-maximum.png",
+      "sha256": "8595df972e4aeede91fc21fa7be7e9bd3817c0db198095283174b25b7b467f5f",
+      "originalExportedFile": "16ECB3A1-383A-4100-8743-BBD8A1D52BFD.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-reentry-normal_0_D06FD78E-9D9A-47CC-A91F-BFF5E39B5042.png",
+      "file": "loading-reentry-normal.png",
+      "sha256": "591e0927b2864d7dfb88f3093d818c2a44900a7f8446d784d9b477daf4b7265e",
+      "originalExportedFile": "B7F2BC0B-CBCD-480C-A09C-54C65DA08F70.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-another-plan-normal_0_3C2C3EB3-A9EA-4C1B-A75B-57F6E1CFA1B0.png",
+      "file": "loading-another-plan-normal.png",
+      "sha256": "3733ee8751cfa183b87a4c8d973e60d27ced24885945f9b8c97350189dfdd62e",
+      "originalExportedFile": "9793DACD-8CBC-4C98-AA2E-0E6738CD59A1.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-retry-normal_0_3489B270-F69C-49A9-AA2E-FAAA94310C48.png",
+      "file": "loading-retry-normal.png",
+      "sha256": "d52501bbb1b1f7d9f60e62301fcef0f7fffb3210fac48c871314891236801cb7",
+      "originalExportedFile": "57A0D644-595F-4FEE-BA73-44A79077710C.png",
+      "associatedWithFailure": false
+    },
+    {
+      "stage": "focused-final",
+      "capture": "loading-failed-normal_0_8EEEF35D-28B0-4A87-842F-1B2065D9CFD1.png",
+      "file": "loading-failed-normal.png",
+      "sha256": "d52501bbb1b1f7d9f60e62301fcef0f7fffb3210fac48c871314891236801cb7",
+      "originalExportedFile": "9B295452-1125-4FC0-8260-C49749A8D55E.png",
+      "associatedWithFailure": false
+    }
+  ]
+}
