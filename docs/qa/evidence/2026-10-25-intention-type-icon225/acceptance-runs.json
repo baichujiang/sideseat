@@ -1,0 +1,39 @@
+{
+  "initial": {
+    "cases": [
+      {
+        "case": "testChineseNormalCombinedTilesRecommendationsAndSaved",
+        "outcome": "passed",
+        "seconds": 58.875
+      },
+      {
+        "case": "testGermanActualSystemMaximumSingleReadableTile",
+        "outcome": "passed",
+        "seconds": 84.179
+      }
+    ],
+    "acceptedAsFinal": false,
+    "visualIssue": "The larger26pt type icon reduced category text width; ordinary study category acquired an ellipsis. Visual review rejected despite functional pass."
+  },
+  "final": {
+    "cases": [
+      {
+        "case": "testChineseNormalCombinedTilesRecommendationsAndSaved",
+        "outcome": "passed",
+        "seconds": 58.034
+      },
+      {
+        "case": "testGermanActualSystemMaximumSingleReadableTile",
+        "outcome": "passed",
+        "seconds": 85.161
+      }
+    ],
+    "acceptedAsFinal": true,
+    "sameFrozenApp": true,
+    "testSourceSHA256": {
+      "CombinedTogetherPhoneUITests.swift": "d09af4385248e135408d2048f08762b90f7fca23b576e51aaf11e1c2232ed4f4"
+    },
+    "notes": "Existing tests reused without source changes. Attachment names still combined224-* but every final capture is newly exported from Preview225 type-fit-final.xcresult. Final4pt type-row gap and bounded type-only text fitting preserve full ordinary category; accessibility text does not scale down."
+  },
+  "scope": "Existing active in-memory fixtures, loopback API override, no real account or business write. Two paths cover ordinary two-card rail, type icons, saved roundtrip, actual creation/new tile visibility and actual system maximum title/actions/editor/delete cancellation. No matching, online sharing, invitation/Calendar API, unchanged unit or browser rerun."
+}

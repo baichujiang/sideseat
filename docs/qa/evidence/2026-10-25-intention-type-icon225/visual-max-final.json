@@ -1,0 +1,190 @@
+{
+  "reviewer": "independent-225-type-fit-final-german-max-visual-review",
+  "stage": 225,
+  "scope": "两处类别行fit微调后的最终App225，德语/浅色/真实系统最大字号15captures/9unique实际PNG。",
+  "sourceIndex": "/tmp/sideseat225-private/final-images/index.json",
+  "sourceResultBundle": "Root指定225 type-fit-final.xcresult；截图名combined224来自复用测试，本报告仅查看225-private/final-images实际导出图。",
+  "captureCount": 15,
+  "uniqueOriginalCount": 9,
+  "duplicateCount": 6,
+  "method": "9个unique原像素均逐张view_image(detail:original)查看，6张exact SHA256明确复用。未以测试通过、缩略图或拼图替代视觉结论。",
+  "result": "scoped-final-visual-pass-no-material-regression",
+  "conclusions": [
+    "类别icon和类别字在更紧凑间距下仍分离，无挤压活动标题或More；长study分类按完整词自然换行。",
+    "活动名称、真实起止时间和三种状态在取景范围完整可读，无新硬裁切/碎字。",
+    "原文本动作面板四项与Abbrechen均完整屏内，旧删除裁切未回归；原编辑器/删除确认上下截面保持可读。"
+  ],
+  "implementationEvidenceLimit": "Root说明类型行8→4pt、类型Text的minimumScaleFactor在a11y=1而普通=0.9，其余主标题/icon26/Menu/规则保持；本只读reviewer不声称独立源码字节审计，只确认实际PNG可见效果。",
+  "existingScopeNotes": [
+    {
+      "id": "existing-delete-confirmation-icon-spacing",
+      "observation": "原删除确认内trash与Löschen首字距离紧密，沿用旧报告记录，非本次类别fit引入。"
+    }
+  ],
+  "limitations": [
+    "只实看本批15德语最大字号captures，不包括同目录中文普通字号，亦非整App验收。",
+    "推荐仅看到Mia卡上部，不能声称完整推荐卡已看全。",
+    "原编辑器关闭/删除确认取消后落页由Root所报同包58.034+85.161=143.195s两case另证；静态图只证明所拍打开/滚动状态及Cancel可见。",
+    "iOS AssistiveTouch右中系统圆点仍在，局部覆盖面板边缘/推荐菜单，未挡类别icon/类别字/活动标题或四动作关键文案。",
+    "原删除确认上/下两张组合覆盖全文及Cancel/Delete，单图视窗切面不代表永久裁切。"
+  ],
+  "previousReportPreserved": "/tmp/sideseat225-private/visual-max.json",
+  "captures": [
+    {
+      "capture": "combined224-recommendation-de-light-system-max_0_82F41BF8-02BC-4903-9972-3F449E835D5D.png",
+      "file": "combined224-recommendation-de-light-system-max.png",
+      "sha256": "d2c08a6c70289a6d6b298be3a4dfe649d819cbc8ee9b78039d12182be0ea6146",
+      "originalExportedFile": "B1D04901-C300-4031-A772-9A6CE8C894E0.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study卡尾部及Für dich推荐标题清楚，Mia卡上部姓名/头像/认证/Basketball可见。顶部分类为滚动取景截面，推荐卡下半不在本图，不能声称整卡已验收。"
+    },
+    {
+      "capture": "combined224-unpublished-tile-de-light-system-max_0_3012569C-8A06-4BE7-93F6-7225E4DD8E89.png",
+      "file": "combined224-unpublished-tile-de-light-system-max.png",
+      "sha256": "5bb233314ce282a9f22d124ccfd8dd4441c58971f951eb03e02cd351a738eeca",
+      "originalExportedFile": "41DDEBF3-FC6B-4A43-A131-FBC4FDBC8688.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "study书本类别icon完整，与多行分类文字间距紧凑但仍有分离，未碰字形或右上More；Gemeinsam/am gleichen/Thema lernen按完整词换行，Library study、时间待定和未寻找状态完整。"
+    },
+    {
+      "capture": "combined224-paused-tile-de-light-system-max_0_51F139B7-BA2B-46DA-80E4-D2C2E7F85053.png",
+      "file": "combined224-paused-tile-de-light-system-max.png",
+      "sha256": "2826888ab613a0efeca4c26c74d2eeac944da64d98c35dab10c71cbd1e2246a9",
+      "originalExportedFile": "EFF8C800-6BBB-41C6-9CDA-94940CBA8182.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "sports跑步icon与Sport文字清楚分离，Badminton标题、右上More、时间待定和Pausiert完整；未见两处fit调整引入的裁切/重叠。"
+    },
+    {
+      "capture": "combined224-panel-delete-cancel-visible-de-light-system-max_0_F9926A58-E00F-40DC-B700-DF34F320199C.png",
+      "file": "combined224-panel-delete-cancel-visible-de-light-system-max.png",
+      "sha256": "bc3e269e2a5ed729ee0f6aa9984c6799de475e753926d14304b93af5808f2287",
+      "originalExportedFile": "778F6D64-449A-4130-AA7E-4D9C05C8159F.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "原删除确认底部滚动截面：末段说明、Abbrechen和Löschen完整屏内。原有trash图标贴近L首字的细节仍在，属于未改确认组件细节，不扩展本次修改范围。"
+    },
+    {
+      "capture": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0_0_B74972DC-ECA9-4431-8CE2-D94A64CBC022.png",
+      "file": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0.png",
+      "sha256": "bc3e269e2a5ed729ee0f6aa9984c6799de475e753926d14304b93af5808f2287",
+      "originalExportedFile": "A5B9456C-1161-4B29-A93C-DF81FC06BD07.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-panel-delete-cancel-visible-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    },
+    {
+      "capture": "combined224-panel-opened-original-delete-prompt-de-light-system-max_0_5998C8D3-D905-4814-964A-6FB08B162826.png",
+      "file": "combined224-panel-opened-original-delete-prompt-de-light-system-max.png",
+      "sha256": "20d21dc6fa978bbfc4392212eaf6454ab834552cfe6b9714166e031b1da1b4c8",
+      "originalExportedFile": "AAFD7E47-6B21-4BE6-925D-F14BD76DBB48.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "原删除确认顶部滚动截面：图标、标题及说明前段可读，底部内容需结合后续滚动截面；未把视窗截面当作永久内容裁切。"
+    },
+    {
+      "capture": "combined224-panel-edit-opened-original-editor-de-light-system-max_0_482AE5EA-A229-456B-AC81-1E69E215294A.png",
+      "file": "combined224-panel-edit-opened-original-editor-de-light-system-max.png",
+      "sha256": "7c58dbdff7398531d65e60c2d423003895496850389558db988bb5712d08fef7",
+      "originalExportedFile": "19CCFE4C-6E0F-4EDC-A6FC-9BECA2DBE0FF.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "原编辑器打开，抬头/关闭X、类别选项、Coffee after class和Speichern可见。此单图只证明打开状态，不能独立证明取消后回页。"
+    },
+    {
+      "capture": "combined224-actions-panel-actions-cancel-de-light-system-max_0_D771F728-2588-4E94-9C2A-A59458BFDBD8.png",
+      "file": "combined224-actions-panel-actions-cancel-de-light-system-max.png",
+      "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+      "originalExportedFile": "FB9419CE-AC35-42EB-8447-F507AC0C35CE.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "动作面板完整：Mehr、Bearbeiten、Teilen、Suche pausieren、Löschen、Abbrechen均完整屏内。暂停按词两行，其余单行，删除/取消未被Tab栏裁切。"
+    },
+    {
+      "capture": "combined224-actions-panel-delete-de-light-system-max_0_C32487EC-4CE4-4EB1-919C-9887E8EAE535.png",
+      "file": "combined224-actions-panel-delete-de-light-system-max.png",
+      "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+      "originalExportedFile": "0680EE63-41FE-45A0-87B5-D786D4B02E55.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-actions-panel-actions-cancel-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    },
+    {
+      "capture": "combined224-actions-panel-toggle-pause-de-light-system-max_0_5E655F33-C825-4272-A563-37D4838B37AE.png",
+      "file": "combined224-actions-panel-toggle-pause-de-light-system-max.png",
+      "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+      "originalExportedFile": "98D07F39-8B53-4543-852D-5800EC550407.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-actions-panel-actions-cancel-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    },
+    {
+      "capture": "combined224-actions-panel-share-de-light-system-max_0_30CE923B-7638-40E8-864C-207C8CCD1FFD.png",
+      "file": "combined224-actions-panel-share-de-light-system-max.png",
+      "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+      "originalExportedFile": "5E217369-6A58-4D27-9338-454E80F5AD38.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "与另一动作面板图独立SHA（系统时间19:34/19:35不同），已另行原图实看；所有动作和Abbrechen完整，无碎词或裁切，系统AssistiveTouch只盖面板右缘。"
+    },
+    {
+      "capture": "combined224-actions-panel-menu-edit-de-light-system-max_0_6C4A7B9B-6106-4924-9244-68CB91D7FFC9.png",
+      "file": "combined224-actions-panel-menu-edit-de-light-system-max.png",
+      "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+      "originalExportedFile": "FA0A98D0-0678-4105-BC24-83740C6492E0.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-actions-panel-share-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    },
+    {
+      "capture": "combined224-actions-panel-top-de-light-system-max_0_B175E4B2-DF3F-49EA-B72B-1B82F4A075A0.png",
+      "file": "combined224-actions-panel-top-de-light-system-max.png",
+      "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+      "originalExportedFile": "85A36908-1B2F-4F2D-9296-C4BA0A663AA7.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-actions-panel-share-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    },
+    {
+      "capture": "combined224-first-status-de-light-system-max_0_BA69AF4E-8F50-4B03-BC99-62D31EF72F9D.png",
+      "file": "combined224-first-status-de-light-system-max.png",
+      "sha256": "b709a0b1448f2abac477b28322139e7ac7da0eac0225cb129662003c4a955b38",
+      "originalExportedFile": "F9236D52-B826-44EF-9FB7-415175FFC228.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "view_image-original-individual",
+      "conclusion": "coffee杯子icon与Kaffee类别文字间距紧凑但未相碰；Coffee after class按完整词两行，More独立，真实Morgen·19:34– /21:34及Suche aktiv完整。"
+    },
+    {
+      "capture": "combined224-first-title-de-light-system-max_0_AF52A381-8410-4B13-ABCC-82B24ED227D8.png",
+      "file": "combined224-first-title-de-light-system-max.png",
+      "sha256": "b709a0b1448f2abac477b28322139e7ac7da0eac0225cb129662003c4a955b38",
+      "originalExportedFile": "9EF227D8-95F6-4D42-9A09-BB70266C61C5.png",
+      "associatedWithFailure": false,
+      "sha256Verified": true,
+      "reviewMethod": "exact-sha256-reuse",
+      "reviewedAs": "combined224-first-status-de-light-system-max.png",
+      "conclusion": "相同SHA256，复用已逐张original查看原图结论。"
+    }
+  ]
+}

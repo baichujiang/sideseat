@@ -1,0 +1,201 @@
+{
+  "reviewedAtUTC": "2026-10-25T18:37:31.714136+00:00",
+  "stage": 225,
+  "revision": "final compact type-row spacing and limited non-accessibility text fitting fix",
+  "sourceIndex": "/tmp/sideseat225-private/final-images/index.json",
+  "legacyFilenameNote": "combined224-* names are retained by reused tests. All six images were read from sideseat225-private/final-images for the final stage225 rebuild.",
+  "method": "Every assigned non-German PNG is hash-unique and was displayed individually via view_image(detail=original). No contact sheet, AX proxy, source modification or device operation.",
+  "captureCount": 6,
+  "uniquePNGCount": 6,
+  "duplicateCaptureCount": 0,
+  "allAssignedHashesVerified": true,
+  "overallResult": "Pass for the actually visible unobscured pixels: study category text is complete in all three study-card frames; prominent coffee/sports/study icons do not overlap type text, activity names or More; no new material visible regression found.",
+  "materialIssueCount": 0,
+  "findings": [],
+  "resolvedPriorFinding": {
+    "id": "study-category-truncated-after-icon-enlargement",
+    "previousObservedText": "一起学同样…",
+    "finalObservedText": "一起学同样内容",
+    "confirmedIn": [
+      "combined224-recommendation-same-page-zh-Hans-light-normal.png",
+      "combined224-third-tile-zh-Hans-light-normal.png",
+      "combined224-bookmark-saved-before-section-change.png"
+    ],
+    "result": "visually_resolved"
+  },
+  "limitations": [
+    "Review is confined to these six ordinary Chinese/light viewports. German maximum Dynamic Type is assigned to another reviewer.",
+    "All images contain system AssistiveTouch and no software keyboard. Covered pixels and offscreen content are not claimed complete.",
+    "Static images cannot independently establish source byte preservation, exact 26×26 or 4pt source values, minimum card height, Dynamic Type shrink policy, focus movement, full action behavior or passing test durations."
+  ],
+  "previousRejectedReport": {
+    "path": "/tmp/sideseat225-private/visual-normal.json",
+    "preservedUnchanged": true,
+    "sha256": "c2b92a1f89fdabf997d00dc8ab361a464b81f8c405f902732beef483914d0bcf"
+  },
+  "images": [
+    {
+      "capture": "combined224-created-fourth-tile-focused_0_824CBF8C-4C8B-40A3-B8EA-4A733D5B2D86.png",
+      "file": "combined224-created-fourth-tile-focused.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-created-fourth-tile-focused.png",
+      "sha256": "a451ef41c2edc845864306cd80c753ff9011dc9589ac65a0fd20a93f52d90b34",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号推荐页，发布成功提示、Quick coffee 与 Coffee after class 两张意愿卡、Mia 推荐卡及底部导航。",
+      "observations": [
+        "两张咖啡杯类型图标清楚且完整，咖啡文字、标题和 More 均分离。",
+        "Quick coffee 和 Coffee after class 标题、时间待商议/明天时段、正在寻找状态清楚。",
+        "新建 Quick coffee 处于可见横排首位，发布成功提示与下方推荐内容均可见。"
+      ],
+      "limitations": [
+        "四张卡没有同时入镜，其余两张在横向屏外。",
+        "静态帧只证明新卡可见及位置，不独立证明交互或辅助焦点已转移。",
+        "AssistiveTouch 覆盖推荐卡右侧学校/语言行附近留白。"
+      ],
+      "studyCategoryFullTextVisible": null
+    },
+    {
+      "capture": "combined224-saved-recommendation-zh-Hans-light-normal_0_E9F27330-85D9-4D49-81CF-F239EA70649D.png",
+      "file": "combined224-saved-recommendation-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-saved-recommendation-zh-Hans-light-normal.png",
+      "sha256": "d064ee1572c786a410324e4e142ce8b5cde4b5a66464e0b5b0b9b629e5aa3e95",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号我的收藏栏，完整 Mia 收藏卡与底部导航。",
+      "observations": [
+        "我的收藏选中状态清楚。",
+        "Mia 头像、认证、篮球活动、时段、学校、语言、两行描述、实心收藏心和打招呼按钮完整可见。",
+        "未发现收藏卡在本次局部修复后新增可见回退。"
+      ],
+      "limitations": [
+        "本帧没有个人意愿横排，不能用于证明 compact 类型图标。",
+        "AssistiveTouch 位于收藏卡下方右侧空白区，其覆盖区不可审看。"
+      ],
+      "studyCategoryFullTextVisible": null
+    },
+    {
+      "capture": "combined224-bookmark-saved-before-section-change_0_7789BEB8-1BED-466E-953C-00784AEBC798.png",
+      "file": "combined224-bookmark-saved-before-section-change.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-bookmark-saved-before-section-change.png",
+      "sha256": "f7843acc096cf1a79a4b9d16df39a0cccf26cea74e8013cc25cee752b69d88e2",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号推荐页，羽毛球和 Library study 双卡、Mia 推荐卡、已收藏反馈及底部导航。",
+      "observations": [
+        "蓝色书本类型图标清楚、完整，类型文字「一起学同样内容」现已完整显示，末尾无省略号。",
+        "类型图标、文字、Library study 活动名和右侧 More 分离，无裁切或重叠。",
+        "运动图标、运动文字、羽毛球活动名、时间待商议、已暂停与尚未寻找状态均清楚。",
+        "实心收藏心与「已收藏，仅自己可见」反馈清楚，反馈文字未截断。"
+      ],
+      "limitations": [
+        "Coffee 卡在横向屏外。",
+        "收藏反馈临时覆盖推荐卡底缘与心形背景下缘，不代表无遮挡的像素。",
+        "AssistiveTouch 覆盖推荐卡右侧留白。"
+      ],
+      "studyCategoryFullTextVisible": true
+    },
+    {
+      "capture": "combined224-recommendation-same-page-zh-Hans-light-normal_0_89B692E5-2051-4296-9B12-53B18A81BE07.png",
+      "file": "combined224-recommendation-same-page-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-recommendation-same-page-zh-Hans-light-normal.png",
+      "sha256": "7b3a18ef7221fc6494a687d454c3e4f85cc8542af8753f53942d3888784bde43",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号推荐页，羽毛球和 Library study 双卡、Mia 推荐卡及底部导航。",
+      "observations": [
+        "蓝色书本类型图标清楚、完整，类型文字「一起学同样内容」现已完整显示，末尾无省略号。",
+        "类型图标、文字、Library study 活动名和右侧 More 分离，无裁切或重叠。",
+        "运动图标、运动文字、羽毛球活动名、时间待商议、已暂停与尚未寻找状态均清楚。",
+        "下方 Mia 推荐卡资料、描述、详情、收藏和打招呼仍在各自可见位置。"
+      ],
+      "limitations": [
+        "Coffee 卡在横向屏外。",
+        "AssistiveTouch 覆盖推荐卡右侧学校/语言行附近留白，覆盖区域不可审看。"
+      ],
+      "studyCategoryFullTextVisible": true
+    },
+    {
+      "capture": "combined224-third-tile-zh-Hans-light-normal_0_03BD4573-B03E-4DEB-8801-4F3E5158C33E.png",
+      "file": "combined224-third-tile-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-third-tile-zh-Hans-light-normal.png",
+      "sha256": "90aef5ea336244eb16f139ba38b3c3105c752076b0027b73ab2845bf8c2346d5",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号推荐页，羽毛球和 Library study 双卡、Mia 推荐卡及底部导航，状态栏时间与上一取景不同。",
+      "observations": [
+        "蓝色书本类型图标清楚、完整，类型文字「一起学同样内容」现已完整显示，末尾无省略号。",
+        "类型图标、文字、Library study 活动名和右侧 More 分离，无裁切或重叠。",
+        "运动图标、运动文字、羽毛球活动名、时间待商议、已暂停与尚未寻找状态均清楚。",
+        "下方 Mia 推荐卡资料、描述、详情、收藏和打招呼仍在各自可见位置。"
+      ],
+      "limitations": [
+        "此帧为独特哈希，已单独看原图，没有复用上一帧的像素审看。",
+        "Coffee 卡在横向屏外。",
+        "AssistiveTouch 覆盖推荐卡右侧学校/语言行附近留白，覆盖区域不可审看。"
+      ],
+      "studyCategoryFullTextVisible": true
+    },
+    {
+      "capture": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal_0_9FB88D21-8C51-4213-8F91-A103C50348F5.png",
+      "file": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+      "path": "/tmp/sideseat225-private/final-images/combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+      "sha256": "b8d48f55075aeba9717a1911ac8b9af12ef702b2c5d8cff951b7a77bca5c98cd",
+      "sha256Verified": true,
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "viewedIndividuallyAtOriginalDetail": true,
+      "result": "no_material_issue_in_visible_pixels",
+      "keyboardVisible": false,
+      "systemAssistiveTouchVisible": true,
+      "visibleScope": "中文普通字号推荐页，Coffee after class 与羽毛球双卡、Mia 推荐卡及底部导航。",
+      "observations": [
+        "咖啡杯和运动类型图标明显、完整；棕色/绿色类型色清楚。",
+        "咖啡和运动类型文字完整，图标与文字间仍有间距，未与活动名或 More 相撞。",
+        "Coffee after class 两行标题、羽毛球标题、明天时段、时间待商议、正在寻找和已暂停状态完整可读。",
+        "下方推荐卡资料、描述、详情、收藏和打招呼可见，无新增明显回退。"
+      ],
+      "limitations": [
+        "Library study 在横向屏外。",
+        "AssistiveTouch 覆盖推荐卡右侧学校/语言行附近留白。"
+      ],
+      "studyCategoryFullTextVisible": null
+    }
+  ]
+}

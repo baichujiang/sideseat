@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-25T18:37:06.538635+00:00",
+  "udid": "00008110-001A69110CC1401E",
+  "marketingName": "iPhone 14 Plus",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 225,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 9862,
+  "livePIDExecutableMatches": true,
+  "launchArguments": [],
+  "qaLaunchEnvironment": false,
+  "runnerRemoved": true,
+  "newAppReports": [],
+  "reportComparison": [
+    "name",
+    "metadata.lastModDate"
+  ],
+  "sameFrozenAppForAllFinalAcceptance": true,
+  "strictSignatureReverified": true,
+  "testFixtureScope": "Existing active in-memory intention/opportunity fixtures; no real account or business write. Two existing phone cases cover ordinary and actual maximum layouts, type icons, horizontal rail/pager separation, saved roundtrip, creation/new card visibility, original editing and delete cancellation. No online sharing or full matching API rerun.",
+  "disposableAccountsCreated": 0,
+  "realUserBusinessWrites": 0,
+  "rawLogsMode": "0600",
+  "resultAndAttachmentDirsMode": "0700",
+  "sourceCommit": "0b0f81c72db468c7351464f517cb518c213c01ee",
+  "pushedBranch": "codex/ios-uxui-20260922",
+  "sourceCommitInputsMatched": true,
+  "generatedRunnerContextRemoved": true,
+  "temporaryLocalSourceContextRemoved": true
+}

@@ -35,8 +35,20 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is224 below. See web release/QA records.
-- Preview224 is the current installed development build, source 9b5de67b04ff7572a841896d41267a47af640c5a pushed.
+  No native rebuild in that web stage; current native build is225 below. See web release/QA records.
+- Preview225 is the current installed development build, source 0b0f81c72db468c7351464f517cb518c213c01ee pushed.
+  Compact intention category uses its existing symbol at26pt,4pt text spacing and
+  bounded secondary-text fit; accessibility text stays full size/multiline. Only
+  the category declaration changes, callbacks/rules and all outside bytes stay.
+  Independent minimal review passed. Final same-App ordinary/German actual-max
+  two cases143.195s passed;21captures/15unique originals reviewed. Initial
+  study-category ellipsis was visually rejected despite AX pass, repaired and both
+  cases repeated. Actual ordinary first card remains188x180pt. Existing capture
+  prefix224 is retained by reused test source; actual images are final225 exports.
+  Normal225 PID9862,268/Local/signature/binaries/compiled test source match commit,
+  ordinary97 retained. Active memory fixtures, no real business write/backend/web
+  release; Runner/temporary Local removed,new App reports0. See225 QA/release.
+- Preview224 was the previous installed development build, source 9b5de67b04ff7572a841896d41267a47af640c5a pushed.
   Together combines own intentions above recommendations with Saved as the second
   section. Ordinary rail shows two compact cards; xxxLarge+ uses one wider card.
   Tap edits, More retains original actions; accessibility reuses the scrolling

@@ -1,0 +1,149 @@
+[
+  {
+    "capture": "combined224-created-fourth-tile-focused_0_824CBF8C-4C8B-40A3-B8EA-4A733D5B2D86.png",
+    "file": "combined224-created-fourth-tile-focused.png",
+    "sha256": "a451ef41c2edc845864306cd80c753ff9011dc9589ac65a0fd20a93f52d90b34",
+    "originalExportedFile": "7A090E39-9DD7-4810-822C-67714B18EEFD.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-saved-recommendation-zh-Hans-light-normal_0_E9F27330-85D9-4D49-81CF-F239EA70649D.png",
+    "file": "combined224-saved-recommendation-zh-Hans-light-normal.png",
+    "sha256": "d064ee1572c786a410324e4e142ce8b5cde4b5a66464e0b5b0b9b629e5aa3e95",
+    "originalExportedFile": "BECC4173-F2E0-445D-A04A-1A4DC088B606.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-bookmark-saved-before-section-change_0_7789BEB8-1BED-466E-953C-00784AEBC798.png",
+    "file": "combined224-bookmark-saved-before-section-change.png",
+    "sha256": "f7843acc096cf1a79a4b9d16df39a0cccf26cea74e8013cc25cee752b69d88e2",
+    "originalExportedFile": "3B913020-D71A-437B-B31C-637D81E2087D.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-recommendation-same-page-zh-Hans-light-normal_0_89B692E5-2051-4296-9B12-53B18A81BE07.png",
+    "file": "combined224-recommendation-same-page-zh-Hans-light-normal.png",
+    "sha256": "7b3a18ef7221fc6494a687d454c3e4f85cc8542af8753f53942d3888784bde43",
+    "originalExportedFile": "D2CCB60F-EA27-4CA7-A1F0-97F1F0AF5748.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-third-tile-zh-Hans-light-normal_0_03BD4573-B03E-4DEB-8801-4F3E5158C33E.png",
+    "file": "combined224-third-tile-zh-Hans-light-normal.png",
+    "sha256": "90aef5ea336244eb16f139ba38b3c3105c752076b0027b73ab2845bf8c2346d5",
+    "originalExportedFile": "FB1C2B24-3A60-464F-8960-29EC5E3F879C.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal_0_9FB88D21-8C51-4213-8F91-A103C50348F5.png",
+    "file": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+    "sha256": "b8d48f55075aeba9717a1911ac8b9af12ef702b2c5d8cff951b7a77bca5c98cd",
+    "originalExportedFile": "96DF6B26-7A99-404B-9BA4-BD0899A3B230.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-recommendation-de-light-system-max_0_82F41BF8-02BC-4903-9972-3F449E835D5D.png",
+    "file": "combined224-recommendation-de-light-system-max.png",
+    "sha256": "d2c08a6c70289a6d6b298be3a4dfe649d819cbc8ee9b78039d12182be0ea6146",
+    "originalExportedFile": "B1D04901-C300-4031-A772-9A6CE8C894E0.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-unpublished-tile-de-light-system-max_0_3012569C-8A06-4BE7-93F6-7225E4DD8E89.png",
+    "file": "combined224-unpublished-tile-de-light-system-max.png",
+    "sha256": "5bb233314ce282a9f22d124ccfd8dd4441c58971f951eb03e02cd351a738eeca",
+    "originalExportedFile": "41DDEBF3-FC6B-4A43-A131-FBC4FDBC8688.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-paused-tile-de-light-system-max_0_51F139B7-BA2B-46DA-80E4-D2C2E7F85053.png",
+    "file": "combined224-paused-tile-de-light-system-max.png",
+    "sha256": "2826888ab613a0efeca4c26c74d2eeac944da64d98c35dab10c71cbd1e2246a9",
+    "originalExportedFile": "EFF8C800-6BBB-41C6-9CDA-94940CBA8182.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-delete-cancel-visible-de-light-system-max_0_F9926A58-E00F-40DC-B700-DF34F320199C.png",
+    "file": "combined224-panel-delete-cancel-visible-de-light-system-max.png",
+    "sha256": "bc3e269e2a5ed729ee0f6aa9984c6799de475e753926d14304b93af5808f2287",
+    "originalExportedFile": "778F6D64-449A-4130-AA7E-4D9C05C8159F.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0_0_B74972DC-ECA9-4431-8CE2-D94A64CBC022.png",
+    "file": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0.png",
+    "sha256": "bc3e269e2a5ed729ee0f6aa9984c6799de475e753926d14304b93af5808f2287",
+    "originalExportedFile": "A5B9456C-1161-4B29-A93C-DF81FC06BD07.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-opened-original-delete-prompt-de-light-system-max_0_5998C8D3-D905-4814-964A-6FB08B162826.png",
+    "file": "combined224-panel-opened-original-delete-prompt-de-light-system-max.png",
+    "sha256": "20d21dc6fa978bbfc4392212eaf6454ab834552cfe6b9714166e031b1da1b4c8",
+    "originalExportedFile": "AAFD7E47-6B21-4BE6-925D-F14BD76DBB48.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-panel-edit-opened-original-editor-de-light-system-max_0_482AE5EA-A229-456B-AC81-1E69E215294A.png",
+    "file": "combined224-panel-edit-opened-original-editor-de-light-system-max.png",
+    "sha256": "7c58dbdff7398531d65e60c2d423003895496850389558db988bb5712d08fef7",
+    "originalExportedFile": "19CCFE4C-6E0F-4EDC-A6FC-9BECA2DBE0FF.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-actions-cancel-de-light-system-max_0_D771F728-2588-4E94-9C2A-A59458BFDBD8.png",
+    "file": "combined224-actions-panel-actions-cancel-de-light-system-max.png",
+    "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+    "originalExportedFile": "FB9419CE-AC35-42EB-8447-F507AC0C35CE.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-delete-de-light-system-max_0_C32487EC-4CE4-4EB1-919C-9887E8EAE535.png",
+    "file": "combined224-actions-panel-delete-de-light-system-max.png",
+    "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+    "originalExportedFile": "0680EE63-41FE-45A0-87B5-D786D4B02E55.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-toggle-pause-de-light-system-max_0_5E655F33-C825-4272-A563-37D4838B37AE.png",
+    "file": "combined224-actions-panel-toggle-pause-de-light-system-max.png",
+    "sha256": "bc4102cee4d7be903946a5ff7e53ad8f6191f8d105466114aea2080605d8c5a3",
+    "originalExportedFile": "98D07F39-8B53-4543-852D-5800EC550407.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-share-de-light-system-max_0_30CE923B-7638-40E8-864C-207C8CCD1FFD.png",
+    "file": "combined224-actions-panel-share-de-light-system-max.png",
+    "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+    "originalExportedFile": "5E217369-6A58-4D27-9338-454E80F5AD38.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-menu-edit-de-light-system-max_0_6C4A7B9B-6106-4924-9244-68CB91D7FFC9.png",
+    "file": "combined224-actions-panel-menu-edit-de-light-system-max.png",
+    "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+    "originalExportedFile": "FA0A98D0-0678-4105-BC24-83740C6492E0.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-actions-panel-top-de-light-system-max_0_B175E4B2-DF3F-49EA-B72B-1B82F4A075A0.png",
+    "file": "combined224-actions-panel-top-de-light-system-max.png",
+    "sha256": "5f4ecb9d6f5f169f4f7a33a359ed5ee4be7ba0fba1ae80229080f479ebf100fe",
+    "originalExportedFile": "85A36908-1B2F-4F2D-9296-C4BA0A663AA7.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-first-status-de-light-system-max_0_BA69AF4E-8F50-4B03-BC99-62D31EF72F9D.png",
+    "file": "combined224-first-status-de-light-system-max.png",
+    "sha256": "b709a0b1448f2abac477b28322139e7ac7da0eac0225cb129662003c4a955b38",
+    "originalExportedFile": "F9236D52-B826-44EF-9FB7-415175FFC228.png",
+    "associatedWithFailure": false
+  },
+  {
+    "capture": "combined224-first-title-de-light-system-max_0_AF52A381-8410-4B13-ABCC-82B24ED227D8.png",
+    "file": "combined224-first-title-de-light-system-max.png",
+    "sha256": "b709a0b1448f2abac477b28322139e7ac7da0eac0225cb129662003c4a955b38",
+    "originalExportedFile": "9EF227D8-95F6-4D42-9A09-BB70266C61C5.png",
+    "associatedWithFailure": false
+  }
+]

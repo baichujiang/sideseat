@@ -1,0 +1,29 @@
+{
+  "method": "Read original1284x2778 pixels, threshold luminance>=250 and flood-fill first white card component from75,900; native14Plus scale3. Read-only image analysis.",
+  "before224": {
+    "file": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+    "sha256": "019bb213462db9b631ebd053322b097e4a94836203f287276a6d7812e029d07e",
+    "whiteConnectedCardBoundsPixels": [
+      60,
+      687,
+      624,
+      1227
+    ],
+    "widthPoints": 188.0,
+    "heightPoints": 180.0
+  },
+  "final225": {
+    "file": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal.png",
+    "sha256": "b8d48f55075aeba9717a1911ac8b9af12ef702b2c5d8cff951b7a77bca5c98cd",
+    "whiteConnectedCardBoundsPixels": [
+      60,
+      687,
+      624,
+      1227
+    ],
+    "widthPoints": 188.0,
+    "heightPoints": 180.0
+  },
+  "ordinaryHeightUnchanged": true,
+  "scope": "First ordinary card; maximum text retains original natural height and separate final screenshot review."
+}

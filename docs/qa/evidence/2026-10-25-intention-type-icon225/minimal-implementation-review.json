@@ -1,0 +1,11 @@
+{
+  "verdict": "No material findings",
+  "independentReviewer": "intent_card_review",
+  "baseline": "e96b13006bcfbcf525a0f497dc880e85b0d7b9b0",
+  "onlyProductBlockChanged": "Existing compact category Label becomes26x26 scaledToFit existing symbol plus same category text with4pt spacing and bounded fitting(0.9 only outside accessibility sizes). Entire source outside this category declaration byte-identical. Preview config225 is the only other product input change.",
+  "reasonForFinalFit": "Actual ordinary7-character study category acquired ellipsis; smaller local gap and slight secondary-text fit repair it while preserving title size, icon size and card height. Accessibility retains full multi-line text with scale factor1.",
+  "newState": false,
+  "newRequest": false,
+  "newDependency": false,
+  "unchanged": "Category mapping/color, activity title and full AX label, menu44, callbacks, store/models, matching/rules, record data, time/status, rail and180pt min card height. No further abstraction needed."
+}

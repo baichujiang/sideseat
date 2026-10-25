@@ -1,0 +1,13 @@
+{
+  "verdict": "Final visual review passed within recorded viewport scopes.",
+  "captureCount": 21,
+  "uniquePixelCount": 15,
+  "method": "Every unique original PNG individually reviewed; exact duplicates reuse SHA-based inspection. Pixel height comparison separately verifies first ordinary card stays188x180pt.",
+  "reports": [
+    "visual-normal-final.json",
+    "visual-max-final.json"
+  ],
+  "rejectedInitial": "rejected/study-type-truncated-before-fit.png",
+  "captureProvenance": "Attachment names reused from unchanged existing tests; actual final App is225, with final install/signature/source/binary verification.",
+  "scope": "Ordinary Chinese and actual-system-maximum German only; individual card/scroll/modal segments and AssistiveTouch limits explicit. No whole-App/intermediate-font/dark or manual performance claim."
+}
