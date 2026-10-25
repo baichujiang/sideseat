@@ -31,13 +31,13 @@ const variants = [
   { name: '320-en-dark-20px', width: 320, height: 812, zh: false, colorScheme: 'dark', fontSize: 20 },
   { name: '1440-en-light', width: 1440, height: 1000, zh: false, colorScheme: 'light', fontSize: 16 },
 ].slice(0, baseline ? 1 : 3);
-const checks = [], screenshots = [];
+const checks = [], screenshots = [], actionTextBounds = [];
 let currentStep = 'launch', failure, browser;
 const contexts = [];
 const report = async passed => fs.writeFile(resultPath, JSON.stringify({
   passed, stage, engine: engineName, baseline, origin, realNetwork: true,
   scope: 'Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI',
-  checks, screenshots, failure: failure ? { step: currentStep, message: 'Verification failed; private diagnostics retained.' } : null,
+  checks, screenshots, actionTextBounds, failure: failure ? { step: currentStep, message: 'Verification failed; private diagnostics retained.' } : null,
   completedAt: new Date().toISOString(),
 }, null, 2) + '\n');
 
@@ -114,6 +114,33 @@ async function target(locator) {
   assert(box && box.height >= 43.99 && box.width >= 43.99, 'An action needs a 44 px target.');
   const viewport = locator.page().viewportSize();
   assert(box.x >= -0.5 && box.x + box.width <= viewport.width + 0.5, 'An action must fit the viewport width.');
+  const textBounds = await locator.evaluate(element => {
+    const box = element.getBoundingClientRect(), style = getComputedStyle(element);
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const rectangles = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.textContent?.trim()) continue;
+      const range = document.createRange(); range.selectNodeContents(node);
+      for (const rect of range.getClientRects()) if (rect.width && rect.height) {
+        rectangles.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
+      }
+    }
+    return { text: element.textContent?.trim(), box: { left: box.left, right: box.right, top: box.top, bottom: box.bottom },
+      paddingLeft: parseFloat(style.paddingLeft), paddingRight: parseFloat(style.paddingRight),
+      borderLeft: parseFloat(style.borderLeftWidth), borderRight: parseFloat(style.borderRightWidth), rectangles };
+  });
+  actionTextBounds.push({ step: currentStep, ...textBounds });
+  assert(textBounds.rectangles.length > 0, 'A primary action has rendered text.');
+  const { paddingLeft, paddingRight, borderLeft, borderRight } = textBounds;
+  for (const rect of textBounds.rectangles) {
+    assert(rect.left >= textBounds.box.left + paddingLeft + borderLeft - 1
+      && rect.right <= textBounds.box.right - paddingRight - borderRight + 1,
+    'Action text must remain inside its horizontal padding.');
+    assert(rect.left >= -0.5 && rect.right <= viewport.width + 0.5
+      && rect.top >= textBounds.box.top - 1 && rect.bottom <= textBounds.box.bottom + 1,
+    'Action text must remain inside its button and viewport.');
+  }
 }
 
 async function capture(page, v, name, focus) {
@@ -172,7 +199,9 @@ try {
     setStep(`${v.name}: released place appears and first guest confirms`);
     await first.page.reload();
     await expect(first.page.getByTestId('plan-invitation-remaining')).toContainText('1');
+    await capture(first.page, v, '02b-one-place-available', first.page.getByTestId('plan-invitation-remaining'));
     const firstConfirm = confirmButton(first.page, v);
+    await target(declineButton(first.page, v));
     await target(firstConfirm); await capture(first.page, v, '03-released-place-confirmation', firstConfirm);
     await firstConfirm.click();
     await expect(firstConfirm).toHaveCount(0, { timeout: 20_000 });
@@ -196,7 +225,9 @@ try {
     await checkCalendars(p, []);
     await second.page.reload();
     await expect(second.page.getByTestId('plan-invitation-remaining')).toContainText('1');
+    await capture(second.page, v, '05b-one-place-released-after-publication', second.page.getByTestId('plan-invitation-remaining'));
     const secondConfirm = confirmButton(second.page, v);
+    await target(declineButton(second.page, v));
     await target(secondConfirm); await capture(second.page, v, '06-second-guest-released-place', secondConfirm); await secondConfirm.click();
     await expect(secondConfirm).toHaveCount(0, { timeout: 20_000 });
     p = await latest(p); assert.equal(selected(p).length, 2); assert.equal(accepted(p).length, 2);
