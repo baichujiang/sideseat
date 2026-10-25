@@ -1,0 +1,543 @@
+{
+  "kind": "Post-promotion live public-path capacity browser acceptance",
+  "passed": true,
+  "checkedAt": "2026-10-25T21:11:08.291612+00:00",
+  "origin": "https://api.sideseat.de",
+  "candidateBasis": {
+    "deploymentID": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+    "sourceCommit": "8c4110c1928b129103f6ac824e2afe3f0d3a0c4a",
+    "sameCandidatePromotedWithoutRebuild": "Parent verified; this record adds actual public-path execution."
+  },
+  "scope": "One real live 390px Chinese light capacity flow per engine after candidate acceptance; both public browser contexts run without protection bypass cookies.",
+  "variant": {
+    "name": "390-zh-light",
+    "width": 390,
+    "height": 844,
+    "rootFontPx": 16,
+    "language": "zh-CN",
+    "appearance": "light"
+  },
+  "candidateFullMatrixRepeated": false,
+  "observedCaptures": 20,
+  "observedUniquePixelsAcrossEngines": 14,
+  "adoptedCaptures": 20,
+  "actionTextBoundsAnd44pxTargetChecks": 14,
+  "reviewMethod": "Actual PNG originals individually viewed; SHA-identical captures reuse exact-pixel review. Captured remaining-place text/timetable is above fixed reply footer; reply labels stay inside their own buttons.",
+  "functionalChecks": [
+    "Unknown guest is blocked when all two places are selected, while a reserved invitee may accept or decline.",
+    "Decline releases a place; browser guest accepts through UI, owner publishes and publication retry preserves unique Calendar entry/accepted companion.",
+    "Second browser guest is blocked until first guest declines through UI; then second guest accepts and first guest cannot reclaim a full place.",
+    "All five registered peer Calendars remain absent for each owned capacity plan; the owner has one exact entry."
+  ],
+  "runs": [
+    {
+      "engine": "chromium",
+      "resultFile": "capacity-browser-live-chromium.json",
+      "resultSHA256": "e3649700fb309da3758380b6b509db4d120d82ff1fc6b315c0e511988e36dbd0",
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "functionalPassed": true,
+      "variants": [
+        "390-zh-light"
+      ],
+      "elapsedSecondsFromLogCreation": 15.251,
+      "completedAt": "2026-10-25T21:10:00.269Z",
+      "actionTextBoundsAnd44pxTargetChecks": 7,
+      "captures": 10,
+      "perEngineUniquePixels": 7,
+      "images": [
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-01-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 485,
+            "bottom": 509,
+            "height": 24
+          },
+          "sha256": "d0e2840eb16349a195797e45b5f52d08a2dcb0a405d1b6e665e947d9436afdfc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-02-full-readonly-timetable.png",
+          "variant": "390-zh-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 182,
+            "bottom": 421,
+            "height": 239
+          },
+          "sha256": "d0e2840eb16349a195797e45b5f52d08a2dcb0a405d1b6e665e947d9436afdfc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-chromium-390-zh-light-01-full-no-confirmation.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-02b-one-place-available.png",
+          "variant": "390-zh-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 715,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "6c6bc099390b2620e38d5bf191d4847d6aa0960680623b7ba662e438bae8bcd7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-03-released-place-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 840,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 740,
+            "bottom": 784,
+            "height": 44
+          },
+          "sha256": "6c6bc099390b2620e38d5bf191d4847d6aa0960680623b7ba662e438bae8bcd7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-chromium-390-zh-light-02b-one-place-available.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-04-first-guest-accepted.png",
+          "variant": "390-zh-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 735,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 8,
+            "bottom": 613,
+            "height": 605
+          },
+          "sha256": "ab8c21e09e694097377d61e523868e888a857fc4bf0d7065c19988f5d0fe3271",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-05-second-guest-full-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 420,
+            "bottom": 444,
+            "height": 24
+          },
+          "sha256": "2238e240e659fde4d4678c79cc53e8679f67aeaa7c0fa2cc3e542b5fedb110ae",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-05b-one-place-released-after-publication.png",
+          "variant": "390-zh-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 715,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "ed18455ad999a231a4af58dd6a8044a9ee9637f81e362a1a6744278482e062ee",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-06-second-guest-released-place.png",
+          "variant": "390-zh-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 840,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 740,
+            "bottom": 784,
+            "height": 44
+          },
+          "sha256": "ed18455ad999a231a4af58dd6a8044a9ee9637f81e362a1a6744278482e062ee",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-chromium-390-zh-light-05b-one-place-released-after-publication.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-07-second-guest-accepted-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 735,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 8,
+            "bottom": 533,
+            "height": 525
+          },
+          "sha256": "45709dedaca64ebb82bf1fc661b5b78208febd383926b23f5c6bc43bf73d74a0",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-chromium-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "40f1892bf6eb65e34a24b693bf8500b4f8febe45c123d8d23965697705a15974",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        }
+      ]
+    },
+    {
+      "engine": "webkit",
+      "resultFile": "capacity-browser-live-webkit.json",
+      "resultSHA256": "c3107834d8cc1ac60941459c4ea3e2adbbc903f3704afa889bc07d1a2291bd64",
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "functionalPassed": true,
+      "variants": [
+        "390-zh-light"
+      ],
+      "elapsedSecondsFromLogCreation": 15.157,
+      "completedAt": "2026-10-25T21:10:26.799Z",
+      "actionTextBoundsAnd44pxTargetChecks": 7,
+      "captures": 10,
+      "perEngineUniquePixels": 7,
+      "images": [
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-01-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 485,
+            "bottom": 509,
+            "height": 24
+          },
+          "sha256": "7e324e9e04f99ea0d3b3c5eb142f541d468b630a3fe66e6f2950c28371a61051",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-02-full-readonly-timetable.png",
+          "variant": "390-zh-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 182,
+            "bottom": 421,
+            "height": 239
+          },
+          "sha256": "7e324e9e04f99ea0d3b3c5eb142f541d468b630a3fe66e6f2950c28371a61051",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-webkit-390-zh-light-01-full-no-confirmation.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-02b-one-place-available.png",
+          "variant": "390-zh-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 715,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "a01b4917a372d2401926418d0ba3d2f1ed8f2644a15c3e861dbef382292abab2",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-03-released-place-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 840,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 740,
+            "bottom": 784,
+            "height": 44
+          },
+          "sha256": "a01b4917a372d2401926418d0ba3d2f1ed8f2644a15c3e861dbef382292abab2",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-webkit-390-zh-light-02b-one-place-available.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-04-first-guest-accepted.png",
+          "variant": "390-zh-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 735,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 8,
+            "bottom": 613,
+            "height": 605
+          },
+          "sha256": "387c72cd6ce7a7d4be6701b35e3fd9b94d2bfa72a0c13aefc24205d47c445e0d",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 420,
+            "bottom": 444,
+            "height": 24
+          },
+          "sha256": "ec365826f636afb1cbc0ce0ac80dcd7dc0eea66e2609ebb8ce0f42f93f8d49a0",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+          "variant": "390-zh-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 715,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "93ad8f2af5fe9d83a84e5230403e4d62d0c433592d29a9f1b2177bec9166e9c7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-06-second-guest-released-place.png",
+          "variant": "390-zh-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 840,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 740,
+            "bottom": 784,
+            "height": 44
+          },
+          "sha256": "93ad8f2af5fe9d83a84e5230403e4d62d0c433592d29a9f1b2177bec9166e9c7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-live-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 735,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 8,
+            "bottom": 533,
+            "height": 525
+          },
+          "sha256": "d1541da32e998b5181d571983d23fd2eb007848733549d88a04117617c5047b3",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        },
+        {
+          "file": "capacity-browser-live-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 832,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 410,
+            "bottom": 434,
+            "height": 24
+          },
+          "sha256": "eec3e5dc1aeb1457aa401053c12442f553a4eded5182fe6882c991c70a799ccd",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "acceptedForShownViewport": true
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "This is a focused production public-path supplement, not another full three-variant matrix. Candidate matrix remains in browser-final-summary.json.",
+    "Browser engine viewport screenshots only; no physical iPhone Safari, native App closed-loop, full-App maximum-font or manual-performance claim.",
+    "Long page content outside each shown scroll viewport is not reviewed by that image.",
+    "Anonymous guests have no registered Calendar account; exact owner event/guest companions and five registered peer absences were verified by API.",
+    "Elapsed times use private log file creation through result completion; they are not performance benchmarks."
+  ],
+  "executionBoundaries": {
+    "v2SourceOrHarnessChangedDuringLiveRuns": false,
+    "bypassCookiesUsed": false,
+    "loginOrAccountTokenRefreshPerformed": false,
+    "cleanupPerformed": false,
+    "promotionPerformedByThisWorker": false,
+    "nativeOrProductFilesEdited": false
+  }
+}

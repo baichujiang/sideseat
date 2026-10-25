@@ -1,0 +1,385 @@
+{
+  "recordedAt": "2026-10-25T22:09:55.517421+00:00",
+  "productPreviewBuild": 228,
+  "purpose": "Successful publication prefix within failed calendar-return continuation, reviewed from actual original images.",
+  "source": {
+    "resultBundle": "/tmp/sideseat228-private/six-user-publication-scroll.xcresult",
+    "test": "PlanSixParticipantPhoneUITests/testContinuePublicationAndCalendarAfterMixedReplies()",
+    "enclosingResult": "Failed",
+    "passedTests": 0,
+    "failedTests": 1,
+    "caseDurationSeconds": 130.605,
+    "bundleElapsedSeconds": 151.23,
+    "compiledTestSource": {
+      "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+      "sha256": "b83bfe76211af1fcbdedfe2235505e76495f6c76ce4b9ab29d2e35d70c8a1446"
+    }
+  },
+  "device": {
+    "architecture": "arm64",
+    "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+    "deviceName": "SideSeat Six User QA",
+    "modelName": "iPhone 14 Plus",
+    "osBuildNumber": "23F77",
+    "osVersion": "26.5",
+    "platform": "iOS Simulator"
+  },
+  "isPhysicalPhone": false,
+  "wholeSixPersonFlowPassedInThisAttempt": false,
+  "publishedInThisAttempt": true,
+  "calendarUIRoundTripPassedInThisAttempt": false,
+  "verifiedPrefix": {
+    "cumulativeReadOnlyAPIPhases": [
+      "created",
+      "owner-draft",
+      "owner-submitted",
+      "shared",
+      "peer1-submitted",
+      "peer2-submitted",
+      "peer3-submitted",
+      "peer4-submitted",
+      "peer5-submitted",
+      "peer3-edited",
+      "peer3-restored",
+      "final-review-cancelled",
+      "invited",
+      "peer1-accepted",
+      "peer2-accepted",
+      "peer3-accepted",
+      "peer4-ignored",
+      "peer5-declined",
+      "published"
+    ],
+    "phaseCount": 19,
+    "newNativeAndAPIPhase": "published",
+    "samePlanContinuation": true,
+    "businessMutationSurface": "Native App UI; read-only API observer",
+    "maximumPromptFlow": "Open message; scroll actual prompt until both actions visible; cancel; reopen message; scroll actual prompt again; confirm; confirmed App state and four actual Calendars.",
+    "publishedAPISnapshot": {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:58:41.824Z"
+    },
+    "ordinaryOwnerCalendarSearch": "Exact plan title found with correct date09:00, tap opens read-only Plan detail medium sheet. Manage Plan not reached in this failed attempt.",
+    "maximumGermanRosterVisual": "Five peers readable across captures; owner accepted status outside captured footer boundary."
+  },
+  "failureDiagnostic": {
+    "category": "Test waits for lower virtualized List row before scrolling medium read-only calendar sheet",
+    "assertion": "calendar-manage-plan existence timed out before any detail List scrolling",
+    "compiledFailureLine": 453,
+    "video": "private publication-scroll-attachments/6485C7AE-99D3-4437-BB11-D2CB23C27950.mp4",
+    "videoDurationSeconds": 130.25666666666666,
+    "frames": [
+      {
+        "privatePath": "/tmp/sideseat228-private/publication-scroll-t119.png",
+        "requestedSeconds": 119,
+        "actualFrameSeconds": 117.51333333333334,
+        "sha256": "9d092640c84073aab4dd6ffe4bf8458a83a983d5db2050307c6faa0d8a8bdab4",
+        "pixels": [
+          1284,
+          2778
+        ],
+        "reviewedOriginalPixels": true,
+        "adoptedAsFunctionalPass": false
+      },
+      {
+        "privatePath": "/tmp/sideseat228-private/publication-scroll-t124.png",
+        "requestedSeconds": 124,
+        "actualFrameSeconds": 117.51333333333334,
+        "sha256": "9d092640c84073aab4dd6ffe4bf8458a83a983d5db2050307c6faa0d8a8bdab4",
+        "pixels": [
+          1284,
+          2778
+        ],
+        "reviewedOriginalPixels": true,
+        "adoptedAsFunctionalPass": false
+      },
+      {
+        "privatePath": "/tmp/sideseat228-private/publication-scroll-t126.png",
+        "requestedSeconds": 126,
+        "actualFrameSeconds": 117.51333333333334,
+        "sha256": "9d092640c84073aab4dd6ffe4bf8458a83a983d5db2050307c6faa0d8a8bdab4",
+        "pixels": [
+          1284,
+          2778
+        ],
+        "reviewedOriginalPixels": true,
+        "adoptedAsFunctionalPass": false
+      }
+    ],
+    "pixelFinding": "Read-only Plan medium sheet is open over Calendar. Correct exact title, Plan category, managed-in-Plans explanation and09:00 start/10:00 end/one-hour duration visible. Lower detail content continues outside sheet viewport. This is not a return to bare Calendar or ordinary event editor.",
+    "inference": "Pixels support successful search-to-detail presentation and an offscreen/lazily materialized Manage Plan action. Specific List virtualization and serialized token completeness derive from parent contract/source investigation, not from these pixels alone."
+  },
+  "counts": {
+    "reviewedCaptureCount": 12,
+    "uniqueCaptureSHA256": 10,
+    "adoptedCaptureCount": 12,
+    "privateDiagnosticFrameRequests": 3,
+    "uniquePrivateDiagnosticFrames": 1
+  },
+  "captures": [
+    {
+      "capture": "plan-six-calendar-owner-exact-plan-result",
+      "file": "plan-six-calendar-owner-exact-plan-result-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "4f07c31cc43979a1508d4b40551362fc3190be41e3599e3134bf665103359f92",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese actual calendar search exact title gives one matching result at Oct26 09:00. Result navigation and Manage Plan availability are separate; this is search-result evidence only.",
+      "exportedOriginal": "D2CBAC90-BDFA-42F7-964E-2F42E3E0F380.png"
+    },
+    {
+      "capture": "plan-six-16-owner-published-before-all-replies",
+      "file": "plan-six-16-owner-published-before-all-replies-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "094a17a9cd910448edf77b216837f9a46af428f4d6a7a00c28ad3839919d872a",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum German owner shows confirmed status, exact date09:00–10:00 and View in Calendar footer.09:00 highlighted row visible;09:30 lower portion outside viewport. No full roster claim from this image.",
+      "exportedOriginal": "12BB4DB2-EC89-462D-8B18-14A878FC2197.png"
+    },
+    {
+      "capture": "plan-six-15-maximum-publish-confirm-after-cancel-actions",
+      "file": "plan-six-15-maximum-publish-confirm-after-cancel-actions-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "7d18451e209ecaad261b326b7946199ac71a178c445071473fb6146643aa4e66",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "After real prompt scroll, both cancel and confirm button bodies/labels fit inside prompt. Confirm label wraps midword at extreme type size (Endgültige / n Plan / senden), readable but visually awkward. Upper title/count naturally scrolled above viewport; paired message capture establishes them.",
+      "exportedOriginal": "A1815EAA-FA25-4D2F-BCA9-3E07DE2DC0A7.png"
+    },
+    {
+      "capture": "plan-six-15-maximum-publish-confirm-after-cancel-message",
+      "file": "plan-six-15-maximum-publish-confirm-after-cancel-message-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "a90dc8f5a467db34f21e19806cd577011bb059cf50b2e0a58603997dd561f23f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German actual maximum type prompt title and complete four-accepted-person message readable. Lower actions intentionally outside this scroll position; use paired action capture.",
+      "exportedOriginal": "2934F9D5-87E4-41FF-984B-001942A9C4BD.png"
+    },
+    {
+      "capture": "plan-six-14-maximum-publish-prompt-four-accepted-actions",
+      "file": "plan-six-14-maximum-publish-prompt-four-accepted-actions-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "7d18451e209ecaad261b326b7946199ac71a178c445071473fb6146643aa4e66",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "After real prompt scroll, both cancel and confirm button bodies/labels fit inside prompt. Confirm label wraps midword at extreme type size (Endgültige / n Plan / senden), readable but visually awkward. Upper title/count naturally scrolled above viewport; paired message capture establishes them.",
+      "exportedOriginal": "C0BBDCC1-C938-4AA5-8D62-98F44D4498EE.png"
+    },
+    {
+      "capture": "plan-six-14-maximum-publish-prompt-four-accepted-message",
+      "file": "plan-six-14-maximum-publish-prompt-four-accepted-message-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "a90dc8f5a467db34f21e19806cd577011bb059cf50b2e0a58603997dd561f23f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German actual maximum type prompt title and complete four-accepted-person message readable. Lower actions intentionally outside this scroll position; use paired action capture.",
+      "exportedOriginal": "12D1C6A1-8D25-40E6-9DA4-C2B948D6486E.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer5",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer5-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "90bf746feeaeb669d7f5fba68a1841e53a899dc86111bfe6efffe29fcac7c179",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type peer4 pending and peer5 declined names/statuses complete; preceding accepted row name touches navigation boundary.",
+      "exportedOriginal": "E1DDB773-13A1-4547-9DF4-8DCE7F808946.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer4",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer4-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "e0d10068b296c9eaa383aeb9e0cf770a60beea8809ea713d9320dcea5afe4882",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type peers1,2,3 names with accepted labels complete; other rows outside viewport.",
+      "exportedOriginal": "12916192-8873-4B0C-AD5C-E25098CDC978.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer3",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer3-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "7b2979066d69c287d68bd79529f510e01ef0478f4677908cc93c3b5bcb2d631b",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type peers1,2,3 names with accepted labels complete; other rows outside viewport.",
+      "exportedOriginal": "1F284443-504F-4B1E-8307-6F040C07095F.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer2",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer2-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "ea94c283d9843afeb904f78fb6a8364d7503294678af1735a4bf65b4d8a75dd2",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type4of6 accepted count and peer1 accepted name/status complete; next peer row outside footer boundary.",
+      "exportedOriginal": "845DCE5E-D37A-47D6-A3EC-4D36E9233FD6.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer1",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer1-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "5de453e4377032c51da2b74b32d9a0cead7d3cd8dfb3eb31ed26f9bbd5df9de6",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type4of6 accepted count and peer1 accepted name/status complete; next peer row outside footer boundary.",
+      "exportedOriginal": "04DD4369-DE9D-418F-AD35-E6E7C807AA4E.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-de-maximum-mixed-replies-owner",
+      "file": "plan-six-roster-owner-de-maximum-mixed-replies-owner-publication-scroll-prefix-preview228-simulator.png",
+      "sha256": "eeea70e546c29f5b22964623d6f250659e60a43db1ccb6914e040817025f8008",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "German maximum type peer4 pending and peer5 declined names/statuses complete; organizer name at lower footer edge, accepted status outside viewport. No complete organizer-row visual claim.",
+      "exportedOriginal": "9386E1B7-2C52-45C9-A537-F24FB08D61D8.png"
+    }
+  ],
+  "limits": [
+    "Enclosing case remains failed; cumulative19of23 phases is not full end-to-end acceptance.",
+    "Maximum prompt buttons are proven visible/reachable after actual scrolling in this attempt; old69.726s publication failure remains historical evidence rather than being rewritten.",
+    "Maximum German confirm label wraps awkwardly within the word Endgültigen, while all letters and button actions remain within prompt. This is a visual limitation, not clipped or unreachable content.",
+    "The maximum-type organizer accepted roster status is not fully shown in these captures; do not claim all six complete rows passed pixel review.",
+    "Published owner maximum image does not show the full09:30 row; both common rows were reviewed in native-invitation228-prefix-visual.json.",
+    "Calendar search-to-detail is visually confirmed but Manage Plan back-navigation did not execute before harness failure.",
+    "Video frames requested at119/124/126 resolve to same retained117.513s frame and SHA; they are one unique visual state, not three independent transitions.",
+    "Physical-phone testing remains separate; these originals are iPhone14Plus Simulator.",
+    "Evidence reviewer did not modify product, Swift, mjs or fixture or interfere with the ongoing calendar continuation."
+  ]
+}

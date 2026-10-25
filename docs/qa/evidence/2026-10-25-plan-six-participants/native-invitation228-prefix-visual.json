@@ -1,0 +1,344 @@
+{
+  "recordedAt": "2026-10-25T21:51:10.546202+00:00",
+  "purpose": "Original-pixel review of successful invitation prefix within a failed continuation attempt; never a full-flow pass.",
+  "productPreviewBuild": 228,
+  "source": {
+    "resultBundle": "/tmp/sideseat228-private/six-user-closure.xcresult",
+    "test": "PlanSixParticipantPhoneUITests/testContinueInvitationAndCalendarAfterSixRealSubmissions()",
+    "enclosingResult": "Failed",
+    "passedTests": 0,
+    "failedTests": 1,
+    "caseDurationSeconds": 486.944,
+    "bundleElapsedSeconds": 505.264,
+    "compiledTestSources": {
+      "PlanSixParticipantPhoneUITests.swift": "1daa1c4a07cd149c11181e3df784d3d8fce89bcdda256954a4e2e5315afe550f",
+      "PlanOpenLinkCapacityPhoneUITests.swift": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a",
+      "compiledTestBundleSHA256": "1a8082ddaf44d77f5360c0fe32a642b4ef042ade37b784fecf3d9f80babd09d3"
+    }
+  },
+  "device": {
+    "architecture": "arm64",
+    "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+    "deviceName": "SideSeat Six User QA",
+    "modelName": "iPhone 14 Plus",
+    "osBuildNumber": "23F77",
+    "osVersion": "26.5",
+    "platform": "iOS Simulator"
+  },
+  "isPhysicalPhone": false,
+  "result": "prefix accepted with explicit maximum-type capture limitations; enclosing XCTest failed before peer1 reply",
+  "wholeSixPersonFlowPassedInThisAttempt": false,
+  "verifiedPrefix": {
+    "cumulativeReadOnlyAPIPhases": [
+      "created",
+      "owner-draft",
+      "owner-submitted",
+      "shared",
+      "peer1-submitted",
+      "peer2-submitted",
+      "peer3-submitted",
+      "peer4-submitted",
+      "peer5-submitted",
+      "peer3-edited",
+      "peer3-restored",
+      "final-review-cancelled",
+      "invited"
+    ],
+    "phaseCount": 13,
+    "newNativeMarkersInThisAttempt": [
+      "final-review-cancelled",
+      "invited"
+    ],
+    "businessMutations": "Native App UI; API observer reads only",
+    "samePlanContinuation": true,
+    "actualInvitationTime": "2026-10-26 09:00–10:00 Europe/Berlin",
+    "crossDayReviewDraftOnly": "2026-10-26 23:00 to 2026-10-27 01:00; cancelled review left server collecting/no calendar, then reset to common hour",
+    "ordinaryRosterVisual": "All six names/statuses complete",
+    "maximumChineseVisual": "All five peer names/pending statuses and both common final half-hour rows readable across captures. Organizer row accepted status not shown completely at maximum type."
+  },
+  "failureDiagnostic": {
+    "category": "test harness viewport bound failure",
+    "assertion": "shared-plan-card-[redacted] actual maxY 804.0 > helper upper 758.5",
+    "compiledSourceFailureLine": 436,
+    "video": "private closure-attachments/D8573546-A189-4574-95E9-1BC0F186D4E8.mp4",
+    "videoDurationSeconds": 486.59166666666664,
+    "requestedSeconds": 484.59166666666664,
+    "actualFrameSeconds": 484.87333333333333,
+    "framePrivatePath": "/tmp/sideseat228-private/closure-final-frame.png",
+    "frameSHA256": "a99df5fb542ae5e527a89af821f933cbc1c06dac074a996a2df8c07873dd3cf1",
+    "framePixels": [
+      1284,
+      2778
+    ],
+    "reviewedOriginalPixels": true,
+    "adoptedAsFunctionalPass": false,
+    "pixelFinding": "Target six-user plan chat card, date/time, pending status and view-invitation action are wholly visible with a clear gap above the composer; composer does not cover this card in the sampled final frame. Older fixture cards are above it.",
+    "inference": "Observed frame supports a mismatched/overstrict generic scroll viewport bound rather than actual composer occlusion. Pixel review alone does not establish which accessibility scroll object was selected; parent repaired test helper to use target action presence plus XCTest automatic tap scrolling."
+  },
+  "counts": {
+    "reviewedCaptureCount": 19,
+    "uniqueCaptureSHA256": 14,
+    "adoptedCaptureCount": 19,
+    "uniqueAdoptedCaptureSHA256": 14,
+    "privateDiagnosticFramesReviewed": 1
+  },
+  "captures": [
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-peer5",
+      "file": "plan-six-roster-owner-zh-maximum-peer5-invitation-prefix-preview228-simulator.png",
+      "sha256": "510234b56d80b63cbd6af54ee9f9c4bbb8c7da0eb8eacf50fd7902e802b86ea1",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peers3–5 complete names and pending statuses readable above fixed publish footer; peer2 may meet navigation boundary; other rows outside viewport.",
+      "exportedOriginal": "A56AA6CF-6B19-4CE3-8A44-774B62568136.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-peer4",
+      "file": "plan-six-roster-owner-zh-maximum-peer4-invitation-prefix-preview228-simulator.png",
+      "sha256": "9fb00895a1ec336ed281a081cdb4e00c8bd09e6524387036b029b225f9fda91d",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peers3–5 complete names and pending statuses readable above fixed publish footer; peer2 may meet navigation boundary; other rows outside viewport.",
+      "exportedOriginal": "89234918-C771-4E79-A1ED-2B5B7A8EEE77.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-peer3",
+      "file": "plan-six-roster-owner-zh-maximum-peer3-invitation-prefix-preview228-simulator.png",
+      "sha256": "e5798c7232d37fcd6b0ad25a64bd7c1c3163c7c8497e9c3024d361a6d7442dd0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peers1–3 complete names and pending statuses readable above fixed publish footer; other rows outside viewport.",
+      "exportedOriginal": "F1A52298-59AC-469A-A8A3-BE518AC6A4EB.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-peer2",
+      "file": "plan-six-roster-owner-zh-maximum-peer2-invitation-prefix-preview228-simulator.png",
+      "sha256": "e5798c7232d37fcd6b0ad25a64bd7c1c3163c7c8497e9c3024d361a6d7442dd0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peers1–3 complete names and pending statuses readable above fixed publish footer; other rows outside viewport.",
+      "exportedOriginal": "A98A3168-4669-45AF-A424-4FA6A67DE767.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-peer1",
+      "file": "plan-six-roster-owner-zh-maximum-peer1-invitation-prefix-preview228-simulator.png",
+      "sha256": "595381f791b9eeda624ffe3ad81c257514d748dd4a2073cfa7ad40a5793958a2",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peers1–3 complete names and pending statuses readable above fixed publish footer; other rows outside viewport.",
+      "exportedOriginal": "9B28560E-B1BC-4229-97ED-F5590734F088.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-zh-maximum-owner",
+      "file": "plan-six-roster-owner-zh-maximum-owner-invitation-prefix-preview228-simulator.png",
+      "sha256": "f03adb10a144cdef0e1afeb591ad598afb782d5b08fea6cc7d55c3410e884315",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: peer3, peer4, peer5 complete names/statuses visible; organizer name is at footer edge and organizer accepted status is outside viewport. Do not use this capture as complete organizer-row evidence.",
+      "exportedOriginal": "D6E658FD-F8AB-456C-89FD-EF40368C6742.png"
+    },
+    {
+      "capture": "plan-six-invited-timetable-owner-zh-maximum-row-2",
+      "file": "plan-six-invited-timetable-owner-zh-maximum-row-2-invitation-prefix-preview228-simulator.png",
+      "sha256": "043766d3b4f1cf0d1e7cecee2657a3d93367fe500244d64b66eacc00e8098ab0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: both full highlighted 09:00 and 09:30 rows readable above fixed publish footer. Header/date have been naturally scrolled above viewport.",
+      "exportedOriginal": "0B00B3A6-22A7-4000-8B2A-48CA4C421FBF.png"
+    },
+    {
+      "capture": "plan-six-invited-timetable-owner-zh-maximum-row-1",
+      "file": "plan-six-invited-timetable-owner-zh-maximum-row-1-invitation-prefix-preview228-simulator.png",
+      "sha256": "2f9ff28e68e5a4add3994c9e5e29ef269412acdb69dd410480c12ec7a9ae7b47",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Maximum Chinese type: title, owner pending-publication status, date, 09:00–10:00 summary and invited-time legend readable with publish footer. Selected cell is partly below footer; this capture does not establish that row visibility.",
+      "exportedOriginal": "4846B319-202E-4ADB-B3FF-5A26CF9B5814.png"
+    },
+    {
+      "capture": "plan-six-10-owner-can-publish-with-five-pending",
+      "file": "plan-six-10-owner-can-publish-with-five-pending-invitation-prefix-preview228-simulator.png",
+      "sha256": "2268e8fe68af7b782a10c06135724fb042fd8a61e310e7f6ef1bce4a08991680",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual formal invitation is Oct 26 09:00–10:00, selected timetable, organizer status, five pending peers and enabled publish action.",
+      "exportedOriginal": "1EDE4454-E85A-49C1-A048-F857169D6ECD.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-peer5",
+      "file": "plan-six-roster-owner-invited-peer5-invitation-prefix-preview228-simulator.png",
+      "sha256": "f8940ae0ee3ea550b12b1c1c18ee87f4398dacaef3d7ad6d9e5bf3f3904ba53f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "05EBE926-09EB-4CED-B936-2D3A330A9154.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-peer4",
+      "file": "plan-six-roster-owner-invited-peer4-invitation-prefix-preview228-simulator.png",
+      "sha256": "f8940ae0ee3ea550b12b1c1c18ee87f4398dacaef3d7ad6d9e5bf3f3904ba53f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "74670D0C-6EE5-427D-8725-570B659B6273.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-peer3",
+      "file": "plan-six-roster-owner-invited-peer3-invitation-prefix-preview228-simulator.png",
+      "sha256": "f8940ae0ee3ea550b12b1c1c18ee87f4398dacaef3d7ad6d9e5bf3f3904ba53f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "EB3DBDB0-30A3-43DF-9B54-18355477D0E3.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-peer2",
+      "file": "plan-six-roster-owner-invited-peer2-invitation-prefix-preview228-simulator.png",
+      "sha256": "f8940ae0ee3ea550b12b1c1c18ee87f4398dacaef3d7ad6d9e5bf3f3904ba53f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "09D72C3E-0690-4B9A-BB59-732C2FD9CDFA.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-peer1",
+      "file": "plan-six-roster-owner-invited-peer1-invitation-prefix-preview228-simulator.png",
+      "sha256": "f8940ae0ee3ea550b12b1c1c18ee87f4398dacaef3d7ad6d9e5bf3f3904ba53f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "9C1A72ED-41A8-412E-B405-1753C004AAFB.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-invited-owner",
+      "file": "plan-six-roster-owner-invited-owner-invitation-prefix-preview228-simulator.png",
+      "sha256": "8e7793e660c98a4e25e49695359736e493429ecba64cdc3bbffb5e11c4b7bfa6",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary type: all six inline names and statuses readable together; five pending peers and accepted organizer; enabled publish action. Upper timetable is scrolled partly above viewport.",
+      "exportedOriginal": "8E85D422-78FB-4138-8733-014CA928D7B3.png"
+    },
+    {
+      "capture": "plan-six-09-review-six-invitees-cross-midnight",
+      "file": "plan-six-09-review-six-invitees-cross-midnight-invitation-prefix-preview228-simulator.png",
+      "sha256": "d12ddf724dc406c75317d63515369af88d51aa0e3f3e4286fd351835b7dd9b20",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Cross-day review dates and clocks, organizer plus first two selected peers visible; footer says six invitees; remaining review rows below viewport are not pixel-verified by this capture.",
+      "exportedOriginal": "A438310A-6A0F-40D0-8CC5-1427B4187AC0.png"
+    },
+    {
+      "capture": "plan-six-final-cross-midnight-morning-summary",
+      "file": "plan-six-final-cross-midnight-morning-summary-invitation-prefix-preview228-simulator.png",
+      "sha256": "6019a1eb8395305f0debc66896c1059a78a4830787fdc7b45d29d52b0e92369b",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Second candidate day 00:00 and 00:30 selected; draft summary Oct 26–27 23:00–01:00, two hours; enabled next action.",
+      "exportedOriginal": "E8EEBB21-972C-4932-9796-01C07F19AF81.png"
+    },
+    {
+      "capture": "plan-six-final-cross-midnight-evening",
+      "file": "plan-six-final-cross-midnight-evening-invitation-prefix-preview228-simulator.png",
+      "sha256": "27ab55611abd32a787cd6bed6c96a17389235fb23852f75627a65206c4212e4d",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "First candidate day 23:00 and 23:30 selected; both whole rows visible; draft summary ends midnight; enabled next action.",
+      "exportedOriginal": "1A85B320-BB21-4240-B44A-E7CFD7DFF277.png"
+    },
+    {
+      "capture": "plan-six-08-six-responses-compact-avatar-summary",
+      "file": "plan-six-08-six-responses-compact-avatar-summary-invitation-prefix-preview228-simulator.png",
+      "sha256": "105c0c20e403ce221fa3b267a9132758d600b0a10d976ddb08408fffb0f0f983",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Six submitted responses; compact avatars with +3; two common half-hour cells each show six; manual saved state and choose-final-time action.",
+      "exportedOriginal": "243F837B-A4CF-4A71-A803-BB7D24A8A07B.png"
+    }
+  ],
+  "limits": [
+    "This continuation started from the previously verified six submitted responses, rather than recreating the plan. Prior eleven phases are documented separately in native-prefix-visual.json.",
+    "Formal invite and maximum owner view completed before failure. Peer accept/ignore/decline, publish, calendar, late acceptance and withdrawal are outside this failed attempt.",
+    "Selected cross-day draft was reviewed and cancelled; actual sent invitation used common09:00–10:00.",
+    "The review screenshot shows only the visible first three of six selected rows; remaining rows were asserted by XCTest, not fully pixel-reviewed in that modal capture.",
+    "Maximum-type owner accepted status is outside recorded viewport; do not claim full six-row maximum-type visual completion.",
+    "Device is iPhone14Plus Simulator, not physical iPhone.",
+    "Failure video, diagnostic frame, accessibility logs and credentials are private and excluded from adopted public PNG evidence.",
+    "No product/test/fixture source was changed or test rerun for this visual review."
+  ]
+}

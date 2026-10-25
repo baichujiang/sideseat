@@ -1,0 +1,13 @@
+{
+  "baselineDeployment": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+  "sourceFiles": 1394,
+  "allSourceSHA1Verified": true,
+  "missing": 0,
+  "mismatched": 0,
+  "overlaidFiles": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "preservedFiles": 1393,
+  "sourceTreeMethod": "MCP tree was response-budget-truncated; full CLI file tree used instead. Exact1394 production source files rehashed before overlay.",
+  "scope": "Capacity display/eligibility only; original backend/source differences preserved, no migration or rule changes."
+}

@@ -1,0 +1,510 @@
+{
+  "passed": true,
+  "completedPhases": 23,
+  "expectedPhases": 23,
+  "executionSurface": "iPhone 14 Plus Simulator iOS 26.5; six real accounts",
+  "businessMutations": "All main plan creation, availability, contact sharing, formal invitations, replies, publication and withdrawal were performed through real native UI sign-ins. Observer only read existing states.",
+  "scope": "Cumulative closed loop on one real plan, across Preview227 then228 and test-only continuations. Not a single uninterrupted same-build XCTest pass.",
+  "finalVerification": {
+    "case": "testVerifyCalendarsAfterParticipantWithdrawal",
+    "passed": true,
+    "tests": 1,
+    "failures": 0,
+    "seconds": 73.054,
+    "businessWrites": false
+  },
+  "capacity228": {
+    "passed": true,
+    "seconds": 52.425,
+    "cases": 1
+  },
+  "finalCalendar": {
+    "counts": {
+      "owner": 1,
+      "peer1": 1,
+      "peer2": 0,
+      "peer3": 1,
+      "peer4": 1,
+      "peer5": 0
+    },
+    "windowStart": "2026-10-25T08:00:00.000Z",
+    "windowEnd": "2026-11-02T16:00:00.000Z",
+    "searchCounts": {
+      "owner": 1,
+      "peer1": 1,
+      "peer2": 0,
+      "peer3": 1,
+      "peer4": 1,
+      "peer5": 0
+    },
+    "searchPreservesPlanIdentityTimesAndAcceptedCompanions": true
+  },
+  "mainRuntimeSegments": [
+    {
+      "log": "six-user-real-auth.log",
+      "completedPhases": [
+        "created",
+        "owner-draft",
+        "owner-submitted",
+        "shared",
+        "peer1-submitted",
+        "peer2-submitted",
+        "peer3-submitted",
+        "peer4-submitted",
+        "peer5-submitted",
+        "peer3-edited",
+        "peer3-restored"
+      ],
+      "enclosingTestPassed": false,
+      "reason": "Test scroll helper required margin beyond fully visible final grid row."
+    },
+    {
+      "log": "six-user-continuation.log",
+      "completedPhases": [],
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-continuation-final.log",
+      "completedPhases": [],
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-final.log",
+      "completedPhases": [],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-closure.log",
+      "completedPhases": [
+        "final-review-cancelled"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-closure.log",
+      "completedPhases": [
+        "invited"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-replies.log",
+      "completedPhases": [
+        "peer1-accepted",
+        "peer2-accepted",
+        "peer3-accepted",
+        "peer4-ignored",
+        "peer5-declined"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-publication.log",
+      "completedPhases": [],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-publication-scroll.log",
+      "completedPhases": [
+        "published"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-calendars.log",
+      "completedPhases": [
+        "calendar-verified",
+        "peer4-late-accepted",
+        "peer2-withdrawn"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-final-calendar.log",
+      "completedPhases": [
+        "final-calendar-verified"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": true
+    }
+  ],
+  "runs": [
+    {
+      "log": "six-user-simulator.log",
+      "sha256": "7bd6f8b6ba8be8f1a49a584bf55e63256e1b63a16cf2a16bf2b1e9a2b57840ac",
+      "nativeBuild": "227",
+      "cases": [
+        {
+          "name": "testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted",
+          "passed": true,
+          "seconds": 18.124
+        },
+        {
+          "name": "testOwnerFiveParticipantsAvailabilityInvitationAndCalendar",
+          "passed": false,
+          "seconds": 33.404
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-simulator-final.log",
+      "sha256": "0b0a4422496d0d0a336b705d0dc59b824c5641dd94d44ca99c9674d876bbc1a5",
+      "nativeBuild": "227",
+      "cases": [
+        {
+          "name": "testOwnerFiveParticipantsAvailabilityInvitationAndCalendar",
+          "passed": false,
+          "seconds": 62.55
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "created",
+        "owner-draft",
+        "owner-submitted"
+      ],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-real-auth.log",
+      "sha256": "e4f527796b562af22da7b8701537728adaf288c15f2b61140880fa991a573c7b",
+      "nativeBuild": "227",
+      "cases": [
+        {
+          "name": "testOwnerFiveParticipantsAvailabilityInvitationAndCalendar",
+          "passed": false,
+          "seconds": 734.454
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "created",
+        "owner-draft",
+        "owner-submitted",
+        "shared",
+        "peer1-submitted",
+        "peer2-submitted",
+        "peer3-submitted",
+        "peer4-submitted",
+        "peer5-submitted",
+        "peer3-edited",
+        "peer3-restored"
+      ],
+      "adoptedObservedPhases": [
+        "created",
+        "owner-draft",
+        "owner-submitted",
+        "shared",
+        "peer1-submitted",
+        "peer2-submitted",
+        "peer3-submitted",
+        "peer4-submitted",
+        "peer5-submitted",
+        "peer3-edited",
+        "peer3-restored"
+      ]
+    },
+    {
+      "log": "six-user-continuation.log",
+      "sha256": "7d2e17eabcdf4b10cf8b330eaca6def5c36d0972a04df6a29a7c87e99c819003",
+      "nativeBuild": "227",
+      "cases": [
+        {
+          "name": "testContinueInvitationAndCalendarAfterSixRealSubmissions",
+          "passed": false,
+          "seconds": 30.515
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-continuation-normalized.log",
+      "sha256": "223a1bf3ae2d9fe62c729524c3b3834840e4ab3216b562e8db9098d008e03c58",
+      "nativeBuild": "227",
+      "cases": [],
+      "terminalSucceeded": true,
+      "zeroTestRun": true,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-continuation-final.log",
+      "sha256": "0a0887daa557a79393169adde4c07ed105468ab24c9d37e6f11068604208fd13",
+      "nativeBuild": "227",
+      "cases": [
+        {
+          "name": "testContinueInvitationAndCalendarAfterSixRealSubmissions",
+          "passed": false,
+          "seconds": 36.453
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-final.log",
+      "sha256": "c218d1503c351766c95b52fd07f8ed1afdfaa0fe2239b354e600981cef495b41",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted",
+          "passed": true,
+          "seconds": 52.425
+        },
+        {
+          "name": "testContinueInvitationAndCalendarAfterSixRealSubmissions",
+          "passed": false,
+          "seconds": 82.195
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-closure.log",
+      "sha256": "5233a7f811dbf416b0bfe1784077ae504c62c09a0f8307d41af7f78936c17b77",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testContinueInvitationAndCalendarAfterSixRealSubmissions",
+          "passed": false,
+          "seconds": 486.944
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "final-review-cancelled",
+        "invited"
+      ],
+      "adoptedObservedPhases": [
+        "final-review-cancelled",
+        "invited"
+      ]
+    },
+    {
+      "log": "six-user-replies.log",
+      "sha256": "cdbcf22f20d90809360e04865af769bef8d9cfcdae7d57f6fd8aad7dc8d5f5de",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testContinueRepliesAndCalendarAfterFormalInvitations",
+          "passed": false,
+          "seconds": 218.516
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "peer1-accepted",
+        "peer2-accepted",
+        "peer3-accepted",
+        "peer4-ignored",
+        "peer5-declined"
+      ],
+      "adoptedObservedPhases": [
+        "peer1-accepted",
+        "peer2-accepted",
+        "peer3-accepted",
+        "peer4-ignored",
+        "peer5-declined"
+      ]
+    },
+    {
+      "log": "six-user-publication.log",
+      "sha256": "86e505c5d6dbe140a7fbf119ac94d8c16ab51379370a3e01de166f78b641e7f3",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testContinuePublicationAndCalendarAfterMixedReplies",
+          "passed": false,
+          "seconds": 69.726
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [],
+      "adoptedObservedPhases": []
+    },
+    {
+      "log": "six-user-publication-scroll.log",
+      "sha256": "b97f4cf76098e6e6bdcb5f53f55763b849f42254e430b18e484b0b95bd0b18de",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testContinuePublicationAndCalendarAfterMixedReplies",
+          "passed": false,
+          "seconds": 130.605
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "published"
+      ],
+      "adoptedObservedPhases": [
+        "published"
+      ]
+    },
+    {
+      "log": "six-user-calendars.log",
+      "sha256": "d19b6a411cf3bbee7983994d3f7267e6c9e043c5010621427ffc5c4681471795",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testContinueCalendarsAfterOrganizerPublished",
+          "passed": false,
+          "seconds": 142.579
+        }
+      ],
+      "terminalSucceeded": false,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "calendar-verified",
+        "peer4-late-accepted",
+        "peer2-withdrawn"
+      ],
+      "adoptedObservedPhases": [
+        "calendar-verified",
+        "peer4-late-accepted",
+        "peer2-withdrawn"
+      ]
+    },
+    {
+      "log": "six-user-final-calendar.log",
+      "sha256": "5d98ba91cd8d7e5a06314ba31236e6a636047fff0ec4b15b4721d33dbb66e722",
+      "nativeBuild": "228",
+      "cases": [
+        {
+          "name": "testVerifyCalendarsAfterParticipantWithdrawal",
+          "passed": true,
+          "seconds": 73.054
+        }
+      ],
+      "terminalSucceeded": true,
+      "zeroTestRun": false,
+      "loggedPhases": [
+        "final-calendar-verified"
+      ],
+      "adoptedObservedPhases": [
+        "final-calendar-verified"
+      ]
+    }
+  ],
+  "compiledTestSources": [
+    {
+      "file": "compiled-phone-source.json",
+      "evidenceStage": "sideseat227-private",
+      "data": {
+        "PlanSixParticipantPhoneUITests.swift": "cfd9af7f0714b94286b723d3a2d6d34d24e427d1d9dc0f02b427edbedff82de0",
+        "PlanOpenLinkCapacityPhoneUITests.swift": "de7e2d9a869f3bc37226f0fba2b6f4c1b58c51c12fbbf8779303d135d102ad29"
+      }
+    },
+    {
+      "file": "compiled-sim-continuation-normalized-source.json",
+      "evidenceStage": "sideseat227-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "17451de71a4067f264aacc71bcfffb6e10667ee1eba62e07b7ad5fb067a2fa30"
+      }
+    },
+    {
+      "file": "compiled-sim-continuation-source.json",
+      "evidenceStage": "sideseat227-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "bc401130c1278d9c1e748fedf574a2bd18937bb3a4f453dc459061b2cdf678c2"
+      }
+    },
+    {
+      "file": "compiled-sim-real-auth-source.json",
+      "evidenceStage": "sideseat227-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "df44af8e29296356de4b24610a19f895b1970731457a3657691e71e82344406f"
+      }
+    },
+    {
+      "file": "compiled-calendar-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "f1134c8674193d225d58896381354a5061919456de4f12d0433d9a50566d1622"
+      }
+    },
+    {
+      "file": "compiled-closure-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "PlanSixParticipantPhoneUITests.swift": "1daa1c4a07cd149c11181e3df784d3d8fce89bcdda256954a4e2e5315afe550f",
+        "PlanOpenLinkCapacityPhoneUITests.swift": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a",
+        "compiledTestBundleSHA256": "1a8082ddaf44d77f5360c0fe32a642b4ef042ade37b784fecf3d9f80babd09d3"
+      }
+    },
+    {
+      "file": "compiled-final-calendar-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "c032087e164ea7ce37d3edf6028808f9a685c744b8b9fa82ddd599550c34859c"
+      }
+    },
+    {
+      "file": "compiled-publication-scroll-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "b83bfe76211af1fcbdedfe2235505e76495f6c76ce4b9ab29d2e35d70c8a1446"
+      }
+    },
+    {
+      "file": "compiled-publication-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "6dda4a7c8a86532f0057011e3d47d5365f1664447e7cdc9b4f4ccae0d70a3a44"
+      }
+    },
+    {
+      "file": "compiled-replies-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "264febd38c464e13dac286722ad9df25fbb19b662819eed6442a35784b34f8ee"
+      }
+    },
+    {
+      "file": "compiled-test-source.json",
+      "evidenceStage": "sideseat228-private",
+      "data": {
+        "PlanSixParticipantPhoneUITests.swift": "75739cd20c681aa78bc51b6bd3e0b1eed33d2e426fd392da557adf01b3b5d848",
+        "PlanOpenLinkCapacityPhoneUITests.swift": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a"
+      }
+    }
+  ],
+  "observerRestartNote": "six-user-closure.log has two recorded read-only observer segments because API authentication was refreshed between phases12 and13; the enclosing UI case later failed at chat-card frame assumptions. Neither prefix is a whole-case pass.",
+  "physicalFullFlowPassed": false,
+  "physicalScope": "Preview228 normal installation and launch verified separately in device-final.json; Xcode227 physical UI service failed before tests; physical228 UI not attempted.",
+  "pushBannerDeliveryVerified": false,
+  "sourceCommit": "bad2471d935d1a7dd6f42924a04865725c2a7a71"
+}

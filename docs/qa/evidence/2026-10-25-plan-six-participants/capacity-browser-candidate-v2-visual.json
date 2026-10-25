@@ -1,0 +1,1548 @@
+{
+  "candidate": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+  "sourceCommit": "8c4110c1",
+  "reviewedAt": "2026-10-25T21:05:42.382801+00:00",
+  "passed": true,
+  "observedCaptures": 80,
+  "observedUniquePixels": 56,
+  "adoptedCaptures": 60,
+  "adoptedUniquePixels": 42,
+  "actionTextBoundsChecks": 56,
+  "scope": "Actual PNG originals individually viewed. Same-pixel captures reuse SHA-identical review. Both engines passed three complete real public guest/API/Calendar variants; only affected desktop capture positioning was repeated after a test-only footer-aware scroll repair. Product candidate stayed unchanged.",
+  "findingsResolved": [
+    "Candidate v1 narrow English reply labels overflowed; candidate v2 wraps both labels within their own button padding at 320px and 20px root font.",
+    "Initial v2 desktop scrollIntoViewIfNeeded left remaining-place text under fixed footer. Test-only natural scrolling now asserts the focused text is above footer; desktop supplements show complete 1 place available status, highlighted hour and reply actions."
+  ],
+  "limits": [
+    "Browser engine viewport screenshots only; no iOS Safari, physical-device, full-App or manual-performance claim.",
+    "Long pages are captured at intentional scroll positions; content outside each shown viewport is not reviewed by that image.",
+    "Initial desktop images below-footer text is explicitly excluded; supplements replace the full desktop pixel set.",
+    "No browser guest Calendar account exists; API verifies owner entry and companions exactly, all five registered peer calendars remain absent."
+  ],
+  "engines": [
+    {
+      "stage": "candidate-v2",
+      "engine": "chromium",
+      "functionalPassed": true,
+      "selectedVariants": [
+        "390-zh-light",
+        "320-en-dark-20px",
+        "1440-en-light"
+      ],
+      "harnessSHA256": "5cd3509717122eb8f920490eef5ef57bd34587f2cfc7143529e3dba4e868fa86",
+      "elapsedSecondsFromLogCreation": 39.209,
+      "captures": 30,
+      "uniquePixels": 21,
+      "actionTextBoundsChecks": 21,
+      "rows": [
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-01-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "d0e2840eb16349a195797e45b5f52d08a2dcb0a405d1b6e665e947d9436afdfc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-02-full-readonly-timetable.png",
+          "variant": "390-zh-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "d0e2840eb16349a195797e45b5f52d08a2dcb0a405d1b6e665e947d9436afdfc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-390-zh-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-02b-one-place-available.png",
+          "variant": "390-zh-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "6c6bc099390b2620e38d5bf191d4847d6aa0960680623b7ba662e438bae8bcd7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-03-released-place-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "6c6bc099390b2620e38d5bf191d4847d6aa0960680623b7ba662e438bae8bcd7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-390-zh-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-04-first-guest-accepted.png",
+          "variant": "390-zh-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "97ca1fede59e208cfbe2093b72acf27c12a772283ba20342c560c9f2a124c3fc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-05-second-guest-full-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "2238e240e659fde4d4678c79cc53e8679f67aeaa7c0fa2cc3e542b5fedb110ae",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-05b-one-place-released-after-publication.png",
+          "variant": "390-zh-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "ed18455ad999a231a4af58dd6a8044a9ee9637f81e362a1a6744278482e062ee",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-06-second-guest-released-place.png",
+          "variant": "390-zh-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "ed18455ad999a231a4af58dd6a8044a9ee9637f81e362a1a6744278482e062ee",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-390-zh-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-07-second-guest-accepted-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "deb73a36f2e4f7a97396f07c9773a657a980049571f4d62d898262e974d6534d",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "40f1892bf6eb65e34a24b693bf8500b4f8febe45c123d8d23965697705a15974",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-01-full-no-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "759469d9e9ba58fcdc0e3b57a8c57211f1cc5f11c3ef8520f061c960fff0785c",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02-full-readonly-timetable.png",
+          "variant": "320-en-dark-20px",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "c64406bc737b247414898efb899885b4122c1be4e14119ec5b12896b1ad2b027",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02b-one-place-available.png",
+          "variant": "320-en-dark-20px",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "c71cdbc0399476eb611c713a1e149f45be7a3809b6fc5f83dd210ae2142b9b1f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-03-released-place-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "c71cdbc0399476eb611c713a1e149f45be7a3809b6fc5f83dd210ae2142b9b1f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-04-first-guest-accepted.png",
+          "variant": "320-en-dark-20px",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "3ed307dc4329f3f74fb1de8da239b7c503ac6e94ba2c1a1634a4aa9945b26500",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-05-second-guest-full-after-publish.png",
+          "variant": "320-en-dark-20px",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "e9beb24a342a9760a223a2f9899554bd3c7537e3fc1a53461a3b1db8c16bbcdb",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-05b-one-place-released-after-publication.png",
+          "variant": "320-en-dark-20px",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "c71cdbc0399476eb611c713a1e149f45be7a3809b6fc5f83dd210ae2142b9b1f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-06-second-guest-released-place.png",
+          "variant": "320-en-dark-20px",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "c71cdbc0399476eb611c713a1e149f45be7a3809b6fc5f83dd210ae2142b9b1f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+          "variant": "320-en-dark-20px",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "d54b3a273e1af9e3bdaceb76f587deec2c03b1277593910534ad46a2dc6df6f9",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "be3a189bd5caab5a902c1d84224bf53294b26605852872871f5214adcce299bd",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-01-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "9579079a0cc5b0ac959a6804d8f0e44268cddf0c785f5b8470fd0cd151ee36ef",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-02-full-readonly-timetable.png",
+          "variant": "1440-en-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "9579079a0cc5b0ac959a6804d8f0e44268cddf0c785f5b8470fd0cd151ee36ef",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-1440-en-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-02b-one-place-available.png",
+          "variant": "1440-en-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "3d8fdec2386e2c173f211d28a4fca758fa19025ec87585217da528e8112505d7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-03-released-place-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "3d8fdec2386e2c173f211d28a4fca758fa19025ec87585217da528e8112505d7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-1440-en-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-04-first-guest-accepted.png",
+          "variant": "1440-en-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "d00c6ad80a97464b559e55d0465852f6292b89545946e46444d52ada6254eb1d",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-05-second-guest-full-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "cac0d60fd00388f9f94d32fd8bdca54b3c831a0c1017f5f6635b9de9bd922960",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+          "variant": "1440-en-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "a180e3fe4ec8d969e350f06948e7b709764e8170e8da8ba8f355c5e289a49aab",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-06-second-guest-released-place.png",
+          "variant": "1440-en-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "a180e3fe4ec8d969e350f06948e7b709764e8170e8da8ba8f355c5e289a49aab",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-07-second-guest-accepted-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "459e012d0e0fc936513d5ab727874d118c3b03f6ffd14ae7ff508e9838894fde",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-chromium-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "2ee39f527c02f15f84370924b4a59d147852d066f5c623fbef34d36eb69e3dc9",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        }
+      ]
+    },
+    {
+      "stage": "candidate-v2",
+      "engine": "webkit",
+      "functionalPassed": true,
+      "selectedVariants": [
+        "390-zh-light",
+        "320-en-dark-20px",
+        "1440-en-light"
+      ],
+      "harnessSHA256": "5cd3509717122eb8f920490eef5ef57bd34587f2cfc7143529e3dba4e868fa86",
+      "elapsedSecondsFromLogCreation": 43.73,
+      "captures": 30,
+      "uniquePixels": 21,
+      "actionTextBoundsChecks": 21,
+      "rows": [
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-01-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "7e324e9e04f99ea0d3b3c5eb142f541d468b630a3fe66e6f2950c28371a61051",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-02-full-readonly-timetable.png",
+          "variant": "390-zh-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "7e324e9e04f99ea0d3b3c5eb142f541d468b630a3fe66e6f2950c28371a61051",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-390-zh-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-02b-one-place-available.png",
+          "variant": "390-zh-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "a01b4917a372d2401926418d0ba3d2f1ed8f2644a15c3e861dbef382292abab2",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-03-released-place-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "a01b4917a372d2401926418d0ba3d2f1ed8f2644a15c3e861dbef382292abab2",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-390-zh-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-04-first-guest-accepted.png",
+          "variant": "390-zh-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "fa64080db2a72bde40b119ddb825aca523ea3b944a2a53ac241580c921725965",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "ec365826f636afb1cbc0ce0ac80dcd7dc0eea66e2609ebb8ce0f42f93f8d49a0",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+          "variant": "390-zh-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "93ad8f2af5fe9d83a84e5230403e4d62d0c433592d29a9f1b2177bec9166e9c7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-06-second-guest-released-place.png",
+          "variant": "390-zh-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "93ad8f2af5fe9d83a84e5230403e4d62d0c433592d29a9f1b2177bec9166e9c7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+          "variant": "390-zh-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "32316b742d1d474a92cc5d8373ebb52ac862b4f0dea0d0e31173cc47e6155498",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "390-zh-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "fontSize": 16,
+          "sha256": "eec3e5dc1aeb1457aa401053c12442f553a4eded5182fe6882c991c70a799ccd",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-01-full-no-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "00ca99d9f2224b55025fa89c54f48d7f72e5cd5f666b558f70f04e4167361186",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02-full-readonly-timetable.png",
+          "variant": "320-en-dark-20px",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "616abd59912c9b7262c3240eba88c915be7393a46407ee199c5df954ca20b7e7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+          "variant": "320-en-dark-20px",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "370907fe709ec62b84ef1eb5b65c276c158769120a27fd771746c84a58428303",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-03-released-place-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "370907fe709ec62b84ef1eb5b65c276c158769120a27fd771746c84a58428303",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-04-first-guest-accepted.png",
+          "variant": "320-en-dark-20px",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "e2ff6ffff2de7daf65886a2259fad2f85ab5cb8a9bb8481e068ff5e7b9f0825c",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05-second-guest-full-after-publish.png",
+          "variant": "320-en-dark-20px",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "9fafeb3dc058dac8e3e5107c74be559b72b0d6330294ab20e44b7abe5278bcd4",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05b-one-place-released-after-publication.png",
+          "variant": "320-en-dark-20px",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "370907fe709ec62b84ef1eb5b65c276c158769120a27fd771746c84a58428303",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-06-second-guest-released-place.png",
+          "variant": "320-en-dark-20px",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "370907fe709ec62b84ef1eb5b65c276c158769120a27fd771746c84a58428303",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+          "variant": "320-en-dark-20px",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "5fb7f5529dcb07ee98b6a30d015136a789043ed7be4510e063d7efbcf07de355",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "320-en-dark-20px",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 320,
+            "height": 812
+          },
+          "fontSize": 20,
+          "sha256": "f58a2681f079c0af4d04b9de9d20508591bd28316a8fa054591ca5f448822d29",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-01-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "ef2c2dfd3a0f356faf5bc6b370422d0be7849dfdf2e592c7d3854b7d73e1b58f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-02-full-readonly-timetable.png",
+          "variant": "1440-en-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "ef2c2dfd3a0f356faf5bc6b370422d0be7849dfdf2e592c7d3854b7d73e1b58f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-1440-en-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-02b-one-place-available.png",
+          "variant": "1440-en-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "a86a201aeb3301398744ea497a314181e028e9c0b21b23c7b0b978c7787370a8",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-03-released-place-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "a86a201aeb3301398744ea497a314181e028e9c0b21b23c7b0b978c7787370a8",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-1440-en-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-04-first-guest-accepted.png",
+          "variant": "1440-en-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "0e9beb50407a1b73ef7fbff56ccbac0e2804ccb3eb89a7e6d46f903d574acefd",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "ca7c1be61e9f6e299aeca81b292228dd37741cd8411a80846958abb269bf787c",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+          "variant": "1440-en-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "30f7870983d25d8b1dd9048b809cebedf6f1ff80732774dd88cc5a31942adb87",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-06-second-guest-released-place.png",
+          "variant": "1440-en-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "30f7870983d25d8b1dd9048b809cebedf6f1ff80732774dd88cc5a31942adb87",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "54a8fe77798a4bdc37057539ddddcee222f59b11835b5691b0592aee77568643",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        },
+        {
+          "file": "capacity-browser-candidate-v2-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "sha256": "da746eb2a7d44d06e0b151ec576c3ada2fa0b95323ee3d2b7d80a090503905cc",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": false,
+          "acceptedForShownViewport": true,
+          "scope": "Initial desktop captures retain visible-only scope; status below fixed footer is not accepted as reviewed. Entire desktop set superseded by footer-aware supplement."
+        }
+      ]
+    },
+    {
+      "stage": "candidate-v2-desktop-supplement",
+      "engine": "chromium",
+      "functionalPassed": true,
+      "selectedVariants": [
+        "1440-en-light"
+      ],
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "elapsedSecondsFromLogCreation": 12.951,
+      "captures": 10,
+      "uniquePixels": 7,
+      "actionTextBoundsChecks": 7,
+      "rows": [
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-01-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "63d46d46aa11111a3cf32c6ede3e20585e2f23fe05f0ec411469517e8a75452f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02-full-readonly-timetable.png",
+          "variant": "1440-en-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 661,
+            "bottom": 900,
+            "height": 239
+          },
+          "sha256": "63d46d46aa11111a3cf32c6ede3e20585e2f23fe05f0ec411469517e8a75452f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02b-one-place-available.png",
+          "variant": "1440-en-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 871,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 847,
+            "bottom": 871,
+            "height": 24
+          },
+          "sha256": "6842a93ef82b3c021e9b5f7264f7c9997dee59a81d5c24589e7a6d08b4479f6c",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-03-released-place-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 996,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 896,
+            "bottom": 940,
+            "height": 44
+          },
+          "sha256": "6842a93ef82b3c021e9b5f7264f7c9997dee59a81d5c24589e7a6d08b4479f6c",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-04-first-guest-accepted.png",
+          "variant": "1440-en-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 891,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 382,
+            "bottom": 891,
+            "height": 509
+          },
+          "sha256": "f342697aff760babcb58913ed0fc87401c8b110014f4b5fc148f3baf642a611f",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05-second-guest-full-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "12618f7bee0b13f5b110d89edf2f2c02795eb92ad0a86fa6d1c7d263ee878a27",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+          "variant": "1440-en-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 871,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 847,
+            "bottom": 871,
+            "height": 24
+          },
+          "sha256": "76cf569ff8eb6ac7fed14990c2f3ab6535ee34438b96efb9c33710e4eb749069",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-06-second-guest-released-place.png",
+          "variant": "1440-en-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 996,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 896,
+            "bottom": 940,
+            "height": 44
+          },
+          "sha256": "76cf569ff8eb6ac7fed14990c2f3ab6535ee34438b96efb9c33710e4eb749069",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-07-second-guest-accepted-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 891,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 382,
+            "bottom": 891,
+            "height": 509
+          },
+          "sha256": "8edc2016bd501e39c56194026ffdb4d47d6c6641ff19bcd2b9971bbaf2eb1796",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "8445b8f851328cd0d5d8cda7894d30b42e1a7b076bfcb1059975f06cda2af83b",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "stage": "candidate-v2-desktop-supplement",
+      "engine": "webkit",
+      "functionalPassed": true,
+      "selectedVariants": [
+        "1440-en-light"
+      ],
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "elapsedSecondsFromLogCreation": 14.361,
+      "captures": 10,
+      "uniquePixels": 7,
+      "actionTextBoundsChecks": 7,
+      "rows": [
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-01-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "01-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "69a3c339fd17900941169b63a041cfa30dc74677a6c77c0d50a3a864116fc8d7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-02-full-readonly-timetable.png",
+          "variant": "1440-en-light",
+          "state": "02-full-readonly-timetable",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 661,
+            "bottom": 900,
+            "height": 239
+          },
+          "sha256": "69a3c339fd17900941169b63a041cfa30dc74677a6c77c0d50a3a864116fc8d7",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-01-full-no-confirmation.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-02b-one-place-available.png",
+          "variant": "1440-en-light",
+          "state": "02b-one-place-available",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 871,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 847,
+            "bottom": 871,
+            "height": 24
+          },
+          "sha256": "3231fa11eb721a1c47dc811bdfcc02a678db29af46303985c89ec7f30e437095",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-03-released-place-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "03-released-place-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 996,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 896,
+            "bottom": 940,
+            "height": 44
+          },
+          "sha256": "3231fa11eb721a1c47dc811bdfcc02a678db29af46303985c89ec7f30e437095",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-02b-one-place-available.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-04-first-guest-accepted.png",
+          "variant": "1440-en-light",
+          "state": "04-first-guest-accepted",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 891,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 382,
+            "bottom": 891,
+            "height": 509
+          },
+          "sha256": "2f3a0071ce26c6b23c2fc1d05ed249aad4e6b061c1ed50217577e28c3cf98a12",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "05-second-guest-full-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "5e2132e4c11da57c74b1f1600106bb861cf34f47f8b5ba66240c2426fa07208b",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+          "variant": "1440-en-light",
+          "state": "05b-one-place-released-after-publication",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 871,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 847,
+            "bottom": 871,
+            "height": 24
+          },
+          "sha256": "50cf603ebecfecc56423a0ff7508840b9ebff74b59327028b8344ebc7991125e",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-06-second-guest-released-place.png",
+          "variant": "1440-en-light",
+          "state": "06-second-guest-released-place",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 996,
+            "fits": true,
+            "inFixedFooter": true,
+            "top": 896,
+            "bottom": 940,
+            "height": 44
+          },
+          "sha256": "50cf603ebecfecc56423a0ff7508840b9ebff74b59327028b8344ebc7991125e",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+          "variant": "1440-en-light",
+          "state": "07-second-guest-accepted-after-publish",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 891,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 382,
+            "bottom": 891,
+            "height": 509
+          },
+          "sha256": "df6ac42bcb34e655e818617f9b909deaad8a57ffd12002fdc9c0a83e194c7268",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        },
+        {
+          "file": "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+          "variant": "1440-en-light",
+          "state": "08-original-declined-guest-full-no-confirmation",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "fontSize": 16,
+          "focusViewport": {
+            "safeTop": 8,
+            "safeBottom": 988,
+            "fits": true,
+            "inFixedFooter": false,
+            "top": 964,
+            "bottom": 988,
+            "height": 24
+          },
+          "sha256": "6638b6c2fefcb5d723b2a4c43a72ed45c560952dc74a9eb2d80c12785a4db646",
+          "actualOriginalReviewed": true,
+          "samePixelsAs": null,
+          "adoptedForFinalPixelAcceptance": true,
+          "acceptedForShownViewport": true,
+          "scope": null
+        }
+      ]
+    }
+  ]
+}

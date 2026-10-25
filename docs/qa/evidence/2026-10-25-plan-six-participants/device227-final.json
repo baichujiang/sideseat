@@ -1,0 +1,30 @@
+{
+  "nativeProductCommit": "38b6927dd62f3ac4ba0b8ecea396f1d2c08e1645",
+  "device": "iPhone 14 Plus",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDeviceIdentifier": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewVersion": "227",
+  "ordinaryVersionPreserved": "97",
+  "frozenAppInputsMatched": 268,
+  "localConfigurationMatched": true,
+  "strictCodeSignatureVerified": true,
+  "binarySHA256Matched": {
+    "SideSeat Preview": "a92f244d2fa3bf4979965ba7889f9a82fad222308a1ad77fcf1a951fe344536e",
+    "SideSeat Preview.debug.dylib": "8a489cf54655d7a52ebd7861b833453c54437223b6bba289e689749adc4ad9c7"
+  },
+  "apiHost": "api.sideseat.de",
+  "normalLaunchPID": 9961,
+  "normalLaunchHasNoQAArgumentsOrCredentials": true,
+  "processExecutableVerified": true,
+  "thisStagePhysicalRunnerAbsent": true,
+  "preExistingOtherRunner": "Flow222UITests-Runner left unchanged",
+  "newOrModifiedSideSeatDeviceReports": 0,
+  "physicalUITesting": {
+    "passed": false,
+    "testsStarted": false,
+    "attempts": 2,
+    "reason": "Xcode destination notification service initialization failed before tests; Mac CoreDevice restart did not restore it",
+    "ordinaryInstallAndLaunchSucceeded": true
+  },
+  "at": "2026-10-25T21:12:15.587692+00:00"
+}

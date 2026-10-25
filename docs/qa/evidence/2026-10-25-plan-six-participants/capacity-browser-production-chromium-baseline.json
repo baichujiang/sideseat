@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "stage": "production",
+  "engine": "chromium",
+  "baseline": true,
+  "origin": "https://www.sideseat.de",
+  "realNetwork": true,
+  "scope": "Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI",
+  "checks": [
+    {
+      "variant": "390-zh-light",
+      "reproduced": true,
+      "selectedPlaces": 2,
+      "capacity": 2,
+      "unknownGuestShownConfirmation": true,
+      "guestAcceptanceAttempted": false
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "capacity-browser-production-chromium-baseline-390-zh-light-baseline-full-invitation-offers-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "baseline-full-invitation-offers-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-production-chromium-baseline-390-zh-light-baseline-full-invited-timetable.png",
+      "variant": "390-zh-light",
+      "state": "baseline-full-invited-timetable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T20:37:47.465Z"
+}

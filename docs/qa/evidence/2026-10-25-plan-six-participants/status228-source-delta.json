@@ -1,0 +1,32 @@
+{
+  "scope": "Native 227 to 228 heading status presentation reuse + version only",
+  "files": {
+    "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift": {
+      "beforeSha256": "eabba0aadd1f5b910f68c1d2162b80a870ebbf843b34e956b593b9abfa0d1747",
+      "afterSha256": "9b5325c454b4be43d3a96078ef703d9cb74a618d39befbd6f832e953e7679b24",
+      "outsideStatusDeclarationIdentical": true
+    },
+    "ios-native/Configuration/Preview.xcconfig": {
+      "beforeSha256": "55fd97127c652389902d2307d5f4f21ff227ac104306bb7bc2b3c68022f5d115",
+      "afterSha256": "63328c7374ea0d51c08b354fcc6429c289f9403d993836faecda3891ea7e32b7",
+      "onlyVersionChanged": true
+    }
+  },
+  "runtimeVerification": "Not run by worker; parent owns builds and focused UI acceptance.",
+  "againstFrozen227": {
+    "comparedNativeInputs": 268,
+    "unchangedNativeInputs": 266,
+    "changedNativeInputs": [
+      {
+        "path": "ios-native/Configuration/Preview.xcconfig",
+        "frozen227Sha256": "55fd97127c652389902d2307d5f4f21ff227ac104306bb7bc2b3c68022f5d115",
+        "working228Sha256": "63328c7374ea0d51c08b354fcc6429c289f9403d993836faecda3891ea7e32b7"
+      },
+      {
+        "path": "ios-native/SideSeat/Features/Chat/PlanFlowViews.swift",
+        "frozen227Sha256": "eabba0aadd1f5b910f68c1d2162b80a870ebbf843b34e956b593b9abfa0d1747",
+        "working228Sha256": "9b5325c454b4be43d3a96078ef703d9cb74a618d39befbd6f832e953e7679b24"
+      }
+    ]
+  }
+}

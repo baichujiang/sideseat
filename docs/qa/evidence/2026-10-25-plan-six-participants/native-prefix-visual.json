@@ -1,0 +1,951 @@
+{
+  "kind": "Native Simulator successful-prefix pixel review; enclosing six-person attempt failed",
+  "reviewedAt": "2026-10-25T21:24:26.003697+00:00",
+  "prefixVisualAcceptedForStatedScope": true,
+  "wholeSixPersonFlowPassed": false,
+  "device": {
+    "model": "iPhone 14 Plus",
+    "platform": "iOS Simulator",
+    "osVersion": "26.5",
+    "osBuild": "23F77",
+    "physicalDevice": false
+  },
+  "sixPersonAttempt": {
+    "resultBundle": "six-user-real-auth.xcresult",
+    "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+    "enclosingResult": "Failed",
+    "elapsedSeconds": 734.454,
+    "compiledTestSourceSHA256": "df44af8e29296356de4b24610a19f895b1970731457a3657691e71e82344406f",
+    "completedPrefix": [
+      "Create normal candidate-date plan with no timetable preview in creation form.",
+      "First detail opens editable timetable without automatic share panel.",
+      "Owner tap/cancel/drag/erase draft remains unsubmitted; manual Submit and share opens sharing.",
+      "Select and send to all five real accepted App contacts.",
+      "Each of five real App participants opens the current plan from chat, submits own availability, reopens it and retains the submitted response.",
+      "Peer3 removes one half-hour, submits, then restores it without modifying other participants.",
+      "Owner sees six submitted people and avatar overflow +3."
+    ],
+    "apiVerifiedPhases": [
+      "created",
+      "owner-draft",
+      "owner-submitted",
+      "shared",
+      "peer1-submitted",
+      "peer2-submitted",
+      "peer3-submitted",
+      "peer4-submitted",
+      "peer5-submitted",
+      "peer3-edited",
+      "peer3-restored"
+    ],
+    "apiVerifiedPhaseCount": 11,
+    "apiScope": "The read-only observer verified these eleven phases while App UI owned main plan mutations. This record snapshots only the completed prefix; later continuation has separate evidence.",
+    "prefixAPIChecks": [
+      {
+        "phase": "created",
+        "actualPhase": "COLLECTING",
+        "submitted": 0,
+        "ownSlots": {
+          "owner": [],
+          "peer1": [],
+          "peer2": [],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "delivery": [
+          {
+            "role": "peer1",
+            "listed": false,
+            "cards": 0
+          },
+          {
+            "role": "peer2",
+            "listed": false,
+            "cards": 0
+          },
+          {
+            "role": "peer3",
+            "listed": false,
+            "cards": 0
+          },
+          {
+            "role": "peer4",
+            "listed": false,
+            "cards": 0
+          },
+          {
+            "role": "peer5",
+            "listed": false,
+            "cards": 0
+          }
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 0,
+            "peer1": 0,
+            "peer2": 0,
+            "peer3": 0,
+            "peer4": 0,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z"
+        },
+        "at": "2026-10-25T21:09:12.783Z"
+      },
+      {
+        "phase": "owner-draft",
+        "actualPhase": "COLLECTING",
+        "submitted": 0,
+        "ownSlots": {
+          "owner": [],
+          "peer1": [],
+          "peer2": [],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 0,
+            "peer1": 0,
+            "peer2": 0,
+            "peer3": 0,
+            "peer4": 0,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z"
+        },
+        "at": "2026-10-25T21:09:24.843Z"
+      },
+      {
+        "phase": "owner-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 1,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [],
+          "peer2": [],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:09:33.394Z"
+      },
+      {
+        "phase": "shared",
+        "actualPhase": "COLLECTING",
+        "submitted": 1,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [],
+          "peer2": [],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "delivery": [
+          {
+            "role": "peer1",
+            "listed": true,
+            "cards": 1
+          },
+          {
+            "role": "peer2",
+            "listed": true,
+            "cards": 1
+          },
+          {
+            "role": "peer3",
+            "listed": true,
+            "cards": 1
+          },
+          {
+            "role": "peer4",
+            "listed": true,
+            "cards": 1
+          },
+          {
+            "role": "peer5",
+            "listed": true,
+            "cards": 1
+          }
+        ],
+        "at": "2026-10-25T21:10:09.620Z"
+      },
+      {
+        "phase": "peer1-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 2,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:10:50.630Z"
+      },
+      {
+        "phase": "peer2-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 3,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:11:30.468Z"
+      },
+      {
+        "phase": "peer3-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 4,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:12:09.670Z"
+      },
+      {
+        "phase": "peer4-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 5,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": []
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:12:49.335Z"
+      },
+      {
+        "phase": "peer5-submitted",
+        "actualPhase": "COLLECTING",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:13:29.150Z"
+      },
+      {
+        "phase": "peer3-edited",
+        "actualPhase": "COLLECTING",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "at": "2026-10-25T21:13:56.451Z"
+      },
+      {
+        "phase": "peer3-restored",
+        "actualPhase": "COLLECTING",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 0,
+        "invitationStatuses": [],
+        "chosenStart": null,
+        "chosenEnd": null,
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 0,
+            "peer1": 0,
+            "peer2": 0,
+            "peer3": 0,
+            "peer4": 0,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z"
+        },
+        "at": "2026-10-25T21:14:04.802Z"
+      }
+    ],
+    "notPassedInThisAttempt": [
+      "Cross-midnight final-time draft selection and review.",
+      "Formal invitation, mixed replies, publication, and native Calendar flow."
+    ],
+    "failureBoundary": "The test reveal helper demanded an extra four-point bottom inset at the last available final-grid row and repeatedly scrolled. Parent separately observed the 23:30 row fully visible and hittable. The enclosing test still failed; the final-time stage is not accepted from this attempt.",
+    "adoptedImages": [
+      {
+        "capture": "plan-six-08-six-responses-compact-avatar-summary",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "E41DEADC-5458-4C57-9F55-2E4308064678.png",
+        "sha256": "6962399c04b70997a7857fd959b4b06300e7e0982c1a8baf06d77bd5390556e2",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-08-six-responses-compact-avatar-summary-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Six-response count, three avatars plus +3 overflow and final-time action are readable. Leading clock glyphs touch/partly clip at screen edge; this capture is not full-grid clock-label visual acceptance."
+      },
+      {
+        "capture": "plan-six-07-peer3-edited-only-own-response",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "EF691275-4AA9-49E7-A686-124D779F1007.png",
+        "sha256": "d8523b94a91b57e2c76bc1efbc63109193b9607775c7d61b09ee4f514cf732a7",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-07-peer3-edited-only-own-response-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-06-peer5-submitted-own-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "B5B96723-B5C5-4877-B9EF-6ED9530E31C3.png",
+        "sha256": "2245ed320935e5ef6be11bd942b64e78507153f19c4408380c2db85172dc6e76",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-06-peer5-submitted-own-availability-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-06-peer4-submitted-own-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "76FD4AE6-3BA1-47B5-A09D-5565F8CEB497.png",
+        "sha256": "1c84a14ee59eaa7d77c8d55488e5f098d16c06092f897c6db2327bde7ce94ac8",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-06-peer4-submitted-own-availability-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-06-peer3-submitted-own-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "343CDE09-97D7-4169-8EAE-18428A9DA7E8.png",
+        "sha256": "43eb90e9a265511a433d1ad9060fb12bce1a6aebaccda774976511d7de97f263",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-06-peer3-submitted-own-availability-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-06-peer2-submitted-own-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "092A3438-C1E4-4747-8E30-7A48968930D3.png",
+        "sha256": "9f099a7c556c130e6ca277cd49776cfb5bf71c1b282bc829e238d118252e92a5",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-06-peer2-submitted-own-availability-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-06-peer1-submitted-own-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "5BD35639-2ACE-47D3-8ADD-605C63A1EC58.png",
+        "sha256": "a3cbf8a11b49b6fe795395c25c9316a70dcb8418d5a9fb9189af231d903a26dc",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-06-peer1-submitted-own-availability-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-05-all-five-App-friends-selected",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "361E90C1-3AA4-4D30-BEA4-7F2307BD01AA.png",
+        "sha256": "7e0387f18aa418e5aa0136fcbd6dc20344c8a879fe689a5347e6d4fab6fd939a",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-05-all-five-App-friends-selected-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-04-owner-submitted-share-panel",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "769930FA-FDC3-4DD0-9A26-F870D14AEDAA.png",
+        "sha256": "8f8cfc8767f3cd660c500ab8fc328991b6a02d10cbad6d4e921d49b4b60d21d5",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-04-owner-submitted-share-panel-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-03-owner-unsubmitted-tap-cancel-drag-erase",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "32A42106-331B-4185-A965-0BA40B1F6CAD.png",
+        "sha256": "2604f1064897c40ec02c9aacf2dfe4a30943a707ee4c65b425e4e7f2da155e2b",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-03-owner-unsubmitted-tap-cancel-drag-erase-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-02-owner-first-editable-timetable",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "77F7CE78-BF54-4CC3-9ACF-EE54037A9473.png",
+        "sha256": "fc4b7f2d1edca6fe03db6b954b4d193321f195d6238d8653b9e73b7200d20383",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-02-owner-first-editable-timetable-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      },
+      {
+        "capture": "plan-six-01-owner-create-candidate-dates",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "9CADAC34-167B-41FF-B90F-4D5F755880A5.png",
+        "sha256": "36da261bc21a32ef8ea230948ace94420267fc763b5be2249353f7a6f52d620f",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "file": "plan-six-01-owner-create-candidate-dates-real-login-prefix-simulator.png",
+        "adopted": true,
+        "acceptedForShownViewport": true,
+        "scope": "Visible original viewport only; offscreen rows/date columns are not visually reviewed."
+      }
+    ],
+    "reviewedButNotAdoptedImages": [
+      {
+        "capture": "plan-six-chat-card-peer5-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "D111D26F-31E1-4FBA-BDDE-9AFC832E341D.png",
+        "sha256": "2eccca695b473b46f829f23b0b468b8c5e06d77bd130f47d716bff50cc826f7a",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "adopted": false,
+        "reason": "Capture shows earlier chat messages and other test plans. The current six-person plan card is outside the captured viewport; no current-card visual acceptance is claimed."
+      },
+      {
+        "capture": "plan-six-chat-card-peer4-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "EEE623A9-80C8-4A94-BEBC-7BBBD5B48950.png",
+        "sha256": "353071f4900eb7d59c16273de91d85ca790527898b7ff437d9b9603951bd9bc0",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "adopted": false,
+        "reason": "Capture shows earlier chat messages and other test plans. The current six-person plan card is outside the captured viewport; no current-card visual acceptance is claimed."
+      },
+      {
+        "capture": "plan-six-chat-card-peer3-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "337C0EDC-D149-4FCE-B3E2-2FF8CB13D22B.png",
+        "sha256": "dffefb258f4d76a7a3534d1f8e030ddea3cd7a455a9c2d03e242b01cd447c2a8",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "adopted": false,
+        "reason": "Capture shows earlier chat messages and other test plans. The current six-person plan card is outside the captured viewport; no current-card visual acceptance is claimed."
+      },
+      {
+        "capture": "plan-six-chat-card-peer2-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "ED570FC4-3571-4CB7-87B5-C8E691125775.png",
+        "sha256": "dffefb258f4d76a7a3534d1f8e030ddea3cd7a455a9c2d03e242b01cd447c2a8",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "adopted": false,
+        "reason": "Capture shows earlier chat messages and other test plans. The current six-person plan card is outside the captured viewport; no current-card visual acceptance is claimed."
+      },
+      {
+        "capture": "plan-six-chat-card-peer1-availability",
+        "testIdentifier": "PlanSixParticipantPhoneUITests/testOwnerFiveParticipantsAvailabilityInvitationAndCalendar()",
+        "originalExportedFile": "244E9401-EDA0-4888-BE27-BC5A2AFAA013.png",
+        "sha256": "05c141e5fa3807c23fb4985721949467709ebe4cd69863a1ff68ec616f87461a",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "adopted": false,
+        "reason": "Capture shows earlier chat messages and other test plans. The current six-person plan card is outside the captured viewport; no current-card visual acceptance is claimed."
+      }
+    ],
+    "actualFailureAssertion": {
+      "kind": "XCTAssertLessThanOrEqual",
+      "elementIdentifier": "time-poll-cell--95",
+      "actualBottom": 755.6666666666666,
+      "helperAllowedBottom": 751.6666666666665,
+      "differencePoints": 4,
+      "compiledSourceLine": 408
+    }
+  },
+  "capacityCase": {
+    "resultBundle": "six-user-simulator.xcresult",
+    "testIdentifier": "PlanOpenLinkCapacityPhoneUITests/testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted()",
+    "testResult": "Passed",
+    "elapsedSeconds": 18.124,
+    "enclosingSuiteResult": "Failed because a different six-person main test failed earlier at the create-button selector; do not label the whole initial suite passed.",
+    "images": [
+      {
+        "file": "plan-six-capacity-released-seat-accepted-simulator.png",
+        "sha256": "044f65a3dc73c85d1ed1f7e922aae149df28223b0e0c898bbf6adc4fb726b35f",
+        "capture": "plan-six-capacity-released-seat-accepted",
+        "testIdentifier": "PlanOpenLinkCapacityPhoneUITests/testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted()",
+        "originalExportedFile": "944F099E-3525-4C53-A37B-E330C674669D.png",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "acceptedForShownViewport": true
+      },
+      {
+        "file": "plan-six-capacity-declined-seat-released-new-viewer-simulator.png",
+        "sha256": "8576f814178d687609e13b36b575a53a3fe14f36682408ae91f02ebd2567fa83",
+        "capture": "plan-six-capacity-declined-seat-released-new-viewer",
+        "testIdentifier": "PlanOpenLinkCapacityPhoneUITests/testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted()",
+        "originalExportedFile": "C38F5077-760B-44C7-883E-99127C0DFD66.png",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "acceptedForShownViewport": true
+      },
+      {
+        "file": "plan-six-capacity-full-reserved-new-viewer-simulator.png",
+        "sha256": "8d6fe76fca96a4d83390cbf8168079e3970646a7dbca0de3534eab33eda3adff",
+        "capture": "plan-six-capacity-full-reserved-new-viewer",
+        "testIdentifier": "PlanOpenLinkCapacityPhoneUITests/testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted()",
+        "originalExportedFile": "D35F593A-43FD-46B0-A2BA-6317C2A876F7.png",
+        "pixelDimensions": [
+          1284,
+          2778
+        ],
+        "actualOriginalReviewed": true,
+        "acceptedForShownViewport": true
+      }
+    ],
+    "visualScope": "Full capacity hides the accept action and explains full status; released seat shows a visible confirmation action; acceptance shows 2/2 and waiting for owner.",
+    "wordingLimit": "The unknown full-capacity viewer still has the generic top chip 待你确认 although the full-body explanation and footer correctly prevent confirmation. This record does not claim all status wording is unified."
+  },
+  "counts": {
+    "reviewedOriginalPNGs": 20,
+    "reviewedUniquePixelHashes": 19,
+    "prefixReviewedPNGs": 17,
+    "prefixAdoptedPNGs": 12,
+    "capacityAdoptedPNGs": 3,
+    "adoptedPNGs": 15,
+    "adoptedUniquePixelHashes": 15,
+    "excludedChatViewportPNGs": 5
+  },
+  "reviewMethod": "Each actual PNG original was visually inspected. Exact SHA-identical images may reuse original-pixel review; accessibility hierarchy text and videos are not visual proof. Only adopted PNG files are copied into public evidence.",
+  "exclusions": [
+    "All failure-stage videos, UI snapshots, AX/debug text and synthesized event attachments.",
+    "Five chat captures whose viewport did not include the current six-person plan card.",
+    "The separately supplied current-crossday.png diagnostic is not adopted and does not turn the enclosing failure into a pass."
+  ],
+  "limits": [
+    "Ordinary Chinese Simulator layouts only, not a physical-device or whole-App maximum-font claim.",
+    "Screenshots capture visible viewports; offscreen content and partially clipped leading clock text are outside acceptance scope.",
+    "No claim of a successful single uninterrupted six-person test; planned continuation must be reported separately."
+  ],
+  "executionBoundaries": {
+    "swiftOrMJSProductEdited": false,
+    "fixtureChanged": false,
+    "cleanupPerformed": false,
+    "mainTestInterruptedByThisWorker": false
+  }
+}

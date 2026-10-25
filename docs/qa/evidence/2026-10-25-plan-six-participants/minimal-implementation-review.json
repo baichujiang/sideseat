@@ -1,0 +1,36 @@
+{
+  "result": "No material findings.",
+  "mode": "Independent read-only precision review",
+  "baseline": "bfba92ae",
+  "productCommit": "38b6927dd62f3ac4ba0b8ecea396f1d2c08e1645",
+  "scope": [
+    "Native selected-seat capacity and presentation",
+    "One shared web component",
+    "Unit state/role matrix"
+  ],
+  "findings": [],
+  "assessment": "Current COLLECT linkParticipantCount conversion retains existing capacity contract. Selected pending invitees reserve places; declined fixed-link participants release places. Accepted progress/notifications/calendar remain distinct. Owner, reserved selected users, released/refilled SHARED/DECLINED viewers, closed COLLECT and terminal guards preserved. No state, persisted field, request or backend rule added.",
+  "limitations": "Reviewer did not execute device/accounts/tests; runtime acceptance recorded separately.",
+  "supplementaryReviews": [
+    {
+      "basis": "8c4110c1928b129103f6ac824e2afe3f0d3a0c4a",
+      "scope": "Shared invitation footer minmax tracks, normal wrapping and content height only",
+      "result": "No material findings.",
+      "runtimeExecutedByReviewer": false
+    },
+    {
+      "basis": "Final real-sign-in harness working tree",
+      "scope": "Empty/nonempty Plans create selector, signed-out ephemeral real UI login, native phase selectors and observer executionSurface",
+      "result": "No material findings.",
+      "runtimeExecutedByReviewer": false,
+      "note": "Global authenticated fixture bypasses Contacts/Inbox/Calendar network stores; real UI login avoids that mock path."
+    },
+    {
+      "basis": "Final228 working tree after final Calendar verification helper",
+      "scope": "Invitation heading reuse; guarded native continuation entries; lazy Calendar List materialization; fresh real sign-in before post-withdraw Calendar search; observer exact prefix and real nonzero test completion guards",
+      "result": "No material findings.",
+      "runtimeExecutedByReviewer": false,
+      "note": "Main plan business mutations remain UI-only. Historical failed attempts are retained; cumulative stages are not a single uninterrupted same-build pass."
+    }
+  ]
+}

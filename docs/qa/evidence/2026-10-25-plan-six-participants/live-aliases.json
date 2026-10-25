@@ -1,0 +1,20 @@
+{
+  "sameTestedCandidatePromoted": true,
+  "aliases": [
+    {
+      "alias": "https://api.sideseat.de",
+      "id": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY"
+    },
+    {
+      "alias": "https://www.sideseat.de",
+      "id": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY"
+    },
+    {
+      "alias": "https://sideseat.de",
+      "id": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+      "readyState": "READY"
+    }
+  ]
+}

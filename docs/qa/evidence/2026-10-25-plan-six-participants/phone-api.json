@@ -1,0 +1,1996 @@
+{
+  "passed": true,
+  "source": "real API; native App UI owns all main business mutations",
+  "executionSurface": "iPhone 14 Plus Simulator iOS 26.5; six real accounts",
+  "resumedAfter": "peer2-withdrawn",
+  "continuationVerification": {
+    "phase": "peer2-withdrawn",
+    "actualPhase": "CONFIRMED",
+    "submitted": 6,
+    "ownSlots": {
+      "owner": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peer1": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peer2": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peer3": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peer4": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "peer5": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "invitationVersion": 1,
+    "invitationStatuses": [
+      {
+        "displayName": "朋友1b0d4",
+        "status": "ACCEPTED",
+        "selected": true
+      },
+      {
+        "displayName": "朋友2b0d4",
+        "status": "DECLINED",
+        "selected": true
+      },
+      {
+        "displayName": "朋友3b0d4",
+        "status": "ACCEPTED",
+        "selected": true
+      },
+      {
+        "displayName": "朋友4b0d4",
+        "status": "ACCEPTED",
+        "selected": true
+      },
+      {
+        "displayName": "朋友5b0d4",
+        "status": "DECLINED",
+        "selected": true
+      },
+      {
+        "displayName": "发起人b0d4",
+        "status": "ACCEPTED",
+        "selected": true
+      }
+    ],
+    "chosenStart": "2026-10-26T08:00:00.000Z",
+    "chosenEnd": "2026-10-26T09:00:00.000Z",
+    "timeZone": "Europe/Berlin",
+    "candidateDates": [
+      "2026-10-26",
+      "2026-10-27",
+      "2026-10-28",
+      "2026-10-29",
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01"
+    ],
+    "calendar": {
+      "counts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 1,
+        "peer4": 1,
+        "peer5": 0
+      },
+      "windowStart": "2026-10-25T08:00:00.000Z",
+      "windowEnd": "2026-11-02T16:00:00.000Z"
+    },
+    "at": "2026-10-25T22:12:15.611Z"
+  },
+  "segments": [
+    {
+      "log": "six-user-real-auth.log",
+      "completedPhases": [
+        "created",
+        "owner-draft",
+        "owner-submitted",
+        "shared",
+        "peer1-submitted",
+        "peer2-submitted",
+        "peer3-submitted",
+        "peer4-submitted",
+        "peer5-submitted",
+        "peer3-edited",
+        "peer3-restored"
+      ],
+      "enclosingTestPassed": false,
+      "reason": "Test scroll helper required margin beyond fully visible final grid row."
+    },
+    {
+      "log": "six-user-continuation.log",
+      "completedPhases": [],
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-continuation-final.log",
+      "completedPhases": [],
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-final.log",
+      "completedPhases": [],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-closure.log",
+      "completedPhases": [
+        "final-review-cancelled"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-closure.log",
+      "completedPhases": [
+        "invited"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-replies.log",
+      "completedPhases": [
+        "peer1-accepted",
+        "peer2-accepted",
+        "peer3-accepted",
+        "peer4-ignored",
+        "peer5-declined"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-publication.log",
+      "completedPhases": [],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-publication-scroll.log",
+      "completedPhases": [
+        "published"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-calendars.log",
+      "completedPhases": [
+        "calendar-verified",
+        "peer4-late-accepted",
+        "peer2-withdrawn"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": false
+    },
+    {
+      "log": "six-user-final-calendar.log",
+      "completedPhases": [
+        "final-calendar-verified"
+      ],
+      "nativeBuild": "228",
+      "enclosingTestPassed": true
+    }
+  ],
+  "expectedPhases": [
+    "created",
+    "owner-draft",
+    "owner-submitted",
+    "shared",
+    "peer1-submitted",
+    "peer2-submitted",
+    "peer3-submitted",
+    "peer4-submitted",
+    "peer5-submitted",
+    "peer3-edited",
+    "peer3-restored",
+    "final-review-cancelled",
+    "invited",
+    "peer1-accepted",
+    "peer2-accepted",
+    "peer3-accepted",
+    "peer4-ignored",
+    "peer5-declined",
+    "published",
+    "calendar-verified",
+    "peer4-late-accepted",
+    "peer2-withdrawn",
+    "final-calendar-verified"
+  ],
+  "checks": [
+    {
+      "phase": "created",
+      "actualPhase": "COLLECTING",
+      "submitted": 0,
+      "ownSlots": {
+        "owner": [],
+        "peer1": [],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "delivery": [
+        {
+          "role": "peer1",
+          "listed": false,
+          "cards": 0
+        },
+        {
+          "role": "peer2",
+          "listed": false,
+          "cards": 0
+        },
+        {
+          "role": "peer3",
+          "listed": false,
+          "cards": 0
+        },
+        {
+          "role": "peer4",
+          "listed": false,
+          "cards": 0
+        },
+        {
+          "role": "peer5",
+          "listed": false,
+          "cards": 0
+        }
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:09:12.783Z"
+    },
+    {
+      "phase": "owner-draft",
+      "actualPhase": "COLLECTING",
+      "submitted": 0,
+      "ownSlots": {
+        "owner": [],
+        "peer1": [],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:09:24.843Z"
+    },
+    {
+      "phase": "owner-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 1,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:09:33.394Z"
+    },
+    {
+      "phase": "shared",
+      "actualPhase": "COLLECTING",
+      "submitted": 1,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "delivery": [
+        {
+          "role": "peer1",
+          "listed": true,
+          "cards": 1
+        },
+        {
+          "role": "peer2",
+          "listed": true,
+          "cards": 1
+        },
+        {
+          "role": "peer3",
+          "listed": true,
+          "cards": 1
+        },
+        {
+          "role": "peer4",
+          "listed": true,
+          "cards": 1
+        },
+        {
+          "role": "peer5",
+          "listed": true,
+          "cards": 1
+        }
+      ],
+      "at": "2026-10-25T21:10:09.620Z"
+    },
+    {
+      "phase": "peer1-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 2,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:10:50.630Z"
+    },
+    {
+      "phase": "peer2-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 3,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:11:30.468Z"
+    },
+    {
+      "phase": "peer3-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 4,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:12:09.670Z"
+    },
+    {
+      "phase": "peer4-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 5,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": []
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:12:49.335Z"
+    },
+    {
+      "phase": "peer5-submitted",
+      "actualPhase": "COLLECTING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:13:29.150Z"
+    },
+    {
+      "phase": "peer3-edited",
+      "actualPhase": "COLLECTING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "at": "2026-10-25T21:13:56.451Z"
+    },
+    {
+      "phase": "peer3-restored",
+      "actualPhase": "COLLECTING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:14:04.802Z"
+    },
+    {
+      "phase": "final-review-cancelled",
+      "actualPhase": "COLLECTING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 0,
+      "invitationStatuses": [],
+      "chosenStart": null,
+      "chosenEnd": null,
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:39:41.788Z"
+    },
+    {
+      "phase": "invited",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:41:23.039Z"
+    },
+    {
+      "phase": "peer1-accepted",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:47:41.901Z"
+    },
+    {
+      "phase": "peer2-accepted",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:48:07.425Z"
+    },
+    {
+      "phase": "peer3-accepted",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:48:33.076Z"
+    },
+    {
+      "phase": "peer4-ignored",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:48:54.047Z"
+    },
+    {
+      "phase": "peer5-declined",
+      "actualPhase": "INVITING",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:49:16.130Z"
+    },
+    {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T21:58:41.824Z"
+    },
+    {
+      "phase": "calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "INVITED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z",
+        "searchCounts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "searchPreservesPlanIdentityTimesAndAcceptedCompanions": true
+      },
+      "at": "2026-10-25T22:07:46.557Z"
+    },
+    {
+      "phase": "peer4-late-accepted",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T22:08:07.862Z"
+    },
+    {
+      "phase": "peer2-withdrawn",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z"
+      },
+      "at": "2026-10-25T22:08:48.331Z"
+    },
+    {
+      "phase": "final-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z",
+        "searchCounts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "searchPreservesPlanIdentityTimesAndAcceptedCompanions": true
+      },
+      "at": "2026-10-25T22:13:40.978Z"
+    }
+  ],
+  "failure": null
+}

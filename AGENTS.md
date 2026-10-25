@@ -21,7 +21,48 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- The current production share page is dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz,
+- Preview228 is the current installed development build. The same real six-account
+  plan completed23/23 cumulative functional phases across227 then228. Final
+  read-only UI verification passed73.054s,1test0fail/skip. Native actual-pixel review
+  completed89captures/73unique,84/69adopted across7scoped reports;5old chat viewports
+  excluded. Product/tests/contracts commitbad2471d935d1a7dd6f42924a04865725c2a7a71
+  is pushed;268 frozen228 App inputs match it. Selected pending invitees
+  reserve places; the detail heading now reuses the existing presentation title,
+  preserving the accepted-waiting wording. Only2/268 native inputs changed from227
+  (status declaration and version);266 and bytes outside the status stay identical.
+  79unit/3suites5.004s,16domain and7+5independent real API checks passed. Frozen228
+  capacity-role UI passed52.425s; its old main test failed82.195s on a mismatched
+  seed expectation, test-only repaired. Later harness viewport/scroll/modal failures
+  retain completed business prefixes. Final Calendars/search each contain exactly
+  one plan for owner/peer1/peer3/peer4 and zero for withdrawn peer2/declined peer5,
+  with exact time/place/accepted companions. No API plan writes patched UI progress.
+  Six disposable accounts and27owned plans deleted;6stale bearers401/27public links404,
+  private fixture removed. Thirteen actual run logs/source proofs retain failures.
+  Four generated contexts,47credential/browser-trace/auth-diagnostic files and the owned six-user
+  Simulator removed;raw evidence retained0700/0600. Final ordinary owner frame shows
+  all6names/statuses,4/6and09-10;maximum owner row remains outside pixel scope,
+  long German confirm word wraps awkwardly but stays inside the reachable button.
+  Normal228 PID9971,268/Local/signature/binaries/process verified,ordinary97 kept,
+  new App reports0; this stage's physical Runner absent, pre-existing Flow222 kept.
+  Physical automation attempts on227 failed before tests at Xcode notification
+  service initialization;228 physical UI was not run. No physical six-person UI or
+  single uninterrupted same-build test pass is claimed;actual push banners unverified.
+  Independent final read-only review found no material findings. See [QA](docs/qa/2026-10-25-plan-six-participants.md)
+  and [release](docs/releases/2026-10-25-preview228-plan-six-participants.md).
+- The current production share page is dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f,
+  source8c4110c1928b129103f6ac824e2afe3f0d3a0c4a pushed. One original component
+  aligns capacity and wraps invitation labels at narrow large text. Exact1394
+  live source hashes verified;1393 preserved,component+marker overlaid,1395uploaded
+  matched. Same tested Production candidate promoted without rebuild,api/www/root
+  READY verified; migrations skipped/activity hook none,no backend rule changes.
+  Candidate Chromium/WebKit three-variant flows39.209/43.730s and desktop capture
+  supplements12.951/14.361s passed; adopted60captures/42unique pixels,56text/44px
+  checks. Public live390zh flows15.251/15.157s passed without bypass cookies,
+  20captures/14unique pixels,14checks. Actual images/scopes recorded; no physical
+  Safari claim. Native23phase closure is cumulative Simulator UI/real API evidence;
+  native scoped pixel review and cleanup completed. Six accounts/27plans are401/404
+  cleaned. See the228 QA/release above; prior web record below stays.
+- The previous production share page was dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz,
   source 55ac46672a925e39df3fcba981fb380539d1d93c pushed. Candidate dates now
   precede grey dot/caption Collecting availability plus full timezone; location
   is independent. Activity ideas retain distinct wording, all other branches and
@@ -35,8 +76,8 @@
   captures reuse exact-image review. Existing narrow invitation-label tightness
   is outside this metadata change; no whole-site maximum-font visual claim.
   Six QA accounts/18links401/404 cleaned; access cookie/private fixtures removed.
-  No native rebuild in that web stage; current native build is226 below. See web release/QA records.
-- Preview226 is the current installed development build, source f3d62a23714dbee63197ad7db54c153f1d515bb6 pushed.
+  No native rebuild in that web stage; its native build was226 below. See web release/QA records.
+- Preview226 was a previous installed development build, source f3d62a23714dbee63197ad7db54c153f1d515bb6 pushed.
   Together removes only the expired-history expansion. Me → History section →
   Intention history owns the original read-only cards and repeat flow, behind the
   existing gate. Records/expiry selection/GET/template rules stay; cancel remains

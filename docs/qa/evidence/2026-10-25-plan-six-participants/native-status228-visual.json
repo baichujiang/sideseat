@@ -1,0 +1,157 @@
+{
+  "kind": "Preview228 role-aware capacity status actual-pixel acceptance",
+  "reviewedAt": "2026-10-25T21:38:31.974364+00:00",
+  "passedForStatedCase": true,
+  "wholeSixPersonSuitePassed": false,
+  "product": "Preview228, same frozen product for the capacity run and parent current continuation",
+  "executionSurface": {
+    "model": "iPhone 14 Plus",
+    "platform": "iOS Simulator",
+    "osVersion": "26.5",
+    "osBuild": "23F77",
+    "physicalDevice": false
+  },
+  "sourceCase": {
+    "resultBundle": "six-user-final.xcresult",
+    "testIdentifier": "PlanOpenLinkCapacityPhoneUITests/testReservedSeatsBlockNewJoinButReleasedSeatCanBeAccepted()",
+    "passed": true,
+    "elapsedSeconds": 52.425,
+    "enclosingSuiteResult": "Failed: the separate main continuation case failed82.195s on test seed/empty-state expectation before formal mutation. That failure is not a capacity-case failure, and this record does not claim whole-suite success.",
+    "capacityCompiledSHA256": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a",
+    "capacityCurrentSHA256": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a",
+    "capacityCompiledAndCurrentBytesMatch": true,
+    "compiledBeforeLatestMainHelperOnlyChange": true,
+    "scopeOfLatestMainHelperChange": "Parent removed test seed/empty-state expectation conflict; capacity file bytes and product228 unchanged. No retrospective whole-suite rerun claim."
+  },
+  "reviewMethod": "Each of six actual exported capacity PNG originals was visually inspected; copied files preserve exact original bytes. UI hierarchy/debug text, recordings and other test-case attachments are not adopted as visual evidence.",
+  "counts": {
+    "reviewedCaptures": 6,
+    "uniquePixels": 6,
+    "adoptedCaptures": 6,
+    "ordinaryCaptures": 5,
+    "actualMaximumTextCaptures": 1
+  },
+  "images": [
+    {
+      "file": "plan-six-capacity-declined-viewer-cannot-reclaim-refilled-seat-maximum-preview228-simulator.png",
+      "capture": "plan-six-capacity-declined-viewer-cannot-reclaim-refilled-seat-maximum",
+      "roleAndCapacity": "declined former invitee after place refilled, actual maximum text",
+      "observedStatus": "你未参加本次计划",
+      "acceptActionExpected": false,
+      "observedFooter": "Return to plans",
+      "sha256": "7d0e11c18381bbb0454f077edfd0f8f48acc9e15eb70b6353f4774e14bf30d78",
+      "originalExportedFile": "13A35E00-24C1-4FA3-A781-D964CD4ABD54.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Top role status, date/range, legend and return action are readable. The highlighted rows and roster extend below the maximum-text viewport; no full-table/roster maximum-text claim."
+    },
+    {
+      "file": "plan-six-capacity-released-seat-accepted-preview228-simulator.png",
+      "capture": "plan-six-capacity-released-seat-accepted",
+      "roleAndCapacity": "viewer accepted the released place",
+      "observedStatus": "待发起人正式发出",
+      "acceptActionExpected": false,
+      "observedFooter": "Accepted; may decline",
+      "sha256": "dca178fff906ac0295c26f9785e9108b02bc455818e029de10a025a4dd1cb538",
+      "originalExportedFile": "D9D1D7A2-3F48-49AC-B98B-23FCF12A646C.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Ordinary Chinese status, complete 09:00–10:00 highlighted interval, visible invitation rows and footer are readable without overlap."
+    },
+    {
+      "file": "plan-six-capacity-declined-seat-released-new-viewer-preview228-simulator.png",
+      "capture": "plan-six-capacity-declined-seat-released-new-viewer",
+      "roleAndCapacity": "viewer declined, place now available",
+      "observedStatus": "待你确认",
+      "acceptActionExpected": true,
+      "observedFooter": "Confirm participation",
+      "sha256": "3f8b6396f0568569809e9cb32a61520db358e133b7a18a6c4781b80be7948b25",
+      "originalExportedFile": "54570CB2-E64C-4540-9FF9-8CF16C8591B4.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Ordinary Chinese status, complete 09:00–10:00 highlighted interval, visible invitation rows and footer are readable without overlap."
+    },
+    {
+      "file": "plan-six-capacity-owner-can-publish-with-reserved-pending-place-preview228-simulator.png",
+      "capture": "plan-six-capacity-owner-can-publish-with-reserved-pending-place",
+      "roleAndCapacity": "owner, one selected reply still pending",
+      "observedStatus": "待你正式发出",
+      "acceptActionExpected": false,
+      "observedFooter": "Send final plan",
+      "sha256": "33039707cb709b765ad1522d78ff57f138f0134bfa393b4e308dc27996b1e7ae",
+      "originalExportedFile": "93F7C542-E95D-4EA3-BC91-54D61C7E3D57.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Ordinary Chinese status, complete 09:00–10:00 highlighted interval, visible invitation rows and footer are readable without overlap."
+    },
+    {
+      "file": "plan-six-capacity-full-selected-invitee-keeps-confirmation-preview228-simulator.png",
+      "capture": "plan-six-capacity-full-selected-invitee-keeps-confirmation",
+      "roleAndCapacity": "selected pending invitee with reserved place",
+      "observedStatus": "待你确认",
+      "acceptActionExpected": true,
+      "observedFooter": "Confirm participation",
+      "sha256": "5f8c295656e94c4abcf5d8a72f3ec8fa25aebc38c6155bd697ef7449c4c62928",
+      "originalExportedFile": "4A2C10C4-DC8B-4197-9BAC-60783D9D9925.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Ordinary Chinese status, complete 09:00–10:00 highlighted interval, visible invitation rows and footer are readable without overlap."
+    },
+    {
+      "file": "plan-six-capacity-full-reserved-new-viewer-preview228-simulator.png",
+      "capture": "plan-six-capacity-full-reserved-new-viewer",
+      "roleAndCapacity": "unselected new viewer, all places reserved",
+      "observedStatus": "你未参加本次计划",
+      "acceptActionExpected": false,
+      "observedFooter": "Return to plans",
+      "sha256": "87b6901c21541b6825ad17b758d41845af496be41c65b7d427ad9b17276b48a9",
+      "originalExportedFile": "E8351F41-E095-4BF8-B443-0444A049421C.png",
+      "pixelDimensions": [
+        1284,
+        2778
+      ],
+      "actualOriginalReviewed": true,
+      "acceptedForShownViewport": true,
+      "scope": "Ordinary Chinese status, complete 09:00–10:00 highlighted interval, visible invitation rows and footer are readable without overlap."
+    }
+  ],
+  "resolvedEarlierFinding": {
+    "priorRecord": "native-prefix-visual.json",
+    "priorScope": "Preview227 capacity screenshot had generic 待你确认 for an unknown full-capacity viewer.",
+    "newEvidence": "Preview228 unknown full-capacity viewer and declined former invitee with refilled place show 你未参加本次计划 with no confirmation action; selected pending, owner and accepted roles retain their correct next-step states.",
+    "historicalRecordRewritten": false
+  },
+  "limits": [
+    "This single capacity status case is separate from the one-owner/five-participant main native closure, which has its own result evidence.",
+    "Ordinary Chinese captures show full invited hour and roster; maximum-text capture validates visible role status/date/legend/return action only.",
+    "Artificial long English test title wraps at maximum type size; no screenshot demonstrates all offscreen invitation rows or highlighted cells at maximum text.",
+    "Simulator original pixels are not physical-iPhone or whole-App maximum-font acceptance."
+  ],
+  "executionBoundaries": {
+    "caseRerunByThisWorker": false,
+    "productOrSwiftOrMJSCodeEdited": false,
+    "fixtureChanged": false,
+    "cleanupPerformed": false,
+    "nonCapacityVisualAttachmentsAdopted": false
+  }
+}

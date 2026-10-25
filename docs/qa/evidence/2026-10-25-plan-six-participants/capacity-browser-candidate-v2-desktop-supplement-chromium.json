@@ -1,0 +1,389 @@
+{
+  "passed": true,
+  "stage": "candidate-v2-desktop-supplement",
+  "engine": "chromium",
+  "baseline": false,
+  "origin": "https://sideseat-eibsv7mvr-baichus-projects.vercel.app",
+  "realNetwork": true,
+  "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+  "selectedVariants": [
+    "1440-en-light"
+  ],
+  "variantFilter": "1440-en-light",
+  "scope": "Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI",
+  "checks": [
+    {
+      "variant": "1440-en-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-01-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 988,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 964,
+        "bottom": 988,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02-full-readonly-timetable.png",
+      "variant": "1440-en-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 988,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 661,
+        "bottom": 900,
+        "height": 239
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02b-one-place-available.png",
+      "variant": "1440-en-light",
+      "state": "02b-one-place-available",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 871,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 847,
+        "bottom": 871,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-03-released-place-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 996,
+        "fits": true,
+        "inFixedFooter": true,
+        "top": 896,
+        "bottom": 940,
+        "height": 44
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-04-first-guest-accepted.png",
+      "variant": "1440-en-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 891,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 382,
+        "bottom": 891,
+        "height": 509
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05-second-guest-full-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 988,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 964,
+        "bottom": 988,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+      "variant": "1440-en-light",
+      "state": "05b-one-place-released-after-publication",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 871,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 847,
+        "bottom": 871,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-06-second-guest-released-place.png",
+      "variant": "1440-en-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 996,
+        "fits": true,
+        "inFixedFooter": true,
+        "top": 896,
+        "bottom": 940,
+        "height": 44
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 891,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 382,
+        "bottom": 891,
+        "height": 509
+      }
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 988,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 964,
+        "bottom": 988,
+        "height": 24
+      }
+    }
+  ],
+  "actionTextBounds": [
+    {
+      "step": "1440-en-light: prepare owned capacity plan",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 49,
+        "right": 217.296875,
+        "top": 538,
+        "bottom": 582
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 62,
+          "right": 204.296875,
+          "top": 551.203125,
+          "bottom": 568.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: released place appears and first guest confirms",
+      "text": "I can't attend",
+      "box": {
+        "left": 272,
+        "right": 566.65625,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 375.578125,
+          "right": 463.078125,
+          "top": 909.203125,
+          "bottom": 926.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: released place appears and first guest confirms",
+      "text": "Confirm participation",
+      "box": {
+        "left": 578.65625,
+        "right": 1168,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 802.328125,
+          "right": 944.3125,
+          "top": 909.203125,
+          "bottom": 926.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: publication creates unique accepted Calendar",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 49,
+        "right": 217.296875,
+        "top": 538,
+        "bottom": 582
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 62,
+          "right": 204.296875,
+          "top": 551.203125,
+          "bottom": 568.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 1054.5,
+        "right": 1168,
+        "top": 944,
+        "bottom": 988
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 1067.5,
+          "right": 1155,
+          "top": 957.203125,
+          "bottom": 974.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 272,
+        "right": 566.65625,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 375.578125,
+          "right": 463.078125,
+          "top": 909.203125,
+          "bottom": 926.203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "Confirm participation",
+      "box": {
+        "left": 578.65625,
+        "right": 1168,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 802.328125,
+          "right": 944.3125,
+          "top": 909.203125,
+          "bottom": 926.203125
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T21:04:23.362Z"
+}

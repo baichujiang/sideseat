@@ -1,0 +1,45 @@
+{
+  "productCommit": "bad2471d935d1a7dd6f42924a04865725c2a7a71",
+  "domain": {
+    "passed": 16,
+    "failed": 0,
+    "durationMs": 387.739667,
+    "scope": "Current tests/time-polls/*.test.ts"
+  },
+  "webESLint": {
+    "file": "components/time-polls/shared-time-poll.tsx",
+    "exitCode": 0
+  },
+  "phoneRuntimeStatus": "Physical UI session initialization failed before tests. Real six-account native UI flow executed on dedicated iPhone14Plus Simulator, with cumulative verified stages reported in phone-api.json.",
+  "native227": {
+    "passed": 79,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      "PlanPresentationTests",
+      "TimePollTests",
+      "NavigationTests"
+    ],
+    "testSeconds": 4.25,
+    "basis": "Frozen227 App inputs and related unit tests, same as product commit"
+  },
+  "native": {
+    "passed": 79,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      "PlanPresentationTests",
+      "TimePollTests",
+      "NavigationTests"
+    ],
+    "testSeconds": 5.004,
+    "basis": "Frozen228 App inputs, status heading correction and related unit tests"
+  },
+  "compiledPhoneSourceSHA256Historical227": {
+    "PlanSixParticipantPhoneUITests.swift": "cfd9af7f0714b94286b723d3a2d6d34d24e427d1d9dc0f02b427edbedff82de0",
+    "PlanOpenLinkCapacityPhoneUITests.swift": "de7e2d9a869f3bc37226f0fba2b6f4c1b58c51c12fbbf8779303d135d102ad29"
+  },
+  "compiledFinalCalendarSourceSHA256": "c032087e164ea7ce37d3edf6028808f9a685c744b8b9fa82ddd599550c34859c",
+  "compiledCapacitySourceSHA256": "b46e1db18913a0cd5ce0911cd790c65c263eb8d28a267cbdff8f4c42a645800a",
+  "nativeProductCommit": "bad2471d935d1a7dd6f42924a04865725c2a7a71"
+}

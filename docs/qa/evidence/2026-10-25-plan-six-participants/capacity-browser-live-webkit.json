@@ -1,0 +1,389 @@
+{
+  "passed": true,
+  "stage": "live",
+  "engine": "webkit",
+  "baseline": false,
+  "origin": "https://api.sideseat.de",
+  "realNetwork": true,
+  "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+  "selectedVariants": [
+    "390-zh-light"
+  ],
+  "variantFilter": "390-zh-light",
+  "scope": "Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI",
+  "checks": [
+    {
+      "variant": "390-zh-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-01-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 832,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 485,
+        "bottom": 509,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-02-full-readonly-timetable.png",
+      "variant": "390-zh-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 832,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 182,
+        "bottom": 421,
+        "height": 239
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-02b-one-place-available.png",
+      "variant": "390-zh-light",
+      "state": "02b-one-place-available",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 715,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 410,
+        "bottom": 434,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-03-released-place-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 840,
+        "fits": true,
+        "inFixedFooter": true,
+        "top": 740,
+        "bottom": 784,
+        "height": 44
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-04-first-guest-accepted.png",
+      "variant": "390-zh-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 735,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 8,
+        "bottom": 613,
+        "height": 605
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 832,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 420,
+        "bottom": 444,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+      "variant": "390-zh-light",
+      "state": "05b-one-place-released-after-publication",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 715,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 410,
+        "bottom": 434,
+        "height": 24
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-06-second-guest-released-place.png",
+      "variant": "390-zh-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 840,
+        "fits": true,
+        "inFixedFooter": true,
+        "top": 740,
+        "bottom": 784,
+        "height": 44
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 735,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 8,
+        "bottom": 533,
+        "height": 525
+      }
+    },
+    {
+      "file": "capacity-browser-live-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16,
+      "focusViewport": {
+        "safeTop": 8,
+        "safeBottom": 832,
+        "fits": true,
+        "inFixedFooter": false,
+        "top": 410,
+        "bottom": 434,
+        "height": 24
+      }
+    }
+  ],
+  "actionTextBounds": [
+    {
+      "step": "390-zh-light: prepare owned capacity plan",
+      "text": "继续查看邀请",
+      "box": {
+        "left": 37,
+        "right": 353,
+        "top": 581,
+        "bottom": 625
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 153.31903076171875,
+          "right": 236.66534423828125,
+          "top": 594.5302734375,
+          "bottom": 611.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: released place appears and first guest confirms",
+      "text": "无法参加",
+      "box": {
+        "left": 16,
+        "right": 131.328125,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 45.881961822509766,
+          "right": 101.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: released place appears and first guest confirms",
+      "text": "确认参加",
+      "box": {
+        "left": 143.328125,
+        "right": 374,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 230.8819580078125,
+          "right": 286.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: publication creates unique accepted Calendar",
+      "text": "继续查看邀请",
+      "box": {
+        "left": 37,
+        "right": 353,
+        "top": 581,
+        "bottom": 625
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 153.31903076171875,
+          "right": 236.66534423828125,
+          "top": 594.5302734375,
+          "bottom": 611.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "无法参加",
+      "box": {
+        "left": 292.421875,
+        "right": 374,
+        "top": 788,
+        "bottom": 832
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 305.4288330078125,
+          "right": 360.9930419921875,
+          "top": 801.5302734375,
+          "bottom": 818.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "无法参加",
+      "box": {
+        "left": 16,
+        "right": 131.328125,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 45.881961822509766,
+          "right": 101.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "确认参加",
+      "box": {
+        "left": 143.328125,
+        "right": 374,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 230.8819580078125,
+          "right": 286.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T21:10:26.799Z"
+}

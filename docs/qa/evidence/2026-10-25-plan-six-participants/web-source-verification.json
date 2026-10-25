@@ -1,0 +1,21 @@
+{
+  "baseline": "dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz",
+  "candidate": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+  "sourceCommit": "8c4110c1928b129103f6ac824e2afe3f0d3a0c4a",
+  "nativeSourceCommit": "38b6927dd62f3ac4ba0b8ecea396f1d2c08e1645",
+  "baselineFiles": 1394,
+  "uploadedFiles": 1395,
+  "allUploadedSourceSHA1Matched": true,
+  "changed": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "added": [
+    ".sideseat-plan-capacity227-source.json"
+  ],
+  "preserved": 1393,
+  "migrationsSkipped": true,
+  "activityReleaseHook": "none",
+  "backendRuleChanges": false,
+  "previousCandidate": "dpl_CTdDsrc5rh4TP5mX7jyRRYSBpvM2",
+  "previousCandidateVisualRejected": true
+}

@@ -1,0 +1,272 @@
+{
+  "kind": "Final candidate browser capacity acceptance evidence index",
+  "createdAt": "2026-10-25T21:08:22.011826+00:00",
+  "accepted": true,
+  "candidate": {
+    "deploymentID": "dpl_4t3gBD6psCHxRsjbDTBu3RvdL37f",
+    "origin": "https://sideseat-eibsv7mvr-baichus-projects.vercel.app",
+    "sourceCommitPrefix": "8c4110c1",
+    "productUnchangedAcrossFourFinalRuns": true,
+    "sourceCommit": "8c4110c1928b129103f6ac824e2afe3f0d3a0c4a"
+  },
+  "functionalScope": [
+    "Current COLLECT creation becomes an existing capacity-link invitation for two places.",
+    "Unknown browser guest sees full status with no confirmation action; selected reserved peer may still accept and decline.",
+    "Decline releases one place; first guest accepts through public UI; owner publishes; retries preserve one exact owner Calendar entry and the accepted guest companion.",
+    "A second fresh guest is blocked at capacity, then accepts after the first guest declines through UI.",
+    "Original declined guest cannot reclaim a full place. All five registered peer Calendar entries remain absent."
+  ],
+  "counts": {
+    "v2ObservedCaptures": 80,
+    "v2ObservedUniquePixels": 56,
+    "finalAdoptedCaptures": 60,
+    "finalAdoptedUniquePixels": 42,
+    "supersededInitialDesktopCaptures": 20,
+    "fullFlowRuns": 2,
+    "fullFlowVariantsPerEngine": 3,
+    "desktopSupplementRuns": 2,
+    "desktopSupplementVariantsPerEngine": 1,
+    "actionTextBoundsAnd44pxTargetChecksAcrossFourRuns": 56
+  },
+  "variants": {
+    "390-zh-light": {
+      "width": 390,
+      "height": 844,
+      "rootFontPx": 16,
+      "language": "zh-CN",
+      "appearance": "light"
+    },
+    "320-en-dark-20px": {
+      "width": 320,
+      "height": 812,
+      "rootFontPx": 20,
+      "language": "en",
+      "appearance": "dark"
+    },
+    "1440-en-light": {
+      "width": 1440,
+      "height": 1000,
+      "rootFontPx": 16,
+      "language": "en",
+      "appearance": "light"
+    }
+  },
+  "runs": [
+    {
+      "file": "capacity-browser-candidate-v2-chromium.json",
+      "sha256": "273e6e769a1f9b8104b51661c0229738d719bfbd91af7aed804d3287a3168f47",
+      "engine": "chromium",
+      "stage": "candidate-v2",
+      "passed": true,
+      "variants": [
+        "390-zh-light",
+        "320-en-dark-20px",
+        "1440-en-light"
+      ],
+      "elapsedSecondsFromLogCreation": 39.209,
+      "captures": 30,
+      "perRunUniquePixels": 21,
+      "actionTextBoundsAnd44pxTargetChecks": 21,
+      "harnessSHA256": "5cd3509717122eb8f920490eef5ef57bd34587f2cfc7143529e3dba4e868fa86",
+      "functionalAssertionsChangedByCaptureRepair": false
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit.json",
+      "sha256": "f7ef89d76ab5a71ae5421ff531db0c8dfbbe090f32b7e3e8c1a1225c0c3ee9c0",
+      "engine": "webkit",
+      "stage": "candidate-v2",
+      "passed": true,
+      "variants": [
+        "390-zh-light",
+        "320-en-dark-20px",
+        "1440-en-light"
+      ],
+      "elapsedSecondsFromLogCreation": 43.73,
+      "captures": 30,
+      "perRunUniquePixels": 21,
+      "actionTextBoundsAnd44pxTargetChecks": 21,
+      "harnessSHA256": "5cd3509717122eb8f920490eef5ef57bd34587f2cfc7143529e3dba4e868fa86",
+      "functionalAssertionsChangedByCaptureRepair": false
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-chromium.json",
+      "sha256": "c48af09a1c025c9b83045195e35c588b69d542bcf243f0d2b16aacb2cb713838",
+      "engine": "chromium",
+      "stage": "candidate-v2-desktop-supplement",
+      "passed": true,
+      "variants": [
+        "1440-en-light"
+      ],
+      "elapsedSecondsFromLogCreation": 12.951,
+      "captures": 10,
+      "perRunUniquePixels": 7,
+      "actionTextBoundsAnd44pxTargetChecks": 7,
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "functionalAssertionsChangedByCaptureRepair": false
+    },
+    {
+      "file": "capacity-browser-candidate-v2-desktop-supplement-webkit.json",
+      "sha256": "0cd9aaf9163860ca1bf70d1d7d43ca7dbc8adf134b0ef6464a85e2c9e489970a",
+      "engine": "webkit",
+      "stage": "candidate-v2-desktop-supplement",
+      "passed": true,
+      "variants": [
+        "1440-en-light"
+      ],
+      "elapsedSecondsFromLogCreation": 14.361,
+      "captures": 10,
+      "perRunUniquePixels": 7,
+      "actionTextBoundsAnd44pxTargetChecks": 7,
+      "harnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b",
+      "functionalAssertionsChangedByCaptureRepair": false
+    }
+  ],
+  "visualManifest": {
+    "file": "capacity-browser-candidate-v2-visual.json",
+    "sha256": "a8b8580b4c31cb47a3e603f7dc09b442c1a7a57ff06855a54297bf543f8297c9",
+    "all80ScreenshotHashesMatchedAtSummaryCreation": true,
+    "reviewMethod": "Actual PNG originals individually viewed; exact SHA-identical pixels reuse the original review."
+  },
+  "finalAdoption": {
+    "mobile": "40 captures from both original v2 mobile variants; unchanged complete functional and DOM checks retain their original harness basis.",
+    "desktop": "20 captures from both footer-aware desktop supplements; all original 20 desktop captures are superseded for final pixel acceptance.",
+    "adoptedScreenshotFiles": [
+      "capacity-browser-candidate-v2-chromium-390-zh-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-desktop-supplement-chromium-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-desktop-supplement-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png"
+    ],
+    "supersededScreenshotFiles": [
+      "capacity-browser-candidate-v2-chromium-1440-en-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-chromium-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-01-full-no-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-02-full-readonly-timetable.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-02b-one-place-available.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-03-released-place-confirmation.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-04-first-guest-accepted.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-06-second-guest-released-place.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "capacity-browser-candidate-v2-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png"
+    ]
+  },
+  "rejectedV1": {
+    "deploymentID": "dpl_CTdDsrc5rh4TP5mX7jyRRYSBpvM2",
+    "accepted": false,
+    "reason": "At 320 px with 20 px root font, I can’t attend overflowed its narrow reply button and Confirm participation was crowded. Functional passes alone did not establish visual acceptance.",
+    "runs": [
+      {
+        "file": "capacity-browser-candidate-chromium.json",
+        "functionalPassed": true,
+        "variants": 3,
+        "captures": 24,
+        "visualAccepted": false,
+        "rejectedExamples": [
+          "capacity-browser-candidate-chromium-320-en-dark-20px-03-released-place-confirmation.png",
+          "capacity-browser-candidate-chromium-320-en-dark-20px-06-second-guest-released-place.png"
+        ]
+      },
+      {
+        "file": "capacity-browser-candidate-webkit.json",
+        "functionalPassed": true,
+        "variants": 3,
+        "captures": 24,
+        "visualAccepted": false,
+        "rejectedExamples": [
+          "capacity-browser-candidate-webkit-320-en-dark-20px-03-released-place-confirmation.png",
+          "capacity-browser-candidate-webkit-320-en-dark-20px-06-second-guest-released-place.png"
+        ]
+      }
+    ],
+    "resolution": "Candidate v2 wraps both reply labels within their own button padding; real DOM text ranges and actual screenshot review verify the repair."
+  },
+  "captureRepairBoundary": {
+    "type": "Test harness only",
+    "reason": "scrollIntoViewIfNeeded treated the desktop remaining-place paragraph as in viewport although the fixed reply footer covered it.",
+    "change": "Natural page scrolling now places focus above the fixed reply footer and asserts its bounds before capture; optional known-variant filtering permits only the affected desktop supplements.",
+    "initialV2DesktopRemainingTextClaimedReviewed": false,
+    "noFunctionalAssertionOrProductChange": true,
+    "mainFullRunHarnessSHA256": "5cd3509717122eb8f920490eef5ef57bd34587f2cfc7143529e3dba4e868fa86",
+    "desktopSupplementHarnessSHA256": "6eea597db6e8205365e5333e3650343bdc7d9fb5633fff70ef854e0c2cc3aa4b"
+  },
+  "limits": [
+    "Browser engine viewport screenshots only; no iOS Safari, physical-device, full-App or manual-performance claim.",
+    "Long pages are captured at intentional scroll positions; content outside each shown viewport is not reviewed by that image.",
+    "Initial desktop images below-footer text is explicitly excluded; supplements replace the full desktop pixel set.",
+    "No browser guest Calendar account exists; API verifies owner entry and companions exactly, all five registered peer calendars remain absent.",
+    "This evidence covers the browser capacity-link cases. It does not replace the separate one-owner/five-participant native App flow.",
+    "All guest identities and RSVPs were actual UI actions. Registered owner/peer setup, publication, read-only verification and Calendar inspection used the real API. No main native plan was mutated by this browser helper.",
+    "Timing is measured from each private log file creation to its public result completion timestamp, not an independent browser performance benchmark."
+  ],
+  "executionBoundaries": {
+    "promotionPerformedByThisWorker": false,
+    "accountCleanupPerformedByThisWorker": false,
+    "loginOrTokenRefreshPerformedByThisWorker": false,
+    "nativeTestOrProductEditsInThisSummaryTask": false
+  }
+}

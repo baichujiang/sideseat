@@ -1,0 +1,872 @@
+{
+  "passed": true,
+  "stage": "candidate-v2",
+  "engine": "webkit",
+  "baseline": false,
+  "origin": "https://sideseat-eibsv7mvr-baichus-projects.vercel.app",
+  "realNetwork": true,
+  "scope": "Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI",
+  "checks": [
+    {
+      "variant": "390-zh-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    },
+    {
+      "variant": "320-en-dark-20px",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    },
+    {
+      "variant": "1440-en-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-01-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-02-full-readonly-timetable.png",
+      "variant": "390-zh-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-02b-one-place-available.png",
+      "variant": "390-zh-light",
+      "state": "02b-one-place-available",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-03-released-place-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-04-first-guest-accepted.png",
+      "variant": "390-zh-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-05b-one-place-released-after-publication.png",
+      "variant": "390-zh-light",
+      "state": "05b-one-place-released-after-publication",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-06-second-guest-released-place.png",
+      "variant": "390-zh-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-01-full-no-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02-full-readonly-timetable.png",
+      "variant": "320-en-dark-20px",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-02b-one-place-available.png",
+      "variant": "320-en-dark-20px",
+      "state": "02b-one-place-available",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-03-released-place-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-04-first-guest-accepted.png",
+      "variant": "320-en-dark-20px",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05-second-guest-full-after-publish.png",
+      "variant": "320-en-dark-20px",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-05b-one-place-released-after-publication.png",
+      "variant": "320-en-dark-20px",
+      "state": "05b-one-place-released-after-publication",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-06-second-guest-released-place.png",
+      "variant": "320-en-dark-20px",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+      "variant": "320-en-dark-20px",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-01-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-02-full-readonly-timetable.png",
+      "variant": "1440-en-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-02b-one-place-available.png",
+      "variant": "1440-en-light",
+      "state": "02b-one-place-available",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-03-released-place-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-04-first-guest-accepted.png",
+      "variant": "1440-en-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-05b-one-place-released-after-publication.png",
+      "variant": "1440-en-light",
+      "state": "05b-one-place-released-after-publication",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-06-second-guest-released-place.png",
+      "variant": "1440-en-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-v2-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    }
+  ],
+  "actionTextBounds": [
+    {
+      "step": "390-zh-light: prepare owned capacity plan",
+      "text": "继续查看邀请",
+      "box": {
+        "left": 37,
+        "right": 353,
+        "top": 581,
+        "bottom": 625
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 153.31903076171875,
+          "right": 236.66534423828125,
+          "top": 594.5302734375,
+          "bottom": 611.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: released place appears and first guest confirms",
+      "text": "无法参加",
+      "box": {
+        "left": 16,
+        "right": 131.328125,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 45.881961822509766,
+          "right": 101.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: released place appears and first guest confirms",
+      "text": "确认参加",
+      "box": {
+        "left": 143.328125,
+        "right": 374,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 230.8819580078125,
+          "right": 286.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: publication creates unique accepted Calendar",
+      "text": "继续查看邀请",
+      "box": {
+        "left": 37,
+        "right": 353,
+        "top": 581,
+        "bottom": 625
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 153.31903076171875,
+          "right": 236.66534423828125,
+          "top": 594.5302734375,
+          "bottom": 611.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "无法参加",
+      "box": {
+        "left": 292.421875,
+        "right": 374,
+        "top": 788,
+        "bottom": 832
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 305.4288330078125,
+          "right": 360.9930419921875,
+          "top": 801.5302734375,
+          "bottom": 818.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "无法参加",
+      "box": {
+        "left": 16,
+        "right": 131.328125,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 45.881961822509766,
+          "right": 101.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "390-zh-light: first guest declines and second guest takes released place",
+      "text": "确认参加",
+      "box": {
+        "left": 143.328125,
+        "right": 374,
+        "top": 740,
+        "bottom": 784
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 230.8819580078125,
+          "right": 286.4461669921875,
+          "top": 753.5302734375,
+          "bottom": 770.4697265625
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: prepare owned capacity plan",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 46,
+        "right": 274,
+        "top": 383.75,
+        "bottom": 428.25
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 71.06869506835938,
+          "right": 248.93130493164062,
+          "top": 395.412841796875,
+          "bottom": 416.587158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: released place appears and first guest confirms",
+      "text": "I can't attend",
+      "box": {
+        "left": 20,
+        "right": 108.328125,
+        "top": 681.5,
+        "bottom": 750.5
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 38.430274963378906,
+          "right": 89.8978500366211,
+          "top": 693.162841796875,
+          "bottom": 714.337158203125
+        },
+        {
+          "left": 37.54869842529297,
+          "right": 90.77942657470703,
+          "top": 717.662841796875,
+          "bottom": 738.837158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: released place appears and first guest confirms",
+      "text": "Confirm participation",
+      "box": {
+        "left": 123.328125,
+        "right": 300,
+        "top": 681.5,
+        "bottom": 750.5
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 177.88156127929688,
+          "right": 245.44656372070312,
+          "top": 693.162841796875,
+          "bottom": 714.337158203125
+        },
+        {
+          "left": 159.04310607910156,
+          "right": 264.2850341796875,
+          "top": 717.662841796875,
+          "bottom": 738.837158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: publication creates unique accepted Calendar",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 46,
+        "right": 274,
+        "top": 383.75,
+        "bottom": 428.25
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 71.06869506835938,
+          "right": 248.93130493164062,
+          "top": 395.412841796875,
+          "bottom": 416.587158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 164.625,
+        "right": 300,
+        "top": 755.5,
+        "bottom": 800
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 177.63160705566406,
+          "right": 286.993408203125,
+          "top": 767.162841796875,
+          "bottom": 788.337158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 20,
+        "right": 108.328125,
+        "top": 681.5,
+        "bottom": 750.5
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 38.430274963378906,
+          "right": 89.8978500366211,
+          "top": 693.162841796875,
+          "bottom": 714.337158203125
+        },
+        {
+          "left": 37.54869842529297,
+          "right": 90.77942657470703,
+          "top": 717.662841796875,
+          "bottom": 738.837158203125
+        }
+      ]
+    },
+    {
+      "step": "320-en-dark-20px: first guest declines and second guest takes released place",
+      "text": "Confirm participation",
+      "box": {
+        "left": 123.328125,
+        "right": 300,
+        "top": 681.5,
+        "bottom": 750.5
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 177.88156127929688,
+          "right": 245.44656372070312,
+          "top": 693.162841796875,
+          "bottom": 714.337158203125
+        },
+        {
+          "left": 159.04310607910156,
+          "right": 264.2850341796875,
+          "top": 717.662841796875,
+          "bottom": 738.837158203125
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: prepare owned capacity plan",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 49,
+        "right": 217.296875,
+        "top": 502,
+        "bottom": 546
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 62.003387451171875,
+          "right": 204.29348754882812,
+          "top": 515.5302734375,
+          "bottom": 532.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: released place appears and first guest confirms",
+      "text": "I can't attend",
+      "box": {
+        "left": 272,
+        "right": 566.65625,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 375.5834045410156,
+          "right": 463.0728454589844,
+          "top": 909.5302734375,
+          "bottom": 926.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: released place appears and first guest confirms",
+      "text": "Confirm participation",
+      "box": {
+        "left": 578.65625,
+        "right": 1168,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 802.3321533203125,
+          "right": 944.3084716796875,
+          "top": 909.5302734375,
+          "bottom": 926.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: publication creates unique accepted Calendar",
+      "text": "Continue to invitation",
+      "box": {
+        "left": 49,
+        "right": 217.296875,
+        "top": 502,
+        "bottom": 546
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 62.003387451171875,
+          "right": 204.29348754882812,
+          "top": 515.5302734375,
+          "bottom": 532.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 1054.5,
+        "right": 1168,
+        "top": 944,
+        "bottom": 988
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 1067.5052490234375,
+          "right": 1154.9947509765625,
+          "top": 957.5302734375,
+          "bottom": 974.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "I can't attend",
+      "box": {
+        "left": 272,
+        "right": 566.65625,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 375.5834045410156,
+          "right": 463.0728454589844,
+          "top": 909.5302734375,
+          "bottom": 926.4697265625
+        }
+      ]
+    },
+    {
+      "step": "1440-en-light: first guest declines and second guest takes released place",
+      "text": "Confirm participation",
+      "box": {
+        "left": 578.65625,
+        "right": 1168,
+        "top": 896,
+        "bottom": 940
+      },
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "borderLeft": 1,
+      "borderRight": 1,
+      "rectangles": [
+        {
+          "left": 802.3321533203125,
+          "right": 944.3084716796875,
+          "top": 909.5302734375,
+          "bottom": 926.4697265625
+        }
+      ]
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T21:03:05.001Z"
+}

@@ -1,0 +1,333 @@
+{
+  "passed": true,
+  "scope": "Independent current COLLECT availability and invitation matrix; main phone plan unchanged",
+  "independentPlans": 2,
+  "checks": [
+    {
+      "name": "five concurrent submissions retain six distinct snapshots and one all-six common hour",
+      "respondents": 6,
+      "maximum": 6,
+      "common": true,
+      "counts": [
+        6,
+        6,
+        6,
+        6,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3,
+          6
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3,
+          7
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3,
+          8
+        ]
+      },
+      "calendars": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-29T11:00:00.000Z"
+      },
+      "at": "2026-10-25T20:47:12.181Z"
+    },
+    {
+      "name": "one participant moves to an exclusive hour; six respondents remain and common becomes false",
+      "respondents": 6,
+      "maximum": 5,
+      "common": false,
+      "counts": [
+        5,
+        5,
+        5,
+        5,
+        2,
+        2,
+        2,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3,
+          6
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3,
+          7
+        ],
+        "peer5": [
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "at": "2026-10-25T20:47:12.675Z"
+    },
+    {
+      "name": "empty availability retains the sixth respondent; identical snapshot adds no response and no timestamp write",
+      "respondents": 6,
+      "maximum": 5,
+      "common": false,
+      "counts": [
+        5,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3,
+          6
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3,
+          7
+        ],
+        "peer5": []
+      },
+      "at": "2026-10-25T20:47:13.611Z"
+    },
+    {
+      "name": "excluded shared participant cannot accept; 403 preserves every submitted availability snapshot",
+      "respondents": 6,
+      "maximum": 5,
+      "common": false,
+      "counts": [
+        5,
+        5,
+        5,
+        5,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3,
+          5
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3,
+          6
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3,
+          7
+        ],
+        "peer5": []
+      },
+      "selectedInvitees": 5,
+      "sharedAccounts": 5,
+      "excludedReply403": true,
+      "calendars": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-29T11:00:00.000Z"
+      },
+      "at": "2026-10-25T20:47:15.406Z"
+    },
+    {
+      "name": "unfilled shared person may be invited and explicitly accept without inventing availability or a published calendar",
+      "respondents": 0,
+      "maximum": 0,
+      "common": false,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ownSlots": {
+        "owner": [],
+        "peer1": [],
+        "peer2": [],
+        "peer3": [],
+        "peer4": [],
+        "peer5": []
+      },
+      "selectedInvitees": 6,
+      "beforeConsentCalendars": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-29T11:00:00.000Z"
+      },
+      "acceptedBeforePublicationCalendars": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-29T11:00:00.000Z"
+      },
+      "at": "2026-10-25T20:47:17.294Z"
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T20:47:17.294Z"
+}

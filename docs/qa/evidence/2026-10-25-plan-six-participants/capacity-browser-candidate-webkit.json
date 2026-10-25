@@ -1,0 +1,324 @@
+{
+  "passed": true,
+  "stage": "candidate",
+  "engine": "webkit",
+  "baseline": false,
+  "origin": "https://sideseat-oohsv17kb-baichus-projects.vercel.app",
+  "realNetwork": true,
+  "scope": "Independent current COLLECT capacity-link plans; guest identity/acceptance/decline through public UI",
+  "checks": [
+    {
+      "variant": "390-zh-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    },
+    {
+      "variant": "320-en-dark-20px",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    },
+    {
+      "variant": "1440-en-light",
+      "fullOutsiderBlocked": true,
+      "reservedInviteeCanAcceptAndDecline": true,
+      "releasedPlaces": [
+        1,
+        1
+      ],
+      "firstGuestAcceptedByUI": true,
+      "secondGuestAcceptedByUI": true,
+      "originalGuestDeclinedByUI": true,
+      "declinedGuestCannotReclaimFullPlace": true,
+      "publicationRetryUnique": true,
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "runtimeErrors": 0
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-01-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-02-full-readonly-timetable.png",
+      "variant": "390-zh-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-03-released-place-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-04-first-guest-accepted.png",
+      "variant": "390-zh-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-05-second-guest-full-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-06-second-guest-released-place.png",
+      "variant": "390-zh-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-07-second-guest-accepted-after-publish.png",
+      "variant": "390-zh-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-390-zh-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "390-zh-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-01-full-no-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-02-full-readonly-timetable.png",
+      "variant": "320-en-dark-20px",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-03-released-place-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-04-first-guest-accepted.png",
+      "variant": "320-en-dark-20px",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-05-second-guest-full-after-publish.png",
+      "variant": "320-en-dark-20px",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-06-second-guest-released-place.png",
+      "variant": "320-en-dark-20px",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-07-second-guest-accepted-after-publish.png",
+      "variant": "320-en-dark-20px",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-320-en-dark-20px-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "320-en-dark-20px",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 320,
+        "height": 812
+      },
+      "fontSize": 20
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-01-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "01-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-02-full-readonly-timetable.png",
+      "variant": "1440-en-light",
+      "state": "02-full-readonly-timetable",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-03-released-place-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "03-released-place-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-04-first-guest-accepted.png",
+      "variant": "1440-en-light",
+      "state": "04-first-guest-accepted",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-05-second-guest-full-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "05-second-guest-full-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-06-second-guest-released-place.png",
+      "variant": "1440-en-light",
+      "state": "06-second-guest-released-place",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-07-second-guest-accepted-after-publish.png",
+      "variant": "1440-en-light",
+      "state": "07-second-guest-accepted-after-publish",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    },
+    {
+      "file": "capacity-browser-candidate-webkit-1440-en-light-08-original-declined-guest-full-no-confirmation.png",
+      "variant": "1440-en-light",
+      "state": "08-original-declined-guest-full-no-confirmation",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fontSize": 16
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T20:53:35.704Z"
+}

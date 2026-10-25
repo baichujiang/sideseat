@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "scope": "Current COLLECT API cases on independent owned test plans; no main phone-plan mutation",
+  "checks": [
+    {
+      "name": "empty response is explicit; invalid slots rejected; repeated response snapshot is stable and isolated",
+      "submitted": 2,
+      "availabilityCounts": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "at": "2026-10-25T20:32:32.610Z"
+    },
+    {
+      "name": "owner permissions; unknown roster and gaps/misaligned/empty windows rejected; final hour outside surveyed hours allowed",
+      "at": "2026-10-25T20:32:34.953Z"
+    },
+    {
+      "name": "zero availability replies may still invite and publish; re-sharing does not duplicate cards; pending replies do not block",
+      "calendarsAfterLateAcceptance": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-30T10:00:00.000Z"
+      },
+      "at": "2026-10-25T20:32:39.650Z"
+    },
+    {
+      "name": "rescheduling increments version and resets consent; old replies/invites/publish rejected; availability freezes after invitation",
+      "at": "2026-10-25T20:32:44.128Z"
+    },
+    {
+      "name": "mixed accepted/pending/declined publication; identical and fresh retry keys stay unique; late accept/withdraw/reaccept synchronize exact calendars",
+      "firstPublication": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 1,
+          "peer3": 1,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-30T10:00:00.000Z"
+      },
+      "at": "2026-10-25T20:32:49.487Z"
+    },
+    {
+      "name": "only current-version owner cancellation succeeds; every calendar removed; cancelled invitation cannot revive",
+      "calendars": {
+        "counts": {
+          "owner": 0,
+          "peer1": 0,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-30T10:00:00.000Z"
+      },
+      "at": "2026-10-25T20:32:50.843Z"
+    },
+    {
+      "name": "continuous midnight crossing publishes exact full-span calendars; independent surveyed availability preserved; publish retry unique",
+      "chosenStart": "2026-10-28T22:00:00.000Z",
+      "chosenEnd": "2026-10-29T00:00:00.000Z",
+      "calendars": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 0,
+          "peer4": 0,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-27T08:00:00.000Z",
+        "windowEnd": "2026-10-30T10:00:00.000Z"
+      },
+      "at": "2026-10-25T20:32:54.121Z"
+    }
+  ],
+  "failure": null,
+  "completedAt": "2026-10-25T20:32:54.121Z"
+}

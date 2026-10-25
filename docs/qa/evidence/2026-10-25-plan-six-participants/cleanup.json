@@ -1,0 +1,23 @@
+{
+  "accountsDeleted": 6,
+  "staleBearer401": 6,
+  "ownedPlansDeleted": 27,
+  "publicLinks404": 27,
+  "at": "2026-10-25T22:15:20.260Z",
+  "local": {
+    "removedOwnedContexts": [
+      "sideseat195-source",
+      "sideseat228-source",
+      "sideseat227-runner",
+      "sideseat-plan-capacity227-release"
+    ],
+    "removedCredentialBearingOrBrowserTraceFiles": 47,
+    "privateFixtureRemoved": true,
+    "dedicatedSixUserSimulatorRemoved": true,
+    "rawLogsAndXCResultsRetainedPrivately": true,
+    "rawEvidenceDirectoryMode": "0700",
+    "rawEvidenceFilesMode": "0600",
+    "preExistingDevicesRunnersAndOrdinaryAppPreserved": true,
+    "completedAt": "2026-10-25T22:19:58.536165+00:00"
+  }
+}

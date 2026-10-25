@@ -1,0 +1,278 @@
+{
+  "recordedAt": "2026-10-25T22:16:35.098167+00:00",
+  "productPreviewBuild": 228,
+  "purpose": "Passed final read-only UI verification after real participant withdrawal; complements earlier same-plan mutation prefixes.",
+  "source": {
+    "resultBundle": "/tmp/sideseat228-private/six-user-final-calendar.xcresult",
+    "test": "PlanSixParticipantPhoneUITests/testVerifyCalendarsAfterParticipantWithdrawal()",
+    "enclosingResult": "Passed",
+    "passedTests": 1,
+    "failedTests": 0,
+    "caseDurationSeconds": 73.054,
+    "bundleElapsedSeconds": 76.582,
+    "compiledTestSource": {
+      "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+      "sha256": "c032087e164ea7ce37d3edf6028808f9a685c744b8b9fa82ddd599550c34859c"
+    }
+  },
+  "device": {
+    "architecture": "arm64",
+    "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+    "deviceName": "SideSeat Six User QA",
+    "modelName": "iPhone 14 Plus",
+    "osBuildNumber": "23F77",
+    "osVersion": "26.5",
+    "platform": "iOS Simulator"
+  },
+  "isPhysicalPhone": false,
+  "finalReadOnlyUICasePassed": true,
+  "samePlanSegmentedFlowAPIPhaseCount": 23,
+  "samePlanSegmentedFlowAPIAllPassed": true,
+  "singleUninterruptedWholeFlowCasePassed": false,
+  "verified": {
+    "newNativeAndAPIPhase": "final-calendar-verified",
+    "peer2Withdrawn": "Exact Calendar search empty in actualUI; API0entries and0searchresults.",
+    "peer5Declined": "Exact Calendar search empty in actualUI; API0entries and0searchresults.",
+    "organizerFinalRoster": "All six names/statuses fully visible in ordinary type,4/6confirmed, correct unchanged highlighted09:00–10:00.",
+    "finalCalendarCounts": {
+      "owner": 1,
+      "peer1": 1,
+      "peer2": 0,
+      "peer3": 1,
+      "peer4": 1,
+      "peer5": 0
+    },
+    "finalReadOnlyAPISnapshot": {
+      "phase": "final-calendar-verified",
+      "actualPhase": "CONFIRMED",
+      "submitted": 6,
+      "ownSlots": {
+        "owner": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer1": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer2": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer3": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer4": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "peer5": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "invitationVersion": 1,
+      "invitationStatuses": [
+        {
+          "displayName": "朋友1b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友2b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友3b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友4b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        },
+        {
+          "displayName": "朋友5b0d4",
+          "status": "DECLINED",
+          "selected": true
+        },
+        {
+          "displayName": "发起人b0d4",
+          "status": "ACCEPTED",
+          "selected": true
+        }
+      ],
+      "chosenStart": "2026-10-26T08:00:00.000Z",
+      "chosenEnd": "2026-10-26T09:00:00.000Z",
+      "timeZone": "Europe/Berlin",
+      "candidateDates": [
+        "2026-10-26",
+        "2026-10-27",
+        "2026-10-28",
+        "2026-10-29",
+        "2026-10-30",
+        "2026-10-31",
+        "2026-11-01"
+      ],
+      "calendar": {
+        "counts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "windowStart": "2026-10-25T08:00:00.000Z",
+        "windowEnd": "2026-11-02T16:00:00.000Z",
+        "searchCounts": {
+          "owner": 1,
+          "peer1": 1,
+          "peer2": 0,
+          "peer3": 1,
+          "peer4": 1,
+          "peer5": 0
+        },
+        "searchPreservesPlanIdentityTimesAndAcceptedCompanions": true
+      },
+      "at": "2026-10-25T22:13:40.978Z"
+    },
+    "actualBusinessMutationScope": "This passed final case only reads. Earlier creation, availability, sharing, invitation, publication, late acceptance and withdrawal were actual AppUI on same record, with read-onlyAPI phase assertions; previous enclosing attempts remain failed as documented."
+  },
+  "counts": {
+    "reviewedCaptureCount": 8,
+    "uniqueCaptureSHA256": 4,
+    "adoptedCaptureCount": 8,
+    "uniqueAdoptedCaptureSHA256": 4
+  },
+  "captures": [
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer5",
+      "file": "plan-six-roster-owner-final-mixed-replies-peer5-final-calendar-preview228-simulator.png",
+      "sha256": "cd5ae04a12993a6efd4db7ff3f8f92289f8c92ea2dffbf25700aba4a29c31eec",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "967262F3-741F-4FB0-B4FB-492D2B4041E1.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer4",
+      "file": "plan-six-roster-owner-final-mixed-replies-peer4-final-calendar-preview228-simulator.png",
+      "sha256": "cd5ae04a12993a6efd4db7ff3f8f92289f8c92ea2dffbf25700aba4a29c31eec",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "4B70FD46-C96C-4FF8-9CA3-05B42B7D1EE9.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer3",
+      "file": "plan-six-roster-owner-final-mixed-replies-peer3-final-calendar-preview228-simulator.png",
+      "sha256": "cd5ae04a12993a6efd4db7ff3f8f92289f8c92ea2dffbf25700aba4a29c31eec",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "0A50F3A4-01DF-43BB-9252-6575B5CC4B23.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer2",
+      "file": "plan-six-roster-owner-final-mixed-replies-peer2-final-calendar-preview228-simulator.png",
+      "sha256": "cd5ae04a12993a6efd4db7ff3f8f92289f8c92ea2dffbf25700aba4a29c31eec",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "30C7F413-2D1D-4BEA-8462-B3EB22371FFB.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-peer1",
+      "file": "plan-six-roster-owner-final-mixed-replies-peer1-final-calendar-preview228-simulator.png",
+      "sha256": "cd5ae04a12993a6efd4db7ff3f8f92289f8c92ea2dffbf25700aba4a29c31eec",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "A0F99D3E-1C36-4552-A87B-DE72CFC4DDB9.png"
+    },
+    {
+      "capture": "plan-six-roster-owner-final-mixed-replies-owner",
+      "file": "plan-six-roster-owner-final-mixed-replies-owner-final-calendar-preview228-simulator.png",
+      "sha256": "78e3c53ab42472989b3bf7fc60992db96a20e514feed4df9b0c609d8e7c13291",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Ordinary Chinese organizer final view: both complete09:00/09:30 highlighted rows;4/6 confirmation count; all six names/statuses visible together, owner/peer1/peer3/peer4 accepted,peer2/peer5 declined; synced-to-Calendar status and Calendar action fully visible. Activity title has been naturally scrolled above viewport.",
+      "exportedOriginal": "DC273A8C-9F5E-4346-9DAE-3C8A7AE27609.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer5-declined-exact-plan-absent",
+      "file": "plan-six-calendar-peer5-declined-exact-plan-absent-final-calendar-preview228-simulator.png",
+      "sha256": "f6b139d5ad8a64501f650f5e135292df8e07fd4b7499e832428bae37d1e38e88",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Exact plan title in Calendar search field; explicit no-related-results message and no result row. Query and empty result fit viewport with keyboard open.",
+      "exportedOriginal": "1427793B-6409-443C-A1A7-FDFCD75AC7DA.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer2-withdrawn-exact-plan-absent",
+      "file": "plan-six-calendar-peer2-withdrawn-exact-plan-absent-final-calendar-preview228-simulator.png",
+      "sha256": "110006069b14a8726b46ec6fc524276189964103ff7ee6bf9bf80b16da5d3a50",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Exact plan title in Calendar search field; explicit no-related-results message and no result row. Query and empty result fit viewport with keyboard open.",
+      "exportedOriginal": "C12169A5-CC32-4983-9347-06B3A40CCA47.png"
+    }
+  ],
+  "limits": [
+    "This73.054sPASS is the final read-only verification case, not an uninterrupted create-to-calendar case.",
+    "The complete same-plan business closure comprises23API-verifiedphases across UI segments separated by harness-only interruptions; earlier failed case results are not rewritten.",
+    "All-six-name/status visual acceptance here is ordinary Chinese type. Maximum Chinese/German owner accepted row was not fully captured in prior evidence and remains a stated scope limit.",
+    "Maximum German confirm label wraps within a long word; fully visible/reachable after prompt scroll but visually awkward.",
+    "These are iPhone14Plus Simulator originals, not physical-phone screenshots.",
+    "No visual clipping or obstruction was found for the shown final ordinary-type roster, selected timetable, Calendar action or exact-title empty-search states.",
+    "Reviewer did not modify product/test/fixture, run App/tests, or perform cleanup."
+  ]
+}

@@ -1,0 +1,368 @@
+{
+  "recordedAt": "2026-10-25T22:00:19.497603+00:00",
+  "productPreviewBuild": 228,
+  "purpose": "Pixel review of real six-person RSVP prefix and maximum German mixed-roster view across two failed continuation attempts.",
+  "isPhysicalPhone": false,
+  "wholeSixPersonFlowPassedInTheseAttempts": false,
+  "publishedInTheseAttempts": false,
+  "calendarVerifiedInTheseAttempts": false,
+  "verifiedPrefix": {
+    "cumulativeReadOnlyAPIPhases": [
+      "created",
+      "owner-draft",
+      "owner-submitted",
+      "shared",
+      "peer1-submitted",
+      "peer2-submitted",
+      "peer3-submitted",
+      "peer4-submitted",
+      "peer5-submitted",
+      "peer3-edited",
+      "peer3-restored",
+      "final-review-cancelled",
+      "invited",
+      "peer1-accepted",
+      "peer2-accepted",
+      "peer3-accepted",
+      "peer4-ignored",
+      "peer5-declined"
+    ],
+    "phaseCount": 18,
+    "newNativeAndAPIPhases": [
+      "peer1-accepted",
+      "peer2-accepted",
+      "peer3-accepted",
+      "peer4-ignored",
+      "peer5-declined"
+    ],
+    "samePlanContinuation": true,
+    "businessMutations": "Native App UI; observer read only",
+    "mixedReplies": {
+      "owner": "accepted",
+      "peer1": "accepted",
+      "peer2": "accepted",
+      "peer3": "accepted",
+      "peer4": "pending; ignored without mutation",
+      "peer5": "declined"
+    },
+    "publicationState": "Not published; still inviting at end of these attempts.",
+    "maximumGermanRosterVisual": "All five peer names/statuses complete across segmented frames. Organizer name+accepted status not fully captured."
+  },
+  "runs": [
+    {
+      "name": "replies",
+      "resultBundle": "/tmp/sideseat228-private/six-user-replies.xcresult",
+      "test": "PlanSixParticipantPhoneUITests/testContinueRepliesAndCalendarAfterFormalInvitations()",
+      "enclosingResult": "Failed",
+      "passedTests": 0,
+      "failedTests": 1,
+      "caseDurationSeconds": 218.516,
+      "bundleElapsedSeconds": 256.168,
+      "compiledTestSource": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "264febd38c464e13dac286722ad9df25fbb19b662819eed6442a35784b34f8ee"
+      },
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+        "deviceName": "SideSeat Six User QA",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "failureDiagnostic": {
+        "category": "generic full-card reveal cannot fit oversized maximum-type Plans card",
+        "assertion": "plans-coordinated-[redacted] actual maxY931.333 > helper upper732.167",
+        "diagnosticFrame": "/tmp/sideseat228-private/replies-final-frame.png",
+        "pixelFinding": "Maximum German type target plan card is taller than available list viewport. Its date,time,title and a large tappable portion are visible; lower status continues below scroll viewport behind fixed create area. A whole-card-in-viewport condition cannot hold for this height. Does not prove a product navigation failure.",
+        "frameSHA256": "fede49e4c8f800f5adbf48b0ddd1dcbedfea7cd6bcd38bc865f1e52c572eef34",
+        "framePixels": [
+          1284,
+          2778
+        ],
+        "reviewedOriginalPixels": true,
+        "adoptedAsFunctionalPass": false
+      },
+      "counts": {
+        "reviewedCaptures": 10,
+        "uniqueSHA256": 8,
+        "adoptedCaptures": 10
+      },
+      "captures": [
+        {
+          "capture": "plan-six-13-peer5-declined",
+          "file": "plan-six-13-peer5-declined-replies-prefix-preview228-simulator.png",
+          "sha256": "ec3706c02f8b0f1edd0abcadd3d5be697d2320e7405a913f5e1ed514ac3702ea",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Peer5 declined header/footer; confirmation remains available and decline action is disabled; confirmed count4/6. Peer5 own inline row is below captured viewport.",
+          "exportedOriginal": "35FAAEFB-C45F-42C4-A6D0-F56337607A91.png"
+        },
+        {
+          "capture": "plan-six-12-peer4-ignored-no-response",
+          "file": "plan-six-12-peer4-ignored-no-response-replies-prefix-preview228-simulator.png",
+          "sha256": "da745da3846ca2af02fbcf658af7adefa33ee285c78d595aeda0f88a4bcc5a3c",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Peer4 remains pending, confirmed count4/6, both confirmation and decline actions visible; no response performed.",
+          "exportedOriginal": "85470308-7E84-44F3-9E58-B3CAE47BD258.png"
+        },
+        {
+          "capture": "plan-six-11-peer3-accepted-waiting-for-publish",
+          "file": "plan-six-11-peer3-accepted-waiting-for-publish-replies-prefix-preview228-simulator.png",
+          "sha256": "6343a35acc4a01452a4fd6b498e92b343c5ca7531053a3335be80b6baabf4644",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Accepted peer status and waiting-for-organizer footer; date09:00–10:00/highlighted rows; confirmed count progresses2/6,3/6,4/6; no calendar CTA. Remaining low roster rows outside recorded viewport.",
+          "exportedOriginal": "62954F69-6B6F-4B3E-A557-E927DBE26F88.png"
+        },
+        {
+          "capture": "plan-six-chat-entry-peer3-invitation-detail",
+          "file": "plan-six-chat-entry-peer3-invitation-detail-replies-prefix-preview228-simulator.png",
+          "sha256": "a1ec10b6c4b540591102863f57afe0157168be20d4242169397a32bd3d14cb66",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Correct plan detail opened from exact chat card; pending peer state and both RSVP actions visible; common09:00–10:00 summary/highlighted rows. Remaining lower roster rows outside captured viewport.",
+          "exportedOriginal": "E23CD100-964F-452D-A776-3372FA4EED49.png"
+        },
+        {
+          "capture": "plan-six-11-peer2-accepted-waiting-for-publish",
+          "file": "plan-six-11-peer2-accepted-waiting-for-publish-replies-prefix-preview228-simulator.png",
+          "sha256": "389ea8fd55f6e2dfda7812f27288d34aadfe6d9d801031b1a5b76963285524f0",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Accepted peer status and waiting-for-organizer footer; date09:00–10:00/highlighted rows; confirmed count progresses2/6,3/6,4/6; no calendar CTA. Remaining low roster rows outside recorded viewport.",
+          "exportedOriginal": "FEF4F2B3-9F0C-4D7F-B363-64EC7B82AAE9.png"
+        },
+        {
+          "capture": "plan-six-chat-entry-peer2-invitation-detail",
+          "file": "plan-six-chat-entry-peer2-invitation-detail-replies-prefix-preview228-simulator.png",
+          "sha256": "0e716ac848eaec1a724b6a2a159abd04cd9ea3c76a25c10ea60b3f529420f35c",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Correct plan detail opened from exact chat card; pending peer state and both RSVP actions visible; common09:00–10:00 summary/highlighted rows. Remaining lower roster rows outside captured viewport.",
+          "exportedOriginal": "C4E61A2A-3C99-48C2-8B94-6005D065E958.png"
+        },
+        {
+          "capture": "plan-six-11-peer1-accepted-waiting-for-publish",
+          "file": "plan-six-11-peer1-accepted-waiting-for-publish-replies-prefix-preview228-simulator.png",
+          "sha256": "63e8b844ac28fb5734ae05e410c4acdfa60cc24bc57418e058b809e46e4a7970",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Accepted peer status and waiting-for-organizer footer; date09:00–10:00/highlighted rows; confirmed count progresses2/6,3/6,4/6; no calendar CTA. Remaining low roster rows outside recorded viewport.",
+          "exportedOriginal": "B1D9C39E-1716-4E5C-B61C-FAC2E24A7C6A.png"
+        },
+        {
+          "capture": "plan-six-invited-timetable-peer1-invited-row-2",
+          "file": "plan-six-invited-timetable-peer1-invited-row-2-replies-prefix-preview228-simulator.png",
+          "sha256": "f1e21032e2e4be37a3979687a6be285307185818b829c0beb4cb41369ac791c8",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Correct plan detail opened from exact chat card; pending peer state and both RSVP actions visible; common09:00–10:00 summary/highlighted rows. Remaining lower roster rows outside captured viewport.",
+          "exportedOriginal": "E583BFCE-1A4E-4DC3-A9C9-70CEC63C536B.png"
+        },
+        {
+          "capture": "plan-six-invited-timetable-peer1-invited-row-1",
+          "file": "plan-six-invited-timetable-peer1-invited-row-1-replies-prefix-preview228-simulator.png",
+          "sha256": "f1e21032e2e4be37a3979687a6be285307185818b829c0beb4cb41369ac791c8",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Correct plan detail opened from exact chat card; pending peer state and both RSVP actions visible; common09:00–10:00 summary/highlighted rows. Remaining lower roster rows outside captured viewport.",
+          "exportedOriginal": "F20E85A7-0E78-48D5-BC6E-F00407D5E412.png"
+        },
+        {
+          "capture": "plan-six-chat-entry-peer1-invitation-detail",
+          "file": "plan-six-chat-entry-peer1-invitation-detail-replies-prefix-preview228-simulator.png",
+          "sha256": "f1e21032e2e4be37a3979687a6be285307185818b829c0beb4cb41369ac791c8",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "Correct plan detail opened from exact chat card; pending peer state and both RSVP actions visible; common09:00–10:00 summary/highlighted rows. Remaining lower roster rows outside captured viewport.",
+          "exportedOriginal": "B1F3F4F2-AA10-4FB4-8345-23995BCF4453.png"
+        }
+      ]
+    },
+    {
+      "name": "publication",
+      "resultBundle": "/tmp/sideseat228-private/six-user-publication.xcresult",
+      "test": "PlanSixParticipantPhoneUITests/testContinuePublicationAndCalendarAfterMixedReplies()",
+      "enclosingResult": "Failed",
+      "passedTests": 0,
+      "failedTests": 1,
+      "caseDurationSeconds": 69.726,
+      "bundleElapsedSeconds": 90.002,
+      "compiledTestSource": {
+        "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+        "sha256": "6dda4a7c8a86532f0057011e3d47d5365f1664447e7cdc9b4f4ccae0d70a3a44"
+      },
+      "device": {
+        "architecture": "arm64",
+        "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+        "deviceName": "SideSeat Six User QA",
+        "modelName": "iPhone 14 Plus",
+        "osBuildNumber": "23F77",
+        "osVersion": "26.5",
+        "platform": "iOS Simulator"
+      },
+      "failureDiagnostic": {
+        "category": "test asserts confirm hittability before scrolling oversized prompt content",
+        "assertion": "unified-plan-publish-confirm is not hittable",
+        "diagnosticFrame": "/tmp/sideseat228-private/publication-exact-prompt-frame.png",
+        "videoDurationSeconds": 69.505,
+        "frameRequestedSeconds": 66.505,
+        "frameActualSeconds": 65.07,
+        "pixelFinding": "German maximum prompt title and four-accepted-person message visible. Cancel action only partly enters bottom of card; confirm action is below recorded viewport. No cancel or confirm activation completed.",
+        "sourceFinding": "SSActionPrompt ViewThatFits vertical fallback wraps all promptContent including actionGroup in ScrollView with0.78screen-height frame. Actions are intended scroll content, not separately clipped buttons.",
+        "inference": "Source plus still frame support offscreen lower scroll actions. This attempt did not scroll the prompt, so reachability remains unverified until a subsequent UI run.",
+        "frameSHA256": "7861c3e1a8a424dbb6327854098bff32bd3484e2407440eb7148492d37c8a81e",
+        "framePixels": [
+          1284,
+          2778
+        ],
+        "reviewedOriginalPixels": true,
+        "adoptedAsFunctionalPass": false
+      },
+      "counts": {
+        "reviewedCaptures": 6,
+        "uniqueSHA256": 4,
+        "adoptedCaptures": 6
+      },
+      "captures": [
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer5",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer5-publication-prefix-preview228-simulator.png",
+          "sha256": "d8e7e95c8af1603a9ef9e37e244e2cd2bd9bc19635f28fce2200fc9d417b72f6",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer3 accepted, peer4 pending and peer5 declined names/statuses readable; peer5 declined row reaches footer edge. Organizer row not visible.",
+          "exportedOriginal": "26094924-1BBE-4742-B67F-A2D12C97100A.png"
+        },
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer4",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer4-publication-prefix-preview228-simulator.png",
+          "sha256": "91f31317b5ccdbe533f4ac1c1b49952982b6d985a6177ca713237c95f4411013",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer1,peer2,peer3 names with accepted labels complete above fixed publish footer; other rows outside viewport.",
+          "exportedOriginal": "5F59F97A-7C2D-400E-8AAF-183BB6D6D8AD.png"
+        },
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer3",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer3-publication-prefix-preview228-simulator.png",
+          "sha256": "91f31317b5ccdbe533f4ac1c1b49952982b6d985a6177ca713237c95f4411013",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer1,peer2,peer3 names with accepted labels complete above fixed publish footer; other rows outside viewport.",
+          "exportedOriginal": "FBC3D54C-471F-430A-AC80-291F2F5D07C2.png"
+        },
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer2",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer2-publication-prefix-preview228-simulator.png",
+          "sha256": "91f31317b5ccdbe533f4ac1c1b49952982b6d985a6177ca713237c95f4411013",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer1,peer2,peer3 names with accepted labels complete above fixed publish footer; other rows outside viewport.",
+          "exportedOriginal": "2A122335-F125-4504-B665-553DEBB68D60.png"
+        },
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-peer1",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-peer1-publication-prefix-preview228-simulator.png",
+          "sha256": "2cd0f1f811cca2383015e5fc9eb9651c145dc38bfb4035eebe23a64b015359a4",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer1,peer2,peer3 names with accepted labels complete above fixed publish footer; other rows outside viewport.",
+          "exportedOriginal": "5EF5FB1E-76A4-45EF-972D-72B313623619.png"
+        },
+        {
+          "capture": "plan-six-roster-owner-de-maximum-mixed-replies-owner",
+          "file": "plan-six-roster-owner-de-maximum-mixed-replies-owner-publication-prefix-preview228-simulator.png",
+          "sha256": "33e50073cf537fd2812a9a37de17562c6bdb59c7dd45b906f8c82af6514a5098",
+          "pixels": [
+            1284,
+            2778
+          ],
+          "reviewedOriginalPixels": true,
+          "adopted": true,
+          "adoptionScope": "German maximum type: peer4 name plus pending label and peer5 name plus declined label fully readable; peer3 accepted label visible but name meets navigation edge. Organizer name/status are outside footer boundary; not complete organizer-row evidence.",
+          "exportedOriginal": "5353CBD2-5033-4C91-B54A-1C0E37BA843B.png"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "reviewedCaptureCount": 16,
+    "uniqueCaptureSHA256": 12,
+    "adoptedCaptureCount": 16,
+    "privateFunctionalFailureDiagnosticFramesReviewed": 2,
+    "otherPrivateVideoFramesReviewed": 3
+  },
+  "limits": [
+    "Both enclosing test cases failed; successful prefixes are not whole-flow passes.",
+    "The replies run resumed after formal invite and completed the next five real UI/API phases; publication run made no formal-publication or calendar mutation.",
+    "Maximum-type six roster rows exist and were asserted in XCTest, but original pixels only fully establish all five peer rows; organizer accepted row remains outside viewport.",
+    "German maximum publish prompt actions were not scrolled or activated in this failed attempt; no cancel/reopen/confirm success is claimed.",
+    "Large-type list card lower content naturally extends outside available viewport; generic whole-card reveal is unsuitable, while actual navigation is tested separately.",
+    "Public screenshots contain only owned disposable test identities. Failure video, diagnostic frames, accessibility text and credentials remain private.",
+    "Evidence reviewer made no product, Swift, mjs or fixture edits and did not execute tests, cleanup or publish."
+  ]
+}

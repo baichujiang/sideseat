@@ -1,0 +1,548 @@
+{
+  "recordedAt": "2026-10-25T22:13:52.180176+00:00",
+  "productPreviewBuild": 228,
+  "purpose": "Actual-pixel review of calendar return, late acceptance and withdrawal prefix within failed final navigation attempt.",
+  "source": {
+    "resultBundle": "/tmp/sideseat228-private/six-user-calendars.xcresult",
+    "test": "PlanSixParticipantPhoneUITests/testContinueCalendarsAfterOrganizerPublished()",
+    "enclosingResult": "Failed",
+    "passedTests": 0,
+    "failedTests": 1,
+    "caseDurationSeconds": 142.579,
+    "bundleElapsedSeconds": 163.612,
+    "compiledTestSource": {
+      "path": "ios-native/SideSeatUITests/PlanSixParticipantPhoneUITests.swift",
+      "sha256": "f1134c8674193d225d58896381354a5061919456de4f12d0433d9a50566d1622"
+    }
+  },
+  "device": {
+    "architecture": "arm64",
+    "deviceId": "9CC717DB-3125-4B6B-8F3A-A393642B63F0",
+    "deviceName": "SideSeat Six User QA",
+    "modelName": "iPhone 14 Plus",
+    "osBuildNumber": "23F77",
+    "osVersion": "26.5",
+    "platform": "iOS Simulator"
+  },
+  "isPhysicalPhone": false,
+  "wholeSixPersonFlowPassedInThisAttempt": false,
+  "verifiedPrefix": {
+    "phaseCount": 22,
+    "cumulativeReadOnlyAPIPhases": [
+      "created",
+      "owner-draft",
+      "owner-submitted",
+      "shared",
+      "peer1-submitted",
+      "peer2-submitted",
+      "peer3-submitted",
+      "peer4-submitted",
+      "peer5-submitted",
+      "peer3-edited",
+      "peer3-restored",
+      "final-review-cancelled",
+      "invited",
+      "peer1-accepted",
+      "peer2-accepted",
+      "peer3-accepted",
+      "peer4-ignored",
+      "peer5-declined",
+      "published",
+      "calendar-verified",
+      "peer4-late-accepted",
+      "peer2-withdrawn"
+    ],
+    "newNativeAndAPIPhases": [
+      "calendar-verified",
+      "peer4-late-accepted",
+      "peer2-withdrawn"
+    ],
+    "samePlanContinuation": true,
+    "businessMutationSurface": "Native App UI; API observer reads only",
+    "uiCompleted": [
+      "Owner Calendar exact search to read-only detail to Manage Plan returning to correct plan.",
+      "Peer1 Calendar exact search to read-only detail to Manage Plan returning to correct plan.",
+      "Peer4 late acceptance after publication; Calendar exact search to detail to Manage Plan returning to correct plan.",
+      "Peer2 withdraws; own declined state and removal of Calendar action."
+    ],
+    "newReadOnlyAPISnapshots": [
+      {
+        "phase": "calendar-verified",
+        "actualPhase": "CONFIRMED",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 1,
+        "invitationStatuses": [
+          {
+            "displayName": "朋友1b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友2b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友3b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友4b0d4",
+            "status": "INVITED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友5b0d4",
+            "status": "DECLINED",
+            "selected": true
+          },
+          {
+            "displayName": "发起人b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          }
+        ],
+        "chosenStart": "2026-10-26T08:00:00.000Z",
+        "chosenEnd": "2026-10-26T09:00:00.000Z",
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 1,
+            "peer1": 1,
+            "peer2": 1,
+            "peer3": 1,
+            "peer4": 0,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z",
+          "searchCounts": {
+            "owner": 1,
+            "peer1": 1,
+            "peer2": 1,
+            "peer3": 1,
+            "peer4": 0,
+            "peer5": 0
+          },
+          "searchPreservesPlanIdentityTimesAndAcceptedCompanions": true
+        },
+        "at": "2026-10-25T22:07:46.557Z"
+      },
+      {
+        "phase": "peer4-late-accepted",
+        "actualPhase": "CONFIRMED",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 1,
+        "invitationStatuses": [
+          {
+            "displayName": "朋友1b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友2b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友3b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友4b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友5b0d4",
+            "status": "DECLINED",
+            "selected": true
+          },
+          {
+            "displayName": "发起人b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          }
+        ],
+        "chosenStart": "2026-10-26T08:00:00.000Z",
+        "chosenEnd": "2026-10-26T09:00:00.000Z",
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 1,
+            "peer1": 1,
+            "peer2": 1,
+            "peer3": 1,
+            "peer4": 1,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z"
+        },
+        "at": "2026-10-25T22:08:07.862Z"
+      },
+      {
+        "phase": "peer2-withdrawn",
+        "actualPhase": "CONFIRMED",
+        "submitted": 6,
+        "ownSlots": {
+          "owner": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer1": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer2": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer3": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer4": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "peer5": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "invitationVersion": 1,
+        "invitationStatuses": [
+          {
+            "displayName": "朋友1b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友2b0d4",
+            "status": "DECLINED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友3b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友4b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          },
+          {
+            "displayName": "朋友5b0d4",
+            "status": "DECLINED",
+            "selected": true
+          },
+          {
+            "displayName": "发起人b0d4",
+            "status": "ACCEPTED",
+            "selected": true
+          }
+        ],
+        "chosenStart": "2026-10-26T08:00:00.000Z",
+        "chosenEnd": "2026-10-26T09:00:00.000Z",
+        "timeZone": "Europe/Berlin",
+        "candidateDates": [
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28",
+          "2026-10-29",
+          "2026-10-30",
+          "2026-10-31",
+          "2026-11-01"
+        ],
+        "calendar": {
+          "counts": {
+            "owner": 1,
+            "peer1": 1,
+            "peer2": 0,
+            "peer3": 1,
+            "peer4": 1,
+            "peer5": 0
+          },
+          "windowStart": "2026-10-25T08:00:00.000Z",
+          "windowEnd": "2026-11-02T16:00:00.000Z"
+        },
+        "at": "2026-10-25T22:08:48.331Z"
+      }
+    ],
+    "expectedCalendarCountsByPhase": {
+      "calendar-verified": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 1,
+        "peer3": 1,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "peer4-late-accepted": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 1,
+        "peer3": 1,
+        "peer4": 1,
+        "peer5": 0
+      },
+      "peer2-withdrawn": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 1,
+        "peer4": 1,
+        "peer5": 0
+      }
+    }
+  },
+  "failureDiagnostic": {
+    "category": "Test looks for underlying tab bar while Plan detail remains presented",
+    "assertion": "Failed to tap Calendar button: no TabBar descendants",
+    "privateFrame": "/tmp/sideseat228-private/calendars-final-frame.png",
+    "frameRequestedSeconds": 139.23833333333334,
+    "frameActualSeconds": 135.055,
+    "videoDurationSeconds": 142.23833333333334,
+    "frameSHA256": "de6ce8c825220b10a2d9e3b27a7979ea8546fced8406093bc613575f47ba9f77",
+    "framePixels": [
+      1284,
+      2778
+    ],
+    "reviewedOriginalPixels": true,
+    "adoptedAsFunctionalPass": false,
+    "pixelFinding": "Still on common-plan detail after peer2 decline; top-left Back control clearly visible, no bottom app tab bar. Declined own state and no calendar action match screenshot.",
+    "inference": "Failure is consistent with test not dismissing plan detail before seeking underlying Calendar tab. This frame does not establish final calendar-search absence; API already verifies removal."
+  },
+  "counts": {
+    "reviewedCaptureCount": 8,
+    "uniqueCaptureSHA256": 8,
+    "adoptedCaptureCount": 8,
+    "privateDiagnosticFramesReviewed": 1
+  },
+  "captures": [
+    {
+      "capture": "plan-six-18-peer2-withdrawn-calendar-action-removed",
+      "file": "plan-six-18-peer2-withdrawn-calendar-action-removed-calendar-prefix-preview228-simulator.png",
+      "sha256": "7c800c889c57436df6020d5c4ac270bfe853f197c04cc6f5b6d0f2949cefa9fb",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Peer2 withdraws:4/6 accepted count, own declined row, unable-to-attend footer, active confirm-to-rejoin and disabled decline; Calendar action absent. Common final time and highlight unchanged.",
+      "exportedOriginal": "94101425-18F3-4517-AEF9-965F037B7293.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer4-late-entry-manage-plan",
+      "file": "plan-six-calendar-peer4-late-entry-manage-plan-calendar-prefix-preview228-simulator.png",
+      "sha256": "6aafbfcc67ecb654c91e0f7da5419959ea64470b0dedc29765617a87453c75c0",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual read-only Plan detail after scrolling; exact title,09:00 start/10:00 end/one-hour duration, nonrepeat and Manage Plan action fully visible. Participants below viewport are only partially captured.",
+      "exportedOriginal": "BF51BCE7-AF20-4BDA-B6B4-81F93DABC723.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer4-late-exact-plan-result",
+      "file": "plan-six-calendar-peer4-late-exact-plan-result-calendar-prefix-preview228-simulator.png",
+      "sha256": "85ae1132779e3e20e03587a90e64de58e71e9a6e75c555c2ae6df9f670e8746f",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual Calendar exact-title search shows matching plan once at Oct26 09:00. Result and keyboard fit viewport.",
+      "exportedOriginal": "4D1F54B9-73E4-441F-913F-328EAF5EE38E.png"
+    },
+    {
+      "capture": "plan-six-17-peer4-late-acceptance-after-publish",
+      "file": "plan-six-17-peer4-late-acceptance-after-publish-calendar-prefix-preview228-simulator.png",
+      "sha256": "d0f6e8eba9d4f2d1a9a9e840977d8c78ebb1f58edc31cd2924d6b434cd36e581",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Peer4 accepts after publication: confirmed status, date09:00–10:00, both highlighted half-hour rows,5/6 accepted count, calendar navigation footer and decline action readable. Own inline row meets footer; no complete own-row-rectangle claim.",
+      "exportedOriginal": "5F04CE7C-59AA-406C-A248-D6099CD09B7D.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer1-entry-manage-plan",
+      "file": "plan-six-calendar-peer1-entry-manage-plan-calendar-prefix-preview228-simulator.png",
+      "sha256": "50ff00483f18cba964041cd71a569ab4b85a3b4cfd252ec07a341dba22dc4da2",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual read-only Plan detail after scrolling; exact title,09:00 start/10:00 end/one-hour duration, nonrepeat and Manage Plan action fully visible. Participants below viewport are only partially captured.",
+      "exportedOriginal": "70CEB3B2-AC91-4C81-BD77-386CDFDCACD1.png"
+    },
+    {
+      "capture": "plan-six-calendar-peer1-exact-plan-result",
+      "file": "plan-six-calendar-peer1-exact-plan-result-calendar-prefix-preview228-simulator.png",
+      "sha256": "83ca79464d72cd3d7d29fe91ea2435b681c859863a11a1501724fa4a39933018",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual Calendar exact-title search shows matching plan once at Oct26 09:00. Result and keyboard fit viewport.",
+      "exportedOriginal": "7E6D1072-DC11-425F-B03D-FE34C6DC9182.png"
+    },
+    {
+      "capture": "plan-six-calendar-owner-entry-manage-plan",
+      "file": "plan-six-calendar-owner-entry-manage-plan-calendar-prefix-preview228-simulator.png",
+      "sha256": "d860b371ea98ec49df8fdfa4d5c8210c19a77cd25fe57b484fa01cfee3a53a45",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual read-only Plan detail after scrolling; exact title,09:00 start/10:00 end/one-hour duration, nonrepeat and Manage Plan action fully visible. Participants below viewport are only partially captured.",
+      "exportedOriginal": "97DE524C-D370-4B51-9A7B-129ED7C58E45.png"
+    },
+    {
+      "capture": "plan-six-calendar-owner-exact-plan-result",
+      "file": "plan-six-calendar-owner-exact-plan-result-calendar-prefix-preview228-simulator.png",
+      "sha256": "e9da59e12a728a6ebd19f80d2bf255233fb224b80468576d96f3f13aea86eef9",
+      "pixels": [
+        1284,
+        2778
+      ],
+      "reviewedOriginalPixels": true,
+      "adopted": true,
+      "adoptionScope": "Actual Calendar exact-title search shows matching plan once at Oct26 09:00. Result and keyboard fit viewport.",
+      "exportedOriginal": "5E6FC38E-0632-46CE-9A33-029F6184E193.png"
+    }
+  ],
+  "limits": [
+    "Enclosing test failed142.579s; cumulative22of23 phases is not full final acceptance.",
+    "Final UI absence verification for withdrawn peer2 and declined peer5, plus final organizer calendar/roster recheck, is outside this attempt.",
+    "Screenshots are ordinary Chinese type; maximum-type scope belongs to previous evidence records.",
+    "Exact search result and Manage action images support actual navigation; full offscreen participant list not visually established by each detail capture.",
+    "Peer4 late-accept own inline row touches footer boundary, while date/highlight,5/6 count and calendar action are fully visible.",
+    "Failure diagnostic image/video is private and not adopted as a passed functional screen.",
+    "These are iPhone14Plus Simulator originals; no physical phone test claim.",
+    "Reviewer changed only independent evidence files; no product/test/fixture changes, no App run or cleanup."
+  ]
+}

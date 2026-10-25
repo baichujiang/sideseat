@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-10-25T22:17:20.711697+00:00",
+  "purpose": "Index of original native screenshot review records, preserving each attempt/capture scope.",
+  "method": "Counts extracted from explicit image lists in seven source reports; global unique counts deduplicated on original PNG SHA256 across all reports. Every adopted public file exists and matches its recorded SHA. No report-local unique counts are blindly summed.",
+  "reports": [
+    {
+      "report": "native-prefix-visual.json",
+      "reportSHA256": "2d95131c82d1811eaa9872402ac5516382303f10603eb75d90bba248d74088cc",
+      "reviewedCaptureCount": 20,
+      "uniqueReviewedSHA256": 19,
+      "adoptedCaptureCount": 15,
+      "uniqueAdoptedSHA256": 15
+    },
+    {
+      "report": "native-status228-visual.json",
+      "reportSHA256": "b15111288e07168f77203f0e0dde6211feee3b8498334c87487a8acdcf77b5eb",
+      "reviewedCaptureCount": 6,
+      "uniqueReviewedSHA256": 6,
+      "adoptedCaptureCount": 6,
+      "uniqueAdoptedSHA256": 6
+    },
+    {
+      "report": "native-invitation228-prefix-visual.json",
+      "reportSHA256": "f095c7ad0f696e634b9fa0feea5a8f1f5b05585e008f1aecc799280d618d46aa",
+      "reviewedCaptureCount": 19,
+      "uniqueReviewedSHA256": 14,
+      "adoptedCaptureCount": 19,
+      "uniqueAdoptedSHA256": 14
+    },
+    {
+      "report": "native-replies228-prefix-visual.json",
+      "reportSHA256": "b9c242c5f9ecb53daed412f44ae2cce243bba9e09fab67338d9fa27d7062106c",
+      "reviewedCaptureCount": 16,
+      "uniqueReviewedSHA256": 12,
+      "adoptedCaptureCount": 16,
+      "uniqueAdoptedSHA256": 12
+    },
+    {
+      "report": "native-publication228-prefix-visual.json",
+      "reportSHA256": "3533568c02d2eec87ddfa4fdf68a885d773483392e9ca39b05361fe7159c6b13",
+      "reviewedCaptureCount": 12,
+      "uniqueReviewedSHA256": 10,
+      "adoptedCaptureCount": 12,
+      "uniqueAdoptedSHA256": 10
+    },
+    {
+      "report": "native-calendars228-prefix-visual.json",
+      "reportSHA256": "8d1462c84262021c39a3f6986ffba8d6b27f519a43f5f91b55090252d4280b87",
+      "reviewedCaptureCount": 8,
+      "uniqueReviewedSHA256": 8,
+      "adoptedCaptureCount": 8,
+      "uniqueAdoptedSHA256": 8
+    },
+    {
+      "report": "native-final-calendar228-visual.json",
+      "reportSHA256": "02312c1111b75f90cd215e7b676f209155556ca5d597055e6bfab4b14264a347",
+      "reviewedCaptureCount": 8,
+      "uniqueReviewedSHA256": 4,
+      "adoptedCaptureCount": 8,
+      "uniqueAdoptedSHA256": 4
+    }
+  ],
+  "totals": {
+    "reviewedCaptureCount": 89,
+    "uniqueReviewedSHA256AcrossReports": 73,
+    "adoptedCaptureCountAtOwnReportScope": 84,
+    "uniqueAdoptedSHA256AcrossReports": 69,
+    "excludedCaptureCount": 5
+  },
+  "finalClosure": {
+    "realAccounts": 6,
+    "samePlanReadOnlyAPIVerifiedPhases": 23,
+    "samePlanReadOnlyAPIAllPassed": true,
+    "finalReadOnlyUICase": "testVerifyCalendarsAfterParticipantWithdrawal",
+    "finalReadOnlyUICasePassed": true,
+    "finalReadOnlyUICaseSeconds": 73.054,
+    "singleUninterruptedFullUIFlowPassed": false,
+    "physicalDevicePassed": false,
+    "executionSurface": "iPhone14Plus Simulator iOS26.5, realApp/API, realUIlogin",
+    "businessMutations": "Main plan business writes executed through real nativeUI across resumed same-record segments; API observer read only."
+  },
+  "interpretationLimits": [
+    "Adopted means the stated visible scope of that source record was accepted, not whole-page or whole-case acceptance. Prefix enclosing failures remain failures.",
+    "Historical Preview227capacity images are included in cumulative review counts; their old full-outsider generic status is superseded by role-correct Preview228capacity evidence. Do not use them as final228status examples.",
+    "Ordinary-type final owner view has all six complete names/statuses. Maximum-type owner accepted row was not fully captured; five peer rows were reviewed across segments.",
+    "Maximum German confirmation label wraps awkwardly inside Endgültigen but fits button and is reachable after actual prompt scrolling.",
+    "Five old chat-viewport captures were reviewed but excluded because the current target plan card was outside captured viewport.",
+    "Video-derived diagnostic frames, unrelated failure attachments/AX text, browser captures, simulator diagnostic current-screen shots and export duplicates not listed in the reports are excluded from these screenshot counts.",
+    "All imagery is Simulator evidence; physical-device XCTest limitation must stay visible in release/user reporting.",
+    "No server cleanup, product edits, test edits, fixture edits or App/test execution were performed by this evidence review."
+  ]
+}
