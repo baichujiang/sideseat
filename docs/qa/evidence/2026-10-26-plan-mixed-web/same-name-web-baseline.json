@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "independentOwnedPlan": true,
+  "sameNamedGuestsRemainDistinct": true,
+  "acceptedCount": 3,
+  "registeredOwnerCalendarCount": 1,
+  "sameNamedGuestCalendarCompanions": 2,
+  "currentGuestInvitationMisleadinglyPromisesSideSeatCalendar": true,
+  "nativeCalendarRenderingStillRequiresPhysicalProbe": true,
+  "at": "2026-10-26T00:05:04.687Z"
+}

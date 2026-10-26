@@ -1,0 +1,46 @@
+{
+  "verifiedAt": "2026-10-26T00:14:25.130503+00:00",
+  "baseline": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "baselineURL": "https://sideseat-83jkfb99t-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectName": "sideseat",
+  "cliVersion": "54.4.1",
+  "aliases": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "baselineFiles": 1396,
+  "uniqueRemoteContentDownloads": 1396,
+  "all1396RemoteFilesDownloadedAndSHA1Matched": true,
+  "localOrPreviousSourceCacheReuse": false,
+  "context": "/tmp/sideseat-mixed230-release",
+  "baselineManifestSHA256": "e8d8c28ea6e83c4e2f3d8014f735e8e41bf923fbb2bb7605e92e7e763ae638c9",
+  "plannedOverlay": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "plannedSourceMarker": ".sideseat-mixed230-source.json",
+  "productionEnvPulled": false,
+  "remoteMutationsPerformed": false,
+  "buildPerformed": false,
+  "deploymentCreated": false,
+  "promotionPerformed": false
+}

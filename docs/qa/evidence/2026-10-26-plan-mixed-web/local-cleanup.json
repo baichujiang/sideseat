@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "ownedGeneratedContextsRemoved": [
+    "/tmp/sideseat-mixed230-runner",
+    "/tmp/sideseat-mixed230-source",
+    "/tmp/sideseat-mixed230-release"
+  ],
+  "credentialFixtureAccessConfigAndTraceFilesRemoved": 29,
+  "privateFixtureRemoved": true,
+  "rawDiagnosticsRetainedPrivate0700And0600": true,
+  "activeLocalConfigurationPreserved": true,
+  "sharedAppBuildOutputsAndSourcePackagesPreserved": true,
+  "noSimulatorCreatedOrRemovedInThisStage": true,
+  "at": "2026-10-26T01:08:27.443507+00:00",
+  "exactValueScanFileRemoved": true,
+  "additionalExactValueScanFilesRemoved": 1
+}

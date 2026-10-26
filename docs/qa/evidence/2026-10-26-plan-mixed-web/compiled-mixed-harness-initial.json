@@ -1,0 +1,9 @@
+{
+  "physicalDeviceUDID": "00008110-001A69110CC1401E",
+  "nativeAppBuild": 230,
+  "runnerSourceSHA256": "52c1a2330d9263cf66ffdbe5d0e0e0d5899e36a6c16d31afe1aec971184f12e6",
+  "coordinatorSHA256": "8c6111b70c979fa5f1cfbc4391b010c9e04b17a860861977f52517dba3e43ebe",
+  "actualCompiledSourceMatchesRoot": true,
+  "testPathsAllAbsolute": true,
+  "privateFixtureIsNotCommitted": true
+}

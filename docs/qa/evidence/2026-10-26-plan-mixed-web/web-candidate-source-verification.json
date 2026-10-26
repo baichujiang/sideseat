@@ -1,0 +1,84 @@
+{
+  "verifiedAt": "2026-10-26T00:18:35.368478+00:00",
+  "candidate": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+  "candidateURL": "https://sideseat-dt19zkq1j-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "teamScope": "baichus-projects",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "baseline": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "sourceBaseCommit": "bfaabe73d765d6c1c8dc8f5c52bf89728b5378b8",
+  "baselineFiles": 1396,
+  "expectedUploadedFiles": 1397,
+  "actualUploadedFiles": 1397,
+  "allUploadedSourceSHA1Matched": true,
+  "allLocalContextSourceStillFrozen": true,
+  "missing": [],
+  "unexpected": [],
+  "mismatches": [],
+  "changed": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "preserved": 1395,
+  "added": [
+    ".sideseat-mixed230-source.json"
+  ],
+  "sourceMarker": {
+    "release": "plan-mixed-web230",
+    "sourceBaseCommit": "bfaabe73d765d6c1c8dc8f5c52bf89728b5378b8",
+    "baselineDeployment": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+    "productScope": "Copy only: distinguish web guest participation from the App account and clarify App-user notifications/SideSeat calendar synchronization versus web guest link updates.",
+    "overlayFiles": [
+      {
+        "path": "components/time-polls/shared-time-poll.tsx",
+        "sha1": "83dfaa228e6f17f84ec2ca92d6be232778bd8ee9",
+        "sha256": "ffd8261f84005445d1a2a45dcefd5c733fd3c5b090b5801d6d1dce673c01613a"
+      }
+    ],
+    "migrationsSkipped": true,
+    "activityReleaseHook": "none"
+  },
+  "sourceMarkerRemoteContentMatchesLocal": true,
+  "expectedManifestSHA256": "d8a5d98053c0b807a6953a4f2884be7e3acef4e25de6d4c49527afdaaeea2011",
+  "buildChecks": {
+    "readyBuildSucceeded": true,
+    "explicitMigrationSkipObserved": true,
+    "observedMigrationSkipLine": "[build] Skipping prisma migrate deploy because SKIP_DATABASE_MIGRATIONS=1.",
+    "activityReleaseHookIntendedValue": "none",
+    "activityHookExecutionMarkersObserved": false,
+    "activityHookSourceGate": "Runs release-plan-activities131.mjs only when SIDESEAT_ACTIVITY_RELEASE is preview131.",
+    "buildEnvironmentValuesNotExposedByDeploymentAPI": true,
+    "environmentValueScope": "The environment API redacts build.env/env. The intended none value is from the prepared deployment controls; this report independently verifies no activity-release preflight/backup execution markers in the successful build logs."
+  },
+  "aliasesBeforePromotion": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "skipDomainVerified": true,
+  "remoteReadOnlyVerification": true,
+  "applicationAPICallsPerformed": false,
+  "phoneOperationsPerformed": false,
+  "deploymentOrPromotionPerformedByVerifier": false,
+  "productCommit": "cf200ba81bd4b976e1de8f2ae9f262d18fba0526",
+  "actualOverlayContentMatchesPushedCommit": true,
+  "overlaySHA256": "ffd8261f84005445d1a2a45dcefd5c733fd3c5b090b5801d6d1dce673c01613a",
+  "aliasesRecheckedAt": "2026-10-26T00:18:57.445787+00:00",
+  "aliasesBeforePromotionCurrentRecheckAllStillBaseline": true
+}

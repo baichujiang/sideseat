@@ -1,0 +1,7 @@
+{
+  "ownedFailedPlanCancelledAndDeleted": true,
+  "publicLink404": true,
+  "reason": "Discard only after failed enclosing screenshot harness; no API business write repairs UI test progress.",
+  "nextRunUsesNewPlan": true,
+  "at": "2026-10-26T00:34:38.376Z"
+}

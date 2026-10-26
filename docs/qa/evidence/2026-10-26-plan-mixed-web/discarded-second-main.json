@@ -1,0 +1,5 @@
+{
+  "passed": true,
+  "scope": "After second physical harness failure, guarded owned QA plan cancellation and deletion only; not part of UI business progress",
+  "publicLink404": true
+}

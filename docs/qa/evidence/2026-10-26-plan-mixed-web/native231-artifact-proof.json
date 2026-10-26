@@ -1,0 +1,82 @@
+{
+  "verifiedAt": "2026-10-26T00:44:48.692662+00:00",
+  "appBuild": 231,
+  "bundleIdentifier": "app.sideseat.mobile.preview",
+  "apiBaseURL": "https://api.sideseat.de",
+  "supportedPlatforms": [
+    "iPhoneOS"
+  ],
+  "sourceProof": {
+    "report": "native231-source-proof.json",
+    "reportSHA256": "21cca24d533b35da2b165c240968932c4c96655d3a68f86b0eda76f78ecef7cf",
+    "productCommit": "cced035cbcec30e14fb7973e43ba6fd1e194e002",
+    "appInputs": 268,
+    "scope": "Existing independent source proof referenced; this report verifies the final signed local artifact, Local configuration and retained installation snapshot."
+  },
+  "activeAndFrozenLocalBytesMatch": true,
+  "localConfigurationSHA256": "b23d35a9d7205c1c6222d8108853a3e6c143815295a89355083c89e4d0093220",
+  "strictDeepCodeSignatureValid": true,
+  "architectures": [
+    "arm64"
+  ],
+  "cdhash": "246521a336bbb1699071174a1b2b0faa708262bb",
+  "teamIdentifier": "V4238R5R53",
+  "safeEntitlements": {
+    "applicationIdentifier": "V4238R5R53.app.sideseat.mobile.preview",
+    "apsEnvironment": "development",
+    "getTaskAllow": true,
+    "associatedDomains": [
+      "applinks:www.sideseat.de"
+    ]
+  },
+  "binarySHA256": {
+    "SideSeat Preview": "e1c1d4844ac3440fafc3303e7a7848c7fff9827e6e57dfaf51b3e5fb90414e4c",
+    "SideSeat Preview.debug.dylib": "d9abb9a971e7786b5eac398855f761b88fd83b178f5c054cc7d78a924ddc106a",
+    "__preview.dylib": "f9f108afd1360bb28443a69892d7397477a3f9425cb10425d2b713ced0dfc189"
+  },
+  "artifactFiles": 22,
+  "canonicalArtifactFileManifestSHA256": "b5f41bea491dddba267e19812664e1a90eb779ac8369332a33e218ae4df99354",
+  "installedAppsExistingSnapshot": {
+    "preview": {
+      "bundleIdentifier": "app.sideseat.mobile.preview",
+      "build": "231",
+      "name": "SideSeat Preview"
+    },
+    "ordinaryPreserved": {
+      "bundleIdentifier": "app.sideseat.mobile",
+      "build": "97",
+      "name": "SideSeat"
+    },
+    "preexistingRunnerPreserved": {
+      "bundleIdentifier": "app.sideseat.mobile.uitests.xctrunner",
+      "build": "1",
+      "name": "Flow222UITests-Runner"
+    },
+    "source": "Existing private apps231-installed.json; verifier did not query the device."
+  },
+  "liveAliases": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "samePreviouslyTestedWebCandidateStillLive": true,
+  "verificationReadOnly": true,
+  "phoneOrDeploymentOrFixtureOrAccountOperationsPerformed": false,
+  "previous230ArtifactAndSourceProofsPreserved": true,
+  "scopeLimits": "No new ordinary launch, installed-device binary readback, UI or push-delivery assertion is made by this local artifact/retained-snapshot check."
+}

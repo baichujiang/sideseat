@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "productCommit": "cf200ba81bd4b976e1de8f2ae9f262d18fba0526",
+  "nativeBuild": 230,
+  "appInputs": 268,
+  "activeFrozenCommitSHA256AllMatch": true,
+  "localConfigurationBytesMatch": true,
+  "deltaFrom229": [
+    "ios-native/Configuration/Preview.xcconfig",
+    "ios-native/SideSeat/Features/Home/HomeRootView.swift"
+  ],
+  "actualAppStrictSignatureAndLiveAPIBaseVerified": true,
+  "installedPhysicalBuildVerified": 230,
+  "sameNamePhysicalBaseline": {
+    "build": 229,
+    "passed": false,
+    "seconds": 34.632,
+    "shownRows": 1
+  },
+  "sameNamePhysicalFixed": {
+    "build": 230,
+    "passed": true,
+    "seconds": 24.264,
+    "shownRows": 2
+  },
+  "fullTypeScriptFinalExit": 0,
+  "touchedTSXESlintExit": 0,
+  "independentProductMinimalReview": "No material findings; recovery-page absent-App-link copy edge also fixed.",
+  "at": "2026-10-26T00:18:19.852583+00:00",
+  "fullMixedFlowScope": "Build230 failed at a test viewport assertion. The complete same-build pass is231, separately recorded in mixed-final-run-summary.json."
+}

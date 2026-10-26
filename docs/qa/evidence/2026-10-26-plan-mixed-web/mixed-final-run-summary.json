@@ -1,0 +1,54 @@
+{
+  "passed": true,
+  "appBuild": 231,
+  "productCommit": "cced035cbcec30e14fb7973e43ba6fd1e194e002",
+  "harnessCommit": "69de464df03459367dd3af6a9a15aba90fc7ffb0",
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "registeredAppUsersIncludingOwner": 3,
+  "independentWebGuests": 3,
+  "nativeSeconds": 565.44,
+  "nativeTests": 1,
+  "nativeFailures": 0,
+  "nativeSkipped": 0,
+  "continuousSameBuildMainPhases": 15,
+  "webChecks": 9,
+  "finalWebCaptures": 16,
+  "publicOrigin": "https://www.sideseat.de",
+  "publicBypassUsed": false,
+  "nativeBusinessWrites": "physical App UI",
+  "guestBusinessWrites": "actual public Chromium/WebKit page UI",
+  "calendarScope": "SideSeat Calendar home schedule and search, with accepted registered users and web guest companions. Web guests have no account Calendar/ICS.",
+  "initialFailures": [
+    {
+      "build": 230,
+      "seconds": 524.86,
+      "phases": 12,
+      "cause": "QA Calendar modal used hidden underlying TabBar viewport"
+    },
+    {
+      "build": 231,
+      "seconds": 530.126,
+      "phases": 13,
+      "cause": "QA system toolbar36 was incorrectly asserted as body44; cancellation not clicked"
+    }
+  ],
+  "noAPIPatchingToCompleteUIPlan": true,
+  "separateSameNameRegression": {
+    "baseline229": {
+      "passed": false,
+      "seconds": 34.632,
+      "visibleRows": 1
+    },
+    "fixed230": {
+      "passed": true,
+      "seconds": 24.264,
+      "visibleRows": 2
+    },
+    "final231": {
+      "passed": true,
+      "seconds": 25.201,
+      "visibleRows": 2
+    }
+  },
+  "pushScope": "Real APNs delivery was verified separately on229; this mixed run does not claim new APNs delivery or Apple Calendar acceptance."
+}

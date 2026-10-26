@@ -1,0 +1,454 @@
+{
+  "passed": false,
+  "origin": "https://www.sideseat.de",
+  "appBuild": 231,
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "phases": [
+    "created",
+    "owner-draft",
+    "owner-submitted",
+    "app-shared",
+    "app1-submitted",
+    "app2-submitted",
+    "six-responses-ready",
+    "invited",
+    "app1-accepted",
+    "mixed-replies-ready",
+    "published",
+    "app2-late-accepted",
+    "app1-withdrawn",
+    "cancelled",
+    "final-calendar-verified"
+  ],
+  "checks": [
+    {
+      "phase": "created",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:44:13.446Z"
+    },
+    {
+      "phase": "owner-draft",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:44:20.043Z"
+    },
+    {
+      "phase": "owner-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:44:27.072Z"
+    },
+    {
+      "phase": "app-shared",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:44:58.166Z"
+    },
+    {
+      "phase": "app1-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 5,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:45:32.025Z"
+    },
+    {
+      "phase": "app2-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:46:05.959Z"
+    },
+    {
+      "phase": "six-responses-ready",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:46:31.309Z"
+    },
+    {
+      "phase": "invited",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u53d1\u8d77\u4eba153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:48:16.043Z"
+    },
+    {
+      "phase": "app1-accepted",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:48:36.662Z"
+    },
+    {
+      "phase": "mixed-replies-ready",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:49:15.853Z"
+    },
+    {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:49:26.011Z"
+    },
+    {
+      "phase": "app2-late-accepted",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u670b\u53cb2153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b",
+        "\u7f51\u9875\u4e59153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 1,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:50:25.270Z"
+    },
+    {
+      "phase": "app1-withdrawn",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb2153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u4e59153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 1,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:51:44.412Z"
+    }
+  ],
+  "webChecks": [
+    {
+      "role": "guestA",
+      "check": "single controlled 503 preserves draft and server snapshot; retry uses real server",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestB",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestC",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "cleared browser data; personal fragment recovery preserves original identity and slots; credential absent from network URLs",
+      "passed": true
+    },
+    {
+      "check": "final highlight, accept / local defer / decline; no registered Calendar before explicit publish",
+      "passed": true
+    },
+    {
+      "check": "web late acceptance updates existing registered Calendars and companions",
+      "passed": true
+    },
+    {
+      "check": "web withdrawal after publication removes guest from all registered Calendar companion lists",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-unsubmitted.png",
+      "sha256": "80b4b9d847842de7f4a0f1eeed027e6ec7ec27475a259e78734571b8797b79b3",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-controlled-failure-keeps-draft.png",
+      "sha256": "0f39f53cf4a20324a2dbb179eeec5b6c7368dada4af100cc98687565806ff8c0",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-submitted.png",
+      "sha256": "115f0da08b688b2dc5062511607ea93f8875d584b703740f5d45aeed15cbb29f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "attempt2-mixed-guestB-unsubmitted.png",
+      "sha256": "5e8179e68d587baf507585d3b6f95b6351166a88d6626d4b31c8b3ccee740165",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "attempt2-mixed-guestB-submitted.png",
+      "sha256": "a571f3b05917d3999ce1c06aa8bf79c475f05005111fbb9a625cf0dca9251805",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestC-unsubmitted.png",
+      "sha256": "191d3fa1b1c97a1c44b2974d0356265f5b229729544f0cd25346bf6c32aa72b8",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestC-submitted.png",
+      "sha256": "f868b691e9d6fb2f182d5828b82e90d7eca75d60beb65a31182c4df5a0efd523",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-restored-original-response.png",
+      "sha256": "8fd019bb7158c899319e105f00e6295474d043a665bad5ef92ec407d7a0262ae",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-final-time-highlight.png",
+      "sha256": "1d59bcd4c94377236cfde05a318e7151ef9a3b0222bc89b02fdd4584b3aca232",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "attempt2-mixed-guestB-final-time-highlight.png",
+      "sha256": "b165857173c2f11d7888b517c5eafa430bdd586fcf3aaa7c4c969e21a34abe06",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestC-final-time-highlight.png",
+      "sha256": "2457e1507c45fb5fd4ae63deac3e47ca3899d74b85846ec897fc759196241f57",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "attempt2-mixed-guestB-late-acceptance.png",
+      "sha256": "5d58987c0f6f2343bf9318439b6523c5724d7f708e5781e1dfde14468f831408",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "attempt2-mixed-guestA-withdrawn.png",
+      "sha256": "24ef6ad5cd1d02781ae06f00a5f6c7213724a4ace3e4b1a5bd2d18e3eee5c59c",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    }
+  ],
+  "mainMutations": "App owner/registered peers through physical UI; guests through actual public browser UI only",
+  "browserEngines": [
+    "chromium",
+    "webkit"
+  ],
+  "realNetwork": true,
+  "failure": {
+    "phase": "app1-withdrawn",
+    "message": "Failed boundary; private diagnostics retained."
+  },
+  "harnessSHA256": "f6452f1f54731d1029e0f2111e6349fe1afa34af2547595a38c95c2aeaeca68f",
+  "at": "2026-10-26T00:52:42.383Z",
+  "attempt": "second full case; 231; failed at test-only toolbar minimum height before cancellation"
+}

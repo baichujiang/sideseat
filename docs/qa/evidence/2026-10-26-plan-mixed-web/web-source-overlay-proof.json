@@ -1,0 +1,45 @@
+{
+  "verifiedAt": "2026-10-26T00:14:32.947364+00:00",
+  "baseline": "dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth",
+  "baselineFiles": 1396,
+  "allBaselineSourceSHA1Matched": true,
+  "preserved": 1395,
+  "changed": [
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "overlaid": [
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "baselineSHA1": "99c5f88f22a7b3b3491952cc8a19c96c2e03a3c3",
+      "overlaySHA1": "83dfaa228e6f17f84ec2ca92d6be232778bd8ee9",
+      "overlaySHA256": "ffd8261f84005445d1a2a45dcefd5c733fd3c5b090b5801d6d1dce673c01613a"
+    }
+  ],
+  "added": [
+    ".sideseat-mixed230-source.json"
+  ],
+  "expectedUploadedFiles": 1397,
+  "sourceBaseCommit": "bfaabe73d765d6c1c8dc8f5c52bf89728b5378b8",
+  "copyOnlyDiff": {
+    "approvedCopyRegions": 2,
+    "removedSourceLines": 2,
+    "addedSourceLines": 4,
+    "reusesExistingRecoveryPagePropForCopy": true,
+    "newStateOrComponentOrAPIOrCSS": false,
+    "businessRuleChanges": false
+  },
+  "expectedManifestSHA256": "d8a5d98053c0b807a6953a4f2884be7e3acef4e25de6d4c49527afdaaeea2011",
+  "sourceMarkerSHA256": "de82b3dc04180c011936d6b3b5c0df562df227ec67cf6aec19cfc71f835ac232",
+  "context": "/tmp/sideseat-mixed230-release",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "cliVersion": "54.4.1",
+  "intendedTarget": "production --skip-domain",
+  "migrationsSkipped": true,
+  "activityReleaseHook": "none",
+  "productionEnvPulled": false,
+  "buildPerformed": false,
+  "deploymentCreated": false,
+  "promotionPerformed": false,
+  "nativeProductOrQAChangesIncluded": false
+}

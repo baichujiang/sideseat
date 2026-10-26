@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "native231InputsRemainIdentical": 268,
+  "localizationPropertyListLint": {
+    "en": 0,
+    "zh-Hans": 0,
+    "de": 0
+  },
+  "qaJavaScriptSyntax": {
+    "plan-mixed-web.mjs": 0,
+    "plan-mixed-web-identity.mjs": 0,
+    "plan-open-link-capacity-browser.mjs": 0
+  },
+  "diffWhitespaceCheck": true,
+  "scope": "Final static validation after last test-only toolbar correction; full TypeScript/TSX ESLint retain earlier same-web-source results."
+}

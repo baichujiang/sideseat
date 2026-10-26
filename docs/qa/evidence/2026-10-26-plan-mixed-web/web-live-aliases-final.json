@@ -1,0 +1,80 @@
+{
+  "verifiedAt": "2026-10-26T00:22:44.096440+00:00",
+  "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+  "url": "https://sideseat-dt19zkq1j-baichus-projects.vercel.app",
+  "readyState": "READY",
+  "target": "production",
+  "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+  "teamId": "team_oF7mkDKDywaaYzrHLxxfZfrc",
+  "sourceBaseCommit": "bfaabe73d765d6c1c8dc8f5c52bf89728b5378b8",
+  "productCommit": "cf200ba81bd4b976e1de8f2ae9f262d18fba0526",
+  "aliases": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "url": "https://sideseat-dt19zkq1j-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "url": "https://sideseat-dt19zkq1j-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "url": "https://sideseat-dt19zkq1j-baichus-projects.vercel.app",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "testedCandidateDeploymentId": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+  "sameTestedImmutableProductionCandidate": true,
+  "noRebuildIdentityProof": {
+    "sameDeploymentId": true,
+    "sameDeploymentURL": true,
+    "unchangedMetadataFields": [
+      "id",
+      "url",
+      "projectId",
+      "createdAt",
+      "buildingAt",
+      "ready",
+      "readyState",
+      "target"
+    ],
+    "beforeMetadata": "release-candidate-ready-deployment.json",
+    "afterMetadata": "release-live-final-deployment.json"
+  },
+  "sourceVerification": {
+    "publicReport": "web-candidate-source-verification.json",
+    "uploadedFiles": 1397,
+    "allSourceSHA1Matched": true,
+    "preserved": 1395,
+    "changed": [
+      "components/time-polls/shared-time-poll.tsx"
+    ],
+    "overlaySHA256": "ffd8261f84005445d1a2a45dcefd5c733fd3c5b090b5801d6d1dce673c01613a",
+    "actualOverlayContentMatchesPushedCommit": true,
+    "added": [
+      ".sideseat-mixed230-source.json"
+    ]
+  },
+  "buildChecks": {
+    "readyBuildSucceeded": true,
+    "explicitMigrationSkipObserved": true,
+    "observedMigrationSkipLine": "[build] Skipping prisma migrate deploy because SKIP_DATABASE_MIGRATIONS=1.",
+    "activityReleaseHookIntendedValue": "none",
+    "activityHookExecutionMarkersObserved": false,
+    "activityHookSourceGate": "Runs release-plan-activities131.mjs only when SIDESEAT_ACTIVITY_RELEASE is preview131.",
+    "buildEnvironmentValuesNotExposedByDeploymentAPI": true,
+    "environmentValueScope": "The environment API redacts build.env/env. The intended none value is from the prepared deployment controls; this report independently verifies no activity-release preflight/backup execution markers in the successful build logs."
+  },
+  "verificationScope": "Read-only Vercel project/deployment/alias inspection and local committed source comparison. No business API, fixture, browser or phone operation.",
+  "promotionPerformedByVerifier": false,
+  "environmentModifiedByVerifier": false,
+  "contextRetainedForRoot": true
+}

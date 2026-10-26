@@ -1,0 +1,11 @@
+{
+  "physicalDeviceUDID": "00008110-001A69110CC1401E",
+  "nativeAppBuild": 231,
+  "runnerSourceSHA256": "c88685befdde9d57bdf38ac847c9128091b1574bfc377a47ce7b652b11ceb523",
+  "coordinatorSHA256": "f6452f1f54731d1029e0f2111e6349fe1afa34af2547595a38c95c2aeaeca68f",
+  "actualCompiledSourceMatchesRoot": true,
+  "testPathsAllAbsolute": true,
+  "privateFixtureIsNotCommitted": true,
+  "viewportCorrection": "Calendar detail uses actual modal List viewport; other surfaces preserve TabBar/footer bounds.",
+  "toolbarCorrection": "Only system toolbar36 and native menu row use platform frame sizing; body44 and all state/action assertions remain."
+}

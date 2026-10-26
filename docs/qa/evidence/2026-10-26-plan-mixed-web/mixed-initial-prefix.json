@@ -1,0 +1,434 @@
+{
+  "passed": false,
+  "origin": "https://www.sideseat.de",
+  "appBuild": 230,
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "phases": [
+    "created",
+    "owner-draft",
+    "owner-submitted",
+    "app-shared",
+    "app1-submitted",
+    "app2-submitted",
+    "six-responses-ready",
+    "invited",
+    "app1-accepted",
+    "mixed-replies-ready",
+    "published",
+    "app2-late-accepted",
+    "app1-withdrawn",
+    "cancelled",
+    "final-calendar-verified"
+  ],
+  "checks": [
+    {
+      "phase": "created",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:23:41.135Z"
+    },
+    {
+      "phase": "owner-draft",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:23:47.581Z"
+    },
+    {
+      "phase": "owner-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:23:54.639Z"
+    },
+    {
+      "phase": "app-shared",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:24:23.963Z"
+    },
+    {
+      "phase": "app1-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 5,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:24:59.250Z"
+    },
+    {
+      "phase": "app2-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:25:31.582Z"
+    },
+    {
+      "phase": "six-responses-ready",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:25:56.386Z"
+    },
+    {
+      "phase": "invited",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u53d1\u8d77\u4eba153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:28:00.279Z"
+    },
+    {
+      "phase": "app1-accepted",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:28:19.887Z"
+    },
+    {
+      "phase": "mixed-replies-ready",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:28:59.077Z"
+    },
+    {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:29:09.483Z"
+    },
+    {
+      "phase": "app2-late-accepted",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "\u670b\u53cb1153b",
+        "\u670b\u53cb2153b",
+        "\u53d1\u8d77\u4eba153b",
+        "\u7f51\u9875\u7532153b",
+        "\u7f51\u9875\u4e59153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 1,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:30:07.381Z"
+    }
+  ],
+  "webChecks": [
+    {
+      "role": "guestA",
+      "check": "single controlled 503 preserves draft and server snapshot; retry uses real server",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestB",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestC",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "cleared browser data; personal fragment recovery preserves original identity and slots; credential absent from network URLs",
+      "passed": true
+    },
+    {
+      "check": "final highlight, accept / local defer / decline; no registered Calendar before explicit publish",
+      "passed": true
+    },
+    {
+      "check": "web late acceptance updates existing registered Calendars and companions",
+      "passed": true
+    },
+    {
+      "check": "web withdrawal after publication removes guest from all registered Calendar companion lists",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "5d5953fe9c58d29f747bab1bb8a747742fc2153181b5dfa505ac16c4ddf42d05",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-unsubmitted.png"
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "b25467710785ed542891336dc01bad7ac67795a857df5b6b9762a8b23dd38f7b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-controlled-failure-keeps-draft.png"
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "115f0da08b688b2dc5062511607ea93f8875d584b703740f5d45aeed15cbb29f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-submitted.png"
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "sha256": "5e8179e68d587baf507585d3b6f95b6351166a88d6626d4b31c8b3ccee740165",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestB-unsubmitted.png"
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "sha256": "a571f3b05917d3999ce1c06aa8bf79c475f05005111fbb9a625cf0dca9251805",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestB-submitted.png"
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "sha256": "1d69dc05a0faf8b11a01b6d35b44cfe63137263e7a63c17063c0bb5e32ab7d41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestC-unsubmitted.png"
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "sha256": "8fd019bb7158c899319e105f00e6295474d043a665bad5ef92ec407d7a0262ae",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestC-submitted.png"
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "dff73023fa3339cb1f8eecfa8d3b9c1cd98f39ee09d732516529ba291efb6e94",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-restored-original-response.png"
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "1d59bcd4c94377236cfde05a318e7151ef9a3b0222bc89b02fdd4584b3aca232",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-final-time-highlight.png"
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "sha256": "b165857173c2f11d7888b517c5eafa430bdd586fcf3aaa7c4c969e21a34abe06",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestB-final-time-highlight.png"
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "sha256": "2457e1507c45fb5fd4ae63deac3e47ca3899d74b85846ec897fc759196241f57",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestC-final-time-highlight.png"
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "sha256": "5d58987c0f6f2343bf9318439b6523c5724d7f708e5781e1dfde14468f831408",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestB-late-acceptance.png"
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "sha256": "24ef6ad5cd1d02781ae06f00a5f6c7213724a4ace3e4b1a5bd2d18e3eee5c59c",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "originalCaptureName": "mixed-guestA-withdrawn.png"
+    }
+  ],
+  "mainMutations": "App owner/registered peers through physical UI; guests through actual public browser UI only",
+  "browserEngines": [
+    "chromium",
+    "webkit"
+  ],
+  "realNetwork": true,
+  "failure": {
+    "phase": "app2-late-accepted",
+    "message": "Failed boundary; private diagnostics retained."
+  },
+  "harnessSHA256": "8c6111b70c979fa5f1cfbc4391b010c9e04b17a860861977f52517dba3e43ebe",
+  "at": "2026-10-26T00:32:05.422Z",
+  "screenshotBytesRetained": false,
+  "screenshotScope": "Initial browser capture hashes only; original bytes were superseded by the later fresh run. Native failed-prefix originals are separately retained and reviewed."
+}

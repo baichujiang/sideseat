@@ -1,0 +1,14 @@
+{
+  "commit": "cced035cbcec30e14fb7973e43ba6fd1e194e002",
+  "appBuild": 231,
+  "inputCount": 268,
+  "activeFrozenAndCommitMatch": true,
+  "changedFrom230": [
+    "ios-native/Configuration/Preview.xcconfig",
+    "ios-native/SideSeat/Resources/de.lproj/Localizable.strings",
+    "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
+    "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings"
+  ],
+  "signatureStrict": true,
+  "homeSameNameFixUnchangedFrom230": true
+}

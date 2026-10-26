@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "scannedPublicFiles": 225,
+  "exactPrivateValueMatchCount": 0,
+  "generalJWTOrPrivateRecoveryFragmentMatchCount": 0,
+  "scanScope": "All current-stage public evidence plus five delivery/index Markdown files and touched product/QA source; exact owned credentials, plan tokens and candidate cookie values, plus credential-form checks. No raw diagnostic files are published.",
+  "actualPixelPrivacyReview": {
+    "reviewedCaptures": 186,
+    "uniqueReviewedSHA256": 129,
+    "safeAdoptedCaptures": 186,
+    "uniqueSafeAdoptedSHA256": 129,
+    "excludedCaptures": 0,
+    "historicalOrFocusedBaselineCaptures": 3,
+    "candidateFinalCopyCaptures": 60,
+    "failedNativePrefixScreenshots": 36,
+    "failedNativeDiagnosticVideoFrames": 1,
+    "preview231FocusedSameNameCaptures": 1,
+    "secondFailedNativeKeyScreenshots": 4,
+    "secondFailedNativeDiagnosticFrames": 1,
+    "secondFailedWebPrefixCaptures": 13,
+    "firstAttemptWebRecordsWithoutRetainedBytesNotCountedAsReviewed": 13,
+    "finalPassedNativeCaptures": 51,
+    "finalPassedNativeUniqueOriginalSHA256": 34,
+    "finalPassedWebCaptures": 16,
+    "finalPassedWebUniqueOriginalSHA256": 15,
+    "finalPassedNativeAndWebCaptures": 67,
+    "finalPassedNativeAndWebUniqueOriginalSHA256": 49
+  },
+  "scanPatternFileRemoved": true,
+  "finalMarkdownStatusRescanPending": false,
+  "at": "2026-10-26T01:16:37.614785+00:00",
+  "finalMarkdownRescanPassed": true
+}

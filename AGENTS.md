@@ -21,7 +21,36 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview229 is the current installed development build, product03ccd83f0ecb16b1467fdab72379f50f65cd5218 pushed.
+- Preview231 is the current installed development build. Productcced035c and
+  final QA helper69de464d are pushed. Default physical iPhone14Plus completed
+  one continuous App/public-web mixed case565.440s,1test0failure/skip,15/15phases:
+  owner+2App peers and3independent Chromium/WebKit guests,9web checks. Registered
+  business writes use physical App UI,guest writes real public browser UI,without
+  API progress patching or deployment bypass. Same-name guest Calendar rows now
+  retain both identities;229 reproduction failed34.632s,230 fixed24.264s and231
+  fixed25.201s passed independently. Native/web invitation copy distinguishes
+  accepted App notifications/Calendar from guest links;business rules stay.
+  Two prior mixed harness failures remain failed,not cumulative acceptance.
+  Normal231 PID10217,empty args/TERM-only env/process verified,ordinary97 and
+  oldFlow222 retained,owned Mixed230Runner removed,new App reports delta0.
+  QA uses ephemeral credentials;ordinary identity was not read or claimed restored.
+  Six QA accounts/10owned plans401/404 cleaned;3contexts/29private config/trace
+  files+1scan-pattern file removed,activeLocal/shared outputs/existingSimulators preserved.
+  Final main pixels67captures/49unique adopted(51/34native,16/15web);global
+  historical/candidate/failure/final review186/129,not additive unique counts.
+  Ordinary Chinese native/AssistiveTouch/narrow-web label limits stay explicit;
+  no maximum-type,physical Safari,new APNs or Apple Calendar acceptance claim.
+  Final public privacy scan225files passed,zero exact credentials/token/cookie or
+  JWT/recovery-form matches;[scan](docs/qa/evidence/2026-10-26-plan-mixed-web/privacy-final.json). See [231 QA](docs/qa/2026-10-26-plan-mixed-web.md)
+  and [release](docs/releases/2026-10-26-preview231-plan-mixed-web.md).
+- Current production is dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5 READY onapi/www/root.
+  Exact1396 live baseline files downloaded/SHA1matched,1395preserved,one shared
+  TSX+new marker overlaid,1397uploads matched sourcecf200ba8. Same tested candidate
+  promoted without rebuild;Chromium/WebKit each3variants,30captures/21text bounds
+  checks passed separately from the real public mixed flow. No API/schema/rule
+  change,migrations skipped,no activity-hook execution;231 native copy did not
+  redeploy web. Previous229 cancellation backend remains in this preserved source.
+- Preview229 was the previous installed development build, product03ccd83f0ecb16b1467fdab72379f50f65cd5218 pushed.
   Default physical iPhone14Plus completed one continuous six-account plan case
   1007.053s/23API phases; separate real foreground/background push90.677s/12phases,
   notification cold launch42.981s/5phases and QA credential cleanup40.801s passed.
@@ -39,7 +68,7 @@
   maximum-type/AssistiveTouch scopes remain explicit. Public privacy scan passed.
   Source/runtime/visual scopes are in [229 QA](docs/qa/2026-10-25-plan-physical-push.md)
   and [release](docs/releases/2026-10-25-preview229-plan-physical-push.md).
-- Current production is dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth, same tested Production
+- Previous production was dpl_GSYgqV1ho3ZZ3pHMNUgedPTckhth, same tested Production
   candidate promoted without rebuild;api/www/root READY. Exact1395 baseline files
   verified,1393preserved,2backend files+marker overlaid,1396uploaded SHA1match03ccd83f.
   First shared-plan cancellation now notifies current selected pending/accepted

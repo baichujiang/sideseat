@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "appBuild": 231,
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "normalPID": 10217,
+  "launchArguments": [],
+  "launchEnvironment": {
+    "TERM": "dumb"
+  },
+  "currentRunningProcessVerified": true,
+  "ordinaryBuild97Retained": true,
+  "oldFlow222RunnerRetained": true,
+  "ownMixed230RunnerRemoved": true,
+  "newSideSeatDeviceReportCount": 0,
+  "reportScope": "systemCrashLogs relative-path delta from before230 install through final231 ordinary launch",
+  "qaCredentialScope": "All current physical test launches use ephemeral QA credentials. No ordinary-domain identity was read or claimed restored.",
+  "phoneUninstallScope": "Only owned app.sideseat.mixed230qa.xctrunner removed; Preview231 remains installed."
+}

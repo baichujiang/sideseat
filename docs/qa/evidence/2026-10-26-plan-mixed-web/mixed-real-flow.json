@@ -1,0 +1,526 @@
+{
+  "passed": true,
+  "origin": "https://www.sideseat.de",
+  "appBuild": 231,
+  "physicalUDID": "00008110-001A69110CC1401E",
+  "phases": [
+    "created",
+    "owner-draft",
+    "owner-submitted",
+    "app-shared",
+    "app1-submitted",
+    "app2-submitted",
+    "six-responses-ready",
+    "invited",
+    "app1-accepted",
+    "mixed-replies-ready",
+    "published",
+    "app2-late-accepted",
+    "app1-withdrawn",
+    "cancelled",
+    "final-calendar-verified"
+  ],
+  "checks": [
+    {
+      "phase": "created",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:55:47.935Z"
+    },
+    {
+      "phase": "owner-draft",
+      "actualPhase": "COLLECTING",
+      "submissions": 0,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:55:54.154Z"
+    },
+    {
+      "phase": "owner-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:56:01.562Z"
+    },
+    {
+      "phase": "app-shared",
+      "actualPhase": "COLLECTING",
+      "submissions": 1,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:56:31.883Z"
+    },
+    {
+      "phase": "app1-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 5,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:57:06.537Z"
+    },
+    {
+      "phase": "app2-submitted",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:57:40.487Z"
+    },
+    {
+      "phase": "six-responses-ready",
+      "actualPhase": "COLLECTING",
+      "submissions": 6,
+      "invitationVersion": 0,
+      "acceptedNames": [],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:58:06.448Z"
+    },
+    {
+      "phase": "invited",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "发起人153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:59:37.904Z"
+    },
+    {
+      "phase": "app1-accepted",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友1153b",
+        "发起人153b",
+        "网页甲153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T00:59:58.193Z"
+    },
+    {
+      "phase": "mixed-replies-ready",
+      "actualPhase": "INVITING",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友1153b",
+        "发起人153b",
+        "网页甲153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:00:38.429Z"
+    },
+    {
+      "phase": "published",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友1153b",
+        "发起人153b",
+        "网页甲153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:00:48.970Z"
+    },
+    {
+      "phase": "app2-late-accepted",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友1153b",
+        "朋友2153b",
+        "发起人153b",
+        "网页甲153b",
+        "网页乙153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 1,
+        "peer2": 1,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:01:45.062Z"
+    },
+    {
+      "phase": "app1-withdrawn",
+      "actualPhase": "CONFIRMED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友2153b",
+        "发起人153b",
+        "网页乙153b"
+      ],
+      "calendarCounts": {
+        "owner": 1,
+        "peer1": 0,
+        "peer2": 1,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:03:05.968Z"
+    },
+    {
+      "phase": "cancelled",
+      "actualPhase": "CANCELLED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友2153b",
+        "发起人153b",
+        "网页乙153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:04:11.137Z"
+    },
+    {
+      "phase": "final-calendar-verified",
+      "actualPhase": "CANCELLED",
+      "submissions": 6,
+      "invitationVersion": 1,
+      "acceptedNames": [
+        "朋友2153b",
+        "发起人153b",
+        "网页乙153b"
+      ],
+      "calendarCounts": {
+        "owner": 0,
+        "peer1": 0,
+        "peer2": 0,
+        "peer3": 0,
+        "peer4": 0,
+        "peer5": 0
+      },
+      "exactRegisteredAndGuestCompanionsChecked": true,
+      "at": "2026-10-26T01:04:47.553Z"
+    }
+  ],
+  "webChecks": [
+    {
+      "role": "guestA",
+      "check": "single controlled 503 preserves draft and server snapshot; retry uses real server",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestB",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestC",
+      "check": "private identity, tap/cancel, draft reload, explicit submission",
+      "passed": true
+    },
+    {
+      "role": "guestA",
+      "check": "cleared browser data; personal fragment recovery preserves original identity and slots; credential absent from network URLs",
+      "passed": true
+    },
+    {
+      "check": "final highlight, accept / local defer / decline; no registered Calendar before explicit publish",
+      "passed": true
+    },
+    {
+      "check": "web late acceptance updates existing registered Calendars and companions",
+      "passed": true
+    },
+    {
+      "check": "web withdrawal after publication removes guest from all registered Calendar companion lists",
+      "passed": true
+    },
+    {
+      "check": "three still-open web pages automatically show cancellation without manual reload; no editing or reply action",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-unsubmitted.png",
+      "sha256": "5d5953fe9c58d29f747bab1bb8a747742fc2153181b5dfa505ac16c4ddf42d05",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-controlled-failure-keeps-draft.png",
+      "sha256": "b6614de2c691f6516a67df29fcba2705449d129ffad35314f6683d0e5f5bd472",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-submitted.png",
+      "sha256": "115f0da08b688b2dc5062511607ea93f8875d584b703740f5d45aeed15cbb29f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-unsubmitted.png",
+      "sha256": "5e8179e68d587baf507585d3b6f95b6351166a88d6626d4b31c8b3ccee740165",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-submitted.png",
+      "sha256": "a571f3b05917d3999ce1c06aa8bf79c475f05005111fbb9a625cf0dca9251805",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-unsubmitted.png",
+      "sha256": "1d69dc05a0faf8b11a01b6d35b44cfe63137263e7a63c17063c0bb5e32ab7d41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-submitted.png",
+      "sha256": "8fd019bb7158c899319e105f00e6295474d043a665bad5ef92ec407d7a0262ae",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-restored-original-response.png",
+      "sha256": "8fd019bb7158c899319e105f00e6295474d043a665bad5ef92ec407d7a0262ae",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-final-time-highlight.png",
+      "sha256": "1d59bcd4c94377236cfde05a318e7151ef9a3b0222bc89b02fdd4584b3aca232",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-final-time-highlight.png",
+      "sha256": "b165857173c2f11d7888b517c5eafa430bdd586fcf3aaa7c4c969e21a34abe06",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-final-time-highlight.png",
+      "sha256": "2457e1507c45fb5fd4ae63deac3e47ca3899d74b85846ec897fc759196241f57",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-late-acceptance.png",
+      "sha256": "5d58987c0f6f2343bf9318439b6523c5724d7f708e5781e1dfde14468f831408",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-withdrawn.png",
+      "sha256": "24ef6ad5cd1d02781ae06f00a5f6c7213724a4ace3e4b1a5bd2d18e3eee5c59c",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-cancelled-without-page-reload.png",
+      "sha256": "2a908a088fd2d86ff93fa973c08a97ea69ecb9e49dcd4652c103eb07bfcd92ca",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-cancelled-without-page-reload.png",
+      "sha256": "f836f53d3212ba9a9855e97e503fa66b880cdeb0cd5da88f9850839ca23f7f5e",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-cancelled-without-page-reload.png",
+      "sha256": "850bd8bac34b93355fc9261a628ea1c68cfd683aaa02471f7b9a5554a5167d6c",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    }
+  ],
+  "mainMutations": "App owner/registered peers through physical UI; guests through actual public browser UI only",
+  "browserEngines": [
+    "chromium",
+    "webkit"
+  ],
+  "realNetwork": true,
+  "failure": null,
+  "harnessSHA256": "f6452f1f54731d1029e0f2111e6349fe1afa34af2547595a38c95c2aeaeca68f",
+  "at": "2026-10-26T01:04:52.262Z"
+}

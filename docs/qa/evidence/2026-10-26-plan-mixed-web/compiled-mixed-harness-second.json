@@ -1,0 +1,10 @@
+{
+  "physicalDeviceUDID": "00008110-001A69110CC1401E",
+  "nativeAppBuild": 231,
+  "runnerSourceSHA256": "39633b905f52965525ad275acc3e909a7c4f21eff37fb2b4b7f6238480f5ab9d",
+  "coordinatorSHA256": "f6452f1f54731d1029e0f2111e6349fe1afa34af2547595a38c95c2aeaeca68f",
+  "actualCompiledSourceMatchesRoot": true,
+  "testPathsAllAbsolute": true,
+  "privateFixtureIsNotCommitted": true,
+  "viewportCorrection": "Calendar detail uses actual modal List viewport; other surfaces preserve TabBar/footer bounds."
+}
