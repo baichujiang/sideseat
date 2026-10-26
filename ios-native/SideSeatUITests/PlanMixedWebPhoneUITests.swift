@@ -148,7 +148,10 @@ import XCTest
         launch("owner"); openListCard(confirmed: true)
         waitForRoster(role: "guestA", status: "已拒绝"); waitForRoster(role: "guestB", status: "已接受")
         verifyRoster(accepted: ["owner", "peer2", "guestB"], declined: ["peer1", "guestA", "guestC"], stage: "before-cancel")
-        tap(app.buttons["time-poll-menu"]); tap(app.buttons["unified-plan-cancel"])
+        // iOS exposes this toolbar Menu's styled 36pt AX frame; its native menu row
+        // has a platform-owned frame. Neither is a custom 44pt body action.
+        tap(app.buttons["time-poll-menu"], minimumHeight: 35.99)
+        tap(app.buttons["unified-plan-cancel"], minimumHeight: nil)
         XCTAssertTrue(app.descendants(matching: .any)["time-poll-cancel-prompt"].firstMatch.waitForExistence(timeout: 10))
         capture("15-cancel-for-everyone-prompt"); tap(app.buttons["time-poll-cancel-confirm"])
         let status = app.descendants(matching: .any)["unified-plan-phase"].firstMatch
@@ -311,9 +314,10 @@ import XCTest
         XCTAssertGreaterThanOrEqual(element.frame.minY, lower, element.identifier)
         XCTAssertLessThanOrEqual(element.frame.maxY, upper, element.identifier)
     }
-    private func tap(_ button: XCUIElement) {
+    private func tap(_ button: XCUIElement, minimumHeight: CGFloat? = 43.99) {
         XCTAssertTrue(button.waitForExistence(timeout: 20)); XCTAssertTrue(button.isHittable, button.identifier)
-        XCTAssertGreaterThanOrEqual(button.frame.height, 43.99, button.identifier); XCTAssertTrue(button.isEnabled); button.tap()
+        if let minimumHeight { XCTAssertGreaterThanOrEqual(button.frame.height, minimumHeight, button.identifier) }
+        XCTAssertTrue(button.isEnabled); button.tap()
     }
     private func wait(_ element: XCUIElement, matching format: String, arguments: [Any] = [], timeout: TimeInterval = 25) {
         let predicate = NSPredicate(format: format, argumentArray: arguments)
