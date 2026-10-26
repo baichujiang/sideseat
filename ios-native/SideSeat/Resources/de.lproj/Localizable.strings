@@ -3063,15 +3063,15 @@
 "Send final plan?" = "Endgültigen Plan senden?";
 "Ready to send final plan" = "Bereit zum endgültigen Senden";
 "Review and send" = "Prüfen und senden";
-"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Sende den endgültigen Plan jederzeit. Nur Personen mit Zusage werden benachrichtigt.";
+"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Sende den endgültigen Plan jederzeit. App-Nutzer mit Zusage erhalten eine Benachrichtigung; Web-Gäste sehen Aktualisierungen über ihren Link.";
 "You accepted. Waiting for the organizer to send the final plan." = "Du hast zugesagt. Warte auf den endgültigen Plan des Organisators.";
 "Accept, decline, or reply later. Only accepted participants join the final plan." = "Zusagen, absagen oder später antworten. Nur Personen mit Zusage nehmen am endgültigen Plan teil.";
 "The organizer sent the final plan. You can still accept before it starts." = "Der endgültige Plan wurde gesendet. Du kannst vor Beginn noch zusagen.";
-"Only accepted participants have this plan in their calendars." = "Nur Personen mit Zusage sehen diesen Plan in ihren Kalendern.";
+"Only accepted participants have this plan in their calendars." = "App-Nutzer mit Zusage sehen den Plan im Kalender. Web-Gäste sehen Aktualisierungen über ihren Link.";
 "Reply later" = "Später antworten";
 "Send whenever you are ready. Pending replies and declines do not hold up this plan." = "Sende, sobald du bereit bist. Ausstehende Antworten und Absagen halten den Plan nicht auf.";
-"Send to %d accepted people, including you. Pending and declined people will not be notified." = "An %d Personen mit Zusage senden, einschließlich dir. Personen ohne Zusage werden nicht benachrichtigt.";
-"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "Der Organisator kann jederzeit senden. Nur Personen mit Zusage werden benachrichtigt und erhalten einen Kalendereintrag.";
+"Send to %d accepted people, including you. Pending and declined people will not be notified." = "An %d Personen mit Zusage senden, einschließlich dir. App-Nutzer erhalten eine Benachrichtigung und einen Kalendereintrag; Web-Gäste sehen Aktualisierungen über ihren Link.";
+"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "Der Organisator kann jederzeit senden. App-Nutzer mit Zusage erhalten eine Benachrichtigung und einen Kalendereintrag; Web-Gäste sehen Aktualisierungen über ihren Link.";
 "Someone declined. You can still send the final plan to the people who accepted." = "Jemand hat abgesagt. Du kannst den endgültigen Plan trotzdem an Personen mit Zusage senden.";
 "Waiting for the organizer to send" = "Wartet auf endgültigen Versand";
 

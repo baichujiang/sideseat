@@ -3064,15 +3064,15 @@
 "Send final plan?" = "Send final plan?";
 "Ready to send final plan" = "Ready to send final plan";
 "Review and send" = "Review and send";
-"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Send the final plan whenever you are ready. Only people who accepted will be notified.";
+"Send the final plan whenever you are ready. Only people who accepted will be notified." = "Send the final plan whenever you are ready. Accepted App users receive a notification; web guests view updates through their link.";
 "You accepted. Waiting for the organizer to send the final plan." = "You accepted. Waiting for the organizer to send the final plan.";
 "Accept, decline, or reply later. Only accepted participants join the final plan." = "Accept, decline, or reply later. Only accepted participants join the final plan.";
 "The organizer sent the final plan. You can still accept before it starts." = "The organizer sent the final plan. You can still accept before it starts.";
-"Only accepted participants have this plan in their calendars." = "Only accepted participants have this plan in their calendars.";
+"Only accepted participants have this plan in their calendars." = "Accepted App users see this plan in their calendars. Web guests view updates through their link.";
 "Reply later" = "Reply later";
 "Send whenever you are ready. Pending replies and declines do not hold up this plan." = "Send whenever you are ready. Pending replies and declines do not hold up this plan.";
-"Send to %d accepted people, including you. Pending and declined people will not be notified." = "Send to %d accepted people, including you. Pending and declined people will not be notified.";
-"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "The organizer can send at any time. Only accepted participants are notified and added to calendars.";
+"Send to %d accepted people, including you. Pending and declined people will not be notified." = "Send to %d accepted people, including you. Accepted App users receive a notification and calendar entry; web guests view updates through their link.";
+"The organizer can send at any time. Only accepted participants are notified and added to calendars." = "The organizer can send at any time. Accepted App users receive a notification and calendar entry; web guests view updates through their link.";
 "Someone declined. You can still send the final plan to the people who accepted." = "Someone declined. You can still send the final plan to the people who accepted.";
 "Waiting for the organizer to send" = "Waiting for the organizer to send";
 

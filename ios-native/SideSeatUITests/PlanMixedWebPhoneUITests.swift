@@ -294,7 +294,12 @@ import XCTest
         for _ in 0..<10 where !element.exists { scroll.swipeUp(velocity: .slow) }
         XCTAssertTrue(element.waitForExistence(timeout: 15))
         let lower = max(scroll.frame.minY, app.navigationBars.firstMatch.frame.maxY + 2)
-        let upper = bottom ?? min(scroll.frame.maxY, app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY)
+        // Calendar details cover the root TabBar; its retained AX frame does not clip
+        // the sheet's visible List. Other surfaces retain their existing footer boundary.
+        let calendarDetail = app.descendants(matching: .any)["calendar-readonly-detail"].firstMatch
+        let viewportBottom = calendarDetail.exists ? app.frame.maxY
+            : app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY
+        let upper = bottom ?? min(scroll.frame.maxY, viewportBottom)
         for _ in 0..<28 {
             if element.isHittable && element.frame.minY >= lower && element.frame.maxY <= upper { break }
             let distance = min(CGFloat(180), max(CGFloat(48), element.frame.minY < lower ? lower - element.frame.minY : element.frame.maxY - upper))

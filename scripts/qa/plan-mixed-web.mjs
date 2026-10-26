@@ -23,7 +23,7 @@ let current = 'starting', failed, completed = false, main;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const sha = value => createHash('sha256').update(value).digest('hex');
 const report = async () => evidence('mixed-real-flow.json', { passed: completed && !failed, origin,
-  appBuild: 230, physicalUDID: '00008110-001A69110CC1401E', phases, checks, webChecks, screenshots,
+  appBuild: 231, physicalUDID: '00008110-001A69110CC1401E', phases, checks, webChecks, screenshots,
   mainMutations: 'App owner/registered peers through physical UI; guests through actual public browser UI only',
   browserEngines: ['chromium', 'webkit'], realNetwork: true,
   failure: failed ? { phase: current, message: 'Failed boundary; private diagnostics retained.' } : null,
