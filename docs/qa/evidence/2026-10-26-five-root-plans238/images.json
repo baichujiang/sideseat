@@ -1,0 +1,312 @@
+{
+  "build": 238,
+  "finalCaptures": 97,
+  "finalUniqueImagesActuallyViewed": 79,
+  "nativeCaptures": 81,
+  "nativeGlobalUniqueActuallyViewed": 63,
+  "webCaptures": 16,
+  "webUniqueActuallyViewed": 16,
+  "failedDiagnosticCapturesExcludedFromFinal": 6,
+  "privacyExclusionsInFinalReviewedImages": 0,
+  "publicOriginalImages": 16,
+  "publicImageUniqueSHA256": 16,
+  "cleanupGateSatisfied": true,
+  "cleanupReceiptSHA256": "7650d2fc08394b9b83a0f69dd56b08a6c6718bd3429c12328cd1cdd4bd1e8072",
+  "reviewGroups": [
+    {
+      "group": "main-native",
+      "captures": 51,
+      "uniqueSHA256": 34,
+      "actuallyViewedUnique": 34,
+      "privateReviewIndexSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b"
+    },
+    {
+      "group": "web",
+      "captures": 16,
+      "uniqueSHA256": 16,
+      "actuallyViewedUnique": 16,
+      "privateReviewIndexSHA256": "2a5e5c43b7acd2227e1d543ce088244e72a64bd5c7ebda6cf93127976c6c3f18"
+    },
+    {
+      "group": "input",
+      "captures": 9,
+      "uniqueSHA256": 9,
+      "actuallyViewedUnique": 9,
+      "privateReviewIndexSHA256": "7a002e4150266800078d3db8e0f9eba50efe2f29c31d85f6fc3c79099e8ec23d"
+    },
+    {
+      "group": "activity",
+      "captures": 13,
+      "uniqueSHA256": 12,
+      "actuallyViewedUnique": 12,
+      "privateReviewIndexSHA256": "49c384ec21c386846b8a55d0baa9198ce4a266ccbeb57cb5a044f6b49f077f32"
+    },
+    {
+      "group": "push",
+      "captures": 8,
+      "uniqueSHA256": 8,
+      "actuallyViewedUnique": 8,
+      "privateReviewIndexSHA256": "451d68ba4eed8158460a46fcaf95c47ad5909df5892725abc1a88caa1d5a6201"
+    }
+  ],
+  "images": [
+    {
+      "file": "main-01-create.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-01-create-dates-without-grid",
+      "sha256": "5e12dbe13e7bde305b11fa5885d1c71e96b694fec5d81d161db572a29a2837b9",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Create form title/location,candidate date summary,09:00–17:00 clocks,Europe/Berlin and activity-proposal checkbox plus fixed next button complete.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "AssistiveTouch in blank lower-right form area; does not cover the fields or next button."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "main-02-timetable.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-02-owner-first-timetable",
+      "sha256": "3bec2b82087a7efccc056953fa15471e68dc21aff50567605aaf218c46cc9ef7",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Upper calendar and0/4/6submitted counts visible; unsubmitted/submitted footer and its controls fit. Selected09:00/09:30Tuesday cells readable.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "OnlyTuesday–Friday and about09:00–14:00 shown; later dates/times are offscreen. AssistiveTouch covers rightmost midday cell area.",
+        "AssistiveTouch is visible; it may partly obscure the right-side grid, roster status or guidance as noted."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "main-03-share.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-04-owner-submitted-share-sheet",
+      "sha256": "6cc644e13d3833c3b5a6429e5f82ea9f08408427b793e2a8918c9730c27b8320",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Share sheet title,App-friend row and web-link/copy buttons complete; no URL,token or credential printed.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "Underlying timetable is intentionally dimmed and covered by modal; AssistiveTouch near right edge of App-friend row.",
+        "AssistiveTouch is visible; it may partly obscure the right-side grid, roster status or guidance as noted."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "main-04-direct-invite.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-08-send-directly-to-six-submitted-people",
+      "sha256": "78840c5bd4dee29216159040507ef97fb845dfef80e0e5dc62a6fe5518c36eb5",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Final-time mode and legend clear; Tuesday09:00 selected cell withcount6 visible;09:00–10:00 summary,1hour,send-to-five text and invitation button complete.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "Grid currently shows06:00–09:00;09:30 selected cell is below this viewport behind the fixed footer. Do not claim both selected cells are visible here. Later invitation time card shows the whole09:00–10:00range. AssistiveTouch overlaps unselected Friday early slots.",
+        "AssistiveTouch is visible; it may partly obscure the right-side grid, roster status or guidance as noted."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "main-05-publish-accepted.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-11-publish-only-three-accepted",
+      "sha256": "83b807c4cc382e3c08e76857c4ca5e9faa9bbf791c271150aced1a12ea841d07",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Publication prompt clearly states three accepted participants including self,App notification/calendar behavior and web-link updates; icon,cancel and publish buttons fit.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "AssistiveTouch is visible; it may partly obscure the right-side grid, roster status or guidance as noted."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "main-06-calendar.png",
+      "sourceGroup": "main-native",
+      "originalCapture": "plan-mixed-calendar-owner-accepted-peer1",
+      "sha256": "17fef5274124c2c0fa2d837fcc93f6327f5415efc66c8d958a9c631b0cf7ff91",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "e0dcb2b472815b322986799f40561854c908ac701ec926a637ee390a967f042b",
+      "visible": "Scrolled Calendar detail showsOctober27 09:00–10:00,1hour,no-repeat,location,manage-plan action and visible companions clearly.",
+      "scope": "Final successful App238 main mixed flow; native screenshots only; default physical iPhone14Plus UDID00008110-001A69110CC1401E; Chinese ordinary text size; light appearance; fictional owned cohort. Static visible viewport; no web pixels or maximum-size claim.",
+      "limits": [
+        "Only the current scroll viewport is reviewed. Offscreen rows/dates are not treated as clipping or as passed.",
+        "Detail title/upper summary are outside current viewport; this is a detail fragment,not full-page proof.",
+        "AssistiveTouch is visible; it may partly obscure the right-side grid, roster status or guidance as noted."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "web-01-draft.png",
+      "sourceGroup": "web",
+      "originalCapture": "mixed-guestA-unsubmitted",
+      "sha256": "5d5953fe9c58d29f747bab1bb8a747742fc2153181b5dfa505ac16c4ddf42d05",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "2a5e5c43b7acd2227e1d543ce088244e72a64bd5c7ebda6cf93127976c6c3f18",
+      "visible": "Editable draft: 09:00 and 09:30 cells have teal selection; bottom dock clearly says 未提交 and 提交我的空闲. Date strip intentionally scrolls horizontally.",
+      "scope": "Original public web screenshot;390pxlight or320pxdark as specified by source review.",
+      "limits": [
+        "This viewport does not show the document header or prove persistence."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "web-02-final-dark.png",
+      "sourceGroup": "web",
+      "originalCapture": "mixed-guestB-final-time-highlight",
+      "sha256": "3b7787fdf464d72c660646e6d568eb13af08af712411988237d35b1148da0831",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "2a5e5c43b7acd2227e1d543ce088244e72a64bd5c7ebda6cf93127976c6c3f18",
+      "visible": "320px dark invitation has a continuous outlined 09:00–10:00 highlight, readable 受邀时段 legend and three distinct RSVP actions. Narrow text wraps within the card.",
+      "scope": "Original public web screenshot;390pxlight or320pxdark as specified by source review.",
+      "limits": [
+        "Date/legend fit does not prove calendar integration."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "web-03-declined.png",
+      "sourceGroup": "web",
+      "originalCapture": "mixed-guestA-withdrawn",
+      "sha256": "9527b2216e727591472cf57af916dadbb7e314b32c0619b70151ad4b26e7f1a2",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "2a5e5c43b7acd2227e1d543ce088244e72a64bd5c7ebda6cf93127976c6c3f18",
+      "visible": "390px light post-withdrawal state has the revised 已拒绝 label on one centered line within its outlined disabled button; 确认参加 remains distinct. Final-time block stays continuous.",
+      "scope": "Original public web screenshot;390pxlight or320pxdark as specified by source review.",
+      "limits": [
+        "The displayed response state does not independently establish the prior attendance count or backend withdrawal."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "web-04-cancelled.png",
+      "sourceGroup": "web",
+      "originalCapture": "mixed-guestC-cancelled-without-page-reload",
+      "sha256": "475d1d9500140f9a98c6953f19f6dd2b2e82737a750e9ee9101c2420b2c1d8c9",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "2a5e5c43b7acd2227e1d543ce088244e72a64bd5c7ebda6cf93127976c6c3f18",
+      "visible": "390px light cancellation shows final range/highlight, 计划已取消 and readable roster statuses, without an active RSVP dock.",
+      "scope": "Original public web screenshot;390pxlight or320pxdark as specified by source review.",
+      "limits": [
+        "Only visible rows are reviewed; no-reload/update timing requires the flow checks."
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "input-01-cross-day.png",
+      "sourceGroup": "input",
+      "originalCapture": "five-root-plan-input-06-final-cross-day-cancel-and-reselect",
+      "sha256": "ec7f734e334c01009f68bfce902ebd4c186fae27b5f48c6043cc22098aee0418",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "7a002e4150266800078d3db8e0f9eba50efe2f29c31d85f6fc3c79099e8ec23d",
+      "visible": "12月1日00:00与00:30高亮；最终23:00–01:00跨天2小时汇总完整。",
+      "scope": "App 238; physical iPhone 14 Plus; ordinary Chinese text; light; owned fake cohort; current visible viewport only",
+      "limits": [
+        "前一天23:00网格在另一滚动片段中；AssistiveTouch覆盖右侧非关键格子。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "input-02-calendar.png",
+      "sourceGroup": "input",
+      "originalCapture": "five-root-plan-input-09-cross-day-calendar-readback",
+      "sha256": "cf3b5a27a9b36ec19d9bac1b6e4b134127afe3239f019706de53db8cff336915",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "7a002e4150266800078d3db8e0f9eba50efe2f29c31d85f6fc3c79099e8ec23d",
+      "visible": "原生日历半屏详情显示11月30日23:00到12月1日01:00、2小时，起止与标题清楚。",
+      "scope": "App 238; physical iPhone 14 Plus; ordinary Chinese text; light; owned fake cohort; current visible viewport only",
+      "limits": [
+        "半屏详情下方内容不在截图内；背景时间网格为模态遮罩。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "activity-01-votes-and-choice.png",
+      "sourceGroup": "activity",
+      "originalCapture": "five-root-plan-activity-05-activity-choice-keeps-submitted-timetable",
+      "sha256": "0aeaf6202d8dea0efa7b921384b758adbbef167001a6558c8ca24d6b8a37a5b5",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "49c384ec21c386846b8a55d0baa9198ce4a266ccbeb57cb5a044f6b49f077f32",
+      "visible": "咖啡休息草稿选中、两张2人感兴趣卡、双人已填写和09:00/09:30绿色已提交空闲格清楚。",
+      "scope": "App238; physical default iPhone14Plus; ordinary Chinese text; light; owned fake cohort; current visible viewport only",
+      "limits": [
+        "这是普通详情已提交空闲网格；不把它声明为选择最终时间模式的截图。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "activity-02-invitation.png",
+      "sourceGroup": "activity",
+      "originalCapture": "five-root-plan-activity-06-chosen-activity-invited-directly",
+      "sha256": "5d22a1e15f1437d16bd812bc899f4e08943998859793bff4b893634d08e7a4c4",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "49c384ec21c386846b8a55d0baa9198ce4a266ccbeb57cb5a044f6b49f077f32",
+      "visible": "所选咖啡休息标题、09:00–10:00受邀卡、1/2确认、发起人已接受与朋友待确认、正式发出按钮完整。",
+      "scope": "App238; physical default iPhone14Plus; ordinary Chinese text; light; owned fake cohort; current visible viewport only",
+      "limits": [
+        "AssistiveTouch遮右侧说明行末；不声明该处全部文字无遮挡。",
+        "没有记录最终选择网格的操作过程；本图为操作后的邀请卡。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "push-01-confirmed.png",
+      "sourceGroup": "push",
+      "originalCapture": "localized-plan-push-03-real-Chinese-confirmation-banner",
+      "sha256": "47f30df4811634f1eda885f4712cd9db44802fc732745c0e939880c47f9cfa23",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "451d68ba4eed8158460a46fcaf95c47ad5909df5892725abc1a88caa1d5a6201",
+      "visible": "通知横幅中文标题“计划已确认”和字面业务名%@ 100%完整可读；底层计划筹划中空状态与底栏清楚。",
+      "scope": "App238; physical default iPhone14Plus; ordinary Chinese text; light; owned independent push QA plan; current visible viewport only",
+      "limits": [
+        "横幅覆盖计划顶栏，不作底层标题完整通过证据。",
+        "筹划中为空不代表已确定列表为空；当前只显示该tab。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    },
+    {
+      "file": "push-02-cancelled.png",
+      "sourceGroup": "push",
+      "originalCapture": "localized-plan-push-06-real-Chinese-cancellation-banner",
+      "sha256": "a4925e7a108d80c5c83dbca7eee58f4a435abd4e22ae2db48ba7212ae380810c",
+      "originalBytesUnmodified": true,
+      "actuallyReviewedByViewImage": true,
+      "reviewReferenceSHA256": "451d68ba4eed8158460a46fcaf95c47ad5909df5892725abc1a88caa1d5a6201",
+      "visible": "通知横幅中文标题“计划已取消”和业务名字面%@ 100%完整可读；底层日历周视口与底栏清楚。",
+      "scope": "App238; physical default iPhone14Plus; ordinary Chinese text; light; owned independent push QA plan; current visible viewport only",
+      "limits": [
+        "横幅覆盖顶栏区域，不作顶栏完整无遮挡证据。",
+        "仅16:00–24:00日历视口；不声明全日或全周清空。"
+      ],
+      "privacy": "Only owned fictional QA business. No personal notice, credential, recovery URL, subscription token, cookie, QR or system desktop. Adopted only after all17owned plan links were verified404."
+    }
+  ],
+  "limits": [
+    "Images prove visible pixels only; phases,identity isolation and auto refresh use separate assertions.",
+    "Ordinary Chinese/light native and390light/320dark web only; no fullApp,max-size,physicalSafari,AppleCalendar or system-background-language claim.",
+    "Candidate82captures/8key actual reviews are separate, not final97/79."
+  ]
+}

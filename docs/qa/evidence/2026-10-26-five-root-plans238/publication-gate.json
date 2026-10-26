@@ -1,0 +1,12 @@
+{
+  "status": "public-safe-originals-adopted-after-cleanup",
+  "ownedAccountsDeleted": 12,
+  "ownedPlanLinks404": 17,
+  "fixtureAbsent": true,
+  "privateCleanupReceiptSHA256": "7650d2fc08394b9b83a0f69dd56b08a6c6718bd3429c12328cd1cdd4bd1e8072",
+  "publicOriginalImageCount": 16,
+  "rawDeviceJSONPublished": false,
+  "rawLogsOrTracesPublished": false,
+  "recoveryOrCredentialMaterialsPublished": false,
+  "scope": "Thin facts,hashes and reviewed original PNGs only; root performs final repository privacy scan and commit."
+}

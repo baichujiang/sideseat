@@ -82,7 +82,7 @@ async function request(endpoint, account, method = 'GET', body, statuses = [200]
         'x-sideseat-platform': 'ios', 'x-sideseat-persistent-intent': '1',
         'x-sideseat-flexible-timing': '1', 'x-sideseat-discovery-matching': '1',
         'x-sideseat-app-version': process.env.SIDESEAT_QA_APP_VERSION || '1.0.0',
-        'x-sideseat-build': process.env.SIDESEAT_QA_BUILD || '236',
+        'x-sideseat-build': process.env.SIDESEAT_QA_BUILD || '238',
         'x-sideseat-capabilities': 'action-coordination-v2',
         ...(account?.accessToken ? { Authorization: `Bearer ${account.accessToken}` } : {}),
         ...(method !== 'GET' ? { 'Idempotency-Key': key } : {}),

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "filesScanned": 41,
+  "exactCredentialMatches": 0,
+  "jwtMatches": 0,
+  "publicEvidencePrivatePathMatches": 0,
+  "publishedOriginalPNGs": 16,
+  "sourceFilesContainNoPrivateCredentialValues": true,
+  "actualPixelReviewScope": "81 native captures/63 globally unique plus16 web unique actually reviewed;16 safe originals adopted only after all owned plans404; candidate/failure figures separately scoped",
+  "allOwnedPlans404BeforeAdoption": true,
+  "accountCleanupVerified": true,
+  "scope": "All explicitly staged Plans stage files, including nine Swift/JavaScript QA sources, documents and adopted PNGs"
+}

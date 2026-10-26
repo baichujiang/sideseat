@@ -1,0 +1,26 @@
+{
+  "removedNativeRuntimeCredentialEnvelopeCount": 4,
+  "removedEnvelopeHashes": [
+    {
+      "bytes": 8807,
+      "sha256": "9b459de63f02c86ae09ff32126f6fa690c28fd1cbeb5f23d269acef536b7d59b"
+    },
+    {
+      "bytes": 9237,
+      "sha256": "2d97036be5c07d4e8b745429d392b7c33c2f61b124f797741390711b0eaf1567"
+    },
+    {
+      "bytes": 9475,
+      "sha256": "307921b1af4efddfd9bf61acf6e84dd47a9c50bc859bbca5d4e87ffdd1821a1b"
+    },
+    {
+      "bytes": 9858,
+      "sha256": "44c29340894678f4bf052bc25c31ff472690f1e2e0fc5efe47aa281e8e409758"
+    }
+  ],
+  "ownedFixtureAbsent": true,
+  "privateRawResultsRetained": true,
+  "buildSourceContextsTemporarilyRetainedForLaterPages": true,
+  "privateReceiptSHA256": "409441c675782a5ba89d7d3158f445ef230cb74e4d8e64ba561da8d65880f17b",
+  "scope": "Only four native runtime credential envelopes removed; private results and build/source contexts remain for the next three pages."
+}

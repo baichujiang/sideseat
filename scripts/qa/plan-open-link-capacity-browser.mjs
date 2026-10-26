@@ -252,7 +252,16 @@ try {
     await first.page.reload();
     const firstDecline = declineButton(first.page, v);
     await target(firstDecline); await firstDecline.click();
-    await expect(first.page.getByRole('button', { name: v.zh ? '已回复无法参加' : 'Declined', exact: true })).toBeDisabled({ timeout: 20_000 });
+    const declinedStatus = first.page.getByRole('button', { name: v.zh ? '已拒绝' : 'Declined', exact: true });
+    await expect(declinedStatus).toBeDisabled({ timeout: 20_000 });
+    await capture(first.page, v, '05c-after-decline-short-status', declinedStatus);
+    if (v.zh) {
+      const bounds = await declinedStatus.evaluate(node => {
+        const text = document.createRange(); text.selectNodeContents(node);
+        return { height: text.getBoundingClientRect().height, lineHeight: parseFloat(getComputedStyle(node).lineHeight) };
+      });
+      assert(bounds.height <= bounds.lineHeight + 1, 'The compact declined status must remain one readable line.');
+    }
     p = await latest(p); assert.equal(selected(p).length, 1);
     await checkCalendars(p, []);
     await second.page.reload();

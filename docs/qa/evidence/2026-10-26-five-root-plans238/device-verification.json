@@ -1,0 +1,30 @@
+{
+  "deviceModel": "iPhone 14 Plus",
+  "osVersion": "26.6.1",
+  "previewBundle": "app.sideseat.mobile.preview",
+  "installedBuild": 238,
+  "normalPID": 11097,
+  "normalLaunchArguments": [],
+  "normalLaunchEnvironment": {
+    "TERM": "dumb"
+  },
+  "normalProcessIndependentlyRead": true,
+  "ordinaryBuildPreserved": 97,
+  "existingRunnerBundlesPreserved": [
+    "app.sideseat.mobile.uitests.xctrunner"
+  ],
+  "ownedRunnersRemoved": [
+    "app.sideseat.fiverootsplansqa.xctrunner",
+    "app.sideseat.fiverootsplaninputsqa.xctrunner",
+    "app.sideseat.fiverootsplanactivityqa.xctrunner",
+    "app.sideseat.fiverootsplanslocalizedpushqa.xctrunner"
+  ],
+  "appReportDeltaByPathAndModificationTime": 0,
+  "reportComparisonFields": [
+    "relativePath",
+    "metadata.lastModDate"
+  ],
+  "ordinaryAccountIdentityRead": false,
+  "privateReceiptSHA256": "13b42fdbd59f45de70179ad6b8f16e54b96a4bd055f01997ce06a90e811adf0d",
+  "scope": "Allowlisted thin device facts; no raw device inventory, report paths or ordinary account profile is published."
+}

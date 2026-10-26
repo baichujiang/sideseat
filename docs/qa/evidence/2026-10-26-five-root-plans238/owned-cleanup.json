@@ -1,0 +1,23 @@
+{
+  "finalCohort": {
+    "accountsDeleted": 6,
+    "staleBearer401": 6,
+    "finalFourPlans404": 4,
+    "previousArtifactsRechecked404": 10,
+    "totalOwnedPlans404": 14
+  },
+  "baseline236Cohort": {
+    "accountsDeleted": 6,
+    "staleBearer401": 6,
+    "ownedPlansDeleted": 3,
+    "publicLinks404": 3,
+    "at": "2026-10-26T20:42:01.228Z"
+  },
+  "allOwnedAccountsDeleted": 12,
+  "allOwnedPlansDeleted404": 17,
+  "fixtureAbsent": true,
+  "ordinaryIdentityInspected": false,
+  "at": "2026-10-26T21:54:36.642Z",
+  "privateReceiptSHA256": "7650d2fc08394b9b83a0f69dd56b08a6c6718bd3429c12328cd1cdd4bd1e8072",
+  "scope": "Counts cover baseline236, final238, candidate and failed preparation artifacts; they are not a single-flow participant count. No account IDs or plan links are published."
+}

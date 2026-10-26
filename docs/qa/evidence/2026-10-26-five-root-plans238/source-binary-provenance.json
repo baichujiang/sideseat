@@ -1,0 +1,58 @@
+{
+  "previewBuild": 238,
+  "sourceCommit": "b551aaf399776357717d832c86f63403ad7916dc",
+  "sourcePushed": true,
+  "appInputCount": 268,
+  "activeFrozenAndBuildContextAllMatch": true,
+  "privateLocalConfigurationBytesMatch": true,
+  "changedFrom236": [
+    "ios-native/Configuration/Preview.xcconfig",
+    "ios-native/SideSeat/Core/Push/SideSeatAppDelegate.swift"
+  ],
+  "preservedFrom236": 266,
+  "phoneProductBundle": "app.sideseat.mobile.preview",
+  "phoneProductVersion": 238,
+  "phoneProductStrictSignaturePassed": true,
+  "phoneProductBinarySHA256": {
+    "SideSeat Preview.debug.dylib": "c57f6c8ed714325843eeaaa5a7fec688f001ccf07ffc3c5324e02aec2cf07483",
+    "SideSeat Preview": "17c3d428104a3d41d1b52b6727453b6f67d4f4db8cad8b785e7e64266634b5b4"
+  },
+  "phoneInstalledInfoVersion": 238,
+  "ordinary97PreservedAtInstall": true,
+  "installedBinaryBytesDirectlyRead": false,
+  "unitEvidence": {
+    "swiftTesting": [
+      {
+        "language": "en",
+        "executedTests": 30,
+        "failures": 0,
+        "skipped": 0,
+        "logSHA256": "1c66551953eb5dea2eb29f30cba7250a50ce75f366b2aada3acf1f55bb602f38"
+      },
+      {
+        "language": "zh-Hans",
+        "executedTests": 30,
+        "failures": 0,
+        "skipped": 0,
+        "logSHA256": "80ce9f8d14cd6fdfccb58bb7ad9f8b2f9212f2e6937d3a186e124a7981c36cf9"
+      },
+      {
+        "language": "de",
+        "executedTests": 30,
+        "failures": 0,
+        "skipped": 0,
+        "logSHA256": "1cb6233639c8724918f72c89c0ee877adc398b8a7f383f55d80f7c5f94eeedd9"
+      }
+    ],
+    "typescriptTests": 34,
+    "typescriptSuites": 5,
+    "typescriptFailures": 0,
+    "typescriptSkipped": 0,
+    "fullTypeScriptExit": 0
+  },
+  "superseded237BodyTemplateWasNeverDeployed": true,
+  "notFinalPageAcceptanceByItself": true,
+  "appInputManifestSHA256": "cd0bc80490871ab6c7f6be187c4e114be3be0745aa2e351d83213e6e0d6509a9",
+  "privateReceiptSHA256": "c4a673aa4bdc12472859fa0aaa12c355f37a2a4218e07127e6d91ddbc6d95b78",
+  "scope": "Active/frozen/build inputs and build-product binaries verified. Installed Info is238; device binary bytes were not directly read. Local values and268-file manifest remain private."
+}

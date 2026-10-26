@@ -21,7 +21,28 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview236 is the current installed development build. Sourcec7572a58 is pushed.
+- Preview238 is the current installed development build. Sourceb551aaf3 is pushed.
+  Five-root acceptance: Together236 and Plans238 passed; Calendar is in progress;
+  Messages/Me business tests have not started. Four separate final238 phone cases passed:
+  Main578.137s/15phases+11webchecks,Input298.567s/8,Activity655.295s/14,
+  real foreground localized push94.849s/10. Push uses an independent owned API
+  setup/trigger; main/input/activity writes use phone UI,guests public browser UI.
+  Activity's one bounded GET transport retry is recorded; prior failures retained.
+  81nativecaptures/63unique+16webunique allactuallyviewed; ordinaryCJK/light,
+  viewport/AssistiveTouch/notice overlays stay scoped. No all-size/device claim.
+  Only push titles localize via existing keys; original body/recipients/rules stay.
+  Web declined status is compact. Three production files+marker over1394 preserved
+  bytes,total1398 remoteSHA1match; same tested HTsL candidate promoted without
+  rebuild,api/www/root READY dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ,migrations skipped.
+  268/Local/strictsignature/productbinary provenance matches238;normalPID11097,
+  emptyargs/TERM-only,ordinary97/oldRunner preserved,4ownPlanRunners removed,
+  newSideSeat reportdelta0.12ownedaccounts401/17ownedplans404 cleaned (includes
+  baseline/failed/candidate data),4runtimecredentialenvelopes removed;build/server
+  contexts remain temporarily for laterpages. No ordinaryidentity was read.
+  See [238 release](docs/releases/2026-10-26-preview238-plan-flows.md),
+  [Plans QA](docs/qa/2026-10-26-five-root-plans.md) and
+  [five-root status](docs/qa/2026-10-26-five-root-flows.md).
+- Preview236 was the previous installed development build. Sourcec7572a58 is pushed.
   Five-root acceptance is sequential: Together passed; Plans/Calendar/Messages/Me
   have not started. Localverified2-user native flows passed7cases/49readonlyDB
   boundaries; physical14Plus productionunverifiedgate passed68.533s/1case.

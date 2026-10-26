@@ -1,0 +1,83 @@
+{
+  "sourceCommit": "b551aaf399776357717d832c86f63403ad7916dc",
+  "sourcePushed": true,
+  "baselineDeployment": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+  "productionDeployment": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+  "baselineFiles": 1397,
+  "bytePreservedFiles": 1394,
+  "overlaidFiles": [
+    "lib/push/apns-payload.ts",
+    "lib/time-polls/notifications.ts",
+    "components/time-polls/shared-time-poll.tsx"
+  ],
+  "addedMarker": ".sideseat-five-roots-plan238-source.json",
+  "actualUploadedFiles": 1398,
+  "all1394PreservedFilesByteEqualBaseline": true,
+  "all1398RemoteSourceUIDsMatchExpectedSHA1": true,
+  "remoteMarkerBytesMatch": true,
+  "overlayHashes": [
+    {
+      "path": "lib/push/apns-payload.ts",
+      "baselineSHA1": "f7dff50cfe39aa3e3ac17019dbd16d76fe406b60",
+      "sha1": "8d39fbb447ab1fc7fc351a6695d2e66d5d51fba2",
+      "sha256": "b24f44b1223fca877551a4e44102cd0c2ded26ae6ebeecf155e4bf127773a6bb"
+    },
+    {
+      "path": "lib/time-polls/notifications.ts",
+      "baselineSHA1": "8ae23c1303461e432bfdb4ca59ef52824078e992",
+      "sha1": "a7d92b7c6f64778b3f08684237744da63e5ee9cc",
+      "sha256": "4badf5eab9b3892fba7acc291ed0ef3c0c232e9c1c2042d2ddc03734ffe9e078"
+    },
+    {
+      "path": "components/time-polls/shared-time-poll.tsx",
+      "baselineSHA1": "83dfaa228e6f17f84ec2ca92d6be232778bd8ee9",
+      "sha1": "d109432700ecaf6f437f8243318ec2f388573902",
+      "sha256": "d83fbff7ead38f92701db4a42cbdce8af1f33edf0271d127f1f1b324d2b9d534"
+    }
+  ],
+  "expectedManifestSHA256": "5848e854279b7056284467b98e59db93c273f003d47a6b43535fc562baa73eef",
+  "remoteSourceTreeSHA256": "05dde48a9890e9557ce9c147d4b2129fd2697c02d596e7a8da1de84a83a2ae39",
+  "markerSHA256": "544b2384af4bfc8c3fd20d67722dc634800eb325ca1ebf91b7e37c110fa33913",
+  "migrationSkipped": true,
+  "activityReleaseHook": "none",
+  "productionEnvironmentSecretsReadOrPulled": false,
+  "promotionMethod": "Promote the same tested existing production candidate; no rebuild.",
+  "domains": [
+    {
+      "domain": "api.sideseat.de",
+      "deploymentId": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "www.sideseat.de",
+      "deploymentId": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production"
+    },
+    {
+      "domain": "sideseat.de",
+      "deploymentId": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production"
+    }
+  ],
+  "candidateBrowserRegression": {
+    "engines": [
+      "chromium",
+      "webkit"
+    ],
+    "variantsPerEngine": [
+      "390-zh-light",
+      "320-en-dark-20px",
+      "1440-en-light"
+    ],
+    "functionalRegressionPassed": true,
+    "targetedShortChineseStatusVariantPerEngine": "390-zh-light",
+    "candidateCaptures": 82,
+    "actualKeyImagesReviewed": 8,
+    "allCandidateImagesReviewed": false
+  },
+  "privateSourceProofSHA256": "95389d17d12e017584d6aa52e8d1d9047a299b834daf342e2e63c3efc1310e68",
+  "privatePromotionReceiptSHA256": "60415f27da1d4f263dcb64fc021c35b942aeea4817538e506640b5935a24d4ed"
+}

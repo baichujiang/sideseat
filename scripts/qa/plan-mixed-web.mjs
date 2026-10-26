@@ -140,6 +140,16 @@ async function reply(g, status) {
   const result = g.page.waitForResponse(r => r.url().endsWith('/invitation-response') && r.request().method() === 'PUT');
   await button.click(); assert.equal((await result).status(), 200);
   assert.equal((await publicPoll(g)).invitations.find(i => i.isMe)?.status, status);
+  if (status === 'DECLINED') {
+    const label = g.page.getByRole('button', { name: '已拒绝', exact: true });
+    await expect(label).toBeDisabled();
+    const fits = await label.evaluate(el => {
+      const range = document.createRange(); range.selectNodeContents(el);
+      return range.getBoundingClientRect().height <= parseFloat(getComputedStyle(el).lineHeight) + 1;
+    });
+    assert(fits, 'The declined status must fit on one line inside its button.');
+    webChecks.push({ role: g.role, check: 'declined status stays within one text line', passed: true });
+  }
 }
 
 async function verifyInvitation(g) {
