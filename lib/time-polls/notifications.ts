@@ -18,6 +18,7 @@ export function schedulePollInvitationNotification(token: string, version: numbe
       ] }, select: { id: true } });
       if (blocked) return;
       await notifyUserPush(person.userId, { title: "A plan is waiting for you", body: poll.title,
+        apnsTitleLocalizationKey: "A plan is waiting for you",
         url: `/time-polls/${token}`, threadId: `time-poll:${token}`, category: "PLAN_UPDATE",
         data: { kind: "time_poll_invitation", timePollToken: token } });
     }));
@@ -40,6 +41,7 @@ export function schedulePublishedPollNotification(token: string, recipientIds: s
       if (blocked) return;
       await notifyUserPush(person.userId, {
         title: "Your plan is confirmed", body: poll.title, url: `/time-polls/${token}`,
+        apnsTitleLocalizationKey: "Plan confirmed",
         threadId: `time-poll:${token}`, category: "PLAN_UPDATE", data: { kind: "time_poll_confirmed", timePollToken: token },
       });
     }));
@@ -62,6 +64,7 @@ export function scheduleCancelledPollNotification(token: string, version: number
       if (blocked) return;
       await notifyUserPush(person.userId, {
         title: "A plan was cancelled", body: poll.title, url: `/time-polls/${token}`,
+        apnsTitleLocalizationKey: "Plan cancelled",
         threadId: `time-poll:${token}`, category: "PLAN_UPDATE", data: { kind: "plan_canceled", timePollToken: token },
       });
     }));

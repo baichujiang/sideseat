@@ -376,6 +376,57 @@ struct NavigationTests {
         #expect(probe.count(for: .sideSeatCalendarNeedsRefresh) == 0)
     }
 
+    @Test("Shared-plan APNs title keys use the current App language and keep the body literal")
+    @MainActor
+    func localizedSharedPlanPushPresentation() {
+        let token = String(repeating: "d", count: 32)
+        let planTitle = "Coffee %@ 100%"
+        let language = AppLocalization.selectedLanguage.locale.language.languageCode?.identifier ?? "en"
+        let cases: [(String, String, [String: String])] = [
+            ("time_poll_invitation", "A plan is waiting for you", [
+                "en": "A plan is waiting for you", "zh": "有计划待你确认", "de": "Ein Plan wartet auf dich",
+            ]),
+            ("time_poll_confirmed", "Plan confirmed", [
+                "en": "Plan confirmed", "zh": "计划已确认", "de": "Plan bestätigt",
+            ]),
+            ("plan_canceled", "Plan cancelled", [
+                "en": "Plan cancelled", "zh": "计划已取消", "de": "Plan abgesagt",
+            ]),
+        ]
+        for (kind, titleKey, translations) in cases {
+            let notice = ForegroundPushNotice(title: "System-language title", body: planTitle,
+                url: "/time-polls/" + token, userInfo: [
+                    "kind": kind, "timePollToken": token,
+                    "aps": ["alert": ["title-loc-key": titleKey, "body": planTitle]],
+                ])
+            let expected = translations[language] ?? translations["en"]!
+            #expect(notice.title == expected)
+            #expect(notice.body == planTitle)
+            #expect(notice.navigationURL == "/time-polls/" + token)
+            #expect(notice.isPlanUpdate)
+            #expect(notice.updatesCalendar == (kind != "time_poll_invitation"))
+            #expect(!notice.isDirectPlanCancellation)
+        }
+    }
+
+    @Test("Ordinary, unknown and missing APNs title keys retain the original presentation")
+    func unrelatedPushPresentationStaysUnchanged() {
+        let knownAlert: [String: Any] = ["title-loc-key": "Plan confirmed", "body": "Coffee %@ 100%"]
+        let unknownAlert: [String: Any] = ["title-loc-key": "Unknown remote title", "body": "Coffee %@ 100%"]
+        let incompleteAlert: [String: Any] = ["title": "Literal title", "body": "Coffee %@ 100%"]
+        let inputs: [[AnyHashable: Any]] = [
+            ["kind": "direct_message", "connectionId": "connection-123", "aps": ["alert": knownAlert]],
+            ["kind": "time_poll_confirmed", "timePollToken": "owned-token", "aps": ["alert": unknownAlert]],
+            ["kind": "time_poll_confirmed", "timePollToken": "owned-token", "aps": ["alert": incompleteAlert]],
+            ["kind": "time_poll_confirmed", "aps": ["alert": knownAlert]],
+        ]
+        for userInfo in inputs {
+            let notice = ForegroundPushNotice(title: "Original title", body: "Coffee %@ 100%", url: nil, userInfo: userInfo)
+            #expect(notice.title == "Original title")
+            #expect(notice.body == "Coffee %@ 100%")
+        }
+    }
+
     @Test("Shared-plan cancellations keep the foreground banner and refresh Plans and Calendar")
     @MainActor
     func sharedPlanCancellationPush() async {

@@ -54,13 +54,23 @@ struct ForegroundPushNotice: Equatable, Sendable {
         url: String?,
         userInfo: [AnyHashable: Any]
     ) {
-        self.title = title
         self.body = body
         self.url = url
-        kind = Self.string("kind", in: userInfo)
+        let notificationKind = Self.string("kind", in: userInfo)
+        kind = notificationKind
         connectionID = Self.string("connectionId", in: userInfo)
         courseID = Self.string("courseId", in: userInfo)
         groupChatID = Self.string("groupChatId", in: userInfo)
+        let alert = (userInfo["aps"] as? [String: Any])?["alert"] as? [String: Any]
+        let sharedPlan = Self.string("timePollToken", in: userInfo) != nil
+            && ["time_poll_invitation", "time_poll_confirmed", "plan_canceled"].contains(notificationKind ?? "")
+        if sharedPlan, let alert,
+           let titleKey = alert["title-loc-key"] as? String,
+           ["A plan is waiting for you", "Plan confirmed", "Plan cancelled"].contains(titleKey) {
+            self.title = AppLocalization.string(String.LocalizationValue(titleKey))
+        } else {
+            self.title = title
+        }
     }
 
     private static func string(_ key: String, in userInfo: [AnyHashable: Any]) -> String? {

@@ -110,6 +110,40 @@ describe("isApnsConfigured", () => {
 });
 
 describe("APNs payload", () => {
+  it("localizes only the APNs title while preserving the literal body, non-APNs fallback and routing", () => {
+    const input = {
+      title: "Your plan is confirmed", body: "Coffee %@ 100%",
+      apnsTitleLocalizationKey: "Plan confirmed",
+      url: "/time-polls/poll-token", threadId: "time-poll:poll-token", category: "PLAN_UPDATE",
+      data: { kind: "time_poll_confirmed", timePollToken: "poll-token" },
+    };
+    const payload = buildApnsPayload(input);
+    assert.deepEqual(payload, {
+      aps: {
+        alert: { "title-loc-key": "Plan confirmed", body: "Coffee %@ 100%" },
+        sound: "default", "thread-id": "time-poll:poll-token", category: "PLAN_UPDATE",
+      },
+      url: "/time-polls/poll-token", kind: "time_poll_confirmed", timePollToken: "poll-token",
+    });
+    assert.equal("title" in payload.aps.alert, false);
+    assert.equal("loc-key" in payload.aps.alert, false);
+    assert.equal("loc-args" in payload.aps.alert, false);
+    assert.equal(input.title, "Your plan is confirmed");
+    assert.equal(input.body, "Coffee %@ 100%");
+  });
+
+  it("reuses readable title keys already present in all three bundle languages", () => {
+    const titles = ["A plan is waiting for you", "Plan confirmed", "Plan cancelled"];
+    for (const language of ["en", "zh-Hans", "de"]) {
+      const lines = readRepoFile(`ios-native/SideSeat/Resources/${language}.lproj/Localizable.strings`).split("\n");
+      for (const key of titles) {
+        const entries = lines.filter(line => line.startsWith(`"${key}" = `));
+        assert.equal(entries.length, 1, `${language}: one bundled notification key`);
+        if (language === "en") assert.equal(entries[0], `"${key}" = "${key}";`);
+      }
+    }
+  });
+
   it("carries routing, grouping, event context, and an exact unread badge", () => {
     assert.deepEqual(
       buildApnsPayload({

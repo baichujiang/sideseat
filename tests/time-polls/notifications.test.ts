@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import test from "node:test";
 import ts from "typescript";
+import type { UserPushPayload } from "../../lib/push/apns-payload";
 
 // Execute the production service and after-response callback with in-memory I/O.
 function loadModule<T>(path: string, imports: Record<string, unknown>): T {
@@ -28,12 +29,12 @@ const roster = () => [invitation("owner", "ACCEPTED"), invitation("pending"), in
 
 function fixture(phase = "CONFIRMED") {
   const poll = {
-    id: "poll-id", token: "poll-token", title: "Dinner", creatorId: "owner", phase, invitationVersion: 2,
+    id: "poll-id", token: "poll-token", title: "Coffee %@ 100%", creatorId: "owner", phase, invitationVersion: 2,
     canceledAt: null as Date | null, updatedAt: new Date(), invitations: roster(), responses: [], activityIdeas: [],
     slots: [], chosenStart: null, chosenEnd: null, activityTopic: null,
   };
   const callbacks: (() => Promise<void>)[] = [];
-  const deliveries: { userId: string; payload: { url: string; data: Record<string, string> } }[] = [];
+  const deliveries: { userId: string; payload: UserPushPayload }[] = [];
   let updates = 0, calendarDeletes = 0, inTransaction = false;
   const prisma = {
     block: {
@@ -43,10 +44,11 @@ function fixture(phase = "CONFIRMED") {
     },
     timePoll: {
       findFirst: async () => poll,
-      findUnique: async ({ select }: { select: { invitations: { where: { userId: { in: string[] }; selected: boolean; status: { in: string[] }; version: number } } } }) => {
+      findUnique: async ({ select }: { select: { invitations: { where: { userId: { in: string[] }; selected: boolean; status: string | { in: string[] }; version?: number } } } }) => {
         const filter = select.invitations.where;
         return { ...poll, invitations: poll.invitations.filter(person => person.userId !== null && filter.userId.in.includes(person.userId)
-          && person.selected === filter.selected && filter.status.in.includes(person.status) && person.version === filter.version) };
+          && person.selected === filter.selected && (typeof filter.status === "string" ? person.status === filter.status : filter.status.in.includes(person.status))
+          && (filter.version === undefined || person.version === filter.version)) };
       },
       update: async ({ data }: { data: { phase: string; canceledAt: Date } }) => { updates++; Object.assign(poll, data); },
     },
@@ -58,7 +60,11 @@ function fixture(phase = "CONFIRMED") {
       try { await work(prisma); } finally { inTransaction = false; }
     },
   };
-  type Notifications = { scheduleCancelledPollNotification: (token: string, version: number, recipients: string[]) => void };
+  type Notifications = {
+    scheduleCancelledPollNotification: (token: string, version: number, recipients: string[]) => void;
+    schedulePollInvitationNotification: (token: string, version: number, recipients: string[]) => void;
+    schedulePublishedPollNotification: (token: string, recipients: string[]) => void;
+  };
   const notifications = loadModule<Notifications>("lib/time-polls/notifications.ts", {
     "server-only": {}, "next/server": { after: (work: () => Promise<void>) => { assert.equal(inTransaction, false); callbacks.push(work); } },
     "@/lib/db/prisma": { prisma },
@@ -71,7 +77,7 @@ function fixture(phase = "CONFIRMED") {
     "@/lib/time-polls/lifecycle": { timePollPhase: (value: typeof poll) => value.phase, timePollExpiresAt: () => null },
     "@/lib/time-polls/notifications": notifications,
   });
-  return { poll, callbacks, deliveries,
+  return { poll, callbacks, deliveries, notifications,
     cancel: (userId = "owner", version = 2) => service.cancelPollPlan(poll.token, userId, version, "https://sideseat.de"),
     changes: () => ({ updates, calendarDeletes }) };
 }
@@ -90,8 +96,56 @@ test("cancelling a formal plan notifies pending and accepted accounts after comm
     for (const { payload } of f.deliveries) {
       assert.equal(payload.url, "/time-polls/poll-token");
       assert.deepEqual(payload.data, { kind: "plan_canceled", timePollToken: "poll-token" });
+      assert.equal(payload.title, "A plan was cancelled");
+      assert.equal(payload.body, "Coffee %@ 100%");
+      assert.equal(payload.apnsTitleLocalizationKey, "Plan cancelled");
     }
   }
+});
+
+test("localized invitation keeps deferred delivery, current-version pending recipients, block checks and the original route", async () => {
+  const f = fixture("INVITING");
+  const recipients = f.poll.invitations.flatMap(person => person.userId ? [person.userId] : []);
+  f.notifications.schedulePollInvitationNotification(f.poll.token, 2, recipients);
+  assert.equal(f.deliveries.length, 0);
+  assert.equal(f.callbacks.length, 1);
+  await f.callbacks[0]();
+  assert.deepEqual(f.deliveries.map(item => item.userId), ["pending"]);
+  assert.deepEqual(f.deliveries[0].payload, {
+    title: "A plan is waiting for you", body: "Coffee %@ 100%",
+    apnsTitleLocalizationKey: "A plan is waiting for you",
+    url: "/time-polls/poll-token", threadId: "time-poll:poll-token", category: "PLAN_UPDATE",
+    data: { kind: "time_poll_invitation", timePollToken: "poll-token" },
+  });
+});
+
+test("localized publication keeps only requested selected accepted accounts and the original confirmed callback", async () => {
+  const f = fixture("CONFIRMED");
+  f.poll.invitations.find(person => person.userId === "blocked")!.status = "ACCEPTED";
+  f.notifications.schedulePublishedPollNotification(f.poll.token, ["accepted", "pending", "declined", "shared", "unselected", "blocked"]);
+  assert.equal(f.deliveries.length, 0);
+  assert.equal(f.callbacks.length, 1);
+  await f.callbacks[0]();
+  assert.deepEqual(f.deliveries.map(item => item.userId), ["accepted"]);
+  assert.deepEqual(f.deliveries[0].payload, {
+    title: "Your plan is confirmed", body: "Coffee %@ 100%",
+    apnsTitleLocalizationKey: "Plan confirmed",
+    url: "/time-polls/poll-token", threadId: "time-poll:poll-token", category: "PLAN_UPDATE",
+    data: { kind: "time_poll_confirmed", timePollToken: "poll-token" },
+  });
+});
+
+test("localized invitation and publication still recheck phase and invitation version before sending", async () => {
+  const invite = fixture("INVITING");
+  invite.notifications.schedulePollInvitationNotification(invite.poll.token, 2, ["pending"]);
+  invite.poll.invitationVersion++;
+  await invite.callbacks[0]();
+  assert.equal(invite.deliveries.length, 0);
+  const published = fixture("CONFIRMED");
+  published.notifications.schedulePublishedPollNotification(published.poll.token, ["accepted"]);
+  published.poll.phase = "CANCELLED";
+  await published.callbacks[0]();
+  assert.equal(published.deliveries.length, 0);
 });
 
 test("repeat cancellation preserves its original timestamp and does not repeat calendar deletion or notification", async () => {

@@ -13,6 +13,7 @@ export type PushNotificationKind =
 export type UserPushPayload = {
   title: string;
   body: string;
+  apnsTitleLocalizationKey?: string;
   url?: string;
   badge?: number;
   threadId?: string;
@@ -28,7 +29,9 @@ export function buildApnsPayload(payload: UserPushPayload) {
 
   return {
     aps: {
-      alert: { title: payload.title, body: payload.body },
+      alert: payload.apnsTitleLocalizationKey
+        ? { "title-loc-key": payload.apnsTitleLocalizationKey, body: payload.body }
+        : { title: payload.title, body: payload.body },
       sound: "default",
       ...(badge !== undefined ? { badge } : {}),
       ...(payload.threadId ? { "thread-id": payload.threadId } : {}),
