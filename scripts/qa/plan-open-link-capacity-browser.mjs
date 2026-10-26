@@ -17,7 +17,7 @@ assert(/^[a-z0-9-]+$/.test(stage ?? ''), 'A safe stage label is required.');
 assert(['chromium', 'webkit'].includes(engineName), 'Choose chromium or webkit.');
 assert(mode === undefined || mode === 'baseline', 'The optional mode is baseline.');
 const baseline = mode === 'baseline';
-const privateDirectory = '/tmp/sideseat227-private';
+const privateDirectory = process.env.SIDESEAT_QA_BROWSER_PRIVATE || '/tmp/sideseat227-private';
 await fs.mkdir(privateDirectory, { recursive: true, mode: 0o700 });
 await fs.chmod(privateDirectory, 0o700);
 await fs.mkdir(out, { recursive: true });

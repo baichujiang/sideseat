@@ -55,7 +55,9 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
     return pollDate(first, zh) + " · " + pollClock(start, poll!.timeZone) + "–" + (first === last ? "" : pollDate(last, zh) + " · ") + pollClock(end, poll!.timeZone);
   };
   const currentTask = fullForViewer && !closed ? fullMessage : choosingName
-    ? (zh ? "填个名字，就能在这里参与。" : "Enter your name to take part here.")
+    ? recoveryPage
+      ? (zh ? "填个名字，以网页访客参与。" : "Enter your name to join as a web guest.")
+      : (zh ? "已有 App？点右上角「打开 App」使用原账号；也可以填名字，以网页访客参与。" : "Have the app? Open it above to use your account, or enter your name to join as a web guest.")
     : collecting
       ? fixedTime
         ? (zh ? "时间已定，展开活动建议，一起决定做什么；收到正式邀请后再确认参加。" : "The time is set. Open activity ideas to choose what to do; confirm attendance after the formal invitation.")
@@ -155,7 +157,7 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
                 {poll.planningMode === "FIXED" && remaining > 0 ? <p className="text-sm leading-6 text-muted-foreground" data-testid="plan-invitation-remaining">{zh ? `还有 ${remaining} 个名额` : remaining === 1 ? "1 place available" : `${remaining} places available`}</p> : null}
                 {fullForViewer ? <p className="text-sm leading-6 text-muted-foreground" data-testid="plan-invitation-full">{fullMessage}</p> : poll.phase === "CONFIRMED" && mine?.status === "ACCEPTED" ? <><p className="text-sm leading-6">{zh ? "发起人已正式发出，你已接受参加。按上面的时间地点参加即可。" : "The organizer sent the final plan and you accepted. Follow the time and place above."}</p><p className="text-sm leading-6 text-muted-foreground">{zh ? "保留此链接，之后可随时查看活动详情。" : "Keep this link to return to the activity details."}</p></> : poll.viewerId ? included ? <>
                   <p className="text-sm leading-6">{mine?.status === "ACCEPTED" ? (zh ? "你已接受。由发起人决定何时正式发出，无需等待所有人回复。" : "You accepted. The organizer decides when to send the final plan, without waiting for everyone.") : (zh ? "现在确认的是上面的具体安排，请看好日期、时间和地点后回复。" : "You're confirming the specific arrangement above. Check the date, time and place before replying.")}</p>
-                  <p className="text-sm leading-6 text-muted-foreground">{zh ? "发起人可随时正式发出，只通知已接受者并同步他们的 SideSeat 日历。未回复或拒绝不会阻塞；发出后仍可在开始前接受。" : "The organizer can send at any time. Only accepted participants are notified and added to their SideSeat calendars. You may still accept before the activity starts."}</p>
+                  <p className="text-sm leading-6 text-muted-foreground">{zh ? "发起人可随时正式发出。已接受的 App 用户会收到通知并同步 SideSeat 日历；网页访客请保留此链接查看更新。未回复或拒绝不会阻塞，开始前仍可接受。" : "The organizer can send at any time. Accepted app users are notified and added to their SideSeat calendars; web guests can return to this link for updates. Pending or declined replies do not block sending, and you may accept before the activity starts."}</p>
                 </> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "你尚未接受这次邀请，不会收到成行通知，也不会加入日历。你填写的空闲仍然保留。" : "You have not accepted this invitation, so you won't receive the final alert or a calendar entry. Your availability is saved."}</p> : <p className="text-sm leading-6 text-muted-foreground">{zh ? "请先填写上面的名字，再回复这次邀请。" : "Enter your name above to reply to this invitation."}</p>}
               </>}
             </section> : null}

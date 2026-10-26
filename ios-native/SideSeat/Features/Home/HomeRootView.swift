@@ -1336,7 +1336,7 @@ private struct HomeAgendaDetailView: View {
 
                 if !people.isEmpty {
                     Section("People") {
-                        ForEach(people, id: \.self) { name in
+                        ForEach(Array(people.enumerated()), id: \.offset) { _, name in
                             HStack(spacing: 10) {
                                 InitialAvatar(name: name, size: 30)
                                 Text(name)
@@ -1377,8 +1377,7 @@ private struct HomeAgendaDetailView: View {
 
     private var people: [String] {
         if !item.participantNames.isEmpty {
-            var seen = Set<String>()
-            return item.participantNames.filter { seen.insert($0).inserted }
+            return item.participantNames
         }
         guard let withLabel = item.withLabel, !withLabel.isEmpty else { return [] }
         return [withLabel]
