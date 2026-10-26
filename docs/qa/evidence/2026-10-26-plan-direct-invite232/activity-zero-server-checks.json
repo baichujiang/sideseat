@@ -1,0 +1,15 @@
+{
+  "readOnly": true,
+  "activity": {
+    "phase": "INVITING",
+    "selectedCount": 2,
+    "activityMatched": true,
+    "invitationVersion": 1
+  },
+  "zero": {
+    "phase": "INVITING",
+    "expectedCount": 2,
+    "selectedCount": 1,
+    "invitationVersion": 1
+  }
+}

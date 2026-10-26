@@ -3223,3 +3223,18 @@
 "Loading intentions" = "正在加载意愿";
 
 "This plan is full. Contact the organizer." = "计划人数已满，请联系发起人。";
+
+// Direct invitations from the timetable.
+"Edit invitation" = "编辑邀请";
+"Timetable respondents" = "已填写的人";
+"Everyone who submitted availability is invited automatically." = "提交过空闲时间的人会自动收到邀请。";
+"Additional invitees" = "额外邀请的人";
+"Invitation link" = "邀请链接";
+"Friends can confirm through the invitation link." = "朋友可通过邀请链接确认参加。";
+"Send invitations to %d people" = "将向 %d 人发送邀请";
+"Choose an activity above before sending invitations." = "先在上方选择活动，再发送邀请。";
+"Interest is not attendance. The organizer chooses the activity here before sending invitations." = "感兴趣不代表确认参加。发起人在这里选好活动后发送邀请。";
+"Choose this activity" = "选择此活动";
+"Plans support up to 20 people, including you." = "每个计划最多 20 人，包含你。";
+"Send plan cards to App friends" = "发计划卡给 App 好友";
+"Select extra invitees here after sending a plan card. Respondents join automatically." = "发出计划卡后，可在这里勾选额外邀请的人；填写后会自动加入。";

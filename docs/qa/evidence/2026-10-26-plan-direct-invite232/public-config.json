@@ -1,0 +1,10 @@
+{
+  "serverTime": "2026-10-26T13:29:13.845Z",
+  "maintenanceMode": false,
+  "features": {
+    "v2WeeklyIntent": true,
+    "v2MutualOpportunity": true,
+    "v2ExploreIntents": true
+  },
+  "scope": "Public config only; account assignment is separate."
+}

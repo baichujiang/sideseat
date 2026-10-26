@@ -1,0 +1,397 @@
+{
+  "reviewer": "saved_profile_qa",
+  "nativeBuild": 232,
+  "sourceManifest": "/tmp/sideseat232-main-inspection/part-1.json",
+  "reviewedAt": "2026-10-26T14:44:00.125960+00:00",
+  "scope": "最终主mixed中段回复、正式发布、日历前段与网页退出后名单；实际原生PNG逐个view_image审阅。",
+  "viewedCaptures": 17,
+  "uniquePixelSHA256": 11,
+  "adoptedCaptures": 17,
+  "blockingCount": 0,
+  "privacyExcludedCount": 0,
+  "conclusion": "按各图实际可见范围采用，未见新的产品阻断／隐私问题；不把运行断言、文件role后缀或视口外内容当作像素证明。",
+  "globalLimitations": [
+    "普通中文原生局部截图，不涵盖最大字号／多语言／网页渲染。",
+    "AssistiveTouch局部遮挡明确逐图记录。",
+    "静态截图不单独证明真实API写入、通知provider送达、唯一日历或取消后的自动刷新。",
+    "重复SHA按捕获次数分别记录，唯一像素数去重。"
+  ],
+  "images": [
+    {
+      "file": "plan-mixed-roster-mixed-replies-owner.png",
+      "sha256": "59dad8ddd0b4ba8d1a037342e5d94579fafa763a69fa4dc8e568d6673900bc1e",
+      "captureName": "plan-mixed-roster-mixed-replies-owner",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "标题、待正式发出状态、地点、10月27日09:00—10:00及连续高亮、3/6确认进度、朋友1接受／朋友2待确认／网页A接受／网页C拒绝、正式发出按钮可见。",
+      "limitations": [
+        "网页B行在视口外；不是完整六人名单的同屏像素证明。",
+        "发起人姓名可见，右侧接受状态部分被AssistiveTouch覆盖。",
+        "文件的role后缀不表示已切换到该角色账号；重复SHA是相同视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-roster-mixed-replies-peer1.png",
+      "sha256": "59dad8ddd0b4ba8d1a037342e5d94579fafa763a69fa4dc8e568d6673900bc1e",
+      "captureName": "plan-mixed-roster-mixed-replies-peer1",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "标题、待正式发出状态、地点、10月27日09:00—10:00及连续高亮、3/6确认进度、朋友1接受／朋友2待确认／网页A接受／网页C拒绝、正式发出按钮可见。",
+      "limitations": [
+        "网页B行在视口外；不是完整六人名单的同屏像素证明。",
+        "发起人姓名可见，右侧接受状态部分被AssistiveTouch覆盖。",
+        "文件的role后缀不表示已切换到该角色账号；重复SHA是相同视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-mixed-replies-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-mixed-replies-peer2.png",
+      "sha256": "59dad8ddd0b4ba8d1a037342e5d94579fafa763a69fa4dc8e568d6673900bc1e",
+      "captureName": "plan-mixed-roster-mixed-replies-peer2",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "标题、待正式发出状态、地点、10月27日09:00—10:00及连续高亮、3/6确认进度、朋友1接受／朋友2待确认／网页A接受／网页C拒绝、正式发出按钮可见。",
+      "limitations": [
+        "网页B行在视口外；不是完整六人名单的同屏像素证明。",
+        "发起人姓名可见，右侧接受状态部分被AssistiveTouch覆盖。",
+        "文件的role后缀不表示已切换到该角色账号；重复SHA是相同视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-mixed-replies-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-mixed-replies-guestA.png",
+      "sha256": "59dad8ddd0b4ba8d1a037342e5d94579fafa763a69fa4dc8e568d6673900bc1e",
+      "captureName": "plan-mixed-roster-mixed-replies-guestA",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "标题、待正式发出状态、地点、10月27日09:00—10:00及连续高亮、3/6确认进度、朋友1接受／朋友2待确认／网页A接受／网页C拒绝、正式发出按钮可见。",
+      "limitations": [
+        "网页B行在视口外；不是完整六人名单的同屏像素证明。",
+        "发起人姓名可见，右侧接受状态部分被AssistiveTouch覆盖。",
+        "文件的role后缀不表示已切换到该角色账号；重复SHA是相同视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-mixed-replies-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-mixed-replies-guestB.png",
+      "sha256": "74c1b520165457d685c451787a3bbf1acd1a6e50a6d4163fe7da593c05f7f1a8",
+      "captureName": "plan-mixed-roster-mixed-replies-guestB",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "3/6进度与六个姓名／角色及各状态可见：朋友1和发起人及网页A接受，朋友2与网页B待确认，网页C拒绝；正式发出及调整邀请入口可见。",
+      "limitations": [
+        "顶部活动标题／日期和09:00起点已滚出视口，不能据此图验完整日期区。",
+        "通知／日历说明右端局部被AssistiveTouch覆盖；完整文案由发布弹框图另验。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-roster-mixed-replies-guestC.png",
+      "sha256": "bd39172f4740fae8c5783530f49e32e1481839b2bfe27e394d145b94c8447ddc",
+      "captureName": "plan-mixed-roster-mixed-replies-guestC",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "3/6进度与六个姓名／角色及各状态可见：朋友1和发起人及网页A接受，朋友2与网页B待确认，网页C拒绝；正式发出及调整邀请入口可见。",
+      "limitations": [
+        "顶部活动标题／日期和09:00起点已滚出视口，不能据此图验完整日期区。",
+        "通知／日历说明右端局部被AssistiveTouch覆盖；完整文案由发布弹框图另验。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-11-publish-only-three-accepted.png",
+      "sha256": "c4c2af1f8a4b88b876691bf752e427ecdd2fd33e84de8ffd2d0e0e2c5bedf670",
+      "captureName": "plan-mixed-11-publish-only-three-accepted",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "正式发出确认弹框完整可读：向3位已接受者（含本人）发出，App通知与日历／网页访客原链接语义区分明确；取消和正式发出按钮完整。",
+      "limitations": [
+        "背景被弹框遮挡／变暗，不把背景名单当作完整人员验收。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-12-published-with-pending-and-declined.png",
+      "sha256": "07c1c242c353f44dcfa407f0c11aa9ab824048feae59273cabe08889de25e06a",
+      "captureName": "plan-mixed-12-published-with-pending-and-declined",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "状态切换为已确认；标题、地点、10月27日09:00—10:00连续高亮、3/6进度与去日历查看入口完整；朋友1接受／朋友2待确认／网页A接受／网页C拒绝可辨。",
+      "limitations": [
+        "网页B行未完整进入视口。",
+        "发起人右侧状态部分被AssistiveTouch覆盖。",
+        "静态截图不单独证明发布请求或日历唯一性。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-calendar-owner-unique-result.png",
+      "sha256": "bba8ce6330d53d1e1e25ab1d893c61dedc7c14bddc1eab6b5cea88f6d2dd53f1",
+      "captureName": "plan-mixed-calendar-owner-unique-result",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "SideSeat日历搜索显示本次QA活动标题、2026年10月27日09:00及测试地点的一条可见结果；搜索输入与清除／关闭入口可见。",
+      "limitations": [
+        "仅像素中一个结果；后端唯一性由运行断言核对，不能由截图独立推出。",
+        "结束时间与同行人不在此搜索结果图内。",
+        "系统键盘可见，输入内容为本次QA活动名，不是凭据。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-calendar-owner-accepted-guestA.png",
+      "sha256": "71c35b482cb4e51eb1b2bdf2986cf9d5d72235c8f8fe3e16591fbc93e5693f44",
+      "captureName": "plan-mixed-calendar-owner-accepted-guestA",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "日历只读详情显示2026年10月27日09:00开始／10:00结束、1小时、不重复、测试地点和管理计划入口；网页A、朋友1、网页B三位同行人姓名完整可见。",
+      "limitations": [
+        "活动标题位于当前滚动视口以上，顶部仅显示计划导航标题。",
+        "同伴列表包含异步晚接受网页B的当前快照；不将其解释为发布瞬间仅两位同伴。",
+        "本图仅为SideSeat日历，不是Apple Calendar或游客日历账户。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-calendar-owner-accepted-peer1.png",
+      "sha256": "32853d039c23c2ffcdacb3cfea65dedb8ebee7110fc0b09b23482e7210d08db7",
+      "captureName": "plan-mixed-calendar-owner-accepted-peer1",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "日历只读详情显示2026年10月27日09:00开始／10:00结束、1小时、不重复、测试地点和管理计划入口；网页A、朋友1、网页B三位同行人姓名完整可见。",
+      "limitations": [
+        "活动标题位于当前滚动视口以上，顶部仅显示计划导航标题。",
+        "同伴列表包含异步晚接受网页B的当前快照；不将其解释为发布瞬间仅两位同伴。",
+        "本图仅为SideSeat日历，不是Apple Calendar或游客日历账户。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-13-app2-late-accepted.png",
+      "sha256": "cd21ab91a68ae757fd6375936975e377ca03b6d9005b3627824847f6f32307c1",
+      "captureName": "plan-mixed-13-app2-late-accepted",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "朋友2本人标记与接受状态、已确认状态、10月27日09:00—10:00高亮、5/6进度、已同步到Sideseat日历说明、去日历及无法参加入口可见。",
+      "limitations": [
+        "产品确认通知横幅覆盖顶部导航，横幅只含QA活动标题，无凭据。",
+        "横幅截图不独立证明新的APNs provider发送或设备送达链路。",
+        "仅前部名单可见，网页A行被固定操作区截断，不能据此图验完整六人。",
+        "发起人右侧接受状态部分被AssistiveTouch覆盖。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-owner.png",
+      "sha256": "e1a87714688e010ccd1e09e7feee5054d96f201bec9ae834c8835ef2dae231d8",
+      "captureName": "plan-mixed-roster-guest-withdrawn-owner",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "已确认、地点、10月27日09:00—10:00连续高亮、4/6进度、朋友1／朋友2接受、当前朋友2的本人标记，以及去日历查看／无法参加动作可见。",
+      "limitations": [
+        "网页A行底部被固定操作区截断；网页B和C不在视口中，不能称六人完整同屏。",
+        "发起人右侧接受状态部分被AssistiveTouch覆盖。",
+        "相同SHA的role文件不表示不同账号视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    },
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-peer1.png",
+      "sha256": "e1a87714688e010ccd1e09e7feee5054d96f201bec9ae834c8835ef2dae231d8",
+      "captureName": "plan-mixed-roster-guest-withdrawn-peer1",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "已确认、地点、10月27日09:00—10:00连续高亮、4/6进度、朋友1／朋友2接受、当前朋友2的本人标记，以及去日历查看／无法参加动作可见。",
+      "limitations": [
+        "网页A行底部被固定操作区截断；网页B和C不在视口中，不能称六人完整同屏。",
+        "发起人右侧接受状态部分被AssistiveTouch覆盖。",
+        "相同SHA的role文件不表示不同账号视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-guest-withdrawn-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-peer2.png",
+      "sha256": "e1a87714688e010ccd1e09e7feee5054d96f201bec9ae834c8835ef2dae231d8",
+      "captureName": "plan-mixed-roster-guest-withdrawn-peer2",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "已确认、地点、10月27日09:00—10:00连续高亮、4/6进度、朋友1／朋友2接受、当前朋友2的本人标记，以及去日历查看／无法参加动作可见。",
+      "limitations": [
+        "网页A行底部被固定操作区截断；网页B和C不在视口中，不能称六人完整同屏。",
+        "发起人右侧接受状态部分被AssistiveTouch覆盖。",
+        "相同SHA的role文件不表示不同账号视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-guest-withdrawn-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-guestA.png",
+      "sha256": "e1a87714688e010ccd1e09e7feee5054d96f201bec9ae834c8835ef2dae231d8",
+      "captureName": "plan-mixed-roster-guest-withdrawn-guestA",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "已确认、地点、10月27日09:00—10:00连续高亮、4/6进度、朋友1／朋友2接受、当前朋友2的本人标记，以及去日历查看／无法参加动作可见。",
+      "limitations": [
+        "网页A行底部被固定操作区截断；网页B和C不在视口中，不能称六人完整同屏。",
+        "发起人右侧接受状态部分被AssistiveTouch覆盖。",
+        "相同SHA的role文件不表示不同账号视口。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。",
+      "samePixelsAs": "plan-mixed-roster-guest-withdrawn-owner.png"
+    },
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-guestB.png",
+      "sha256": "a40b1860db68bd5c489e741ed112f847ad3e1b3836e6d2923753a1495ec93ac0",
+      "captureName": "plan-mixed-roster-guest-withdrawn-guestB",
+      "actualSHA256Verified": true,
+      "dimensions": [
+        1284,
+        2778
+      ],
+      "actuallyViewed": true,
+      "viewMethod": "view_image",
+      "adopt": true,
+      "blocking": false,
+      "privacyExclude": false,
+      "visibleScope": "4/6进度、六个姓名及角色均进入视口；朋友1／朋友2／发起人接受、网页A／网页C拒绝，网页B姓名与游客标记可见；已同步到Sideseat日历及底部日历／无法参加入口可见。",
+      "limitations": [
+        "网页B右侧接受状态部分被AssistiveTouch覆盖，不能宣称该状态全字无遮挡像素通过。",
+        "顶部活动名／日期区已滚出；只剩时间表部分时刻与高亮，不能用此图验完整日期。"
+      ],
+      "privacy": "仅本轮专用QA姓名／活动／地点；未见密码、Bearer、计划token、恢复凭据或系统桌面。"
+    }
+  ]
+}

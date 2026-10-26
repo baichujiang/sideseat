@@ -313,7 +313,8 @@ struct TimePollDetailView: View {
     @State private var showsDelete = false
     @State private var showsCancelPlan = false
     @State private var deleting = false
-    @State private var showsInvite = false
+    @State private var showsInvitationSettings = false
+    @State private var sendingInvitations = false
     @State private var showsPeople = false
     @State private var showsSharing = false
     @State private var restoredFinalDraft = false
@@ -328,7 +329,7 @@ struct TimePollDetailView: View {
         if poll.hasFixedTime, let start = poll.chosenStart, let end = poll.chosenEnd { return .init(start: start, end: end) }
         return TimePollFinalRange.selected(finalSelected, slots: poll.finalTimeSlots)
     }
-    @State private var invitationRoster = Set<String>()
+    @State private var extraInviteeIDs = Set<String>()
     @State private var invitationActivityID: String?
     @State private var invitationLinkCount: Int?
     @State private var choosingAgain = false
@@ -346,10 +347,12 @@ struct TimePollDetailView: View {
                 if let error = store.error {
                     HStack {
                         Text(error).font(.caption).foregroundStyle(SideSeatTheme.danger)
-                        Button("Retry") {
-                            if deleting { Task { await delete() } }
-                            else if store.submissionFailed { Task { await submitAvailability() } }
-                            else { Task { await store.retry(session: session) } }
+                        if !poll.isOwner || (!pickingFinalTime && !poll.hasFixedTime) {
+                            Button("Retry") {
+                                if deleting { Task { await delete() } }
+                                else if store.submissionFailed { Task { await submitAvailability() } }
+                                else { Task { await store.retry(session: session) } }
+                            }.disabled(sendingInvitations || !store.canMutate)
                         }
                     }.padding(.horizontal, SideSeatTheme.spaceMD)
                 }
@@ -368,30 +371,37 @@ struct TimePollDetailView: View {
         .padding(.top, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.bg)
         .navigationTitle(pickingFinalTime ? "Choose final time" : "Plan together").navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(pickingFinalTime)
+        .navigationBarBackButtonHidden(pickingFinalTime || sendingInvitations)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if let poll = store.poll, !editingInformation && !editingActivity, poll.planningPhase == "COLLECTING" || choosingAgain {
                 collectionFooter(poll)
             }
         }
         .toolbar {
-            if pickingFinalTime {
+            if pickingFinalTime || sendingInvitations {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { cancelFinalSelection() } label: { Label("Back to plan", systemImage: "chevron.left").labelStyle(.iconOnly) }
                         .buttonStyle(SSActionButtonStyle(size: .toolbar))
                         .accessibilityIdentifier("time-poll-cancel-final")
+                        .disabled(sendingInvitations || store.acting)
                 }.ssStandaloneAction()
             }
             if let poll = store.poll, !editingInformation && !editingActivity {
-                if poll.isOwner && !pickingFinalTime {
+                if poll.isOwner {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        if poll.isOwner && ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
+                        if poll.planningPhase == "COLLECTING" || choosingAgain {
+                            Button("Edit invitation", systemImage: "person.badge.plus") {
+                                prepareInvitation(poll); showsInvitationSettings = true
+                            }.accessibilityIdentifier("unified-plan-edit-invitation")
+                        }
+                        if !pickingFinalTime && ["INVITING", "CONFIRMED"].contains(poll.planningPhase) {
                             Button("Cancel plan", role: .destructive) { showsCancelPlan = true }.accessibilityIdentifier("unified-plan-cancel")
                         }
-                        if poll.isOwner && ["COLLECTING", "CANCELLED", "EXPIRED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
+                        if !pickingFinalTime && ["COLLECTING", "CANCELLED", "EXPIRED"].contains(poll.planningPhase) { Button("Delete poll", role: .destructive) { showsDelete = true } }
                     } label: { Image(systemName: "ellipsis") }
                     .buttonStyle(SSActionButtonStyle(size: .toolbar)).accessibilityIdentifier("time-poll-menu")
+                    .disabled(sendingInvitations || store.acting)
                 }.ssStandaloneAction()
                 }
             }
@@ -426,7 +436,12 @@ struct TimePollDetailView: View {
                 },
             ]
         }
-        .sheet(isPresented: $showsInvite) { if let poll = store.poll, let finalRange { UnifiedPlanInviteView(poll: poll, store: store, range: finalRange, selected: $invitationRoster, activityID: $invitationActivityID, linkParticipantCount: $invitationLinkCount).dynamicTypeSize(typeSize) } }
+        .sheet(isPresented: $showsInvitationSettings) {
+            if let poll = store.poll {
+                PlanInvitationSettingsView(poll: poll, store: store, extraInviteeIDs: $extraInviteeIDs,
+                    linkParticipantCount: $invitationLinkCount).dynamicTypeSize(typeSize)
+            }
+        }
         .sheet(isPresented: $showsPeople) {
             if let poll = store.poll {
                 PlanPeopleView(poll: poll).dynamicTypeSize(typeSize)
@@ -437,9 +452,16 @@ struct TimePollDetailView: View {
         }
         .onChange(of: finalSelected) { _, _ in persistFinalDraft() }
         .onChange(of: pickingFinalTime) { _, _ in persistFinalDraft() }
+        .onChange(of: extraInviteeIDs) { _, _ in persistFinalDraft() }
+        .onChange(of: invitationActivityID) { _, value in
+            if value != nil, let poll = store.poll { prepareInvitation(poll) }
+            persistFinalDraft()
+        }
+        .onChange(of: invitationLinkCount) { _, _ in persistFinalDraft() }
         .onChange(of: store.poll?.invitationVersion) { previous, _ in
             guard previous != nil else { return }
             choosingAgain = false; pickingFinalTime = false; finalSelected = []; preparedInvitation = false
+            extraInviteeIDs = []; invitationActivityID = nil; invitationLinkCount = nil
             if let userID = session.currentUser?.id {
                 UserDefaults.standard.removeObject(forKey: TimePollFinalDraft.key(userID: userID, token: store.token))
             }
@@ -449,15 +471,17 @@ struct TimePollDetailView: View {
             restoreFinalDraft()
             while !Task.isCancelled {
                 do { try await Task.sleep(for: .seconds(10)) } catch { return }
-                if scenePhase == .active { await store.load(session: session) }
+                if scenePhase == .active && !sendingInvitations { await store.load(session: session) }
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await store.load(session: session) } }
+            if phase == .active { Task { if !sendingInvitations { await store.load(session: session) } } }
         }
         .onReceive(NotificationCenter.default.publisher(for: .sideSeatPlansNeedsRefresh)) { _ in
-            guard store.canMutate else { return }
-            Task { await store.load(session: session) }
+            Task {
+                guard store.canMutate && !sendingInvitations else { return }
+                await store.load(session: session)
+            }
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { date in
             if let expiry = store.poll?.expirationDate, now < expiry, expiry <= date { now = date }
@@ -545,7 +569,7 @@ struct TimePollDetailView: View {
                         }.padding(.horizontal, SideSeatTheme.screenHorizontal)
                         TimePollGrid(table: poll.timetable, selected: $store.selected, editable: editsTimetable(poll), pickingFinalTime: pickingFinalTime, finalSelected: $finalSelected,
                             chooseNoFreeTime: !poll.didRespond && store.selected.isEmpty ? { store.chooseNoFreeTime() } : nil) {}
-                            .disabled(store.acting).allowsHitTesting(!store.acting)
+                            .disabled(store.acting || sendingInvitations).allowsHitTesting(!store.acting && !sendingInvitations)
                             .id("plan-timetable")
                     }
                 }
@@ -570,25 +594,28 @@ struct TimePollDetailView: View {
                     .accessibilityIdentifier("plan-final-time-context")
             }
             if poll.activitySelection?.isOpen == true {
-                PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle, showsSuggestion: $editingActivity)
+                PlanActivityIdeasView(poll: poll, store: store, draftTitle: $activityDraftTitle,
+                    showsSuggestion: $editingActivity, selectedActivityID: $invitationActivityID,
+                    selectingFinalTime: pickingFinalTime)
             }
             if poll.hasFixedTime {
                 Text(dateRange(poll.dates) + " · " + poll.timeZone).font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("time-poll-date-range")
             }
-        }.padding(.horizontal, SideSeatTheme.screenHorizontal)
+        }.padding(.horizontal, SideSeatTheme.screenHorizontal).disabled(sendingInvitations)
     }
 
     private func collectionFooter(_ poll: NativeTimePoll) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
             if pickingFinalTime {
-                FinalTimeControls(slots: poll.finalTimeSlots, timeZone: poll.timeZone, selection: $finalSelected)
-                PlanActionButton(title: AppLocalization.string(typeSize.isAccessibilitySize ? "Review invitees" : "Next: review invitation list"), symbol: "person.2", kind: .commit,
-                                accessibilityID: "unified-plan-review-roster") { showsInvite = true }
-                    .disabled(finalRange == nil || !store.canMutate || poll.activitySelection?.isOpen == true && (poll.activitySelection?.ideas ?? []).isEmpty)
+                if !poll.hasFixedTime {
+                    FinalTimeControls(slots: poll.finalTimeSlots, timeZone: poll.timeZone, selection: $finalSelected)
+                }
+                invitationAction(poll)
                 if poll.activitySelection?.isOpen == true {
                     Button("Share for activity ideas") { showsSharing = true }
                         .buttonStyle(SSActionButtonStyle(size: .compact)).frame(maxWidth: .infinity)
+                        .disabled(sendingInvitations || !store.canMutate)
                         .accessibilityIdentifier("plan-share-activity-ideas")
                 }
             } else {
@@ -612,9 +639,7 @@ struct TimePollDetailView: View {
                     }
                 }
                 if poll.isOwner && poll.hasFixedTime {
-                    PlanActionButton(title: AppLocalization.string(poll.activitySelection?.isOpen == true ? "Choose activity and review invitation" : "Review invitation"), symbol: "person.2", kind: .commit,
-                        accessibilityID: "unified-plan-review-fixed") { beginFinalSelection(poll) }
-                        .disabled(!store.canMutate || (poll.activitySelection?.isOpen == true && (poll.activitySelection?.ideas ?? []).isEmpty))
+                    invitationAction(poll)
                 }
                 if !poll.isOwner {
                     Text("Wait for the organizer's invitation")
@@ -628,17 +653,96 @@ struct TimePollDetailView: View {
         .overlay(alignment: .top) { Divider() }
     }
 
-    private func beginFinalSelection(_ poll: NativeTimePoll) {
-        if !preparedInvitation {
-            preparedInvitation = true
-            invitationRoster = Set(poll.invitationCandidates.map(\.id))
-            invitationActivityID = poll.activitySelection?.selectedIdeaId
-            invitationLinkCount = poll.hasFixedTime ? poll.expectedCount : poll.invitationCandidates.contains(where: { !$0.isMe }) ? nil : 2
-            if finalSelected.isEmpty, let start = poll.chosenStart, let end = poll.chosenEnd {
-                finalSelected = Set(poll.finalTimeSlots.filter { $0.start >= start && $0.end <= end }.map(\.id))
-            }
+    private func invitationIDs(_ poll: NativeTimePoll) -> Set<String> {
+        poll.invitationParticipantIDs(adding: extraInviteeIDs)
+    }
+
+    private func invitationFriendCount(_ poll: NativeTimePoll) -> Int {
+        let ownIDs = Set((poll.participants + poll.invitationCandidates).filter(\.isMe).map(\.id))
+        return invitationIDs(poll).subtracting(ownIDs).count
+    }
+
+    private func effectiveLinkCount(_ poll: NativeTimePoll) -> Int? {
+        let friends = invitationFriendCount(poll)
+        if let count = invitationLinkCount ?? (poll.hasFixedTime ? poll.expectedCount : nil) {
+            return min(20, max(count, friends + 1))
         }
-        if poll.hasFixedTime { showsInvite = true } else { pickingFinalTime = true }
+        return friends == 0 ? 2 : nil
+    }
+
+    private func invitationAction(_ poll: NativeTimePoll) -> some View {
+        let friends = invitationFriendCount(poll)
+        let needsActivity = poll.activitySelection?.isOpen == true
+        let hasActivity = (poll.activitySelection?.ideas ?? []).contains { $0.id == invitationActivityID }
+        return VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+            Text(friends == 0 ? AppLocalization.string("Friends can confirm through the invitation link.")
+                 : String(format: AppLocalization.string("Send invitations to %d people"), friends))
+                .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("unified-plan-invitation-summary")
+            if needsActivity && !hasActivity {
+                Text("Choose an activity above before sending invitations.")
+                    .font(.caption).foregroundStyle(SideSeatTheme.statusWarningText)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("unified-plan-activity-required")
+            }
+            if friends >= 20 {
+                Text("Plans support up to 20 people, including you.")
+                    .font(.caption).foregroundStyle(SideSeatTheme.danger)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("unified-plan-invitation-limit")
+            }
+            PlanActionButton(title: AppLocalization.string(friends == 0 ? "Create invitation link" : "Send invitations"),
+                symbol: "paperplane.fill", kind: .commit, isLoading: sendingInvitations || store.acting,
+                accessibilityID: "unified-plan-send-invitations") {
+                Task { await sendInvitations() }
+            }.disabled(finalRange == nil || sendingInvitations || !store.canMutate || friends >= 20 || (needsActivity && !hasActivity))
+        }
+    }
+
+    private func prepareInvitation(_ poll: NativeTimePoll) {
+        guard !preparedInvitation else { return }
+        preparedInvitation = true
+        // Preserve actual pending invitees when changing an existing invitation, never all shared contacts.
+        extraInviteeIDs.formUnion(Set(poll.allInvitations.filter(\.selected).map(\.id))
+            .intersection(Set(poll.invitationCandidates.map(\.id))))
+        invitationActivityID = invitationActivityID ?? poll.activitySelection?.selectedIdeaId
+        invitationLinkCount = invitationLinkCount ?? (poll.hasFixedTime ? poll.expectedCount : nil)
+        if finalSelected.isEmpty, let start = poll.chosenStart, let end = poll.chosenEnd {
+            finalSelected = Set(poll.finalTimeSlots.filter { $0.start >= start && $0.end <= end }.map(\.id))
+        }
+    }
+
+    private func beginFinalSelection(_ poll: NativeTimePoll) {
+        prepareInvitation(poll)
+        pickingFinalTime = true
+    }
+
+    private func sendInvitations() async {
+        guard let poll = store.poll, poll.isOwner, let range = finalRange, !sendingInvitations, store.canMutate else { return }
+        prepareInvitation(poll)
+        let generation = session.authorizationGeneration
+        sendingInvitations = true
+        defer { sendingInvitations = false }
+        // Explicitly refresh before deriving recipients; a failed GET must never send an old roster.
+        guard await store.load(session: session), generation == session.authorizationGeneration,
+              let fresh = store.poll, fresh.isOwner, fresh.invitationVersion == poll.invitationVersion,
+              ["COLLECTING", "INVITING"].contains(fresh.planningPhase) else { return }
+        if fresh.activitySelection?.isOpen == true {
+            guard let activityID = invitationActivityID,
+                  fresh.activitySelection?.ideas?.contains(where: { $0.id == activityID }) == true else { return }
+            await store.mutate("activities/choose", body: ChoosePlanActivityRequest(ideaId: activityID), session: session)
+            guard store.error == nil, generation == session.authorizationGeneration else { return }
+        }
+        guard let current = store.poll, generation == session.authorizationGeneration, current.isOwner,
+              current.invitationVersion == poll.invitationVersion, invitationFriendCount(current) < 20 else { return }
+        await store.mutate("invitations", body: SendPollInvitationsRequest(
+            start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end),
+            attendeeIds: invitationIDs(current).sorted(), version: current.invitationVersion ?? 0,
+            linkParticipantCount: effectiveLinkCount(current)), session: session)
+        if store.error == nil && store.poll?.planningPhase == "INVITING" {
+            choosingAgain = false; pickingFinalTime = false
+        }
     }
 
     private func submitAvailability() async {
@@ -650,20 +754,28 @@ struct TimePollDetailView: View {
     private func restoreFinalDraft() {
         guard !restoredFinalDraft, let poll = store.poll, let userID = session.currentUser?.id else { return }
         restoredFinalDraft = true
-        guard poll.isOwner, poll.planningPhase == "COLLECTING",
+        guard poll.isOwner, ["COLLECTING", "INVITING"].contains(poll.planningPhase),
               var draft = TimePollFinalDraft.load(userID: userID, token: store.token),
               draft.invitationVersion == (poll.invitationVersion ?? 0) else { return }
         finalSelected = draft.selected.intersection(Set(poll.finalTimeSlots.map(\.id)))
-        if draft.choosingFinal { beginFinalSelection(poll) }
-        let next = draft.next; draft.next = nil; draft.save(userID: userID, token: store.token)
-        if next == .review, finalRange != nil { showsInvite = true }
+        extraInviteeIDs = (draft.extraInviteeIDs ?? []).intersection(Set(poll.invitationCandidates.map(\.id)))
+        invitationActivityID = draft.activityID
+        invitationLinkCount = draft.linkParticipantCount
+        preparedInvitation = draft.extraInviteeIDs != nil
+        if draft.choosingFinal || draft.next == .review {
+            choosingAgain = poll.planningPhase == "INVITING"
+            beginFinalSelection(poll)
+        }
+        draft.next = nil; draft.save(userID: userID, token: store.token)
     }
 
     private func persistFinalDraft() {
-        guard restoredFinalDraft, let poll = store.poll, poll.isOwner,
-              poll.planningPhase == "COLLECTING", let userID = session.currentUser?.id else { return }
+        guard restoredFinalDraft, preparedInvitation, let poll = store.poll, poll.isOwner,
+              ["COLLECTING", "INVITING"].contains(poll.planningPhase), let userID = session.currentUser?.id else { return }
         TimePollFinalDraft(selected: finalSelected, choosingFinal: pickingFinalTime,
-            invitationVersion: poll.invitationVersion ?? 0).save(userID: userID, token: store.token)
+            invitationVersion: poll.invitationVersion ?? 0, extraInviteeIDs: extraInviteeIDs,
+            activityID: invitationActivityID, linkParticipantCount: invitationLinkCount)
+            .save(userID: userID, token: store.token)
     }
 
     private func cancelFinalSelection() {
@@ -1024,6 +1136,8 @@ struct PlanActivityIdeasView: View {
     @State private var expanded = false
     @Binding var draftTitle: String
     @Binding var showsSuggestion: Bool
+    @Binding var selectedActivityID: String?
+    let selectingFinalTime: Bool
     @FocusState private var suggestionFocused: Bool
     private var activity: NativePlanActivity { poll.activitySelection! }
     private var ideas: [NativePlanActivity.Idea] { activity.ideas ?? [] }
@@ -1072,15 +1186,18 @@ struct PlanActivityIdeasView: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: SideSeatTheme.spaceSM, alignment: .top), count: typeSize.isAccessibilitySize ? 1 : 2), alignment: .leading, spacing: SideSeatTheme.spaceSM) {
                     ForEach(ideas) { idea in ideaCard(idea) }
                 }.accessibilityIdentifier("plan-activity-board")
-                Text("Interest is not attendance. The organizer confirms the activity when reviewing invitations.")
+                Text("Interest is not attendance. The organizer chooses the activity here before sending invitations.")
                     .font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier("plan-activity-consent-note")
             }
         }
         .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-ideas")
         .onAppear {
-            if poll.hasFixedTime { expanded = true }
+            if poll.hasFixedTime || poll.isOwner && selectingFinalTime { expanded = true }
             if !draftTitle.isEmpty { expanded = true; showsSuggestion = true }
+        }
+        .onChange(of: selectingFinalTime) { _, choosing in
+            if poll.isOwner && choosing { expanded = true }
         }
         .onDisappear { showsSuggestion = false }
     }
@@ -1136,9 +1253,26 @@ struct PlanActivityIdeasView: View {
 
     private func ideaCard(_ idea: NativePlanActivity.Idea) -> some View {
         VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
-            Text(idea.title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityLabel(idea.title + ", " + String(format: AppLocalization.string("%@ suggested this"), idea.authorName))
+            if poll.isOwner {
+                Button { selectedActivityID = idea.id } label: {
+                    HStack(alignment: .top, spacing: SideSeatTheme.spaceSM) {
+                        Text(idea.title).font(.subheadline.weight(.semibold))
+                            .foregroundStyle(SideSeatTheme.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Image(systemName: selectedActivityID == idea.id ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selectedActivityID == idea.id ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondaryStrong)
+                    }.frame(minHeight: 44, alignment: .top).contentShape(Rectangle())
+                }.buttonStyle(SSPressButtonStyle()).disabled(!store.canMutate)
+                    .accessibilityLabel(idea.title + ", " + String(format: AppLocalization.string("%@ suggested this"), idea.authorName))
+                    .accessibilityHint("Choose this activity")
+                    .accessibilityValue(selectedActivityID == idea.id ? "Selected" : "Not selected")
+                    .accessibilityIdentifier("unified-plan-activity-\(idea.id)")
+            } else {
+                Text(idea.title).font(.subheadline.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(idea.title + ", " + String(format: AppLocalization.string("%@ suggested this"), idea.authorName))
+            }
             if let location = idea.location, !location.isEmpty {
                 Label(location, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1157,7 +1291,8 @@ struct PlanActivityIdeasView: View {
         }
         .padding(.horizontal, SideSeatTheme.spaceMD).padding(.top, SideSeatTheme.spaceMD).padding(.bottom, SideSeatTheme.spaceSM)
         .background(SideSeatTheme.surface, in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(SideSeatTheme.textSecondaryStrong.opacity(0.18)))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(poll.isOwner && selectedActivityID == idea.id
+            ? SideSeatTheme.utilityAction : SideSeatTheme.textSecondaryStrong.opacity(0.18)))
         .accessibilityElement(children: .contain).accessibilityIdentifier("plan-activity-idea-\(idea.id)")
     }
 }

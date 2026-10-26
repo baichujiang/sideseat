@@ -1,0 +1,18 @@
+{
+  "phase": "INVITING",
+  "version": 1,
+  "selectedCount": 3,
+  "acceptedCount": 1,
+  "submittedEmptyResponseIncluded": true,
+  "unfilledExplicitExtraIncluded": true,
+  "ownerServerAvailabilityUnchanged": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "privateEditedSlotsNotSubmitted": true,
+  "chosenStart": "2026-10-27T08:00:00.000Z",
+  "chosenEnd": "2026-10-27T09:00:00.000Z",
+  "readOnlyVerification": true
+}

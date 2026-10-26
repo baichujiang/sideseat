@@ -54,6 +54,10 @@ struct NativeTimePoll: Decodable, Sendable {
     var invitees: [Participant]? = nil
     var sharedWithUserIds: [String]? = nil
     var invitationCandidates: [Participant] { invitees ?? participants }
+    /// A submitted timetable joins the invitation; sharing alone does not.
+    func invitationParticipantIDs(adding extraIDs: Set<String>) -> Set<String> {
+        Set(participants.map(\.id)).union(extraIDs.intersection(Set(invitationCandidates.map(\.id))))
+    }
     var expirationDate: Date? {
         expiresAt ?? (phase == "INVITING" ? chosenStart : (phase == nil || phase == "COLLECTING") ? slots.last?.end : nil)
     }
@@ -385,6 +389,9 @@ struct TimePollFinalDraft: Codable {
     var choosingFinal: Bool
     var invitationVersion: Int
     var next: Next? = nil
+    var extraInviteeIDs: Set<String>? = nil
+    var activityID: String? = nil
+    var linkParticipantCount: Int? = nil
 
     static func key(userID: String, token: String) -> String { "plan.final-time-draft.v1.\(userID).\(token)" }
     static func load(userID: String, token: String, defaults: UserDefaults = .standard) -> Self? {

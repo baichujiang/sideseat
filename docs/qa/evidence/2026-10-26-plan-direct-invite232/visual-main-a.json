@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "saved_profile_source",
+  "reviewDate": "2026-10-26",
+  "scope": "Native creation, sharing, availability, direct invitation and initial reply viewports from the final continuous mixed-flow run. Ordinary Chinese/light UI only.",
+  "method": "All 17 files individually opened with view_image; no AX text substituted for pixels; raw files not edited. SHA-256 verified against part-0 index.",
+  "captureCount": 17,
+  "uniqueSHA256Count": 14,
+  "acceptedCaptureCount": 17,
+  "excludedCaptureCount": 0,
+  "blockingIssueCount": 0,
+  "overallConclusion": "Accept within the explicitly visible native viewports. No new blocking visual issue or visible credential/recovery-link/desktop exposure found.",
+  "globalLimitations": [
+    "No maximum-text, dark-mode, browser, push-delivery or Calendar visual acceptance is inferred from this partition.",
+    "Captures are scroll viewports, not full-page images; duplicate capture names do not imply independent unique visuals.",
+    "System AssistiveTouch overlays some cells/status text; per-image limitations remain explicit.",
+    "Business writes, durability, no intermediate review page and complete identity/status correctness require separate continuous test/API evidence."
+  ],
+  "images": [
+    {
+      "file": "plan-mixed-01-create-dates-without-grid.png",
+      "sha256": "479e78727cfc10cf2c2055cb25adde7a0a47338b9286fe1dbdd2c6b8ab4299de",
+      "captureName": "plan-mixed-01-create-dates-without-grid",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Create sheet shows activity and location, candidate dates 27 Oct–2 Nov, daily 09:00–17:00, Europe/Berlin, optional activity suggestions and Next: fill availability without a timetable preview.",
+      "limitations": [
+        "Only this visible form viewport; date picker expansion and validation are not shown."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-02-owner-first-timetable.png",
+      "sha256": "90a2020032492a4bbe5e2263b1e9436ae7f081d39cb960901ab6544529e65fce",
+      "captureName": "plan-mixed-02-owner-first-timetable",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Owner detail shows the title/location, zero responses, visible 27–30 Oct columns, empty heatmap and separate Submit and share / Choose final time controls.",
+      "limitations": [
+        "Only visible columns and approximately 09:00–14:00 rows; remaining dates/hours require scrolling.",
+        "System AssistiveTouch overlays a small lower-right grid area."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-03-owner-unsubmitted-availability.png",
+      "sha256": "351155a7c0fd41217ed533ee7978fc12780fc556e1240c7a2b8b97ba53b2017b",
+      "captureName": "plan-mixed-03-owner-unsubmitted-availability",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Selected 27 Oct 09:00 and 09:30 cells have teal outlines/checks while the visible counter remains zero and the footer says Not submitted, one day/one hour selected.",
+      "limitations": [
+        "Visible pixels distinguish local selection from the zero response count; durability and network writes are separate test evidence.",
+        "System AssistiveTouch overlays a lower-right grid area."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-04-owner-submitted-share-sheet.png",
+      "sha256": "8a621ad3212ecc634656bc386cfffd70c83f353663b03e738bb38604f911c93f",
+      "captureName": "plan-mixed-04-owner-submitted-share-sheet",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Share sheet shows the same plan title, App friends, Share web link and Copy link, while the dimmed background shows one submitted response.",
+      "limitations": [
+        "Underlying timetable is dimmed and partially covered; this is a share-panel viewport, not a full detail review.",
+        "No actual link or token is displayed."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-05-two-App-contacts-selected.png",
+      "sha256": "88bb059a754d46964c58ee808f5d4c2a7dccfd5e6d9592a7301bd44bad4051ca",
+      "captureName": "plan-mixed-05-two-App-contacts-selected",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Contact picker visibly checks Friends 1 and 2, leaves Friends 3–5 unchecked, and shows Send to 2 contacts plus the search field.",
+      "limitations": [
+        "Screenshot proves visible selection, not message delivery.",
+        "System AssistiveTouch overlaps the edge of the last contact/footer area."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-06-app1-submitted-and-reopened.png",
+      "sha256": "280f8b3284d3d80add7db023f4d46c20a2a976282b4529e9b33696c9fc46cd60",
+      "captureName": "plan-mixed-06-app1-submitted-and-reopened",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "App participant view shows four responses, teal selected 27 Oct 09:00/09:30 cells, Submitted availability, one day/one hour, and Wait for organizer invitation.",
+      "limitations": [
+        "Only the current visible timetable columns/hours and this participant footer are reviewed; reopening itself is test evidence.",
+        "System AssistiveTouch overlaps a lower-right grid area."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-06-app2-submitted-and-reopened.png",
+      "sha256": "85f10469a560b8deeb3614054f1ef880cdcfbbeba66e89eeadbf395f48fff031",
+      "captureName": "plan-mixed-06-app2-submitted-and-reopened",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "App participant view shows six responses, the same selected one-hour interval, Submitted availability, and Wait for organizer invitation.",
+      "limitations": [
+        "Only this visible participant viewport; it is not a full-page or all-date review.",
+        "System AssistiveTouch overlaps a lower-right grid area."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-07-six-App-and-web-responses.png",
+      "sha256": "9d9cc3bce5ce4028d4d5a650d5ddcf0f1acd715441ae3b5f346a1af86eb03063",
+      "captureName": "plan-mixed-07-six-App-and-web-responses",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Participant progress sheet visibly lists six distinct names: organizer, App Friends 1 and 2, and browser Guests A/B/C; every listed row has submitted-availability wording and guests carry Guest labels.",
+      "limitations": [
+        "The screenshot is a native progress sheet; it does not itself show browser input or submission mechanics.",
+        "System AssistiveTouch touches the lower right of the Guest C row/row separator."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-08-send-directly-to-six-submitted-people.png",
+      "sha256": "b3c3a8c4230c7b26bcdfce7f5fa2d090a9d28ad761f060c1a2b4ddbd73ae8b5e",
+      "captureName": "plan-mixed-08-send-directly-to-six-submitted-people",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Final-time page shows six responses, amber 27 Oct 09:00–10:00 selection over six-person heatmap cells, and a same-page Send invitations button with Send to 5 people wording.",
+      "limitations": [
+        "The five-person send summary excludes the organizer; this screenshot does not show five separate recipient names.",
+        "A before-send image alone cannot prove an intermediate page was absent; continuous test evidence supplies navigation behavior.",
+        "Only the visible dates/hours are reviewed, with system AssistiveTouch over lower-right cells."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-owner.png",
+      "sha256": "11affd4a44a2b7ac7dc88159ee0ca5ab3952fd707362e0753bad9b6de0554315",
+      "captureName": "plan-mixed-roster-initial-invitations-owner",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Owner confirmation view shows final 27 Oct 09:00–10:00 highlighting, 1/6 confirmation progress, Friends 1/2 pending, organizer accepted, Guests A/C pending, and the final-publish action.",
+      "limitations": [
+        "Guest B row is below this viewport; this is not all six names in one frame.",
+        "System AssistiveTouch overlaps part of the organizer accepted status.",
+        "Filename suffix identifies a capture target and is not proof of viewer identity."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-peer1.png",
+      "sha256": "11affd4a44a2b7ac7dc88159ee0ca5ab3952fd707362e0753bad9b6de0554315",
+      "captureName": "plan-mixed-roster-initial-invitations-peer1",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Pixel-identical owner confirmation viewport: final interval, 1/6 progress and visible Friends 1/2, organizer, Guests A/C rows.",
+      "limitations": [
+        "Exact duplicate of the owner capture; counted as a capture, not a new unique visual.",
+        "Guest B is outside this viewport and AssistiveTouch overlaps the organizer status.",
+        "Despite the peer1 filename, visible owner controls are not presented as a separate participant-view verification."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-peer2.png",
+      "sha256": "11affd4a44a2b7ac7dc88159ee0ca5ab3952fd707362e0753bad9b6de0554315",
+      "captureName": "plan-mixed-roster-initial-invitations-peer2",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Pixel-identical owner confirmation viewport: final interval, 1/6 progress and visible Friends 1/2, organizer, Guests A/C rows.",
+      "limitations": [
+        "Exact duplicate of the owner capture; not a new unique visual.",
+        "Guest B is outside this viewport and AssistiveTouch overlaps the organizer status.",
+        "Despite the peer2 filename, visible owner controls are not presented as a separate participant-view verification."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-guestA.png",
+      "sha256": "11affd4a44a2b7ac7dc88159ee0ca5ab3952fd707362e0753bad9b6de0554315",
+      "captureName": "plan-mixed-roster-initial-invitations-guestA",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Pixel-identical owner confirmation viewport includes Guest A pending along with Friends 1/2, organizer and Guest C.",
+      "limitations": [
+        "Exact duplicate of the owner capture; not a browser view or a new unique visual.",
+        "Guest B is outside this viewport and AssistiveTouch overlaps the organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-guestB.png",
+      "sha256": "cfe688b1a5acb69c2af1a449134e28b2b9582912be174227304f9480b252b442",
+      "captureName": "plan-mixed-roster-initial-invitations-guestB",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Scrolled native owner roster visibly includes all six distinct names with 1/6 progress; organizer accepted, Friends 1/2 and Guests A/C pending, plus Guest B at the bottom; adjustment guidance is visible.",
+      "limitations": [
+        "System AssistiveTouch overlaps Guest B reply status, so a fully unobscured six-status visual is not claimed.",
+        "The top of the final timetable is clipped by normal scroll position; this is a roster-focused viewport.",
+        "This is the owner native view, not the guest browser."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-initial-invitations-guestC.png",
+      "sha256": "71b69789dd55790ebe1c7298a21b969dd7a4ab4fb6b10a4438ca6621948358e6",
+      "captureName": "plan-mixed-roster-initial-invitations-guestC",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Scrolled native owner roster again shows all six names, owner accepted, and the pending rows; adjustment action and repeat-confirmation guidance remain visible.",
+      "limitations": [
+        "System AssistiveTouch overlaps Guest B reply status; not all six statuses are wholly unobscured.",
+        "Top timetable/title are outside or clipped by the scrolled viewport.",
+        "Native owner view only, regardless of guestC capture suffix."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-09-owner-invited-five.png",
+      "sha256": "19eeb34bcd0670a0714d7de201f10c9f2b0df1faba109be3daef99fc7d6fcfb7",
+      "captureName": "plan-mixed-09-owner-invited-five",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Owner view shows the final highlighted interval, 1/6 progress, pending App Friends 1/2 and Guests A/C, accepted organizer and the explicit final-publish footer.",
+      "limitations": [
+        "Guest B row is below the dock/viewport; do not call this a full six-person roster image.",
+        "AssistiveTouch overlaps organizer status; other captures provide its clear accepted label."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-10-app1-accepted-before-publication.png",
+      "sha256": "29c7bc175e2ffb848e49d09efbf01f1a0ad72f72c5fc27df36910c084dfb7092",
+      "captureName": "plan-mixed-10-app1-accepted-before-publication",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "App Friend 1 view shows 3/6 progress, their accepted row with the You marker, organizer accepted, App Friend 2 pending, Guest A accepted, and the waiting-for-organizer footer with decline action.",
+      "limitations": [
+        "Lower roster rows are partly hidden by the fixed participant footer; not all six reply states are visible.",
+        "System AssistiveTouch overlaps part of the organizer row.",
+        "Visible status is before publication, not a Calendar or notification-delivery assertion."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    }
+  ]
+}

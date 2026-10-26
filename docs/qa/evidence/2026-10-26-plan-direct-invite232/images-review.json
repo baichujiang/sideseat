@@ -1,0 +1,141 @@
+{
+  "focusedCapturesActuallyViewed": [
+    {
+      "file": "direct-invitation-three-people-sent-de-largest-dark.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "1a4db18935ff08f90e693befe78157a4994b3ff4f5cef3e62194afd5ba4bc55a"
+    },
+    {
+      "file": "direct-invitation-keeps-private-availability-de-largest-dark.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "5b8f7eb45874a0d7a35fc58d2b9da84ba7ca5b75997055f0aaf0cc19c5336f94"
+    },
+    {
+      "file": "direct-invitation-editor-restored-de-largest-dark.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "b96206479dbf31271c67fc4fa835193011082c994acadec3fa689a5d52dbfc17"
+    },
+    {
+      "file": "direct-invitation-extra-selected-de-largest-dark.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "5bd6622806e1e369a2c6219940a5e606b59ec156a796e4f1152df1effe401c08"
+    },
+    {
+      "file": "direct-invitation-dock-de-largest-dark.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "1d50f8ec4d9c7c5b8cf2e7aa1938035e70c9a818abd9189c604bb06909a80228"
+    },
+    {
+      "file": "direct-invitation-keeps-private-availability-zh-Hans-normal-light.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "c60c2356f91410baea77fb52c8e5546065431a54bc70c4b453a44e33e33176f8"
+    },
+    {
+      "file": "direct-invitation-editor-restored-zh-Hans-normal-light.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "b36ce2515b11c1b22a1ffe1e06cd2c715d81fab1e38e6ccc1ccd795c830b4c5a"
+    },
+    {
+      "file": "direct-invitation-extra-selected-zh-Hans-normal-light.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "ca22cfcb2a758dd9c9459e388e2c8d6dffaf71e62fa3dc2f3342986c5438cead"
+    },
+    {
+      "file": "direct-invitation-dock-zh-Hans-normal-light.png",
+      "scope": "pre-label functional focused run",
+      "sha256": "01ece40ce5aa1977ce60d6bb81107a0ec31dfcf979788f90e2ab09279b9f3a71"
+    },
+    {
+      "file": "direct-invitation-largest-contact-action-de-dark.png",
+      "scope": "short-label and activity/open-link focused checks before nonvisual background-read guards",
+      "sha256": "a37a1a41712d9b42b75b8167cac3fa3e04730b1afe0e67ebac1482abad78282b"
+    },
+    {
+      "file": "direct-invitation-activity-sent-without-review-page.png",
+      "scope": "short-label and activity/open-link focused checks before nonvisual background-read guards",
+      "sha256": "6837835e873285fbb3623b8112d0f033c452b1c308a26e7096e7a1f70e003f45"
+    },
+    {
+      "file": "direct-invitation-activity-chosen-on-timetable.png",
+      "scope": "short-label and activity/open-link focused checks before nonvisual background-read guards",
+      "sha256": "0408c988b4afacb80a609015472618b30f08be8ebc0956e187bfb8fb43446307"
+    },
+    {
+      "file": "direct-invitation-zero-response-link-sent.png",
+      "scope": "short-label and activity/open-link focused checks before nonvisual background-read guards",
+      "sha256": "bb529e490e9f69b2aa66b243475ebf43b3dfff6e7c2fee73b115fd48250d7805"
+    },
+    {
+      "file": "direct-invitation-zero-response-link-before-sending.png",
+      "scope": "short-label and activity/open-link focused checks before nonvisual background-read guards",
+      "sha256": "47fbb1b11b4bb9570182739821514005671551187a6580b70d77f13314c6542c"
+    }
+  ],
+  "focusedCaptureCount": 14,
+  "preservedFocusedCaptures": [
+    "direct-invitation-dock-zh-Hans-normal-light.png",
+    "direct-invitation-editor-restored-zh-Hans-normal-light.png",
+    "direct-invitation-keeps-private-availability-zh-Hans-normal-light.png",
+    "direct-invitation-largest-contact-action-de-dark.png",
+    "direct-invitation-activity-sent-without-review-page.png",
+    "direct-invitation-activity-chosen-on-timetable.png",
+    "direct-invitation-zero-response-link-sent.png",
+    "direct-invitation-zero-response-link-before-sending.png"
+  ],
+  "newGermanContactLabelAccepted": true,
+  "knownLimits": [
+    "Largest German private-availability and invitation pages contain existing tall typography and footer; scope is new dock/editor action only.",
+    "The three-person sent screenshot did not show its full roster; exact3 was verified by real UI assertions and read-only API, not claimed as full roster pixels.",
+    "AssistiveTouch overlays remain.",
+    "One diagnostic extraction landed on the private iOS Home screen after teardown; never adopted or copied to public evidence."
+  ],
+  "focusedNewIssueFixed": "New contact-action German sending verb was clipped; short Plankarte senden rendered fully in actual largest-text follow-up.",
+  "mainNativeCaptures": 51,
+  "mainWebCaptures": 16,
+  "mainTotalCaptures": 67,
+  "mainUniqueSHA256": 53,
+  "mainNativeUniqueSHA256": 37,
+  "mainWebUniqueSHA256": 16,
+  "mainAllActualImagesViewed": true,
+  "mainReports": [
+    "visual-main-a.json",
+    "visual-main-b.json",
+    "visual-main-c.json"
+  ],
+  "preservedMainNativeCaptures": [
+    "plan-mixed-01-create-dates-without-grid.png",
+    "plan-mixed-02-owner-first-timetable.png",
+    "plan-mixed-04-owner-submitted-share-sheet.png",
+    "plan-mixed-07-six-App-and-web-responses.png",
+    "plan-mixed-08-send-directly-to-six-submitted-people.png",
+    "plan-mixed-roster-initial-invitations-guestC.png",
+    "plan-mixed-10-app1-accepted-before-publication.png",
+    "plan-mixed-11-publish-only-three-accepted.png",
+    "plan-mixed-calendar-owner-accepted-peer1.png",
+    "plan-mixed-13-app2-late-accepted.png",
+    "plan-mixed-14-app1-withdrawn.png",
+    "plan-mixed-16-cancelled-plan.png",
+    "plan-mixed-calendar-app2-cancelled-absent.png",
+    "plan-mixed-calendar-owner-cancelled-absent.png"
+  ],
+  "preservedWebCaptures": [
+    "mixed-guestA-unsubmitted.png",
+    "mixed-guestA-controlled-failure-keeps-draft.png",
+    "mixed-guestA-submitted.png",
+    "mixed-guestB-unsubmitted.png",
+    "mixed-guestB-submitted.png",
+    "mixed-guestC-unsubmitted.png",
+    "mixed-guestC-submitted.png",
+    "mixed-guestA-restored-original-response.png",
+    "mixed-guestA-final-time-highlight.png",
+    "mixed-guestB-final-time-highlight.png",
+    "mixed-guestC-final-time-highlight.png",
+    "mixed-guestB-late-acceptance.png",
+    "mixed-guestA-withdrawn.png",
+    "mixed-guestA-cancelled-without-page-reload.png",
+    "mixed-guestB-cancelled-without-page-reload.png",
+    "mixed-guestC-cancelled-without-page-reload.png"
+  ],
+  "rawNativeRetention": "/tmp/sideseat232-main-inspection (private0700); actual captures not selected for Git remain in private raw artifacts.",
+  "mainPrivacyExclusions": 0
+}

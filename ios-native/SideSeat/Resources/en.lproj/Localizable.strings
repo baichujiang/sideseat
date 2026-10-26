@@ -3223,3 +3223,18 @@
 "Loading intentions" = "Loading intentions";
 
 "This plan is full. Contact the organizer." = "This plan is full. Contact the organizer.";
+
+// Direct invitations from the timetable.
+"Edit invitation" = "Edit invitation";
+"Timetable respondents" = "Timetable respondents";
+"Everyone who submitted availability is invited automatically." = "Everyone who submitted availability is invited automatically.";
+"Additional invitees" = "Additional invitees";
+"Invitation link" = "Invitation link";
+"Friends can confirm through the invitation link." = "Friends can confirm through the invitation link.";
+"Send invitations to %d people" = "Send invitations to %d people";
+"Choose an activity above before sending invitations." = "Choose an activity above before sending invitations.";
+"Interest is not attendance. The organizer chooses the activity here before sending invitations." = "Interest is not attendance. The organizer chooses the activity here before sending invitations.";
+"Choose this activity" = "Choose this activity";
+"Plans support up to 20 people, including you." = "Plans support up to 20 people, including you.";
+"Send plan cards to App friends" = "Send plan cards to App friends";
+"Select extra invitees here after sending a plan card. Respondents join automatically." = "Select extra invitees here after sending a plan card. Respondents join automatically.";

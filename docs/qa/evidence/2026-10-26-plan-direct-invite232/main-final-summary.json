@@ -1,0 +1,17 @@
+{
+  "mainNative": {
+    "result": "Passed",
+    "totalTestCount": 1,
+    "passedTests": 1,
+    "failedTests": 0,
+    "skippedTests": 0
+  },
+  "durationSeconds": 561.821,
+  "phases": 15,
+  "expectedPhases": 15,
+  "webChecks": 9,
+  "webCaptures": 16,
+  "nativeCaptures": 51,
+  "physicalDefaultDevice": true,
+  "finalProductFrozen": true
+}

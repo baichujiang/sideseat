@@ -1,0 +1,917 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "direct_invite_native",
+  "reviewDate": "2026-10-26",
+  "scope": "Final mixed-flow late acceptance, withdrawal and cancellation native viewports, plus all16 public-web guest captures listed by the main report.",
+  "method": "All33 files individually opened with view_image. Exact SHA-256 verified against native part-2 and web screenshots metadata; no AX/API results substituted for pixels, no image edits.",
+  "captureCount": 33,
+  "nativeCaptureCount": 17,
+  "webCaptureCount": 16,
+  "uniqueSHA256Count": 28,
+  "acceptedCaptureCount": 33,
+  "excludedCaptureCount": 0,
+  "blockingIssueCount": 0,
+  "overallConclusion": "Accept within visible controlled-test viewports. No new blocking visual issue or rendered secret/recovery URL/system desktop found.",
+  "globalLimitations": [
+    "Native captures are ordinary Chinese/light, with existing AssistiveTouch overlays; role-suffixed duplicate images are not proof of independent account views.",
+    "Some native rosters and web lists require scrolling. Search screenshots establish visible one-result/no-result states, not database-wide uniqueness.",
+    "Web captures cover Chromium390px light and WebKit320px dark as metadata records, not physical Safari or maximum-font acceptance.",
+    "An existing disabled Chinese declined-reply footer label wraps its last character in the390px web capture; it remains contained/readable.",
+    "Durability, no page reload, publication sequencing, notification delivery and exact account membership rely on separate test/API evidence."
+  ],
+  "privacyExclusions": [],
+  "images": [
+    {
+      "file": "plan-mixed-roster-guest-withdrawn-guestC.png",
+      "sha256": "f3a027c14b2de88fc05826c67a04c5a80ac2d05b2b74d68d67ce46237b9b97a1",
+      "captureName": "plan-mixed-roster-guest-withdrawn-guestC",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-guest-withdrawn-guestC.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Scrolled invitation view shows 4/6 confirmed, two App friends and organizer accepted, web A/C declined, web B accepted; accepted viewer has Calendar action and withdraw control. Six names/status rows are present.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Title and date header are above the viewport; System AssistiveTouch partially overlaps the final web-B status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-peer2-late-unique-result.png",
+      "sha256": "1592bf5605ec9d5544eb03917e4531bd262066e552c436662a8e8b8ea7ba8647",
+      "captureName": "plan-mixed-calendar-peer2-late-unique-result",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-peer2-late-unique-result.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar search visibly shows one matching test-plan result, 27 Oct 2026 at09:00 and the controlled test location.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "One visible search-result viewport does not independently prove database-wide uniqueness; keyboard covers the lower screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-peer2-late-accepted-guestB.png",
+      "sha256": "c16bca1acac53db521d54f97db86de18748c4dfdf7fc163c52c1ed81bbd417e4",
+      "captureName": "plan-mixed-calendar-peer2-late-accepted-guestB",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-peer2-late-accepted-guestB.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar detail viewport shows27 Oct09:00–10:00, one hour, nonrepeating, the controlled location, Manage plan and three companion rows: organizer, App friend1 and web B.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Title/current-account identity are outside this viewport. Three differently suffixed files have identical SHA/pixels and do not prove three independent viewer perspectives; current attendee may be omitted from companions.",
+        "System AssistiveTouch overlays the right margin."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-peer2-late-accepted-owner.png",
+      "sha256": "c16bca1acac53db521d54f97db86de18748c4dfdf7fc163c52c1ed81bbd417e4",
+      "captureName": "plan-mixed-calendar-peer2-late-accepted-owner",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-peer2-late-accepted-owner.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar detail viewport shows27 Oct09:00–10:00, one hour, nonrepeating, the controlled location, Manage plan and three companion rows: organizer, App friend1 and web B.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Title/current-account identity are outside this viewport. Three differently suffixed files have identical SHA/pixels and do not prove three independent viewer perspectives; current attendee may be omitted from companions.",
+        "System AssistiveTouch overlays the right margin."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-peer2-late-accepted-peer1.png",
+      "sha256": "c16bca1acac53db521d54f97db86de18748c4dfdf7fc163c52c1ed81bbd417e4",
+      "captureName": "plan-mixed-calendar-peer2-late-accepted-peer1",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-peer2-late-accepted-peer1.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar detail viewport shows27 Oct09:00–10:00, one hour, nonrepeating, the controlled location, Manage plan and three companion rows: organizer, App friend1 and web B.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Title/current-account identity are outside this viewport. Three differently suffixed files have identical SHA/pixels and do not prove three independent viewer perspectives; current attendee may be omitted from companions.",
+        "System AssistiveTouch overlays the right margin."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-14-app1-withdrawn.png",
+      "sha256": "ce3e9e38394c32b0dfe97e99c656c420ca7b3cd6d69194e5db660cd3e24ee843",
+      "captureName": "plan-mixed-14-app1-withdrawn",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-14-app1-withdrawn.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "App friend1 is marked You/declined, progress is3/6, final interval09:00–10:00 remains highlighted; bottom text records unable-to-attend response and offers explicit reacceptance.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Only the first four roster rows are fully in view; lower web rows require scrolling. System AssistiveTouch partially overlaps organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-app1-withdrawn-absent.png",
+      "sha256": "30619b14566d0ab89524a980420ae011e6f20b02dea71e268ba648759c18482f",
+      "captureName": "plan-mixed-calendar-app1-withdrawn-absent",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-app1-withdrawn-absent.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar search shows the exact synthetic plan title and a no-results state after App friend1 withdrawal.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Pixels show this search result only; removal timing and actor identity require separate test evidence. Keyboard occupies the lower viewport."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-owner.png",
+      "sha256": "d48b3639503755e16aab8e422a872a34f9aa610757edeffd148edc08d108cd8c",
+      "captureName": "plan-mixed-roster-before-cancel-owner",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-owner.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Five rows are fully visible and final web-B row lies below or partly under bottom dock. Four role-suffixed files share identical pixels and are targeted-row captures on the same owner view, not account switches. System AssistiveTouch overlaps organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-peer1.png",
+      "sha256": "d48b3639503755e16aab8e422a872a34f9aa610757edeffd148edc08d108cd8c",
+      "captureName": "plan-mixed-roster-before-cancel-peer1",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-peer1.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Five rows are fully visible and final web-B row lies below or partly under bottom dock. Four role-suffixed files share identical pixels and are targeted-row captures on the same owner view, not account switches. System AssistiveTouch overlaps organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-peer2.png",
+      "sha256": "d48b3639503755e16aab8e422a872a34f9aa610757edeffd148edc08d108cd8c",
+      "captureName": "plan-mixed-roster-before-cancel-peer2",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-peer2.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Five rows are fully visible and final web-B row lies below or partly under bottom dock. Four role-suffixed files share identical pixels and are targeted-row captures on the same owner view, not account switches. System AssistiveTouch overlaps organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-guestA.png",
+      "sha256": "d48b3639503755e16aab8e422a872a34f9aa610757edeffd148edc08d108cd8c",
+      "captureName": "plan-mixed-roster-before-cancel-guestA",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-guestA.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Five rows are fully visible and final web-B row lies below or partly under bottom dock. Four role-suffixed files share identical pixels and are targeted-row captures on the same owner view, not account switches. System AssistiveTouch overlaps organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-guestB.png",
+      "sha256": "ac1d9c126adfac1746cfa22b385e85e5f5e4bef2d6ef2552da3d9df0135db68e",
+      "captureName": "plan-mixed-roster-before-cancel-guestB",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-guestB.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Scrolled viewport exposes all six roster rows but title/location are above viewport; System AssistiveTouch partly obscures web-A declined text."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-roster-before-cancel-guestC.png",
+      "sha256": "98c9adcdbad3d4d70f11e418ef7ee5b6e31b9917a7e06c9d8acd3092b9f4f9c0",
+      "captureName": "plan-mixed-roster-before-cancel-guestC",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-roster-before-cancel-guestC.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan roster shows3/6 confirmed, App friend1/web A/web C declined and App friend2/organizer/web B accepted; final27 Oct09:00–10:00 interval remains visible.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Scrolled viewport exposes all six roster rows but title/location are above viewport; System AssistiveTouch partly obscures web-A declined text."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-15-cancel-for-everyone-prompt.png",
+      "sha256": "de170b6ef017effee4d472cbbd73d95c64d91da1014baf7afd04b51a994bba0c",
+      "captureName": "plan-mixed-15-cancel-for-everyone-prompt",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-15-cancel-for-everyone-prompt.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Centered cancellation prompt has complete title, consequence text and separate Keep plan / Cancel plan buttons; destructive action uses red text and pale red fill, no overlap.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Underlying plan is dimmed and partial; this frame proves the visible prompt, not that cancellation was committed."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-16-cancelled-plan.png",
+      "sha256": "7c6c84c4a61005a2b34373a8076acfcde524ec33e49647f5ecfe319f4ebbe921",
+      "captureName": "plan-mixed-16-cancelled-plan",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-16-cancelled-plan.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Plan header visibly changes to Cancelled while preserving historical final interval/roster; bottom dock becomes Return to plans with no attendance/publish control.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Roster progress remains historical3/6; lower rows are offscreen. System AssistiveTouch overlaps part of organizer status."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-app2-cancelled-absent.png",
+      "sha256": "b0558c3580346f59870a853fba90ef1dc16b4b30e2a3c9bc7a99596f28d0c7a5",
+      "captureName": "plan-mixed-calendar-app2-cancelled-absent",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-app2-cancelled-absent.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar search shows the exact synthetic plan title and a no-results state after cancellation.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Only this search viewport is established; cancellation synchronization and logged-in actor are separate test evidence. Keyboard occupies lower screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "file": "plan-mixed-calendar-owner-cancelled-absent.png",
+      "sha256": "8343b4a550f87051e828dfa9c258163140cf9a88030896e4977b40ca621d9bb4",
+      "captureName": "plan-mixed-calendar-owner-cancelled-absent",
+      "source": "native",
+      "reviewedPath": "/tmp/sideseat232-main-inspection/plan-mixed-calendar-owner-cancelled-absent.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Calendar search shows the exact synthetic plan title and a no-results state after cancellation.",
+      "limitations": [
+        "Ordinary Chinese/light physical-App viewport only; no maximum-text or dark-mode claim.",
+        "Only this search viewport is established; cancellation synchronization and logged-in actor are separate test evidence. Keyboard occupies lower screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-unsubmitted.png",
+      "sha256": "5d5953fe9c58d29f747bab1bb8a747742fc2153181b5dfa505ac16c4ddf42d05",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-unsubmitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Editable timetable visibly retains two selected green half-hour cells09:00/09:30 on27 Oct, alongside aggregate counts, the Not submitted status and explicit Submit my availability button.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Partial next-date columns are the horizontal scrolling boundary, not evidence that all dates fit on screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-controlled-failure-keeps-draft.png",
+      "sha256": "07f9c194fee2efcb6163dce97287ae3813a76edd21f8c4028de541d2d0418e60",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-controlled-failure-keeps-draft.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Controlled QA transport-failure message is visible above synthetic identity, while bottom status says submission failed, choices retained/retry and Submit my availability remains available.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "The timetable selection is offscreen in this error viewport; retention of exact cells requires the adjacent captures and test assertions. Recovery explanation is expanded but no full recovery URL/token or credential is rendered; its copy-link button does not reveal the link.",
+        "The English Controlled QA transport failure banner is injected test copy, not a full Chinese-localization acceptance claim."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-submitted.png",
+      "sha256": "115f0da08b688b2dc5062511607ea93f8875d584b703740f5d45aeed15cbb29f",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-submitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Timetable shows selected27 Oct09:00/09:30 cells and Submitted availability acknowledgement with1 day/1 hour; aggregate row counts update to the visible current group total.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Pixels do not independently prove server durability or identity recovery; those are separate flow assertions."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-unsubmitted.png",
+      "sha256": "5e8179e68d587baf507585d3b6f95b6351166a88d6626d4b31c8b3ccee740165",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestB-unsubmitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Editable timetable visibly retains two selected green half-hour cells09:00/09:30 on27 Oct, alongside aggregate counts, the Not submitted status and explicit Submit my availability button.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Partial next-date columns are the horizontal scrolling boundary, not evidence that all dates fit on screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-submitted.png",
+      "sha256": "a571f3b05917d3999ce1c06aa8bf79c475f05005111fbb9a625cf0dca9251805",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestB-submitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Timetable shows selected27 Oct09:00/09:30 cells and Submitted availability acknowledgement with1 day/1 hour; aggregate row counts update to the visible current group total.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Pixels do not independently prove server durability or identity recovery; those are separate flow assertions."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-unsubmitted.png",
+      "sha256": "1d69dc05a0faf8b11a01b6d35b44cfe63137263e7a63c17063c0bb5e32ab7d41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestC-unsubmitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Editable timetable visibly retains two selected green half-hour cells09:00/09:30 on27 Oct, alongside aggregate counts, the Not submitted status and explicit Submit my availability button.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Partial next-date columns are the horizontal scrolling boundary, not evidence that all dates fit on screen."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-submitted.png",
+      "sha256": "8fd019bb7158c899319e105f00e6295474d043a665bad5ef92ec407d7a0262ae",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestC-submitted.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Timetable shows selected27 Oct09:00/09:30 cells and Submitted availability acknowledgement with1 day/1 hour; aggregate row counts update to the visible current group total.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Pixels do not independently prove server durability or identity recovery; those are separate flow assertions."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-restored-original-response.png",
+      "sha256": "dff73023fa3339cb1f8eecfa8d3b9c1cd98f39ee09d732516529ba291efb6e94",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-restored-original-response.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Timetable shows selected27 Oct09:00/09:30 cells and Submitted availability acknowledgement with1 day/1 hour; aggregate row counts update to the visible current group total.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Pixels do not independently prove server durability or identity recovery; those are separate flow assertions."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-final-time-highlight.png",
+      "sha256": "7b56ef64f29ab290aa6d92ba076d281f601f43a20e53cb741828672ef8945fc6",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-final-time-highlight.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Read-only invitation timetable clearly outlines27 Oct09:00–10:00, labels the invited interval at the header right, shows1/6 confirmed, explanatory App-calendar/web-link text and complete decline/accept/reply-later controls.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Only the first two roster names are fully visible; the rest require scrolling."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-final-time-highlight.png",
+      "sha256": "b443c2594c415cdf8d9a18ca1a83798021fd4821cf4d8f9fd9dfc1d7e2b3b24b",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestB-final-time-highlight.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Read-only invitation timetable clearly outlines27 Oct09:00–10:00, labels the invited interval at the header right, shows1/6 confirmed, explanatory App-calendar/web-link text and complete decline/accept/reply-later controls.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Only the first two roster names are fully visible; the rest require scrolling."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-final-time-highlight.png",
+      "sha256": "bb4a36566b2699c854687011741c13dc3be566fe67cacd272c50f78c4249a089",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestC-final-time-highlight.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Read-only invitation timetable clearly outlines27 Oct09:00–10:00, labels the invited interval at the header right, shows1/6 confirmed, explanatory App-calendar/web-link text and complete decline/accept/reply-later controls.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Only the first two roster names are fully visible; the rest require scrolling."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-late-acceptance.png",
+      "sha256": "170a2657a505d646d0cf6d064165b7e4ffc338474a38622a13ec788bf1f55752",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestB-late-acceptance.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Dark320px page shows Plan confirmed,27 Oct09:00–10:00 highlight,4/6 confirmed and the viewer acceptance acknowledgement; bottom offers unable-to-attend rather than initial acceptance.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Only the first roster rows are visible; timing relative to publication and absence of page reload cannot be inferred from still pixels."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-withdrawn.png",
+      "sha256": "616566fe5ff9e9249b84a4f1a90df8912e24693fc463a8d404df7b4739a753fd",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-withdrawn.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Published-plan page preserves highlighted09:00–10:00 interval and4/6 progress; disabled already-replied-unable-to-attend label plus explicit Confirm attendance button show withdrawal/reacceptance state.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "Existing narrow footer label wraps its last Chinese character onto a second line; text stays inside the button and is readable but this is not an all-labels-single-line visual claim."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestA",
+      "engine": "chromium",
+      "file": "mixed-guestA-cancelled-without-page-reload.png",
+      "sha256": "49590b02bd7ca3474bd6a606a952d8523af6b70fc44eab41e6234a49eb502417",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestA-cancelled-without-page-reload.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Shared page visibly shows Plan cancelled with retained27 Oct09:00–10:00 timetable and cancellation guidance. Historical roster statuses remain, and active reply controls are absent from the viewport.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "The file name records the harness no-reload step; still pixels establish cancelled state only. Final web-B roster row is partly below the844px viewport in some captures."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestB",
+      "engine": "webkit",
+      "file": "mixed-guestB-cancelled-without-page-reload.png",
+      "sha256": "8e5fe8eb181e7b995dd05a75de0c2879a2118cd66a529ea642232908c816a09b",
+      "viewport": {
+        "width": 320,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestB-cancelled-without-page-reload.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Shared page visibly shows Plan cancelled with retained27 Oct09:00–10:00 timetable and cancellation guidance. Historical roster statuses remain, and active reply controls are absent from the viewport.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "The file name records the harness no-reload step; still pixels establish cancelled state only. Final web-B roster row is partly below the844px viewport in some captures."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    },
+    {
+      "role": "guestC",
+      "engine": "chromium",
+      "file": "mixed-guestC-cancelled-without-page-reload.png",
+      "sha256": "9972c728d2fb575b6502d9975ae16ace2646d654067209a79a2d5b2c4c07b583",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "source": "web",
+      "reviewedPath": "/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui/docs/qa/evidence/2026-10-26-plan-direct-invite232/mixed-guestC-cancelled-without-page-reload.png",
+      "sha256Verified": true,
+      "viewedWith": "view_image",
+      "actualPixelsReviewed": true,
+      "visibleConclusion": "Shared page visibly shows Plan cancelled with retained27 Oct09:00–10:00 timetable and cancellation guidance. Historical roster statuses remain, and active reply controls are absent from the viewport.",
+      "limitations": [
+        "Browser-engine viewport capture, not a physical Safari screen; normal Chinese text only.",
+        "Only the visible scroll viewport is reviewed; headers or remaining dates/roster rows may be outside it.",
+        "The file name records the harness no-reload step; still pixels establish cancelled state only. Final web-B roster row is partly below the844px viewport in some captures."
+      ],
+      "acceptedWithinVisibleScope": true,
+      "blockingIssue": false,
+      "privacy": {
+        "safeControlledTestContent": true,
+        "credentialsVisible": false,
+        "recoveryLinkVisible": false,
+        "systemDesktopVisible": false,
+        "exclude": false
+      }
+    }
+  ]
+}

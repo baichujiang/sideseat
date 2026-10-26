@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-26T14:45:05.558200+00:00",
+  "device": "iPhone14 Plus / iPhone (4)",
+  "udid": "00008110-001A69110CC1401E",
+  "coreDevice": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+  "previewBuild": 232,
+  "ordinaryBuildPreserved": 97,
+  "normalLaunchPID": 10784,
+  "processExecutableMatches": true,
+  "launchArguments": [],
+  "environmentKeys": [
+    "TERM"
+  ],
+  "ownedRunnerRemoved": true,
+  "preexistingFlow222Preserved": [],
+  "all268InputsMatch": true,
+  "privateLocalMatches": true,
+  "binarySHA256MatchesFinalUIArtifact": true,
+  "strictSignatureReverified": true,
+  "newAppReportCount": 0,
+  "newAppReports": [],
+  "ordinaryIdentity": "Not read; QA used ephemeral credentials, normal launch domain only verified.",
+  "ownedTemporaryContextsRemoved": 5,
+  "privateConfigFilesRemoved": 25,
+  "activeLocalSharedOutputsAndExistingSimulatorsPreserved": true,
+  "rawLogsMode": "0600",
+  "rawResultAndCaptureDirectoriesMode": "0700"
+}

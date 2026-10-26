@@ -13,12 +13,12 @@ struct PlanGuidanceTests {
     }
     private let now = Date(timeIntervalSince1970: 1_000)
 
-    @Test("Organizer can share before filling and choose a time after a friend responds")
+    @Test("Organizer guidance recommends filling first, then sharing and choosing a time")
     func organizerJourney() throws {
-        #expect(try item().nextStep(at: now) == .shareAvailability)
+        #expect(try item().nextStep(at: now) == .fillAvailability)
         #expect(try item(["didRespond": true, "respondedCount": 1]).nextStep(at: now) == .shareAvailability)
         #expect(try item(["didRespond": true, "respondedCount": 2]).nextStep(at: now) == .chooseTime)
-        #expect(try item(["didRespond": false, "respondedCount": 1]).nextStep(at: now) == .chooseTime)
+        #expect(try item(["didRespond": false, "respondedCount": 1]).nextStep(at: now) == .fillAvailability)
     }
     @Test("A participant who filled in waits for an invitation rather than being asked to repeat")
     func participantJourney() throws {

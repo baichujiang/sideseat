@@ -2,7 +2,7 @@
 
 **Status:** Frozen v1.0 with approved activity-fit (2026-09-08), flexible-timing, event-driven publication and discovery-first (2026-09-09) amendments
 
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26
 
 **Scope:** Product positioning, canonical objects, information architecture, invariants, and non-goals
 
@@ -72,6 +72,28 @@ separate follow-up integrations; the membership badge does not certify them.
 
 This is the highest product authority in the repository. Implementation details
 belong in feature contracts; build status belongs in release records.
+
+**2026-10-26 owner-approved direct invitation flow:**
+After selecting the final interval in the native timetable, the organizer sends
+invitations from that page without a required roster-review step. The default
+list is all currently submitted availability respondents, including explicit
+no-free-time responses, plus the organizer. Availability coverage does not filter
+this list, and unsent local availability does not create a respondent. An optional
+edit area manages explicitly added unfilled people, App contact delivery and
+invitation-link capacity. Shared-but-unfilled contacts are not included by
+default; explicit extras are remembered, including already-selected unfilled
+invitees when adjusting an existing invitation. With no other selected person,
+the same plan can create an open invitation link defaulting to two people
+including the organizer. Activity ideas are explicitly decided on the same page
+before sending; interest is not that decision.
+
+Drafts remain scoped to account, plan token and invitation version; older drafts
+recover without a forced review or automatic send. Existing selected invitations,
+guest identity/recovery, RSVP, organizer-controlled publication and accepted-only
+notifications/SideSeat Calendars retain their rules. This supersedes only the
+mandatory roster-review and automatic unfilled-contact defaults in earlier dated
+amendments below; those passages remain historical. It does not assert delivery
+or acceptance. See the [current planning contract](./UNIFIED_PLANS.md#current-manual-plan-flow--owner-correction--2026-10-26).
 
 **2026-10-25 invitation-capacity presentation correction:**
 App and share pages use selected invitations as reserved places in the existing

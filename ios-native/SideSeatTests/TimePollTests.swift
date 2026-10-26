@@ -102,6 +102,63 @@ struct TimePollTests {
         #expect(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults)?.selected == draft.selected)
     }
 
+    @Test("Every submitted identity joins automatically, including empty availability and same-name guests")
+    func automaticInvitationParticipants() throws {
+        let responses: [[String: Any]] = [
+            ["id": "owner", "displayName": "Owner", "slotIds": [], "isMe": true, "didRespond": true],
+            ["id": "app", "displayName": "App friend", "slotIds": [0, 1], "isMe": false, "didRespond": true],
+            ["id": "guest-one", "displayName": "Same name", "slotIds": [], "isMe": false, "isGuest": true, "didRespond": true],
+            ["id": "guest-two", "displayName": "Same name", "slotIds": [2, 3], "isMe": false, "isGuest": true],
+        ]
+        let shared: [String: Any] = ["id": "shared", "displayName": "Not filled", "slotIds": [], "isMe": false, "didRespond": false]
+        let poll = try invitationPoll(responses: responses, candidates: responses + [shared])
+        #expect(poll.invitationParticipantIDs(adding: []) == ["owner", "app", "guest-one", "guest-two"])
+        #expect(!poll.invitationParticipantIDs(adding: []).contains("shared"))
+    }
+
+    @Test("Explicit extras intersect current candidates and never duplicate submitted identities")
+    func explicitInvitationExtras() throws {
+        let response: [String: Any] = ["id": "responded", "displayName": "Friend", "slotIds": [], "isMe": false]
+        let shared: [String: Any] = ["id": "shared", "displayName": "Friend", "slotIds": [], "isMe": false, "didRespond": false]
+        let poll = try invitationPoll(responses: [response], candidates: [response, shared])
+        let extras = Set(["shared", "shared", "responded", "unknown-or-removed"])
+        #expect(poll.invitationParticipantIDs(adding: extras) == ["responded", "shared"])
+        let noResponses = try invitationPoll(responses: [], candidates: [shared])
+        #expect(noResponses.invitationParticipantIDs(adding: []).isEmpty)
+        #expect(noResponses.invitationParticipantIDs(adding: ["shared"]) == ["shared"])
+    }
+
+    @Test("A refreshed response joins without an old roster snapshot and removed extras stop joining")
+    func refreshedInvitationParticipants() throws {
+        let initial: [String: Any] = ["id": "initial", "displayName": "Initial", "slotIds": [0], "isMe": false]
+        let newResponse: [String: Any] = ["id": "new-response", "displayName": "New", "slotIds": [], "isMe": false]
+        let removed: [String: Any] = ["id": "removed", "displayName": "Removed", "slotIds": [], "isMe": false, "didRespond": false]
+        let old = try invitationPoll(responses: [initial], candidates: [initial, removed])
+        let refreshed = try invitationPoll(responses: [initial, newResponse], candidates: [initial])
+        let extras: Set<String> = ["removed"]
+        #expect(old.invitationParticipantIDs(adding: extras) == ["initial", "removed"])
+        #expect(refreshed.invitationParticipantIDs(adding: extras) == ["initial", "new-response"])
+    }
+
+    @Test("Legacy final drafts retain their range while optional invitation edits round-trip per account")
+    func invitationDraftCompatibility() throws {
+        let suite = "invitation-draft-test-" + UUID().uuidString
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let key = TimePollFinalDraft.key(userID: "owner", token: "plan")
+        defaults.set(Data(#"{"selected":[0,1,2,3],"choosingFinal":true,"invitationVersion":0,"next":"review"}"#.utf8), forKey: key)
+        var draft = try #require(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults))
+        #expect(draft.selected == [0, 1, 2, 3] && draft.choosingFinal && draft.next == .review)
+        #expect(draft.extraInviteeIDs == nil && draft.activityID == nil && draft.linkParticipantCount == nil)
+        // Old navigation data remains decodable; the current screen owns whether any action runs.
+        draft.next = nil; draft.extraInviteeIDs = ["extra"]; draft.activityID = "idea"; draft.linkParticipantCount = 5
+        draft.save(userID: "owner", token: "plan", defaults: defaults)
+        let restored = try #require(TimePollFinalDraft.load(userID: "owner", token: "plan", defaults: defaults))
+        #expect(restored.selected == draft.selected && restored.extraInviteeIDs == ["extra"])
+        #expect(restored.activityID == "idea" && restored.linkParticipantCount == 5 && restored.next == nil)
+        #expect(TimePollFinalDraft.load(userID: "other", token: "plan", defaults: defaults) == nil)
+    }
+
     @Test("Paint and erase a rectangle without toggling revisited cells")
     func rectangles() {
         let slots = (0..<8).map { id in NativeTimePoll.Slot(id: id, date: id < 4 ? "2026-10-16" : "2026-10-17", row: String(id % 4), label: String(id % 4), start: Date(timeIntervalSince1970: Double(id * 900)), end: Date(timeIntervalSince1970: Double((id + 1) * 900))) }
@@ -346,6 +403,28 @@ struct TimePollTests {
         #expect(store.selected == [0, 1] && store.hasChanges && store.error != nil)
     }
 
+    @Test("Pre-send refresh reports fresh success or failure without submitting private availability")
+    @MainActor
+    func refreshResultKeepsPrivateDraft() async throws {
+        for status in [200, 503] {
+            let transport = PollSaveTransport(initialSlots: [0, 1], readStatus: status)
+            let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport),
+                                       credentialStore: EphemeralCredentialStore(), device: .current)
+            session.installUITestingSession()
+            let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
+            store.selected = [4, 5]; store.displayName = "Unsubmitted availability"
+            let refreshed = await store.load(session: session)
+            #expect(refreshed == (status == 200))
+            #expect(store.selected == [4, 5] && store.displayName == "Unsubmitted availability" && store.hasChanges)
+            #expect(await transport.writes.isEmpty)
+            if status == 200 {
+                #expect(store.poll?.mySlotIds == [0, 1] && store.poll?.didRespond == true && store.error == nil)
+            } else {
+                #expect(store.poll?.mySlotIds == [] && store.poll?.didRespond == false && store.error != nil)
+            }
+        }
+    }
+
     @Test("Drafts restore per account and plan without publishing")
     @MainActor
     func localDraftRecovery() async throws {
@@ -431,6 +510,32 @@ struct TimePollTests {
         #expect(store.poll?.planningPhase == "INVITING")
         #expect(store.selected == [2, 3] && store.displayName == "Local nickname" && store.hasChanges)
         #expect(await transport.writes.isEmpty)
+    }
+
+    @Test("Invitation failure and duplicate taps keep private availability for explicit retry")
+    @MainActor
+    func invitationFailureAndDuplicateGuard() async throws {
+        let transport = PollInvitationTransport()
+        let session = SessionStore(apiClient: APIClient(environment: .developmentFallback, transport: transport),
+                                   credentialStore: EphemeralCredentialStore(), device: .current)
+        session.installUITestingSession()
+        let store = TimePollStore(token: "poll", poll: try collectingPoll(), draftDefaults: nil)
+        store.selected = [4, 5]; store.displayName = "Private availability"
+        let request = SendPollInvitationsRequest(start: "2030-10-16T07:00:00Z", end: "2030-10-16T08:00:00Z",
+                                                 attendeeIds: ["friend"], version: 0)
+        let sending = Task { await store.mutate("invitations", body: request, session: session) }
+        await transport.waitUntilFirstStarted()
+        #expect(store.acting && !store.canMutate)
+        await store.mutate("invitations", body: request, session: session)
+        #expect(await transport.paths.count == 1)
+        await transport.finishFirst(); await sending.value
+        #expect(store.error != nil && store.canMutate)
+        #expect(store.poll?.planningPhase == "COLLECTING")
+        #expect(store.selected == [4, 5] && store.displayName == "Private availability" && store.hasChanges)
+        await store.mutate("invitations", body: request, session: session)
+        #expect(store.error == nil && store.poll?.planningPhase == "INVITING")
+        #expect(store.selected == [4, 5] && store.displayName == "Private availability" && store.hasChanges)
+        #expect(await transport.paths == ["/api/v1/time-polls/poll/invitations", "/api/v1/time-polls/poll/invitations"])
     }
 
     @Test("Dirty availability keeps refreshing peers and formal invitation phases")
@@ -560,6 +665,37 @@ private func collectingPollData() -> Data {
 private func collectingPoll() throws -> NativeTimePoll {
     let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
     return try decoder.decode(NativeTimePoll.self, from: collectingPollData())
+}
+
+private func invitationPoll(responses: [[String: Any]], candidates: [[String: Any]]) throws -> NativeTimePoll {
+    var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+    object["participants"] = responses; object["invitees"] = candidates
+    let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+    return try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object))
+}
+
+private actor PollInvitationTransport: APITransport {
+    private(set) var paths: [String] = []
+    private var started: CheckedContinuation<Void, Never>?
+    private var pending: CheckedContinuation<Void, Never>?
+    func waitUntilFirstStarted() async {
+        if paths.isEmpty { await withCheckedContinuation { started = $0 } }
+    }
+    func finishFirst() { pending?.resume(); pending = nil }
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        paths.append(request.url!.path)
+        if paths.count == 1 {
+            await withCheckedContinuation { continuation in
+                pending = continuation; started?.resume(); started = nil
+            }
+            return (Data(#"{"error":{"code":"UNAVAILABLE","message":"Invitation failed","retryable":false}}"#.utf8),
+                    HTTPURLResponse(url: request.url!, statusCode: 503, httpVersion: nil, headerFields: nil)!)
+        }
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["phase"] = "INVITING"; object["invitationVersion"] = 1
+        let data = try JSONSerialization.data(withJSONObject: ["data": object])
+        return (data, HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    }
 }
 
 private actor PollSaveTransport: APITransport {

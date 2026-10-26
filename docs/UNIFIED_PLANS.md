@@ -3,7 +3,9 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
-## Current manual plan flow — 2026-10-24
+<a id="current-manual-plan-flow--2026-10-24"></a>
+
+## Current manual plan flow — owner correction / 2026-10-26
 
 Enter activity and optional location → choose candidate dates and daily voting
 hours (optional friends' activity suggestions) → create one COLLECT plan and
@@ -11,18 +13,37 @@ open its editable timetable without a share modal → organizer fills their own
 availability → Submit and share explicitly saves it, then opens sharing to App
 contacts or browser guests → friends fill the timetable and explicitly submit →
 organizer selects a continuous final interval
-on the same timetable, reviews invitees and sends formal invitations → each
+on the same timetable and sends formal invitations directly from that page → each
 invitee accepts, declines or leaves pending → organizer may publish at any time;
 only accepted account participants are notified and receive their unique
 SideSeat Calendar projection. Guests view the published arrangement on the share
 page and retain the same RSVP version rules, without a personal Calendar row.
-Later acceptance before the start follows the existing publication rules. Zero availability responses never block final selection or invitation.
+Later acceptance before the start follows the existing publication rules.
 
-When activity ideas are enabled, the organizer must choose the activity before
-sending formal invitations. Creation has no timetable preview or separate fixed-time branch. The timetable
+The default invitation list is every person with a currently submitted availability
+response, including an explicit no-free-time response. It is not filtered by
+availability for the final interval, and local unsent drafts do not add people.
+The organizer is always included. Sending refreshes the current plan before computing
+the list; a failed refresh sends no invitation and leaves local drafts intact.
+An optional edit area manages additional people
+who have not submitted; merely receiving a shared plan card does not include them
+by default. Explicit extra selections survive leaving and returning. When adjusting
+an existing invitation, already-selected people who have not submitted remain in
+that extra list. Guest identities remain distinct even when names match.
+
+There is no required roster-review page between selecting time and sending.
+Additional App contacts and invitation-link capacity belong in the optional edit
+area. Contact delivery keeps its explicit existing send action and effects; it is
+not a silent local selection. With no other selected invitee, sending can create
+the same plan's open invitation link, defaulting to two people including the
+organizer. Zero responses therefore never block final selection or invitation.
+
+When activity ideas are enabled, the organizer explicitly chooses the activity
+on the same page before sending formal invitations; marking interest is not that
+choice. Creation has no timetable preview or separate fixed-time branch. The timetable
 appears immediately after creation. Native selection supports tap/toggle and
 hold-paint/erase, including cross-day final drafts; discontinuous final drafts
-remain editable and disable review. Availability is a local draft until explicit
+remain editable and disable sending. Availability is a local draft until explicit
 submission; filling availability is separate from accepting an invitation, and
 sending invitations is separate from publishing to Calendar. Native grids have
 no one-step Undo. Existing records, guest identity, invitation versions and
@@ -33,8 +54,18 @@ submission opens sharing only after the current draft is acknowledged and clean;
 failure, an in-flight newer edit or a participant submission never opens it.
 Later owner edits retain Save changes. The title's share action stays available
 before any submission, so filling is the recommended order, not a new gate.
-Old persisted share handoffs are decoded and consumed without opening a modal;
-final-time selections and review handoffs retain their existing compatibility.
+Final-time and extra-invitee drafts remain scoped to account, plan token and
+invitation version. Older drafts still decode; old share/review handoffs restore
+the page without opening a mandatory review or automatically sending anything.
+An invitation-version change invalidates the old invitation draft. Activity
+selection or invitation failure preserves the remaining local work; neither
+operation submits availability on the user's behalf.
+
+This owner correction supersedes earlier dated requirements to review a roster
+before sending and to preselect every unfilled shared contact. Those descriptions
+remain historical below. RSVP, explicit organizer publication, accepted-only
+notifications/Calendars, existing fixed-time records and guest recovery retain
+their existing rules; this approval is not a deployment or acceptance claim.
 
 Actual installed builds, source hashes and verification scopes are recorded in
 [Deployed state](./DEPLOYED_STATE.md) and the

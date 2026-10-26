@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-26T14:48:29.551602+00:00",
+  "fileCount": 66,
+  "exactPrivatePatternCount": 22,
+  "exactCredentialPlanCookieMatches": 0,
+  "jwtOrRecoveryFormatMatches": 0,
+  "mainImagePrivacyReview": "All67 actual captures reviewed; zero exclusions.",
+  "diagnosticOSFrame": "Private only, excluded from public evidence.",
+  "scope": "New evidence plus related source, tests and current contracts. Final release/state prose receives another scan after writing."
+}

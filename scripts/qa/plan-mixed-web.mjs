@@ -4,14 +4,19 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { chromium, webkit, expect } from '@playwright/test';
-import { call, calendars, persist, readFixture, route, evidence, out } from './plan-six-participant-phone.mjs';
+import { call, calendars, persist, readFixture, route } from './plan-six-participant-phone.mjs';
 
 const [logPath] = process.argv.slice(2);
 assert(logPath, 'Supply the actual physical XCTest log.');
 const origin = process.env.SIDESEAT_MIXED_WEB_ORIGIN || 'https://www.sideseat.de';
-const privateDir = '/tmp/sideseat-mixed230-private';
+const appBuild = Number(process.env.SIDESEAT_QA_UI_BUILD || '232');
+assert(Number.isSafeInteger(appBuild) && appBuild > 0, 'Supply a positive native build number.');
+const privateDir = path.resolve(process.env.SIDESEAT_MIXED_PRIVATE_DIR || `/tmp/sideseat-mixed${appBuild}-private`);
+const out = path.resolve(process.env.SIDESEAT_QA_OUTPUT || `docs/qa/evidence/2026-10-26-plan-direct-invitation${appBuild}`);
 await fs.mkdir(privateDir, { recursive: true, mode: 0o700 });
+await fs.chmod(privateDir, 0o700);
 await fs.mkdir(out, { recursive: true });
+const evidence = async (name, value) => fs.writeFile(path.join(out, name), JSON.stringify(value, null, 2) + '\n');
 const f = await readFixture();
 assert(f.title.startsWith('混合闭环 ') && f.mixedGuests.length === 3);
 const owner = f.accounts.find(a => a.role === 'owner');
@@ -23,7 +28,7 @@ let current = 'starting', failed, completed = false, main;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const sha = value => createHash('sha256').update(value).digest('hex');
 const report = async () => evidence('mixed-real-flow.json', { passed: completed && !failed, origin,
-  appBuild: 231, physicalUDID: '00008110-001A69110CC1401E', phases, checks, webChecks, screenshots,
+  appBuild, physicalUDID: '00008110-001A69110CC1401E', phases, checks, webChecks, screenshots,
   mainMutations: 'App owner/registered peers through physical UI; guests through actual public browser UI only',
   browserEngines: ['chromium', 'webkit'], realNetwork: true,
   failure: failed ? { phase: current, message: 'Failed boundary; private diagnostics retained.' } : null,
@@ -184,6 +189,12 @@ async function verify(phase) {
     } else assert.deepEqual(view.mySlotIds, submitted ? [0, 1, 2, 3] : [], `${role}: own availability snapshot`);
   }
   if (['six-responses-ready', 'invited', 'mixed-replies-ready'].includes(phase)) assert.equal(p.summary.participantCount, 6);
+  if (phase === 'invited') {
+    assert.equal(p.phase, 'INVITING'); assert.equal(p.invitationVersion, 1);
+    const identity = person => JSON.stringify({ name: person.displayName, guest: Boolean(person.isGuest) });
+    assert.deepEqual(p.invitations.filter(i => i.selected).map(identity).sort(), p.participants.map(identity).sort(),
+      'Direct sending includes all six submitted App and guest identities, without a review-page selection.');
+  }
   if (phase === 'created' || phase === 'owner-draft') assert.equal(p.phase, 'COLLECTING');
   if (phase === 'mixed-replies-ready') {
     assert.equal(p.phase, 'INVITING'); assert.equal(included.length, 0);

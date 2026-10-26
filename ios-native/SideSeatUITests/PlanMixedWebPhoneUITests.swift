@@ -92,15 +92,12 @@ import XCTest
         selectCommonAvailability()
         let summary = app.staticTexts["time-poll-final-summary"]
         XCTAssertTrue(summary.label.contains("09:00") && summary.label.contains("10:00"), summary.label)
-        tap(app.buttons["unified-plan-review-roster"])
-        let inviteRows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'unified-plan-invite-person-'"))
-        XCTAssertEqual(inviteRows.count, 6)
-        for person in people {
-            let row = inviteRows.matching(NSPredicate(format: "label CONTAINS %@", person.name)).firstMatch
-            XCTAssertTrue(row.exists, person.name)
-            XCTAssertTrue(["Selected", "已选择"].contains(row.value as? String ?? ""), person.name)
-        }
-        capture("08-review-six-invitees"); tap(app.buttons["unified-plan-send-invitations"])
+        XCTAssertFalse(app.buttons["unified-plan-review-roster"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["unified-plan-invitation-editor"].firstMatch.exists)
+        let invitationSummary = app.descendants(matching: .any)["unified-plan-invitation-summary"].firstMatch
+        XCTAssertTrue(invitationSummary.waitForExistence(timeout: 10))
+        XCTAssertTrue(invitationSummary.label.contains(String(people.count - 1)), invitationSummary.label)
+        capture("08-send-directly-to-six-submitted-people"); tap(app.buttons["unified-plan-send-invitations"])
         XCTAssertTrue(app.buttons["unified-plan-publish"].waitForExistence(timeout: 25))
         verifyRoster(accepted: ["owner"], declined: [], stage: "initial-invitations")
         verifyInvitedTimetable(); capture("09-owner-invited-five"); phase("invited")

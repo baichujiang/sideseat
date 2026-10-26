@@ -3222,3 +3222,18 @@
 "Loading intentions" = "Vorhaben werden geladen";
 
 "This plan is full. Contact the organizer." = "Dieser Plan ist voll. Kontaktiere die organisierende Person.";
+
+// Direct invitations from the timetable.
+"Edit invitation" = "Einladung bearbeiten";
+"Timetable respondents" = "Zeitplan ausgefüllt";
+"Everyone who submitted availability is invited automatically." = "Alle mit eingereichten Zeiten werden automatisch eingeladen.";
+"Additional invitees" = "Weitere Eingeladene";
+"Invitation link" = "Einladungslink";
+"Friends can confirm through the invitation link." = "Freunde können über den Einladungslink zusagen.";
+"Send invitations to %d people" = "Einladungen an %d Personen senden";
+"Choose an activity above before sending invitations." = "Wähle oben eine Aktivität, bevor du Einladungen sendest.";
+"Interest is not attendance. The organizer chooses the activity here before sending invitations." = "Interesse ist keine Zusage. Der Organisator wählt hier vor dem Einladen die Aktivität.";
+"Choose this activity" = "Diese Aktivität wählen";
+"Plans support up to 20 people, including you." = "Ein Plan ist für höchstens 20 Personen einschließlich dir möglich.";
+"Send plan cards to App friends" = "Plankarte senden";
+"Select extra invitees here after sending a plan card. Respondents join automatically." = "Wähle hier nach dem Senden weitere Eingeladene aus. Wer Zeiten einreicht, wird automatisch eingeladen.";

@@ -88,9 +88,10 @@ final class TimePollStore {
         selected = selection
     }
 
-    func load(session: SessionStore) async {
+    @discardableResult
+    func load(session: SessionStore) async -> Bool {
         bindDraft(session: session)
-        guard !saving && !acting else { return }
+        guard !saving && !acting else { return false }
         let generation = session.authorizationGeneration
         let currentRevision = revision
         let request = UUID()
@@ -98,16 +99,16 @@ final class TimePollStore {
         do {
             let response: APIEnvelope<NativeTimePoll> = try await session.sendAuthorized("/api/v1/time-polls/\(token)")
             guard generation == session.authorizationGeneration,
-                  request == refreshID else { return }
-            if !saving && !acting {
-                if hasChanges || currentRevision != revision { poll = response.data }
-                else { accept(response.data) }
-                restoreDraft()
-                if !submissionFailed { error = nil }
-            }
+                  request == refreshID, !saving, !acting else { return false }
+            if hasChanges || currentRevision != revision { poll = response.data }
+            else { accept(response.data) }
+            restoreDraft()
+            if !submissionFailed { error = nil }
+            return true
         } catch {
             if generation == session.authorizationGeneration, currentRevision == revision,
                request == refreshID, !saving, !acting { self.error = error.localizedDescription }
+            return false
         }
     }
 

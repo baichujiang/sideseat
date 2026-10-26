@@ -2,13 +2,13 @@
 
 **Status:** One-to-one v1.0 contract retained; approved manual planning follows the current flow below
 
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26
 
 **Governing product:** [Product](./PRODUCT.md)
 
 **Scope:** User-visible interaction from Intent through Plan, plus the approved repeat boundary
 
-## Current manual plan flow — 2026-10-24
+## Current manual plan flow — owner correction / 2026-10-26
 
 Create a COLLECT plan from activity/location, candidate dates and daily hours,
 with optional activity ideas; creation has no timetable preview and opens the
@@ -17,11 +17,27 @@ Submit and share acknowledges that draft before opening the share panel.
 The title's share entry remains available earlier; later owner edits and all
 participant submissions save without opening sharing. App contacts and browser
 guests fill the same detail timetable and explicitly submit local drafts. The organizer can choose a continuous final interval even
-with zero responses, review the roster and send invitations. Invitees accept,
+with zero responses and send invitations directly from that page. No roster-review
+page is required. Invitees accept,
 decline or leave pending; the organizer may publish at any time. Only accepted
 account participants receive notifications and SideSeat Calendar entries; guests
 view the final arrangement on the shared page. Activity ideas must be decided
-before formal invitations are sent.
+on the same page before formal invitations are sent; interest alone is not a
+final activity choice.
+
+The default list contains all currently submitted respondents, including people
+who submitted no free time, plus the organizer. It is not restricted to people
+available for the chosen interval. Additional unfilled people are explicitly
+managed in the optional edit area; shared-but-unfilled contacts are not included
+automatically. Explicit extra selections are remembered, and already-selected
+unfilled invitees remain when adjusting an existing invitation. If nobody else
+is selected, the same plan can create an open invitation link with a default
+total of two including the organizer. Extra App contact delivery and link capacity
+remain optional edits, not mandatory steps.
+
+Invitation drafts recover per account, token and invitation version. Older drafts
+restore the page without a forced review or automatic send. These defaults do not
+submit availability or accept an invitation for anyone.
 
 For fixed-capacity share invitations, selected pending invitees reserve their
 places. They can still reply when full; an unselected link viewer sees a full
@@ -30,10 +46,12 @@ and before the activity starts. Confirmation progress and published Calendars
 continue to count accepted people only.
 
 The canonical selection, guest/record compatibility and consent contract is in
-[Unified plans](./UNIFIED_PLANS.md#current-manual-plan-flow--2026-10-24).
+[Unified plans](./UNIFIED_PLANS.md#current-manual-plan-flow--owner-correction--2026-10-26).
 Actual releases and verification scopes are in [Deployed state](./DEPLOYED_STATE.md).
 Preview-numbered sections below are dated evolution, superseded by newer
-amendments; they are not additional current entry paths or fresh acceptance.
+amendments; their required roster-review and all-shared-contact defaults are
+superseded by this correction. They are not additional current entry paths or
+fresh acceptance.
 
 ## Activity undecided, time already set — Preview 156
 
