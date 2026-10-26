@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-26T19:10:00.733Z",
+  "method": "Authenticated deployment read for each public hostname",
+  "deployments": [
+    {
+      "host": "api.sideseat.de",
+      "deploymentID": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "state": "READY",
+      "target": "production"
+    },
+    {
+      "host": "www.sideseat.de",
+      "deploymentID": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "state": "READY",
+      "target": "production"
+    },
+    {
+      "host": "sideseat.de",
+      "deploymentID": "dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5",
+      "state": "READY",
+      "target": "production"
+    }
+  ],
+  "backendReleasedThisStage": false
+}

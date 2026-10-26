@@ -958,7 +958,7 @@
 "Verification rejected" = "认证未通过";
 "Not school verified" = "尚未完成学校认证";
 "%@ verified" = "%@ 已认证";
-"A verified school identity makes posts, activity signups, course spaces, and chats safer for international students." = "学校认证会让发帖、活动报名、课程空间和聊天对留学生更安全。";
+"Complete your school and language details and verify your school identity to use Together recommendations." = "完成学校和语言资料，并通过学校认证后，就能使用「同行」推荐。";
 
 /* 语音智能添加与课表导入 */
 "Stop dictation" = "停止语音输入";

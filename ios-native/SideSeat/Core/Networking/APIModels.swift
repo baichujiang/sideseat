@@ -93,14 +93,15 @@ enum APIClientError: LocalizedError, Sendable {
 
     var errorDescription: String? {
         switch self {
-        case .invalidResponse:
-            "The server returned an invalid response."
         case .transport:
-            "The network connection failed. Please try again."
+            AppLocalization.string("The network connection failed. Please try again.")
+        case .server(let status, _) where (500...599).contains(status),
+             .decoding(let status, _) where (500...599).contains(status):
+            AppLocalization.string("The service is temporarily unavailable. Please try again shortly.")
         case .server(_, let payload):
-            payload.message
-        case .decoding:
-            "The server response could not be read."
+            AppLocalization.string(String.LocalizationValue(payload.message))
+        case .invalidResponse, .decoding:
+            AppLocalization.string("Something went wrong. Please try again.")
         }
     }
 }

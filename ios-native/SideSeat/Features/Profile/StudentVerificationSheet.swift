@@ -203,7 +203,7 @@ struct StudentVerificationSheet: View {
                 } header: {
                     Text("Current identity")
                 } footer: {
-                    Text("A verified school identity makes posts, activity signups, course spaces, and chats safer for international students.")
+                    Text("Complete your school and language details and verify your school identity to use Together recommendations.")
                 }
 
                 if displayedVerifiedStudent {

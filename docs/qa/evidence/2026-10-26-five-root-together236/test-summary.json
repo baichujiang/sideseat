@@ -1,0 +1,182 @@
+{
+  "passed": true,
+  "page": "Together",
+  "productBuild": 236,
+  "sameFrozenAppAcrossRuns": true,
+  "singleUninterruptedSuite": false,
+  "totalSuccessfulTests": 10,
+  "independentDatabaseChecks": 49,
+  "runs": [
+    {
+      "run": "together-safety236",
+      "cases": [
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherDiscoveryEdgesLiveUITests test02ProfileReportAndBlockRequireExplicitConfirmation",
+          "seconds": 225.286
+        }
+      ],
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "64e4b1cb3e1bd5099353c7e6aefc2ca22c1ac00aadd0adaf2167b693fde00f4e",
+      "databaseChecks": 9,
+      "completedPhases": [
+        "safety-owner-published",
+        "safety-peer-published",
+        "safety-profile-opened",
+        "safety-report-cancelled",
+        "safety-reported",
+        "safety-block-cancelled",
+        "safety-blocked",
+        "safety-peer-reloaded",
+        "safety-owner-reloaded"
+      ]
+    },
+    {
+      "run": "together-main236",
+      "cases": [
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherLiveUITests test01EditorLifecyclePersistsAndPreservesPausedState",
+          "seconds": 313.995
+        },
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherLiveUITests test02TwoPeopleDiscoverSaveGreetReplyAndKeepOneChat",
+          "seconds": 304.322
+        }
+      ],
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "5c5c2fbace5bb3d64221d37f4ccee7a869bde787108355519c8f26c12593d89d",
+      "databaseChecks": 19,
+      "completedPhases": [
+        "lifecycle-draft-cancelled",
+        "lifecycle-published",
+        "lifecycle-edited",
+        "lifecycle-paused",
+        "lifecycle-paused-edited",
+        "lifecycle-resumed",
+        "lifecycle-share-cancelled",
+        "lifecycle-delete-cancelled",
+        "lifecycle-reloaded",
+        "lifecycle-deleted",
+        "owner-published",
+        "peer-published",
+        "profile-returned",
+        "bookmarked",
+        "bookmark-roundtrip",
+        "composer-cancelled",
+        "greeting-sent",
+        "reply-sent",
+        "chat-roundtrip"
+      ]
+    },
+    {
+      "run": "together-input236",
+      "cases": [
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherInputEdgesUITests testSaveFailurePreservesDraftAndRetry",
+          "seconds": 83.252
+        },
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherInputEdgesUITests testTimingCategoriesAndDraftIsolation",
+          "seconds": 339.232
+        }
+      ],
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "953088fafa78839a25f949282a72b02b67d8e6133248ed6deedf47143ce6f972",
+      "databaseChecks": 9,
+      "completedPhases": [
+        "categories-validated",
+        "exact-windows-selected",
+        "cancel-reopen-preserved",
+        "account-drafts-isolated",
+        "exact-save-readback",
+        "timing-edge-ui-deleted",
+        "save-failed-no-server-write",
+        "save-retry-created-once",
+        "retry-edge-ui-deleted"
+      ]
+    },
+    {
+      "run": "together-discovery236",
+      "cases": [
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherDiscoveryEdgesLiveUITests test01DiscoveryBookmarkDraftAndDismissUndoPersist",
+          "seconds": 259.343
+        }
+      ],
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "84e43a3eeb7f064cf368e27a4eb13eb917417bdc4dcdcc214aef5a74c1ce216a",
+      "databaseChecks": 12,
+      "completedPhases": [
+        "edge-owner-published",
+        "edge-peer-published",
+        "edge-inline-results",
+        "edge-profile-returned",
+        "edge-bookmarked",
+        "edge-unbookmarked",
+        "edge-empty-saved-returned",
+        "edge-composer-cancelled",
+        "edge-draft-restored",
+        "edge-hide-undone",
+        "edge-hide-committed",
+        "edge-hidden-reloaded"
+      ]
+    },
+    {
+      "run": "together-clock236",
+      "cases": [
+        {
+          "name": "FiveRootsUITests.FiveRootTogetherInputEdgesUITests testCustomExactClockPersists",
+          "seconds": 90.186
+        }
+      ],
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "4f8184618412456b4093df82e6e59e8e824dbe59fc06dc7fbc27eb390c84ab72",
+      "scope": "Real native clock adjustment,exact own API readback,reopen and UI deletion"
+    },
+    {
+      "run": "together-public-phone236",
+      "cases": [
+        {
+          "name": "FiveRootsPhoneUITests.FiveRootTogetherPublicPhoneUITests testUnverifiedSetupEntriesCancelAndReturnFromMessages",
+          "seconds": 68.533
+        }
+      ],
+      "tests": 1,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "98cc8758c4134a4830d2144ce8cf19a2215b42cfab2adb4b6977ed69b0ffbe54",
+      "scope": "Physical production unverified setup; independent Mac profile oracle"
+    },
+    {
+      "run": "together-visual236",
+      "cases": [
+        {
+          "name": "FiveRootsVisualUITests.CombinedTogetherPhoneUITests testChineseNormalCombinedTilesRecommendationsAndSaved",
+          "seconds": 62.976
+        },
+        {
+          "name": "FiveRootsVisualUITests.CombinedTogetherPhoneUITests testGermanActualSystemMaximumSingleReadableTile",
+          "seconds": 104.291
+        }
+      ],
+      "tests": 2,
+      "failures": 0,
+      "skipped": 0,
+      "logSHA256": "845c3c149a142bdce14189a8ddde07a0130fe97fd41d0a0ec37954a1869994eb",
+      "scope": "Fixture-only normal/German maximum visual targets"
+    }
+  ],
+  "mainEnvironment": "Owned local PostgreSQL15434 and actual active-checkout API3344; native UI owns business actions; verification+English seeded only as prerequisites",
+  "physicalScope": "DefaultiPhone14Plus real production signup/readiness/cancel/return; notverified matching business",
+  "fixtureScope": "Visual-only cards and action panels,notAPI acceptance",
+  "currentAndHistoricalFailuresRetained": true
+}

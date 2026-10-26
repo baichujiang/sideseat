@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "filesChecked": 32,
+  "exactOwnedSecretAndJWTMatches": 0,
+  "finalUniqueScreenshotsActuallyReviewed": 59,
+  "personalNotificationCandidateFramesExcluded": true,
+  "onlyFakeDataImagesAdopted": 15
+}

@@ -1,0 +1,102 @@
+{
+  "uniqueCohorts": 13,
+  "accountsDeleted": 26,
+  "staleBearer401": 26,
+  "receipts": [
+    {
+      "receipt": "debug2-cohort-cleanup.json",
+      "runSHA256": "62daa4bd5db55c392afc9700bd8d76afc26c56daeff4f23e0667db798e7652af",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "discovery-clock-cohort-cleanup.json",
+      "runSHA256": "ff402033026f830b8de33e68402f49fc6bb5c6a09963d2dd197859d830492b09",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "discovery234-initial-cohort-cleanup.json",
+      "runSHA256": "1f1d4be529d95122ad2c70fb711299e5662a801230d51b074eecfc8146ad0600",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "initial-cohort-cleanup.json",
+      "runSHA256": "00935c0be28d7d8e23748e9dd85c430c4c447794f2373f01d0391f8597818e48",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "input-cohort-cleanup.json",
+      "runSHA256": "8c9f56f9871548bdbcc7d70d9be617d8799510af46185b732b9c2eac09757237",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "main-cohort-cleanup.json",
+      "runSHA256": "c205fa4a9797e184665c5f7a81c61c8acbe5d59c1b1a457a11112a31b58bb0c3",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "phone-prod-cohort-cleanup.json",
+      "runSHA256": "1a788852c06f4bb92554226c8f6cafbec4a54d6523fb9f56c336a8acd3a066bc",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "phone234-cohort-cleanup.json",
+      "runSHA256": "08a9edfb450304be08628c8fb1dcac1ac9100201ce3978514315e0d20d20607f",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "phone235-cohort-cleanup.json",
+      "runSHA256": "243066c6f8b596c412f85d5ea7b778f21c266fe05722d852edc888a5d7943fc3",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "phone236-cohort-cleanup.json",
+      "runSHA256": "1bb9069f34227b752f6b4d688f36cf32acd9fb5bd177f7535601618d53f66925",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "safety-initial-cohort-cleanup.json",
+      "runSHA256": "bde9855fb9d651695e51328ac18fa2b5ab5603530ec8a075c02271febc080446",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "together234-final-cohort-cleanup.json",
+      "runSHA256": "fe075858320da9446d76d049529d9232f48f0927466f45885ab333d6bd3c48a6",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    },
+    {
+      "receipt": "together236-final-cohort-cleanup.json",
+      "runSHA256": "297a4bf67b42c7f4ac5e1518731dd070b573a897c158b2683e2d4dd8b4344a35",
+      "accountsDeleted": 2,
+      "staleBearer401": 2,
+      "ownedPlanPublic404": 0
+    }
+  ],
+  "activeLocalFixtureAbsent": true,
+  "activeProductionFixtureAbsent": true,
+  "ordinaryAccountsInspected": false,
+  "temporaryBuildAndServerContextsRetainedForRemainingPages": true
+}

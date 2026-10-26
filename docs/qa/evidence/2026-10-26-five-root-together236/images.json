@@ -1,0 +1,657 @@
+{
+  "build": 236,
+  "captureCount": 67,
+  "globalUniquePixels": 59,
+  "allUniquePixelsActuallyReviewed": true,
+  "adoptedPublicImages": 15,
+  "knownMaxDeleteOverlapFixed": true,
+  "scopeNotes": [
+    "Physical only ordinary-type production unverified setup.",
+    "Systemmaximum visual fixtures are Simulator-only; partial card viewports do not prove fullmaximum cards.",
+    "Business screenshots are actual nativeUI with owned localAPI/DB; pixels do not independently prove persistence.",
+    "Sourcecaptureprefix combined224 is reused test naming; actualinstalled236 verified.",
+    "234notification frames and rejected234delete-overlap frames excluded from finalimages."
+  ],
+  "batches": [
+    {
+      "kind": "phone",
+      "captures": 5,
+      "uniquePixels": 5
+    },
+    {
+      "kind": "visual",
+      "captures": 21,
+      "uniquePixels": 15
+    },
+    {
+      "kind": "safety",
+      "captures": 5,
+      "uniquePixels": 5
+    },
+    {
+      "kind": "main",
+      "captures": 18,
+      "uniquePixels": 16
+    },
+    {
+      "kind": "input",
+      "captures": 7,
+      "uniquePixels": 7
+    },
+    {
+      "kind": "discovery",
+      "captures": 8,
+      "uniquePixels": 8
+    },
+    {
+      "kind": "clock",
+      "captures": 3,
+      "uniquePixels": 3
+    }
+  ],
+  "images": [
+    {
+      "batch": "phone",
+      "captureName": "unverified-return-from-messages-keeps-setup",
+      "originalBasename": "94C9CBB0-AE5A-44A2-9422-AD081F0064B1.png",
+      "sha256": "0fa62f0a0a23d5efaa18554b68bdcd14f00621af651b26834a188211989a9d1a",
+      "pixelReview": "view_image",
+      "scope": "App236, physical iPhone 14 Plus, production unverified setup gate, ordinary text size, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "phone",
+      "captureName": "unverified-setup-entry-student-verification-sheet",
+      "originalBasename": "799A1607-4F29-4079-9D4B-EF86F4BE68C1.png",
+      "sha256": "7305b022325c9c43e00fc7b8c1fa491b873faae0fbdab1b91b739a9a663fddb4",
+      "pixelReview": "view_image",
+      "scope": "App236, physical iPhone 14 Plus, production unverified setup gate, ordinary text size, static screenshot",
+      "publicFile": "images/phone-verification-copy.png"
+    },
+    {
+      "batch": "phone",
+      "captureName": "unverified-setup-entry-required-setup-languages",
+      "originalBasename": "B6A25EB9-768A-46BA-9EF5-543317341386.png",
+      "sha256": "60d2d10368d39c1c9f9438c0903aab64bf89f5c5b4bf5d3e691033bc5b15dec1",
+      "pixelReview": "view_image",
+      "scope": "App236, physical iPhone 14 Plus, production unverified setup gate, ordinary text size, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "phone",
+      "captureName": "unverified-setup-entry-required-setup-campus",
+      "originalBasename": "33A69E0F-CB6A-4A89-B665-BFEDF6990FD2.png",
+      "sha256": "75cfd7fdc628a0394ece17c0207897716e401983c4a92ec057c9ec7bb453292a",
+      "pixelReview": "view_image",
+      "scope": "App236, physical iPhone 14 Plus, production unverified setup gate, ordinary text size, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "phone",
+      "captureName": "unverified-real-production-setup",
+      "originalBasename": "118A3306-C28E-4BD6-A76C-7AE259B7A15A.png",
+      "sha256": "eecfaa3684ecf67534c04239938a98d40177d0594ec988f8c8b25c4dba155df6",
+      "pixelReview": "view_image",
+      "scope": "App236, physical iPhone 14 Plus, production unverified setup gate, ordinary text size, static screenshot",
+      "publicFile": "images/phone-setup.png"
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-created-fourth-tile-focused",
+      "originalBasename": "908AC6EC-A1CE-440C-AF55-4625C98D9CD3.png",
+      "sha256": "28332fcbefa087680cfdbc5f3416fa620319321cf5bd4835e5c1f13dc19eabe9",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-saved-recommendation-zh-Hans-light-normal",
+      "originalBasename": "B311979D-876D-41BF-98EC-143D4C0E5DD4.png",
+      "sha256": "006f349d65ed30a3df7ad85a1c674ac21d2d5b5985f67854e91629a2ffbee426",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-bookmark-saved-before-section-change",
+      "originalBasename": "636E6C91-5966-4BB9-AF24-7F5A0B3A9A59.png",
+      "sha256": "f34e695f96eac76d937f60a7c73cd1d804874c1c248ca88b5e83be779c43c767",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-recommendation-same-page-zh-Hans-light-normal",
+      "originalBasename": "54CF313B-A9B5-4BF9-9284-24CCF42429DF.png",
+      "sha256": "37fd275b5997eb244c4a885274764000c784113953716d9452bd2b5ff00ad56f",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-third-tile-zh-Hans-light-normal",
+      "originalBasename": "A3DA6D28-FDD7-4C93-A639-A764C5801C9F.png",
+      "sha256": "7711f0f2ec419fd60442c64f72a53fcd71fca3cecd8100485da3d0ec2a74114c",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-two-tiles-and-recommendation-zh-Hans-light-normal",
+      "originalBasename": "01274D5F-D03F-41C3-8E9E-447B8332C91D.png",
+      "sha256": "543702964e2106f0e6e3773c08b6862b96a4ff288ec0125cf483e74e759e2000",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, Chinese ordinary text, visible portions only",
+      "publicFile": "images/normal-rail.png"
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-recommendation-de-light-system-max",
+      "originalBasename": "91E5CF0C-FAEF-4708-BF31-D861251C4852.png",
+      "sha256": "4d585f2704b95d9cb033fbc3e5af7d220e5c234b19d481b0aa8870b697630983",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-unpublished-tile-de-light-system-max",
+      "originalBasename": "DFF17CA0-2624-4740-B93B-59FA75939B24.png",
+      "sha256": "4d897d4b9d0d75ee0d3d5b2343ba4c5fa07ed73db1719d33f22b481518d992ba",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-paused-tile-de-light-system-max",
+      "originalBasename": "BFD4D71D-2819-4520-B308-9C7D37E7E928.png",
+      "sha256": "909a6130e93107ee2629721092900ab4973d6f51e73c680da31f47e84da8a34c",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-panel-delete-cancel-visible-de-light-system-max",
+      "originalBasename": "28147EB7-1203-4211-9F2C-7DC00A935334.png",
+      "sha256": "c6a178d45dd42ae5755c388ceae6c4d7668456c3c8de9b8faa8f4e4a98f1bc41",
+      "pixelReview": "view_image_original_resolution",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": "images/maximum-delete-spacing.png"
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-prompt-continuous-original-delete-cancel-de-light-system-max-segment-0",
+      "originalBasename": "0CC0B7F8-B598-4AD4-9851-F120B4DD53D4.png",
+      "sha256": "c6a178d45dd42ae5755c388ceae6c4d7668456c3c8de9b8faa8f4e4a98f1bc41",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-panel-opened-original-delete-prompt-de-light-system-max",
+      "originalBasename": "9E10BD91-B9A1-4AB6-81D4-D075F595AFF7.png",
+      "sha256": "baa292c6e08ee56f2c6df5ef3fc13de78c61041786592d7415f4ccfb249b344d",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-panel-edit-opened-original-editor-de-light-system-max",
+      "originalBasename": "CEA28438-DE31-49F8-9501-BA2A5FB6864A.png",
+      "sha256": "759f470d61a38b2f67e2119195b3210e6ba0b855669e17b590d8fe606c8ecf72",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-actions-cancel-de-light-system-max",
+      "originalBasename": "74B0215D-73CD-4B7F-B6DE-58AC8F4F5934.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-delete-de-light-system-max",
+      "originalBasename": "083E9698-DD8D-4B54-B85B-6891A20DB393.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-toggle-pause-de-light-system-max",
+      "originalBasename": "7379FCB3-9871-456A-9370-E74B164F6441.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-share-de-light-system-max",
+      "originalBasename": "8891ED50-8A84-422B-A85A-2FB79E60383C.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-menu-edit-de-light-system-max",
+      "originalBasename": "8C8B6D77-E390-4331-A67E-760D854CAC9A.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-actions-panel-top-de-light-system-max",
+      "originalBasename": "F7D96643-CF55-4CA6-BD2C-4A6F4A997DDA.png",
+      "sha256": "266f81eaca4be4cedcd1f5cf63bc963689741dfa0f29d3dfa8eef6d6ea0bc38b",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": "images/maximum-menu.png"
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-first-status-de-light-system-max",
+      "originalBasename": "C9D90BC5-CA38-42E9-8FE1-0B2A43A182B3.png",
+      "sha256": "f74f6250f2906b476a5deb4ca7fa11b2aae9a99292b850dc65ea15beda8f58f4",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "visual",
+      "captureName": "combined224-first-title-de-light-system-max",
+      "originalBasename": "3796BF82-5958-4A62-9F3B-0D283C31B362.png",
+      "sha256": "2a2aefa11a3cf9fee36e2264fd875b0c6c75ee325fff390247cc2932f25a15ea",
+      "pixelReview": "view_image",
+      "scope": "App236 visual fixture, Simulator, light, German actual system maximum text, visible portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "safety",
+      "captureName": "five-root-together-safety-blocked-peer-after-login",
+      "originalBasename": "A919C05D-77F0-448E-A12C-4611F95FFE15.png",
+      "sha256": "991e250201e6b6c10e167322d64b9feb9f493948a6e74b3425dafd0bbf149744",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "safety",
+      "captureName": "five-root-together-safety-blocker-after-login",
+      "originalBasename": "DFA83676-9754-4902-BDB6-6F992178F4F0.png",
+      "sha256": "c5380352699bb94cf1747140e38a15d423f46a569664b15db107ad69063289df",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "safety",
+      "captureName": "five-root-together-safety-blocked",
+      "originalBasename": "0FF44E1D-7803-4A71-81BC-FD69083D42C0.png",
+      "sha256": "3b97274b668b842a59e0e570a36448900cc474b477cd8f3619eb6f67905aa1a7",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "safety",
+      "captureName": "five-root-together-safety-report-sent",
+      "originalBasename": "723DC898-01D4-44AC-BDD1-4933E282FFEE.png",
+      "sha256": "21c0cc5216d70d6c308575ffcf391614fed848b525cdd269cb8d79fc4c6fc059",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": "images/report-success.png"
+    },
+    {
+      "batch": "safety",
+      "captureName": "five-root-together-safety-profile",
+      "originalBasename": "962D7AF1-F63C-435C-BD30-EB0CD4A6860D.png",
+      "sha256": "f2f4bdc461b663a9a3a7774138fc3331acfefdfc81ef2f33781574385a347315",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-lifecycle-deleted",
+      "originalBasename": "357BC263-04C1-4287-A95C-442DCF999964.png",
+      "sha256": "e45aaf35927cf774fd9df393950957d9d39eb666b26c33ea87509da558ce2314",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-lifecycle-reloaded",
+      "originalBasename": "1BB10914-AAC8-425D-8218-91836CA99853.png",
+      "sha256": "204f9b325dfc65b7f8e36f195d88eb80c9f3bb01369e393088613affd1b0a69e",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-lifecycle-paused-edit-keeps-status",
+      "originalBasename": "B6CA9C08-8CCB-467E-8C91-65B41BF0212B.png",
+      "sha256": "2241367a286aafbc804b2319e5d79ed56e20887131c0b7865cb5169d7f84f1d2",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": "images/paused-edit.png"
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-lifecycle-published",
+      "originalBasename": "FAD2CEB3-E830-4893-B85F-81E2C0EDB7F9.png",
+      "sha256": "36fcc4e759eefbcc8ff390419f7b2ddb65eac6b71e78a9662c5e9349f39ae405",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": "images/published.png"
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-saved-view-chat-roundtrip",
+      "originalBasename": "01B8B29D-89C0-423F-8D0C-95442CD6A55A.png",
+      "sha256": "5e6cf7d4f1808a0bbb6ca35b5fef51887e183bcafb5c8663231b26b71dcc659c",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": "images/same-chat.png"
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-original-intention-context",
+      "originalBasename": "E0AB2572-1F19-46FB-8614-C81EFA2D5B4A.png",
+      "sha256": "ea76fcb4e5a72b8d24f050c69291790b4e1f6344922c414928d787cee7b21905",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-sender-same-chat-context",
+      "originalBasename": "C4EFCAE6-B51C-4F13-A862-B84FD31E855C.png",
+      "sha256": "4fd03e5b08839fd2a439008bdc60934f57dd4980f29f1d893ab00146cb63d463",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-original-intention-context",
+      "originalBasename": "A4AF69D8-5891-4FE9-BF44-4C2C8F439C32.png",
+      "sha256": "ea76fcb4e5a72b8d24f050c69291790b4e1f6344922c414928d787cee7b21905",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-receiver-replied-chat-context",
+      "originalBasename": "DC908E2F-C1C5-45A7-ACEA-416788A3A5BD.png",
+      "sha256": "034d0015448cc4b11291f224ab465d573064c45b099a5717fef58af135ca69df",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-original-intention-context",
+      "originalBasename": "5B5D28E6-4778-46DC-8E84-769F1D3A0DBC.png",
+      "sha256": "bcb9e9e5422d0d95baa1fe3db7ae916de48652ae1f07a74e3d23599f5bab3e70",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-sender-waiting-for-reply",
+      "originalBasename": "A3D20128-5D45-4243-875E-49833B1BEA11.png",
+      "sha256": "eb2a19c94f70698b3d6c251fbe2c38a49c54ac91d5b5653a495ecf4fc58d0838",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": "images/greeting-waiting.png"
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-greeting-cancelled",
+      "originalBasename": "240F74EE-CC9E-4107-9B40-9B7A86426E91.png",
+      "sha256": "364f8edd4e61ff18d3302c790e02a8543445c5644b51ae7797a628f15953e81e",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-saved-card",
+      "originalBasename": "95D2211D-E38B-491B-8B9B-266572C2B071.png",
+      "sha256": "bf0fd557cfbbe44497cb442555ec5a729dc086e34cb2cb971d7ec655c29fd5bd",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-bookmarked-in-place",
+      "originalBasename": "05F05B87-3319-4DC1-BDCF-E5EA61DCE4FC.png",
+      "sha256": "f4b869da2738c7756e73e5c4918b1670a1445b79d97ddc7b89c568f10605da52",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-peer-profile",
+      "originalBasename": "12BF6160-4213-4E9E-91CA-4726DD8C0F87.png",
+      "sha256": "8630b1dfb17eddfb65a4b10987e7a219f2b7410a81976bfd0c15d4cfb90bc181",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-recommendation",
+      "originalBasename": "E517898F-CF1A-4885-98D2-647A4072C7BD.png",
+      "sha256": "58b92aa319a862a3fc240f9576077b02fe8a9f5a7df591aa8a03af20efaf42b2",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-published-coffee",
+      "originalBasename": "EDF2F46E-574C-4BA7-BA7B-6D2A875961AD.png",
+      "sha256": "58b92aa319a862a3fc240f9576077b02fe8a9f5a7df591aa8a03af20efaf42b2",
+      "pixelReview": "reused_identical_sha",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "main",
+      "captureName": "five-root-together-published-coffee",
+      "originalBasename": "EDB6D4B0-94D7-421F-BF6A-C57EF521DE1E.png",
+      "sha256": "09194144ab7a75d461234dbbfe968f4c01b426f0bf6d53af410a7ae1d3bf1e13",
+      "pixelReview": "view_image",
+      "scope": "App236 local live business UI, Simulator ordinary Chinese text, fake test accounts, visible screenshot portions only",
+      "publicFile": null
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-retry-created-once",
+      "originalBasename": "68AAA18A-50BF-42D9-B146-7A421F7D74AF.png",
+      "sha256": "ac00dffbf54908b9dcd0f886cca60de286d766668ada54fe8518c1b24424026a",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-save-503-retains-input-and-times",
+      "originalBasename": "8CBA4B01-AD8A-4823-81DE-A62B4B4E5505.png",
+      "sha256": "ee010443dca9f8411f7ba65ea5227cc4484fcc3251e625ca64014904af6957a5",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": "images/localized-retry.png"
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-saved-exact-windows-readback",
+      "originalBasename": "7E54D7B8-AF31-4CF8-8B9E-6282F562E276.png",
+      "sha256": "451e24f478a25f69d65c3b67d1c00fb5eb79febd9d4c1522345a83c6e4b6d10c",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": "images/exact-windows.png"
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-peer-draft-isolated",
+      "originalBasename": "0FBBB503-3E39-4859-BF96-3CDAB9AE37DB.png",
+      "sha256": "80750af88821f2c7cf126f5e4614871da2fba09ae105af5ffa189c2b82da3db0",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-draft-restored-after-relaunch",
+      "originalBasename": "FB054B9C-4D43-4522-85D6-877CD5D140ED.png",
+      "sha256": "9119931be6515829377bbe98db24b8e326152b1c634b53a6408479b3753fc953",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-two-exact-windows",
+      "originalBasename": "57E819EF-B8A8-4080-AC16-871C1104738B.png",
+      "sha256": "8775ae26ba2911d7e956654da051fbef816a893a0c706a910e61025253cf93de",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "input",
+      "captureName": "five-root-together-edge-categories-and-undecided",
+      "originalBasename": "09168B9B-0B11-4BB3-A107-C47233B30397.png",
+      "sha256": "63dd6c9b0a807900e9bd6880f5da3d72100a1c7da482dc0aae169d73475ff792",
+      "pixelReview": "view_image",
+      "scope": "App236 local live input business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-hidden-after-login",
+      "originalBasename": "C8B1DFE3-A8F9-49CA-BC57-A3D53B9BFF24.png",
+      "sha256": "5ab05f514a5e2e035ae10cb04ec1a90ab912212c5326b5075c5736921e1ddce6",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": "images/hidden-relogin.png"
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-hide-committed",
+      "originalBasename": "D18DA84E-10BB-47CD-9AE2-37992A73C6AC.png",
+      "sha256": "00923fbc9f70706ca2f12c4c3db9d119aa19d3722d9f9afafeb9fd9ef6858861",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-hide-undone",
+      "originalBasename": "885961A2-B2B0-483E-823C-A6AA8039AA48.png",
+      "sha256": "0f925d06299aa61e6c878fd38aa943a5305911f3216131c7a17d4036197e64c4",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-restored-unsent-draft",
+      "originalBasename": "3EC2B535-3A04-467F-9269-B4AB71FD23AA.png",
+      "sha256": "8dc0c751621f59dcebf2b861179c26d39bdb372a21a61090fcd6562560b900ef",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-unbookmarked-empty-saved",
+      "originalBasename": "A7BD2AA4-DAB4-4611-8F2D-07089AFF2A02.png",
+      "sha256": "6c09898ccc4f69e6f8d7d2918ec685c84dee56dbba1cde03aacfe605a1cb419d",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-bookmarked",
+      "originalBasename": "2CB7C768-FB15-4794-AA75-68A46EE77D84.png",
+      "sha256": "a30006ec35b3fb53af116d280e783f412c1df26994982d61b4180d288e8f513f",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-profile",
+      "originalBasename": "051B2925-0CB1-49BE-9EA8-855A9D45001F.png",
+      "sha256": "581a4ee54d24a0e9603e7e777e5eec00782246a382e210f192f3a08f6658effc",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "discovery",
+      "captureName": "five-root-together-discovery-inline-results",
+      "originalBasename": "8610DA1F-115A-4294-B3D9-B48FF44F0B89.png",
+      "sha256": "5c4880721355f0cecc877c3813a858ad24a7b97a28bd03c11d08253c7c27620d",
+      "pixelReview": "view_image",
+      "scope": "App236 local live discovery business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "clock",
+      "captureName": "five-root-together-edge-custom-clock-reopened-exact-readback",
+      "originalBasename": "A69FC1D1-0484-4E81-B250-9AD63851AFCC.png",
+      "sha256": "d4437c096da61eabe389bbaf16cc121e06dfa5c31f51c469d04ff7cfc6e6f662",
+      "pixelReview": "view_image",
+      "scope": "App236 local live clock business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": "images/clock-reopened.png"
+    },
+    {
+      "batch": "clock",
+      "captureName": "five-root-together-edge-custom-clock-confirmed-summary",
+      "originalBasename": "A9C669FE-C737-40CA-B66F-D28BDD918994.png",
+      "sha256": "9b0ef7cbcb5a7057b347e4ac3c46444979cc0d1b7f31f5e56791c44ac58da1fa",
+      "pixelReview": "view_image",
+      "scope": "App236 local live clock business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": null
+    },
+    {
+      "batch": "clock",
+      "captureName": "five-root-together-edge-custom-clock-native-value-changed",
+      "originalBasename": "6801B636-D21E-475D-9439-72CB7441DBA4.png",
+      "sha256": "2bf8e5acb586c54b5d506ea1551a17963813131124cf70cfe7bbd654b807ce05",
+      "pixelReview": "view_image",
+      "scope": "App236 local live clock business UI, Simulator ordinary Chinese text, fake test accounts, static screenshot",
+      "publicFile": "images/clock-changed.png"
+    }
+  ]
+}

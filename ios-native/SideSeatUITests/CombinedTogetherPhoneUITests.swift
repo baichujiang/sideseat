@@ -349,9 +349,13 @@ import Vision
     }
     private func showTile(_ id: String) {
         if !rail.exists { XCTFail("The intention rail is absent"); return }
-        // Bring a short existing menu control into the vertical viewport first;
-        // horizontal movement then stays inside the rail instead of paging roots.
-        let knownMenu = rail.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-menu-")).allElementsBoundByIndex.first { $0.isHittable }
+        // A retained vertical offset can clip every menu above the section header.
+        // Pick a horizontally visible short control first, then reveal it vertically.
+        let horizontalBounds = viewport.insetBy(dx: -1, dy: -1)
+        let knownMenu = rail.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "weekly-intent-menu-")).allElementsBoundByIndex.first {
+            let frame = $0.frame
+            return frame.minX >= horizontalBounds.minX && frame.maxX <= horizontalBounds.maxX
+        }
         if let knownMenu { reveal(knownMenu) }
         for left in [true, false] {
             for _ in 0..<4 {

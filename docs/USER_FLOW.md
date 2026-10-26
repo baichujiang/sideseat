@@ -400,8 +400,8 @@ Current editor behavior:
 - Plan again prefills the original weekday/local time and duration next calendar
   week. The user can adjust it or return to undecided timing before publishing;
 - choose Coffee, Study, Sports, Explore, Food or Events;
-- Coffee, Explore, Food and Events require a short concrete action rather than
-  matching on the broad category alone;
+- Coffee, Explore, Food and Events accept optional short details. Publishing
+  without details keeps a category-only intention rather than inventing text;
 - Sports accepts direct text with common suggestions instead of a long fixed list;
 - Study may include a current course, a concrete goal and whether parallel study
   with different goals is acceptable;

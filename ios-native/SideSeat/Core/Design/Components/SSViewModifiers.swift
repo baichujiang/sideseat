@@ -993,7 +993,6 @@ private struct SSActionPrompt: View {
                 if !compact, let systemImage = action.systemImage {
                     Image(systemName: systemImage)
                         .font(.body.weight(.medium))
-                        .frame(width: 22)
                         .accessibilityHidden(true)
                 }
 

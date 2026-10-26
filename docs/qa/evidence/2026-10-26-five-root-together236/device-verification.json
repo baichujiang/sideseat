@@ -1,0 +1,23 @@
+{
+  "deviceModel": "iPhone 14 Plus",
+  "osVersion": "26.6.1",
+  "previewBundle": "app.sideseat.mobile.preview",
+  "installedBuild": 236,
+  "normalPID": 10918,
+  "normalLaunchArguments": [],
+  "normalLaunchEnvironment": {
+    "TERM": "dumb"
+  },
+  "ordinaryBuildPreserved": 97,
+  "existingRunnerBundlesPreserved": [
+    "app.sideseat.mobile.uitests.xctrunner"
+  ],
+  "ownedRunnerRemoved": true,
+  "appReportDeltaByPathAndModificationTime": 0,
+  "reportComparisonFields": [
+    "relativePath",
+    "metadata.lastModDate"
+  ],
+  "reportDelta": [],
+  "ordinaryAccountIdentityRead": false
+}
