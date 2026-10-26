@@ -24,5 +24,6 @@
   "privateConfigFilesRemoved": 25,
   "activeLocalSharedOutputsAndExistingSimulatorsPreserved": true,
   "rawLogsMode": "0600",
-  "rawResultAndCaptureDirectoriesMode": "0700"
+  "rawResultAndCaptureDirectoriesMode": "0700",
+  "finalPrivateScanPatternRemoved": true
 }

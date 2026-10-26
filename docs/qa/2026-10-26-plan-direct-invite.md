@@ -24,6 +24,6 @@
 
 268项活跃／冻结来源、Local、严格签名及最后UI前后二进制hash一致。默认手机已安装232并空参数／仅TERM普通启动 **PID10784**，实际进程对应；普通97与既有Flow222保留，本轮Flow232Runner移除，无本轮新增App系统报告。QA用ephemeral凭据，未读取普通身份。6专用账号旧Bearer401／4个本轮计划公开链接404已清理；其中活动选择改名计划按受控token、发起人、实际选定标题与版本严格核对后单独删除，其他仍走原防护清理。
 
-无后端／网页／Schema发布，三域仍Ready `dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5`；公开flag不等于逐账户assignment。5个本轮临时上下文和25个私密配置已移除，活跃Local、共享产物和既有Simulator保留；原始结果／截图0700、日志0600。公开隐私扫描通过，见[扫描](./evidence/2026-10-26-plan-direct-invite232/privacy-final.json)，不在公开材料保留密码、Bearer、计划token或恢复凭据。最后一个临时扫描模式文件在交付正文复扫后删除。
+无后端／网页／Schema发布，三域仍Ready `dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5`；公开flag不等于逐账户assignment。5个本轮临时上下文和25个私密配置已移除，活跃Local、共享产物和既有Simulator保留；原始结果／截图0700、日志0600。公开隐私扫描通过，见[扫描](./evidence/2026-10-26-plan-direct-invite232/privacy-final.json)，不在公开材料保留密码、Bearer、计划token或恢复凭据。最后一个临时扫描模式文件已在交付正文复扫后删除。
 
 [普通原页发送](./evidence/2026-10-26-plan-direct-invite232/direct-invitation-dock-zh-Hans-normal-light.png)、[可选编辑](./evidence/2026-10-26-plan-direct-invite232/direct-invitation-editor-restored-zh-Hans-normal-light.png)、[最大字号短按钮](./evidence/2026-10-26-plan-direct-invite232/direct-invitation-largest-contact-action-de-dark.png)、[活动原页选择](./evidence/2026-10-26-plan-direct-invite232/direct-invitation-activity-chosen-on-timetable.png)、[零填写链接](./evidence/2026-10-26-plan-direct-invite232/direct-invitation-zero-response-link-before-sending.png)、[像素范围](./evidence/2026-10-26-plan-direct-invite232/images-review.json)、[来源](./evidence/2026-10-26-plan-direct-invite232/native-build-manifest.json)。

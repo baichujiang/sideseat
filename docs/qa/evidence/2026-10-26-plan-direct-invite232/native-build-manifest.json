@@ -309,5 +309,8 @@
     "businessSourceUnchanged": true,
     "reason": "Actual maximum-text contact action had a clipped sending verb."
   },
-  "lastCoordinationFix": "Pause timer,scene and notification background reads while explicit invitation freshness/send is running. Final main mixed run and unit repeat use this source."
+  "lastCoordinationFix": "Pause timer,scene and notification background reads while explicit invitation freshness/send is running. Final main mixed run and unit repeat use this source.",
+  "sourceCommit": "329be6697664189160ec52d3acf3f4c2e2db5558",
+  "sourcePushed": true,
+  "committed268InputsVerified": true
 }

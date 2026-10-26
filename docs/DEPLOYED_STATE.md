@@ -1,12 +1,14 @@
 # 已部署功能与归档边界
 
-**状态：** 默认实体iPhone14Plus已交付Preview231，单次连续App＋网页混合闭环565.440秒／15阶段通过；同名游客日历显示和App／网页身份说明已修正。网页同一已测候选正式提升，6个QA账号／10个计划及临时上下文清理完成；最终实图范围已汇总，公开隐私扫描通过。2026-10-26，Europe/Berlin。
+**状态：** 默认实体iPhone14Plus已交付Preview232，时间表原页直接发送，填写者自动加入、额外人可选编辑。最终App＋公开网页561.821秒／15阶段通过；源已推送，测试数据／私密上下文清理、普通启动与隐私扫描核验。无后端／网页发布。2026-10-26，Europe/Berlin。
 
 本文件记录实际安装、部署、开关和入口，供维护时确认版本使用。
 产品语义仍由 [Product](./PRODUCT.md) 和 [User Flow](./USER_FLOW.md) 管理；
 源码里有声明、测试曾通过或讨论过一个方案，都不代表当前用户能进入该功能。
 
-原生当前 **Preview231，真机App＋分享网页单次混合闭环通过**：默认iPhone14Plus同包连续565.440秒、1项0失败／0跳过、15／15阶段；发起人及两位App朋友、三位独立网页访客完成填写、手动提交、邀请、混合回复、正式发布、日历、晚接受、退出与取消，公开网页9项检查通过。注册参与者通过真机App UI、游客通过Chromium／WebKit实际公开页面操作，未以API补写进度；两次旧QA边界失败保留，不累计作通过。同名游客日历行重复姓名显示已修：229复现34.632秒失败，230修复24.264秒及231同包25.201秒分别通过；App／网页文案明确已接受App用户的通知／日历与游客保留链接，业务规则不变。产品`cced035c`／最终QA`69de464d`已推送，231的268项来源匹配；正常231 PID10217、空参数／仅TERM及进程核对，普通97／旧Flow222保留，自有Mixed230Runner移除、新SideSeat系统报告相对路径增量0。QA为ephemeral凭据，普通账号身份未读；6个QA账号／10个本轮计划401／404清理，3个上下文／29个私密配置与trace文件及1个扫描模式文件删除，活跃Local／共享构建与既有模拟器保留。最终主流程原图67次／49种全部采用（原生51／34、网页16／15），全阶段历史／候选／失败／最终合计186次／129种；普通中文、AssistiveTouch及窄屏标签范围见QA，不宣称本轮最大字号／物理Safari／新APNs／Apple Calendar验收。最终225份公开文件精确凭据／计划token／候选cookie及JWT／恢复格式扫描0匹配，[隐私扫描](./qa/evidence/2026-10-26-plan-mixed-web/privacy-final.json)通过。[231交付](./releases/2026-10-26-preview231-plan-mixed-web.md)、[混合闭环与证据](./qa/2026-10-26-plan-mixed-web.md)。
+原生当前 **Preview232，原页直接发送邀请**：已提交时间表者（含无空闲）按ID自动加入；未填共享联系人仅通过可选编辑明确增加，活动同页选择，零填写保留邀请链接；不再必经名单页。发送前成功刷新，后台读暂停，普通重试不触发首次发送；原RSVP、随时正式发出、已接受App日历与游客规则保持。源码 `329be669` 已推送，268项提交／活跃／冻结来源及Local、签名／二进制一致。最终真机＋公开网页连续 **561.821秒／15阶段／1项0失败跳过**、9网页检查，注册写入真机UI／游客公开浏览器UI，无API补写主计划。最终62单元／3套4.224秒、8领域及focused分次通过；前序失败、标签短文案与后续非视觉读取协调差异均保留，不称单次focused套件全通过。主流程67次／53种原图复核，原生51／37、网页16／16；保存14原生／16网页，focused另14次看8张保存加1安全失败图。最大字旧大底栏／断词、滚动／重复角色后缀与系统浮层限制明确。默认232普通 **PID10784**，空参数／仅TERM进程核对，普通97／Flow222保留，本轮Runner移除，新App报告0；6专用账号旧Bearer401／4计划404、5上下文／25私密配置及扫描模式清理，普通身份未读。无后端／网页／Schema发布，三域仍Ready `dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5`；不称新APNs、实体Safari、Apple Calendar或全App最大字号验收。[232交付](./releases/2026-10-26-preview232-plan-direct-invite.md)、[QA与实际图](./qa/2026-10-26-plan-direct-invite.md)。
+
+原生此前 **Preview231，真机App＋分享网页单次混合闭环通过**：默认iPhone14Plus同包连续565.440秒、1项0失败／0跳过、15／15阶段；发起人及两位App朋友、三位独立网页访客完成填写、手动提交、邀请、混合回复、正式发布、日历、晚接受、退出与取消，公开网页9项检查通过。注册参与者通过真机App UI、游客通过Chromium／WebKit实际公开页面操作，未以API补写进度；两次旧QA边界失败保留，不累计作通过。同名游客日历行重复姓名显示已修：229复现34.632秒失败，230修复24.264秒及231同包25.201秒分别通过；App／网页文案明确已接受App用户的通知／日历与游客保留链接，业务规则不变。产品`cced035c`／最终QA`69de464d`已推送，231的268项来源匹配；正常231 PID10217、空参数／仅TERM及进程核对，普通97／旧Flow222保留，自有Mixed230Runner移除、新SideSeat系统报告相对路径增量0。QA为ephemeral凭据，普通账号身份未读；6个QA账号／10个本轮计划401／404清理，3个上下文／29个私密配置与trace文件及1个扫描模式文件删除，活跃Local／共享构建与既有模拟器保留。最终主流程原图67次／49种全部采用（原生51／34、网页16／15），全阶段历史／候选／失败／最终合计186次／129种；普通中文、AssistiveTouch及窄屏标签范围见QA，不宣称本轮最大字号／物理Safari／新APNs／Apple Calendar验收。最终225份公开文件精确凭据／计划token／候选cookie及JWT／恢复格式扫描0匹配，[隐私扫描](./qa/evidence/2026-10-26-plan-mixed-web/privacy-final.json)通过。[231交付](./releases/2026-10-26-preview231-plan-mixed-web.md)、[混合闭环与证据](./qa/2026-10-26-plan-mixed-web.md)。
 
 当前生产 **`dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5` READY**，api／www／根域名一致，同一已测候选原样提升无重建。1396项真实远程基线全下载／SHA1匹配，保留1395项，只覆盖1个共享TSX及新增标记，上传1397项全匹配`cf200ba8`；候选两引擎各3变体、各30次截图／21项文字边界检查通过，与最终公开网页混合闭环分开记录。迁移跳过、无活动发布执行标记，无API／Schema／业务规则改动；231原生文案更新未重新部署网页，229取消通知后端随基线保留。[231交付](./releases/2026-10-26-preview231-plan-mixed-web.md)、[网页来源与运行范围](./qa/2026-10-26-plan-mixed-web.md)。
 
@@ -188,9 +190,9 @@
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
-| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 网页 `55ac4667`、原生 `f3d62a23` 均已推送；[网页来源](./qa/evidence/2026-10-24-web-status-metadata/source-verification.json)／[226来源](./qa/evidence/2026-10-25-intention-history226/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (226)` | 意愿历史五项专项227.236秒、普通／真实最大字号通过，严格签名／安装／正常PID9918；[交付](./releases/2026-10-25-preview226-intention-history.md) |
-| 默认真机测试设备 | iPhone14 Plus / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；226通过，Runner清理、普通97保留；[设备核验](./qa/evidence/2026-10-25-intention-history226/device-verification.json) |
+| 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `329be669`已推送，后端／网页保持生产；[232来源](./qa/evidence/2026-10-26-plan-direct-invite232/native-build-manifest.json) |
+| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (232)` | 原页直发，最终连续混合561.821秒／15阶段通过，正常PID10784；[交付](./releases/2026-10-26-preview232-plan-direct-invite.md) |
+| 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；232安装／正常进程核验，普通97／Flow222保留、本轮Runner移除；[设备](./qa/evidence/2026-10-26-plan-direct-invite232/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
 | 生产 API 与分享网页 | `https://api.sideseat.de`、`https://www.sideseat.de`、`https://sideseat.de` → `dpl_3y9L5UfyX7v1hhUPsXGVg7Cg27zz`，READY | 1393基线逐项核验，仅1TSX＋来源标记；1392项保持、上传1394全匹配，无迁移。候选／正式双引擎流程及metadata视觉通过；[网页交付](./releases/2026-10-24-share-status-metadata.md) |

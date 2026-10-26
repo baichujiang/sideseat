@@ -21,7 +21,30 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview231 is the current installed development build. Productcced035c and
+- Preview232 is the current installed development build. Source329be669 is
+  pushed. Final time sends directly from the timetable; all submitted respondents,
+  including explicit no-free-time, join by ID. Unfilled SHARED contacts need an
+  explicit optional edit selection. Keep activity choice inline, zero-response
+  links, fixed capacity, RSVP/publish/Calendar/guest rules. Fresh GET must succeed
+  before send; background readers pause and generic Retry never first-sends.
+  Existing account/token/version draft extended compatibly; no new backend/schema.
+  Final physical14Plus/public-web main passed561.821s,1test0fail/skip,15/15phases
+  and9web checks, no API progress patch. Final unit62/3suites4.224s,domain8 pass.
+  Focused189.787/23.845/24.940/56.215s are scoped separate runs, before the final
+  nonvisual background-read guards; do not claim one all-passed focused suite.
+  Actual German contact-button clipping fixed with short Plankarte senden.
+  Earlier unit/preflight/viewport/localization/restored-draft failures retain scopes.
+  Main67captures/53unique(51/37native,16/16web) all actually reviewed;14native and
+  16web saved,focused14viewed/8saved plus1safe failure frame. Existing max-text
+  tall dock/word breaks,AssistiveTouch,scroll/role-alias limits remain explicit.
+  Normal232 PID10784,empty args/TERM-only/process/signature/binary/268/Local match;
+  ordinary97/oldFlow222 kept,ownFlow232 removed,new App reports0. Six QA accounts
+  stale401/fourplans404 and5contexts/25private configs cleaned;scan file removed
+  after final public scan. QAephemeral;ordinary identity not read. No backend/web
+  release,newAPNs,physicalSafari,AppleCalendar or whole-App maximum-type claim.
+  See [232 QA](docs/qa/2026-10-26-plan-direct-invite.md) and
+  [release](docs/releases/2026-10-26-preview232-plan-direct-invite.md).
+- Preview231 was the previous installed development build. Productcced035c and
   final QA helper69de464d are pushed. Default physical iPhone14Plus completed
   one continuous App/public-web mixed case565.440s,1test0failure/skip,15/15phases:
   owner+2App peers and3independent Chromium/WebKit guests,9web checks. Registered

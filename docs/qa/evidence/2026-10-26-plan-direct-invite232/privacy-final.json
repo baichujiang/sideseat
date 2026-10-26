@@ -1,11 +1,13 @@
 {
   "passed": true,
-  "checkedAt": "2026-10-26T14:48:29.551602+00:00",
-  "fileCount": 66,
+  "checkedAt": "2026-10-26T14:54:18.151744+00:00",
+  "fileCount": 75,
   "exactPrivatePatternCount": 22,
   "exactCredentialPlanCookieMatches": 0,
   "jwtOrRecoveryFormatMatches": 0,
   "mainImagePrivacyReview": "All67 actual captures reviewed; zero exclusions.",
   "diagnosticOSFrame": "Private only, excluded from public evidence.",
-  "scope": "New evidence plus related source, tests and current contracts. Final release/state prose receives another scan after writing."
+  "scope": "New evidence plus related source, tests and current contracts. Final release/state prose receives another scan after writing.",
+  "finalReleaseAndStateProseIncluded": true,
+  "sourceCommit": "329be6697664189160ec52d3acf3f4c2e2db5558"
 }
