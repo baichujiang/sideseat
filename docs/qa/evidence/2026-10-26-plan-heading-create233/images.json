@@ -1,0 +1,90 @@
+[
+  {
+    "file": "plan-heading-confirmed-de-dark-system-max.png",
+    "sha256": "3481299f474cea86c6c863918e16b7016a5940de534b65b7617a171689e2b018",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-planning-de-dark-system-max.png",
+    "sha256": "5d4b041b8de45eb5eee44116b05c90cf2fcb05b065a66b1ebeefc7acf3eb4de6",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-confirmed-de-light-system-max.png",
+    "sha256": "404abfe9ee69a394c84f7b2e2ba63fdc372cffbef403a617c78c48b1e0ae62a5",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-planning-de-light-system-max.png",
+    "sha256": "076dedec49712c1ed72c7a15d4f3949f5e55b93f1c555f943dd606f2ae45a691",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "root",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-confirmed-zh-Hans-dark-normal.png",
+    "sha256": "9ed20e68e9ddd957fbb51a4122dc2458d4bedb80dc9f061c26746e9e02edc92e",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-planning-zh-Hans-dark-normal.png",
+    "sha256": "1ec6f5c510b42ce09497959b93c7343f0e10dbdf97ce34b22afc31a6558a20bd",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-confirmed-zh-Hans-light-normal.png",
+    "sha256": "3b475828a0ba31d82a3738235b26f0dc99d4b5d026ed7350a83c1019a6f93280",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-create-without-submission-zh-Hans-light-normal.png",
+    "sha256": "57037b92d5d03c26c4cdb3918b3adaf5fd032f4e6191e0bdfda3cd39bc8ac68e",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "root",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-planning-zh-Hans-light-normal.png",
+    "sha256": "a6f6180780bb024c4fac087809d4a6b8aa77040fee947e6747a589e809da9af6",
+    "test": "PlanHeadingCreatePhoneUITests/testContentHeadingCreationAcrossAppearanceAndTextSizes()",
+    "actualPixelsReviewed": true,
+    "reviewer": "root",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-store-error-coordination-unavailable-zh-light.png",
+    "sha256": "97ad59de232d2c7570e0748c62fe79979c0d9529de7583b7049f490950111975",
+    "test": "PlanHeadingCreatePhoneUITests/testEmptyAndFailedStoresRetainContentCreationEntry()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  },
+  {
+    "file": "plan-heading-empty-store-coordination-unavailable-zh-light.png",
+    "sha256": "aa7c79f3141e949ae82b666ecea5e409e0de97f6a1870bb27580dddf79a5eb69",
+    "test": "PlanHeadingCreatePhoneUITests/testEmptyAndFailedStoresRetainContentCreationEntry()",
+    "actualPixelsReviewed": true,
+    "reviewer": "independent-native-reviewer",
+    "scope": "New heading and creation entry; fake local records with intentionally unavailable coordination endpoint."
+  }
+]

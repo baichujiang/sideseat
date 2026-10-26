@@ -146,10 +146,10 @@ import XCTest
         let scroll = app.scrollViews["plans-scroll-waitingResponse"]
         if !large {
             let expand = app.buttons["plans-toggle-outgoing"]
-            reveal(expand, in: scroll, top: picker.frame.maxY + 4, bottom: planCreate.frame.minY - 8)
+            reveal(expand, in: scroll, top: picker.frame.maxY + 4, bottom: app.tabBars.firstMatch.frame.minY - 8)
             assertTarget(expand); tap(expand)
         }
-        let createY = planCreate.frame.minY, pickerY = picker.frame.minY, headingY = heading.frame.minY
+        let pickerY = picker.frame.minY, headingY = heading.frame.minY
         let cards = scroll.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'plans-row-'"))
         let before = cards.allElementsBoundByIndex.first { $0.isHittable }
         XCTAssertNotNil(before)
@@ -157,30 +157,32 @@ import XCTest
         let last = scroll.buttons["plans-row-ui-plan-outgoing-3"]
         for _ in 0..<20 {
             let viewport = CGRect(x: 0, y: picker.frame.maxY + 4, width: app.windows.firstMatch.frame.width,
-                                  height: max(0, planCreate.frame.minY - picker.frame.maxY - 12))
+                                  height: max(0, app.tabBars.firstMatch.frame.minY - picker.frame.maxY - 12))
             if last.exists, last.isHittable, last.frame.maxY <= viewport.maxY,
                last.frame.intersection(viewport).height >= 44 { break }
             scroll.swipeUp(velocity: .slow)
         }
         XCTAssertTrue(last.exists && last.isHittable)
-        XCTAssertLessThanOrEqual(last.frame.maxY, planCreate.frame.minY - 8)
+        XCTAssertLessThanOrEqual(last.frame.maxY, app.tabBars.firstMatch.frame.minY - 8)
         let visibleBottom = last.frame.intersection(CGRect(x: 0, y: picker.frame.maxY + 4,
-            width: app.windows.firstMatch.frame.width, height: max(0, planCreate.frame.minY - picker.frame.maxY - 12)))
+            width: app.windows.firstMatch.frame.width, height: max(0, app.tabBars.firstMatch.frame.minY - picker.frame.maxY - 12)))
         XCTAssertGreaterThanOrEqual(visibleBottom.height, 44,
-            "An oversized maximum-text card may span screens; its final segment must remain reachable above the action")
+            "An oversized maximum-text card may span screens; its final segment must remain reachable above the floating tab bar")
         let after = cards.allElementsBoundByIndex.first { $0.isHittable }
         XCTAssertTrue(after?.identifier != beforeID || abs((after?.frame.minY ?? 0) - (beforeY ?? 0)) > 20,
                       "Content must actually move before checking fixed chrome")
         XCTAssertEqual(heading.frame.minY, headingY, accuracy: 2)
         XCTAssertEqual(picker.frame.minY, pickerY, accuracy: 2)
-        XCTAssertEqual(planCreate.frame.minY, createY, accuracy: 2)
-        assertTarget(planCreate)
-        XCTAssertLessThanOrEqual(planCreate.frame.maxY, app.tabBars.firstMatch.frame.minY - 4)
-        XCTAssertEqual(planCreate.frame.maxX, app.windows.firstMatch.frame.maxX - 20, accuracy: 2)
         XCTAssertEqual(app.navigationBars.firstMatch.buttons.matching(NSPredicate(format: "identifier IN %@",
             ["plans-create-primary", "plans-create-unified"])).count, 0)
-        capture("plans-last-visible-segment-and-fixed-actions-\(tag)")
+        capture("plans-last-visible-segment-and-fixed-navigation-\(tag)")
         guard opensCreation else { return }
+        for _ in 0..<20 {
+            if planCreate.exists, planCreate.isHittable, planCreate.frame.minY >= picker.frame.maxY + 4,
+               planCreate.frame.maxY <= app.tabBars.firstMatch.frame.minY - 8 { break }
+            scroll.swipeDown(velocity: .slow)
+        }
+        assertTarget(planCreate)
         tap(planCreate)
         XCTAssertTrue(element("time-poll-title").waitForExistence(timeout: 10))
         XCTAssertFalse(element("time-poll-grid").exists)

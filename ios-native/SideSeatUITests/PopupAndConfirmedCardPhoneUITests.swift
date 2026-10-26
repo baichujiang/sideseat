@@ -368,7 +368,7 @@ import Vision
     }
     private var planViewport: CGRect {
         let top = element("plans-segmented-control").frame.maxY + 8
-        let bottom = app.buttons["plans-create-unified"].frame.minY - 8
+        let bottom = app.tabBars.firstMatch.frame.minY - 8
         return CGRect(x: window.minX, y: top, width: window.width, height: max(0, bottom - top))
     }
 
@@ -387,7 +387,7 @@ import Vision
                 offset += segment.height - 24; part += 1
             } else { move(segment: segment, into: viewport) }
         }
-        XCTFail("Every part of the maximum-text calendar card must be reachable above the create action")
+        XCTFail("Every part of the maximum-text calendar card must be reachable above the floating tab bar")
     }
 
     private func revealCardSegment(_ card: XCUIElement) -> CGRect {

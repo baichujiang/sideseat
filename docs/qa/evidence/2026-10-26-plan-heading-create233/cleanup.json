@@ -1,0 +1,16 @@
+{
+  "removedOwnedContexts": [
+    "sideseat233-source",
+    "sideseat233-runner",
+    "sideseat233-runner-build"
+  ],
+  "removedPrivateTopLevelJSONAndXctestrunCount": 14,
+  "sourceAndBinaryFinalMatch": true,
+  "ownedRunnerRemoved": true,
+  "ordinaryAppAndPreexistingRunnerKept": true,
+  "sharedBuildAndSPMKept": true,
+  "activeLocalAndExistingSimulatorsKept": true,
+  "QAAccountsOrPlansCreated": 0,
+  "ordinaryAccountIdentityRead": false,
+  "rawResultAndAttachmentPermissions": "0700 directories / 0600 files"
+}

@@ -1,0 +1,21 @@
+{
+  "result": "Passed",
+  "passedTests": 2,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "totalTestCount": 2,
+  "startTime": 1793027357.793,
+  "finishTime": 1793027508.449,
+  "xctestTotalSeconds": 146.517,
+  "cases": [
+    {
+      "name": "testContentHeadingCreationAcrossAppearanceAndTextSizes",
+      "seconds": 108.559
+    },
+    {
+      "name": "testEmptyAndFailedStoresRetainContentCreationEntry",
+      "seconds": 37.958
+    }
+  ],
+  "imageCount": 11
+}

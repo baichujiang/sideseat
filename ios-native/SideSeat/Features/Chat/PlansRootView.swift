@@ -102,15 +102,6 @@ struct PlansRootView: View {
                     }
                 }
                 .background(SideSeatTheme.bgGrouped)
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    HStack {
-                        Spacer(minLength: 0)
-                        createPlanButton
-                    }
-                    .padding(.horizontal, SideSeatTheme.screenHorizontal)
-                    .padding(.vertical, SideSeatTheme.spaceMD)
-                    .background(SideSeatTheme.bgGrouped)
-                }
                 .ssRootNavigationTitle("Plans")
             }
         }
@@ -172,16 +163,20 @@ struct PlansRootView: View {
 
     private var createPlanButton: some View {
         Button { showsPlanCreation = true } label: {
-            Label("Start a plan", systemImage: "plus")
-                .font(.body.weight(.semibold))
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, SideSeatTheme.spaceLG)
-                .padding(.vertical, SideSeatTheme.spaceMD)
-                .frame(minHeight: 48)
-                .foregroundStyle(SideSeatTheme.ProductAction.foreground)
-                .background(SideSeatTheme.ProductAction.fill, in: Capsule())
-                .contentShape(Capsule())
-                .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
+            HStack(spacing: SideSeatTheme.spaceSM) {
+                Image(systemName: "plus")
+                    .accessibilityHidden(true)
+                Text("Start a plan")
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(SideSeatTheme.utilityAction)
+            .padding(.horizontal, SideSeatTheme.spaceMD)
+            .frame(minWidth: 44, maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil,
+                minHeight: 44, alignment: dynamicTypeSize.isAccessibilitySize ? .leading : .center)
+            .background(SideSeatTheme.fillTertiary, in: Capsule())
+            .contentShape(Rectangle())
+            .fixedSize(horizontal: !dynamicTypeSize.isAccessibilitySize, vertical: true)
         }
         .buttonStyle(SSPressButtonStyle())
         .accessibilityLabel(AppLocalization.string("Start a plan"))
@@ -201,15 +196,37 @@ struct PlansRootView: View {
     private func sectionScroll(_ section: MVPPlanSection) -> some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: SideSeatTheme.spaceMD) {
+                if section != .ended { sectionHeading(section) }
                 sectionContent(section)
             }
             .padding(.horizontal, SideSeatTheme.screenHorizontal)
             .padding(.top, SideSeatTheme.spaceMD)
-            .padding(.bottom, SideSeatTheme.spaceXL)
+            .padding(.bottom, SideSeatTheme.rootScrollBottomClearance)
             .background(PlanListScrollCapture(positions: scrollPositions, section: section))
         }
         .accessibilityIdentifier("plans-scroll-\(section.rawValue)")
         .refreshable { await store.load(using: session); await loadCoordinatedPlans() }
+    }
+
+    private func sectionHeading(_ section: MVPPlanSection) -> some View {
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: SideSeatTheme.spaceMD))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: SideSeatTheme.spaceMD))
+        return layout {
+            if section == .waitingResponse {
+                overviewHeading("Plan arrangements", count: coordinated(in: section).filter {
+                    $0.nextStep(at: now).needsYou
+                }.count + plans(in: section).filter { $0.receiver.id == currentUserID }.count,
+                    identifier: "plans-waiting-incoming-heading", needsAttention: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text(section.title)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityAddTraits(.isHeader)
+            }
+            createPlanButton
+        }
     }
 
     @ViewBuilder
@@ -281,13 +298,9 @@ struct PlansRootView: View {
         let outgoing = plans(in: .waitingResponse).filter { $0.proposer.id == currentUserID }
         return VStack(alignment: .leading, spacing: SideSeatTheme.spaceLG) {
             if !needs.isEmpty || !incoming.isEmpty {
-                VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
-                    overviewHeading("Your next steps", count: needs.count + incoming.count,
-                        identifier: "plans-waiting-incoming-heading", needsAttention: true)
-                    VStack(spacing: SideSeatTheme.spaceSM) {
-                        ForEach(needs) { plan in coordinatedOverview(plan) }
-                        ForEach(incoming) { plan in conversationOverview(plan) }
-                    }
+                VStack(spacing: SideSeatTheme.spaceSM) {
+                    ForEach(needs) { plan in coordinatedOverview(plan) }
+                    ForEach(incoming) { plan in conversationOverview(plan) }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("plans-needs-you")
             }
             if !waiting.isEmpty || !outgoing.isEmpty {
@@ -468,10 +481,11 @@ struct PlansRootView: View {
             Text(title)
                 .font(.headline)
                 .foregroundStyle(needsAttention ? SideSeatTheme.textPrimary : SideSeatTheme.textSecondaryStrong)
-            Text(count.formatted())
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(SideSeatTheme.textSecondaryStrong)
-
+            if count > 0 {
+                Text(count.formatted())
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(SideSeatTheme.textSecondaryStrong)
+            }
         }
         .accessibilityElement(children: .combine)
         .accessibilityValue(count.formatted())
