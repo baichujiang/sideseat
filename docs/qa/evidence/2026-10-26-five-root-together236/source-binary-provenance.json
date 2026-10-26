@@ -296,11 +296,14 @@
   ],
   "preservedAppInputCount": 261,
   "buildContextNote": "Stable native-source234 path reused incrementally with all268 inputs verified to frozen236;234source snapshot preserved separately. Buildfolder name does not identify version.",
-  "scope": "Frozen active inputs, exacthost build products and explicit-device install/normal process; noon-device executable extraction.",
+  "scope": "Frozen active inputs, exact host build products and explicit-device install/normal process; no on-device executable extraction.",
   "simulatorInstalledBuild": 236,
   "simulatorInstalledBinariesMatchProducts": true,
   "simulatorBinarySHA256": {
     "SideSeat Preview": "ef36abc938e2542bf8f6b44ef27f7e4d3078f5de44ca6f7bc61aff57f497ec6d",
     "SideSeat Preview.debug.dylib": "4ee8c502a22886de19a474d62bd290e829cfd44e65adae52cbf6e097970c8269"
-  }
+  },
+  "deliveredSourceCommit": "c7572a581f8bbdb33310c2aadceeb4b120d24574",
+  "committedAppInputsMatch": true,
+  "committedTestSourcesMatch": true
 }

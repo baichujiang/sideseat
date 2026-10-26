@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview233 is the current installed development build. Sourced31b56da is pushed.
+- Preview236 is the current installed development build. Sourcec7572a58 is pushed.
+  Five-root acceptance is sequential: Together passed; Plans/Calendar/Messages/Me
+  have not started. Localverified2-user native flows passed7cases/49readonlyDB
+  boundaries; physical14Plus productionunverifiedgate passed68.533s/1case.
+  Simulator normalChinese/Germanactualmax fixture2cases passed62.976/104.291s.
+  Samefrozen236 across7successful runs,10cases0fail/skip; notonecontinuoussuite.
+  Fixed localized genericerrors,currentverificationcopy,andSSActionPrompt icon
+  intrinsicwidth byremovingfixed22pt. No rules/API/schema/backendrelease change.
+  Final67captures/59unique actualpixels reviewed,15safeoriginals adopted;max
+  partialviewport andphysicalunverified scopes stayexplicit. Normal236 PID10918,
+  268/Local/strictsignature/binaries/process match;ordinary97/oldRunner preserved,
+  ownRunner removed,newSideSeat reports0.13ownedcohorts/26accounts+oldbearer401
+  cleaned;phonecredentialenvelopes removed,ongoingtaskcontexts retainedprivately.
+  api/www/root READY dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5 unchanged. See
+  [five-root QA](docs/qa/2026-10-26-five-root-flows.md) and
+  [236 release](docs/releases/2026-10-26-preview236-together-flow.md).
+- Preview233 was the previous installed development build. Sourced31b56da is pushed.
   Rename the content heading to Plan arrangements; Start a plan now sits beside
   it using Together Add's soft capsule, and stacks below at accessibility sizes.
   Keep both active tabs' creation entry, waiting rail, history and all rules.
