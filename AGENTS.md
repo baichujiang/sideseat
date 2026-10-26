@@ -21,7 +21,21 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview232 is the current installed development build. Source329be669 is
+- Preview233 is the current installed development build. Sourced31b56da is pushed.
+  Rename the content heading to Plan arrangements; Start a plan now sits beside
+  it using Together Add's soft capsule, and stacks below at accessibility sizes.
+  Keep both active tabs' creation entry, waiting rail, history and all rules.
+  Default physical14Plus focused UI passed146.517s,2tests0fail/skip across Chinese
+  ordinary/German maximum light/dark,creation-cancel,history and empty/error entry.
+  All11actual fake screenshots reviewed;coordination is deliberately unavailable,
+  so no clean online-empty/full-card-max or new API/web journey claim.
+  Normal233 PID10805,268/Local/signature/binaries/process match;ordinary97 and
+  existing Runner retained,ownedFlow233 removed,new SideSeat reportdelta0.
+  Three owned contexts/14private top-level JSON/configs cleaned;no QA data writes.
+  No backend/web/schema release;api/www/root READY dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5.
+  See [233 QA](docs/qa/2026-10-26-plan-heading-create.md) and
+  [release](docs/releases/2026-10-26-preview233-plan-heading-create.md).
+- Preview232 was the previous installed development build. Source329be669 is
   pushed. Final time sends directly from the timetable; all submitted respondents,
   including explicit no-free-time, join by ID. Unfilled SHARED contacts need an
   explicit optional edit selection. Keep activity choice inline, zero-response

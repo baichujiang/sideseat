@@ -1,7 +1,7 @@
 {
-  "scannedFiles": 20,
+  "scannedFiles": 25,
   "actualPixelReviewedFakeImages": 11,
   "matches": [],
   "rawDeviceJSONOrXctestrunPublished": false,
-  "scope": "New stage documents/evidence and focused test only; all screenshots visually reviewed as controlled fixtures."
+  "scope": "Stage documents/evidence/focused test and current-state documents; all screenshots actually reviewed as controlled fixtures."
 }

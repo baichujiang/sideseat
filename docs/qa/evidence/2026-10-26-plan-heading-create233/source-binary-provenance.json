@@ -290,5 +290,7 @@
     "ios-native/SideSeat/Resources/en.lproj/Localizable.strings",
     "ios-native/SideSeat/Resources/zh-Hans.lproj/Localizable.strings"
   ],
-  "preservedAppInputCount": 263
+  "preservedAppInputCount": 263,
+  "deliveredSourceCommit": "d31b56da5cd2a8c6c1c7dbae2807564b333c26b6",
+  "committedAppInputsMatch": true
 }
