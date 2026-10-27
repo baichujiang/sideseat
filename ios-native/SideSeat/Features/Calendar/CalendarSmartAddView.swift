@@ -850,6 +850,13 @@ private struct CalendarSmartDraftEditorView: View {
             .navigationTitle("Edit event details")
             .navigationBarTitleDisplayMode(.inline)
             .accessibilityIdentifier("smart-schedule-draft-editor")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if focusedField != nil {
+                    CalendarKeyboardDoneBar(accessibilityIdentifier: "smart-draft-keyboard-done") {
+                        focusedField = nil
+                    }
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", systemImage: "xmark") { dismiss() }.ssToolbarAction()
@@ -858,10 +865,6 @@ private struct CalendarSmartDraftEditorView: View {
                     Button("Apply") { applyChanges() }
                         .ssConfirmationActionStyle()
                         .accessibilityIdentifier("smart-draft-apply")
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done", systemImage: "checkmark") { focusedField = nil }.ssToolbarAction()
                 }
             }
         }

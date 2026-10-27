@@ -237,8 +237,8 @@ struct CalendarConnectionView: View {
                         id: "calendar-connection-revoke-confirm",
                         title: AppLocalization.string("Revoke"),
                         role: .destructive
-                    ) {
-                        guard let connection = pendingRevocation else { return }
+                    ) { [connection = pendingRevocation] in
+                        guard let connection else { return }
                         pendingRevocation = nil
                         Task { _ = await connectionStore.revoke(connection, using: session) }
                     },

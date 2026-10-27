@@ -1,0 +1,8 @@
+{
+  "stage": "Preview246 verified fixes only; whole Calendar remains incomplete",
+  "explicitFiles": 30,
+  "ownedPrivatePatternsChecked": 4,
+  "findings": 0,
+  "unrelatedTsconfigPreserved": true,
+  "excludedInFlightAdvancedAndMessagesMe": true
+}

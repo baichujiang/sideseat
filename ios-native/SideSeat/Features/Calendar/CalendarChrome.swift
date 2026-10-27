@@ -368,6 +368,7 @@ struct CalendarEventBlockLabel: View {
                         .accessibilityHidden(true)
                 }
             }
+            .dynamicTypeSize(...DynamicTypeSize.large)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.trailing, displaysContextSymbol && !compact ? 10 : 0)
             .padding(.horizontal, horizontalPadding)

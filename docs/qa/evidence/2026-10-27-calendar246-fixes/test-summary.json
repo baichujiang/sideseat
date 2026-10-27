@@ -1,0 +1,47 @@
+{
+  "nativeSourceBuild": 246,
+  "phoneInstalledPreview": 246,
+  "phoneOrdinary97Preserved": true,
+  "normalPhoneLaunchVerified": false,
+  "phoneUIComplete": false,
+  "calendarWholePageAccepted": false,
+  "fiveRootTaskComplete": false,
+  "nativeChanges": "Main/SmartDraft safe-area Done; accessibility Companions stack; compact grid font cap; captured revoke payload",
+  "visual245": {
+    "nativeSeconds": 700.79,
+    "variants": 4,
+    "PNGsActuallyViewed": 30,
+    "uniquePNGHashes": 29,
+    "publishedSelectedOriginals": 6
+  },
+  "focusedRevoke244Baseline": {
+    "nativeSeconds": 110.867,
+    "UI": "failed after actual Confirm; row remains",
+    "GETRoundsAndACK": 5
+  },
+  "focusedRevoke246": {
+    "nativeSeconds": 111.549,
+    "passed": true,
+    "GETRoundsAndACK": 7,
+    "PNGsActuallyViewed": 13
+  },
+  "connections246": {
+    "nativeSeconds": 167.957,
+    "controllerSeconds": 184.292023,
+    "passed": true,
+    "GETRoundsAndACK": 10,
+    "PNGsActuallyViewed": 6,
+    "ownedFeed200Then404AndNoStore": true,
+    "afterCleanupStandardTLS404": true,
+    "QAAccountsDeleted": 2,
+    "staleBearer401": 2
+  },
+  "remaining": "Single-event Week AX target and default Phone retest; Messages/Me business unstarted",
+  "backendDeployment": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+  "backendWebSchemaReleased": false,
+  "scopeNotes": [
+    "Different cases/builds are recorded separately, not one final246 suite.",
+    "Only standard Chinese/light Simulator business; four-variant fixture visual matrix.",
+    "No confirmed Apple Calendar subscription, actual external cancel, ordinary file or arbitrary multiline acceptance."
+  ]
+}

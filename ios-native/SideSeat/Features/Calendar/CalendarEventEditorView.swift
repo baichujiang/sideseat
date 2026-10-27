@@ -266,11 +266,21 @@ struct CalendarEventFormFields: View {
                     NavigationLink {
                         CalendarEventCompanionPicker(companions: companions, selectedIDs: $companionIDs)
                     } label: {
-                        HStack {
-                            Text("Companions")
-                            Spacer()
-                            Text(companionSummary(companionIDs))
-                                .foregroundStyle(SideSeatTheme.textSecondary)
+                        if dynamicTypeSize.isAccessibilitySize {
+                            VStack(alignment: .leading, spacing: SideSeatTheme.spaceXS) {
+                                Text("Companions")
+                                Text(companionSummary(companionIDs))
+                                    .foregroundStyle(SideSeatTheme.textSecondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            HStack {
+                                Text("Companions")
+                                Spacer()
+                                Text(companionSummary(companionIDs))
+                                    .foregroundStyle(SideSeatTheme.textSecondary)
+                            }
                         }
                     }
                     .calendarEventPrimaryRow()
@@ -744,6 +754,13 @@ struct CalendarEventEditorView: View {
             .scrollDismissesKeyboard(.immediately)
             .disabled(isSaving)
             .accessibilityIdentifier("event-editor-form")
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if focusedTextField != nil {
+                    CalendarKeyboardDoneBar(accessibilityIdentifier: "event-keyboard-done") {
+                        focusedTextField = nil
+                    }
+                }
+            }
             .safeAreaInset(edge: .top, spacing: 0) {
                 if let displayedIssue {
                     Text(displayedIssue)
@@ -775,11 +792,6 @@ struct CalendarEventEditorView: View {
                     .disabled(isSaving)
                     .ssConfirmationActionStyle()
                 }.ssStandaloneAction()
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done", systemImage: "checkmark") { focusedTextField = nil }.ssToolbarAction()
-                        .accessibilityIdentifier("event-keyboard-done")
-                }
             }
             .ssActionPrompt(
                 isPresented: $showConfirmation,
@@ -1024,6 +1036,23 @@ struct CalendarEventEditorView: View {
         } catch {
             issue = error.localizedDescription
         }
+    }
+}
+
+struct CalendarKeyboardDoneBar: View {
+    let accessibilityIdentifier: String
+    let onDone: () -> Void
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button("Done", systemImage: "checkmark", action: onDone)
+                .ssToolbarAction()
+                .accessibilityIdentifier(accessibilityIdentifier)
+        }
+        .padding(.horizontal, SideSeatTheme.spaceLG)
+        .padding(.vertical, SideSeatTheme.spaceXS)
+        .background(SideSeatTheme.bgGrouped)
     }
 }
 

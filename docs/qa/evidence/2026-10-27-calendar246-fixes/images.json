@@ -1,0 +1,50 @@
+[
+  {
+    "file": "zh-grid-3.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-zh-Hans-light-ordinary-01-grid-3-days_0_F0632CB1-620B-4771-891D-E848D5773710.png",
+    "sha256": "99a0a9e46cc843cae1e76b80ab5802e24a6616b23c840c50149c22ee227b8516",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  },
+  {
+    "file": "zh-companions-normal.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-zh-Hans-light-ordinary-02-companions-completely-visible_0_B1DE301B-3A8E-4CD6-ADC5-2ADF34F03E75.png",
+    "sha256": "ebd97a18f5bcd9dcfc872af2266bc0ae7c5fe1dfd9e8f4c492e10e10042b2ceb",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  },
+  {
+    "file": "de-companions-max.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-de-light-system-max-02-companions-completely-visible_0_A6A45432-9366-4394-AF82-5E6D67B2E9F3.png",
+    "sha256": "eb0a52a288e09c74f9a29d335983b59993c201586763418be40eecf886160af7",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  },
+  {
+    "file": "zh-notes-cold-max.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-zh-Hans-dark-system-max-07-max-notes-cold-four-real-done_0_6280E7C0-DD58-4027-BEEF-F2F5C3B09D6E.png",
+    "sha256": "5fdf7f8056980d4bb6695fdaf3c3d9b3e674eabd02746a123a0b947f2fe24f5d",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  },
+  {
+    "file": "zh-notes-done-max.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-zh-Hans-dark-system-max-08-max-notes-cold-done-keyboard-and-utility-gone_0_4F53C302-7C9C-4ED3-964A-4C081C97F1B4.png",
+    "sha256": "3e225286c4c84083b8cc24daf5a8569ed9e3595ec13ab4fd3cdc737e5016c67a",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  },
+  {
+    "file": "de-grid-7-max.png",
+    "sourceBuild": 245,
+    "sourceCaptureName": "calendar-compact245-de-light-system-max-01-grid-7-days_0_CDC7854A-EFC0-4AC6-9A5C-1A4425097DEA.png",
+    "sha256": "700e5e877a3ded01f095bb4300b7785f3928ce1114f17b058ffa46be2dac7fb9",
+    "actualPixelsReviewed": true,
+    "scope": "Offline owned Simulator UI, not a physical Phone or business API proof"
+  }
+]

@@ -21,19 +21,30 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview241 is installed on the default iPhone14Plus; sourceb6825f42 is pushed.
-  Personal detail toolbar/intrinsic icons and adaptive legacy/repeat date layout
-  passed Simulator4variants601.374s plus separateGermanmaxmenu64.342s,2tests,
-  35captures/30globalunique allactuallyviewed,16safeoriginals saved. Offline
-  fakeauth/ephemeral/loopback9 only; noPhoneGUI/APIbusiness/legacy persistence
-  claim. CollapsedGermanmenu ellipsis is scoped; expandedoptions complete and
-  outside-dismiss preserves selection. 268/Local/signatures/binaries match;
-  rootinstalled241/ordinary97 retained,phone stilllocked,normal launch unverified.
-  Productionapi/www/root READY HTsL unchanged; no backend/web/schema release.
-  Calendar is NOT accepted; ownSimulator realAPI core supplemental is in progress,
-  remaining sharing/time/repeat/connections and physical retest remain.
-  Messages/Me business is unstarted. See [241 scoped release](docs/releases/2026-10-27-preview241-calendar-layout.md)
-  and [Calendar checkpoint](docs/qa/2026-10-27-five-root-calendar.md).
+- Active candidate source is now Preview246; default iPhone14Plus now has246
+  and ordinary97 is retained. Only4/268 inputs changed from frozen244: version,
+  accessibility Companions layout, fixed-grid label font cap, and by-value revoke
+  connection capture.264 inputs, Local bytes and both compiled246 products match.
+  Installed owned Simulator246 Info/two binaries/strict signature are verified;
+  focused246 passed111.549s/7GET-rounds7ACK; fullConnections246 passed167.957s/
+  10GET-rounds10ACK,6actualPNG allreviewed,2accounts401/ownedfeed404 cleaned.
+  Installed PhoneInfo246/ordinary97 are verified; no normal Phone launch/UI claim.
+  Six separate ordinaryChinese/light realAPI Simulator cases passed244: Core12,
+  Timing8, Share13, Companions10, Recurrence10, Smart9. Share's old controller TLS
+  failure stays false; cleaned same-URL404 has a separate standardTLS supplement.
+  Private245 four variants passed700.790s/30PNG29unique, all actually reviewed;
+  scope is fixed grid, Companions and one short max Notes first line/Done/Cancel.
+  Actual244 focused revoke110.867s proved real Confirm leaves the connection;
+  Cancel/5GET-rounds/5ACK passed, both QA accounts401 cleaned.246 fixes payload
+  retention and its focused/fullConnections UI are accepted at ordinary Sim scope.
+  Weekly13 again failed102.186s at a single
+  event's expanded AX target before any edit gesture; no relaxed drag assertion.
+  Calendar/five-root task are NOT accepted. Together236/Plans238 remain accepted,
+  Messages/Me business unstarted. Finish Calendar before advancing to Messages.
+  Previous241 layout4variants601.374s and separateGermanmaxmenu64.342s,
+  35captures/30unique allviewed,16safeoriginals and pushedb6825f42 remain scoped
+  historical evidence. Three production domains READY HTsL unchanged; no
+  backend/web/schema release. See [Calendar checkpoint](docs/qa/2026-10-27-five-root-calendar.md).
 - Preview238 was the previous installed development build. Sourceb551aaf3 is pushed.
   Five-root acceptance: Together236 and Plans238 passed; Calendar is in progress;
   Messages/Me business tests have not started. Four separate final238 phone cases passed:
