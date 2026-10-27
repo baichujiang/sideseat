@@ -1,0 +1,38 @@
+{
+  "appBuild": 241,
+  "productSourceCommit": "b6825f429c4e272394b9a7d47ecdf2ebd1c28019",
+  "sourcePushed": true,
+  "fullFourVariants": {
+    "uiPassed": true,
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 601.374,
+    "variants": [
+      "zh-Hans/light/ordinary",
+      "de/dark/ordinary",
+      "zh-Hans/dark/systemmaximum",
+      "de/light/systemmaximum"
+    ],
+    "captures": 32,
+    "uniqueActuallyReviewed": 28
+  },
+  "separateMenuSupplement": {
+    "uiPassed": true,
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "seconds": 64.342,
+    "captures": 3,
+    "uniqueActuallyReviewed": 2
+  },
+  "totalFinalCaptures": 35,
+  "totalFinalGlobalUniqueActuallyReviewed": 30,
+  "privacyExcluded": 0,
+  "scope": "Two separate Simulator offline fakeauth/ephemeral loopback9 runs; all actions open/cancel only. No Phone GUI, production API business or persistent legacy-minute acceptance.",
+  "knownLimitation": "German maximum collapsed repeat-ending value is middle-ellipsized; actual expanded menu is complete, outside dismissal preserves selection.",
+  "clockScope": "Same-editor native month/day/clock signatures preserved. Search fixtures regenerate Date.now, so no cross-search equality/persistence claim.",
+  "touchScope": "Source minimum44 logical points; native toolbar AX screen frames may be smaller. Earlier eight-point sample is only Chinese ordinary Simulator, not continuous44 screen-point proof.",
+  "calendarPageAccepted": false,
+  "messagesAndMeBusinessStarted": false
+}

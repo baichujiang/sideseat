@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "scope": "Only this scoped layout delivery; not whole repository or private raw results. Text credential/JWT/private-URL/path patterns plus original PNG SHA and actual-review adoption flags.",
+  "scannedFiles": 27,
+  "textFiles": 11,
+  "originalPNGs": 16,
+  "findings": [],
+  "calendarBusinessAccepted": false,
+  "phoneGUIAccepted": false
+}

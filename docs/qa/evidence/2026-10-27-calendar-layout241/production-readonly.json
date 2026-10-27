@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-27 00:42:52 UTC",
+  "readOnly": true,
+  "noDeploymentMutation": true,
+  "records": [
+    {
+      "host": "api.sideseat.de",
+      "id": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production",
+      "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+      "url": "sideseat-ae1ysjm5h-baichus-projects.vercel.app"
+    },
+    {
+      "host": "www.sideseat.de",
+      "id": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production",
+      "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+      "url": "sideseat-ae1ysjm5h-baichus-projects.vercel.app"
+    },
+    {
+      "host": "sideseat.de",
+      "id": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+      "readyState": "READY",
+      "target": "production",
+      "projectId": "prj_Mmv4C0ROdAmglCHaI41vrzTXiH2N",
+      "url": "sideseat-ae1ysjm5h-baichus-projects.vercel.app"
+    }
+  ]
+}

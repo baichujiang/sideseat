@@ -1,0 +1,155 @@
+{
+  "appBuild": 241,
+  "surface": "iPhone17Pro Simulator iOS26.5",
+  "allFinalCaptures": 35,
+  "allGlobalUniqueActuallyViewed": 30,
+  "adoptedSourceCaptures": 16,
+  "adoptedUniqueOriginalPNGs": 16,
+  "editedImages": false,
+  "images": [
+    {
+      "file": "zh-ordinary-personal-detail.png",
+      "sha256": "1cc2e54783b22eebd3d99426e57c3cee3726ec468b0093714ff526a8cce9d94a",
+      "captureName": "calendar-toolbar241-01-personal-toolbar-zh-Hans-light-ordinary_0_18D3DD02-05C8-4472-B177-487A18C9D7CA.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese light ordinary / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Personal detail title/type and visible Start context readable; Done/Share/Pencil are separate complete toolbar icons with no overlap. Medium sheet retains ordinary text; visible Start/End time rows fit, lower rows require scrolling.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-ordinary-personal-detail.png",
+      "sha256": "95350b22e6922433ddc877fc7e1d0884d30e05ee2064a86a7efb740a0573ea04",
+      "captureName": "calendar-toolbar241-01-personal-toolbar-de-dark-ordinary_0_86751A1F-20E9-4956-84C2-62C8A4CCF0C8.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German dark ordinary / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Personal detail title/type and visible Start context readable; Done/Share/Pencil are separate complete toolbar icons with no overlap. Medium sheet retains ordinary text; visible Start/End time rows fit, lower rows require scrolling.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-max-personal-detail.png",
+      "sha256": "b5f4802fee39e0b61144bb08d0f8fda9860411489234764d4350ca9895f90a4b",
+      "captureName": "calendar-toolbar241-01-personal-toolbar-zh-Hans-dark-system-max_0_1F5AD11D-4C3D-411C-894C-0BC47BF1EB36.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese dark maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Personal detail title/type and visible Start context readable; Done/Share/Pencil are separate complete toolbar icons with no overlap. Large detent and wrapped enlarged title/date text visible; lower rows require scrolling.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-personal-detail.png",
+      "sha256": "0438ad494e9bf25d8b4ab64b3aa957f19a4823366e23033884d5fd7afde0ffdb",
+      "captureName": "calendar-toolbar241-01-personal-toolbar-de-light-system-max_0_05FB17EC-CD2B-4222-B4D4-E58ECFF933DB.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Personal detail title/type and visible Start context readable; Done/Share/Pencil are separate complete toolbar icons with no overlap. Large detent and wrapped enlarged title/date text visible; lower rows require scrolling.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-max-ends-detail.png",
+      "sha256": "9107000f00ef1483d8d0f6f6132e9e0fd0283762011e948773c48348a2ced43e",
+      "captureName": "calendar-toolbar241-01-search-ends-complete-zh-Hans-dark-system-max_0_5B9E433A-DFB7-41F7-821F-6EEAE5A9265B.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese dark maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Read-only Start/End dates and times completely visible in this scrolled viewport, icons reserve intrinsic width and do not overlap labels. Top/bottom partial rows are scroll viewport limits.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-ends-detail.png",
+      "sha256": "b8c58e8d2a44d77739532b9e96246998dd7acea51ba995ae95eee35c14cf192a",
+      "captureName": "calendar-toolbar241-01-search-ends-complete-de-light-system-max_0_2C4CBC17-FCFE-46F6-9A9A-753A04BD38E7.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Read-only Start/End dates and times completely visible in this scrolled viewport, icons reserve intrinsic width and do not overlap labels. Top/bottom partial rows are scroll viewport limits.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-max-start-picker.png",
+      "sha256": "82218d4a1bfbd80842d317f551541d7c936707a6d5665115a0fe585357aaec34",
+      "captureName": "calendar-toolbar241-03-max-starts-complete-zh-Hans-dark-system-max_0_0535D839-B30A-4A80-A1A8-36DE6A2ABF07.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese dark maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Graphical Starts label, full month grid and native clock completely visible; no horizontal overflow or overlap. Native clock 01:36. Singleline title field ellipsis is its editable viewport.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-max-end-picker.png",
+      "sha256": "a21b55b8303b99ea3a0a312e12d82a619f56d83dd2234f0f896c10aefed6005e",
+      "captureName": "calendar-toolbar241-03-max-ends-complete-zh-Hans-dark-system-max_0_B7706061-3C29-44B7-9427-40BACE62516F.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese dark maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Graphical Ends label, full month grid and native clock 02:36 completely visible; no horizontal overflow or overlap.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-max-repeat-until.png",
+      "sha256": "65d8f0cf1e4ba040d369205aef785ddb8079acb7e58e610c1bdb215e9158343a",
+      "captureName": "calendar-toolbar241-03-max-repeat-until-complete-zh-Hans-dark-system-max_0_D7F7EFF2-3ACA-4E4C-BCE8-E458412059AE.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese dark maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "RepeatUntil separate label and complete November graphical calendar selected27 visible without horizontal overflow. Chinese EndRepeat/OnDate value and RepeatUntil label readable.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-start-picker.png",
+      "sha256": "3e812ce2bcc5132d37feb9300121e63529c9e2fa7c3a912f6beeb7a5ff1275ef",
+      "captureName": "calendar-toolbar241-03-max-starts-complete-de-light-system-max_0_8796D094-4260-4679-BEED-175136B29D74.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Graphical Starts label, full month grid and native clock completely visible; no horizontal overflow or overlap. Native clock 01:39. Singleline title field ellipsis is its editable viewport.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-end-picker.png",
+      "sha256": "3a0890139fa4db734b467dc128c46d6d2aae3f4a9ac60be45c49b0868d71bf35",
+      "captureName": "calendar-toolbar241-03-max-ends-complete-de-light-system-max_0_0DB82056-A8AC-4351-9E38-9ABDA2824AAC.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Graphical Ends label, full month grid and native clock 02:39 completely visible; no horizontal overflow or overlap.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-repeat-until.png",
+      "sha256": "c7ebc4a7e37446477b7764d6c259c84e7478e853bbb921d0b89555e3801f9bad",
+      "captureName": "calendar-toolbar241-03-max-repeat-until-complete-de-light-system-max_0_15EB7A88-2054-410D-948A-994C2EFA2A2C.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "RepeatUntil separate label and complete November graphical calendar selected27 visible without horizontal overflow. Known scoped limitation: collapsed native EndRepeat value An einem Datum is middle-ellipsized as An ei…atum; separate menu diagnostic requested, no claim all text complete.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-readonly-plan-manage.png",
+      "sha256": "ce6f00bf0b95793d37604c9d6d7a5eca0e5560fee482ce31b0c4182d8c03eb15",
+      "captureName": "calendar-toolbar241-05-readonly-plan-management-visible-de-light-system-max_0_D55E6DEA-AB74-4DF7-A720-5474DA9C1679.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / German light maximum / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Read-only Plan scrolled viewport shows separated detail icons/labels and complete ManagePlan action; Manage only revealed, never tapped. Partial content above/below viewport is not a clipping defect.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "zh-ordinary-unsent-share.png",
+      "sha256": "2be30a02b75331f22661a7520698a1b52f3066ac2903ecac8ba55e9f02341605",
+      "captureName": "calendar-toolbar241-02-share-preview-cancel-only-zh-Hans-light-ordinary_0_8CD98451-8807-4C3D-9708-E57F78456D1B.png",
+      "actualPixelViewed": true,
+      "scope": "App241 / iPhone17Pro Simulator iOS26.5 / Chinese light ordinary / offline fakeauth ephemeral loopback9 fixture only; no Phone/API/business/persistentlegacy acceptance",
+      "pixelReview": "Unsent share preview header, fixture title, complete time range, location and Continue button visible without overlap. Continue never tapped. IncludeLocation and explanatory paragraph also readable in this ordinary viewport.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-repeat-ending-expanded.png",
+      "sha256": "a398db8b753e62aa39e97fe73da0e0c3c77d6b135774757a9e8b22681cf07753",
+      "captureName": "calendar-toolbar241-menu-de-max-02-expanded-no-option-selected_0_22B4730C-6BCA-44E4-B3F6-88B796841C9A.png",
+      "actualPixelViewed": true,
+      "scope": "App241 AEBD iPhone17ProSimulator iOS26.5 Germanlight/systemmaximum offlinefixture single native-menu diagnostic; no option selected, no DatePicker value edits, noSave/Continue/Manage/API writes; notPhone/full4/core12/persistentlegacy",
+      "pixelReview": "Expanded native menu actually viewed: complete Nie and checked An einem Datum wrap to two lines, fully within rounded menu, no clipping or icon/text overlap. Background is intentionally modal/blurred.",
+      "privacyExcluded": false
+    },
+    {
+      "file": "de-max-repeat-ending-collapsed-unchanged.png",
+      "sha256": "b251e175bacbf713658def2634bb706bf92cb69e3d3469164e80e3747f0c6b08",
+      "captureName": "calendar-toolbar241-menu-de-max-03-collapsed-unchanged_0_963242DF-27E6-492A-BE35-DA2DA9A5D4DA.png",
+      "actualPixelViewed": true,
+      "scope": "App241 AEBD iPhone17ProSimulator iOS26.5 Germanlight/systemmaximum offlinefixture single native-menu diagnostic; no option selected, no DatePicker value edits, noSave/Continue/Manage/API writes; notPhone/full4/core12/persistentlegacy",
+      "pixelReview": "Collapsed EndRepeat actual maximum-text value is middle-ellipsized as An ei…atum; this is a recorded native collapsed-control limitation. SameEditor exact AX label/value preserved after verified outside NavTitle coordinate dismissal; before/after screenshots are SHA-identical. Other editor content extends above/below current scroll viewport.",
+      "privacyExcluded": false
+    }
+  ]
+}

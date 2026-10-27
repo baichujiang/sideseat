@@ -21,7 +21,20 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Preview238 is the current installed development build. Sourceb551aaf3 is pushed.
+- Preview241 is installed on the default iPhone14Plus; sourceb6825f42 is pushed.
+  Personal detail toolbar/intrinsic icons and adaptive legacy/repeat date layout
+  passed Simulator4variants601.374s plus separateGermanmaxmenu64.342s,2tests,
+  35captures/30globalunique allactuallyviewed,16safeoriginals saved. Offline
+  fakeauth/ephemeral/loopback9 only; noPhoneGUI/APIbusiness/legacy persistence
+  claim. CollapsedGermanmenu ellipsis is scoped; expandedoptions complete and
+  outside-dismiss preserves selection. 268/Local/signatures/binaries match;
+  rootinstalled241/ordinary97 retained,phone stilllocked,normal launch unverified.
+  Productionapi/www/root READY HTsL unchanged; no backend/web/schema release.
+  Calendar is NOT accepted; ownSimulator realAPI core supplemental is in progress,
+  remaining sharing/time/repeat/connections and physical retest remain.
+  Messages/Me business is unstarted. See [241 scoped release](docs/releases/2026-10-27-preview241-calendar-layout.md)
+  and [Calendar checkpoint](docs/qa/2026-10-27-five-root-calendar.md).
+- Preview238 was the previous installed development build. Sourceb551aaf3 is pushed.
   Five-root acceptance: Together236 and Plans238 passed; Calendar is in progress;
   Messages/Me business tests have not started. Four separate final238 phone cases passed:
   Main578.137s/15phases+11webchecks,Input298.567s/8,Activity655.295s/14,
@@ -117,7 +130,7 @@
   Final public privacy scan225files passed,zero exact credentials/token/cookie or
   JWT/recovery-form matches;[scan](docs/qa/evidence/2026-10-26-plan-mixed-web/privacy-final.json). See [231 QA](docs/qa/2026-10-26-plan-mixed-web.md)
   and [release](docs/releases/2026-10-26-preview231-plan-mixed-web.md).
-- Current production is dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5 READY onapi/www/root.
+- Before Plans238, production was dpl_8zqCd2KWQVtuaytvqu89hCaYM9d5 READY onapi/www/root.
   Exact1396 live baseline files downloaded/SHA1matched,1395preserved,one shared
   TSX+new marker overlaid,1397uploads matched sourcecf200ba8. Same tested candidate
   promoted without rebuild;Chromium/WebKit each3variants,30captures/21text bounds
