@@ -989,13 +989,7 @@ final class DirectChatStore {
         defer { isMutatingConnectionAction = false }
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--ui-testing-authenticated") {
-            connectionActions = NativeConnectionActionsPayload(
-                remark: remark,
-                peerId: connectionActions?.peerId,
-                isSelfNotes: connectionActions?.isSelfNotes,
-                friendLink: connectionActions?.friendLink,
-                contactExchange: connectionActions?.contactExchange
-            )
+            applyRemark(remark)
             return true
         }
         #endif
@@ -1006,18 +1000,33 @@ final class DirectChatStore {
                 body: NativeConnectionRemarkPatch(remark: remark),
                 idempotencyKey: UUID().uuidString
             )
-            connectionActions = NativeConnectionActionsPayload(
-                remark: response.data.remark,
-                peerId: connectionActions?.peerId,
-                isSelfNotes: connectionActions?.isSelfNotes,
-                friendLink: connectionActions?.friendLink,
-                contactExchange: connectionActions?.contactExchange
-            )
+            applyRemark(response.data.remark)
             return true
         } catch {
             actionIssue = error.localizedDescription
             return false
         }
+    }
+
+    private func applyRemark(_ remark: String?) {
+        connectionActions = NativeConnectionActionsPayload(
+            remark: remark,
+            peerId: connectionActions?.peerId,
+            isSelfNotes: connectionActions?.isSelfNotes,
+            friendLink: connectionActions?.friendLink,
+            contactExchange: connectionActions?.contactExchange
+        )
+        if let current = conversation, !current.isSelfNotes {
+            conversation = NativeDirectConversation(
+                id: current.id,
+                isSelfNotes: current.isSelfNotes,
+                replyLimitUnlocked: current.replyLimitUnlocked,
+                displayName: remark ?? current.peer.displayName,
+                peer: current.peer
+            )
+        }
+        scheduleCachePersist()
+        NotificationCenter.default.post(name: .sideSeatInboxNeedsRefresh, object: nil)
     }
 
     @discardableResult

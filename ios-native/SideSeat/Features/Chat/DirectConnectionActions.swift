@@ -49,6 +49,13 @@ struct NativeConnectionActionRequest: Encodable, Sendable {
 
 struct NativeConnectionRemarkPatch: Encodable, Sendable {
     let remark: String?
+
+    private enum CodingKeys: String, CodingKey { case remark }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(remark, forKey: .remark)
+    }
 }
 
 struct NativeConnectionRemarkResult: Decodable, Sendable {

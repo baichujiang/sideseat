@@ -1444,6 +1444,24 @@ struct ChatThreadSearchRowTests {
     }
 }
 
+@Suite("Contact remark request contract")
+struct ContactRemarkRequestContractTests {
+    @Test("Clearing a remark sends the required key with an explicit null")
+    func clearRemark() throws {
+        let data = try JSONEncoder().encode(NativeConnectionRemarkPatch(remark: nil))
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(object["remark"] is NSNull)
+    }
+
+    @Test("Saving a remark preserves its full text")
+    func saveRemark() throws {
+        let remark = "朋友 ☕️"
+        let data = try JSONEncoder().encode(NativeConnectionRemarkPatch(remark: remark))
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(object["remark"] as? String == remark)
+    }
+}
+
 @Suite("Contact exchange presentation state")
 struct ContactExchangePresentationStateTests {
     @Test("Requester cancellation immediately becomes available")
