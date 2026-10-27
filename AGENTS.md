@@ -21,7 +21,23 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Active source/defaultPhone Preview is now251; ordinary97 is preserved. Only
+- Active source/defaultPhone Preview is now252; ordinary97 is preserved. Only
+  version and CalendarCategoryListView's link.badge.minus→link change from251;
+  266 inputs/Local and the251 prompt provider remain exact. Independent review,
+  164 App Swift+1generated/268 inputs/private sources/no symlinks/three binaries,
+  Info/signature/default14Plus provisioning were checked. Focused7 passed121.857s/
+  7GET7ACK, zero retries;13PNG/7unique actually reviewed, four revoke glyphs visible,
+  body/Cancel retention/Confirm0/relogin0 preserved. No successful-run video.
+  Default14Plus installedInfo252 and normal PID11592/full executable path match;
+  empty arguments/TERM-only/no QA flags, no ordinary identity read. Installed
+  executable bytes were not read. One CLI flags-ordering failure never launched.
+  Calendar is accepted across nine separate244/246/250/251 business groups,
+  physical251 Core12 and251/252 focused regressions, not a252 same-build full run.
+  External Calendar scope is system cancel only, not a completed subscription.
+  Messages/Me business remain unstarted; the five-root task is incomplete.
+  No backend/web/schema release; HTsL remains the last recorded production check.
+  See docs/releases/2026-10-27-preview252-calendar-closeout.md.
+- Preview251 was the previous completed stage; ordinary97 was preserved. Only
   version and SSViewModifiers change from250;266 inputs and Local remain exact.
   Message expressions stay as providers through both prompt layers and are read
   in the presented card body. Actions/bindings/dismiss/layout/rules are unchanged.
@@ -45,8 +61,8 @@
   compiled old244 QA source, so they do not prove the new cancel helper executed.
   Final compiled sources/QA binary/runtime were independently realigned and checked.
   Four final revoke prompts show a blank gray glyph for link.badge.minus.251 has
-  not fixed that visual finding; private252 is not built, accepted or installed.
-  Calendar/five-root task remain unaccepted; Messages/Me business are unstarted.
+  not fixed that visual finding at251;252 was then only a private candidate.
+  Calendar/five-root task were unaccepted at251; Messages/Me were unstarted.
   No backend/web/schema release; HTsL is the last recorded production check only.
   See docs/releases/2026-10-27-preview251-calendar-live-result.md.
 - Preview250 was the previous completed stage; ordinary97 was preserved. Relative

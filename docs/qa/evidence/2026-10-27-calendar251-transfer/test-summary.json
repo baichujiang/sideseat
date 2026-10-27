@@ -133,21 +133,22 @@
     "symbol": "link.badge.minus",
     "actualReviewedCapturesShowingBlankGrayCircle": 4,
     "fixedIn251": false,
-    "private252CandidateBuiltOrUITestedOrInstalled": false
+    "resolutionBuild": 252
   },
   "exactPhonePreviewRestartVerified": true,
   "exactPhonePreviewRestartEvidence": "Installed Info251, full executable path and fresh PID matched; no AppData or Keychain reset",
   "ordinaryPhoneSessionAcceptanceComplete": false,
   "phoneCore251": {
-    "status": "running",
+    "status": "passed",
     "firstPreflightStoppedBeforeFactoryOrUI": true,
     "firstPreflightReason": "Preview PID11543 was already running",
-    "label": "Core251-restart-final",
-    "verifiedGETRoundsAtThisCheckpoint": 4,
-    "nativeACKsAtThisCheckpoint": 4,
+    "label": "calendar-phone-core-251-restart-final",
     "requiredGETRounds": 12,
-    "eventCreateVerifiedAtThisCheckpoint": true,
-    "passed": false
+    "passed": true,
+    "verifiedGETRounds": 12,
+    "nativeACKs": 12,
+    "nativeSeconds": 469.055,
+    "controllerSeconds": 503.450988
   },
   "phoneCoreNativeSeconds": 469.055,
   "phoneCoreControllerSeconds": 503.450988,
@@ -163,5 +164,8 @@
   "phoneCoreUniqueNativePNGs": 12,
   "phoneCoreRetainedVideoActuallyReviewed": false,
   "phonePhysicalCopyScope": "12copies validated size/localpayload/nativeACK; no claim of complete postcopy device-byte readback",
-  "phoneCleanupScope": "Own host sessions have no remaining members; native app terminate recorded; final physicalstop targets empty, no fabricated exactkill/uninstall"
+  "phoneCleanupScope": "Own host sessions have no remaining members; native app terminate recorded; final physicalstop targets empty, no fabricated exactkill/uninstall",
+  "stageResultScope": "251 stage; final calendar acceptance and ordinary Phone session are recorded in the252 closeout",
+  "finalCalendarCloseoutBuild": 252,
+  "finalCalendarCloseoutSummary": "../2026-10-27-calendar252-closeout/test-summary.json"
 }

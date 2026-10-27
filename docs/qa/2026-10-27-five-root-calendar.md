@@ -1,6 +1,6 @@
 # 五入口验收：日历阶段
 
-**状态：日历未通过。** 同行236和计划238已通过；日历9个分开业务组已在Simulator244／246／250／251各自闭环，Files251完整8阶段及focused7额外回归通过，原PNG均实际审看。Phone已装251、普通97保留；14:41已解锁并精确重启，默认iPhone14Plus Core12已469.055秒／12GET轮次12ACK通过，12原PNG全审。251撤销弹窗空灰图标尚未修复，私有252两端已构建，尚未采纳／安装／验图。消息／我业务未开始；日历完整验收后才进入下一页。
+**状态：日历已通过。** 同行236、计划238已通过；九个日历业务组在244／246／250／251分开闭环，251默认iPhone14Plus Core12、251／252共用弹窗focused7和252图标审看已完成。Phone已装252、普通97保留；空参数／仅TERM正常会话PID11592与完整执行路径／安装Info一致，普通身份未读取。消息／我业务尚未开始，五入口任务未完成；不称252同包全套重跑或真实Apple订阅成功。
 
 ## 当前修复
 
@@ -8,7 +8,7 @@
 
 239仅 `HomeRootView.swift` 和版本配置改变；其余266项App输入保持238。手机和Simulator构建成功，268项活跃／冻结／构建上下文输入、Local配置字节及严格签名已核对。默认手机已安装239；不能直接读取手机已安装的可执行字节，不作该项声明。
 
-本阶段没有API、网页、Schema或生产部署改动，生产仍为 `dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ`。
+本阶段没有API、网页、Schema或生产部署改动；`dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ`仅为上次生产核验记录，本轮未重新核验。
 
 239四组合的自动化交互随后通过，但实际审图发现最大字号详情图标压字，以及中文legacy日期编辑行横向溢出，因此视觉验收仍失败。240候选已通过独立最简复核，手机／Simulator构建、严格签名成功，268项输入及Local三方匹配；仅3项改变，265项保持239。已安装默认手机，Simulator四组合复验进行中：详情图标取消固定24×24占位；旧非五分钟日程的原生DatePicker仅在辅助字号改为纵向graphical布局，原值、绑定、范围、时区、ID、普通compact与五分钟分支保持。手机在240候选阶段仍锁屏，未启动该轮真机工具栏或完整业务验收。
 
@@ -134,7 +134,7 @@ Transfer250前五次失败分别涉及QA搜索返回、iOS原位命名、空Text
 
 第六次 `calendar-transfer-sim250-file-cell-final` 实际点唯一原生File Cell后已关闭picker，但结果弹窗只有标题、图标和OK，正文完全空白，晚期AX及实际视频帧一致。Native214.618／controller249.279809秒，4／8GET-round和Native ACK通过，导入后的第5阶段未到，不能判断本轮后端是否成功；439B文件及目录、2账号／旧401、runtime与fixture.json均清理。原Imported1／Skipped0断言保持，未通过API补写。
 
-源码定位到Popovers提前创建AnyView、异步present与live Bool结合旧String正文快照的时序风险。251仅把ssActionPrompt message改为escaping autoclosure，经过两层provider转发，在实际提示框body读当前message；其余actions／Binding／dismiss／布局保持，独立最简复查通过。较250只版本和SSViewModifiers两项变化，266项及Local保留；两端164个App Swift＋1generated、268输入／Local／三binary／签名均核对。默认14Plus已安装251并读回Info，普通97保留；没有直接读取Phone执行字节，Phone Core12尚未完成。
+源码定位到Popovers提前创建AnyView、异步present与live Bool结合旧String正文快照的时序风险。251仅把ssActionPrompt message改为escaping autoclosure，经过两层provider转发，在实际提示框body读当前message；其余actions／Binding／dismiss／布局保持，独立最简复查通过。较250只版本和SSViewModifiers两项变化，266项及Local保留；两端164个App Swift＋1generated、268输入／Local／三binary／签名均核对。默认14Plus已安装251并读回Info，普通97保留；没有直接读取Phone执行字节；此时Phone Core12尚未完成，最终结果见下文。
 
 原8阶段真实复测367.111秒、controller394.363338秒、1项0失败／0跳过、UI0／observer0、8GET轮次8Native ACK通过。真实保存的439B／1VEVENT与原API导出严格UTF8全文一致；先UI删源／GET0，再选择同一文件导入，明确显示Imported1／Skipped0，新ID与原ID不同，title／start／end／location／note精确读回，重登仍同ID，UI删除后重登0、peer0。12张原PNG／10unique全部实看，1棵私有树，无成功视频。source-deleted的owner/me有一次ENOTFOUND按冻结750ms／最多1次重试恢复，不能称零重试。export／file／cleanup三SHA一致；2账号删除／旧401、runtime与fixture.json实际移除，fixture目录只留cleanup-receipt；本轮文件和目录删除、baseline/noUnexpected/filesClean，provider根实际为空。
 
@@ -150,3 +150,13 @@ fresh XcodeGen后，实际两SwiftFileList的源路径／hash、双QA binary与r
 `calendar-phone-core-251-restart-final`在指定默认实体14Plus真实通过：Native469.055秒、controller503.450988秒，1项0失败／0跳过、UI0／observer0，12GET轮次／12Native ACK。新建、编辑完整字段、重启、分类改名／改色、删分类保留日程及无分类状态、删日程和重启搜索为空、peer隔离均通过；12张原PNG全部实际审看，真机成功包保留1MP4（与Simulator成功包无video分别记录）。普通中文／正常字号和AssistiveTouch可见范围保留，非全字号或普通身份数据验收。
 
 首次preflight发现已运行Preview11543而停在factory之前，未建账号／未启动UI；Root随后依据完整闭环授权，独立精确匹配default设备／Info251／installed executable路径／freshPID，只终止Preview进入隔离QA，无AppData／Keychain reset、普通97未触。第二次完整流程2账号删除／旧Bearer401、runtime与fixture.json实际移除，目录仅保留cleanup-receipt。普通会话最终启动尚未恢复，Root下一阶段处理空灰glyph后统一装机；消息／我继续等待日历整体验收。
+
+## 252最终收尾与日历验收
+
+252只替换CalendarCategoryListView撤销prompt图标link.badge.minus→link及版本，266项／Local保持，SSProvider与251完全相同。独立最简复核、164个App Swift＋1generated／268输入、私有来源无symlink、三产品binary、Info／严格签名及默认UDID provision均核对。251来源d0d58003和receipt提交257dfe42保持；252提交与receipt待Root完成后补，不预称已推送。
+
+最终focused Native121.857／controller149.456783秒，UI0／observer0、7GET／7ACK、零重试通过。13张原PNG全部实际审看、7unique，无成功视频；四张opened／settled撤销提示均有完整link图标，正文／Cancel保留1／Confirm0／重登0正确。2账号删除／旧401、runtime与fixture.json清理，目录只留receipt。[安全原图](./evidence/2026-10-27-calendar252-closeout/revoke-link-symbol.png)与[执行摘要](./evidence/2026-10-27-calendar252-closeout/test-summary.json)。外部Calendar仍仅取消分支，没有Lookup／保存或完成订阅。
+
+默认实体14Plus身份、安装Info252／普通97、Local三产品hash／268来源／签名一致；未直接读设备执行字节。正常启动PID11592为空参数／仅TERM，无QA flags，完整executablePath与installed Preview及launchResult一致，fresh PID匹配，CoreQA不在运行，普通身份未读取。一次CLI flags顺序错误exit64未启动，保留原失败；正确命令随后启动成功，不称首试通过。
+
+日历最终验收通过。依据是九个分开的244／246／250／251业务组、251实体Core12及251／252focused7；252仅图标UI差异，不代表252同包重跑所有case，也不扩大到全App字号、真实Apple订阅或完整分类／系列文件备份。251实体12PNG全实看，1成功MP4存在但未审看，copy的size／localpayload／nativeACK与namespace范围照原记录。Share TLSfalse／独立404补证和全部失败／纠正记录保留。消息／我业务尚未开始，五入口任务仍未完成。[252收尾](../releases/2026-10-27-preview252-calendar-closeout.md)。

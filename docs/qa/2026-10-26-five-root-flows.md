@@ -6,7 +6,7 @@
 |---|---|---|
 | 1 | 同行 | 236已通过；10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
 | 2 | 计划 | 238已通过；4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
-| 3 | 日历 | 未通过：Phone251已安装、普通97保留，已解锁并精确重启；9个分开业务组在244／246／250／251闭环，新增Files8阶段及focused7补充回归通过；Phone Core12已469.055秒／12阶段通过，251撤销提示图标与普通会话收尾待修；见[日历检查点](./2026-10-27-five-root-calendar.md) |
+| 3 | 日历 | 已通过：九个分开业务组在244／246／250／251闭环，251默认真机Core12通过，252图标focused7及普通会话PID11592核对；Phone252／普通97保留，非252同包全套重跑；见[日历收尾](../releases/2026-10-27-preview252-calendar-closeout.md) |
 | 4 | 消息 | 未开始 |
 | 5 | 我 | 未开始 |
 
@@ -83,4 +83,10 @@ api／www／根域只读核对均为READY production `dpl_8zqCd2KWQVtuaytvqu89hC
 
 focused7最终Native120.398秒／controller149.161733秒、UI0／observer0、7GET／7ACK、零重试通过，counts0→0→1→1→1→0→0；撤销取消保留、确认／重登为0、peer／categories保持。13PNG／6unique全实看，无成功视频；系统取消由native记录核验。旧2／7与3／7失败保留：复制工程仍绝对引用244 QA源，新取消helper未实际编入；第二次仅callback-notice且取消未核验，冷重启仍loading时被instant count误判。最终编译源／双QA／runtime已独立对齐。
 
-当前9组是不同版本的分开业务闭环，不是251同包全套重跑；Share旧controller的TLSfalse与独立404补证仍保留。251安装Info已读回、普通97保留，14:41已解锁并完成精确Preview重启；首Core preflight因已有Preview进程在0factory／0UI退出，新Core12运行中（本次记录4／12读验阶段），不能称Phone完成。251四张撤销提示图标为空灰圆，私有252尚未构建或安装；日历整体未通过，消息／我保持未开始。[251阶段与证据](../releases/2026-10-27-preview251-calendar-live-result.md)。
+251早期检查点：9组是不同版本的分开业务闭环，不是251同包全套重跑；Share旧controller的TLSfalse与独立404补证仍保留。251安装Info已读回、普通97保留，14:41已解锁并完成精确Preview重启；首Core preflight因已有Preview进程在0factory／0UI退出，新Core12运行中（本次记录4／12读验阶段），不能称Phone完成。251四张撤销提示图标为空灰圆，私有252尚未构建或安装；日历整体未通过，消息／我保持未开始。[251阶段与证据](../releases/2026-10-27-preview251-calendar-live-result.md)。
+
+## 日历252收尾：通过
+
+251默认真机Core12最终469.055秒／12GET／12ACK通过，12原PNG／12unique全审；保留1成功MP4但未审看视频，账号／旧401及凭据清理。252只改版本和撤销图标为link，prompt provider与251相同，268来源／Local／产品／签名核验一致。focused7最终121.857秒／controller149.456783秒、UI0／observer0、7GET／7ACK、零重试通过；13PNG／7unique全审，四张打开／稳定提示中的图标、正文、取消保留与确认／重登为空均正确。
+
+默认14Plus已安装252，普通97保留，空参数／仅TERM正常会话PID11592与完整执行路径／launchResult匹配，CoreQA未运行，普通身份未读取；一次CLI参数顺序失败未启动，正确命令随后成功。日历最终通过，消息／我业务尚未开始，五入口整体仍未完成。九组分版本业务、251真机和251／252补充回归分别计证；系统Calendar只验取消，未Lookup／保存或完成真实订阅，Share旧TLSfalse／独立404补证及早期失败不变。[252交付与原图](../releases/2026-10-27-preview252-calendar-closeout.md)。

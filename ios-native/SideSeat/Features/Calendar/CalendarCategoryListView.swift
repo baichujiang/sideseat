@@ -222,7 +222,7 @@ struct CalendarConnectionView: View {
                 isPresented: revocationBinding,
                 title: AppLocalization.string("Revoke calendar connection?"),
                 message: AppLocalization.string("Apple Calendar will stop receiving updates from this private link."),
-                systemImage: "link.badge.minus",
+                systemImage: "link",
                 dismissOnTapOutside: true,
                 onDismiss: { pendingRevocation = nil },
                 accessibilityIdentifier: "calendar-connection-revoke-prompt"
