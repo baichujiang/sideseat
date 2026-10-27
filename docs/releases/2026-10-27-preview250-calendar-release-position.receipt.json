@@ -1,0 +1,59 @@
+{
+  "sourceCommit": "3f74a261e573c59e82c029252462f394cc6c03f2",
+  "sourcePushed": true,
+  "branch": "codex/ios-uxui-20260922",
+  "previewBuild": 250,
+  "all268CommittedActiveFrozenMatch": true,
+  "LocalBytesMatch": true,
+  "products": {
+    "simulator": {
+      "version": 250,
+      "buildExit": 0,
+      "strictSignaturePassed": true,
+      "binarySHA256": {
+        "__preview.dylib": "eb287082eaa6c084eccda2ad16785f89892eb5068a3ee363eb854c97a1c128fc",
+        "SideSeat Preview.debug.dylib": "ffe1ac0bc3244ed21951230cfe111deba683674f1a710d3030d3a2cba368eb0e",
+        "SideSeat Preview": "7c86cac02d2c835029e32700dc9a632804a08c2ce10930fd1cc2fac5d1ef2663"
+      }
+    },
+    "phone": {
+      "version": 250,
+      "buildExit": 0,
+      "strictSignaturePassed": true,
+      "binarySHA256": {
+        "__preview.dylib": "877f106895d2679ca81c773cbc604e59867ed97579632f9b0eb23b5d7d61011c",
+        "SideSeat Preview.debug.dylib": "9fcb7a5fdd22e850b72a8a67e77e2f720ccf5434f548328334790123aed3a131",
+        "SideSeat Preview": "6e13551d3fa504d91dd32298828ab8968e77dfeba97655e9630f6088751d6ed7"
+      }
+    }
+  },
+  "specifiedDefaultPhoneInstalledInfo250Verified": true,
+  "ordinary97Preserved": true,
+  "installedPhoneExecutableBytesRead": false,
+  "normalPhoneLaunchVerified": false,
+  "phoneUITestPassed": false,
+  "weeklyNativeSeconds": 263.788,
+  "weeklyControllerSeconds": 281.942184,
+  "weekly13GETRoundsAndACK": 13,
+  "nativePNGsActuallyReviewed": 5,
+  "selectedPublicOriginals": 2,
+  "successfulRunVideoAvailable": false,
+  "scope": "OrdinaryChinese/light owned Simulator Weekly13, separate from earlier cases",
+  "QAOnlyVelocityChange": "250→40pt/s; all coordinates/distance/holds and13 exact data assertions preserved",
+  "failedFast246And250Preserved": true,
+  "endRecomputationAloneProvedCause": false,
+  "ownedAccountsDeleted": 2,
+  "staleBearer401": 2,
+  "credentialRuntimeAndFixtureJSONActuallyRemoved": true,
+  "fixtureDirectoryOnlyCleanupReceipt": true,
+  "wholeCalendarAccepted": false,
+  "fiveRootTaskComplete": false,
+  "messagesAndMeBusinessStarted": false,
+  "remaining": [
+    "Files actual save/import happy path",
+    "Default iPhone14Plus Core12 after manual unlock"
+  ],
+  "backendWebSchemaReleaseInThisStage": false,
+  "lastRecordedProductionDeployment": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+  "freshProductionReadInThisStage": false
+}

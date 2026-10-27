@@ -10,4 +10,4 @@
 
 两端实际编译164个App Swift源码，268来源／冻结输入／Local／全部产品二进制hash和严格签名匹配；默认iPhone14Plus已安装250并读回Info，普通97保留。手机执行字节未直接读取，当前仍需人工解锁，未完成普通启动或Phone UI。
 
-日历已有8个分开执行的业务组在244／246／250各自闭环通过，文件保存后导入的成功分支与Phone Core12仍待补验。共享旧controller的TLS失败仍保留false，同一已清理URL另有标准TLS 404补证，不称一次全部controller同时通过。**日历整体和五入口任务尚未通过，消息／我未开始。** 本阶段无后端、网页或Schema发布；正式部署保留上次核验HTsL记录。源码提交／推送及安装来源见后续receipt。
+日历已有8个分开执行的业务组在244／246／250各自闭环通过，文件保存后导入的成功分支与Phone Core12仍待补验。共享旧controller的TLS失败仍保留false，同一已清理URL另有标准TLS 404补证，不称一次全部controller同时通过。**日历整体和五入口任务尚未通过，消息／我未开始。** 本阶段无后端、网页或Schema发布；正式部署保留上次核验HTsL记录。源码 `3f74a261` 已推送；来源与安装范围见[receipt](./2026-10-27-preview250-calendar-release-position.receipt.json)。
