@@ -7,8 +7,8 @@
 | 1 | 同行 | 236已通过；10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
 | 2 | 计划 | 238已通过；4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
 | 3 | 日历 | 已通过：九个分开业务组在244／246／250／251闭环，251默认真机Core12通过，252图标focused7及普通会话PID11592核对；Phone252／普通97保留，非252同包全套重跑；见[日历收尾](../releases/2026-10-27-preview252-calendar-closeout.md) |
-| 4 | 消息 | 未开始 |
-| 5 | 我 | 未开始 |
+| 4 | 消息 | 254已通过：六个分开的252／254范围、真机即时名称14PNG／12unique全审；末轮原controllerfalse与独立清理补证保留，见[消息QA](./2026-10-27-five-root-messages.md) |
+| 5 | 我 | 下一页；仅准备／只读审查，尚无UI／业务测试 |
 
 ## 同行修复与最简实现
 
@@ -90,3 +90,11 @@ focused7最终Native120.398秒／controller149.161733秒、UI0／observer0、7GE
 251默认真机Core12最终469.055秒／12GET／12ACK通过，12原PNG／12unique全审；保留1成功MP4但未审看视频，账号／旧401及凭据清理。252只改版本和撤销图标为link，prompt provider与251相同，268来源／Local／产品／签名核验一致。focused7最终121.857秒／controller149.456783秒、UI0／observer0、7GET／7ACK、零重试通过；13PNG／7unique全审，四张打开／稳定提示中的图标、正文、取消保留与确认／重登为空均正确。
 
 默认14Plus已安装252，普通97保留，空参数／仅TERM正常会话PID11592与完整执行路径／launchResult匹配，CoreQA未运行，普通身份未读取；一次CLI参数顺序失败未启动，正确命令随后成功。日历最终通过，消息／我业务尚未开始，五入口整体仍未完成。九组分版本业务、251真机和251／252补充回归分别计证；系统Calendar只验取消，未Lookup／保存或完成真实订阅，Share旧TLSfalse／独立404补证及早期失败不变。[252交付与原图](../releases/2026-10-27-preview252-calendar-closeout.md)。
+
+## 消息254收尾：通过
+
+已修复清除备注漏传nullable键和保存／清除后顶部名称陈旧，原规则保持。最终范围分别为252 Simulator Main16、252真机Main16、252本地Ignore6、254本地Safety13、254本地End6、254真机即时名称8。全部实际原图审查，最后真机14PNG／12unique、六个即时header／toolbar／inbox检查正确；不称254同包全套重跑。
+
+末轮Phone254业务／8GET／8ACK通过，但一次CoreDevice收尾读取失败使原controllerfalse保持，独立恢复补证完成精确自有账号／旧401／runtime清理并复核原SHA。正常254PID11702、空参数／仅TERM，普通97保留；本地服务和准确启动增量已收尾，原无关tsconfig保持。源码及测试提交ce1b9dd2已推送，无本轮后端／网页／Schema发布。253Phone8的P2画面问题与早期失败保留。[消息QA](./2026-10-27-five-root-messages.md)、[254交付](../releases/2026-10-27-preview254-messages-closeout.md)。
+
+消息页通过后，下一页为“我”；当前仅准备／只读审查，尚无UI／业务测试，五入口整体仍未完成。

@@ -19,6 +19,23 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
+- Active defaultPhone Preview is now254. Messages is accepted by Root across six
+  separate252/254 scopes: MainSim16, MainPhone16, Ignore6, Safety13, End6 and
+  PhoneRemark8; not a254 same-package full run. Explicit-null remark clearing and
+  immediate conversation/cache/inbox name synchronization preserve all rules.
+  268 inputs, Local, actual164 App Swift+1generated per platform, product hashes
+  and strict signatures match; two hostless contract tests are not all-App units.
+  Phone254 final14PNG/12unique were actually reviewed, zero material findings.
+  Its original controller remainsfalse (CoreDevice cleanup-read failure); exact
+  SHA and independent recovered2accounts/old401/runtime cleanup are retained.
+  Normal254 PID11702/emptyargs/TERM-only/full executable path and freshPID match;
+  ordinary97 preserved, ordinaryidentity and Phone executable bytes not read.
+  Owned local services and exact startup deltas are closed/restored, user original
+  tsconfig bytes preserved. Source254 source/test commit ce1b9dd2 is pushed. No backend,
+  web or Schema release, HTsL is only the last recorded production check.
+  Together, Plans, Calendar and Messages are accepted. Me has preparation/read-only
+  review only, no UI/business run; the five-root task is incomplete. See
+  docs/releases/2026-10-27-preview254-messages-closeout.md and Messages QA.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
 - Active source/defaultPhone Preview is now252; ordinary97 is preserved. Only
