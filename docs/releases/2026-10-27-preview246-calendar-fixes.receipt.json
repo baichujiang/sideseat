@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "3b123505e5789d5b2d299422120d061a3796c744",
+  "sourcePushed": true,
+  "branch": "codex/ios-uxui-20260922",
+  "previewBuild": 246,
+  "all268CommittedActiveFrozenMatchAtStage": true,
+  "LocalBytesMatch": true,
+  "products": {
+    "simulator": {
+      "version": 246,
+      "buildExit": 0,
+      "strictSignaturePassed": true,
+      "binarySHA256": {
+        "SideSeat Preview": "e0d61b124fe72dcfe42364a5a87184872a93f170bdc91eb9b01fc5ac1d6b52e2",
+        "SideSeat Preview.debug.dylib": "233e40ce1706fcb51e70748fffebbf8ba0942bb987ca7066658a297d855a3d2d"
+      },
+      "path": "/tmp/sideseat-five-roots-private/calendar-revoke246-candidate/sim-build/Build/Products/Preview-iphonesimulator/SideSeat Preview.app"
+    },
+    "phone": {
+      "version": 246,
+      "buildExit": 0,
+      "strictSignaturePassed": true,
+      "binarySHA256": {
+        "SideSeat Preview": "e1fbb2e213fb9ef6093b85b42c3af468a14df557b2c83dd5d72d7c0fe8fffbe0",
+        "SideSeat Preview.debug.dylib": "eb6dbc0447a6502971e449a4ba13dbd02061c1774cf0bbe1598c8e453af9ef23"
+      },
+      "path": "/tmp/sideseat-five-roots-private/calendar-revoke246-candidate/phone-build/Build/Products/Preview-iphoneos/SideSeat Preview.app"
+    }
+  },
+  "phoneInstalledInfo246Verified": true,
+  "ordinary97Preserved": true,
+  "installedPhoneExecutableBytesRead": false,
+  "normalPhoneLaunchVerified": false,
+  "phoneUIComplete": false,
+  "wholeCalendarAccepted": false,
+  "fiveRootTaskComplete": false,
+  "backendDeployment": "dpl_HTsL9cNjKSrWp2wQUMGKGaj9ifvZ",
+  "backendWebSchemaReleaseInThisStage": false,
+  "remaining": "Week single-event AX boundary; physical unlock/retest; Messages/Me unstarted"
+}
