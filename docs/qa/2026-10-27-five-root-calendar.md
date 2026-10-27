@@ -1,6 +1,6 @@
 # 五入口验收：日历阶段
 
-**状态：日历未通过。** 同行236和计划238已通过；日历已有8个分开的业务组分别在Simulator244／246／250完成闭环，最新Week250完整13阶段通过，5原PNG全部实看。文件真正保存后成功导入及默认iPhone14Plus Core12仍待补验。Phone已装250、普通97保留，仍锁屏；消息／我业务未开始。只有日历完整验收后才进入消息。
+**状态：日历未通过。** 同行236和计划238已通过；日历9个分开业务组已在Simulator244／246／250／251各自闭环，Files251完整8阶段及focused7额外回归通过，原PNG均实际审看。Phone已装251、普通97保留；14:41已解锁并精确重启，默认iPhone14Plus Core12已469.055秒／12GET轮次12ACK通过，12原PNG全审。251撤销弹窗空灰图标尚未修复，私有252两端已构建，尚未采纳／安装／验图。消息／我业务未开始；日历完整验收后才进入下一页。
 
 ## 当前修复
 
@@ -18,18 +18,18 @@
 
 | 流程 | 必须核对 | 当前状态 |
 |---|---|---|
-| 个人日程／分类 | 真实登录，月周日、Today、搜索和草稿取消；分类新建／改名／改色／删除；日程新建／搜索／详情／编辑／重启／删除；分类删除后日程保留；第二账号隔离 | Simulator244完整12阶段通过：Native456.825秒、UI0／observer0、12GET／12ACK；12张原PNG全部实看，双账号隔离和清理通过。限普通中文／浅色；Phone仍待解锁补验 |
+| 个人日程／分类 | 真实登录，月周日、Today、搜索和草稿取消；分类新建／改名／改色／删除；日程新建／搜索／详情／编辑／重启／删除；分类删除后日程保留；第二账号隔离 | Simulator244完整12阶段通过：Native456.825秒、UI0／observer0、12GET／12ACK；12张原PNG全部实看，双账号隔离和清理通过。另默认实体Phone251完成469.055秒／12GET／12ACK，12原PNG全审；各普通字号范围分别记录 |
 | 个人日程共享 | UI生成并复制过滤后的链接；另一自有账号打开、添加、重登、再添加防重复；独立修改和源事件删除不影响副本；双方UI清理 | Simulator244实际完整13阶段通过356.445秒，13核验轮次／13ACK，11原PNG全部实看；真实原生Paste校验Copy、过滤、幂等和双方副本独立通过。旧controller因本机PythonCA在最终URL检查失败保留false；同一已清理链接另用标准TLS Node GET补证404。2账号／旧401／凭据封装清理；不声明Safari关联选择 |
 | 日期时间与搜索 | 非Today跨月／周切换；创建起点／取消；空标题恢复；真正修改日期和时钟；搜索空态改词恢复、日期保留、重启读回 | Simulator244新cohort完整通过203.888秒，8核验阶段／8ACK，双方精确时间和重启／删除闭环；5张原PNG均实看，2账号／旧401清理；仅普通中文浅色 |
 | 周视图替代写入 | 移动／调整时长的取消与确认、精确时间；复制粘贴和立即复制；按ID清理 | Simulator250完整263.788秒／13GET轮次13ACK通过，5原PNG均实看；09:30／11:00及三独立副本、重启／删除闭环通过；输入只放慢速度，旧失败保留；非Phone或最大字号 |
 | 重复日程 | 范围选择取消保留；本次修改隔离相邻项；以后／全部作用边界；范围删除收尾 | Simulator244完整通过294.555秒，10核验阶段／10ACK，无重试；本次例外重登保留、以后拆分新系列、全部只作用于当前拆分系列及逐项删除通过。2张里程碑原PNG均实看，2账号／旧401／凭据封装清理；仅四天窗口，非无限历史审计 |
 | 系统连接与传输边界 | 文件导入／导出选择器取消；自有订阅创建、复制、重登、撤销取消／确认；撤销后feed404与无缓存；另一账号隔离 | Simulator246完整10阶段通过167.957秒，10GET／10ACK、6原PNG全部实看；Copy／原生Paste、取消保留、确认撤销及重登0、feed200→404／no-store和最终清理404均通过。2账号旧401／runtime清理完整。另同源focused111.549秒／7阶段通过；仅普通中文浅色，不确认Apple系统订阅或外部Cancel，不读写普通文件 |
-| 文件传输成功分支 | 非空单次日程UI导出到本轮Files目录、删源、选该文件立即导入、精确新ID读回／重登／删除 | 待执行；此前连接case只验证导出picker／取消与API空ICS，不能代替真实保存和成功导入。现有规则不恢复完整系列／分类，不假设同文件重复手选去重 |
+| 文件传输成功分支 | 非空单次日程UI导出到本轮Files目录、删源、选该文件导入、精确新ID读回／重登／删除 | Simulator251完整367.111秒／8GET轮次8ACK通过，12PNG／10unique全实看，无成功视频；439B单VEVENT与原API ICS的UTF8全文一致，Imported1／Skipped0、完整字段／新ID／重登／删除重登0及peer0通过；1次限定GET重试，文件／目录和双账号旧401清理完整。仅基本字段，不是完整分类／系列备份恢复 |
 | 日程同行人 | 自有ACTIVE联系人选择／保存／详情／重登；取消移除保留、正式移除、删除；另一账号无日程或新邀请 | Simulator244完整通过453.293秒，10核验阶段／10ACK，无重试；10张原PNG均实看，2账号／旧401／凭据封装清理。仅自有ACTIVE联系人前置；现有功能只记录owner日程同行人，不新增邀请规则 |
 | 智能文字输入 | 真实UI输入／解析预览／草稿Apply仍0事件／正式Add／详情、重登、隔离、删除 | Simulator244完整通过363.779秒，9核验阶段／9ACK，无重试；本次真实UI解析一次，未修正AI字段来通过断言，Apply仍0、正式保存恰好1条、同ID重登及删除闭环通过。30PNG／22unique全部实看，2账号／旧401／凭据封装清理；仅单句单事件，不涵盖语音／图片 |
 | 工具栏视觉与路由 | 中文／德文、普通／实际系统最大字号、浅／深四组合；分享预览取消、编辑取消；计划投影无修改入口、管理入口可见 | 241四组合及独立菜单通过，35图／30unique全实看；244输入focused四组合通过590.863秒、48PNG／40unique全实看。后者仅四字单段Notes首行及Done，不代表整页大字验收；实际发现同行人碎词、固定网格时钟严重省略，私有245待实际UI验证。Phone待解锁 |
 
-以上共8项独立业务用例，均需各自完整GET／ACK／UI终态及清理；准备或部分阶段通过不算验收。六组成功是分开运行，均限自有iPhone17Pro／iOS26.5 Simulator、普通中文／浅色，不能合成一次不中断套件或默认手机通过。文中GET阶段／轮次指独立状态核验，每轮可能包含多条HTTP请求，不是HTTP请求总数。Apple Calendar、文件导入／导出和受开关控制的智能输入范围单列，不能以事件CRUD代替这些集成的验收。不得接触普通账号的系统日历或个人文件来补齐结果。
+以上共9项独立业务用例，均有各自GET／ACK／UI终态及清理范围；准备或部分阶段通过不算验收。九组成功分开运行且版本不同，均限自有iPhone17Pro／iOS26.5 Simulator、普通中文／浅色，不能合成251同包不中断套件或默认手机通过。文中GET阶段／轮次指独立状态核验，每轮可能包含多条HTTP请求，不是HTTP请求总数。Apple Calendar、文件导入／导出和受开关控制的智能输入范围单列，不能以事件CRUD代替这些集成的验收。不得接触普通账号的系统日历或个人文件来补齐结果。
 
 ## 已发生的失败与范围
 
@@ -126,3 +126,27 @@ Root已将246四项输入采用到活跃源码并冻结268项，264项相对244�
 5原PNG全部实际审看：取消前移动确认9:30、拉伸确认09:30–11:00、保存成功、14:00–15:30粘贴和三个独立卡片精确时间；成功运行没有视频attachment，不假称第二确认有连续视频。两张安全原PNG原字节采用。40pt/s只改自动化输入速度，距离／坐标／hold／原13业务要求保留；同250快输入失败证据仍在，不把终点重算单独当作差异已解决的因果证明。[250阶段](../releases/2026-10-27-preview250-calendar-release-position.md)。
 
 覆盖复核发现既有Connections10只到导出picker／取消及API空ICS核验，没有真实Files保存和成功导入。正在准备独立ownedSim单次事件导出→删源→选同文件导入→新ID精确读回／重登→UI删除的真实闭环；保持现有导入规则，不假设重复手选文件会去重或完整恢复分类／系列。Phone Core12仍待解锁。因此日历与五页任务均未完成，不能进入消息。
+
+
+## 251文件成功闭环与弹窗正文修复；整页仍待验收
+
+Transfer250前五次失败分别涉及QA搜索返回、iOS原位命名、空TextView的nil值、目录自动进入、文件名StaticText未选中文件，均保留原失败与实际图，不改业务断言。第五次已经完成实际439B ICS保存／UTF8全文与API导出严格一致，以及删源后GET0；旧默认空文件夹由创建前后实际图、精确birthtime/inode证实属于本轮，Root只rmdir该空目录，有独立补充receipt。后续baseline会保留所有原项，未知新增文件不删除。
+
+第六次 `calendar-transfer-sim250-file-cell-final` 实际点唯一原生File Cell后已关闭picker，但结果弹窗只有标题、图标和OK，正文完全空白，晚期AX及实际视频帧一致。Native214.618／controller249.279809秒，4／8GET-round和Native ACK通过，导入后的第5阶段未到，不能判断本轮后端是否成功；439B文件及目录、2账号／旧401、runtime与fixture.json均清理。原Imported1／Skipped0断言保持，未通过API补写。
+
+源码定位到Popovers提前创建AnyView、异步present与live Bool结合旧String正文快照的时序风险。251仅把ssActionPrompt message改为escaping autoclosure，经过两层provider转发，在实际提示框body读当前message；其余actions／Binding／dismiss／布局保持，独立最简复查通过。较250只版本和SSViewModifiers两项变化，266项及Local保留；两端164个App Swift＋1generated、268输入／Local／三binary／签名均核对。默认14Plus已安装251并读回Info，普通97保留；没有直接读取Phone执行字节，Phone Core12尚未完成。
+
+原8阶段真实复测367.111秒、controller394.363338秒、1项0失败／0跳过、UI0／observer0、8GET轮次8Native ACK通过。真实保存的439B／1VEVENT与原API导出严格UTF8全文一致；先UI删源／GET0，再选择同一文件导入，明确显示Imported1／Skipped0，新ID与原ID不同，title／start／end／location／note精确读回，重登仍同ID，UI删除后重登0、peer0。12张原PNG／10unique全部实看，1棵私有树，无成功视频。source-deleted的owner/me有一次ENOTFOUND按冻结750ms／最多1次重试恢复，不能称零重试。export／file／cleanup三SHA一致；2账号删除／旧401、runtime与fixture.json实际移除，fixture目录只留cleanup-receipt；本轮文件和目录删除、baseline/noUnexpected/filesClean，provider根实际为空。
+
+focused251首轮Native135.002／controller175.971536秒只完成2／7GET与ACK，snapshot超时；实际视频仍在系统AddSubscription编辑页，未回App，也未到RevokeCancel／Confirm。只读probe证明host为mobilecal、标题“添加订阅日历”及cancel-button，没有Lookup／Subscribe；额外cleanup probe因Calendar非foreground停下，0Cancel、无fullhash，不称旧UI已清理。第二轮`system-cancel-final`为Native47.766／controller87.531895秒、3／7GET／ACK：创建连接并返回App notice成功；重启后1.7秒仍loading，被即时5条计数门槛误判，externalOutcome仅callback-notice，取消未核验。随后查明复制project仍绝对引用244源，实际编原2604而非新4ad；两次旧run均保留失败范围，不能声称新取消helper已执行。Root确认先前实际编译清单核验遗漏。
+
+fresh XcodeGen后，实际两SwiftFileList的源路径／hash、双QA binary与runtime已独立对齐；仅修系统返回helper与35秒内同时等登录两字段消失／精确5条，原7阶段主体数据不变。最终`calendar-connections-focused-sim251-composite-return-final`为Native120.398／controller149.161733秒、UI0／observer0、7GET／7ACK、零重试，counts0→0→1→1→1→0→0，撤销取消保留、确认／重登0、peer／categories保持。13PNG／6unique全部实看，无成功视频；externalOutcome=calendar-subscription-cancelled／verified=true来自native记录。2账号删除／旧401、runtime与fixture.json移除，fixture目录只留receipt。四张撤销prompt中的link.badge.minus实际为空灰圆，251未修；私有252候选只准备替换link和版本，尚未构建／测试／装机。
+
+14:41默认14Plus系统已解锁。首Core251 preflight因Preview PID11543已运行而在0factory／0UI退出；单独授权的精确Preview重启核对Info251／完整执行路径／fresh PID，无AppData／Keychain重置，普通97不触。新`Core251-restart-final`正在运行，本次记录4／12GET／ACK（创建event已过），不称Phone已完成。日历目前9个分开业务组和额外focused回归通过，整页与五入口任务仍未通过，消息／我未开始。[251交付与原图](../releases/2026-10-27-preview251-calendar-live-result.md)。
+
+
+## 默认iPhone14Plus251 Core12完成
+
+`calendar-phone-core-251-restart-final`在指定默认实体14Plus真实通过：Native469.055秒、controller503.450988秒，1项0失败／0跳过、UI0／observer0，12GET轮次／12Native ACK。新建、编辑完整字段、重启、分类改名／改色、删分类保留日程及无分类状态、删日程和重启搜索为空、peer隔离均通过；12张原PNG全部实际审看，真机成功包保留1MP4（与Simulator成功包无video分别记录）。普通中文／正常字号和AssistiveTouch可见范围保留，非全字号或普通身份数据验收。
+
+首次preflight发现已运行Preview11543而停在factory之前，未建账号／未启动UI；Root随后依据完整闭环授权，独立精确匹配default设备／Info251／installed executable路径／freshPID，只终止Preview进入隔离QA，无AppData／Keychain reset、普通97未触。第二次完整流程2账号删除／旧Bearer401、runtime与fixture.json实际移除，目录仅保留cleanup-receipt。普通会话最终启动尚未恢复，Root下一阶段处理空灰glyph后统一装机；消息／我继续等待日历整体验收。

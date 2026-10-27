@@ -1,0 +1,57 @@
+[
+  {
+    "file": "before250-blank-result.png",
+    "sha256": "4cb8e724c5ce296f7618bb085a9678b22f02ae971beb65580aec739049260d19",
+    "scope": "Failed250 video actual200.361667s; title and OK without result text; import data was not read back.",
+    "actuallyViewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "syntheticOwnedQADataOnly": true,
+    "editedOrCropped": false
+  },
+  {
+    "file": "after251-import-result.png",
+    "sha256": "77444e49e7a597cd998f4e09a249e23b9a145399fb90a16629f2518a2dfe9ee6",
+    "scope": "Original251 native PNG; actual Imported1/Skipped0.",
+    "actuallyViewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "syntheticOwnedQADataOnly": true,
+    "editedOrCropped": false
+  },
+  {
+    "file": "after251-imported-detail.png",
+    "sha256": "91c91188e843112b98151a116f2dd33b38cc08ade6223e4a458a514439cf3d88",
+    "scope": "Original251 native PNG; same title/start/end/location/note and a new independentID verified separately.",
+    "actuallyViewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "syntheticOwnedQADataOnly": true,
+    "editedOrCropped": false
+  },
+  {
+    "file": "phone251-created-day.png",
+    "sha256": "be71ae901833e38e63f9a29cbed5ba1bd339b05a8170ef69208caa5a0d0012c8",
+    "scope": "Actual default iPhone14Plus251; created owned event10:00–11:00, ordinaryCJK. AssistiveTouch is visible.",
+    "actuallyViewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "syntheticOwnedQADataOnly": true,
+    "editedOrCropped": false
+  },
+  {
+    "file": "phone251-edited-category.png",
+    "sha256": "332f2a438df3a9160b394b7c91436e2a012572afbe51a1c561471534e65d798d",
+    "scope": "Actual default iPhone14Plus251; edited fields and green category; owned syntheticQA only.",
+    "actuallyViewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "syntheticOwnedQADataOnly": true,
+    "editedOrCropped": false
+  }
+]

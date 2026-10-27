@@ -21,7 +21,35 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Active source/defaultPhone Preview is now250; ordinary97 is preserved. Relative
+- Active source/defaultPhone Preview is now251; ordinary97 is preserved. Only
+  version and SSViewModifiers change from250;266 inputs and Local remain exact.
+  Message expressions stay as providers through both prompt layers and are read
+  in the presented card body. Actions/bindings/dismiss/layout/rules are unchanged.
+  Both products compile164 App Swift inputs plus one generated source;268 frozen
+  inputs, Local, three binary hashes and strict signatures match. Installed Phone
+  Info251 is read back, not executable bytes. At14:41 default14Plus was unlocked;
+  an exact Preview-only restart matched Info251/full executable path/fresh PID,
+  without AppData/Keychain reset. Core12 passed469.055s/12GET-rounds12ACK on that actualPhone; ordinary launch is pending.
+  Real Files roundtrip251 passed367.111s/8GET-rounds8ACK:439B single event exported,
+  source deleted, exact saved file imported into a new ID, full fields/relogin and
+  delete/relogin0 verified.12PNG/10unique all actually reviewed; no success video.
+  One owner/me ENOTFOUND recovered under the frozen750ms/one-retry policy. Files,
+  run folder,2accounts/old401/runtime/fixtureJSON are cleaned; no unknown entries.
+  Earlier8 separate business groups remain scoped to244/246/250, now9 with Files251;
+  do not call these one same-build suite. Share's old TLSfalse+separate404 stay.
+  Additional251 focused7 passed120.398s/7GET-rounds7ACK, zero retries, counts
+  0/0/1/1/1/0/0. Cancel retains the connection; Confirm/relogin remove it; peer and
+  categories stay unchanged.13PNG/6unique were actually reviewed, no success video;
+  native records verify calendar-subscription-cancelled, not video evidence.
+  Two earlier failed runs retain their2/7 and3/7 scopes. Their copied project still
+  compiled old244 QA source, so they do not prove the new cancel helper executed.
+  Final compiled sources/QA binary/runtime were independently realigned and checked.
+  Four final revoke prompts show a blank gray glyph for link.badge.minus.251 has
+  not fixed that visual finding; private252 is not built, accepted or installed.
+  Calendar/five-root task remain unaccepted; Messages/Me business are unstarted.
+  No backend/web/schema release; HTsL is the last recorded production check only.
+  See docs/releases/2026-10-27-preview251-calendar-live-result.md.
+- Preview250 was the previous completed stage; ordinary97 was preserved. Relative
   to246 only version and HomeWeekTimetableView change,266 inputs and Local remain.
   Both products compile the exact164 App Swift inputs;268/source/signatures/all
   product binaries match. Phone installedInfo250 is read back, not its binary bytes;

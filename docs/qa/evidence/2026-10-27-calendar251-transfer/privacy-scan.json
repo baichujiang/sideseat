@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-27T13:58:14.046955+00:00",
+  "scope": "Explicit251 stage files and5 independently reviewed ownedQA images only; not a whole-repository scan",
+  "filesScanned": 18,
+  "ownedTokenOrURLPatterns": 4,
+  "ownedTokenOrURLLiteralMatches": 0,
+  "jwtShapeMatches": 0,
+  "publicImagesIndividuallyViewed": 5,
+  "ordinaryPhoneIdentityRead": false,
+  "unrelatedTsconfigOriginalBytesPreserved": true,
+  "active251268Match": true
+}

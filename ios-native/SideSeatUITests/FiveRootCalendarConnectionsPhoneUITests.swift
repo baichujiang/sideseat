@@ -172,7 +172,15 @@ import Darwin
         identifier.tap(); identifier.typeText(owner.identifier)
         app.secureTextFields["login-password"].tap(); app.secureTextFields["login-password"].typeText(owner.password)
         app.buttons["login-submit"].tap()
-        try require(app.tabBars.firstMatch.waitForExistence(timeout: 35) && app.tabBars.buttons.count == 5, "Owned login must reach the five-root shell.")
+        let loginDeadline = Date().addingTimeInterval(35)
+        var shellReady = false
+        while Date() < loginDeadline {
+            if app.state == .runningForeground && !app.textFields["login-identifier"].exists
+                && !app.secureTextFields["login-password"].exists && app.tabBars.firstMatch.exists
+                && app.tabBars.buttons.count == 5 { shellReady = true; break }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        try require(shellReady, "Owned login must finish loading, dismiss both login inputs and expose exactly five root destinations.")
         try tap(app.tabBars.buttons.element(boundBy: 2))
         try require(app.buttons["calendar-search"].waitForExistence(timeout: 20), "Select the actual Calendar root.")
     }
@@ -231,30 +239,68 @@ import Darwin
     private func handleExternalCalendarWithoutSubscribing() {
         let calendar = XCUIApplication(bundleIdentifier: "com.apple.mobilecal")
         let system = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let titles = ["添加订阅日历", "日历订阅", "添加日历订阅", "Calendar Subscription", "Add Calendar Subscription", "Add Subscription Calendar", "Kalenderabonnement", "Kalenderabonnement hinzufügen"]
         let deadline = Date().addingTimeInterval(18)
         while Date() < deadline {
-            let alert = system.alerts.firstMatch
-            let isCalendarOpen = alert.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Calendar' OR label CONTAINS[c] '日历' OR label CONTAINS[c] 'Kalender'")).firstMatch.exists
-            let alertCancel = alert.buttons.matching(NSPredicate(format: "label IN %@", cancelLabels)).firstMatch
-            if isCalendarOpen && alertCancel.exists && alertCancel.isHittable {
-                alertCancel.tap(); externalOutcome = "system-open-cancelled"; break
-            }
+            // The system editor can arrive after Preview's openURL callback.
+            // Never query Preview's covered AX tree while Calendar is foreground.
             if calendar.state == .runningForeground {
-                let title = calendar.navigationBars.matching(NSPredicate(format: "label IN %@",
-                    ["日历订阅", "添加日历订阅", "Calendar Subscription", "Add Calendar Subscription", "Kalenderabonnement", "Kalenderabonnement hinzufügen"])).firstMatch
-                let cancel = title.buttons.matching(NSPredicate(format: "label IN %@", cancelLabels)).firstMatch
-                if title.exists && cancel.exists && cancel.isHittable {
-                    cancel.tap(); externalOutcome = "calendar-subscription-cancelled"
+                let window = calendar.windows.firstMatch.frame
+                let editors = calendar.navigationBars.matching(NSPredicate(format: "identifier IN %@ OR label IN %@", titles, titles))
+                    .allElementsBoundByIndex.filter { $0.frame.width > 0 && $0.frame.height > 0 && window.contains($0.frame) }
+                if editors.count == 1 {
+                    let editor = editors[0]
+                    let cancels = editor.buttons.matching(identifier: "cancel-button").allElementsBoundByIndex.filter {
+                        cancelLabels.contains($0.label) && $0.isEnabled && $0.frame.width > 0 && $0.frame.height > 0
+                            && editor.frame.contains($0.frame) && window.contains($0.frame) && $0.isHittable
+                    }
+                    if cancels.count == 1 {
+                        let cancel = cancels[0]
+                        print("CALENDAR_CONNECTIONS_EXTERNAL_NATIVE_CANCEL host=com.apple.mobilecal nav=\(editor.identifier) id=\(cancel.identifier) frame=\(cancel.frame)"); fflush(stdout)
+                        cancel.tap()
+                        guard editor.waitForNonExistence(timeout: 12) else {
+                            XCTFail("The actual system subscription editor must close after its one Cancel action."); return
+                        }
+                        externalOutcome = "calendar-subscription-cancelled"
+                        break
+                    }
+                }
+            } else {
+                let alert = system.alerts.firstMatch
+                let isCalendarOpen = alert.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'Calendar' OR label CONTAINS[c] '日历' OR label CONTAINS[c] 'Kalender'")).firstMatch.exists
+                let cancel = alert.buttons.matching(NSPredicate(format: "label IN %@", cancelLabels)).firstMatch
+                if isCalendarOpen && cancel.exists && cancel.isEnabled && cancel.isHittable {
+                    cancel.tap()
+                    guard alert.waitForNonExistence(timeout: 12) else {
+                        XCTFail("The actual system Open Calendar confirmation must close after Cancel."); return
+                    }
+                    externalOutcome = "system-open-cancelled"
                     break
                 }
             }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        if externalOutcome == "not-opened" {
+            guard calendar.state != .runningForeground else {
+                XCTFail("Do not leave an unverified foreground system Calendar editor or query the covered Preview."); return
+            }
+            // Only after the bounded external-opening window may the callback-only route be observed.
             if app.state == .runningForeground && element("calendar-connection-notice").exists {
-                externalOutcome = "preview-callback-notice-no-subscription"; break
+                externalOutcome = "preview-callback-notice-no-subscription"
+            } else { externalOutcome = "external-return-only-unverified-cancel" }
+        }
+        app.activate()
+        let returnDeadline = Date().addingTimeInterval(15)
+        var returnedToPreview = false
+        while Date() < returnDeadline {
+            if app.state == .runningForeground && calendar.state != .runningForeground {
+                returnedToPreview = true; break
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
-        if externalOutcome == "not-opened" { externalOutcome = "external-return-only-unverified-cancel" }
-        app.activate()
+        guard returnedToPreview else {
+            XCTFail("Return to actual foreground Preview only after the system cancellation completes."); return
+        }
     }
     private func dismissConnectionNoticeIfPresent() throws {
         if element("calendar-connection-notice").waitForExistence(timeout: 2) { try tap(app.buttons["calendar-connection-notice-ok"]) }

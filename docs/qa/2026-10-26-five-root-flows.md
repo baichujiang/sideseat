@@ -6,7 +6,7 @@
 |---|---|---|
 | 1 | 同行 | 236已通过；10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
 | 2 | 计划 | 238已通过；4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
-| 3 | 日历 | 未通过：Phone250已安装但仍锁屏；8个分开业务组在244／246／250闭环通过，最新Week13阶段完成；文件实际保存／成功导入与Phone Core12待补验；见[日历检查点](./2026-10-27-five-root-calendar.md) |
+| 3 | 日历 | 未通过：Phone251已安装、普通97保留，已解锁并精确重启；9个分开业务组在244／246／250／251闭环，新增Files8阶段及focused7补充回归通过；Phone Core12已469.055秒／12阶段通过，251撤销提示图标与普通会话收尾待修；见[日历检查点](./2026-10-27-five-root-calendar.md) |
 | 4 | 消息 | 未开始 |
 | 5 | 我 | 未开始 |
 
@@ -76,3 +76,11 @@ api／www／根域只读核对均为READY production `dpl_8zqCd2KWQVtuaytvqu89hC
 ## 日历246修复阶段
 
 246已安装默认手机，普通97保留，正常启动及Phone UI待解锁；源码／产品／签名／安装Info核对。撤销focused111.549秒／7阶段和完整连接167.957秒／10阶段分别通过，实际原图、GET／ACK、feed失效与清理完整；布局在私有245四组合700.790秒、30图全审通过。与先前六组业务合计已有7／8组，各组／版本范围仍分别记录；周视图单日程AX边界与真机补验未通过，因此日历整体未验收，消息／我未开始。[246修复阶段](../releases/2026-10-27-preview246-calendar-fixes.md)。
+
+## 日历251：Files成功闭环通过，整页仍待验收
+
+251修复导入结果正文空白。原Native及双QA二进制与250最后一轮相同，8阶段、Imported1／Skipped0及完整字段断言保留：真实导出439B单次事件→UI删源／GET0→原生文件Cell选取→导入独立新ID→详情与重登→UI删除→重登为空／peer0，Native367.111秒／controller394.363338秒、8GET轮次8ACK通过。12原PNG／10unique全部实际审看，无成功视频；一次owner/me ENOTFOUND按冻结750ms／单次重试恢复。文件及本轮目录、2账号／旧401、runtime／fixture.json均清理，fixture目录只保留cleanup-receipt。
+
+focused7最终Native120.398秒／controller149.161733秒、UI0／observer0、7GET／7ACK、零重试通过，counts0→0→1→1→1→0→0；撤销取消保留、确认／重登为0、peer／categories保持。13PNG／6unique全实看，无成功视频；系统取消由native记录核验。旧2／7与3／7失败保留：复制工程仍绝对引用244 QA源，新取消helper未实际编入；第二次仅callback-notice且取消未核验，冷重启仍loading时被instant count误判。最终编译源／双QA／runtime已独立对齐。
+
+当前9组是不同版本的分开业务闭环，不是251同包全套重跑；Share旧controller的TLSfalse与独立404补证仍保留。251安装Info已读回、普通97保留，14:41已解锁并完成精确Preview重启；首Core preflight因已有Preview进程在0factory／0UI退出，新Core12运行中（本次记录4／12读验阶段），不能称Phone完成。251四张撤销提示图标为空灰圆，私有252尚未构建或安装；日历整体未通过，消息／我保持未开始。[251阶段与证据](../releases/2026-10-27-preview251-calendar-live-result.md)。

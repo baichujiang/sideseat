@@ -762,7 +762,8 @@ struct SSActionPromptAction: Identifiable {
 private struct SSActionPromptModifier: ViewModifier {
     @Binding var isPresented: Bool
     let title: String
-    let message: String?
+    // Popovers builds content before presentation; the card must read the latest result.
+    let message: () -> String?
     let systemImage: String
     let tint: Color
     let dismissOnTapOutside: Bool
@@ -871,7 +872,7 @@ private struct SSActionPromptModifier: ViewModifier {
 private struct SSActionPrompt: View {
     @Binding var isPresented: Bool
     let title: String
-    let message: String?
+    let message: () -> String?
     let systemImage: String
     let tint: Color
     let accessibilityIdentifier: String
@@ -936,7 +937,7 @@ private struct SSActionPrompt: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    if let message, !message.isEmpty {
+                    if let message = message(), !message.isEmpty {
                         Text(message)
                             .font(.subheadline)
                             .foregroundStyle(SideSeatTheme.textSecondaryStrong)
@@ -1055,7 +1056,7 @@ extension View {
     func ssActionPrompt(
         isPresented: Binding<Bool>,
         title: String,
-        message: String? = nil,
+        message: @autoclosure @escaping () -> String? = nil,
         systemImage: String = "questionmark",
         tint: Color = SideSeatTheme.utilityAction,
         dismissOnTapOutside: Bool = false,
