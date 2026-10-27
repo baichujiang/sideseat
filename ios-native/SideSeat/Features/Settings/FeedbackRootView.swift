@@ -111,6 +111,13 @@ struct NativeFeedbackCreateRequest: Encodable, Sendable {
 
 struct NativeFeedbackVoteRequest: Encodable, Sendable {
     let value: String?
+
+    private enum CodingKeys: String, CodingKey { case value }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(value, forKey: .value)
+    }
 }
 
 struct NativeFeedbackCommentRequest: Encodable, Sendable {
