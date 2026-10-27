@@ -238,15 +238,17 @@ struct CalendarEventFormFields: View {
                     .accessibilityIdentifier("event-repeat-end-mode")
                     .calendarEventPrimaryRow()
                     if repeatHasEnd {
-                        DatePicker(
-                            "Repeat until",
-                            selection: $repeatUntil,
-                            in: startAt...,
-                            displayedComponents: .date
-                        )
-                        .environment(\.calendar, Calendar.sideSeatBerlin)
-                        .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
-                        .accessibilityIdentifier("event-repeat-until")
+                        adaptiveDatePickerRow(label: "Repeat until") {
+                            DatePicker(
+                                "Repeat until",
+                                selection: $repeatUntil,
+                                in: startAt...,
+                                displayedComponents: .date
+                            )
+                            .environment(\.calendar, Calendar.sideSeatBerlin)
+                            .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
+                            .accessibilityIdentifier("event-repeat-until")
+                        }
                         .calendarEventPrimaryRow()
                     }
                 }
@@ -385,11 +387,12 @@ struct CalendarEventFormFields: View {
             )
         } else {
             // Preserve legacy/imported off-grid values until the user intentionally edits time.
-            DatePicker("Starts", selection: startAtBinding)
-                .datePickerStyle(.compact)
-                .environment(\.calendar, Calendar.sideSeatBerlin)
-                .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
-                .accessibilityIdentifier("event-start")
+            adaptiveDatePickerRow(label: "Starts") {
+                DatePicker("Starts", selection: startAtBinding)
+                    .environment(\.calendar, Calendar.sideSeatBerlin)
+                    .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
+                    .accessibilityIdentifier("event-start")
+            }
         }
     }
 
@@ -405,16 +408,37 @@ struct CalendarEventFormFields: View {
             )
         } else {
             // Preserve legacy/imported off-grid values until the user intentionally edits time.
-            DatePicker(
-                "Ends",
-                selection: endAtBinding,
-                in: legacyMinimumEnd...,
-                displayedComponents: [.date, .hourAndMinute]
-            )
-            .datePickerStyle(.compact)
-            .environment(\.calendar, Calendar.sideSeatBerlin)
-            .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
-            .accessibilityIdentifier("event-end")
+            adaptiveDatePickerRow(label: "Ends") {
+                DatePicker(
+                    "Ends",
+                    selection: endAtBinding,
+                    in: legacyMinimumEnd...,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .environment(\.calendar, Calendar.sideSeatBerlin)
+                .environment(\.timeZone, Calendar.sideSeatBerlin.timeZone)
+                .accessibilityIdentifier("event-end")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func adaptiveDatePickerRow<Picker: View>(
+        label: LocalizedStringKey,
+        @ViewBuilder picker: () -> Picker
+    ) -> some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: SideSeatTheme.spaceSM) {
+                Text(label)
+                    .foregroundStyle(SideSeatTheme.textPrimary)
+                    .accessibilityHidden(true)
+                picker()
+                    .labelsHidden()
+                    .datePickerStyle(.graphical)
+                    .frame(maxWidth: .infinity)
+            }
+        } else {
+            picker().datePickerStyle(.compact)
         }
     }
 

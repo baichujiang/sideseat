@@ -1358,15 +1358,17 @@ private struct HomeAgendaDetailView: View {
                         } label: {
                             Image(systemName: "square.and.arrow.up")
                         }
+                        .ssToolbarAction()
                         .accessibilityLabel("Share event details")
                         .accessibilityIdentifier("calendar-detail-share-event")
-                    }
+                    }.ssStandaloneAction()
                 }
                 if canEdit {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Edit", action: onEdit)
+                        Button("Edit", systemImage: "pencil", action: onEdit)
+                            .ssToolbarAction()
                             .accessibilityIdentifier("calendar-detail-edit")
-                    }
+                    }.ssStandaloneAction()
                 }
             }
         }
@@ -1428,7 +1430,6 @@ private struct HomeAgendaDetailView: View {
         HStack(alignment: .top, spacing: SideSeatTheme.spaceMD) {
             Image(systemName: systemImage)
                 .foregroundStyle(SideSeatTheme.textSecondary)
-                .frame(width: 24, height: 24)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
