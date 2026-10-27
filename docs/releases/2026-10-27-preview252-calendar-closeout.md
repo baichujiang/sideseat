@@ -9,3 +9,5 @@
 **日历已通过，消息／我业务尚未开始，五入口整体未完成。** 验收由九个分开的244／246／250／251业务组、251实体Core12及251／252 focused7组成，不称252同包重跑所有case。251真机Core12为469.055／503.450988秒、12GET／12ACK，12原PNG／12unique全审，1成功MP4存在但未审看；2账号／旧401及namespace copy／ACK范围保持。系统Calendar本轮只验取消，没有Lookup／保存或完成真实订阅；文件基本字段成功链也不代表完整分类／参与者／系列备份恢复。全部旧失败、误编纠正及Share旧TLSfalse／独立404补证保留。
 
 详见[日历QA](../qa/2026-10-27-five-root-calendar.md)、[251正文修复及真机证据](./2026-10-27-preview251-calendar-live-result.md)、[250周视图修复](./2026-10-27-preview250-calendar-release-position.md)和[五入口状态](../qa/2026-10-26-five-root-flows.md)。251来源d0d58003及receipt提交257dfe42保持；252源码提交和receipt待Root补入，当前不作已推送声明。本阶段无后端／网页／Schema发布，HTsL仅为上次生产核验记录。
+
+来源 `c6814c74` 已推送，提交／安装与正常启动范围见[receipt](./2026-10-27-preview252-calendar-closeout.receipt.json)。
