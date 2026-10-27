@@ -897,7 +897,15 @@ struct HomeWeekTimetableView: View {
                     showEventActions(placement.item, renderedDay: renderedDay)
                     return
                 }
-                guard let preview = dragPreview else { return }
+                guard let previousPreview = dragPreview, let drag else { return }
+                // Resolve from the release position, which can follow the last preview update.
+                guard let preview = resolvedDragPreview(
+                    for: placement,
+                    translation: drag.translation,
+                    dayWidth: dayWidth,
+                    days: days,
+                    operation: previousPreview.operation
+                ) else { return }
                 guard let target = dragTargetRange(for: preview, days: days) else { return }
                 let startChanged = abs(target.start.timeIntervalSince(placement.item.start)) >= 60
                 let endChanged = abs(target.end.timeIntervalSince(placement.item.end)) >= 60
@@ -1012,9 +1020,37 @@ struct HomeWeekTimetableView: View {
         days: [Date],
         operation: HomeWeekWindow.EventDragOperation
     ) {
+        guard let nextPreview = resolvedDragPreview(
+            for: placement,
+            translation: translation,
+            dayWidth: dayWidth,
+            days: days,
+            operation: operation
+        ) else { return }
+        guard let preview = dragPreview else {
+            dragPreview = nextPreview
+            return
+        }
+        let targetChanged = preview.targetDayIndex != nextPreview.targetDayIndex
+            || preview.targetStartMinute != nextPreview.targetStartMinute
+            || preview.targetEndMinute != nextPreview.targetEndMinute
+        guard targetChanged else { return }
+        withAnimation(.interactiveSpring(response: 0.16, dampingFraction: 0.88)) {
+            dragPreview = nextPreview
+        }
+        UISelectionFeedbackGenerator().selectionChanged()
+    }
+
+    private func resolvedDragPreview(
+        for placement: CalendarDayPlacement,
+        translation: CGSize,
+        dayWidth: CGFloat,
+        days: [Date],
+        operation: HomeWeekWindow.EventDragOperation
+    ) -> WeekDragPreview? {
         guard let originDayIndex = days.firstIndex(where: {
             calendar.isDate($0, inSameDayAs: placement.item.start)
-        }) else { return }
+        }) else { return nil }
         let targetDayIndex: Int
         let targetStartMinute: Int
         let targetEndMinute: Int
@@ -1048,28 +1084,13 @@ struct HomeWeekTimetableView: View {
             targetEndMinute = target.endMinute
         }
 
-        if dragPreview == nil {
-            dragPreview = WeekDragPreview(
-                item: placement.item,
-                operation: operation,
-                targetDayIndex: targetDayIndex,
-                targetStartMinute: targetStartMinute,
-                targetEndMinute: targetEndMinute
-            )
-            return
-        }
-        guard var preview = dragPreview else { return }
-        let targetChanged = preview.targetDayIndex != targetDayIndex
-            || preview.targetStartMinute != targetStartMinute
-            || preview.targetEndMinute != targetEndMinute
-        guard targetChanged else { return }
-        preview.targetDayIndex = targetDayIndex
-        preview.targetStartMinute = targetStartMinute
-        preview.targetEndMinute = targetEndMinute
-        withAnimation(.interactiveSpring(response: 0.16, dampingFraction: 0.88)) {
-            dragPreview = preview
-        }
-        UISelectionFeedbackGenerator().selectionChanged()
+        return WeekDragPreview(
+            item: placement.item,
+            operation: operation,
+            targetDayIndex: targetDayIndex,
+            targetStartMinute: targetStartMinute,
+            targetEndMinute: targetEndMinute
+        )
     }
 
     private func dragTargetRange(

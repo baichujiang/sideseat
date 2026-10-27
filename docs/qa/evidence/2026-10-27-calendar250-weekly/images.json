@@ -1,0 +1,24 @@
+[
+  {
+    "file": "resize-confirmation.png",
+    "sha256": "dbb6a7d4c7885c752dce48455c16fc2da010bec5c0891206d7a1b40687d90836",
+    "scope": "Actual pending resize09:30–11:00; cancel precedes a later confirmed resize.",
+    "source": "Actual owned Simulator250 XCTest screenshot; fake QA title only",
+    "reviewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "editedOrCropped": false
+  },
+  {
+    "file": "independent-copies.png",
+    "sha256": "d4cdd7ec1657b19493cb2cb9e4f4487978633e9f0a5d00a66726e6baf3485531",
+    "scope": "Original09:30–11:00, duplicate11:00–12:30, pasted14:00–15:30; identities separately verified by GET.",
+    "source": "Actual owned Simulator250 XCTest screenshot; fake QA title only",
+    "reviewedBy": [
+      "calendar_keyboard_ab",
+      "root"
+    ],
+    "editedOrCropped": false
+  }
+]

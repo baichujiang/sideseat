@@ -21,7 +21,19 @@
   for that compatibility surface is required before changing it.
 - Saved-card spacing in Preview 173 passed standard/maximum-text Simulator UI
   acceptance; physical-device installation and ordinary launch are verified.
-- Active candidate source is now Preview246; default iPhone14Plus now has246
+- Active source/defaultPhone Preview is now250; ordinary97 is preserved. Relative
+  to246 only version and HomeWeekTimetableView change,266 inputs and Local remain.
+  Both products compile the exact164 App Swift inputs;268/source/signatures/all
+  product binaries match. Phone installedInfo250 is read back, not its binary bytes;
+  normal launch and Core12 still need manual unlock. Week250 ordinaryChinese/light
+  passed263.788s/13GET-rounds13ACK, actual5PNG reviewed; final QA only slows touch
+  velocity250→40, preserving coordinates/distance/holds/all13 exact data checks.
+  Fast246 and250 bothfailed09:30 and are retained; do not claim release-target
+  recomputation alone proved that5minute difference's cause/fix.8separate business
+  groups passed244/246/250; Files actualsave/import success and PhoneCore12 still
+  pending. Calendar/five-root task remain unaccepted; Messages/Me business unstarted.
+  See docs/releases/2026-10-27-preview250-calendar-release-position.md.
+- Preview246 was the previous completed fixes stage; default iPhone14Plus had246
   and ordinary97 is retained. Only4/268 inputs changed from frozen244: version,
   accessibility Companions layout, fixed-grid label font cap, and by-value revoke
   connection capture.264 inputs, Local bytes and both compiled246 products match.
@@ -37,8 +49,15 @@
   Actual244 focused revoke110.867s proved real Confirm leaves the connection;
   Cancel/5GET-rounds/5ACK passed, both QA accounts401 cleaned.246 fixes payload
   retention and its focused/fullConnections UI are accepted at ordinary Sim scope.
-  Weekly13 again failed102.186s at a single
-  event's expanded AX target before any edit gesture; no relaxed drag assertion.
+  Weekly13 touch flow remains incomplete. Live stable246 trees prove exactly one
+  event-ID Button with canvas402x1363.667 bounds and a unique direct drawn Other
+  child47x55. No duplicate ID or wrong ScrollView selector. Use the fresh real
+  direct child for touch geometry, retaining Button identity/clock/uniqueness and
+  full visible clip/native-column checks plus original13 data/API assertions.
+  Product247/248/249 experiments failed and were fully reverted to246; do not
+  retry them or call parent AX bounds the visual card. VoiceOver impact remains
+  unverified, not a demonstrated user-touch failure. Live diagnostics aren't a
+  full business pass. Default Phone still needs manual unlock for Core12.
   Calendar/five-root task are NOT accepted. Together236/Plans238 remain accepted,
   Messages/Me business unstarted. Finish Calendar before advancing to Messages.
   Previous241 layout4variants601.374s and separateGermanmaxmenu64.342s,
