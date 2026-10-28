@@ -7,11 +7,11 @@ SideSeat 是面向大学生的校园同行产品。用户从一个具体、短�
 长期目标不是制造更多匹配，而是让一次共同经历自然发展成下一次适合的同行，
 让原本陌生的校园逐渐充满熟悉的人。
 
-活跃源码、默认iPhone14Plus及自有Simulator现为 **Preview260**，普通97保留。产品与QA共20文件已提交并推送`9c501d8a9609adbc8929a06730a743716374fa49`，268项Git／活跃／冻结／构建输入及Local匹配（[来源绑定](./docs/qa/evidence/2026-10-28-me260/native-source-commit-binding.json)）。260较259仅改版本和反馈列表的图标／数字组件；资料23／课程16在258的完整闭环保留独立范围，不合称260同包全跑。
+活跃源码、默认iPhone14Plus及自有Simulator为 **Preview260**，普通97保留。产品与QA20文件已提交推送`9c501d8a9609adbc8929a06730a743716374fa49`；268项Git／活跃／冻结／构建输入及Local匹配（[来源绑定](./docs/qa/evidence/2026-10-28-me260/native-source-commit-binding.json)）。最终补验未新增App构建或重新安装。
 
-260反馈普通L与最大AX5的完整12阶段已分别通过。普通10张原图全审；MAX r4实际397.450秒、12GETDB／12ACK、35张原图／27unique全审，单次发送、真实空草稿、评论及双方重登录均通过并精确清理。此前失败和独立补证保留。用户USB重连／解锁已实际确认，但新的默认手机260资料7尝试及无账号空fixture诊断均在XCTest启用automation mode时60秒超时，资料业务尚未启动；没有系统密码提示确证。现在等待的是新的动作：完整重启默认iPhone14Plus，在手机输入密码解锁并保持USB连接。
+**五个入口已按各自实际范围验收通过**：同行236、计划238、日历244—252的独立范围、消息252／254及260原生侧滑8、我页255／258及260反馈与真机资料7。这些是不同版本、设备与独立轮次，不能合称Preview260一次连续全套。260反馈普通L和MAX AX5各自完整12阶段通过；默认真机资料7通过154.740秒／7GET／7ACK，消息侧滑8通过235.701秒／8GETDB／8ACK且仅自有Simulator。业务、实际画面和精确清理均独立复核，旧失败和原false保留。
 
-「我」及五入口整体 **NOT ACCEPTED／真机自动化初始化受阻**，前四页原验收保持。官方QA五源9.489秒仅编译范围不变，代码／QA9c501与先前文档55d49已推送，本轮没有新App代码或构建。消息原生侧滑260八阶段仍待Me全过；不盲重试UI或停止全局daemon。自有3344／15434继续停用、TS原修改保持，已静态审查的restart仍仅plan，未取得新PID或禁邮件证明。正常手机最终启动未完成。无本轮后端／网页／Schema发布，HTsL仅上次生产记录。见[我页QA](./docs/qa/2026-10-27-five-root-me.md)、[260检查点](./docs/releases/2026-10-28-preview260-me-checkpoint.md)及[五入口状态](./docs/qa/2026-10-26-five-root-flows.md)。
+手机最终正常启动已完成：默认14Plus Info260、PID686的两次fresh完整路径核对、空参数／仅TERM环境，普通97保持。自有3344／15434已关闭，容器保留、DB0／原目录核对及本轮启动增量恢复完成，用户原TS修改保持。没有新增后端／网页／Schema发布，HTsL仅上次生产核验记录。见[最终交付](./docs/releases/2026-10-28-preview260-five-roots-closeout.md)、[分范围证据](./docs/qa/evidence/2026-10-28-me260/final-closeout-summary.json)、[我页QA](./docs/qa/2026-10-27-five-root-me.md)及[五入口状态](./docs/qa/2026-10-26-five-root-flows.md)；[旧未验收检查点](./docs/releases/2026-10-28-preview260-me-checkpoint.md)保留当时状态。
 
 以下254及更早段落保留各阶段的历史范围，当前状态以上方260为准。
 

@@ -2,15 +2,21 @@
 
 按用户要求依次验收：同行 → 计划 → 日历 → 消息 → 我。本页完整通过后才开始下一页业务测试。跨页结果交接不等于下一页已验收。
 
-当前活跃源码／默认iPhone14Plus／自有Simulator均为260，普通97保留；产品与QA20文件`9c501d8a9609adbc8929a06730a743716374fa49`及先前文档55d49已推，268项来源与Local保持（[来源绑定](./evidence/2026-10-28-me260/native-source-commit-binding.json)）。前四页保持原验收，第五页NOT ACCEPTED；260反馈普通r1／MAX r4及255／258各独立通过范围不变，失败／补证保留。用户USB重连解锁已实测完成，但新Phone260资料7在87.366708秒、0Native／0ACK处发生automation mode60秒超时，独立无账号gate0-r3也同样失败，清理通过，不是业务验收。现在等待完整重启默认14Plus后在机输入密码解锁的新回复，不盲重试或kill daemon。消息nativeSwipe260八阶段仍严格待Me全过，未执行；本轮没有新App代码或构建。3344／15434继续停用、TS原修改保持，已静态审查的restart仅plan，未来须新启动／PID／禁邮件证明。正常手机最终启动及五入口整体仍未完成。[我页QA](./2026-10-27-five-root-me.md)、[260未验收检查点](../releases/2026-10-28-preview260-me-checkpoint.md)
+**当前：五个入口已按下表的独立实际范围验收通过，默认手机正常交付完成。** 活跃源码／默认iPhone14Plus／自有Simulator为Preview260，普通97保留；产品与QA20文件`9c501d8a9609adbc8929a06730a743716374fa49`已推，268项来源及Local匹配（[来源绑定](./evidence/2026-10-28-me260/native-source-commit-binding.json)）。本次收尾未新建App包；不同版本、设备及独立轮次不能合称260一次连续五页套件。[最终交付](../releases/2026-10-28-preview260-five-roots-closeout.md)、[最终分范围证据](./evidence/2026-10-28-me260/final-closeout-summary.json)
 
-| 顺序 | 页面 | 状态 |
+| 顺序 | 页面 | 已验收的实际范围 |
 |---|---|---|
-| 1 | 同行 | 236已通过；10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
-| 2 | 计划 | 238已通过；4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
-| 3 | 日历 | 已通过：九个分开业务组在244／246／250／251闭环，251默认真机Core12通过，252图标focused7及普通会话PID11592核对；Phone252／普通97保留，非252同包全套重跑；见[日历收尾](../releases/2026-10-27-preview252-calendar-closeout.md) |
-| 4 | 消息 | 254已通过：六个分开的252／254范围、真机即时名称14PNG／12unique全审；末轮原controllerfalse与独立清理补证保留，见[消息QA](./2026-10-27-five-root-messages.md) |
-| 5 | 我 | NOT ACCEPTED／真机自动化初始化受阻；USB重连解锁已确认，新Phone260资料7及空gate0均在业务前超时。等待完整重启后输入密码解锁的新回复；此前独立通过范围保留，不称260同包全跑，见[我页QA](./2026-10-27-five-root-me.md) |
+| 1 | 同行 | 236：10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
+| 2 | 计划 | 238：4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
+| 3 | 日历 | 九个分开业务组在244／246／250／251闭环，251默认真机Core12、252图标focused7及普通会话核对；非252同包全套，见[日历收尾](../releases/2026-10-27-preview252-calendar-closeout.md) |
+| 4 | 消息 | 252／254六个独立范围；新增260自有Simulator原生侧滑8，235.701秒／8GETDB／8ACK，20PNG／15unique及20AX实审；不称Phone侧滑通过，见下方补验与[消息QA](./2026-10-27-five-root-messages.md) |
+| 5 | 我 | 255 Core17／Extended12、258 FullProfile23／Courses16及NoScrollB5／ArchiveB7、260普通及MAX各自Feedback12、260默认真机Profile7；业务／实际画面／清理独立通过，见[我页QA](./2026-10-27-five-root-me.md) |
+
+260真机Profile7最后通过154.740秒／7strictGET／7nonce ACK；新的精确runner只读初始化通过后执行原7步，0重试、单次copy30、peer保持、2张原图实审与精确清理完成。完整重启未使旧host恢复；不把新host的通过归因为已证实的缓存损坏。正常默认Phone260 PID686、两次fresh完整路径／Info260＋97、空参数／仅TERM环境已核对。
+
+消息260原生侧滑补验是在Me仍未验收时，按事先独立ordering supplement授权回归已验收的第四页；原“待Me”计划metadata未倒改。只在自有Simulator执行六次系统侧滑，核对已读3／置顶2及反向取消；已接受联系人与两条TEXT为明确API前置，不计作UI创建。精确2账号／旧401／DB0／原目录／fixture与runtime清理通过；独立评审SHA `f61621a03b92b89919f22b6a8cd366736dbd367b4903b2d1b3d704e2989ef5f0`。
+
+自有服务已收尾：3344／15434关闭、准确容器保留、DB0／原catalog及新run启动增量恢复通过，用户原TS修改保持。旧失败、原false与[旧NOT ACCEPTED检查点](../releases/2026-10-28-preview260-me-checkpoint.md)均保留。无新增后端／网页／Schema发布，HTsL仅上次生产记录。
 
 下方保留各阶段原始历史记录，其“尚未开始”等状态只适用于当时，当前进度以上表及我页QA为准。
 
@@ -101,4 +107,4 @@ focused7最终Native120.398秒／controller149.161733秒、UI0／observer0、7GE
 
 末轮Phone254业务／8GET／8ACK通过，但一次CoreDevice收尾读取失败使原controllerfalse保持，独立恢复补证完成精确自有账号／旧401／runtime清理并复核原SHA。正常254PID11702、空参数／仅TERM，普通97保留；本地服务和准确启动增量已收尾，原无关tsconfig保持。源码及测试提交ce1b9dd2已推送，无本轮后端／网页／Schema发布。253Phone8的P2画面问题与早期失败保留。[消息QA](./2026-10-27-five-root-messages.md)、[254交付](../releases/2026-10-27-preview254-messages-closeout.md)。
 
-消息254收尾当时，“我”仅准备／只读审查，尚无UI／业务测试；该句仅记录当时范围。当前260进度以上方总表及我页QA为准，五入口整体仍未完成。
+消息254收尾当时，“我”仅准备／只读审查，尚无UI／业务测试；该句仅记录当时范围。当前260进度以上方总表及我页QA为准；此段的未完成结论只适用于254收尾当时。

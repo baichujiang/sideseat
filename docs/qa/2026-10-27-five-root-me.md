@@ -1,4 +1,23 @@
-# 「我」页面闭环检查：Preview260（NOT ACCEPTED／真机自动化初始化受阻）
+# 「我」页面闭环检查：Preview260（分范围验收通过）
+
+## 2026-10-28最终业务验收与交付
+
+**「我」及五个入口已按各自实际范围验收通过，默认手机正常交付完成。** 活跃源码、默认iPhone14Plus及自有Simulator为260，普通97保留。Me范围为255 Core17／Extended12、258 FullProfile23／Courses16／NoScrollB5／ArchiveB7、260普通L及MAX AX5各自完整Feedback12，以及本次默认真机Profile7；不是260同包一次连续全页或全设备套件。详见[五入口总表](./2026-10-26-five-root-flows.md)、[最终交付](../releases/2026-10-28-preview260-five-roots-closeout.md)及[最终分范围证据](./evidence/2026-10-28-me260/final-closeout-summary.json)。
+
+默认14Plus的260资料7实际通过Native154.740／controller182.242431秒，7次严格GET／7原nonce ACK、单次copy30且0重试，原资料7业务正文未改。对方资料保持；2张安全PNG／2unique全部实看，两个专属账号删除、两个旧bearer401，fixture、backup及凭据runtime均移除。独立评审`me-phone-profile260-isolated-host-r2-review/scoped-profile-report.json` SHA `625c88a57a795b19efc0f04ac185d1f57ab071a9578154791432b01a16e1de60`。
+
+完整重启后旧host仍在初始化边界失败，原失败证据保留。新的精确runner `app.sideseat.automationinit260.xctrunner`先只读初始化通过（0账号），随后新业务harness实际fresh三源编译8.766秒，再完成上述原7步；仅该harness的精确runner读屏障改变，没有扩大全局白名单、重置AppData／Keychain或全局daemon。不能把这条可用路径描述为已证实的缓存损坏根因，也不扩大为所有host自动化恢复。
+
+消息260侧滑8另于自有Simulator通过Native235.701／controller265.660648秒、8GETDB／8ACK；20PNG／15unique和20AX全部审查，六次真实系统侧滑及已读3／置顶2／反向取消通过。联系人接受与两条TEXT是API前置；本轮不证明Phone侧滑。它在Me仍未验收时按事前ordering supplement获准回归已验收第四页，原等待Me的计划metadata仍保留。独立评审SHA `f61621a03b92b89919f22b6a8cd366736dbd367b4903b2d1b3d704e2989ef5f0`，两账号／旧401／DB0／原目录及runtime均精确清理。
+
+本轮自有服务实际收尾：fresh身份及禁邮件heartbeat两次匹配、DB0／原目录核对后，仅TERM自有84474／84503组，3344关闭；准确15434容器stop并保留。仅用本轮新run快照恢复启动增量，原用户TS `d46e76c6…`及next-env `85ae5aee…`恢复，unknown触碰0。收据`me260-local-services-restart-preparation/runs/20261028T175707082792Z-93061bfd/closeout-20261028T182002187152Z/STOP-RECEIPT.json` SHA `f86959249a494e0b533d295563cf1756e0d287b1a14ada6046e541d3b31a40c9`；这些PID及mail proof现为历史，不再是存活声明。
+
+最终正常启动为默认14Plus Preview260 PID686，两次fresh完整执行路径／PID、安装Info260＋普通97、空参数及App环境仅`TERM:dumb`核对。首轮已有Preview684被预检拒绝的原false保留；只停止该精确核对的Preview后成功正常启动，无重新安装、普通身份读、手机执行字节读或reset。normal receipt SHA `94572345b647ee199dfdaca46ddb924735f882ccb57b36c835b3a93ce48813ca`。App与QA20文件提交`9c501d8a9609adbc8929a06730a743716374fa49`及268项／Local来源保持；最终补验没有新App构建或后端／网页／Schema发布，HTsL仅上次生产核验记录。
+
+## 历史检查点：真机初始化受阻时的原状态
+
+下方NOT ACCEPTED、待重启、待Me及restart仅plan均记录当时状态，已由上方实际闭环收尾；原失败、false收据和[旧未验收检查点](../releases/2026-10-28-preview260-me-checkpoint.md)保持，不倒改为成功。
+
 
 **NOT ACCEPTED。** 本文记录2026-10-27—28的进行中状态，不能作为「我」页面或五入口整体通过的证明。同行、计划、日历、消息保留此前各自的验收范围；当前继续完成「我」。已完成的业务、画面与清理分开记录，后续用例必须实际闭环后才能更新状态。
 
@@ -6,7 +25,7 @@
 
 用户USB重连／解锁已实际确认，新的默认手机260资料7尝试及独立空fixture诊断仍在XCTest启用automation mode时60秒超时，未进入资料业务；现在等待的是新的“完整重启默认14Plus后在机输入密码解锁、保持USB连接”回复。正常手机最终启动、Me及五入口整体仍未验收。消息nativeSwipe260八阶段严格待Me全部通过，未执行；3344／15434继续停用，restart仅静态通过的plan，没有新PID或禁邮件证明。代码／QA9c501与先前文档55d49已推，本轮没有新App代码或构建；本文为进行中追记，无后端、网页或Schema发布，HTsL只是上次生产核验记录。[260未验收检查点](../releases/2026-10-28-preview260-me-checkpoint.md)
 
-## 2026-10-28真机启动诊断（进行中，非业务验收）
+## 历史诊断：2026-10-28旧host初始化受阻（非业务验收）
 
 用户回复后，Root实际核对默认iPhone14Plus为paired wired／connected／unlocked、Info260且普通97保留；DeveloperMode enabled、DDI compatible／usable均正常。仅对两次fresh完整执行路径与PID匹配的自有Preview11928做终止后，独立新账号运行`me-phone-260-profile-serialized-final`。controller87.366708秒、UI65／observer1，Runner12120启动，但指定Native用例启动0、资料阶段0、nonce ACK0；仅完成专属账号前置与GET基线核对，不计资料7步。自有会话与Preview／Runner退出后，2账号删除、旧bearer401、fixture及凭据runtime清理通过，原controller／observer保持false。
 
@@ -64,7 +83,7 @@ R3 own Session依次记录testmanagerd.remote连接成功、session initiation e
 
 扩展中的教程首次1／5关闭、真实重登保留，再重放Next／Back、完成全部五步和最终重登通过；服务端仅owner教程字段产生两个严格递增的实际UI时间戳，peer在12轮资料核对中始终保持。会员空兑换码与无效认证邮箱均不可提交，没有兑换、验证码或证明材料发送。空意愿历史、课程入口及返回保持，未创建课程。10张原PNG／9种像素全部实际审看，无视频，无material发现；只有教程首末步骤有原图，中间Next／Back及持久化以Native＋GET为证。该轮业务12GET／12ACK及零GET重试通过，原controller因收尾两次apps元数据查询exit2保持false，独立清理详见下文。
 
-## 新完成的258范围与当前待验收项
+## 已完成的258独立范围
 
 | 258独立范围／自有Simulator＋本地API／DB | Native／controller秒 | GET／DB轮次／ACK | 原PNG／unique | 实际审查 |
 |---|---:|---:|---:|---|
@@ -129,9 +148,9 @@ S5没有点击SelectAll或操作选择范围，不声明通过SelectAll清空；
 
 照片短3（W／255）独立通过Native73.451／controller88.744536秒、3GET／DB及3ACK，使用系统导航Cancel的语义定位后返回，未读取图库或相册资源。留存PNG／视频均0，仅导航Cancel AX，不能写为照片画面或上传验收。两账号／旧401、本地业务0、原课程目录、fixture及runtime清理通过；此Native语义取消已在258完整Full22实际完成。首W虽然UI结束码为0，oracle把默认随机preset误当null而失败，原false及清理保留，不能洗成旧Full23通过。
 
-258真机资料旧尝试仍未完成：首preflight16.246367秒、0UI／0ACK因`/tmp`与`/private/tmp`路径别名QA guard拒绝，已修并清理；第二轮1.613442秒在0factory前拒绝已有Preview。精确重启后的92.448298秒一轮只有signed-in的1GET、无ACK，CoreDevice copy15秒超时且锁状态查询迟缓。rev3移除UI期间持续锁轮询、单次copy超时改30秒且不重试变更操作，但实际86.087051秒仍NativeStarted0，在启用automation mode超时，两个账号／旧401清理；不能声称copy30已成功。旧259准备与复用编译证据保持，不写为实际执行；当时260仅准备的记录不再表示现状，当前USB已重连解锁及新260启动失败见上方追记，不宣称自动化恢复。
+**历史检查点（后续260新host资料7已通过）：** 258真机资料旧尝试仍未完成：首preflight16.246367秒、0UI／0ACK因`/tmp`与`/private/tmp`路径别名QA guard拒绝，已修并清理；第二轮1.613442秒在0factory前拒绝已有Preview。精确重启后的92.448298秒一轮只有signed-in的1GET、无ACK，CoreDevice copy15秒超时且锁状态查询迟缓。rev3移除UI期间持续锁轮询、单次copy超时改30秒且不重试变更操作，但实际86.087051秒仍NativeStarted0，在启用automation mode超时，两个账号／旧401清理；不能声称copy30已成功。旧259准备与复用编译证据保持，不写为实际执行；当时260仅准备的记录不再表示现状，当前USB已重连解锁及新260启动失败见上方追记，不宣称自动化恢复。
 
-另有260消息原生侧滑八阶段准备，尚未执行：DIRECT行已读／置顶两项恢复系统按钮样式，此前254已通过的是long-press菜单路径，不是原生swipe。旧A258从未执行，不伪造A/B失败或抹掉254原验收；新八阶段严格只在Me全部通过后执行。不可达Hide／legacy MyPosts／SavedPosts不随此改动启用。
+**历史准备检查点（后续实际侧滑8见顶部）：** 另有260消息原生侧滑八阶段准备，尚未执行：DIRECT行已读／置顶两项恢复系统按钮样式，此前254已通过的是long-press菜单路径，不是原生swipe。旧A258从未执行，不伪造A/B失败或抹掉254原验收；新八阶段严格只在Me全部通过后执行。不可达Hide／legacy MyPosts／SavedPosts不随此改动启用。
 
 ## 保留的失败与恢复补证
 
@@ -150,7 +169,9 @@ S5没有点击SelectAll或操作选择范围，不声明通过SelectAll清空；
 - NoScroll A／255独立失败Native107.419秒、3ACK，5PNG／4unique实看，另5AX／4geometry。此路径major自然359—381pt通过；Next后的Wechat469—491pt仅与toolbar491—539pt贴边，gap0、文字完整，没有正面积遮挡证据。失败在保留4pt安全边距的视口上界487pt，不得与旧Full major的真实遮挡混为一谈；原false和清理保持。
 - 归档A／255明确对标题区域横拖仍无Delete像素或AX，Native60.857秒、1ACK，拖动前后两张原图均实看，只见Done及两个Restore按钮；该轮未执行restore，已清理。静态检查发现父列表与归档列表各自持有store、成功后缺父刷新回调，258新增onChange后父load；不能称旧255已通过UI复现父刷新缺陷。258归档B7及Full16后来实际补齐删除、取消、恢复后父自然刷新，原A失败保持。
 
-## 来源与待收尾事项
+## 历史来源与当时待收尾事项
+
+本节保留业务补验前的来源／待收尾检查点；其中“未验证”“仅准备”等只适用于当时，最新验收及正常手机交付以上方收尾为准。
 
 当前260较259仅版本与反馈显式Image／Text计数组件两项变化，其余266项／Local保持；ProfileEdit、CourseList、CourseDetail、CourseStores、ChatsRootView及三份locale资源八个继承源逐字节保持259，资料／课程业务源仍等于已验258。这只证明来源保持，不是260同包全套重跑。双build141.627／171.930秒，每端164个App Swift＋1generated／165条FileList与实际编译、逐源SHA、产品三binary／严格签名／默认14Plus profile、编译后三语课程键和计数读屏键均实核。manifest SHA `89a2b4da5152cee72e455a40d9360f7fda038bd2a616b5001b4efb17c2f6e184`，provenance SHA `5f605354b0b307bf790c6e028c0e25fa6b89bcb0b4f2b6e83edceba8a000381b`，source-proof SHA `e68f215afaf28fa8a126ae19fd31be8fe46054fb7d11556a65d99c5e8c40082f`。Root已实际采纳、双端安装与读回Info260，主receipt `me260-app-adoption-receipt.json` SHA `21ed244dd35ee55df7f7da2fcc48477a9afd6622a480763632efe4d47ee9d9a8`及alias字节一致；手机执行字节未读取，自动化可用性及正常手机最终启动未验证。普通97保持，无普通身份读或reset。
 
@@ -164,6 +185,6 @@ S5没有点击SelectAll或操作选择范围，不声明通过SelectAll清空；
 
 上述七次255业务各自的两个账号均已删除、旧401及fixture.json／凭据runtime已清理，账号4由owner实际UI删除与peer factory清理合计，真机基础资料与最终设置扩展使用独立恢复补证。258完整资料、课程及专项、259普通、260普通／MAX r1—r4与短probe均按各自精确归属清理，旧false和像素失败不改写。
 
-最终收尾已实际完成：先以canonical `/private/tmp` frozenCampus `verify-after-cleanup`得到精确成功文字，确认自有users／business0、原catalog SHA `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`保持、unknownDeleted0。确认无自有UI与锁冲突后，fresh parent97096／listener97106的UID、cwd、command、start、PGID及mail heartbeat两次匹配，仅TERM自有PGID97096，未KILL，3344已关闭；准确15434容器只stop并保留、未remove。随后仅在当前文件匹配启动SHA时恢复tsconfig至 `d46e76c6e35074916301d3de58624167dc63084e04f5c252f50e64ca356b630c`、next-env至 `85ae5aee75f011967cf2d25cbc342f62d69314e9d925f7f4aa3456fc2cffcca6`，当前哈希已独立读回、用户原tsconfig修改保持。其他服务、容器和设备未动。收据`me260-official-qa-build/local-services-closeout.json` SHA `0e286090aef46c6b382328af6bb5e24fc46b484fb82e93fc29b88a1fe1945192`；未来任何本地测试须显式新启动、新PID／监听与实际禁邮件证明，97096只是历史PID。
+**较早服务收尾（97096／97106，非最后一次新run）：** 先以canonical `/private/tmp` frozenCampus `verify-after-cleanup`得到精确成功文字，确认自有users／business0、原catalog SHA `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`保持、unknownDeleted0。确认无自有UI与锁冲突后，fresh parent97096／listener97106的UID、cwd、command、start、PGID及mail heartbeat两次匹配，仅TERM自有PGID97096，未KILL，3344已关闭；准确15434容器只stop并保留、未remove。随后仅在当前文件匹配启动SHA时恢复tsconfig至 `d46e76c6e35074916301d3de58624167dc63084e04f5c252f50e64ca356b630c`、next-env至 `85ae5aee75f011967cf2d25cbc342f62d69314e9d925f7f4aa3456fc2cffcca6`，当前哈希已独立读回、用户原tsconfig修改保持。其他服务、容器和设备未动。收据`me260-official-qa-build/local-services-closeout.json` SHA `0e286090aef46c6b382328af6bb5e24fc46b484fb82e93fc29b88a1fe1945192`；未来任何本地测试须显式新启动、新PID／监听与实际禁邮件证明，97096只是历史PID。
 
-Me业务补验仍为默认Phone260资料7；USB重连解锁已确认，但新资料尝试与独立空测都在业务前发生automation mode初始化超时。当前只等待新的完整重启、在机输入密码解锁及保持USB的回复；正常手机最终启动未做。Messages260原生侧滑八阶段仍仅准备，严格待Me实际验收后执行，五入口整体NOT ACCEPTED。3344／15434继续停用、restart仅plan，构建／失败／补证上下文保留，不把服务收尾、skip或超时写成真机业务通过。
+**历史待办检查点（已由顶部实际收尾取代）：** Me业务补验仍为默认Phone260资料7；USB重连解锁已确认，但新资料尝试与独立空测都在业务前发生automation mode初始化超时。当前只等待新的完整重启、在机输入密码解锁及保持USB的回复；正常手机最终启动未做。Messages260原生侧滑八阶段仍仅准备，严格待Me实际验收后执行，五入口整体NOT ACCEPTED。3344／15434继续停用、restart仅plan，构建／失败／补证上下文保留，不把服务收尾、skip或超时写成真机业务通过。
