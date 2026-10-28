@@ -1,10 +1,12 @@
 # 已部署功能与归档边界
 
-**当前状态：Preview260，「我」NOT ACCEPTED／默认真机待重连。** 活跃源码、默认iPhone14Plus及自有Simulator均为260，普通97保持；产品与QA20文件已提交推送`9c501d8a9609adbc8929a06730a743716374fa49`，268项Git／活跃／冻结／构建输入及Local逐项匹配（[来源绑定](./qa/evidence/2026-10-28-me260/native-source-commit-binding.json)）。260较259仅版本与反馈Image＋Text计数组件变化；双build141.627／171.930秒、每端164 App Swift＋1generated／165 FileList、签名及来源已核。双端安装主receipt SHA `21ed244dd35ee55df7f7da2fcc48477a9afd6622a480763632efe4d47ee9d9a8`与alias一致，历史证据未倒改，新增提交绑定补证；无普通身份读或reset。
+**当前状态：Preview260，「我」NOT ACCEPTED／真机自动化初始化受阻。** 活跃源码、默认iPhone14Plus及自有Simulator均为260，普通97保持；产品与QA20文件已提交推送`9c501d8a9609adbc8929a06730a743716374fa49`，先前检查点文档55d49已推，本轮没有新App代码或构建。268项Git／活跃／冻结／构建输入及Local逐项匹配（[来源绑定](./qa/evidence/2026-10-28-me260/native-source-commit-binding.json)）。260较259仅版本与反馈Image＋Text计数组件变化；原双build141.627／171.930秒、签名及双端安装证据范围不变，主receipt SHA `21ed244dd35ee55df7f7da2fcc48477a9afd6622a480763632efe4d47ee9d9a8`与alias一致，历史证据未倒改；无普通身份读或reset。
 
-255 Core／Extended、258 FullProfile23／FullCourses16及专项保留各自通过范围，业务源在260保持，不称260同包全套。260反馈普通L r1与MAX AX5 r4分别完整通过：普通12／12ACK及10PNG／8unique全审；MAX397.450／414.689045秒、12GETDB／12ACK、35PNG／27unique、25AX／28geometry全审，四次空白单点390,395、单次发送、真实草稿清空及双方评论重登通过，账号／旧401／DB0／runtime清理完整。259数字消失、MAX r1／r2／r3的3／8／8ACK失败及短probe旧regex false与补证保持。官方九QA文件同步后五源build-only9.489秒／实际FileList＋Compile／两签名通过，不新增UI验收。当前Me业务仅默认手机260资料7待用户USB重连／解锁，未收到回复；不宣称自动化恢复。
+255 Core／Extended、258 FullProfile23／FullCourses16及专项保留各自通过范围，业务源在260保持，不称260同包全套。260反馈普通L r1与MAX AX5 r4分别完整通过：普通12／12ACK及10PNG／8unique全审；MAX397.450／414.689045秒、12GETDB／12ACK、35PNG／27unique、25AX／28geometry全审，四次空白单点390,395、单次发送、真实草稿清空及双方评论重登通过，账号／旧401／DB0／runtime清理完整。259数字消失、MAX r1／r2／r3的3／8／8ACK失败及短probe补证保持。官方QA五源9.489秒仅编译范围不变。
 
-前四页原验收保持，消息nativeSwipe260八阶段仅准备、严格待Me全过再执行，旧A未跑不作AB；五入口未完成。最终DB0／原catalog hash核对后，仅TERM两次fresh匹配的自有Next97096／97106，3344已关闭；准确15434容器停止并保留，tsconfig／next-env只恢复已知启动增量，用户原修改保持。后续本地测试必须新启动、新PID及实际禁邮件证明，不复用旧存活声明。正常手机最终启动仍待真机复测后完成，无本阶段后端／网页／Schema发布，HTsL仅上次核验记录。[我页QA](./qa/2026-10-27-five-root-me.md)、[260未验收检查点](./releases/2026-10-28-preview260-me-checkpoint.md)。
+用户USB重连／解锁已确认；新的Phone260资料7尝试87.366708秒、UI65、Native／ACK0，Runner先获daemon授权成功，再在启用automation mode时60秒超时，2账号／旧401／runtime清理通过。独立空gate0-r3同样超时，0Native／skip0、0账号／API／DB且清理通过；R1预检拒绝和R2 CLI64各自保留。DeveloperMode、DDI usable、paired wired及解锁元数据正常，没有系统密码prompt确证，也没有App业务缺陷证据。当前待用户完成新请求：完整重启默认14Plus，在机输入密码解锁并保持USB；不盲重试或kill全局daemon。
+
+前四页原验收保持，消息nativeSwipe260八阶段仅准备、严格待Me全过再执行，旧A未跑不作AB；五入口未完成。最终DB0／原catalog hash核对后的自有服务收尾仍有效：3344／15434停用、容器保留、用户TS原修改保持。restart preparation独立静态NoMaterial，仅plan，未启动或取得新PID／禁邮件证明；后续本地测试必须显式新启动，不复用97096／97106存活声明。正常手机最终启动仍未完成，无本阶段后端／网页／Schema发布，HTsL仅上次核验记录。[我页QA](./qa/2026-10-27-five-root-me.md)、[260未验收检查点](./releases/2026-10-28-preview260-me-checkpoint.md)。
 
 以下254及更早段落保留当时范围，当前状态以上方260为准。
 

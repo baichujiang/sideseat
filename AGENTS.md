@@ -31,9 +31,19 @@
   9c501d8a9609adbc8929a06730a743716374fa49;268 Git blobs/active/frozen/built inputs
   and Local match. Historical candidate/adoption/provenance bytes stay unchanged;
   the [commit binding](docs/qa/evidence/2026-10-28-me260/native-source-commit-binding.json)
-  is a separate supplement. These checkpoint docs preserve the incomplete acceptance state.
-  Me is NOT ACCEPTED: defaultPhone260 Profile7 is prepared but unrun, awaiting
-  the user's USB reconnect/unlock reply. Other Me business groups retain their
+  is a separate supplement. Previous checkpoint docs55d49 are pushed;this is an
+  in-progress status update only,no new App code/build or completed acceptance.
+  Me is NOT ACCEPTED. User USB reconnect/unlock was actually confirmed. The new
+  defaultPhone260 Profile7 attempt failed87.366708s/UI65 before Native/ACK0;
+  Runner12120 got daemon authorization Success,then automation-mode60s timeout.
+  Own2/old401/runtime cleanup passed. Independent empty gate0-r3 reproduced the
+  same initialization timeout,Native started/skipped0,actors/API/DB0,cleanup passed;
+  earlier gate0-r1 preflight refusal andr2 CLI64 stay separate failures.
+  No passcode prompt is established. DeveloperMode/DDI/paired-wired/unlocked
+  metadata were normal;do not infer an App defect or completed Profile flow.
+  Root now awaits the new request:fully reboot the default14Plus,enter its
+  passcode on-device and keep USB connected. Do not blindly retry UI or kill
+  global daemons while waiting. Other Me business groups retain their
   separately accepted scopes:255 Core17/Extended12,258 FullProfile23/Courses16,
   NoScrollB5/ArchiveB7 and260 Feedback12; not260 same-build full verification.
   Feedback260 standard L/EN/light passed192.539/213.514477s,12GETDB12ACK,
@@ -60,7 +70,10 @@
   Final owned DB0/original catalog hash passed; only known startup deltas were
   restored to original tsconfig/next-env hashes,user TS changes preserved.
   Future local tests require new startup/PID/actual mail-disabled proof;97096 is
-  historical,not a live service. Final normalPhone launch remains pending until physical verification resumes. No ordinary identity read or reset.
+  historical,not a live service. The restart preparation had independent static
+  NoMaterial review only;3344/15434 stay stopped,no new PID/mail proof exists.
+  Final normalPhone launch remains pending until physical verification resumes.
+  No ordinary identity read or reset.
   No backend/web/Schema release; HTsL is only the last recorded production check.
   See docs/qa/2026-10-27-five-root-me.md and the NOT ACCEPTED stage draft whose
   filename is2026-10-28-preview260-me-checkpoint.md (NOT ACCEPTED/Phone pending).

@@ -1,6 +1,10 @@
-# Preview260「我」检查点（NOT ACCEPTED／真机待重连）
+# Preview260「我」检查点（NOT ACCEPTED／真机自动化初始化受阻）
 
-**NOT ACCEPTED／默认真机待重连。** 当前活跃源码、默认iPhone14Plus与自有Simulator均为260，普通97保留。反馈普通r1与MAX full-r4完整12已分别通过；此前255／258各独立业务范围保持，Me业务补验只剩默认Phone260资料7，仍等待用户USB重连／解锁回复，未执行。产品与QA20文件`9c501d8a9609adbc8929a06730a743716374fa49`已实际推送；安装、编译或这些分项通过不等于整页／五入口验收。前四页保留原范围。[完整QA、失败与补证](../qa/2026-10-27-five-root-me.md)
+**NOT ACCEPTED／真机自动化初始化受阻，进行中。** USB重连／解锁已由用户完成并实际核对，但新的Phone260资料7尝试与独立空fixture测试仍在启用automation mode时60秒超时，未进入业务。当前等待新的动作：完整重启默认iPhone14Plus后在机输入密码解锁、保持USB。活跃源码及双端安装仍为260，普通97保持；代码／QA`9c501d8a9609adbc8929a06730a743716374fa49`与先前文档55d49已推，本轮没有新App代码或构建。反馈普通r1／MAX r4及255／258独立通过范围不变，不等于Me／五入口验收。[完整QA、失败与补证](../qa/2026-10-27-five-root-me.md)
+
+新增真机资料尝试`me-phone-260-profile-serialized-final`：controller87.366708秒、UI65／observer1、Native0／ACK0；Runner12120先获daemon授权Success，随后启用mode的60秒future超时。只完成专属账号前置与GET基线核对，未通过资料保存／取消／语言业务；2账号删除／旧401／fixture与runtime清理通过，原false保持。独立诊断SHA `61f9320b6b2e336c9c680c17a4e85f8fe10f9607caba3ea7fae1c40c83519ad6`。
+
+empty gate0始终0账号／API／DB：R1仅因已有Preview被preflight拒绝，0UI；R2因多余`-test-iterations 1`被CLI64拒绝，未启动Runner，producer修参数但保留旧false／snapshot；R3真实启动Runner12134仍同60秒automation mode超时，Native／skip／通过均0，未到预期setUp skip，清理通过。连接、session、daemon授权及执行RPC已到达，尚无系统密码prompt确证；DeveloperMode／DDI usable／paired wired／解锁元数据正常，不据通用错误归为App缺陷。独立R3诊断SHA `5a3d6f672e26583476331fe05a10605283ea795886417e5e0911bfd4cfafd0b4`；不把skip或超时算作业务通过。等待完整重启后的新回复期间不盲重试、不kill全局daemon。
 
 255修复反馈撤销投票请求：可选值nil原先省略API必需的`value`键，现在显式发送`value:null`，UP／DOWN保持原值。只修改该DTO，不改变全局编码或既有业务规则。活跃DTO／API schema纯契约复现与2个测试函数、3个参数情况的hostless Swift Testing通过，旧实现失败；范围不是完整App单元套件。
 
@@ -24,7 +28,7 @@ MAX260-r1保持失败163.716／199.114192秒、3GETDB3ACK：列表作者与0／0
 
 最终MAX AX5／EN／浅色full-r4由空板以实际App创建并完整通过397.450／414.689045秒、12GETDB／12nonce ACK、0重试。全部35张安全PNG／27unique逐张实看、25AX／28geometry核对；4次右侧真空白单点390,395进入原post及正文，数字／图标分离，3次裁剪gutter后完整Submit才点击，实际单次Send、真实field存在且异步清空、评论及双方重登读回同一ID／作者／正文。两次撤票DB0、最后四阶段评论严格1、资料及无关业务保持、监听进程禁邮件／存储邮件字段null；2账号删除／旧401／DB0／fixture与runtime清理完整。评审receipt SHA `92f10a969bc2f145bec784df86efb3149112a25341cd4a3596cf2a9ed68f708a`。普通r1与MAX r4是独立成功轮次；r4 fresh两源QA编译9.109秒，不是旧8.232秒产品复用，QA改动未改变App260，不扩展成Phone或Me全页通过。
 
-258真机各次尝试保持失败：16.246367秒路径别名误拒、1.613442秒拒已有Preview、92.448298秒signed-in仅1GET／无ACK后copy15超时；rev3改为单copy30及移除锁轮询，86.087051秒仍NativeStarted0、启用自动化超时，不能声称copy30已成功。259／260尚无新增手机UI验收；260资料7仅准备，等待用户USB重连／解锁，不切其他设备或重启全局服务，不宣称自动化恢复。DIRECT原生swipe260八阶段仅准备，严格待Me全部通过后执行，旧254验过的是长按菜单；旧A258未执行，不能伪造A/B失败或改写旧验收。
+258真机各次尝试保持失败：16.246367秒路径别名误拒、1.613442秒拒已有Preview、92.448298秒signed-in仅1GET／无ACK后copy15超时；rev3改为单copy30及移除锁轮询，86.087051秒仍NativeStarted0、启用自动化超时，不能声称copy30已成功。旧259准备与当时260仅准备的记录保留；当前USB已恢复与新的260启动失败以上方追记为准，仍无新增手机业务验收，不切其他设备或重启全局服务。DIRECT原生swipe260八阶段仅准备，严格待Me全部通过后执行，旧254验过的是长按菜单；旧A258未执行，不伪造A/B失败或改写旧验收。
 
 真机基础资料7 Native157.618／controller188.758870秒、7GET／7ACK、2张原图实看通过；收尾CoreDevice读取失败，原controller保持false。Root独立重核设备和执行路径，精确停止匹配两次的自有Preview进程，再按本轮归属清理两个账号、旧401、fixture和唯一runtime，unknown0；原SHA及false未改。设置两次QA定位失败、Simulator前置执行开关错误及解除拉黑前置201预期错误均保留原失败与清理证据。
 
@@ -32,4 +36,4 @@ MAX260-r1保持失败163.716／199.114192秒、3GETDB3ACK：列表作者与0／0
 
 实际MAX评审后才同步官方Campus6＋Safety3共九QA文件，保留原业务／设备guard／12阶段与DB、邮件、nonce、清理规则；新增独立settings scripts、外部依赖路径及expectedBuild严格匹配，静态审查无material发现。官方五源fresh build-only9.489秒、实际5条FileList／5个SwiftCompile及两严格签名通过，6个改动／新增Node脚本语法通过，不新增UI验收。产品8＋QA12共20文件`9c501d8a9609adbc8929a06730a743716374fa49`已实际推送，远端分支已包含该提交；268项Git blob／活跃／冻结／构建输入和Local逐项匹配，[提交绑定补证](../qa/evidence/2026-10-28-me260/native-source-commit-binding.json)另立，历史candidate／provenance／adoption原字节不改。
 
-普通97保持，无普通身份读或reset；手机安装执行字节未读、自动化可用性与正常手机最终启动未验证。当前Me仅默认Phone260资料7待用户USB回复；消息260侧滑八阶段仍待Me全过后才执行，五入口整体NOT ACCEPTED。最终owned DB0／原catalog hash通过后，仅TERM两次fresh核对的自有Next97096／97106，3344关闭；精确15434容器停止并保留，TS／next-env只恢复已知启动增量，用户原修改保持，其他服务及设备未动。收尾receipt SHA `0e286090aef46c6b382328af6bb5e24fc46b484fb82e93fc29b88a1fe1945192`；未来本地测试必须显式新启动／PID／实际禁邮件证明，不能称97096仍存活。正常手机最终启动仍待真机复测后完成。历史false与独立补证全部保留，无本阶段后端／网页／Schema发布，HTsL仅上次生产核验记录。
+普通97保持，无普通身份读或reset；手机安装执行字节未读，正常手机最终启动未完成。当前Me仍缺默认Phone260资料7，待新的完整重启／在机输入密码解锁回复；消息260侧滑八阶段仍严格待Me全过，未执行，五入口整体NOT ACCEPTED。此前自有服务／DB0／原catalog／TS收尾证据不变，3344／15434继续停用、容器保留、用户TS原修改保持；restart preparation独立静态NoMaterial但仍仅plan，未取得新PID或mail proof。收尾receipt SHA `0e286090aef46c6b382328af6bb5e24fc46b484fb82e93fc29b88a1fe1945192`，未来本地测试须明确新启动／PID／实际禁邮件证明，不能称97096仍存活。历史false与独立补证全部保留，无本阶段后端／网页／Schema发布，HTsL仅上次生产核验记录。

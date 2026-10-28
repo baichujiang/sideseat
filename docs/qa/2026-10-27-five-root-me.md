@@ -1,10 +1,30 @@
-# 「我」页面闭环检查：Preview260（NOT ACCEPTED／真机待重连）
+# 「我」页面闭环检查：Preview260（NOT ACCEPTED／真机自动化初始化受阻）
 
 **NOT ACCEPTED。** 本文记录2026-10-27—28的进行中状态，不能作为「我」页面或五入口整体通过的证明。同行、计划、日历、消息保留此前各自的验收范围；当前继续完成「我」。已完成的业务、画面与清理分开记录，后续用例必须实际闭环后才能更新状态。
 
 活跃源码、默认iPhone14Plus及自有Simulator均为260，普通97保留；产品与QA20文件已提交并推送`9c501d8a9609adbc8929a06730a743716374fa49`，268项Git／活跃／冻结／构建输入及Local匹配，历史候选／安装／provenance证据不倒改。260反馈普通r1及最大AX5 full-r4的完整12阶段已分别通过并实际审图、精确清理；255 Core／Extended与258 FullProfile23／Courses16／专项保留各自范围，不写成260同包全套。
 
-当前Me业务仅默认手机260资料7待用户USB重连／解锁回复，未执行，也未证明自动化恢复；正常手机最终启动尚未完成。官方QA同步后五源fresh build-only9.489秒通过，没有新增UI执行。消息nativeSwipe260八阶段仍严格待Me全部通过后执行；自有服务／DB与精确TS启动增量已收尾，本文档保存为独立检查点。Me及五入口整体NOT ACCEPTED，无本阶段后端、网页或Schema发布，HTsL只是上次生产核验记录。[260未验收检查点](../releases/2026-10-28-preview260-me-checkpoint.md)
+用户USB重连／解锁已实际确认，新的默认手机260资料7尝试及独立空fixture诊断仍在XCTest启用automation mode时60秒超时，未进入资料业务；现在等待的是新的“完整重启默认14Plus后在机输入密码解锁、保持USB连接”回复。正常手机最终启动、Me及五入口整体仍未验收。消息nativeSwipe260八阶段严格待Me全部通过，未执行；3344／15434继续停用，restart仅静态通过的plan，没有新PID或禁邮件证明。代码／QA9c501与先前文档55d49已推，本轮没有新App代码或构建；本文为进行中追记，无后端、网页或Schema发布，HTsL只是上次生产核验记录。[260未验收检查点](../releases/2026-10-28-preview260-me-checkpoint.md)
+
+## 2026-10-28真机启动诊断（进行中，非业务验收）
+
+用户回复后，Root实际核对默认iPhone14Plus为paired wired／connected／unlocked、Info260且普通97保留；DeveloperMode enabled、DDI compatible／usable均正常。仅对两次fresh完整执行路径与PID匹配的自有Preview11928做终止后，独立新账号运行`me-phone-260-profile-serialized-final`。controller87.366708秒、UI65／observer1，Runner12120启动，但指定Native用例启动0、资料阶段0、nonce ACK0；仅完成专属账号前置与GET基线核对，不计资料7步。自有会话与Preview／Runner退出后，2账号删除、旧bearer401、fixture及凭据runtime清理通过，原controller／observer保持false。
+
+该轮own Session诊断明确daemon授权返回Success，随后创建启用automation mode的60.00秒future，最终`com.apple.dt.XCTest.XCTFuture` Code1000超时。没有passcode、用户授权prompt或截图的确证；daemon对测试进程授权成功不代表automation mode已启用，日志未出现提示也不能证明手机从未显示提示。本轮未读取认证Type、普通身份或全手机日志；仅读own Session，其他四份诊断内容未读。独立窄诊断receipt SHA `61f9320b6b2e336c9c680c17a4e85f8fe10f9607caba3ea7fae1c40c83519ad6`，不能归为App业务缺陷或Me通过。
+
+为隔离账号和App业务，另做empty fixture／execute0的初始化gate0，始终0账号／API／DB：
+
+| 轮次 | 实际结果 | 保留范围 |
+|---|---|---|
+| R1 | 已有Preview在preflight被拒，0UI | 未启动Runner，不证明automation mode恢复 |
+| R2 | 多余`-test-iterations 1`被xcodebuild CLI64拒绝，未启动设备Runner | producer只修私有driver参数，旧false与snapshot保持 |
+| R3 | 删除多余参数后真实Runner12134启动，UI65；Native启动／skip／通过均0，automation mode仍60秒超时 | 未到预期setUp skip，清理通过；不计Profile或Me业务 |
+
+R3 own Session依次记录testmanagerd.remote连接成功、session initiation error:null、Runner session成功、daemon authorization Success、`_IDE_startExecutingTestPlanWithProtocolVersion:36`及XCTAutomationSupport链接成功，然后启用mode的60秒future超时；没有passcode／permission／prompt／consent文字。只审own Session，未读其他四份诊断或全手机日志。实际runtime为唯一资料方法、`SIDESEAT_ME_EXECUTE=0`且fixture空，0业务阶段／ACK；自有Xcode session退出、无残留新Runner，无其他App／全局服务终止或AppData／Keychain reset。独立receipt SHA `5a3d6f672e26583476331fe05a10605283ea795886417e5e0911bfd4cfafd0b4`，原false不改。xcresult的一条Runner基础设施失败不能计作指定Native用例已运行，也不能把预期skip或超时当业务通过。
+
+现有证据定位在XCTest自动化初始化边界，尚未证明具体系统根因或App缺陷。Root已请求用户**完整重启默认iPhone14Plus，在手机输入密码解锁并保持USB连接**，等待此新回复；此前USB重连／解锁已经完成，不能再将旧请求写为未回复。等待期间不盲重试UI、不kill全局daemon、不切换手机。后续先验证初始化边界，只有资料7步实际闭环并独立审查后才可验收Me，再执行Messages8。
+
+本地restart preparation独立静态审查NoMaterial：固定准确容器／127.0.0.1:3344与15434、新run快照、fresh parent／listener与实际四邮件键heartbeat两次通过后才发布兼容指针。它仍仅plan，未执行服务、API／DB或设备操作，3344／15434继续停用；不声明新PID或mail proof，旧97096／97106仍是历史。实际重启须待Me验收，后续本地Message测试仍须新启动、新PID及实际禁邮件证明。App260／268输入／Local、普通97及用户原TS哈希d46e保持，本轮不新增App代码或产品构建。
 
 ## 已修复的问题
 
@@ -109,7 +129,7 @@ S5没有点击SelectAll或操作选择范围，不声明通过SelectAll清空；
 
 照片短3（W／255）独立通过Native73.451／controller88.744536秒、3GET／DB及3ACK，使用系统导航Cancel的语义定位后返回，未读取图库或相册资源。留存PNG／视频均0，仅导航Cancel AX，不能写为照片画面或上传验收。两账号／旧401、本地业务0、原课程目录、fixture及runtime清理通过；此Native语义取消已在258完整Full22实际完成。首W虽然UI结束码为0，oracle把默认随机preset误当null而失败，原false及清理保留，不能洗成旧Full23通过。
 
-258真机资料新增尝试仍未完成：首preflight16.246367秒、0UI／0ACK因`/tmp`与`/private/tmp`路径别名QA guard拒绝，已修并清理；第二轮1.613442秒在0factory前拒绝已有Preview。精确重启后的92.448298秒一轮只有signed-in的1GET、无ACK，CoreDevice copy15秒超时且锁状态查询迟缓。rev3移除UI期间持续锁轮询、单次copy超时改30秒且不重试变更操作，但实际86.087051秒仍NativeStarted0，在启用automation mode超时，两个账号／旧401清理；不能声称copy30已成功。259／260手机尚无新增UI验收；260资料7仅准备，待用户USB重连／解锁后执行，不声称自动化已恢复，不切换其他手机或重启全局服务。旧259准备与复用编译证据保留，不写为实际执行。
+258真机资料旧尝试仍未完成：首preflight16.246367秒、0UI／0ACK因`/tmp`与`/private/tmp`路径别名QA guard拒绝，已修并清理；第二轮1.613442秒在0factory前拒绝已有Preview。精确重启后的92.448298秒一轮只有signed-in的1GET、无ACK，CoreDevice copy15秒超时且锁状态查询迟缓。rev3移除UI期间持续锁轮询、单次copy超时改30秒且不重试变更操作，但实际86.087051秒仍NativeStarted0，在启用automation mode超时，两个账号／旧401清理；不能声称copy30已成功。旧259准备与复用编译证据保持，不写为实际执行；当时260仅准备的记录不再表示现状，当前USB已重连解锁及新260启动失败见上方追记，不宣称自动化恢复。
 
 另有260消息原生侧滑八阶段准备，尚未执行：DIRECT行已读／置顶两项恢复系统按钮样式，此前254已通过的是long-press菜单路径，不是原生swipe。旧A258从未执行，不伪造A/B失败或抹掉254原验收；新八阶段严格只在Me全部通过后执行。不可达Hide／legacy MyPosts／SavedPosts不随此改动启用。
 
@@ -146,4 +166,4 @@ S5没有点击SelectAll或操作选择范围，不声明通过SelectAll清空；
 
 最终收尾已实际完成：先以canonical `/private/tmp` frozenCampus `verify-after-cleanup`得到精确成功文字，确认自有users／business0、原catalog SHA `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`保持、unknownDeleted0。确认无自有UI与锁冲突后，fresh parent97096／listener97106的UID、cwd、command、start、PGID及mail heartbeat两次匹配，仅TERM自有PGID97096，未KILL，3344已关闭；准确15434容器只stop并保留、未remove。随后仅在当前文件匹配启动SHA时恢复tsconfig至 `d46e76c6e35074916301d3de58624167dc63084e04f5c252f50e64ca356b630c`、next-env至 `85ae5aee75f011967cf2d25cbc342f62d69314e9d925f7f4aa3456fc2cffcca6`，当前哈希已独立读回、用户原tsconfig修改保持。其他服务、容器和设备未动。收据`me260-official-qa-build/local-services-closeout.json` SHA `0e286090aef46c6b382328af6bb5e24fc46b484fb82e93fc29b88a1fe1945192`；未来任何本地测试须显式新启动、新PID／监听与实际禁邮件证明，97096只是历史PID。
 
-Me业务补验仅默认Phone260资料7待用户USB重连／解锁回复；正常手机最终启动仍待真机复测后完成。消息260原生侧滑八阶段仍仅准备，严格待Me全部通过后执行，五入口整体NOT ACCEPTED。构建／失败／补证上下文保留，不把服务收尾写成真机或业务通过。
+Me业务补验仍为默认Phone260资料7；USB重连解锁已确认，但新资料尝试与独立空测都在业务前发生automation mode初始化超时。当前只等待新的完整重启、在机输入密码解锁及保持USB的回复；正常手机最终启动未做。Messages260原生侧滑八阶段仍仅准备，严格待Me实际验收后执行，五入口整体NOT ACCEPTED。3344／15434继续停用、restart仅plan，构建／失败／补证上下文保留，不把服务收尾、skip或超时写成真机业务通过。
