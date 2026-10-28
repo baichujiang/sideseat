@@ -153,6 +153,10 @@ export async function POST(request: Request) {
             orderBy: { sortOrder: "asc" },
             select: { id: true, url: true, sortOrder: true },
           },
+          userLanguages: {
+            orderBy: { tag: "asc" },
+            select: { tag: true, proficiency: true },
+          },
         },
       });
       const blockedCount = await tx.block.count({ where: { blockerId: auth.user.id } });

@@ -4,8 +4,15 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+import { currentUserV1 } from "../../lib/api/v1/user-dto";
+import { deriveNativeMVPReadiness } from "../../lib/api/v1/mvp-readiness";
+import { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions } from "../../lib/constants/schools";
+import { DEGREE_LEVEL_LABELS } from "../../lib/constants/majors";
+import { savedProfileAppearance } from "../../lib/profile/appearance";
+import { usernameChangePolicyDto } from "../../lib/profile/username-change-policy";
 
-// Execute the real route, image validator/upload and lifecycle reference checks.
+// Execute the real route, image validator/upload, lifecycle reference checks
+// and the shared GET/POST profile DTO/readiness projections.
 // The VM only exposes explicitly substituted I/O: no real Prisma, fetch or Blob.
 const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jXioAAAAASUVORK5CYII=", "base64");
 const oldURL = "https://qa-unit.public.blob.vercel-storage.com/avatars/custom/owner_test/old.png";
@@ -14,6 +21,11 @@ const digest = (value: string) => crypto.createHash("sha256").update(value).dige
 type Mode = "rollback" | "commit-uncertain" | "delete-fails" | "queue-fails" | "success" | "replay" | "provider-ambiguous" | "profile-read-fails";
 type Job = { id: string; url: string; store: string; attempts: number; availableAt: Date; lastError: string | null };
 type Snapshot = { avatar: string; jobs: Job[] };
+type RelationSelection = { orderBy?: Record<string, "asc" | "desc">; select?: Record<string, boolean> };
+type ProfileService = {
+  currentProfileDto: (profile: Record<string, unknown>, options: { blockedCount: number; locale: "en" }) => unknown;
+  loadNativeCurrentProfile: (options: { user: { id: string }; locale: "en" }) => Promise<unknown>;
+};
 
 function scenario(mode: Mode) {
   const state = {
@@ -24,9 +36,20 @@ function scenario(mode: Mode) {
     cleanupError: Object.assign(new Error("injected cleanup unavailable"), { name: "CleanupUnavailable" }),
   };
 
-  function load<T>(path: string, imports: Record<string, unknown>): T {
+  function load<T>(path: string, imports: Record<string, unknown>, functions?: string[]): T {
     const url = new URL(`../../${path}`, import.meta.url);
-    const compiled = ts.transpileModule(readFileSync(url, "utf8"), {
+    let source = readFileSync(url, "utf8");
+    if (functions) {
+      // Execute these unchanged production functions and their actual pure
+      // dependencies without initializing unrelated profile mutation services.
+      const parsed = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
+      source = parsed.statements.filter(statement =>
+        (ts.isFunctionDeclaration(statement) && statement.name && functions.includes(statement.name.text))
+        || (ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier)
+          && Object.hasOwn(imports, statement.moduleSpecifier.text)))
+        .map(statement => statement.getText(parsed)).join("\n");
+    }
+    const compiled = ts.transpileModule(source, {
       fileName: path,
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true },
     }).outputText;
@@ -43,18 +66,52 @@ function scenario(mode: Mode) {
     return loaded.exports as T;
   }
 
+  const savedLanguages = [
+    { tag: "GERMAN", proficiency: "CONVERSATIONAL" },
+    { tag: "ENGLISH", proficiency: "FLUENT" },
+  ];
+  const profileBase = {
+    id: "owner_test", username: "owned_unit", nickname: "Owned profile", gender: "OTHER",
+    email: null, phone: null, bio: "Keep my existing profile",
+    school: "TUM", studentStatus: "CURRENT_STUDENT", degreeLevel: "BACHELOR",
+    major: "Computer Science", semester: 3, graduationYear: null,
+    isGuest: false, onboardingComplete: true, verifiedStudent: true, studentVerificationStatus: "VERIFIED",
+    usernameUpdatedAt: null, productTutorialDismissedAt: null,
+    usernameChangeWindowStartedAt: null, usernameChangeCount: 0,
+    profileAppearance: { theme: "classic", icon: "none", style: "classic", showMembershipBadge: true },
+    wechatHandle: null, whatsappHandle: null, telegramHandle: null, instagramHandle: null,
+    discoverByCourse: true, discoverByMajor: true, discoverBySemester: true,
+    allowInvitationNotes: true, contactInfoOptIn: false, hideFromCourseMembers: false, hideFromDiscovery: false,
+  };
+  function relationRows(rows: Record<string, unknown>[], selection: RelationSelection) {
+    const result = [...rows];
+    for (const [field, direction] of Object.entries(selection.orderBy ?? {}).reverse()) {
+      result.sort((a, b) => String(a[field]).localeCompare(String(b[field])) * (direction === "asc" ? 1 : -1));
+    }
+    return selection.select ? result.map(row => Object.fromEntries(Object.entries(row)
+      .filter(([field]) => selection.select![field]))) : result;
+  }
+  function profileRow(avatarUrl: string, include: Record<string, RelationSelection> = {}) {
+    const result: Record<string, unknown> = { ...profileBase, avatarUrl };
+    // Prisma only returns a relation when requested; otherwise the real DTO
+    // cannot project it. This is shared by the real GET loader and POST route.
+    if (include.lifePhotos) result.lifePhotos = relationRows([], include.lifePhotos);
+    if (include.userLanguages) result.userLanguages = relationRows(savedLanguages, include.userLanguages);
+    return result;
+  }
   function database(transaction = false, snapshot: Snapshot = state) {
     return {
       apiIdempotencyRecord: { deleteMany: async () => ({ count: 0 }) },
       user: {
-        findUnique: async () => {
+        findUnique: async ({ select, include }: { select?: Record<string, boolean>; include?: Record<string, RelationSelection> }) => {
           if (mode === "profile-read-fails") throw state.originalError;
-          return { avatarUrl: snapshot.avatar };
+          const profile = profileRow(snapshot.avatar, include);
+          return select ? Object.fromEntries(Object.entries(profile).filter(([field]) => select[field])) : profile;
         },
-        update: async ({ data }: { data: { avatarUrl: string } }) => {
+        update: async ({ data, include }: { data: { avatarUrl: string }; include?: Record<string, RelationSelection> }) => {
           assert.ok(transaction);
           snapshot.avatar = data.avatarUrl;
-          return { id: "owner_test", avatarUrl: snapshot.avatar, lifePhotos: [] };
+          return profileRow(snapshot.avatar, include);
         },
         findMany: async ({ where }: { where: { avatarUrl?: { in: string[] } } }) =>
           where.avatarUrl?.in.includes(state.avatar) ? [{ avatarUrl: state.avatar }] : [],
@@ -151,6 +208,15 @@ function scenario(mode: Mode) {
     "@/lib/media/upload-allowance": { consumeMediaUploadAllowance: async () => {} },
   });
   const avatars = load("lib/constants/avatars.ts", {});
+  const profileService = load<ProfileService>("lib/api/v1/profile-service.ts", {
+    "@/lib/api/v1/user-dto": { currentUserV1 },
+    "@/lib/api/v1/mvp-readiness": { deriveNativeMVPReadiness },
+    "@/lib/constants/schools": { DEFAULT_SCHOOL, normalizeSchoolCode, schoolOptions },
+    "@/lib/constants/majors": { DEGREE_LEVEL_LABELS },
+    "@/lib/profile/appearance": { savedProfileAppearance },
+    "@/lib/profile/username-change-policy": { usernameChangePolicyDto },
+    "@/lib/db/prisma": { prisma: db },
+  }, ["schoolSummary", "currentProfileDto", "loadNativeCurrentProfile"]);
   const replayBody = { avatar: { url: oldURL }, profile: { id: "owner_test", avatarUrl: oldURL } };
   const route = load<{ POST: (request: Request) => Promise<Response> }>("app/api/v1/me/avatar/route.ts", {
     "@/lib/media/upload-allowance": { MediaUploadRateLimitError },
@@ -174,13 +240,15 @@ function scenario(mode: Mode) {
     "@/lib/api/v1/rate-limit": {
       consumeV1RateLimit: async () => ({ allowed: true }), rateLimitHeaders: () => ({}), rateLimitSubject: (value: string) => value,
     },
-    "@/lib/api/v1/profile-service": {
-      currentProfileDto: (profile: { id: string; avatarUrl: string }) => ({ id: profile.id, avatarUrl: profile.avatarUrl }),
-    },
+    "@/lib/api/v1/profile-service": profileService,
     "@/lib/constants/avatars": avatars, "@/lib/db/prisma": { prisma: db }, "@/lib/media/native-image-upload": image,
   });
   return {
     state, replayBody,
+    async freshGETProfile() {
+      const result = await profileService.loadNativeCurrentProfile({ user: { id: "owner_test" }, locale: "en" });
+      return JSON.parse(JSON.stringify(result)); // The same JSON boundary as the real GET route.
+    },
     async run() {
       const form = new FormData();
       form.append("file", new File([png], "owned.png", { type: "image/png" }));
@@ -263,6 +331,20 @@ test("successful201 keeps the new avatar and cleans only the old avatar", async 
   assert.ok(state.objects.has(unrelatedURL));
   assert.equal(state.completeCalls, 1);
   assert.equal(state.logs.length, 0);
+});
+
+test("upload201 retains both saved language proficiencies and readiness exactly like a fresh profile GET", async () => {
+  const { run, freshGETProfile } = scenario("success");
+  const response = await run();
+  assert.equal(response.status, 201);
+  const { data } = await response.json();
+  assert.deepEqual(data.profile, await freshGETProfile());
+  assert.deepEqual(data.profile.languages, [
+    { tag: "ENGLISH", proficiency: "FLUENT" },
+    { tag: "GERMAN", proficiency: "CONVERSATIONAL" },
+  ]);
+  assert.equal(data.profile.readiness.languagesComplete, true);
+  assert.equal(data.profile.readiness.ready, true);
 });
 
 test("idempotency replay returns the prior201 without uploading or queuing anything", async () => {
