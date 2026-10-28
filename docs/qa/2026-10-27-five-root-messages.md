@@ -1,4 +1,16 @@
-# 消息页闭环验收：Preview254
+# 消息页闭环验收：含Preview260真机侧滑补验
+
+## 2026-10-28：默认iPhone14Plus原生侧滑8通过
+
+在Preview260／iOS26.6.1上实际执行唯一原生用例246.615秒，controller276.780119秒、UI0／observer0，8次严格生产GET边界／8原nonce ACK、0GET重试。直接横拖6次，实际点击已读类按钮3次、置顶类按钮2次，并验证反向取消；没有长按菜单替代。已读清除、手动未读提醒、置顶与重登保持、peer隔离、清除／取消后重登恢复全部通过。
+
+20张安全原PNG／16unique逐张实看，20份AX全部核对；6个侧滑展开状态的read／pin按钮均唯一、可用且完整可见。服务器未读数与置顶由GET核对，本机未读提醒由真实UI及账号切换验证；生产GET没有公开底层cursor时间戳，不声明SQL或rawcursor不变。联系人接受及双方各一条TEXT仅为明确的自有API前置，业务进展来自真机UI。
+
+两个测试账号删除／两个旧bearer401、fixture与backupJSON／凭据runtime清理完成；无普通身份读取或AppData／Keychain重置。最新普通Phone260 PID727、两次fresh完整执行路径、空参数／App仅TERM及普通97保持已核对。本轮未发现需新增修复的问题，无新App构建或重新安装。此前Sim260及252／254六范围保留，非260整套连续重跑。[真机交付](../releases/2026-10-28-preview260-phone-message-swipe.md)／[补验证据](./evidence/2026-10-28-messages260-phone/native-swipe-summary.json)。
+
+## 历史：Preview254六个范围收尾
+
+下方“我尚未开始”、PID11702及254版本均记录当时状态，不代表当前进度。
 
 消息页已于2026-10-27通过Root验收，下一页为“我”；“我”业务测试尚未开始，五入口整体未完成。默认iPhone14Plus已安装254并恢复正常进程PID11702，普通97保留。源码及测试聚焦提交ce1b9dd2已推送。[交付receipt](../releases/2026-10-27-preview254-messages-closeout.receipt.json)
 

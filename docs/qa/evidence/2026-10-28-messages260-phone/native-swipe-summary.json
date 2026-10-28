@@ -1,0 +1,129 @@
+{
+  "kind": "Preview260-default14Plus-native-message-swipe-actual-supplement",
+  "recordedAt": "2026-10-28T19:45:53.484063+00:00",
+  "sourceCommit": "9c501d8a9609adbc8929a06730a743716374fa49",
+  "branch": "codex/ios-uxui-20260922",
+  "PreviewBuild": 260,
+  "newAppCodeBuildOrInstall": false,
+  "result": "Scoped PASS / No material findings",
+  "device": {
+    "name": "iPhone14Plus",
+    "UDID": "00008110-001A69110CC1401E",
+    "CoreDeviceID": "D906CC6D-3EC6-50A2-8D93-A6602521362A",
+    "OS": "26.6.1 (23G83)",
+    "language": "zh-Hans",
+    "appearance": "light",
+    "contentSize": "L"
+  },
+  "nativeSeconds": 246.615,
+  "controllerSeconds": 276.780119,
+  "singleNativeCasePassed": true,
+  "uiExit": 0,
+  "observerExit": 0,
+  "phases": [
+    "baseline",
+    "swipe-cancelled",
+    "server-read",
+    "local-unread",
+    "owner-reloaded-pinned",
+    "peer-isolated",
+    "owner-local-cleared-unpinned",
+    "restored-reloaded"
+  ],
+  "strictProductionGETBoundaries": 8,
+  "nonceAndNativeACKs": 8,
+  "GETRetries": 0,
+  "actualNativeHorizontalExposures": 6,
+  "reverseCancel": true,
+  "readActionTaps": 3,
+  "pinActionTaps": 2,
+  "longPressFallbackUsed": false,
+  "ownerServerUnreadByPhase": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "ownerPinnedByPhase": [
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    false
+  ],
+  "peerServerUnreadAlways": 1,
+  "peerPinnedAlways": false,
+  "manualUnreadDeviceLocalStateVerifiedByUIReloginAndAccountIsolation": true,
+  "actualPixels": {
+    "PNGCount": 20,
+    "uniquePNGCount": 16,
+    "AXCount": 20,
+    "allOriginalSafePNGIndividuallyViewed": true,
+    "allAXRead": true,
+    "sixNativeActionPairsUniqueEnabledAndFullyVisible": true
+  },
+  "copyTransport": {
+    "maximumSeconds": 30,
+    "outerMaximumSeconds": 35,
+    "maximumAttempts": 1,
+    "allEightFirstAttemptsSucceeded": true,
+    "actualMillisecondsRange": [
+      267,
+      461
+    ]
+  },
+  "preconditions": "fresh2 owned production accounts; accepted contact plus two immutable TEXT messages via API only; no API read/pin/manual-unread progress writes",
+  "GETScope": "Both profiles/contacts/actions/history/inbox projections and visible unrelated collections remain exact except expected owner unread/pin. No SQL or underlying read-cursor timestamp claim.",
+  "cleanup": {
+    "accountsDeleted": 2,
+    "staleBearer401": 2,
+    "fixtureAndBackupJSONGone": true,
+    "credentialRuntimeGone": true,
+    "ordinary97Preserved": true,
+    "ownTestSessionsAndPhoneAppsStopped": true,
+    "unknownAccountsOrDataTouched": false
+  },
+  "QA": {
+    "freshSwiftCompileInputs": 2,
+    "freshCompileSeconds": 8.622,
+    "arm64IOS": true,
+    "twoStrictSignaturesAndDefaultDeviceProfileVerified": true,
+    "sameKnownExactIsolatedRunner": "app.sideseat.automationinit260.xctrunner",
+    "allEightBusinessPhasesAndGesturesUnchanged": true,
+    "oldInputsProductsAndProofsPreserved": true
+  },
+  "finalNormalPhone": {
+    "build": 260,
+    "PID": 727,
+    "twoFreshPIDAndFullInstalledExecutableSnapshotsMatched": true,
+    "emptyArguments": true,
+    "AppEnvironment": {
+      "TERM": "dumb"
+    },
+    "terminateExistingInstances": false,
+    "ordinary97Preserved": true,
+    "ordinaryIdentityOrPhoneExecutableBytesRead": false,
+    "AppDataOrKeychainReset": false
+  },
+  "evidenceSHA256": {
+    "controller": "e6aa4fbb9a81d4429b87486bb5675377c4703d5e82e9dafce1b3dbe31087714c",
+    "observer": "4fc6d6dbe586d3bcdc8ef7bb58e67911eae12e41673d2fffaf0c0359e0937e91",
+    "independentReview": "6d83be5dfedc97b1b4a47873e51c607d3fd496a7c7440128f4b43c6c2383fbdc",
+    "harnessFreeze": "256ac88c283fdd0eb75de30e771036273cac9016eff2c97f7da540872e2663d0",
+    "actualTwoSwiftCompileProof": "aa7da13975ec3e02485ce6a09390899e1c6920c1163335799e905b7c5fc01b43",
+    "cleanup": "61319862f63e0b4506dae6903c1d3ef33416f87403d468bf41545681a5d856b4",
+    "normalPhoneLaunch": "7794900646cdfd800f07e4dba1d7ad3ad64d2bcaedf4709f1dbac5af31af1f75"
+  },
+  "scopeLimits": [
+    "Ordinary Chinese/light/L on default14Plus only",
+    "This is a focused Messages8 supplement, not continuous all-five or all-device/all-size suite",
+    "No SQL, raw read-cursor timestamps, real third-party message send, or new backend/web/schema/AppStore/TestFlight release"
+  ]
+}

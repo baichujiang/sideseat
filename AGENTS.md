@@ -19,6 +19,13 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
+- Latest default14Plus physical Messages260 nativeSwipe8 passed246.615s/
+  8productionGET/8nonceACK, zero retries;20PNG/16unique and20AX all reviewed.
+  Read/manual-unread/pin/unpin/relogin/peer isolation and own2/old401/runtime
+  cleanup passed. No new App code/build/reinstall, SQL or raw read-cursor claim.
+  Final normalPhone260 is now PID727,emptyargs/TERM-only/two fresh fullpath
+  snapshots; ordinary97 remains. The earlier PID686 and Simulator-only swipe
+  below retain their original scopes. See the [physical supplement](docs/releases/2026-10-28-preview260-phone-message-swipe.md).
 - Active source/defaultPhone/ownedSimulator Preview is260; ordinary97 is preserved.
   Product+QA20 files are committed and pushed as
   9c501d8a9609adbc8929a06730a743716374fa49;268 Git/active/frozen/built inputs
@@ -49,7 +56,7 @@
   deltas were restored to original TS/next-env bytes,user TS changes preserved.
   These PIDs and mail proofs are historical; future local tests require fresh
   startup/identity/mail-disabled proof. No other service,container or data touched.
-  Final normal defaultPhone260 launch completed:PID686,two fresh full-path/PID
+  Earlier five-root normal defaultPhone260 launch completed:PID686,two fresh full-path/PID
   snapshots,Info260+ordinary97,empty args and App env TERM:dumb. No ordinary
   identity or installed executable bytes read,no reset. The preceding existing-
   Preview684 preflight refusal remains; only that exactly verified Preview was

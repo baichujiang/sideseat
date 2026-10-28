@@ -2,17 +2,19 @@
 
 按用户要求依次验收：同行 → 计划 → 日历 → 消息 → 我。本页完整通过后才开始下一页业务测试。跨页结果交接不等于下一页已验收。
 
-**当前：五个入口已按下表的独立实际范围验收通过，默认手机正常交付完成。** 活跃源码／默认iPhone14Plus／自有Simulator为Preview260，普通97保留；产品与QA20文件`9c501d8a9609adbc8929a06730a743716374fa49`已推，268项来源及Local匹配（[来源绑定](./evidence/2026-10-28-me260/native-source-commit-binding.json)）。本次收尾未新建App包；不同版本、设备及独立轮次不能合称260一次连续五页套件。[最终交付](../releases/2026-10-28-preview260-five-roots-closeout.md)、[最终分范围证据](./evidence/2026-10-28-me260/final-closeout-summary.json)
+**最新补验：默认iPhone14Plus原生消息侧滑8已通过。** Native246.615秒／controller276.780119秒、8生产GET／8ACK，20PNG／16unique及20AX全部审查；已读、未读提醒、置顶／取消、重登保持和peer隔离均通过。最新正常Phone260 PID727，普通97保留。[本次真机报告](../releases/2026-10-28-preview260-phone-message-swipe.md)。
+
+**五个入口已按下表的独立实际范围验收通过，默认手机正常交付完成。** 活跃源码／默认iPhone14Plus／自有Simulator为Preview260，普通97保留；产品与QA20文件`9c501d8a9609adbc8929a06730a743716374fa49`已推，268项来源及Local匹配（[来源绑定](./evidence/2026-10-28-me260/native-source-commit-binding.json)）。本次收尾未新建App包；不同版本、设备及独立轮次不能合称260一次连续五页套件。[最终交付](../releases/2026-10-28-preview260-five-roots-closeout.md)、[最终分范围证据](./evidence/2026-10-28-me260/final-closeout-summary.json)
 
 | 顺序 | 页面 | 已验收的实际范围 |
 |---|---|---|
 | 1 | 同行 | 236：10项UI测试、49个独立数据库检查点；源码c7572a58已推送 |
 | 2 | 计划 | 238：4项真机用例、47阶段及11网页检查，含独立推送触发专项 |
 | 3 | 日历 | 九个分开业务组在244／246／250／251闭环，251默认真机Core12、252图标focused7及普通会话核对；非252同包全套，见[日历收尾](../releases/2026-10-27-preview252-calendar-closeout.md) |
-| 4 | 消息 | 252／254六个独立范围；新增260自有Simulator原生侧滑8，235.701秒／8GETDB／8ACK，20PNG／15unique及20AX实审；不称Phone侧滑通过，见下方补验与[消息QA](./2026-10-27-five-root-messages.md) |
+| 4 | 消息 | 252／254六个独立范围；新增260自有Simulator原生侧滑8，235.701秒／8GETDB／8ACK，20PNG／15unique及20AX实审；随后260默认真机侧滑8通过246.615秒／8GET／8ACK、20PNG／16unique及20AX实审，两端分次验收，见下方补验与[消息QA](./2026-10-27-five-root-messages.md) |
 | 5 | 我 | 255 Core17／Extended12、258 FullProfile23／Courses16及NoScrollB5／ArchiveB7、260普通及MAX各自Feedback12、260默认真机Profile7；业务／实际画面／清理独立通过，见[我页QA](./2026-10-27-five-root-me.md) |
 
-260真机Profile7最后通过154.740秒／7strictGET／7nonce ACK；新的精确runner只读初始化通过后执行原7步，0重试、单次copy30、peer保持、2张原图实审与精确清理完成。完整重启未使旧host恢复；不把新host的通过归因为已证实的缓存损坏。正常默认Phone260 PID686、两次fresh完整路径／Info260＋97、空参数／仅TERM环境已核对。
+260真机Profile7最后通过154.740秒／7strictGET／7nonce ACK；新的精确runner只读初始化通过后执行原7步，0重试、单次copy30、peer保持、2张原图实审与精确清理完成。完整重启未使旧host恢复；不把新host的通过归因为已证实的缓存损坏。原五入口收尾的正常默认Phone260 PID686、两次fresh完整路径／Info260＋97、空参数／仅TERM环境已核对。
 
 消息260原生侧滑补验是在Me仍未验收时，按事先独立ordering supplement授权回归已验收的第四页；原“待Me”计划metadata未倒改。只在自有Simulator执行六次系统侧滑，核对已读3／置顶2及反向取消；已接受联系人与两条TEXT为明确API前置，不计作UI创建。精确2账号／旧401／DB0／原目录／fixture与runtime清理通过；独立评审SHA `f61621a03b92b89919f22b6a8cd366736dbd367b4903b2d1b3d704e2989ef5f0`。
 
