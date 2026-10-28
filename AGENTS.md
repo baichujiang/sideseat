@@ -19,7 +19,54 @@
   for existing clients/data and shared dependencies. Do not redesign, expose,
   reactivate, migrate or remove them as incidental cleanup. A direct owner request
   for that compatibility surface is required before changing it.
-- Active defaultPhone Preview is now254. Messages is accepted by Root across six
+- Active source/defaultPhone/ownedSimulator Preview is260, both installed;
+  ordinary97 is preserved. Only version and Feedback Image+Text metrics change
+  from259;266 inputs and Local remain exact. Profile/Course business sources,
+  ChatsRootView and three locale files retain259 bytes; Profile/Course match258.
+  Actual164 App Swift+1generated/165 FileList+compile per platform,141.627/171.930s
+  builds,three binaries/signatures/default14Plus profile/compiled locale keys
+  verified. Root260 adoption receipt and alias match, SHA
+  21ed244dd35ee55df7f7da2fcc48477a9afd6622a480763632efe4d47ee9d9a8.
+  App+QA20 files are committed and pushed as
+  9c501d8a9609adbc8929a06730a743716374fa49;268 Git blobs/active/frozen/built inputs
+  and Local match. Historical candidate/adoption/provenance bytes stay unchanged;
+  the [commit binding](docs/qa/evidence/2026-10-28-me260/native-source-commit-binding.json)
+  is a separate supplement. These checkpoint docs preserve the incomplete acceptance state.
+  Me is NOT ACCEPTED: defaultPhone260 Profile7 is prepared but unrun, awaiting
+  the user's USB reconnect/unlock reply. Other Me business groups retain their
+  separately accepted scopes:255 Core17/Extended12,258 FullProfile23/Courses16,
+  NoScrollB5/ArchiveB7 and260 Feedback12; not260 same-build full verification.
+  Feedback260 standard L/EN/light passed192.539/213.514477s,12GETDB12ACK,
+  10PNG/8unique and4blank-point geometries. Separate MAX AX5/EN/light full-r4
+  passed397.450/414.689045s,12GETDB12ACK,35PNG/27unique,25AX/28geometry, all reviewed;
+  four blank taps390,395,single Send,real cleared draft,peer/owner relogin and
+  cleanup2/old401/DB0/runtime removal passed. These are separate successful runs.
+  Keep259's data-pass/pixel-fail,258's actual MAX P2 and260-r1/r2/r3 false
+  at3/8/8ACK. r3 typed a real draft but failed QA Submit reveal; it did not send.
+  The separate6-boundary gutter probe used an explicit API seed only as setup;
+  its old-method terminal regex false and independent supplement stay, never
+  count it as full Feedback12. Full-r4 uses native creation from an empty board.
+  After actual review,nine official Campus/Safety QA files were synchronized;
+  five-source QA build-only9.489s/FileList+Compile/two strict signatures passed,
+  with no new UI claim. Independent settings scripts and explicit harness/build
+  parameters preserve the original physical guard and business/data oracles.
+  Prior258 failures do not prove copy30 or automation recovery. Do not switch
+  device or restart global services. Messages254 longpress-menu acceptance stays;
+  nativeSwipe260 eight-stage preparation waits for all Me acceptance. OldA258
+  was never executed; do not claim a failed A/B. Together, Plans, Calendar and
+  Messages stay accepted; the five-root task remains incomplete.
+  Owned local services are now closed: fresh twice-matched97096/97106 group got
+  TERM only,3344 closed,and the exact15434 Docker container was stopped/retained.
+  Final owned DB0/original catalog hash passed; only known startup deltas were
+  restored to original tsconfig/next-env hashes,user TS changes preserved.
+  Future local tests require new startup/PID/actual mail-disabled proof;97096 is
+  historical,not a live service. Final normalPhone launch remains pending until physical verification resumes. No ordinary identity read or reset.
+  No backend/web/Schema release; HTsL is only the last recorded production check.
+  See docs/qa/2026-10-27-five-root-me.md and the NOT ACCEPTED stage draft whose
+  filename is2026-10-28-preview260-me-checkpoint.md (NOT ACCEPTED/Phone pending).
+- The following older stages retain their historical scopes; the260 progress
+  paragraph above governs the current state.
+- Previous defaultPhone Preview254 completed Messages. Root accepted six
   separate252/254 scopes: MainSim16, MainPhone16, Ignore6, Safety13, End6 and
   PhoneRemark8; not a254 same-package full run. Explicit-null remark clearing and
   immediate conversation/cache/inbox name synchronization preserve all rules.

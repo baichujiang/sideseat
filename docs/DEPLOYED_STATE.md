@@ -1,8 +1,16 @@
 # 已部署功能与归档边界
 
-**当前状态：Preview254，消息页已通过。** 默认iPhone14Plus正常PID11702，空参数／仅TERM、完整安装执行路径／fresh PID与Info254核对，普通97保留；268输入／Local／两平台实际编译／签名／产品来源一致，Phone执行字节与普通身份未读。两项备注修复保留原规则，六个252／254独立范围已验收，非254同包全套。真机最后14PNG／12unique全审；原controllerfalse与独立恢复清理补证保持。自有服务和准确启动增量已收尾，用户原无关tsconfig保持。source254及测试提交ce1b9dd2已推送，无后端／网页／Schema发布，HTsL仅上次核验记录。同行、计划、日历、消息已通过；“我”仅准备／只读审查，无UI／业务测试，五入口整体未完成。[254交付](./releases/2026-10-27-preview254-messages-closeout.md)、[消息QA](./qa/2026-10-27-five-root-messages.md)。
+**当前状态：Preview260，「我」NOT ACCEPTED／默认真机待重连。** 活跃源码、默认iPhone14Plus及自有Simulator均为260，普通97保持；产品与QA20文件已提交推送`9c501d8a9609adbc8929a06730a743716374fa49`，268项Git／活跃／冻结／构建输入及Local逐项匹配（[来源绑定](./qa/evidence/2026-10-28-me260/native-source-commit-binding.json)）。260较259仅版本与反馈Image＋Text计数组件变化；双build141.627／171.930秒、每端164 App Swift＋1generated／165 FileList、签名及来源已核。双端安装主receipt SHA `21ed244dd35ee55df7f7da2fcc48477a9afd6622a480763632efe4d47ee9d9a8`与alias一致，历史证据未倒改，新增提交绑定补证；无普通身份读或reset。
 
-以下252及更早段落保留当时范围，当前状态以上方254为准。
+255 Core／Extended、258 FullProfile23／FullCourses16及专项保留各自通过范围，业务源在260保持，不称260同包全套。260反馈普通L r1与MAX AX5 r4分别完整通过：普通12／12ACK及10PNG／8unique全审；MAX397.450／414.689045秒、12GETDB／12ACK、35PNG／27unique、25AX／28geometry全审，四次空白单点390,395、单次发送、真实草稿清空及双方评论重登通过，账号／旧401／DB0／runtime清理完整。259数字消失、MAX r1／r2／r3的3／8／8ACK失败及短probe旧regex false与补证保持。官方九QA文件同步后五源build-only9.489秒／实际FileList＋Compile／两签名通过，不新增UI验收。当前Me业务仅默认手机260资料7待用户USB重连／解锁，未收到回复；不宣称自动化恢复。
+
+前四页原验收保持，消息nativeSwipe260八阶段仅准备、严格待Me全过再执行，旧A未跑不作AB；五入口未完成。最终DB0／原catalog hash核对后，仅TERM两次fresh匹配的自有Next97096／97106，3344已关闭；准确15434容器停止并保留，tsconfig／next-env只恢复已知启动增量，用户原修改保持。后续本地测试必须新启动、新PID及实际禁邮件证明，不复用旧存活声明。正常手机最终启动仍待真机复测后完成，无本阶段后端／网页／Schema发布，HTsL仅上次核验记录。[我页QA](./qa/2026-10-27-five-root-me.md)、[260未验收检查点](./releases/2026-10-28-preview260-me-checkpoint.md)。
+
+以下254及更早段落保留当时范围，当前状态以上方260为准。
+
+**此前状态：Preview254，消息页已通过。** 默认iPhone14Plus正常PID11702，空参数／仅TERM、完整安装执行路径／fresh PID与Info254核对，普通97保留；268输入／Local／两平台实际编译／签名／产品来源一致，Phone执行字节与普通身份未读。两项备注修复保留原规则，六个252／254独立范围已验收，非254同包全套。真机最后14PNG／12unique全审；原controllerfalse与独立恢复清理补证保持。自有服务和准确启动增量已收尾，用户原无关tsconfig保持。source254及测试提交ce1b9dd2已推送，无后端／网页／Schema发布，HTsL仅上次核验记录。同行、计划、日历、消息已通过；当时“我”仅准备／只读审查，无UI／业务测试，五入口整体未完成。[254交付](./releases/2026-10-27-preview254-messages-closeout.md)、[消息QA](./qa/2026-10-27-five-root-messages.md)。
+
+以下252及更早段落保留当时范围。
 
 **状态：** 默认iPhone14Plus已安装252，普通97保留；268来源／Local／产品三binary及严格签名核对，安装Info与正常启动PID11592／完整执行路径一致，未直接读取手机执行字节。同行236、计划238、日历已通过；日历九组业务分版本闭环、251真机Core12及252图标focused7范围分别保留，不称252同包全套重跑。消息／我业务尚未开始，五入口任务未完成。本阶段无后端／网页／Schema发布，HTsL仅保留上次生产核验记录。2026-10-27，Europe/Berlin。见[252收尾](./releases/2026-10-27-preview252-calendar-closeout.md)和[日历检查点](./qa/2026-10-27-five-root-calendar.md)。
 
@@ -204,12 +212,14 @@
 
 此前五项按序交付 Preview 137–141，142 补正读取重试入口；手动提交和本地恢复合同继续保留。[142 验收](./qa/2026-10-20-plans137-142.md)。
 
-## 版本与核验依据
+## 版本与核验依据（232阶段历史快照）
+
+下表保留232阶段及更早证据，不代表当前源码提交、安装、设备在线状态或线上部署的新核验；当前260状态与未完成范围见文首。
 
 | 对象 | 实际状态 | 依据 |
 | --- | --- | --- |
 | 活跃项目 | `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`，`codex/ios-uxui-20260922` | 原生 `329be669`已推送，后端／网页保持生产；[232来源](./qa/evidence/2026-10-26-plan-direct-invite232/native-build-manifest.json) |
-| 当前手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (232)` | 原页直发，最终连续混合561.821秒／15阶段通过，正常PID10784；[交付](./releases/2026-10-26-preview232-plan-direct-invite.md) |
+| 232阶段手机开发版 | `SideSeat Preview / app.sideseat.mobile.preview / 1.0.0 (232)` | 原页直发，最终连续混合561.821秒／15阶段通过，正常PID10784；[交付](./releases/2026-10-26-preview232-plan-direct-invite.md) |
 | 默认真机测试设备 | iPhone14 Plus / iOS26.6.1 / UDID `00008110-001A69110CC1401E` | CoreDevice `D906CC6D-3EC6-50A2-8D93-A6602521362A`；232安装／正常进程核验，普通97／Flow222保留、本轮Runner移除；[设备](./qa/evidence/2026-10-26-plan-direct-invite232/device-verification.json) |
 | Preview 110 原生源码 | `01d6350` | 已推送；一级计划创建/打开链接、确认/征集/下次安排分组。卡片、新建成功、消息和 deep link 都是一级计划页上方的一层详情；保存后刷新卡片，109 详情和自动保存保留 |
 | 普通 SideSeat | `app.sideseat.mobile / 1.0.0 (97)` | 独立安装、保留兼容，未进行 TestFlight/App Store 上传 |
