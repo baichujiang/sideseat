@@ -353,6 +353,7 @@ struct ChatsRootView: View {
                     systemImage: store.isUnread(row) ? "envelope.open" : "envelope.badge"
                 )
             }
+            .buttonStyle(.automatic)
             .tint(SideSeatTheme.Chat.inboxReadAction)
             .disabled(store.isMutating)
             .accessibilityIdentifier("inbox-row-\(row.id)-read")
@@ -365,6 +366,7 @@ struct ChatsRootView: View {
                     systemImage: row.pinned ? "pin.slash.fill" : "pin.fill"
                 )
             }
+            .buttonStyle(.automatic)
             .tint(SideSeatTheme.warning)
             .accessibilityIdentifier("inbox-row-\(row.id)-pin")
 

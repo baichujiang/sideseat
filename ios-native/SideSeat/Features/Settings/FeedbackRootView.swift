@@ -318,8 +318,27 @@ final class FeedbackStore {
 struct FeedbackRootView: View {
     @Environment(SessionStore.self) private var session
     @Environment(RouterPath.self) private var router
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var store = FeedbackStore()
     @State private var showCompose = false
+
+    private var metadataLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+            : AnyLayout(HStackLayout(spacing: 12))
+    }
+
+    private func feedbackMetric(_ count: Int, systemImage: String, accessibilityLabel: LocalizedStringKey) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: systemImage)
+                .accessibilityHidden(true)
+            Text(verbatim: String(count))
+                .accessibilityLabel(Text(accessibilityLabel))
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .fixedSize(horizontal: true, vertical: false)
+    }
 
     var body: some View {
         Group {
@@ -357,24 +376,25 @@ struct FeedbackRootView: View {
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(3)
-                            HStack(spacing: 12) {
+                            metadataLayout {
                                 Text(post.author.displayName)
                                     .font(.caption2.weight(.semibold))
                                     .foregroundStyle(.secondary)
-                                Text(post.topicLabel)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Label("\(post.score)", systemImage: "arrow.up.arrow.down")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                Label("\(post.commentCount)", systemImage: "bubble.left")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : nil, alignment: .leading)
+                                HStack(spacing: 12) {
+                                    Text(post.topicLabel)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                    feedbackMetric(post.score, systemImage: "arrow.up.arrow.down", accessibilityLabel: "Score \(post.score)")
+                                    feedbackMetric(post.commentCount, systemImage: "bubble.left", accessibilityLabel: "\(post.commentCount) comments")
+                                }
                             }
                         }
                         .padding(.vertical, 4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(SSActionButtonStyle(horizontalPadding: 0))
+                    .buttonStyle(.plain)
                     .accessibilityIdentifier("feedback-row-\(post.id)")
                 }
                 .listStyle(.plain)

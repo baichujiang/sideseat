@@ -78,7 +78,7 @@ struct CourseListView: View {
         }
         .sheet(isPresented: $showsArchivedCourses) {
             NavigationStack {
-                ArchivedCourseListView(showsDoneButton: true)
+                ArchivedCourseListView(showsDoneButton: true, onChange: { await load() })
             }
         }
         .sheet(isPresented: $showsScreenshotImport) {
@@ -383,6 +383,7 @@ struct ArchivedCourseListView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
     var showsDoneButton = false
+    var onChange: () async -> Void = {}
     @State private var store = CourseListStore()
     @State private var query = ""
     @State private var pendingRemoval: NativeCourseSummary?
@@ -427,6 +428,7 @@ struct ArchivedCourseListView: View {
                                 } label: {
                                     Label("Remove from archive", systemImage: "trash")
                                 }
+                                .buttonStyle(.automatic)
                                 .accessibilityIdentifier("course-archived-remove-\(course.id)")
                             }
                     }
@@ -500,7 +502,11 @@ struct ArchivedCourseListView: View {
                 systemImage: "trash",
                 role: .destructive
             ) {
-                Task { _ = await store.removeArchivedCourse(courseID, using: session) }
+                Task {
+                    if await store.removeArchivedCourse(courseID, using: session) {
+                        await onChange()
+                    }
+                }
             },
         ]
     }
@@ -510,7 +516,11 @@ struct ArchivedCourseListView: View {
             CourseSummaryRow(course: course, showsArchivedStatus: true)
             if course.viewer.canRestore == true {
                 Button {
-                    Task { _ = await store.restoreArchivedCourse(course.id, using: session) }
+                    Task {
+                        if await store.restoreArchivedCourse(course.id, using: session) {
+                            await onChange()
+                        }
+                    }
                 } label: {
                     Label("Restore", systemImage: "arrow.counterclockwise")
                         .font(.subheadline.weight(.semibold))

@@ -207,9 +207,13 @@ struct ProfileEditSheet: View {
                     }
                 }
                 .onChange(of: inputIssue) { _, _ in
-                    if let focusedInput {
-                        scroll.scrollTo(focusedInput, anchor: .center)
-                    }
+                    revealFocusedInput(using: scroll)
+                }
+                .onChange(of: focusedInput) { _, _ in
+                    revealFocusedInput(using: scroll)
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)) { _ in
+                    revealFocusedInput(using: scroll)
                 }
                 .navigationTitle("Profile")
                 .navigationBarTitleDisplayMode(.inline)
@@ -324,6 +328,11 @@ struct ProfileEditSheet: View {
                 },
             ]
         }
+    }
+
+    private func revealFocusedInput(using scroll: ScrollViewProxy) {
+        guard let focusedInput else { return }
+        scroll.scrollTo(focusedInput, anchor: .center)
     }
 
     private var currentDraft: ProfileEditDraft {
