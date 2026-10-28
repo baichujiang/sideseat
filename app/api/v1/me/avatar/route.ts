@@ -116,6 +116,7 @@ export async function POST(request: Request) {
 
     const image = await validateNativeImageFile(file);
     const locale = localeFromRequest(request);
+    let uploadedAvatarUrl: string | undefined;
     const result = await prisma.$transaction(async (tx) => {
       await tx.apiIdempotencyRecord.deleteMany({ where: { expiresAt: { lt: new Date() } } });
       const claim = await claimIdempotency(tx, {
@@ -132,17 +133,17 @@ export async function POST(request: Request) {
       });
       if (claim.kind !== "owner") return claim;
 
-      const [oldProfile, uploaded] = await Promise.all([
-        tx.user.findUnique({
-          where: { id: auth.user.id },
-          select: { avatarUrl: true },
-        }),
-        uploadNativeImage({ userId: auth.user.id,
-          image,
-          blobPrefix: userCustomAvatarBlobPrefix(auth.user.id),
-          logScope: "v1/me/avatar",
-        }),
-      ]);
+      const oldProfile = await tx.user.findUnique({
+        where: { id: auth.user.id },
+        select: { avatarUrl: true },
+      });
+      const uploaded = await uploadNativeImage({
+        userId: auth.user.id,
+        image,
+        blobPrefix: userCustomAvatarBlobPrefix(auth.user.id),
+        logScope: "v1/me/avatar",
+      });
+      uploadedAvatarUrl = uploaded.url;
 
       const profile = await tx.user.update({
         where: { id: auth.user.id },
@@ -171,6 +172,19 @@ export async function POST(request: Request) {
         oldAvatarUrl: oldProfile?.avatarUrl ?? null,
         nextAvatarUrl: uploaded.url,
       } as const;
+    }).catch(async (cause) => {
+      if (uploadedAvatarUrl) {
+        try {
+          // Outside the failed transaction; keep the existing in-use reference check.
+          await queueMediaDeletion(prisma, [uploadedAvatarUrl]);
+          await processMediaDeletionJobs({ urls: [uploadedAvatarUrl] });
+        } catch (cleanupCause) {
+          console.error("Failed avatar upload cleanup remains unconfirmed", {
+            error: cleanupCause instanceof Error ? cleanupCause.name : "UnknownError",
+          });
+        }
+      }
+      throw cause;
     });
 
     const response = avatarMutationResponse(request, result);
