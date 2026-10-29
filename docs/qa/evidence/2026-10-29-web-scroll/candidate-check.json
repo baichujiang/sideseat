@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "deploymentId": "dpl_HLHJLHHJgPhP27oQ1RfcsaabZRDr",
+  "compiledCSSContainsScopedFix": true,
+  "existingProductionAccountAccepted": true,
+  "clientConfigUnchanged": true,
+  "migrationSkipConfirmed": true,
+  "buildPassed": true,
+  "runtimeScope": "one web CSS file only"
+}

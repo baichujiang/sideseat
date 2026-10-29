@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "exactPasswordCookieMatches": 0,
+  "jwtPatternMatches": 0,
+  "screenshotsReviewed": "owned empty QA calendars/timetables only; no passwords, poll URLs or ordinary profiles"
+}

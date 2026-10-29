@@ -1,0 +1,21 @@
+{
+  "baselineDeployment": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD",
+  "baselineFiles": 1427,
+  "preservedFiles": 1426,
+  "candidateFiles": 1428,
+  "fullManifestSHA256": "c56d0cd9902db241c1c8093c5c18e3f934c37f5c852b75c1bdd04f19c0559a49",
+  "changedOrAddedFiles": [
+    {
+      "path": ".sideseat-web-scroll-source.json",
+      "sha1": "4088f7367aabf95f677138a2ba6ae6b30a05d097",
+      "sha256": "0bb39a7210c40d3f273efd755ac4926682522b79354e4fd7f46fa440b804cf86",
+      "bytes": 316
+    },
+    {
+      "path": "app/web/web.css",
+      "sha1": "0ce072e4a42292af2a5da457a558cf8067369cf4",
+      "sha256": "700fd579e778f7b64841315edc0b67b5ced659e8bad866977b8bf96ec1f770cd",
+      "bytes": 22830
+    }
+  ]
+}

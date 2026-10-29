@@ -1,8 +1,22 @@
 # AGENTS.md — Positive-First Development Protocol
 
-## Current web brand production — 2026-10-29
+## Current web scroll production — 2026-10-29
 
-- All root/www/api aliases now point to READY `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`.
+- Root/www/api now point to READY `dpl_HLHJLHHJgPhP27oQ1RfcsaabZRDr`, the same
+  tested Production candidate promoted without rebuild. Source `5ba690e5580f4cc555385ba26794700be9600c56`.
+  All1,428 remote sources match;1,426 baseline files preserved, one CSS overlay and
+  one provenance marker. Native/API/business/schema/flags are unchanged.
+- Mac wheel failure is reproduced on the prior live calendar. Scoped `/web` body
+  overflow now permits grid→document scroll chaining. Real1440x900 browser wheel
+  journeys pass both directions on final Calendar and Plan; post-dialog scrolling
+  passes. Captures are1248x900 clips; not a full-width/Safari/physical-phone claim.
+- One local and one production own QA account/poll are deleted; old cookies401 and
+  owned public APIs404. Existing3344/15434 services and unrelated user TS startup
+  edits are preserved. See [scroll release](docs/releases/2026-10-29-web-scroll-chaining.md).
+
+## Web brand production baseline — 2026-10-29
+
+- All root/www/api aliases then pointed to READY `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`.
   The tested Production candidate was promoted without rebuild; all1,427 remote
   sources match. Preserve1,419 baseline files;7 branding/navigation overlays plus
   one marker. Source `ba9f1b40b92eff3cf4210f0cd094857e887de379` is pushed.

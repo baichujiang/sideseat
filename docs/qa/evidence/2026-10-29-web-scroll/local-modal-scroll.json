@@ -1,0 +1,31 @@
+[
+  {
+    "phase": "after-close",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": null,
+    "innerY": null,
+    "pageMax": 249,
+    "pageY": 0,
+    "rect": null,
+    "viewport": [
+      1440,
+      900
+    ],
+    "openDialogs": 0
+  },
+  {
+    "phase": "after-close-scroll",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": null,
+    "innerY": null,
+    "pageMax": 249,
+    "pageY": 249,
+    "rect": null,
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+]

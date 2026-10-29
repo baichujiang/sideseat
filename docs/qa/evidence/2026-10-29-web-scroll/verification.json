@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "beforeLiveWheelFailureReproduced": true,
+  "productionCalendarBothDirectionsAndBoundaryChaining": true,
+  "productionPlanBothDirectionsAndBoundaryChaining": true,
+  "productionScrollAfterDialogDismiss": true,
+  "localTimeCellPressedStateTrue": true,
+  "input": "real browser wheel input via computer-use controls",
+  "browser": "Mac in-app browser",
+  "viewport": [
+    1440,
+    900
+  ],
+  "nativePhoneUIRun": false,
+  "businessRulesChanged": false
+}

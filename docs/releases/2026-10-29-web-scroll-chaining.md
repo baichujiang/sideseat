@@ -1,8 +1,10 @@
 # Web calendar/plan wheel scrolling — 2026-10-29
 
-Status: reproduced on the live web release and fixed/verified locally; production
-rollout is in progress under the owner's existing web publication authorization.
-Reviewed baseline: `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`.
+Status: **live at [sideseat.de](https://sideseat.de)**, production
+`dpl_HLHJLHHJgPhP27oQ1RfcsaabZRDr` READY on root/www/api. Same tested Production
+candidate promoted without rebuilding; web source commit
+`5ba690e5580f4cc555385ba26794700be9600c56` on `codex/ios-uxui-20260922`.
+Previous baseline: `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`.
 
 The owner reports intermittent Mac trackpad/mouse scrolling in Calendar and plan
 timetables. The inherited `body { overflow-x:hidden }` computes vertical overflow
@@ -31,5 +33,50 @@ Observed with real browser wheel input:
 The existing active-checkout server PID8263/port3344 was reused. Its fresh socket
 inspection confirms connections to127.0.0.1:15434. No server/database restart or
 configuration change was made. One isolated local and one isolated production QA
-account, each with an owned timetable, are reserved for exact cleanup after final
-verification. Ordinary accounts are outside this run.
+account were each checked by ID/username and deleted with their owned timetable.
+Old cookies return401; both owned public timetable APIs return404. Ordinary
+accounts are outside this run.
+
+
+## Release and final verification
+
+All1,427 prior production source files were freshly checked against the retained
+candidate cache. Only `app/web/web.css` is overlaid; one source marker is added.
+All1,428 remote files match the expected manifest and1,426 baseline files remain
+byte-identical. Database/schema, account APIs, native sources, branding and flags
+are preserved. Compilation, lint/types and routes completed; the migration skip
+is confirmed and `SIDESEAT_ACTIVITY_RELEASE=none` is retained.
+
+Candidate checks confirm the compiled served CSS contains the scoped fix, the
+existing production QA account is accepted and client configuration is unchanged.
+After actual alias promotion, the same authenticated browser was reloaded and both
+week-calendar and plan-grid wheel journeys were repeated on the public domain:
+
+- Calendar inner384→567.5, then page0→157.5; reverse gestures return both to0.
+- Plan inner0→926, then page0→364; reverse gestures return both to0.
+- Closing the event dialog leaves0 open dialogs and wheel input moves page0→249.
+
+All final measurements use Mac in-app browser at1440x900 and actual wheel inputs,
+without script-setting scroll positions or injected DOM/CSS. The saved viewport
+screenshots are1248x900 capture clips; they show the relevant main scroll areas,
+not a complete pixel-width acceptance of the entire1440px page. The scope is Mac
+browser wheel behavior, not physical trackpad hardware, Safari or phone UI.
+
+The initial bounded CLI build-log output omitted its final completion line;
+READY metadata and the latest MCP events independently show Deployment completed.
+One initial post-refresh Week selector wait still saw Month; selecting Week from
+the fresh state preceded the passing wheel run. These harness boundaries do not
+change the production CSS correction or the measured scroll assertions.
+
+Both own QA accounts and their owned polls are cleaned; no availability was
+submitted or invitation sent. Production UI logout completed and the browser was
+returned to sign-in. Temporary credentials are excluded from Git and removed after
+the evidence scan. User `next-env.d.ts`/`tsconfig.json`, local3344/15434 services,
+Preview260 and the separate pending phone supplement remain unchanged.
+
+See [before live reproduction](../qa/evidence/2026-10-29-web-scroll/before-calendar-scroll.json),
+[production calendar](../qa/evidence/2026-10-29-web-scroll/production-calendar-scroll.json),
+[production plan](../qa/evidence/2026-10-29-web-scroll/production-plan-scroll.json),
+[functional assertions](../qa/evidence/2026-10-29-web-scroll/verification.json),
+[source proof](../qa/evidence/2026-10-29-web-scroll/remote-source-proof.json) and
+[production cleanup](../qa/evidence/2026-10-29-web-scroll/production-cleanup.json).

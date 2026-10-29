@@ -1,0 +1,47 @@
+[
+  {
+    "phase": "start",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 568,
+    "innerY": 384,
+    "pageMax": 157,
+    "pageY": 0
+  },
+  {
+    "phase": "inner-down",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 568,
+    "innerY": 567.5,
+    "pageMax": 157,
+    "pageY": 0
+  },
+  {
+    "phase": "bottom-to-page-down",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 568,
+    "innerY": 567.5,
+    "pageMax": 157,
+    "pageY": 157.5
+  },
+  {
+    "phase": "inner-up",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 568,
+    "innerY": 0,
+    "pageMax": 157,
+    "pageY": 157.5
+  },
+  {
+    "phase": "top-to-page-up",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 568,
+    "innerY": 0,
+    "pageMax": 157,
+    "pageY": 0
+  }
+]

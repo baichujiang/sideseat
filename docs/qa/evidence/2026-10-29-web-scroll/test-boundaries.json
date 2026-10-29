@@ -1,0 +1,11 @@
+{
+  "initialLocalDatabaseEnvironmentRead": "process environment did not expose DATABASE_URL; fresh process sockets independently confirmed 127.0.0.1:15434 before creating QA accounts",
+  "initialTimeCellSelector": "AX represented aria-pressed buttons as checkboxes; corrected to the existing time-cell test ID and observed pressed=true",
+  "initialBuildLogGate": "bounded CLI output omitted the final completion event; READY metadata and latest MCP events independently confirmed Deployment completed",
+  "initialAfterReloadWeekWait": "month view remained after an early action; selected Week from fresh UI state before the passing production wheel run",
+  "localLogoutAutomation": "one fixed-button action could not be targeted; own account was deleted and tab returned to sign-in instead",
+  "screenshotCapture": "viewport snapshots are1248x900 clips; DOM and all recorded production regression measurements are1440x900",
+  "publicShareRoutesChanged": false,
+  "physicalTrackpadHardwareInstrumented": false,
+  "nativeOperations": 0
+}

@@ -1,0 +1,10 @@
+{
+  "kind": "web-scroll-chaining",
+  "baseline": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD",
+  "sourceCommit": "5ba690e5580f4cc555385ba26794700be9600c56",
+  "overlays": {
+    "app/web/web.css": "700fd579e778f7b64841315edc0b67b5ced659e8bad866977b8bf96ec1f770cd"
+  },
+  "nativeAssetsUnchanged": true,
+  "migrations": "skip"
+}

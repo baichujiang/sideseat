@@ -1,0 +1,135 @@
+[
+  {
+    "phase": "start",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 0,
+    "pageMax": 364,
+    "pageY": 0,
+    "rect": {
+      "bottom": 1062.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 522.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "down-1",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 900,
+    "pageMax": 364,
+    "pageY": 0,
+    "rect": {
+      "bottom": 1062.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 522.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "down-2",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 926,
+    "pageMax": 364,
+    "pageY": 0,
+    "rect": {
+      "bottom": 1062.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 522.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "down-3",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 926,
+    "pageMax": 364,
+    "pageY": 364,
+    "rect": {
+      "bottom": 698.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 158.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "up-1",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 26,
+    "pageMax": 364,
+    "pageY": 364,
+    "rect": {
+      "bottom": 698.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 158.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "up-2",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 0,
+    "pageMax": 364,
+    "pageY": 364,
+    "rect": {
+      "bottom": 698.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 158.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "phase": "up-3",
+    "bodyOverflow": "clip visible",
+    "bodyOverscroll": "auto",
+    "innerMax": 926,
+    "innerY": 0,
+    "pageMax": 364,
+    "pageY": 0,
+    "rect": {
+      "bottom": 1062.078125,
+      "left": 313,
+      "right": 1088,
+      "top": 522.078125
+    },
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+]
