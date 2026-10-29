@@ -1,9 +1,11 @@
 # New SideSeat web workspace — 2026-10-29
 
-Status: implemented and locally verified; production publication awaits the current
-owner's approval under `docs/RELEASE.md`. The existing production deployment is
-`dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6`. No production alias, environment, database,
-schema, feature flag, native source or phone installation was changed by this work.
+Status: the initial implementation and local verification stage is complete.
+The owner subsequently authorized publication; the new web workspace is now live
+at `sideseat.de`. See the separate [production release record](2026-10-29-web-workspace-production.md)
+for the actual deployment, live tests, cleanup and physical-device limitation.
+The implementation stage below used production baseline
+`dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6` and did not itself change production or the phone.
 
 Source commit: `b00ef212429ac5065126cc04c679fac3ba26eff6`, branch
 `codex/ios-uxui-20260922`. All31 runtime overlays in the build receipt match
@@ -92,11 +94,11 @@ overlays and24 new web files. See [build binding](../qa/evidence/2026-10-29-web-
 
 ## Publication
 
-Formal `sideseat.de` publication is a separate approval gate. No TestFlight or App
-Store action is part of this web work. A subsequent authorized production release
-must preserve the current baseline, use the reviewed web overlay, retain existing
-production secrets/flags, skip database migrations and verify both the web entry
-and the unchanged native API before assigning domains.
+The owner explicitly authorized production publication on2026-10-29. The reviewed
+web overlay was deployed, tested against the existing production database, and
+promoted without rebuilding. Production secrets and flags remain inherited;
+migrations were skipped. No TestFlight or App Store action is part of this work.
+See the [actual production record](2026-10-29-web-workspace-production.md).
 
 Both owned local QA accounts were deleted and their old cookies returned401.
 The run’s private credential/context files were removed. The shared QA server and

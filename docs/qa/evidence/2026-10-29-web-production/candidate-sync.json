@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "environment": "production database",
+  "webOrigin": "https://sideseat-297ekx9nj-baichus-projects.vercel.app",
+  "nativeAPI": "https://api.sideseat.de",
+  "physicalDeviceTest": false,
+  "checks": [
+    "existing mobile client configuration unchanged",
+    "two existing accounts: browser session and mobile token share the same user IDs",
+    "profile: web → mobile API and mobile API → web",
+    "private intention: web → mobile API and mobile API → web",
+    "calendar: web → mobile API and mobile API → web with one event each",
+    "shared plan: mobile availability appears in web",
+    "chat: web → peer mobile API and peer mobile API → web",
+    "web invitation → mobile acceptance → exactly one calendar entry per participant"
+  ],
+  "testAccounts": 2,
+  "ordinaryUsersTouched": 0
+}

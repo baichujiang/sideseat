@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "exactCurrentPasswordTokenCookieMatches": 0,
+  "jwtPatternMatches": 0,
+  "screenshots": "reviewed; only disposable profile names and messages; no login fields or ordinary accounts",
+  "rawAuthenticatedFilesCommitted": false
+}

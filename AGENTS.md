@@ -1,11 +1,29 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web production — 2026-10-29
+
+- Owner-authorized web publication is live at `sideseat.de`. All three api/www/root
+  aliases point to READY `dpl_27E69W2D1v5CGphCzP8PqkPSi1LK`; the exact tested
+  Production candidate was promoted without rebuilding. All1,424 remote sources
+  match the manifest:1,392 prior production files preserved,31 web overlays and
+  one provenance marker. Web source is `b00ef212429ac5065126cc04c679fac3ba26eff6`.
+- Existing production database, native APIs, flags and accounts are shared; no
+  migrations or native App changes. Two-account candidate and production tests
+  pass bidirectional profile/intent/calendar/chat and plan acceptance → exactly
+  one Calendar entry each. Actual production browser UI save/create/send and
+  native-API readback, reply auto-refresh, five-page navigation and390px widths pass.
+- Both own QA accounts and owned records are deleted; old browser/native sessions
+  return401 and the final public plan returns404. The default14Plus connection
+  is unavailable, so this release does **not** claim physical App UI synchronization.
+  Preview260 and the separate four-root phone supplement below keep their scopes.
+  See [production release](docs/releases/2026-10-29-web-workspace-production.md).
+
 ## Current in-progress supplement — 2026-10-29
 
 - The requested four-root physical supplement is **IN PROGRESS**. Use the
   [current scope and remaining work](docs/qa/2026-10-29-four-root-phone-supplement.md);
   earlier accepted scopes below remain historical and do not complete this run.
-- Production is now actually READY on `dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6` for
+- The pre-web production baseline was READY on `dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6` for
   api/www/root aliases, with all1,399 remote sources verified. Avatar rollback
   cleanup and complete language/readiness response fixes (`d2f94a7f`, `fe02e127`)
   are pushed and live;9 targeted tests, lint and full TypeScript passed. Actual

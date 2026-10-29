@@ -1,0 +1,17 @@
+{
+  "deploymentId": "dpl_27E69W2D1v5CGphCzP8PqkPSi1LK",
+  "remoteFiles": 1424,
+  "exactSourceMatch": true,
+  "baselinePreserved": 1392,
+  "runtimeOverlays": 31,
+  "migrationsApplied": 0,
+  "sourceCommit": "b00ef212429ac5065126cc04c679fac3ba26eff6",
+  "baselineDeployment": "dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6",
+  "expectedSourceManifestSHA256": "9197a2e0a923f5a56298e0cb3b1ece205463d5c9db5996c94c7cebf11e9a1493",
+  "productionBuildPassed": true,
+  "migrationSkipConfirmedInBuildLog": true,
+  "deploymentURL": "https://sideseat-297ekx9nj-baichus-projects.vercel.app",
+  "promotion": "same tested production deployment; no rebuild",
+  "physicalDeviceUI": "not run; selected iPhone14Plus tunnel unavailable",
+  "ordinaryPhoneAppTouched": false
+}

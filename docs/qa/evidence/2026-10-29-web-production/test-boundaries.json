@@ -1,0 +1,21 @@
+{
+  "firstCandidateAttempt": {
+    "passed": false,
+    "completed": [
+      "shared identity",
+      "profile bidirectional"
+    ],
+    "stoppedAt": "weekly intent test request",
+    "reason": "QA supplied automaticMatching=false but the existing API accepts only true; final request omits the optional field",
+    "productChanged": false
+  },
+  "finalCandidateAndProductionRunsPassed": true,
+  "publicPageCheckInitialAssertion": "English-only label expectation corrected to the actual Chinese Open web app label; page and API unchanged",
+  "physicalPhone": {
+    "defaultModel": "iPhone 14 Plus",
+    "state": "unavailable",
+    "uiRunPerformed": false,
+    "phoneAppBuildInstallOrLaunchPerformed": false
+  },
+  "priorPreview260PhoneSupplement": "independent and still in progress"
+}

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "profileWebUIWriteNativeAPIRead": true,
+  "physicalDeviceTest": false,
+  "nativeAPIProfileWriteWebUIRead": true,
+  "calendarWebUICreateNativeAPIRead": true,
+  "chatWebUISendPeerNativeAPIRead": true,
+  "peerNativeAPIReplyAutoAppearedInWebUI": true,
+  "fiveWebPagesVisited": true,
+  "confirmedPlanVisibleInWebUI": true,
+  "mobileBrowserWidth": 390,
+  "mobileBrowserNoHorizontalOverflow": true,
+  "desktopWidth": 1440
+}

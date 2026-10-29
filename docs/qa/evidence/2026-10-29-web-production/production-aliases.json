@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-29 18:55:11 UTC",
+  "aliases": [
+    {
+      "alias": "sideseat.de",
+      "deploymentId": "dpl_27E69W2D1v5CGphCzP8PqkPSi1LK"
+    },
+    {
+      "alias": "www.sideseat.de",
+      "deploymentId": "dpl_27E69W2D1v5CGphCzP8PqkPSi1LK"
+    },
+    {
+      "alias": "api.sideseat.de",
+      "deploymentId": "dpl_27E69W2D1v5CGphCzP8PqkPSi1LK"
+    }
+  ]
+}

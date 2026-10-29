@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-29T18:54:30.653773+00:00",
+  "accounts": [
+    {
+      "identityCheckedBeforeDeletion": true,
+      "deleted": true,
+      "oldNativeSessionStatus": 401,
+      "oldBrowserSessionStatus": 401
+    },
+    {
+      "identityCheckedBeforeDeletion": true,
+      "deleted": true,
+      "oldNativeSessionStatus": 401,
+      "oldBrowserSessionStatus": 401
+    }
+  ],
+  "publicPlanAfterCleanup": 404,
+  "cleanupScope": "two own disposable web-sync QA accounts and their owned records",
+  "ordinaryAccountsTouched": 0,
+  "physicalDeviceOperations": 0
+}

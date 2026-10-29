@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-29T18:51:43.157800+00:00",
+  "checks": [
+    {
+      "path": "/.well-known/apple-app-site-association",
+      "status": 200
+    },
+    {
+      "path": "/privacy",
+      "status": 200
+    },
+    {
+      "path": "/support",
+      "status": 200
+    },
+    {
+      "path": "/web/login",
+      "status": 200
+    }
+  ]
+}
