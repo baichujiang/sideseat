@@ -56,5 +56,7 @@
     "databasePlaceholderOnly": true
   },
   "deployed": false,
-  "physicalPhoneChanged": false
+  "physicalPhoneChanged": false,
+  "sourceCommit": "b00ef212429ac5065126cc04c679fac3ba26eff6",
+  "branch": "codex/ios-uxui-20260922"
 }

@@ -5,6 +5,11 @@ owner's approval under `docs/RELEASE.md`. The existing production deployment is
 `dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6`. No production alias, environment, database,
 schema, feature flag, native source or phone installation was changed by this work.
 
+Source commit: `b00ef212429ac5065126cc04c679fac3ba26eff6`, branch
+`codex/ios-uxui-20260922`. All31 runtime overlays in the build receipt match
+this committed source exactly. Native phone Preview remains260; no device
+build/install/launch was requested or performed for this web-only source change.
+
 ## Product
 
 New `/web` workspace with desktop sidebar and responsive mobile navigation:
