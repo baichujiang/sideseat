@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-29T19:29:34.657390+00:00",
+  "state": "READY",
+  "target": "production",
+  "sameTestedCandidatePromotedWithoutRebuild": true,
+  "aliases": {
+    "sideseat.de": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD",
+    "www.sideseat.de": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD",
+    "api.sideseat.de": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD"
+  }
+}

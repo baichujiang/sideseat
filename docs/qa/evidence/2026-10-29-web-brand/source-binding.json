@@ -1,0 +1,16 @@
+{
+  "kind": "web-brand-alignment",
+  "baseline": "dpl_27E69W2D1v5CGphCzP8PqkPSi1LK",
+  "sourceCommit": "ba9f1b40b92eff3cf4210f0cd094857e887de379",
+  "overlays": {
+    "app/web/web.css": "aed145b874da6ddcb58ffb7f85b455d2041b5e881035bbb81a741ecc290c5f42",
+    "components/web/web-brand.tsx": "14e9c4e4d36d9411c08650018922034c870dfe606990ad105b6b0f6e8a66b9ea",
+    "components/web/web-shell.tsx": "68f735d90f343d4fe337aa53bc6d5b9f86f72e158b783f6e41c82dcb1482795a",
+    "components/web/web-login.tsx": "4411485a1edd76af7ff11da570d370e25a40eebbb792abf2ebf67111af31fc55",
+    "components/web/web-signup.tsx": "39853273882716064906def3b34c51ecba7c9d9393b180177134df594a2e47bc",
+    "public/icons/app-icon.png": "1a792bda882acbfe025aab45685b8552958e9cfa9e9c5d068768aafbd30dbd4c",
+    "public/icons/brand-mark.png": "4fbb750cb2a1faf4e944b5b265ff3fd69abe0b8ba29aca17ab66408736f55349"
+  },
+  "nativeAssetsUnchanged": true,
+  "migrations": "skip"
+}

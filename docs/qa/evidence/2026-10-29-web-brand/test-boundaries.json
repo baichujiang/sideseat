@@ -1,0 +1,10 @@
+{
+  "ownRedundantGitPreviewCanceled": "dpl_EXnFWkmPacVxo2gZHFUGGHhmaFG6",
+  "cancelReason": "free the build slot for the production-baseline-preserving candidate",
+  "productionPromotionRequests": 1,
+  "initialPostPromotionRead": "aliases still pointed to previous deployment and the new raw asset was not yet available",
+  "finalPostPromotionRead": "after all three aliases were observed on the new deployment, public asset hashes and identity checks passed",
+  "mobileBusinessSynchronizationFullSuiteRerun": false,
+  "reason": "presentation/assets only; API and business sources preserved byte-for-byte",
+  "nativePhoneOperations": 0
+}

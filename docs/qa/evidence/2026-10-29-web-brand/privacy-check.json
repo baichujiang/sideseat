@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "exactPasswordTokenCookieMatches": 0,
+  "jwtPatternMatches": 0,
+  "screenshots": "only own disposable account; no login credentials or ordinary identities"
+}

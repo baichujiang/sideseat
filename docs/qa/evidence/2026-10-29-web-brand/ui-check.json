@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "formalDesktopSidebarNativeMarkLoaded": true,
+  "markRenderedSize": [
+    40,
+    40
+  ],
+  "formalLoginAndSignupNativeMarkLoaded": true,
+  "oldBadgeCount": 0,
+  "navigation": [
+    "users-round",
+    "circle-check",
+    "calendar-days",
+    "messages-square",
+    "user-round"
+  ],
+  "navigationScope": "same meanings as native SF Symbols; platform vector drawings differ",
+  "mobileWidth": 390,
+  "mobilePageWidth": 390,
+  "desktopScreenshotReviewed": true,
+  "mobileScreenshotReviewed": true,
+  "signedOutAtEnd": true
+}

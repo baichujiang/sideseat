@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "deploymentId": "dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD",
+  "nativeImageSHA256": {
+    "/icons/brand-mark.png": "4fbb750cb2a1faf4e944b5b265ff3fd69abe0b8ba29aca17ab66408736f55349",
+    "/icons/app-icon.png": "1a792bda882acbfe025aab45685b8552958e9cfa9e9c5d068768aafbd30dbd4c"
+  },
+  "bothImagesByteIdenticalToNative": true,
+  "loginAndSignupUseNativeMark": true,
+  "oldBadgeRemoved": true,
+  "clientConfigUnchanged": true,
+  "sameBrowserNativeAccountID": true,
+  "migrationSkipConfirmed": true,
+  "buildCompleted": true,
+  "physicalPhoneAppChanged": false
+}

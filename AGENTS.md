@@ -1,9 +1,24 @@
 # AGENTS.md — Positive-First Development Protocol
 
-## Current web production — 2026-10-29
+## Current web brand production — 2026-10-29
 
-- Owner-authorized web publication is live at `sideseat.de`. All three api/www/root
-  aliases point to READY `dpl_27E69W2D1v5CGphCzP8PqkPSi1LK`; the exact tested
+- All root/www/api aliases now point to READY `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`.
+  The tested Production candidate was promoted without rebuild; all1,427 remote
+  sources match. Preserve1,419 baseline files;7 branding/navigation overlays plus
+  one marker. Source `ba9f1b40b92eff3cf4210f0cd094857e887de379` is pushed.
+- Sidebar/login/signup share the exact native BrandMark PNG; browser/shared-page
+  App icon matches native AppIcon bytes. Navigation meanings match the five native
+  tabs using web SVG equivalents; do not call them identical SF Symbol drawings.
+  Production raw-file hashes, authenticated desktop/sidebar,390px navigation and
+  auth pages passed. One own QA account is deleted and old web/native sessions401.
+- No native source/build/install/launch, database migration, flag or API/business
+  change. Earlier web/mobile API sync evidence and the separate pending physical
+  supplement retain their scopes. See [brand release](docs/releases/2026-10-29-web-brand-alignment.md).
+
+## Initial web production baseline — 2026-10-29
+
+- Initial owner-authorized web publication used `sideseat.de`. All three api/www/root
+  aliases then pointed to READY `dpl_27E69W2D1v5CGphCzP8PqkPSi1LK`; the exact tested
   Production candidate was promoted without rebuilding. All1,424 remote sources
   match the manifest:1,392 prior production files preserved,31 web overlays and
   one provenance marker. Web source is `b00ef212429ac5065126cc04c679fac3ba26eff6`.

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-29T19:26:18.388532+00:00",
+  "productionPNGHashes": {
+    "brand-mark.png": "4fbb750cb2a1faf4e944b5b265ff3fd69abe0b8ba29aca17ab66408736f55349",
+    "app-icon.png": "1a792bda882acbfe025aab45685b8552958e9cfa9e9c5d068768aafbd30dbd4c"
+  },
+  "productionFilesByteIdenticalToNative": true,
+  "existingWebNativeAccountStillSame": true,
+  "nativeAppBuildInstallOrLaunch": false
+}

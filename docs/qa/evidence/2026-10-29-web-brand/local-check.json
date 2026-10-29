@@ -1,0 +1,16 @@
+{
+  "focusedESLint": "passed",
+  "reactReview": "shared static component, decorative image alt with link text, dimensions and native corner ratio, no state or data-path changes",
+  "nativeBrandPNGExact": true,
+  "nativeAppIconPNGExact": true,
+  "desktopLoginScreenshotReviewed": true,
+  "mobileLoginScreenshotReviewed": true,
+  "mobileSignupImageLoaded": true,
+  "mobileViewportWidth": 390,
+  "mobilePageWidth": 390,
+  "existingLocalServerPID": 8263,
+  "serverPort": 3344,
+  "serverWorkingDirectory": "active checkout",
+  "nativeSourceChanged": false,
+  "ownRedundantGitPreviewCanceled": "dpl_EXnFWkmPacVxo2gZHFUGGHhmaFG6"
+}
