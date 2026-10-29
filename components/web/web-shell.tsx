@@ -6,19 +6,20 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
-  CalendarCheck2,
+  CircleCheck,
   ChevronRight,
-  Compass,
   HelpCircle,
   LogOut,
-  MessageCircle,
+  MessagesSquare,
   Plus,
   Smartphone,
   UserRound,
+  UsersRound,
 } from "lucide-react";
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { useWebResource } from "@/lib/web/client";
 import { Avatar } from "./ui";
+import { WebBrand } from "./web-brand";
 export type WebUser = {
   id: string;
   username: string;
@@ -37,13 +38,13 @@ const navigation = [
     href: "/web/together",
     name: "同行",
     caption: "找到一起的人",
-    icon: Compass,
+    icon: UsersRound,
   },
   {
     href: "/web/plans",
     name: "计划",
     caption: "让见面发生",
-    icon: CalendarCheck2,
+    icon: CircleCheck,
   },
   {
     href: "/web/calendar",
@@ -55,7 +56,7 @@ const navigation = [
     href: "/web/messages",
     name: "消息",
     caption: "从一声招呼开始",
-    icon: MessageCircle,
+    icon: MessagesSquare,
   },
   { href: "/web/me", name: "我", caption: "你的校园名片", icon: UserRound },
 ];
@@ -97,12 +98,7 @@ export function WebShell({
             className="sw-brand"
             aria-label="SideSeat 首页"
           >
-            <span className="sw-brand-symbol">
-              s<span>•</span>
-            </span>
-            <span>
-              sideseat<span className="sw-brand-dot">.</span>
-            </span>
+            <WebBrand />
           </Link>
           <p className="sw-sidebar-tagline">校园很大，刚好同路。</p>
           <nav className="sw-navigation" aria-label="主导航">

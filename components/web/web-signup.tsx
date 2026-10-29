@@ -7,6 +7,7 @@ import { schoolOptions } from "@/lib/constants/schools";
 import { messageOf, webRequest } from "@/lib/web/client";
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { ErrorNotice, Field } from "./ui";
+import { WebBrand } from "./web-brand";
 export function WebSignup() {
   const router = useRouter();
   const [busy, setBusy] = useState(false),
@@ -38,10 +39,7 @@ export function WebSignup() {
   return (
     <main className="sw-signup">
       <Link href="/web/login" className="sw-brand">
-        <span className="sw-brand-symbol">
-          s<span>•</span>
-        </span>
-        <span>sideseat.</span>
+        <WebBrand />
       </Link>
       <h1>从这里，认识同路的人。</h1>
       <p className="sw-subtitle" style={{ marginBottom: 25 }}>

@@ -14,6 +14,7 @@ import {
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { webRequest, messageOf } from "@/lib/web/client";
 import { ErrorNotice, Field } from "./ui";
+import { WebBrand } from "./web-brand";
 export function WebLogin({
   returnTo = "/web/together",
 }: {
@@ -47,10 +48,7 @@ export function WebLogin({
     <main className="sw-login">
       <section className="sw-login-story">
         <Link href="/web" className="sw-brand">
-          <span className="sw-brand-symbol">
-            s<span>•</span>
-          </span>
-          <span>sideseat.</span>
+          <WebBrand />
         </Link>
         <div className="sw-login-copy">
           <p className="sw-eyebrow">LESS SCROLLING. MORE LIVING.</p>

@@ -88,29 +88,13 @@
   letter-spacing: -1.7px;
   line-height: 1;
 }
-.sw-brand-symbol {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sw-accent);
-  color: #fff;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -1px;
-  transform: rotate(-7deg);
-}
-.sw-brand-symbol span {
-  font-size: 18px;
-  position: absolute;
-  right: 3px;
-  top: 0;
-}
-.sw-brand-dot {
-  color: var(--sw-accent);
+.sw-brand-icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 22%;
+  object-fit: contain;
 }
 .sw-sidebar-tagline {
   font-size: 11px;
