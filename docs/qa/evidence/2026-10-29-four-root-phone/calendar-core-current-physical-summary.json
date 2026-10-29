@@ -1,0 +1,151 @@
+{
+  "RootCoreAccepted": true,
+  "acceptedAt": "2026-10-28T23:30:39.919254+00:00",
+  "caseCount": 8,
+  "cases": [
+    {
+      "case": "share",
+      "controllerSHA256": "f58746290324192d569a62d11935b3c6c7083b69c8cf9d209365bb762e55c8e0",
+      "phases": 13,
+      "qualifiedOriginalFalse": true,
+      "reviewSHA256": "20acf18900a1276effae75ebaf8a4c88a3265b26502626e0cf2070889cb8921b"
+    },
+    {
+      "case": "timing",
+      "controllerSHA256": "6d1e2e93dfbe843c1abf459d6bf0555a074b81bb483a11a4fcd1cedaf7c29a35",
+      "phases": 8,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "071d543a9aa7857eeb45176c670477601610ab533ed3f7baba409dc25a350fc1"
+    },
+    {
+      "case": "weekly",
+      "controllerSHA256": "f528ffadf0006c09bbdb605acfe98f209d0f92330d195544d182b183ca3aa547",
+      "phases": 13,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "c04d6d719d82a4b4119a62119dd7cbeb286a00f7af55b6c6e20de25930eebcfe"
+    },
+    {
+      "case": "recurrence",
+      "controllerSHA256": "ee05f7cb04ce132f8417cf40f5e5c813fb0d770bdf4fb3fd9d41bfb62c33853c",
+      "phases": 10,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "51e6534e9fbc935b1e7a8b6cdf690e8d2bc2a674a584876f4f09a90547951458"
+    },
+    {
+      "case": "connections",
+      "controllerSHA256": "1962eaa7cb1780dd761fa24d36bacb397e84214c4557df7b50880ddc8410cbc7",
+      "phases": 10,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "2fd704f698f5ce16bff0c1352509080208c8d7f4f698a688d2c6c5bd90aade29"
+    },
+    {
+      "case": "companions",
+      "controllerSHA256": "ce9f47a480d3f93dc75ac4656663a9088b071f199a5c5065159a2e06e74d9121",
+      "phases": 10,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "f2d9f162096ef1f97321ff55685b14a675d696ae5ad838d929aabad9bcbbf292"
+    },
+    {
+      "case": "smart",
+      "controllerSHA256": "7d1a391f57a7e9ee65c46828cfa6f3c343c315575982c99ef18eab0fc60609bf",
+      "phases": 9,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "226475ead1de3be41ab69d3c377fcb6062a13dc6034fe514e294505f177b8824"
+    },
+    {
+      "case": "transfer",
+      "controllerSHA256": "44c68cd34b3043fbb56acfa93edc1c176436dc35bb0ea4ed041c37f0f48fb891",
+      "phases": 8,
+      "qualifiedOriginalFalse": false,
+      "reviewSHA256": "7be5f6b6c5b42287192362f0075b06473da218165be25436cea7ce074dfa2a6f"
+    }
+  ],
+  "companionsLimit": {
+    "APNsOrOSNotificationCenterDeliveryTested": false,
+    "acceptedOwnedContactWasExplicitAPIPrerequisite": true,
+    "newPlanInvitationCreated": false,
+    "notificationScope": "Empty native UI and unchanged domain sources.",
+    "peerCalendarCopyCreated": false
+  },
+  "connectionsLimit": {
+    "FilesImportExportResult": "Pickers cancelled in this case.",
+    "exactRevokedICS404NoStoreVerified": true,
+    "externalCalendarResult": "Actual subscription-editor Cancel only.",
+    "externalSubscriptionConfirmed": false,
+    "ordinaryCalendarEnumeration": false,
+    "ownedFeedGETMayUpdateLastAccessedAt": true
+  },
+  "deviceClass": "default iPhone14Plus",
+  "imageFirstFailure": {
+    "accepted": false,
+    "assetCreationNotReachedByFailedControlFlow": true,
+    "businessPhases": 0,
+    "nonceACKs": 0,
+    "ordinaryPhotoLibraryOrUnknownSystemAttachmentsRead": false,
+    "productAppDefectEstablished": false,
+    "reviewSHA256": "6c64962ae03f7b20dc023d46bceb33d5f78208d415fbb7bba28598840054c63d"
+  },
+  "kind": "sanitized-calendar-current-physical-core81-acceptance",
+  "nativeAppRebuiltOrReinstalledForThisSupplement": false,
+  "nativePreviewBuild": 260,
+  "oneContinuousSuite": false,
+  "ordinaryInstalledBuild": 97,
+  "phaseCount": 81,
+  "priorFalseReceiptsPreserved": true,
+  "privateRawArtifactsIncluded": false,
+  "recurrenceLimit": {
+    "consecutiveBerlinDays": 4,
+    "unboundedSeriesCoverageClaim": false
+  },
+  "remainingRequiredMedia": {
+    "image": {
+      "accepted": false,
+      "phases": 9
+    },
+    "voice": {
+      "accepted": false,
+      "phases": 10
+    }
+  },
+  "rootCanonicalCertificateSHA256": "fbfe3614ccff2aeec07f8c8ded01528dfd9cc1f379338413392b24b1608bc645",
+  "schemaVersion": 1,
+  "shareQualification": {
+    "HTMLContract": "Exact unavailable200 tombstone without owned content.",
+    "expectedFieldsDerivedFromPassedContracts": true,
+    "native13ReplayedForCleanupSupplement": false,
+    "originalControllerPassed": false,
+    "originalControllerSHA256": "f58746290324192d569a62d11935b3c6c7083b69c8cf9d209365bb762e55c8e0",
+    "publicAPIContract": "404 NOT_FOUND, private/no-store, no data.",
+    "publicCleanupSupplementSHA256": "32af4f723aa33cfc9ee541946435376a7d1ed85fda0a623ccdd2c36138e99f7d",
+    "qualifiedReviewSHA256": "20acf18900a1276effae75ebaf8a4c88a3265b26502626e0cf2070889cb8921b",
+    "rawSnapshotWasRetained": false,
+    "specificRootAcceptanceSHA256": "34f5b6033bd6aad4c1f714b0c00fc16455d3d25d01042b740bbd28dc287c510d",
+    "supplementActors": 0,
+    "supplementGETs": 2
+  },
+  "smartLimit": {
+    "imageOrVoiceAcceptanceIncluded": false,
+    "providerTelemetryAudited": false,
+    "realUITextParses": 1,
+    "safePNGFilesByteChecked": 30,
+    "safeUniquePixelsViewed": 15,
+    "stubRetryOrFieldCorrectionUsed": false
+  },
+  "transferScope": {
+    "VEVENTCount": 1,
+    "diagnosticsAndCleanupSupplementsCountAsBusinessPass": false,
+    "exactOwnedFileAndFolderCleanupVerified": true,
+    "fileBytes": 439,
+    "fullByteCopiesComparedWithAPIExport": 4,
+    "importedIdentityDiffersFromSource": true,
+    "ordinaryFilesRead": false,
+    "ownedNonrecurringEvents": 1,
+    "priorFalseControllerSHA256": [
+      "20e733867ae78a27489b291198d0e58d0545362d7d10ec4d264404bcba004f77",
+      "659d5a976a04d698d2f988dbd093acd01bdc3e9800f2c1aa6cf71f9236953a4c"
+    ],
+    "realFilesSaveImportReloginDeleteVerified": true
+  },
+  "verificationScope": "Production GET boundaries and nonce ACKs, not literal HTTP-request totals and not SQL verification.",
+  "wholeCalendarAccepted": false
+}

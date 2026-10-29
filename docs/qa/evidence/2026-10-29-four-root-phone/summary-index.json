@@ -1,0 +1,69 @@
+{
+  "acceptedSummaries": [
+    {
+      "SHA256": "aabbad72ee88ddec66e1787ea0e795e80195ee7f2d35ba1a27d1f61d2b013afe",
+      "file": "together-current-physical-summary.json"
+    },
+    {
+      "SHA256": "ecb856166f39523f83a1201391fc76eb6f7f0ee822dcbe7c617166d2be420bc4",
+      "file": "calendar-core-current-physical-summary.json"
+    }
+  ],
+  "allFourRootsAccepted": false,
+  "kind": "sanitized-four-root-phone-supplement-index",
+  "native": {
+    "LocalConfigurationMatchRootVerified": true,
+    "finalNormalPreviewDeliveryPending": true,
+    "frozenInputCount": 268,
+    "newAppBuildOrReinstallForSupplement": false,
+    "ordinaryAccountIdentityRead": false,
+    "ordinaryInstalledBuild": 97,
+    "previewBuild": 260,
+    "sourceCommit": "9c501d8a9609adbc8929a06730a743716374fa49"
+  },
+  "overallStatus": "IN_PROGRESS",
+  "privacy": {
+    "privateFilesystemPathsIncluded": false,
+    "rawLogsFixturesCredentialsTokensIncluded": false,
+    "rawPhotosOrOrdinaryFilesIncluded": false,
+    "unsafeNotificationOrSystemImagesIncluded": false
+  },
+  "production": {
+    "actualImageUploadUIAccepted": false,
+    "aliases": [
+      "api.sideseat.de",
+      "www.sideseat.de",
+      "sideseat.de"
+    ],
+    "deploymentId": "dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6",
+    "fullTypeScriptPassed": true,
+    "lintPassed": true,
+    "overlaidSourcePaths": [
+      "app/api/v1/me/avatar/route.ts"
+    ],
+    "preservedBaselineFiles": 1397,
+    "ready": true,
+    "remoteSourceFileCount": 1399,
+    "sourceCommits": [
+      "d2f94a7f6db06fccfee766ea99f456c241c6d8b9",
+      "fe02e127a3d95b66178e9482a53b6ea647eb39b6"
+    ],
+    "sourceVerificationCanonicalSHA256": "67b1383a65638a89b7f42933705c799bd7582461280edd4e79a017870e3bc246",
+    "targetedUnitChecksPassed": 9
+  },
+  "remaining": {
+    "MeAvatarPhases": 7,
+    "MeCoreAndExtraPhases": 109,
+    "MeUIStarted": false,
+    "calendarMediaPhases": 19
+  },
+  "retainedPlansScope": {
+    "new260PhysicalReplayClaim": false,
+    "priorMacWebChecks": 11,
+    "priorPhysicalCases": 4,
+    "priorPhysicalPhases": 47,
+    "relevantFilesUnchanged": 15
+  },
+  "schemaVersion": 1,
+  "scope": "Fixed safe facts and cryptographic references only; original canonical certificates remain unchanged and retained privately."
+}

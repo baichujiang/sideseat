@@ -1,0 +1,98 @@
+{
+  "RootAccepted": true,
+  "acceptedAt": "2026-10-28T21:42:46.462817+00:00",
+  "backendScope": "Real isolated local API/PostgreSQL through owned paired-USB loopback bridge; not production identity verification.",
+  "caseCount": 9,
+  "cases": [
+    {
+      "case": "lifecycle",
+      "controllerSHA256": "e8875547187a70ae8d048f7b1693a4e00259074e0d5867d6fc9e1dba8e947586",
+      "phases": 10,
+      "reviewResult": "PASS",
+      "reviewSHA256": "f619b6e4da8b093a4822f9bbf63d5aca70aea1c589e544b7ecc06c64e04c30ae"
+    },
+    {
+      "case": "main",
+      "controllerSHA256": "896f31b08da3a2cbbdabefc8caef24f208aa9fa81eb007eb379f8c54f4f65503",
+      "phases": 9,
+      "reviewResult": "PASS",
+      "reviewSHA256": "6230499cc57ffc75ea7a8ec4a59f5cddfc5b2a055ad0f69179301b873745a64b"
+    },
+    {
+      "case": "discovery",
+      "controllerSHA256": "bd2cc17d5bc2ec2d54425b00b75b4901b3f15e7db625280447a2c2e63c6d27e8",
+      "phases": 12,
+      "reviewResult": "PASS",
+      "reviewSHA256": "d03af35fa10e6bcc36853b83d0eca81fa2ba4ec635505990ba5fb029f7b6cb82"
+    },
+    {
+      "case": "timing",
+      "controllerSHA256": "73d802c50111759b0d4ce468fcdc637f55d0d0e5819e6610e0a8cd8718f59064",
+      "phases": 6,
+      "reviewResult": "PASS",
+      "reviewSHA256": "cfbce0af60840218c06e96bd4097ad0724a3e72d254fd72ec41cd8516e408f06"
+    },
+    {
+      "case": "safety",
+      "controllerSHA256": "0af42963718d1f6fd9fb5df9f4ba0e20330543699614f84eb68c103f685bad66",
+      "phases": 9,
+      "reviewResult": "PASS",
+      "reviewSHA256": "5c9d2a31d9d604fc8bdb07a52729b8197092c3a94e46b3a67f56fe279cc7bd90"
+    },
+    {
+      "case": "recovery",
+      "controllerSHA256": "f5f2e0627bd4309499edb8cebbbd7fe0c3cef49aa32b0d866cf8efab96565cf4",
+      "phases": 3,
+      "reviewResult": "PASS",
+      "reviewSHA256": "693de3819bed312aaac1cc538cdbc2bc9b6338d972ce78b209eabe764e543111"
+    },
+    {
+      "case": "clock",
+      "controllerSHA256": "889fe9aaa6a1e375e08ee348583f1c8de5cd8eda9ff1cdfdd5d30f82ea4bd2c5",
+      "phases": 3,
+      "reviewResult": "PASS",
+      "reviewSHA256": "9811933137a67accca5246e433fce7f366cce9c7f547b57846921ba968d7a6a5"
+    },
+    {
+      "case": "category",
+      "controllerSHA256": "19c246e7dac0631a0f664953ebef00682159234f9a93addcc342b8612dcfff93",
+      "phases": 18,
+      "reviewResult": "PASS",
+      "reviewSHA256": "1ed8ba705a0d4d27784b090feaa7d8578f77d56c7ee531b6b20cc4856230459a"
+    },
+    {
+      "case": "explore",
+      "controllerSHA256": "5c617bdb9b0a8ed26ff385df4ad3e5d46d941b08134ccb4a9ff45ed05d65c20a",
+      "phases": 8,
+      "reviewResult": "FUNCTIONAL_SCOPED_PASS_WITH_ONE_PIXEL_EXCLUSION",
+      "reviewSHA256": "571f3eb8df80ae0fc1f4201089600d55022f52e4a9c3ee891ecf8fb2b72f1098"
+    }
+  ],
+  "deviceClass": "default iPhone14Plus",
+  "explicitPrerequisites": [
+    "Fresh owned pair per independent case.",
+    "Local-only student verification and English readiness.",
+    "Explore alone adds six owner public candidate intentions via explicit local API prerequisite."
+  ],
+  "explorePixelScope": {
+    "attachmentCount": 6,
+    "excludedAttachmentCount": 1,
+    "excludedReason": "System notification affected capture; content excluded.",
+    "pageHeaderPixelAcceptanceClaim": false,
+    "safeAttachmentsUsed": 5
+  },
+  "kind": "sanitized-together-current-physical-acceptance",
+  "nativeAppRebuiltOrReinstalledForThisSupplement": false,
+  "nativePreviewBuild": 260,
+  "oneContinuousSuite": false,
+  "ordinaryInstalledBuild": 97,
+  "phaseCount": 78,
+  "priorFalseAttemptsPreserved": true,
+  "privateRawArtifactsIncluded": false,
+  "rootCanonicalCertificateSHA256": "de54d30bb48ff4f2463e5eea125eea7f66ce83fe42c640bcdb6712bd8cabc4b2",
+  "schemaVersion": 1,
+  "scopeLimits": [
+    "Independent current physical functional cases; not all devices, all sizes or one uninterrupted suite.",
+    "Only safe reviewed captures support their recorded visual scope."
+  ]
+}

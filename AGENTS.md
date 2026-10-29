@@ -1,5 +1,40 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current in-progress supplement — 2026-10-29
+
+- The requested four-root physical supplement is **IN PROGRESS**. Use the
+  [current scope and remaining work](docs/qa/2026-10-29-four-root-phone-supplement.md);
+  earlier accepted scopes below remain historical and do not complete this run.
+- Production is now actually READY on `dpl_78FQQyqiDPP7gxqNsbnn3moi9KW6` for
+  api/www/root aliases, with all1,399 remote sources verified. Avatar rollback
+  cleanup and complete language/readiness response fixes (`d2f94a7f`, `fe02e127`)
+  are pushed and live;9 targeted tests, lint and full TypeScript passed. Actual
+  image-upload UI acceptance is still pending.
+- Native Preview260/source `9c501d8a` remains unchanged:268 inputs and Local
+  match, ordinary97 preserved, no new App build/reinstall. Previous normal-launch
+  PIDs are historical; final normal Preview delivery for this supplement is pending.
+- Together's9 separate default14Plus cases/78 phases are accepted. Explore used
+  five safe attachments; one notification-affected attachment was excluded.
+  Do not claim page-header pixel acceptance. Plans retains its prior4 physical
+  cases/47 phases plus11 Mac-web checks, with15 relevant files unchanged.
+- Calendar Share13, Timing8, Weekly13, Recurrence10, Connections10, Companions10,
+  Smart9 and Transfer8 are accepted within their separate scopes (8 core cases/81 phases). Recurrence is
+  bounded to four consecutive Berlin days. External Calendar covers the actual
+  subscription-editor Cancel only, with no confirmed subscription or ordinary list.
+  Share's original `f5874629…` controller remains false; qualified independent
+  review and a0-actor/two-GET public-cleanup supplement establish its acceptance.
+  Image9/voice10 remain unaccepted. The image first attempt stopped at its
+  permission query before any business phase/ACK or asset-creation marker;
+  no OCR success or App defect is established. Smart9 covers one real UI text
+  parse, not image/voice or provider telemetry. Transfer's two prior false
+  attempts and diagnostic/cleanup supplements remain separate from its accepted run.
+  Companions is a personal-calendar relation with no peer copy or new Plan invitation.
+- Me's109-phase supplement and separate Avatar7 have not run. Avatar's prepared
+  forward package and actual production binding do not imply UI success.
+  Preserve frozen sources, old false receipts, TS startup/user changes and unsafe
+  artifact exclusions. Ordinary account identity has not been read. Final sanitized
+  evidence and page acceptance will be updated after actual completion.
+
 ## Active version and archive boundary — owner instruction 2026-10-15
 
 - The active checkout is `/Users/baichu/Desktop/项目/app开发项目/Sideseat-ios-uxui`,
