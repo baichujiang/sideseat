@@ -1,3 +1,10 @@
+/* The document owns page scrolling; body must not trap wheel chaining from grids. */
+body:has(.sideseat-web) {
+  overflow-x: clip;
+  overflow-y: visible;
+  overscroll-behavior-y: auto;
+}
+
 .sideseat-web {
   --sw-ink: #292d28;
   --sw-muted: #85877f;
