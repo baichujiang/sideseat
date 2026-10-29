@@ -14,6 +14,15 @@ import { isPublicAppPath } from "@/lib/nav/public-app-path";
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  if (pathname === "/web" || pathname.startsWith("/web/")) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(
+      "x-sideseat-web-return-to",
+      pathname + request.nextUrl.search,
+    );
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (isLegacyWebFrozen() && !isNativeWebPath(pathname)) {
     const nativeAppURL = new URL("/ios", request.url);
     const verification = request.nextUrl.searchParams.get("verification");

@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "environment": "local",
+  "browserUiWritesReadViaNativeAuthentication": [
+    "calendar event",
+    "created plan + submitted availability",
+    "sent message"
+  ],
+  "physicalDeviceTest": false
+}

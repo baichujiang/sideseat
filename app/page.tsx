@@ -1,1 +1,2 @@
-export { metadata, default } from "./ios/page";
+import { redirect } from "next/navigation";
+export default function HomePage() { redirect("/web"); }

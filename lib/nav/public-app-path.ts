@@ -3,6 +3,9 @@
  * Used by client auth bootstrap to avoid redirect loops on auth screens.
  */
 export function isPublicAppPath(pathname: string): boolean {
+  // The new workspace guards its authenticated layout on the server. Keep its
+  // login/registration reachable without reviving any frozen legacy app routes.
+  if (pathname === "/web" || pathname.startsWith("/web/")) return true;
   if (
     pathname === "/manifest.webmanifest" ||
     pathname === "/sw.js" ||

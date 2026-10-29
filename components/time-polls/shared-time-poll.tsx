@@ -75,6 +75,7 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
         <div className="flex items-center gap-2">
           <button type="button" className="min-h-11 text-sm" aria-label={zh ? "Switch to English" : "切换为中文"} onClick={() => { const next = !zh; setZh(next); document.cookie = POLL_LOCALE_COOKIE + "=" + (next ? "zh-CN" : "en") + "; Path=/time-polls; Max-Age=31536000; SameSite=Lax"; }}>{zh ? "English" : "中文"}</button>
           {!recoveryPage ? <a href={"sideseat://time-polls/" + encodeURIComponent(token)} className={styles.actionLink + " inline-flex min-h-11 items-center gap-1 text-sm"}>{zh ? "打开 App" : "Open app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></a> : null}
+          {!recoveryPage ? <Link href={`/web/plans/${encodeURIComponent(token)}`} className={styles.actionLink + " inline-flex min-h-11 items-center gap-1 text-sm"}>{zh ? "打开网页版" : "Open web app"}<ArrowUpRight className="h-3.5 w-3.5" aria-hidden /></Link> : null}
         </div>
       </header>
       {!poll ? <section className="rounded-2xl border bg-background p-6" aria-live="polite">

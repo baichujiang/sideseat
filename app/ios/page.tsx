@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { NativeAppHandoff } from "@/components/native/native-app-handoff";
 import { getServerAppLocale } from "@/lib/i18n/server-locale";
@@ -20,14 +21,14 @@ export default async function IOSAppPage({
   return (
     <NativeAppHandoff
       openURL="sideseat://home"
-      title={zh ? "SideSeat 现已专注于 iPhone" : "SideSeat now lives on iPhone"}
+      title={zh ? "SideSeat，随时在你身边" : "Take SideSeat with you"}
       description={
         zh
-          ? "网页 App 已停止使用。请在 SideSeat iPhone App 中继续。"
-          : "The web app has been retired. Continue in the SideSeat iPhone app."
+          ? "在 iPhone 上继续，或打开新版网页端。一个账号，共用你的校园生活。"
+          : "Continue on iPhone or use the new web app. One account for your campus life."
       }
       statusMessage={verificationMessage(query.verification, zh)}
-    />
+    ><Link href="/web" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">{zh ? "在浏览器中使用 SideSeat →" : "Use SideSeat in your browser →"}</Link></NativeAppHandoff>
   );
 }
 

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "checks": [
+    "account-0: shared browser/native identity",
+    "account-1: shared browser/native identity",
+    "profile: browser write → native read",
+    "intention: browser write → native read",
+    "intention: native write → browser read",
+    "calendar: browser write → native read",
+    "calendar: native write → browser read",
+    "plan: shared token, native availability → browser read",
+    "chat: browser send → peer native receive",
+    "chat: peer native send → browser receive",
+    "plan: browser invite → peer native accept → exactly one calendar per participant"
+  ],
+  "environment": "local",
+  "physicalDeviceTest": false
+}

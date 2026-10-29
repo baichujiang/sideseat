@@ -1,4 +1,4 @@
-const NATIVE_WEB_PATHS = ["/", "/ios", "/xhs", "/privacy", "/support"] as const;
+const NATIVE_WEB_PATHS = ["/", "/ios", "/xhs", "/privacy", "/support", "/web"] as const;
 const ADMIN_WEB_PATHS = ["/admin", "/login", "/forgot-password"] as const;
 
 export function isLegacyWebFrozen(

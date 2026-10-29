@@ -1,0 +1,17 @@
+{
+  "environment": "local",
+  "passed": true,
+  "accounts": [
+    {
+      "ownedAccountDeleted": true,
+      "oldCookieStatus": 401
+    },
+    {
+      "ownedAccountDeleted": true,
+      "oldCookieStatus": 401
+    }
+  ],
+  "ordinaryAccountsTouched": false,
+  "serverRestarted": false,
+  "databaseConfigurationChanged": false
+}
