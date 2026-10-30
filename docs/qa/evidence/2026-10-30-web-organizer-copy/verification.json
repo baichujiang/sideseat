@@ -1,0 +1,137 @@
+{
+  "verifiedAtUTC": "2026-10-30T20:37:49Z",
+  "sourceBinding": {
+    "kind": "organizer-plan-copy",
+    "sourceCommit": "e6129d55e7a3c89d4132163186aa8cc7d0659b2b",
+    "baseline": "dpl_CgvMZYefoGM7TpvQqXTkdPars2W2",
+    "overlays": {
+      "components/web/plans.tsx": "15a8a5d4ae12fa4601266661133363f51049fc4a72acd15a02753aa48b781788",
+      "components/web/ui.tsx": "0002716739c79808949409c8dd4d1d5f692c3c9c92a3a403ea8a856e4e1e3113"
+    },
+    "contracts": "preserve production capacity 20, existing cap controls, single contact-sharing request and all backend/shared-reader inputs",
+    "migrations": "skip",
+    "activityHook": "none"
+  },
+  "release": {
+    "deployment": "dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3",
+    "state": "READY",
+    "promotedSameBuild": true,
+    "baselineFiles": 1439,
+    "unchangedBaselineFiles": 1437,
+    "overlayFiles": 2,
+    "provenanceMarkersAdded": 1,
+    "files": 1440,
+    "allUploadedSHA1Match": true,
+    "manifestSHA256": "10c92febce1a58fba970e3bbd6fa1348c4f333acca468218005b08dc1dc59451",
+    "aliases": {
+      "sideseat.de": "dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3",
+      "www.sideseat.de": "dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3",
+      "api.sideseat.de": "dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3"
+    }
+  },
+  "overlayManifest": [
+    {
+      "path": ".sideseat-web-organizer-copy-source.json",
+      "sha1": "0821828458d3709a902f081ef1515801dabf3736",
+      "sha256": "7ade68648279aa0a5a944b7007f842020f334fbf48052c8d40b9ef07dfe75f97",
+      "bytes": 557
+    },
+    {
+      "path": "components/web/plans.tsx",
+      "sha1": "2839742701eeb424c1f6150aa53fc125d66d7dbc",
+      "sha256": "15a8a5d4ae12fa4601266661133363f51049fc4a72acd15a02753aa48b781788",
+      "bytes": 43624
+    },
+    {
+      "path": "components/web/ui.tsx",
+      "sha1": "7be329516e40c1ef755e046e42bb7c082da0535d",
+      "sha256": "0002716739c79808949409c8dd4d1d5f692c3c9c92a3a403ea8a856e4e1e3113",
+      "bytes": 3610
+    }
+  ],
+  "checks": {
+    "focusedESLint": "pass (source and staged variant)",
+    "localTypecheck": "pass (current-server routes, preserved owner config)",
+    "existingTimePollTests": {
+      "passed": 25,
+      "failed": 0
+    },
+    "productionBuild": "pass (compile, lint/types, 131 static pages, ready)",
+    "candidateAuthenticatedHTTP": {
+      "login": 200,
+      "ownedPublicPlan": 200,
+      "phase": "COLLECTING",
+      "startMinute": 720,
+      "endMinute": 930
+    },
+    "publicBrowser": [
+      "new organizer headings and explicit actions",
+      "availability submit and one owned contact plan card, no duplicate",
+      "invite defaults 12:00–15:30; production max 20 preserved",
+      "optional capacity field and inclusive-organizer label",
+      "peer acceptance then owner publication",
+      "CONFIRMED with exactly one Calendar entry per registered account",
+      "published actions and stale share notice removed",
+      "re-invitation version 2 resets peer to INVITED",
+      "cancel/delete consequences previewed and dismissed with Keep plan",
+      "API cancellation removes both Calendar projections",
+      "cancelled UI: state heading and link-only share dialog"
+    ],
+    "liveViewportChecks": [
+      {
+        "width": 390,
+        "height": 844,
+        "documentScrollWidth": 390
+      },
+      {
+        "width": 320,
+        "height": 740,
+        "documentScrollWidth": 320
+      }
+    ],
+    "localDesktopViewport": {
+      "width": 1440,
+      "height": 900,
+      "actualCapturesReviewed": true
+    },
+    "liveMobileCapturesReviewed": true,
+    "runtimeErrorQuery": {
+      "since": "15m",
+      "limit": 30,
+      "entries": 0
+    }
+  },
+  "cleanup": {
+    "local": {
+      "ownedAccountsDeleted": 2,
+      "oldCookies": 401,
+      "ownedPublicPlans404": 3
+    },
+    "production": {
+      "ownedAccountsDeleted": 2,
+      "oldCookies": 401,
+      "ownedPublicPlans404": 3
+    },
+    "privateAccountAndSessionFilesRemoved": true,
+    "credentialBearingHelperRemoved": true,
+    "qaTabsClosed": true,
+    "viewportOverrideReset": true,
+    "ordinaryUserRecordsChanged": false
+  },
+  "scope": {
+    "nativeChanges": false,
+    "nativeBuildInstall": false,
+    "physicalPhoneUI": false,
+    "allBrowserE2EClaim": false,
+    "schemaMigrations": false,
+    "backendAPIChanges": false,
+    "sharedReaderDirectEntryPreserved": true
+  },
+  "resolvedObservations": [
+    "Local temporary misplaced JSX guard caused compile/read failure; corrected and cancellation, visual, lint and type checks repeated.",
+    "Initial contact fixture was not accepted; normal friend-link request/accept prepared before delivery.",
+    "Candidate curl initially forwarded unsupported scope; corrected linked-project authenticated command passed.",
+    "Public tab retained pre-promotion JS until explicit refresh; acceptance began only on new labels.",
+    "Successful share closes dialog; stale Close locator was replaced with current page state."
+  ]
+}

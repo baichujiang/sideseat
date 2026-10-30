@@ -1,5 +1,9 @@
 # 已部署功能与归档边界
 
+## Organizer plan details and dialogs — 2026-10-30
+
+Root/www/api point to READY `dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3`, source `e6129d55e7a3c89d4132163186aa8cc7d0659b2b`. Organizer details and share/invitation/edit dialogs use concise, explicit labels and state-specific actions. Invitation defaults retain 12:00–15:30; re-invitation and destructive consequences remain visible. Existing capacity/backend/shared-entry behavior is preserved. Local and live browser/API/Calendar checks and owned-data cleanup passed. [Release and verification](releases/2026-10-30-web-organizer-copy.md).
+
 ## Direct shared-plan entry — 2026-10-30
 
 Root/www/api point to READY `dpl_CgvMZYefoGM7TpvQqXTkdPars2W2`; the name field and timetable appear on the same page, and a guest identity is created with their first submitted action. [Release and verification](releases/2026-10-30-web-direct-shared-plan-entry.md).
