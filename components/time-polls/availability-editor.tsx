@@ -28,9 +28,11 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
     return { date, label: pollDate(date, zh),
       day: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", month: "short", day: "numeric" }).format(new Date(date + "T12:00:00Z")),
       weekday: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", weekday: "short" }).format(new Date(date + "T12:00:00Z")),
-      ids: slots.map((slot) => slot.id),
+      ids: slots.map((slot) => slot.id), endAt: last?.end,
       endLabel: last ? `${endDate !== date ? (zh ? "次日 " : "Next day ") : ""}${pollClock(last.end, poll.timeZone)}` : "—" };
   });
+  const endLabels = [...new Set(dates.filter((date) => date.endAt).map((date) => date.endLabel))];
+  const commonEnd = endLabels.length === 1 ? endLabels[0] : null;
   const apply = (value: number[]) => {
     const next = [...new Set(value)].sort((a, b) => a - b);
     if (next.length === selected.length && next.every((id) => selected.includes(id))) return;
@@ -64,7 +66,7 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={zh ? "大家的时间表，直接选择我的空闲" : "Group timetable: select my free time"}>
     <>
-      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格最多 30 分钟。左侧是开始时间，底部显示结束时间。点一下选中，再点一次取消。" : "Each cell is up to 30 minutes. Times on the left are starts; the end appears below. Tap to select or clear."}</p>
+      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格最多 30 分钟，时间标在格子的边界。点一下选中，再点一次取消。" : "Each cell is up to 30 minutes; times mark the boundaries. Tap to select or clear."}</p>
         <button type="button" aria-label={zh ? "撤销上次修改" : "Undo last change"} data-testid="time-poll-undo" disabled={!undo || disabled || gesture.preview !== null} onClick={() => { if (undo) { onChange(undo); setUndo(null); } }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border disabled:opacity-35"><Undo2 className="h-4 w-4" aria-hidden /></button>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
@@ -92,26 +94,28 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
             </div>;
           })}
         </div>
+        <div className="py-2">
         <div ref={gesture.surface} className="grid select-none" style={{ ...columns, WebkitTouchCallout: "none" }} onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove} onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel} onLostPointerCapture={gesture.onLostPointerCapture} onContextMenu={(event) => event.preventDefault()}>
-          {rows.map((row) => <div key={row} className="contents">
-            <div className="sticky left-0 z-10 flex h-11 items-center justify-center border-b bg-background px-1 text-[10px] tabular-nums">{labels.get(row)}</div>
-            {dates.map(({ date, label }) => {
+          {rows.map((row, rowIndex) => <div key={row} className="contents">
+            <div className="sticky left-0 z-10 h-11 border-b bg-background text-[10px] tabular-nums">
+              <span data-testid={`time-poll-boundary-${rowIndex}`} className="absolute inset-x-0 top-0 -translate-y-1/2 text-center leading-none">{labels.get(row)}</span>
+              {rowIndex === rows.length - 1 && commonEnd ? <span data-testid="time-poll-final-boundary" className="absolute inset-x-0 bottom-0 translate-y-1/2 text-center leading-none">{commonEnd}</span> : null}
+            </div>
+            {dates.map(({ date, label, endAt, endLabel }) => {
               const slot = lookup.get(date + "|" + row);
               if (!slot) return <div key={date} className="h-11 border-b border-l bg-muted/30" />;
               const all = slot.slotIds.every((id) => active.has(id));
               const partial = !all && slot.slotIds.some((id) => active.has(id));
               const count = otherSelections.filter((ids) => slot.slotIds.every((id) => ids.has(id))).length + Number(all);
               const name = `${label}, ${slot.label}–${pollClock(slot.end, poll.timeZone)}`;
-              return <button key={date} type="button" data-testid={`time-poll-cell-${slot.id}`} aria-label={`${name}, ${count} ${zh ? "人有空" : "available"}`} aria-pressed={all ? true : partial ? "mixed" : false} disabled={disabled} onClick={(event) => gesture.onClick(slot.slotIds, event.detail === 0)} className={`flex h-11 items-center justify-center gap-1.5 border-b border-l text-sm tabular-nums focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-blue-500 ${all ? styles.mine : partial ? styles.minePartial : "border-border"}`} style={{ backgroundColor: `rgb(13 148 136 / ${count ? 0.14 + 0.42 * count / Math.max(1, displayedParticipants) : 0.04})` }}>
+              return <button key={date} type="button" data-testid={`time-poll-cell-${slot.id}`} aria-label={`${name}, ${count} ${zh ? "人有空" : "available"}`} aria-pressed={all ? true : partial ? "mixed" : false} disabled={disabled} onClick={(event) => gesture.onClick(slot.slotIds, event.detail === 0)} className={`relative flex h-11 items-center justify-center gap-1.5 border-b border-l text-sm tabular-nums focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-blue-500 ${all ? styles.mine : partial ? styles.minePartial : "border-border"}`} style={{ backgroundColor: `rgb(13 148 136 / ${count ? 0.14 + 0.42 * count / Math.max(1, displayedParticipants) : 0.04})` }}>
                 {all || partial ? <span className={all ? styles.mineMark : styles.partialMark} aria-hidden>{all ? "✓" : "−"}</span> : null}<span aria-hidden>{count}</span>
+                {!commonEnd && slot.end === endAt ? <span aria-hidden data-testid={`time-poll-end-${date}`} className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap rounded bg-background px-1 text-[10px] leading-none">{endLabel}</span> : null}
               </button>;
             })}
           </div>)}
         </div>
-        {rows.length ? <div className="grid bg-background text-xs text-muted-foreground" style={columns}>
-          <div className="sticky left-0 flex min-h-9 items-center justify-center bg-background">{zh ? "结束" : "End"}</div>
-          {dates.map(({ date, endLabel }) => <div key={date} data-testid={`time-poll-end-${date}`} className="flex min-h-9 items-center justify-center border-l px-1 tabular-nums">{endLabel}</div>)}
-        </div> : null}
+        </div>
       </div>
     </div>
 
