@@ -81,6 +81,7 @@ body:has(.sideseat-web) {
   inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   padding: 34px 22px 18px;
   border-right: 1px solid var(--sw-line);
   background: #f5f5ee;

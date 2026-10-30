@@ -706,11 +706,15 @@ export function CalendarPage() {
     if (view === "week" && weekScroll.current)
       weekScroll.current.scrollTop = 8 * 48;
   }, [view]);
+  function selectDate(day: Date) {
+    setAnchor(day);
+    setSelectedDay(dateKey(day));
+  }
   function navigate(amount: number) {
-    setAnchor((current) =>
+    selectDate(
       view === "month"
-        ? addMonths(current, amount)
-        : addDays(current, amount * 7),
+        ? addMonths(anchor, amount)
+        : addDays(anchor, amount * 7),
     );
   }
   return (
@@ -801,7 +805,7 @@ export function CalendarPage() {
                     >
                       <button
                         className={`sw-day-number ${key === dayID(new Date()) ? "is-today" : ""}`}
-                        onClick={() => setSelectedDay(key)}
+                        onClick={() => selectDate(day)}
                         onDoubleClick={() => {
                           setSelectedDay(key);
                           setEditing(true);
@@ -831,7 +835,7 @@ export function CalendarPage() {
                         {dayEvents(key).length > 3 ? (
                           <button
                             className="sw-more-events"
-                            onClick={() => setSelectedDay(key)}
+                            onClick={() => selectDate(day)}
                           >
                             还有 {dayEvents(key).length - 3} 项
                           </button>
@@ -853,7 +857,7 @@ export function CalendarPage() {
                       className={
                         dateKey(day) === dayID(new Date()) ? "is-today" : ""
                       }
-                      onClick={() => setSelectedDay(dateKey(day))}
+                      onClick={() => selectDate(day)}
                     >
                       <small>
                         {

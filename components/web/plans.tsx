@@ -585,6 +585,7 @@ function PollWorkspace({
   const draftKey = `sideseat:web:availability:${user.id}:${poll.token}`;
   const [selected, setSelected] = useState<number[]>(poll.mySlotIds),
     [dirty, setDirty] = useState(false),
+    [restoredDraftKey, setRestoredDraftKey] = useState<string | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
@@ -630,11 +631,13 @@ function PollWorkspace({
       }
     } catch {
       setError("浏览器无法读取草稿，请保持页面打开并手动提交。");
+    } finally {
+      setRestoredDraftKey(draftKey);
     }
   }, [draftKey]); // one account + plan, never shared across accounts
   useEffect(() => {
-    if (!dirty) setSelected(poll.mySlotIds);
-  }, [poll.mySlotIds, dirty]);
+    if (restoredDraftKey === draftKey && !dirty) setSelected(poll.mySlotIds);
+  }, [draftKey, restoredDraftKey, poll.mySlotIds, dirty]);
   function choose(ids: number[]) {
     setSelected(ids);
     setDirty(true);
@@ -858,7 +861,7 @@ function PollWorkspace({
                   className="sw-button"
                   disabled={busy || mine?.status === "DECLINED"}
                   onClick={() =>
-                    void action("/invitation-response", "POST", {
+                    void action("/invitation-response", "PUT", {
                       status: "DECLINED",
                       version: poll.invitationVersion,
                     })
@@ -870,7 +873,7 @@ function PollWorkspace({
                   className="sw-button sw-primary"
                   disabled={busy || mine?.status === "ACCEPTED"}
                   onClick={() =>
-                    void action("/invitation-response", "POST", {
+                    void action("/invitation-response", "PUT", {
                       status: "ACCEPTED",
                       version: poll.invitationVersion,
                     })
