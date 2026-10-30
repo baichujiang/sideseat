@@ -1,5 +1,8 @@
 # SideSeat
 
+**网页时间文字更新（2026-10-30）**：时间刻度保持对齐格线，文字周围留白，避免线条穿过数字。[发布记录](docs/releases/2026-10-30-web-axis-label-visibility.md)。
+
+
 **网页时间刻度更新（2026-10-30）**：时间直接对齐时间格的边界，不再额外增加结束行；多日窄屏时间表支持横向滚动。[发布记录](docs/releases/2026-10-30-web-timetable-boundary-labels.md)。
 
 

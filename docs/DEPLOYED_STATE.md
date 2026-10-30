@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web timetable label visibility — 2026-10-30
+
+Root/www/api point to READY `dpl_FPJzY2MwEiSugy7aprXVUziuwsaV`, source `670bdced1cdbf0093d8f43fc4d3d027068891a3b`. Boundary time labels have a clear background so grid lines do not cross the text. [Release and scope](releases/2026-10-30-web-axis-label-visibility.md).
+
+
 ## Web timetable boundary labels — 2026-10-30
 
 Root/www/api point to READY `dpl_7JLt9ahvijFbQcUJcJHazbceNeio`, source `3417b740098fa67e3c57db41a3fbee31a0038ced`. Web times appear at grid boundaries; multi-day narrow screens can scroll horizontally. [Release and scope](releases/2026-10-30-web-timetable-boundary-labels.md).

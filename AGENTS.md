@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web timetable label visibility — 2026-10-30
+
+- Root/www/api point to READY `dpl_FPJzY2MwEiSugy7aprXVUziuwsaV`, source `670bdced1cdbf0093d8f43fc4d3d027068891a3b`. Time-label backgrounds prevent grid lines crossing the text; boundary alignment and selection retained. 1,435 source hashes match; local and live browser checks passed. Local owned IDs absent by independent read-only check; production QA accounts deleted. [Release](docs/releases/2026-10-30-web-axis-label-visibility.md).
+
+
 ## Current web timetable boundary labels — 2026-10-30
 
 - Root/www/api point to READY `dpl_7JLt9ahvijFbQcUJcJHazbceNeio`, source `3417b740098fa67e3c57db41a3fbee31a0038ced`. Web time labels align to cell boundaries without an ending row; narrow multi-day grid scrolls within its panel. 1,434 source hashes match; local and live browser checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-boundary-labels.md).
