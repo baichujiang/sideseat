@@ -648,11 +648,15 @@ function PollWorkspace({
       setError("此浏览器无法保留草稿，离开前请手动提交。");
     }
   }
-  async function action(path: string, method: string, body?: unknown) {
+  async function action<T = PollDetail>(
+    path: string,
+    method: string,
+    body?: unknown,
+  ) {
     setBusy(true);
     setError("");
     try {
-      const result = await webRequest<PollDetail>(
+      const result = await webRequest<T>(
         `/api/v1/time-polls/${poll.token}${path}`,
         method,
         body,
@@ -1003,6 +1007,14 @@ function PollWorkspace({
             <Copy size={15} />
             复制链接
           </button>
+          <ErrorNotice
+            message={error}
+            retry={() => {
+              setError("");
+              setShowShare(false);
+              reload();
+            }}
+          />
           <div className="sw-line" />
           <h3>直接发给 App 联系人</h3>
           <ErrorNotice message={contacts.error} />
@@ -1035,13 +1047,22 @@ function PollWorkspace({
               className="sw-button sw-soft"
               disabled={busy || !contactIds.length}
               onClick={async () => {
-                const result = await action("/contacts", "POST", {
+                const result = await action<{
+                  deliveries: { connectionId: string }[];
+                }>("/contacts", "POST", {
                   connectionIds: contactIds,
                   version: poll.invitationVersion,
                 });
                 if (result) {
                   setShowShare(false);
-                  setNotice("已发送到朋友的 SideSeat 聊天和计划中。");
+                  const sent = result.deliveries.length;
+                  setNotice(
+                    sent === 0
+                      ? "这些联系人之前已收到该计划，本次没有重复发送。"
+                      : sent < contactIds.length
+                        ? `已发送给 ${sent} 位联系人，其余联系人之前已收到该计划。`
+                        : "已发送到朋友的 SideSeat 聊天和计划中。",
+                  );
                 }
               }}
             >
