@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web timetable boundary labels — 2026-10-30
+
+- Root/www/api point to READY `dpl_7JLt9ahvijFbQcUJcJHazbceNeio`, source `3417b740098fa67e3c57db41a3fbee31a0038ced`. Web time labels align to cell boundaries without an ending row; narrow multi-day grid scrolls within its panel. 1,434 source hashes match; local and live browser checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-boundary-labels.md).
+
+
 ## Current web modal scroll containment — 2026-10-30
 
 - Root/www/api point to READY `dpl_7P6A7Hy3EQQwRhEUEpbnuVuaSQHJ`, source `71ccae5e534204a7cd2ef4407198007a7792eb32`. Web modal background wheel bleed fixed while preserving textarea/dialog and post-close page scrolling. 1,433 source hashes match; local and live in-app browser checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-modal-scroll.md).

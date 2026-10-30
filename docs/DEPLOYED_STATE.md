@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web timetable boundary labels — 2026-10-30
+
+Root/www/api point to READY `dpl_7JLt9ahvijFbQcUJcJHazbceNeio`, source `3417b740098fa67e3c57db41a3fbee31a0038ced`. Web times appear at grid boundaries; multi-day narrow screens can scroll horizontally. [Release and scope](releases/2026-10-30-web-timetable-boundary-labels.md).
+
+
 ## Web modal scroll containment — 2026-10-30
 
 Root/www/api point to READY `dpl_7P6A7Hy3EQQwRhEUEpbnuVuaSQHJ`, source `71ccae5e534204a7cd2ef4407198007a7792eb32`. Web dialogs contain wheel scrolling and the background unlocks on close. [Release and scope](releases/2026-10-30-web-modal-scroll.md).
