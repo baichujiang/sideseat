@@ -1,5 +1,9 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current shared-plan copy and web invitation time — 2026-10-30
+
+- Root/www/api point to READY `dpl_8THpobYYYsaGDMoPJ3CVZrjkzaSN`. Shared-page copy is concise and state-specific; the organizer dialog retains the complete candidate range instead of a one-hour default. Five frontend overlays preserve the existing production backend/capacity contract. All 1,438 source hashes match; live two-account/guest confirmation, Calendar and activity checks passed and owned QA data was cleaned. [Release](docs/releases/2026-10-30-web-plan-copy.md).
+
 ## Shared-plan page simplification — deployed (2026-10-30)
 
 - Vercel resumed; root/www/api point to READY `dpl_Hgsjz93Y96bCmmkdYmmSHw8ubkzS`. Responsive shared-page UI and live guest flows verified; the unshipped unlimited-capacity backend remains excluded. [Release](docs/releases/2026-10-30-web-share-page-simplification.md).

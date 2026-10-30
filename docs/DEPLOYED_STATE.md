@@ -1,5 +1,9 @@
 # 已部署功能与归档边界
 
+## Web shared-plan copy and invitation time — 2026-10-30
+
+Root/www/api point to READY `dpl_8THpobYYYsaGDMoPJ3CVZrjkzaSN`. The shared page removes repeated explanations and uses explicit task, invitation and attendance labels. The organizer's final-time dialog retains 12:00–15:30 instead of inventing a one-hour interval. Existing production capacity/backend behavior is preserved; actual live browser/API/Calendar checks and QA cleanup passed. [Release and verification](releases/2026-10-30-web-plan-copy.md).
+
 ## Web shared-plan page simplification — 2026-10-30
 
 Root/www/api point to READY `dpl_Hgsjz93Y96bCmmkdYmmSHw8ubkzS`, with UI from `d50ea41b6c4d3a2e22b0964563ea6fffd0f954c2` isolated on the previous production baseline. Desktop/mobile shared pages are streamlined; existing capacity behavior is preserved. [Release and verification](releases/2026-10-30-web-share-page-simplification.md).

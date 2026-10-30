@@ -1,0 +1,62 @@
+{
+  "verifiedAtUTC": "2026-10-30T19:51:26.355292+00:00",
+  "status": "READY",
+  "deployment": "dpl_8THpobYYYsaGDMoPJ3CVZrjkzaSN",
+  "url": "sideseat-pajikj96y-baichus-projects.vercel.app",
+  "aliases": [
+    "sideseat.de",
+    "www.sideseat.de",
+    "api.sideseat.de"
+  ],
+  "buildingAt": 1793389325768,
+  "readyAt": 1793389535641,
+  "sourceBinding": {
+    "kind": "web-plan-copy-and-time",
+    "baseline": "dpl_Hgsjz93Y96bCmmkdYmmSHw8ubkzS",
+    "copyCommit": "efcf9fe8",
+    "timeImplementationCommit": "6350c987",
+    "timeVerificationCommit": "d008f2f2",
+    "overlays": {
+      "components/time-polls/shared-time-poll.tsx": "1dc530410ac3f01c09f85d3d49e8f6210958bb1a205345c69c89c649a72a5fc2",
+      "components/time-polls/availability-editor.tsx": "6a9cac63ea01c43a41a66e9b9e1fa35470294d471a0d8933413ec10e06ddbb7c",
+      "components/time-polls/activity-ideas.tsx": "453d5accfb35552487ea7a0423b4956a529991d1c1c5b5f05118de935cb5c8b1",
+      "components/time-polls/invitation-timetable.tsx": "1ee17498a04488283ac04a88ed2b85f8761132288e2296450c32777edf20b126",
+      "components/web/plans.tsx": "2fa21beda3b5c5517eef9cc44504973db0c5578f9088ddc0ea989ea58f5c20be"
+    },
+    "capacityPresentation": "preserve current production fallback and cap semantics; remove five unshipped unlimited-capacity expressions",
+    "backend": "all source hashes preserved",
+    "migrations": "skip",
+    "activityHook": "none"
+  },
+  "remoteSources": {
+    "files": 1438,
+    "allSHA1Match": true,
+    "baselineFilesPreserved": 1432
+  },
+  "local": {
+    "timePollTestsPassed": 25,
+    "focusedESLintPassed": true,
+    "currentGeneratedRoutesTypecheckPassed": true,
+    "ownedAccountDeleted": true,
+    "ownedPlans404": 4
+  },
+  "production": {
+    "ownerBrowserDefault": "12:00–15:30",
+    "savedInvitation": "12:00–15:30",
+    "existingCapacity": 20,
+    "guestBrowserRSVPPassed": true,
+    "peerAccountRSVPPassed": true,
+    "organizerBrowserPublishPassed": true,
+    "uniqueCalendarEntriesPerRegisteredAccount": 1,
+    "registeredAccountsChecked": 2,
+    "activitySuggestionBrowserPassed": true,
+    "english320NoHorizontalOverflow": true,
+    "ownedAccountsDeleted": 2,
+    "oldCookies401": 2,
+    "ownedPlans404": 2,
+    "ordinaryAccountsModified": 0,
+    "boundedErrorLogRecordsReturned": 0
+  },
+  "candidateBrowser": "Vercel SSO blocked browser; authenticated CLI login and public-plan data returned 200 before promotion. Production browser acceptance followed promotion without rebuilding.",
+  "nativeBuildOrInstallation": false
+}
