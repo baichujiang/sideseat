@@ -3,6 +3,17 @@
 Owner approval: 2026-10-15. Delivery status: [Deployed state](./DEPLOYED_STATE.md).
 Product authority: [Product](./PRODUCT.md), [User Flow](./USER_FLOW.md).
 
+## Web invitation time — owner correction / 2026-10-30
+
+When no invitation interval has been explicitly saved, the web final-time dialog
+starts with the first future candidate day's complete available range. A
+12:00–15:30 candidate range remains 12:00–15:30; the dialog must not invent a
+one-hour duration. An existing saved invitation interval retains its own endpoints.
+The invitation phase reads “拟定时间，待确认”; only CONFIRMED reads
+“这次，我们约好了。” This changes web defaults and presentation, not the
+invitation, explicit publication or Calendar consent rules. See the
+[implementation and verification record](./releases/2026-10-30-web-invitation-time.md).
+
 <a id="current-manual-plan-flow--2026-10-24"></a>
 
 ## Current manual plan flow — owner correction / 2026-10-26
