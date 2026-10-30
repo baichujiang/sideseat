@@ -5,6 +5,10 @@ body:has(.sideseat-web) {
   overscroll-behavior-y: auto;
 }
 
+html:has(.sideseat-web .sw-dialog[open]) {
+  overflow-y: hidden;
+}
+
 .sideseat-web {
   --sw-ink: #292d28;
   --sw-muted: #85877f;
@@ -534,6 +538,8 @@ body:has(.sideseat-web) {
 .sw-dialog {
   width: min(520px, calc(100vw - 32px));
   max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0;
   border: 1px solid var(--sw-line);
   border-radius: 20px;
