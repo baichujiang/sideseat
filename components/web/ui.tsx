@@ -43,7 +43,7 @@ export function PageHeading({
   description,
   children,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description?: string;
   children?: ReactNode;
@@ -51,7 +51,7 @@ export function PageHeading({
   return (
     <header className="sw-page-heading">
       <div>
-        <p className="sw-eyebrow">{eyebrow}</p>
+        {eyebrow ? <p className="sw-eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>
         {description ? <p className="sw-subtitle">{description}</p> : null}
       </div>

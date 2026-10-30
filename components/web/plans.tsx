@@ -628,7 +628,7 @@ function PollWorkspace({
         ) {
           setSelected(ids);
           setDirty(true);
-          setNotice("已恢复此浏览器的空闲草稿，尚未提交。");
+          setNotice("草稿已恢复，尚未提交。");
         }
       }
     } catch {
@@ -643,7 +643,7 @@ function PollWorkspace({
   function choose(ids: number[]) {
     setSelected(ids);
     setDirty(true);
-    setNotice("草稿已保存在此浏览器，提交后朋友才能看到。");
+    setNotice("");
     try {
       localStorage.setItem(draftKey, JSON.stringify(ids));
     } catch {
@@ -657,6 +657,7 @@ function PollWorkspace({
   ) {
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       const result = await webRequest<T>(
         `/api/v1/time-polls/${poll.token}${path}`,
@@ -685,7 +686,7 @@ function PollWorkspace({
       } catch {
         /* server acknowledgement remains authoritative */
       }
-      setNotice("空闲已提交，手机端也能看到。");
+      setNotice("");
       if (poll.isOwner && !poll.didRespond) setShowShare(true);
     }
   }
@@ -718,6 +719,7 @@ function PollWorkspace({
   const firstDayEnd = first && poll.slots.filter((slot) => slot.date === first.date).at(-1)?.end;
   const initialStart = poll.chosenStart ?? first?.start;
   const initialEnd = poll.chosenEnd ?? firstDayEnd;
+  const canInvite = poll.isOwner && !closed && ["COLLECTING", "INVITING"].includes(poll.phase);
   const minimumAttendees = Math.max(
     2,
     1 + invitees.filter((id) => !poll.invitees?.some((person) => person.id === id && person.isMe)).length,
@@ -725,13 +727,12 @@ function PollWorkspace({
   return (
     <>
       <PageHeading
-        eyebrow="A LITTLE PLAN, A REAL CONNECTION"
         title={poll.title}
-        description={`${poll.location || "地点可以一起商量"} · ${poll.timeZone}`}
+        description={[poll.location, poll.timeZone].filter(Boolean).join(" · ")}
       >
         <button className="sw-button" onClick={() => setShowShare(true)}>
           <Copy size={15} />
-          分享
+          分享计划
         </button>
         {poll.isOwner && !closed ? (
           <button
@@ -747,22 +748,23 @@ function PollWorkspace({
         <section className="sw-panel">
           <div className="sw-panel-heading">
             <div>
-              <span className="sw-label orange">
-                {phaseNames[poll.phase] ?? poll.phase}
-              </span>
-              <h2 style={{ marginTop: 12 }}>
+              <h2>
                 {poll.phase === "COLLECTING"
-                  ? "大家的时间表"
+                  ? "收集空闲时间"
                   : poll.phase === "INVITING"
                     ? "拟定时间，待确认"
                     : poll.phase === "CONFIRMED"
                       ? "这次，我们约好了。"
-                      : "计划详情"}
+                      : poll.phase === "CANCELLED"
+                        ? "计划已取消"
+                        : poll.phase === "EXPIRED"
+                          ? "计划已过期"
+                          : "计划详情"}
               </h2>
             </div>
-            <span className="sw-muted">
-              {poll.dates[0]?.slice(5)} — {poll.dates.at(-1)?.slice(5)}
-            </span>
+            {!poll.chosenStart ? <span className="sw-muted">
+              {poll.dates[0]?.slice(5)}{poll.dates.length > 1 ? ` — ${poll.dates.at(-1)?.slice(5)}` : ""}
+            </span> : null}
           </div>
           {poll.chosenStart && poll.chosenEnd ? (
             <div className="sw-confirmed-time">
@@ -771,7 +773,7 @@ function PollWorkspace({
                 <strong>{prettyDate(poll.chosenStart, poll.timeZone)}</strong>
                 <p>
                   {clock(poll.chosenStart, poll.timeZone)} —{" "}
-                  {prettyDate(poll.chosenEnd, poll.timeZone)}{" "}
+                  {formatInTimeZone(poll.chosenStart, poll.timeZone, "yyyy-MM-dd") !== formatInTimeZone(poll.chosenEnd, poll.timeZone, "yyyy-MM-dd") ? prettyDate(poll.chosenEnd, poll.timeZone) + " " : ""}
                   {clock(poll.chosenEnd, poll.timeZone)}
                 </p>
               </div>
@@ -807,7 +809,7 @@ function PollWorkspace({
               />
               {poll.isOwner && poll.activitySelection.isOpen ? (
                 <div className="sw-activity-choices">
-                  <p className="sw-muted">发邀请前，先确定这次活动：</p>
+                  <h3 className="sw-section-title">选定活动</h3>
                   {poll.activitySelection.ideas.map((idea) => (
                     <button
                       key={idea.id}
@@ -819,7 +821,7 @@ function PollWorkspace({
                         })
                       }
                     >
-                      选定：{idea.title}
+                      选择「{idea.title}」
                     </button>
                   ))}
                 </div>
@@ -844,7 +846,7 @@ function PollWorkspace({
                       ? "草稿 · 未提交"
                       : poll.didRespond
                         ? "已提交空闲"
-                        : "还没有提交空闲"}
+                        : "未提交"}
                   </span>
                 </p>
                 <button
@@ -906,7 +908,7 @@ function PollWorkspace({
         <aside className="sw-stack">
           <section className="sw-panel">
             <div className="sw-panel-heading">
-              <h2>一起的人</h2>
+              <h2>{poll.phase === "COLLECTING" ? "空闲提交" : "邀请回复"}</h2>
               <Users size={17} color="#9ba58b" />
             </div>
             {(poll.phase === "COLLECTING"
@@ -921,29 +923,21 @@ function PollWorkspace({
                 </span>
                 <small>
                   {"status" in person
-                    ? (phaseNames[person.status] ??
-                      { INVITED: "待确认", SHARED: "已分享" }[person.status] ??
-                      person.status)
-                    : "已填写"}
+                    ? (({ INVITED: "待回复", ACCEPTED: "已确认参加", DECLINED: "已婉拒", SHARED: "未受邀" } as Record<string, string>)[person.status] ?? person.status)
+                    : "已提交"}
                 </small>
               </div>
             ))}
             {!poll.participants.length && poll.phase === "COLLECTING" ? (
-              <p className="sw-muted">还没有人填写。你可以先选好自己的空闲。</p>
+              <p className="sw-muted">暂无提交</p>
             ) : null}
-            <p className="sw-muted" style={{ marginTop: 18 }}>
-              填写空闲不等于确认参加。收到最终邀请后，每个人都要明确确认。
-            </p>
           </section>
-          {poll.isOwner && !closed ? (
-            <section className="sw-panel">
-              <h2 className="sw-section-title">下一步</h2>
-              <p className="sw-muted">
-                即使还没有人填写，也可以直接选定最终时间并发出邀请。
-              </p>
+          {canInvite ? (
+            <section className="sw-panel sw-stack" aria-label="计划操作">
+              {poll.phase === "COLLECTING" || poll.planningMode !== "FIXED" ? (
               <button
-                className="sw-button sw-primary"
-                style={{ width: "100%", marginTop: 18 }}
+                className={`sw-button ${poll.phase === "COLLECTING" ? "sw-primary" : ""}`}
+                style={{ width: "100%" }}
                 disabled={busy || !!poll.activitySelection?.isOpen}
                 onClick={() => {
                   setInvitees(
@@ -965,12 +959,13 @@ function PollWorkspace({
                 }}
               >
                 <CalendarDays size={15} />
-                {poll.chosenStart ? "调整时间与邀请" : "选定时间并邀请"}
+                {poll.activitySelection?.isOpen ? "选定活动后邀请" : poll.phase === "INVITING" ? "修改邀请" : poll.chosenStart ? "设置邀请" : "设置时间与邀请"}
               </button>
+              ) : null}
               {poll.phase === "INVITING" ? (
                 <button
-                  className="sw-button sw-soft"
-                  style={{ width: "100%", marginTop: 10 }}
+                  className="sw-button sw-primary"
+                  style={{ width: "100%" }}
                   disabled={busy}
                   onClick={() =>
                     void action("/publish", "POST", {
@@ -979,28 +974,24 @@ function PollWorkspace({
                   }
                 >
                   <Send size={15} />
-                  正式发出计划
+                  发布最终计划
                 </button>
               ) : null}
-              <p className="sw-muted" style={{ marginTop: 12 }}>
-                正式发出后，仅已确认参加的账号用户会收到日历安排。
-              </p>
+              {poll.phase === "INVITING" ? <p className="sw-muted">
+                仅已确认参加的账号用户会同步日历。
+              </p> : null}
             </section>
           ) : null}
           <Link href="/web/calendar" className="sw-banner">
             <CalendarDays size={20} />
-            <span>确认的安排，在日历里等你。</span>
+            <span>查看日历</span>
             <ArrowRight size={15} />
           </Link>
         </aside>
       </div>
       {showShare ? (
-        <Modal title="给朋友，留一个位置。" onClose={() => setShowShare(false)}>
-          <p className="sw-muted">
-            网页链接可让朋友免下载参与。已有 SideSeat
-            账号的朋友可以在新版网页端登录后填写。
-          </p>
-          <Field label="公开计划链接">
+        <Modal title="分享计划" onClose={() => setShowShare(false)}>
+          <Field label="计划链接">
             <input
               readOnly
               value={poll.shareUrl}
@@ -1030,8 +1021,9 @@ function PollWorkspace({
               reload();
             }}
           />
+          {poll.isOwner && !closed ? <>
           <div className="sw-line" />
-          <h3>直接发给 App 联系人</h3>
+          <h3>分享给联系人</h3>
           <ErrorNotice message={contacts.error} />
           {contacts.loading ? (
             <Loading />
@@ -1082,10 +1074,10 @@ function PollWorkspace({
                   setShowShare(false);
                   setNotice(
                     sent === 0
-                      ? "这些联系人之前已收到该计划，本次没有重复发送。"
+                      ? "所选联系人已收到计划。"
                       : sent < contactIds.length
-                        ? `已发送给 ${sent} 位联系人，其余联系人之前已收到该计划。`
-                        : "已发送到朋友的 SideSeat 聊天和计划中。",
+                        ? `已发送给 ${sent} 人，其余人已收到。`
+                        : `已发送给 ${sent} 位联系人。`,
                   );
                 } catch (cause) {
                   refreshWebData();
@@ -1099,25 +1091,28 @@ function PollWorkspace({
               }}
             >
               <Send size={15} />
-              发送给所选联系人
+              发送计划卡片
             </button>
           </div>
+          </> : null}
         </Modal>
       ) : null}
       {showFinal ? (
         <Modal
-          title="选一个真正见面的时间。"
+          title={poll.phase === "INVITING" ? "修改邀请" : poll.planningMode === "FIXED" ? "设置邀请" : "设置时间与邀请"}
           onClose={() => setShowFinal(false)}
         >
           <form onSubmit={(event) => void invite(event)}>
             <p className="sw-muted" style={{ marginBottom: 20 }}>
-              时间按 {poll.timeZone} 填写，需在候选日期内，以 15 分钟为单位。
+              {poll.timeZone} · 仅限候选日期 · 15 分钟为单位
             </p>
-            <Field label="开始">
+            {poll.invitationVersion > 0 ? <p className="sw-muted">修改后，参与者需要重新确认。</p> : null}
+            <Field label="开始时间">
               <input
                 type="datetime-local"
                 step={900}
                 name="start"
+                readOnly={poll.planningMode === "FIXED"}
                 required
                 defaultValue={initialStart ? formatInTimeZone(
                   initialStart,
@@ -1126,11 +1121,12 @@ function PollWorkspace({
                 ) : ""}
               />
             </Field>
-            <Field label="结束">
+            <Field label="结束时间">
               <input
                 type="datetime-local"
                 step={900}
                 name="end"
+                readOnly={poll.planningMode === "FIXED"}
                 required
                 defaultValue={initialEnd ? formatInTimeZone(
                   initialEnd,
@@ -1139,7 +1135,7 @@ function PollWorkspace({
                 ) : ""}
               />
             </Field>
-            <h3 className="sw-section-title">邀请名单</h3>
+            {poll.invitees?.length ? <h3 className="sw-section-title">邀请名单</h3> : null}
             {(poll.invitees ?? []).map((person) => (
               <label key={person.id} className="sw-check">
                 <input
@@ -1158,8 +1154,8 @@ function PollWorkspace({
                 {person.isMe
                   ? " · 发起人"
                   : person.didRespond
-                    ? " · 已填写"
-                    : " · 尚未填写"}
+                    ? " · 已提交空闲"
+                    : " · 未提交空闲"}
               </label>
             ))}
             <label className="sw-check">
@@ -1168,23 +1164,23 @@ function PollWorkspace({
                 checked={openInviteLink}
                 onChange={(event) => setOpenInviteLink(event.target.checked)}
               />
-              允许朋友通过链接加入
+              允许通过链接参加
             </label>
             {openInviteLink ? (
               <>
-                <p className="sw-muted">默认不限参加人数。</p>
+                <p className="sw-muted">不设人数上限</p>
                 <label className="sw-check">
                   <input
                     type="checkbox"
                     checked={limitAttendees}
                     onChange={(event) => setLimitAttendees(event.target.checked)}
                   />
-                  限制参加人数（可选）
+                  自定人数上限
                 </label>
                 {limitAttendees ? (
                   <Field
-                    label="最多参加几人（包括你）"
-                    hint={`至少 ${minimumAttendees} 人，包含你和已选中的朋友。`}
+                    label="人数上限（含你）"
+                    hint={`至少 ${minimumAttendees} 人`}
                   >
                     <input
                       name="capacity"
@@ -1207,7 +1203,7 @@ function PollWorkspace({
                 取消
               </button>
               <button className="sw-button sw-primary" disabled={busy}>
-                发送正式邀请
+                {busy ? "发送中…" : poll.phase === "INVITING" ? "重新发送邀请" : "发送邀请"}
                 <Send size={15} />
               </button>
             </div>
@@ -1227,7 +1223,7 @@ function PollWorkspace({
               if (result) setEdit(false);
             }}
           >
-            <Field label="名称">
+            <Field label="计划名称">
               <input
                 name="title"
                 defaultValue={poll.title}
@@ -1235,7 +1231,7 @@ function PollWorkspace({
                 maxLength={120}
               />
             </Field>
-            <Field label="地点">
+            <Field label="地点（选填）">
               <input
                 name="location"
                 defaultValue={poll.location ?? ""}
@@ -1252,7 +1248,7 @@ function PollWorkspace({
                   setConfirm(poll.invitationVersion > 0 ? "cancel" : "delete");
                 }}
               >
-                取消或删除计划
+                {poll.invitationVersion > 0 ? "取消计划" : "删除计划"}
               </button>
               <button className="sw-button sw-primary" disabled={busy}>
                 保存修改
@@ -1263,13 +1259,13 @@ function PollWorkspace({
       ) : null}
       {confirm ? (
         <Modal
-          title={confirm === "cancel" ? "取消这次计划？" : "删除这个计划？"}
+          title={confirm === "cancel" ? "取消计划？" : "删除计划？"}
           onClose={() => setConfirm(null)}
         >
           <p className="sw-muted">
             {confirm === "cancel"
-              ? "参与者会看到取消结果，相关 SideSeat 日历安排将一并更新。"
-              : "这会删除你发起的计划，分享链接也将失效。"}
+              ? "链接仍可查看取消状态，日历安排将移除。"
+              : "计划将被删除，分享链接随即失效。"}
           </p>
           <ErrorNotice message={error} />
           <div className="sw-form-actions">
