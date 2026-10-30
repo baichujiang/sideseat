@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web calendar and plans — 2026-10-30
+
+Root/www/api are READY on `dpl_u3vCd6ps1s6JzDwJ7gKTDLqxhtk8`, source `b95e460f50d390d53852076011c446b340e050c5`. Calendar navigation, short-window scrolling, plan draft restoration and invitation response are fixed. Details and verification scope: [release](releases/2026-10-30-web-calendar-plans-interactions.md).
+
+
 **最新滚动修正已上线：** 根／www／api指向READY `dpl_HLHJLHHJgPhP27oQ1RfcsaabZRDr`，同一已测Production候选原样提升。源码`5ba690e5`仅修正`/web`外层body滚动传递；1,428项远端源匹配，1,426项基线保留，1个CSS覆盖加1个标记。此前线上Mac周日历滚到底后整页不动已复现；新版1440x900真实滚轮的日历／计划双向内外衔接及关闭弹窗后滚动均通过。截图为1248x900主区域捕获，不作全宽像素／Safari／手机UI声明。各1个本地／生产自有账号及计划已删，旧cookie401、公开API404；无API／原生／Schema／开关变更，3344／15434服务保持。[滚动修正记录](./releases/2026-10-29-web-scroll-chaining.md)。
 
 **此前图标修正：** 根／www／api当时均指向READY `dpl_5BKA8W4f9ga7ZcQaQNP37zL2AxcD`，同一已测Production候选原样提升；源码`ba9f1b40`已推送。1,427项远端源全匹配，1,419项原生产内容保留，只有7项品牌／导航覆盖加1项来源标记。侧栏／登录／注册直接复用原生BrandMark原图，浏览器／分享页图标与原生AppIcon字节一致；五导航使用与原生同含义的网页SVG，非同一SF绘制文件。线上原图哈希、实际桌面侧栏／登录／注册和390px导航通过；1自有账号已删除、旧网页／手机会话401。无原生构建／安装／启动、API／业务／Schema／开关变化；真机同步UI仍保留此前未验范围。[图标发布记录](./releases/2026-10-29-web-brand-alignment.md)。

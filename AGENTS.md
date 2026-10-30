@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web calendar and plans production — 2026-10-30
+
+- Root/www/api point to READY `dpl_u3vCd6ps1s6JzDwJ7gKTDLqxhtk8`; source `b95e460f50d390d53852076011c446b340e050c5`. Four web interaction fixes, 1,429 source hashes verified, no native/API/schema changes. Local and production two-account plan confirmation and schedule readback passed; own accounts cleaned. See [release](docs/releases/2026-10-30-web-calendar-plans-interactions.md) for scope and limitations.
+
+
 ## Current web scroll production — 2026-10-29
 
 - Root/www/api now point to READY `dpl_HLHJLHHJgPhP27oQ1RfcsaabZRDr`, the same
