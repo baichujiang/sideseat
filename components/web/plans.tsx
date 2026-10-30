@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import {
   ArrowLeft,
@@ -17,11 +17,13 @@ import {
 } from "lucide-react";
 import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
 import { ActivityIdeas } from "@/components/time-polls/activity-ideas";
+import { CollaborationOptions, ownCollaborationChoices } from "@/components/time-polls/collaboration-options";
+import { ActivityCreateEditor } from "./activity-create-editor";
+import { CollaborativeFinalFields } from "./collaboration-final-fields";
+import workspaceStyles from "./collaboration-workspace.module.css";
 import type { SharedTimePoll } from "@/lib/time-polls/browser-types";
 import {
-  browserTimeZone,
   clock,
-  dateKey,
   messageOf,
   prettyDate,
   refreshWebData,
@@ -88,6 +90,7 @@ type PollDetail = SharedTimePoll & {
     displayName: string;
     didRespond: boolean;
     isMe: boolean;
+    selected?: boolean;
   }[];
 };
 const phaseNames: Record<string, string> = {
@@ -102,142 +105,17 @@ const phaseNames: Record<string, string> = {
   CANCELED: "已取消",
   COUNTERED: "已提议调整",
 };
-function CreatePlan({ close }: { close: () => void }) {
-  const router = useRouter();
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const later = new Date(tomorrow);
-  later.setDate(later.getDate() + 6);
-  async function create(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    const data = new FormData(event.currentTarget);
-    try {
-      const first = String(data.get("from")),
-        last = String(data.get("to"));
-      if (last < first) throw new Error("结束日期不能早于开始日期。");
-      const dates: string[] = [];
-      for (
-        let day = new Date(first + "T12:00:00");
-        dateKey(day) <= last;
-        day.setDate(day.getDate() + 1)
-      ) {
-        dates.push(dateKey(day));
-        if (dates.length > 31) throw new Error("最多选择 31 个候选日期。");
-      }
-      const minutes = (key: string) => {
-        const [h, m] = String(data.get(key)).split(":").map(Number);
-        return h * 60 + m;
-      };
-      const result = await webRequest<PollDetail>(
-        "/api/v1/time-polls",
-        "POST",
-        {
-          title: data.get("title"),
-          location: data.get("location"),
-          timeZone: browserTimeZone(),
-          dates,
-          startMinute: minutes("start"),
-          endMinute: minutes("end"),
-          planningMode: "COLLECT",
-          chooseActivityTogether: data.get("ideas") === "on",
-        },
-      );
-      refreshWebData();
-      close();
-      router.push(`/web/plans/${result.token}`);
-    } catch (cause) {
-      setError(messageOf(cause));
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <Modal title="让想法，变成一个计划。" onClose={close}>
-      <form onSubmit={(event) => void create(event)}>
-        <Field label="计划名称">
-          <input
-            name="title"
-            required
-            maxLength={120}
-            placeholder="例如：周末一起去逛美术馆"
-            autoFocus
-          />
-        </Field>
-        <Field label="地点（选填）">
-          <input
-            name="location"
-            maxLength={200}
-            placeholder="可以先留空，之后一起商量"
-          />
-        </Field>
-        <div className="sw-form-row">
-          <Field label="候选日期 · 从">
-            <input
-              name="from"
-              type="date"
-              defaultValue={dateKey(tomorrow)}
-              min={dateKey(new Date())}
-              required
-            />
-          </Field>
-          <Field label="到">
-            <input
-              name="to"
-              type="date"
-              defaultValue={dateKey(later)}
-              min={dateKey(new Date())}
-              required
-            />
-          </Field>
-        </div>
-        <div className="sw-form-row">
-          <Field label="每天可填写的时间 · 从">
-            <input
-              name="start"
-              type="time"
-              step={900}
-              defaultValue="09:00"
-              required
-            />
-          </Field>
-          <Field label="到">
-            <input
-              name="end"
-              type="time"
-              step={900}
-              defaultValue="22:00"
-              required
-            />
-          </Field>
-        </div>
-        <label className="sw-check">
-          <input name="ideas" type="checkbox" />
-          也让朋友一起提议活动
-        </label>
-        <p className="sw-muted">
-          创建后直接进入时间表。填写并提交自己的空闲，再分享给朋友。时区：
-          {browserTimeZone()}
-        </p>
-        <ErrorNotice message={error} />
-        <div className="sw-form-actions">
-          <button type="button" className="sw-button" onClick={close}>
-            取消
-          </button>
-          <button className="sw-button sw-primary" disabled={busy}>
-            {busy ? "创建中…" : "创建时间表"}
-            <ArrowRight size={15} />
-          </button>
-        </div>
-      </form>
-    </Modal>
-  );
+function InvitationEditor({ inline, title, onClose, children }: { inline: boolean; title: string; onClose: () => void; children: ReactNode }) {
+  if (!inline) return <Modal title={title} onClose={onClose}>{children}</Modal>;
+  return <section className={workspaceStyles.inlineInvite}>
+    <button type="button" className="sw-text-button" onClick={onClose}><ArrowLeft size={15} />返回活动</button>
+    <p className="sw-muted">{title}</p>
+    {children}
+  </section>;
 }
 export function PlansPage() {
   const search = useSearchParams();
+  const router = useRouter();
   const [create, setCreate] = useState(search.get("create") === "1"),
     [tab, setTab] = useState("planning"),
     [direct, setDirect] = useState<DirectPlan | null>(null);
@@ -267,6 +145,10 @@ export function PlansPage() {
   const pairs = (directs.data?.plans ?? []).filter((row) =>
     visible(row.status, row.endTime),
   );
+  if (create) return <ActivityCreateEditor onCancel={() => {
+    setCreate(false);
+    if (search.has("create")) { const params = new URLSearchParams(search.toString()); params.delete("create"); router.replace(`/web/plans${params.size ? "?" + params : ""}`, { scroll: false }); }
+  }} onCreated={token => { refreshWebData(); router.push(`/web/plans/${encodeURIComponent(token)}?share=1`); }} />;
   return (
     <>
       <PageHeading
@@ -412,7 +294,6 @@ export function PlansPage() {
           ) : null}
         </>
       )}
-      {create ? <CreatePlan close={() => setCreate(false)} /> : null}
       {direct ? (
         <DirectPlanModal
           plan={direct}
@@ -581,6 +462,8 @@ function PollWorkspace({
 }) {
   const user = useWebUser(),
     router = useRouter();
+  const search = useSearchParams();
+  const isCollaboration = !!poll.collaboration;
   const initialSlots = useRef(poll.slots);
   const draftKey = `sideseat:web:availability:${user.id}:${poll.token}`;
   const [selected, setSelected] = useState<number[]>(poll.mySlotIds),
@@ -590,9 +473,32 @@ function PollWorkspace({
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
   const [showFinal, setShowFinal] = useState(false),
-    [showShare, setShowShare] = useState(false),
+    [showShare, setShowShare] = useState(poll.isOwner && search.get("share") === "1"),
     [confirm, setConfirm] = useState<"cancel" | "delete" | null>(null),
     [edit, setEdit] = useState(false);
+  useEffect(() => {
+    if (search.get("share") !== "1") return;
+    const params = new URLSearchParams(search.toString()); params.delete("share");
+    router.replace(`/web/plans/${poll.token}${params.size ? "?" + params : ""}`, { scroll: false });
+  }, [search, router, poll.token]);
+  const choiceKey = `sideseat:web:choices:v1:${user.id}:${poll.token}`;
+  const initialOptions = useRef(poll.collaboration?.options ?? []);
+  const [choiceIds, setChoiceIds] = useState<string[]>(() => ownCollaborationChoices(poll));
+  const [choiceDirty, setChoiceDirty] = useState(false);
+  const [choicesReady, setChoicesReady] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(choiceKey);
+      if (raw) { const draft = JSON.parse(raw); if (draft.version === 1 && Array.isArray(draft.ids) && draft.ids.every((id: unknown) => typeof id === "string")) { const valid = new Set(initialOptions.current.map(option => option.id)); setChoiceIds(draft.ids.filter((id: string) => valid.has(id))); setChoiceDirty(true); } }
+    } catch { setError("浏览器无法恢复选择草稿，请保持页面打开并手动提交。"); }
+    setChoicesReady(true);
+  }, [choiceKey]);
+  useEffect(() => { if (choicesReady && !choiceDirty) setChoiceIds(ownCollaborationChoices(poll)); }, [choicesReady, choiceDirty, poll]);
+  function chooseOptions(ids: string[]) {
+    const next = [...new Set(ids)].sort(); setChoiceIds(next); setChoiceDirty(true); setNotice("");
+    try { localStorage.setItem(choiceKey, JSON.stringify({ version: 1, ids: next })); }
+    catch { setError("此浏览器无法保留选择草稿，离开前请手动提交。"); }
+  }
   const [openInviteLink, setOpenInviteLink] = useState(true),
     [limitAttendees, setLimitAttendees] = useState(false);
   const contacts = useWebResource<{
@@ -610,7 +516,9 @@ function PollWorkspace({
   const [contactIds, setContactIds] = useState<string[]>([]);
   const [invitees, setInvitees] = useState<string[]>(
     (poll.invitees ?? [])
-      .filter((person) => person.didRespond)
+      .filter((person) => isCollaboration
+        ? poll.phase === "COLLECTING" || person.selected
+        : person.didRespond)
       .map((person) => person.id),
   );
   useEffect(() => {
@@ -675,19 +583,19 @@ function PollWorkspace({
     }
   }
   async function submit() {
-    const result = await action("/response", "PUT", {
-      displayName: poll.myDisplayName || user.nickname || user.username,
-      slotIds: selected,
-    });
+    const result = isCollaboration
+      ? await action("/preferences", "POST", { optionIds: choiceIds, ...(dirty && poll.collaboration?.time ? { slotIds: selected } : {}) })
+      : await action("/response", "PUT", { displayName: poll.myDisplayName || user.nickname || user.username, slotIds: selected });
     if (result) {
-      setDirty(false);
+      setDirty(false); setChoiceDirty(false);
       try {
-        localStorage.removeItem(draftKey);
+        localStorage.removeItem(draftKey); localStorage.removeItem(choiceKey);
       } catch {
         /* server acknowledgement remains authoritative */
       }
       setNotice("");
-      if (poll.isOwner && !poll.didRespond) setShowShare(true);
+      if (!isCollaboration && poll.isOwner && !poll.didRespond) setShowShare(true);
+      if (isCollaboration) setNotice("选择已提交。");
     }
   }
   async function invite(event: FormEvent<HTMLFormElement>) {
@@ -703,8 +611,9 @@ function PollWorkspace({
       end,
       attendeeIds: invitees,
       version: poll.invitationVersion,
+      ...(isCollaboration ? { arrangement: { title: String(form.get("title") ?? "").trim(), activityType: String(form.get("activityType") ?? "").trim(), location: String(form.get("location") ?? "").trim() } } : {}),
       ...(openInviteLink
-        ? { linkParticipantCount: limitAttendees ? Number(form.get("capacity")) : null }
+        ? { linkParticipantCount: limitAttendees ? Number(form.get("capacity")) : isCollaboration ? 20 : null }
         : {}),
     });
     if (result) setShowFinal(false);
@@ -726,9 +635,9 @@ function PollWorkspace({
   );
   return (
     <>
-      <PageHeading
+      {(!isCollaboration || !showFinal) ? <div className={isCollaboration ? workspaceStyles.heading : undefined}><PageHeading
         title={poll.title}
-        description={[poll.location, poll.timeZone].filter(Boolean).join(" · ")}
+        description={isCollaboration ? undefined : [poll.location, poll.timeZone].filter(Boolean).join(" · ")}
       >
         <button className="sw-button" onClick={() => setShowShare(true)}>
           <Copy size={15} />
@@ -736,15 +645,15 @@ function PollWorkspace({
         </button>
         {poll.isOwner && !closed ? (
           <button
-            className="sw-icon-button"
-            aria-label="编辑计划"
-            onClick={() => setEdit(true)}
+            className={isCollaboration && poll.phase !== "COLLECTING" ? "sw-text-button" : "sw-icon-button"}
+            aria-label={isCollaboration && poll.phase !== "COLLECTING" ? "取消计划" : "编辑计划"}
+            onClick={() => isCollaboration && poll.phase !== "COLLECTING" ? setConfirm("cancel") : setEdit(true)}
           >
-            ···
+            {isCollaboration && poll.phase !== "COLLECTING" ? "取消计划" : "···"}
           </button>
         ) : null}
-      </PageHeading>
-      <div className="sw-grid sw-poll-layout">
+      </PageHeading></div> : null}
+      <div className={"sw-grid sw-poll-layout " + (isCollaboration ? workspaceStyles.workspace : "")} hidden={isCollaboration && showFinal}>
         <section className="sw-panel">
           <div className="sw-panel-heading">
             <div>
@@ -766,6 +675,9 @@ function PollWorkspace({
               {poll.dates[0]?.slice(5)}{poll.dates.length > 1 ? ` — ${poll.dates.at(-1)?.slice(5)}` : ""}
             </span> : null}
           </div>
+          {isCollaboration && poll.phase !== "COLLECTING" ? <dl className={workspaceStyles.arrangement}>
+            <div><dt>活动</dt><dd>{poll.collaboration?.activityType || poll.title}</dd></div><div><dt>地点</dt><dd>{poll.location || "地点稍后通知"}</dd></div>
+          </dl> : null}
           {poll.chosenStart && poll.chosenEnd ? (
             <div className="sw-confirmed-time">
               <CalendarCheck2 size={30} strokeWidth={1.3} />
@@ -786,7 +698,13 @@ function PollWorkspace({
               {notice}
             </p>
           ) : null}
-          {poll.activitySelection ? (
+          {isCollaboration && poll.phase === "COLLECTING" ? <CollaborationOptions poll={poll} selected={choiceIds} onChange={chooseOptions} disabled={busy} zh onSuggest={async (kind, value) => {
+            const result = await action("/options", "POST", { kind, value });
+            const added = result?.collaboration?.options.find(option => option.kind === kind && option.value === value && option.isMine);
+            if (added) chooseOptions([...choiceIds, added.id]);
+            return !!result;
+          }} /> : null}
+          {!isCollaboration && poll.activitySelection ? (
             <>
               <ActivityIdeas
                 activity={poll.activitySelection}
@@ -828,7 +746,7 @@ function PollWorkspace({
               ) : null}
             </>
           ) : null}
-          {poll.planningMode !== "FIXED" && poll.phase === "COLLECTING" ? (
+          {(isCollaboration ? poll.collaboration?.time : poll.planningMode !== "FIXED") && poll.phase === "COLLECTING" ? (
             <>
               <AvailabilityEditor
                 poll={poll}
@@ -850,22 +768,23 @@ function PollWorkspace({
                   </span>
                 </p>
                 <button
-                  className="sw-button sw-primary"
-                  disabled={busy || (!dirty && poll.didRespond)}
+                  className={"sw-button " + (isCollaboration && poll.isOwner ? "" : "sw-primary")}
+                  disabled={busy || (!dirty && !choiceDirty && (poll.didRespond || (isCollaboration && poll.invitations.some(person => person.isMe))))}
                   onClick={() => void submit()}
                 >
                   {busy
                     ? "提交中…"
-                    : poll.isOwner && !poll.didRespond
+                    : !isCollaboration && poll.isOwner && !poll.didRespond
                       ? "提交并分享"
                       : poll.didRespond
                         ? "保存修改"
-                        : "提交我的空闲"}
+                        : isCollaboration ? "提交我的选择" : "提交我的空闲"}
                   <Check size={15} />
                 </button>
               </div>
             </>
           ) : null}
+          {isCollaboration && !poll.collaboration?.time && poll.phase === "COLLECTING" ? <div className="sw-poll-submit"><span className="sw-muted">{choiceDirty ? "选择尚未提交" : "未选择的项目视为未表态"}</span><button className="sw-button" disabled={busy || (!choiceDirty && poll.invitations.some(person => person.isMe))} onClick={() => void submit()}>提交我的选择</button></div> : null}
           {!poll.isOwner &&
           !closed &&
           ["INVITING", "CONFIRMED"].includes(poll.phase) ? (
@@ -906,7 +825,7 @@ function PollWorkspace({
           ) : null}
         </section>
         <aside className="sw-stack">
-          <section className="sw-panel">
+          {isCollaboration ? <details className={workspaceStyles.responses}><summary>参与回复 · {(poll.phase === "COLLECTING" ? poll.invitees ?? [] : poll.invitations).length} 人</summary>{(poll.phase === "COLLECTING" ? poll.invitees ?? [] : poll.invitations).map(person => <div key={person.id} className="sw-participant"><span>{person.displayName}{person.isMe ? "（我）" : ""}</span><small>{"status" in person ? (({ INVITED: "待回复", ACCEPTED: "已确认参加", DECLINED: "已婉拒", SHARED: "未受邀" } as Record<string, string>)[person.status] ?? person.status) : person.didRespond ? "已提交空闲" : "参与商量"}</small></div>)}</details> : <section className="sw-panel">
             <div className="sw-panel-heading">
               <h2>{poll.phase === "COLLECTING" ? "空闲提交" : "邀请回复"}</h2>
               <Users size={17} color="#9ba58b" />
@@ -931,35 +850,34 @@ function PollWorkspace({
             {!poll.participants.length && poll.phase === "COLLECTING" ? (
               <p className="sw-muted">暂无提交</p>
             ) : null}
-          </section>
+          </section>}
           {canInvite ? (
             <section className="sw-panel sw-stack" aria-label="计划操作">
-              {poll.phase === "COLLECTING" || poll.planningMode !== "FIXED" ? (
+              {isCollaboration || poll.phase === "COLLECTING" || poll.planningMode !== "FIXED" ? (
               <button
                 className={`sw-button ${poll.phase === "COLLECTING" ? "sw-primary" : ""}`}
                 style={{ width: "100%" }}
-                disabled={busy || !!poll.activitySelection?.isOpen}
+                disabled={busy || (!isCollaboration && !!poll.activitySelection?.isOpen)}
                 onClick={() => {
                   setInvitees(
                     (poll.invitees ?? [])
                       .filter(
                         (person) =>
-                          person.didRespond ||
-                          poll.invitations.some(
+                          (isCollaboration ? poll.phase === "COLLECTING" || person.selected : person.didRespond || poll.invitations.some(
                             (invitation) =>
                               invitation.id === person.id &&
                               invitation.selected,
-                          ),
+                          )),
                       )
                       .map((person) => person.id),
                   );
                   setOpenInviteLink(poll.phase === "COLLECTING" || poll.planningMode === "FIXED");
-                  setLimitAttendees(poll.planningMode === "FIXED" && poll.expectedCount !== null);
+                  setLimitAttendees(poll.planningMode === "FIXED" && poll.expectedCount !== null && (!isCollaboration || poll.expectedCount < 20));
                   setShowFinal(true);
                 }}
               >
                 <CalendarDays size={15} />
-                {poll.activitySelection?.isOpen ? "选定活动后邀请" : poll.phase === "INVITING" ? "修改邀请" : poll.chosenStart ? "设置邀请" : "设置时间与邀请"}
+                {isCollaboration ? poll.phase === "INVITING" ? "修改最终安排" : "确认最终安排" : poll.activitySelection?.isOpen ? "选定活动后邀请" : poll.phase === "INVITING" ? "修改邀请" : poll.chosenStart ? "设置邀请" : "设置时间与邀请"}
               </button>
               ) : null}
               {poll.phase === "INVITING" ? (
@@ -974,7 +892,7 @@ function PollWorkspace({
                   }
                 >
                   <Send size={15} />
-                  发布最终计划
+                  {isCollaboration ? "确认并发布" : "发布最终计划"}
                 </button>
               ) : null}
               {poll.phase === "INVITING" ? <p className="sw-muted">
@@ -1098,11 +1016,12 @@ function PollWorkspace({
         </Modal>
       ) : null}
       {showFinal ? (
-        <Modal
-          title={poll.phase === "INVITING" ? "修改邀请" : poll.planningMode === "FIXED" ? "设置邀请" : "设置时间与邀请"}
+        <InvitationEditor inline={isCollaboration}
+          title={isCollaboration ? "确认完整活动安排" : poll.phase === "INVITING" ? "修改邀请" : poll.planningMode === "FIXED" ? "设置邀请" : "设置时间与邀请"}
           onClose={() => setShowFinal(false)}
         >
-          <form onSubmit={(event) => void invite(event)}>
+          <form onSubmit={(event) => void invite(event)}><fieldset disabled={busy} className={workspaceStyles.fieldset}>
+            {isCollaboration ? <CollaborativeFinalFields poll={poll} /> : null}
             <p className="sw-muted" style={{ marginBottom: 20 }}>
               {poll.timeZone} · 仅限候选日期 · 15 分钟为单位
             </p>
@@ -1112,7 +1031,7 @@ function PollWorkspace({
                 type="datetime-local"
                 step={900}
                 name="start"
-                readOnly={poll.planningMode === "FIXED"}
+                readOnly={poll.planningMode === "FIXED" && !isCollaboration}
                 required
                 defaultValue={initialStart ? formatInTimeZone(
                   initialStart,
@@ -1126,7 +1045,7 @@ function PollWorkspace({
                 type="datetime-local"
                 step={900}
                 name="end"
-                readOnly={poll.planningMode === "FIXED"}
+                readOnly={poll.planningMode === "FIXED" && !isCollaboration}
                 required
                 defaultValue={initialEnd ? formatInTimeZone(
                   initialEnd,
@@ -1168,7 +1087,7 @@ function PollWorkspace({
             </label>
             {openInviteLink ? (
               <>
-                <p className="sw-muted">不设人数上限</p>
+                <p className="sw-muted">{isCollaboration ? "系统最多 20 人，可按需设置更小的上限。" : "不设人数上限"}</p>
                 <label className="sw-check">
                   <input
                     type="checkbox"
@@ -1186,6 +1105,7 @@ function PollWorkspace({
                       name="capacity"
                       type="number"
                       min={minimumAttendees}
+                      max={isCollaboration ? 20 : undefined}
                       defaultValue={Math.max(poll.expectedCount ?? minimumAttendees, minimumAttendees)}
                       required
                     />
@@ -1203,12 +1123,12 @@ function PollWorkspace({
                 取消
               </button>
               <button className="sw-button sw-primary" disabled={busy}>
-                {busy ? "发送中…" : poll.phase === "INVITING" ? "重新发送邀请" : "发送邀请"}
+                {busy ? "发送中…" : isCollaboration ? poll.phase === "INVITING" ? "更新安排，重新确认" : "确认内容并发送邀请" : poll.phase === "INVITING" ? "重新发送邀请" : "发送邀请"}
                 <Send size={15} />
               </button>
             </div>
-          </form>
-        </Modal>
+          </fieldset></form>
+        </InvitationEditor>
       ) : null}
       {edit ? (
         <Modal title="编辑计划" onClose={() => setEdit(false)}>

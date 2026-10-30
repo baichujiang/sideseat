@@ -1,0 +1,25 @@
+.heading{max-width:780px;margin:0 auto}
+.workspace{grid-template-columns:minmax(0,1fr)!important;max-width:780px;margin:0 auto;gap:20px!important}
+.workspace[hidden]{display:none!important}
+.workspace>section{border:0!important;background:transparent!important;padding:10px 0!important}
+.workspace>aside>section{border:0!important;background:transparent!important;padding:14px 0!important}
+.workspace :global(.sw-panel-heading){margin-bottom:22px}
+.workspace :global(.sw-panel-heading h2){font-size:14px}
+.workspace :global(.sw-confirmed-time){background:transparent;padding:14px 0;border-bottom:1px solid var(--sw-line);border-radius:0}
+.workspace :global(.sw-confirmed-time strong){font-size:17px}
+.workspace :global(.sw-confirmed-time svg){width:22px}
+.workspace :global(.sw-poll-submit){padding:18px 0}
+.workspace :global(.sw-banner){padding:13px 0;background:transparent;border-top:1px solid var(--sw-line);border-radius:0;font-size:12px}
+.workspace :global([aria-label="计划操作"]){position:sticky;bottom:0;background:var(--sw-bg)!important;z-index:10;border-top:1px solid var(--sw-line)!important}
+.responses{border-top:1px solid var(--sw-line);font-size:12px;color:var(--sw-muted)}
+.responses summary{padding:13px 0;min-height:44px;cursor:pointer}
+.arrangement{margin:0;border-top:1px solid var(--sw-line)}
+.arrangement>div{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:16px 0;border-bottom:1px solid var(--sw-line)}
+.arrangement dt{font-size:12px;color:var(--sw-muted)}
+.arrangement dd{font-size:15px;margin:0;overflow-wrap:anywhere}
+.inlineInvite{max-width:780px;margin:18px auto 0;padding:27px 30px;border:1px solid var(--sw-line);border-radius:17px;background:var(--sw-paper)}
+.inlineInvite>p{font-size:12px;margin:15px 0 22px!important}
+.fieldset{border:0;padding:0;margin:0;min-width:0}
+.inlineInvite :global(.sw-form-actions){padding-top:16px;border-top:1px solid var(--sw-line);position:sticky;bottom:0;background:var(--sw-paper);padding-bottom:12px;z-index:5}
+.inlineInvite :global(.sw-field input){font-size:14px;min-height:44px}
+@media(max-width:650px){.inlineInvite{padding:21px 18px}.inlineInvite :global(.sw-field input){font-size:16px}.workspace{gap:12px!important}.workspace :global(.sw-panel-heading){margin-bottom:18px}.inlineInvite :global(.sw-form-actions button){min-height:46px;white-space:normal}.workspace :global(.sw-poll-submit){flex-wrap:wrap;gap:12px}.workspace :global(.sw-poll-submit button){min-height:44px}}

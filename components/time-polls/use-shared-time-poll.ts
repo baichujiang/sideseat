@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SharedTimePoll } from "@/lib/time-polls/browser-types";
 
-type Draft = { version: 1; slotIds: number[] };
+type Draft = { version: 1; slotIds: number[]; optionIds?: string[]; availabilityEdited?: boolean };
+const ownOptions = (poll: SharedTimePoll) => (poll.collaboration?.options ?? []).filter(option => option.interestedBy.some(person => person.isMe)).map(option => option.id).sort();
 const pendingViewer = "__pending_guest__";
 const switchingKey = (token: string) => `sideseat:switching-participant:v1:${encodeURIComponent(token)}`;
 const draftKey = (token: string, viewerId: string) => `sideseat:availability-draft:v1:${encodeURIComponent(token)}:${encodeURIComponent(viewerId)}`;
@@ -12,12 +13,16 @@ function readDraft(key: string, poll: SharedTimePoll): Draft | null {
   const value = JSON.parse(raw) as Partial<Draft>;
   if (value.version !== 1 || !Array.isArray(value.slotIds) || !value.slotIds.every(Number.isInteger)) return null;
   const valid = new Set(poll.slots.map(slot => slot.id));
-  return { version: 1, slotIds: [...new Set(value.slotIds)].filter(id => valid.has(id)).sort((a, b) => a - b) };
+  const validOptions = new Set(poll.collaboration?.options.map(option => option.id));
+  return { version: 1, slotIds: [...new Set(value.slotIds)].filter(id => valid.has(id)).sort((a, b) => a - b),
+    ...(Array.isArray(value.optionIds) && value.optionIds.every(id => typeof id === "string") ? { optionIds: [...new Set(value.optionIds)].filter(id => validOptions.has(id)).sort() } : {}),
+    ...(typeof value.availabilityEdited === "boolean" ? { availabilityEdited: value.availabilityEdited } : {}) };
 }
 
 export function useSharedTimePoll(token: string) {
   const [poll, setPoll] = useState<SharedTimePoll | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
+  const [optionIds, setOptionIds] = useState<string[]>([]);
   const [edited, setEdited] = useState(false);
   const [restoredDraft, setRestoredDraft] = useState(false);
   const [storageFailed, setStorageFailed] = useState(false);
@@ -34,12 +39,14 @@ export function useSharedTimePoll(token: string) {
   const recoveryRequest = useRef<Promise<SharedTimePoll & { resumed?: boolean }> | null>(null);
   const [editingAvailability, setEditingAvailability] = useState(false);
   const hasChanges = !!poll && (switchingParticipant || !poll.viewerId ? edited || restoredDraft : restoredDraft || (!poll.didRespond && edited) || selected.join(",") !== poll.mySlotIds.join(","));
+  const preferencesDirty = !!poll?.collaboration && optionIds.join(",") !== (switchingParticipant ? "" : ownOptions(poll).join(","));
+  const preferencesSaved = !!poll?.collaboration && !switchingParticipant && !saving && !hasChanges && !preferencesDirty && (poll.preferenceSubmitted || poll.didRespond || poll.invitations.some(person => person.isMe) || ownOptions(poll).length > 0);
   const saved = !switchingParticipant && !saving && !!poll?.didRespond && !hasChanges;
   const running = useRef(false), acting = useRef(false);
   const revision = useRef(0), refreshRequest = useRef(0);
   const identity = useRef<string | null>(null);
   const dirty = useRef(false);
-  dirty.current = hasChanges;
+  dirty.current = hasChanges || preferencesDirty;
   const pauseRefresh = useRef(false);
   pauseRefresh.current = busy || saving || editingName || (switchingParticipant && !!poll) || editingAvailability;
   const base = `/api/public/time-polls/${encodeURIComponent(token)}`;
@@ -59,8 +66,9 @@ export function useSharedTimePoll(token: string) {
     let draft: Draft | null = null;
     try { if (key) draft = readDraft(key, data); setStorageFailed(false); }
     catch { storageError(); }
-    setSelected(draft?.slotIds ?? data.mySlotIds); setEdited(!!draft);
-    const isDirty = !!draft;
+    setSelected(draft?.slotIds ?? data.mySlotIds); setOptionIds(draft?.optionIds ?? ownOptions(data));
+    const isDirty = !!draft && (draft.availabilityEdited ?? true);
+    setEdited(isDirty);
     dirty.current = isDirty; setRestoredDraft(isDirty);
   }, [token]);
 
@@ -105,11 +113,11 @@ export function useSharedTimePoll(token: string) {
   }, [call, adopt, changeSwitching, token]);
 
   useEffect(() => {
-    if (!hasChanges || !storageFailed) return;
+    if ((!hasChanges && !preferencesDirty) || !storageFailed) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [hasChanges, storageFailed]);
+  }, [hasChanges, preferencesDirty, storageFailed]);
 
   const submit = async (displayName = "") => {
     if (!poll || poll.phase !== "COLLECTING" || !hasChanges || acting.current || running.current) return false;
@@ -151,10 +159,45 @@ export function useSharedTimePoll(token: string) {
     setSelected(next); setEdited(true); setSubmissionFailed(false); setError("");
     try {
       const key = draftKey(token, switchingParticipant ? pendingViewer : poll.viewerId ?? pendingViewer);
-      if (!running.current && !switchingParticipant && !restoredDraft && poll.didRespond && next.join(",") === poll.mySlotIds.join(",")) localStorage.removeItem(key);
-      else localStorage.setItem(key, JSON.stringify({ version: 1, slotIds: next } satisfies Draft));
+      if (!running.current && !switchingParticipant && !restoredDraft && !preferencesDirty && poll.didRespond && next.join(",") === poll.mySlotIds.join(",")) localStorage.removeItem(key);
+      else localStorage.setItem(key, JSON.stringify({ version: 1, slotIds: next, optionIds, availabilityEdited: true } satisfies Draft));
       setStorageFailed(false);
     } catch { storageError(); }
+  };
+  const saveOptionSelection = (ids: string[]) => {
+    if (!poll?.collaboration) return;
+    revision.current += 1;
+    const next = [...new Set(ids)].sort();
+    setOptionIds(next); setSubmissionFailed(false); setError(""); dirty.current = true;
+    try { localStorage.setItem(draftKey(token, switchingParticipant ? pendingViewer : poll.viewerId ?? pendingViewer), JSON.stringify({ version: 1, slotIds: selected, optionIds: next, availabilityEdited: edited || restoredDraft } satisfies Draft)); setStorageFailed(false); }
+    catch { storageError(); }
+  };
+  const submitPreferences = async (displayName = "") => {
+    if (!poll?.collaboration || poll.phase !== "COLLECTING" || acting.current || running.current) return false;
+    running.current = true; setSaving(true); setSubmissionFailed(false); setError(""); refreshRequest.current += 1;
+    const submittedRevision = revision.current, slots = [...selected], choices = [...optionIds];
+    const draft: Draft = { version: 1, slotIds: slots, optionIds: choices, availabilityEdited: hasChanges };
+    let key = draftKey(token, switchingParticipant ? pendingViewer : poll.viewerId ?? pendingViewer);
+    try {
+      let current = poll;
+      if (!current.viewerId || switchingParticipant) {
+        if (!displayName.trim()) return false;
+        const guest = await call("/participant", "POST", { displayName: displayName.trim(), newParticipant: switchingParticipant });
+        if (!guest.viewerId) throw new Error("The participant could not be created.");
+        current = guest; key = draftKey(token, guest.viewerId); identity.current = key;
+        setPoll(guest); changeSwitching(false); setResumed(guest.resumed === true);
+        try { localStorage.setItem(key, JSON.stringify(draft)); localStorage.removeItem(draftKey(token, pendingViewer)); } catch { storageError(); }
+      }
+      const data = await call("/preferences", "POST", { participantId: current.viewerId, optionIds: choices, ...(hasChanges && current.collaboration?.time ? { slotIds: slots } : {}) });
+      if (identity.current !== key) return false;
+      setPoll(data);
+      if (submittedRevision === revision.current) {
+        setSelected(data.mySlotIds); setOptionIds(ownOptions(data)); setEdited(false); setRestoredDraft(false);
+        try { localStorage.removeItem(key); setStorageFailed(false); } catch { storageError(); }
+      }
+      return true;
+    } catch (cause) { setSubmissionFailed(true); setError((cause as Error).message); return false; }
+    finally { running.current = false; setSaving(false); }
   };
   const act = async (suffix: string, method: string, body: Record<string, unknown>, displayName = "") => {
     if (acting.current || running.current) return false;
@@ -172,6 +215,13 @@ export function useSharedTimePoll(token: string) {
         requestBody = { ...body, participantId: guest.viewerId };
       }
       const data = await call(suffix, method, requestBody);
+      if (suffix === "/options" && dirty.current) {
+        const added = data.collaboration?.options.find(option => option.value === body.value && option.kind === body.kind && option.isMine);
+        if (added) {
+          const next = [...new Set([...optionIds, added.id])].sort(); setOptionIds(next);
+          try { localStorage.setItem(draftKey(token, data.viewerId ?? pendingViewer), JSON.stringify({ version: 1, slotIds: selected, optionIds: next, availabilityEdited: edited || restoredDraft } satisfies Draft)); } catch { storageError(); }
+        }
+      }
       adopt(data, true); setEditingName(false); changeSwitching(false);
       if (suffix === "/participant" && method === "POST") setResumed(data.resumed === true);
       return true;
@@ -193,12 +243,13 @@ export function useSharedTimePoll(token: string) {
     } catch (cause) { setError((cause as Error).message); return null; }
     finally { setBusy(false); }
   };
-  return { poll, selected, error, busy, saving, saved, hasChanges, submissionFailed, restoredDraft, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, recoveryLink, loadRecoveryLink, setEditingAvailability, saveSelection, submit, retry: submit,
+  return { poll, selected, optionIds, preferencesDirty, preferencesSaved, saveOptionSelection, submitPreferences, error, busy, saving, saved, hasChanges, submissionFailed, restoredDraft, editingName, setEditingName, switchingParticipant, setSwitchingParticipant, resumed, recoveryLink, loadRecoveryLink, setEditingAvailability, saveSelection, submit, retry: submit,
     cancelNameEditing: () => { setEditingName(false); changeSwitching(false); if (switchingParticipant) { try { localStorage.removeItem(draftKey(token, pendingViewer)); } catch { storageError(); } } if (switchingParticipant && poll) adopt(poll, false); setError(""); },
-    startSwitchingParticipant: () => { changeSwitching(true); setResumed(false); identity.current = draftKey(token, pendingViewer); let draft: Draft | null = null; try { if (poll) draft = readDraft(identity.current, poll); } catch { storageError(); } setSelected(draft?.slotIds ?? []); setEdited(!!draft); setRestoredDraft(!!draft); dirty.current = !!draft; },
+    startSwitchingParticipant: () => { changeSwitching(true); setResumed(false); identity.current = draftKey(token, pendingViewer); let draft: Draft | null = null; try { if (poll) draft = readDraft(identity.current, poll); } catch { storageError(); } setSelected(draft?.slotIds ?? []); setOptionIds(draft?.optionIds ?? []); const availabilityDirty = !!draft && (draft.availabilityEdited ?? true); setEdited(availabilityDirty); setRestoredDraft(availabilityDirty); dirty.current = !!draft; },
     join: (displayName: string) => act("/participant", "POST", { displayName, newParticipant: switchingParticipant }),
     rename: (displayName: string) => act("/participant", "PATCH", { participantId: poll?.viewerId, displayName }),
     suggestActivity: (title: string, location: string, displayName = "") => act("/activities", "POST", { participantId: poll?.viewerId, title, location }, displayName),
+    suggestOption: (kind: "ACTIVITY" | "LOCATION", value: string, displayName = "") => act("/options", "POST", { participantId: poll?.viewerId, kind, value }, displayName),
     setActivityInterest: (ideaId: string, interested: boolean, displayName = "") => act("/activities/interest", "PUT", { participantId: poll?.viewerId, ideaId, interested }, displayName),
     reply: (status: string, displayName = "") => act("/invitation-response", "PUT", { participantId: poll?.viewerId, status, version: poll?.invitationVersion }, displayName) };
 }

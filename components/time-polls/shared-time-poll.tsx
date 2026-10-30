@@ -8,6 +8,7 @@ import { InvitationTimetable } from "@/components/time-polls/invitation-timetabl
 import { AvailabilityEditor } from "@/components/time-polls/availability-editor";
 import { ActivityIdeas } from "@/components/time-polls/activity-ideas";
 import { useSharedTimePoll } from "@/components/time-polls/use-shared-time-poll";
+import { CollaborativeSharedPlan } from "@/components/time-polls/collaborative-shared-plan";
 import styles from "./shared-time-poll.module.css";
 import { POLL_LOCALE_COOKIE, pollClock, pollDate } from "@/lib/time-polls/browser-types";
 
@@ -60,6 +61,8 @@ export function SharedTimePoll({ token, zh: initialZh, recoveryPage = false }: {
     const first = formatter.format(new Date(start)), last = formatter.format(new Date(end));
     return pollDate(first, zh) + " · " + pollClock(start, poll!.timeZone) + "–" + (first === last ? "" : pollDate(last, zh) + " · ") + pollClock(end, poll!.timeZone);
   };
+
+  if (poll?.collaboration) return <CollaborativeSharedPlan token={token} state={state} zh={zh} setZh={setZh} recoveryPage={recoveryPage} />;
 
   return <main lang={zh ? "zh-CN" : "en"} className={styles.page + " min-h-dvh px-4 pt-4 sm:px-6 " + (editing || replying ? "pb-60" : "pb-12")}>
     <div className={"mx-auto " + (compactEntry ? "max-w-[720px]" : "max-w-4xl lg:max-w-[1440px]")}>

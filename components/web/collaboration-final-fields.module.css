@@ -1,0 +1,33 @@
+.fields {
+  --cf-ink: var(--sw-ink, hsl(var(--foreground, 80 7% 17%)));
+  --cf-muted: var(--sw-muted, hsl(var(--muted-foreground, 75 7% 48%)));
+  --cf-line: var(--sw-line, hsl(var(--border, 65 16% 90%)));
+  --cf-paper: var(--sw-paper, hsl(var(--background, 60 20% 99%)));
+  --cf-accent: var(--sw-accent, #dd6945);
+  --cf-accent-soft: var(--sw-accent-soft, light-dark(#fff0e8, #3c2a22));
+  color: var(--cf-ink);
+  min-width: 0;
+}
+.fields input, .fields button { font-family: inherit; }
+.fields :focus-visible { outline: 2px solid var(--cf-accent); outline-offset: 3px; }
+.titleField { display: grid; gap: 8px; color: var(--cf-muted); font-size: 12px; }
+.titleField input, .input { width: 100%; min-width: 0; min-height: 45px; border: 1px solid var(--cf-line); border-radius: 9px; background: var(--cf-paper); color: var(--cf-ink); padding: 10px 12px; font-size: 14px; box-sizing: border-box; }
+.hint { margin: 12px 0 0; color: var(--cf-muted); font-size: 12px; }
+.field { padding: 15px 0 18px; border-bottom: 1px solid var(--cf-line); }
+.field:last-child { margin-bottom: 17px; }
+.heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; margin-bottom: 5px; }
+.heading label { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--cf-ink); }
+.heading svg { flex-shrink: 0; }
+.toggle { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; border: 0; background: transparent; color: var(--cf-muted); padding: 5px 2px 5px 7px; font-size: 12px; cursor: pointer; }
+.toggle:hover { color: var(--cf-accent); }
+.options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.option { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; max-width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--cf-line); border-radius: 10px; color: var(--cf-ink); background: var(--cf-paper); font-size: 13px; cursor: pointer; }
+.option span { overflow-wrap: anywhere; }
+.option small { color: var(--cf-muted); font-size: 11px; white-space: nowrap; }
+.option svg { flex-shrink: 0; }
+.option[aria-pressed="true"] { background: var(--cf-accent-soft); border-color: var(--cf-accent); color: var(--cf-accent); }
+@media (max-width: 650px) {
+  .titleField input, .input { font-size: 16px; }
+  .field { padding-top: 12px; padding-bottom: 15px; }
+  .hint { font-size: 11px; }
+}

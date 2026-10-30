@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import test from "node:test";
 import ts from "typescript";
 import type { UserPushPayload } from "../../lib/push/apns-payload";
+import * as collaboration from "../../lib/time-polls/collaboration";
 
 // Execute the production service and after-response callback with in-memory I/O.
 function loadModule<T>(path: string, imports: Record<string, unknown>): T {
@@ -73,6 +74,7 @@ function fixture(phase = "CONFIRMED") {
   const service = loadModule<{ cancelPollPlan: (token: string, userId: string, version: number, appOrigin: string) => Promise<unknown> }>("lib/api/v1/time-poll-service.ts", {
     "server-only": {}, "node:crypto": { randomBytes }, "@/lib/db/prisma": { prisma }, "@/lib/api/v1/http": {},
     "@/lib/time-polls/domain": { summarizePoll: () => ({}) },
+    "@/lib/time-polls/collaboration": collaboration,
     "@/lib/time-polls/planning": { lockPollPlan: async () => poll },
     "@/lib/time-polls/lifecycle": { timePollPhase: (value: typeof poll) => value.phase, timePollExpiresAt: () => null },
     "@/lib/time-polls/notifications": notifications,

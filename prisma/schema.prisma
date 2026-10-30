@@ -2789,6 +2789,7 @@ model TimePoll {
   activitySelectedId String?
   activityChosenAt DateTime?
   activityIdeas TimePollActivityIdea[]
+  collaboration Json?
 
   @@index([creatorId, updatedAt])
 }
@@ -2854,6 +2855,7 @@ model TimePollActivityIdea {
   guestId String?
   displayName String @db.VarChar(60)
   title String @db.VarChar(120)
+  kind String @default("ACTIVITY")
   location String? @db.VarChar(200)
   createdAt DateTime @default(now())
   poll TimePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)

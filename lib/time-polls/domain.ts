@@ -5,6 +5,12 @@ const dateKey = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
   const date = new Date(value + "T12:00:00Z");
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }, "Choose a valid date.");
+export const pollCollaborationInputSchema = z.object({
+  activity: z.boolean(), location: z.boolean(), time: z.boolean(),
+  activityType: z.string().trim().max(120).optional(),
+  activityOptions: z.array(z.string().trim().min(1).max(120)).max(20),
+  locationOptions: z.array(z.string().trim().min(1).max(120)).max(20),
+}).strict();
 export const createTimePollSchema = z.object({
   title: z.string().trim().min(1).max(120),
   timeZone: z.string().max(80).refine((value) => {
@@ -19,6 +25,7 @@ export const createTimePollSchema = z.object({
   planningMode: z.enum(["COLLECT", "FIXED"]).optional(),
   fixedStart: z.string().datetime().optional(),
   chooseActivityTogether: z.boolean().optional(),
+  collaboration: pollCollaborationInputSchema.optional(),
 }).strict().refine((value) => value.endMinute > value.startMinute, { path: ["endMinute"], message: "End time must follow start time." });
 
 export const suggestPollActivitySchema = z.object({
@@ -30,6 +37,12 @@ export const pollActivityInterestSchema = z.object({
   ideaId: z.string().cuid(), interested: z.boolean(),
 }).strict();
 export const choosePollActivitySchema = z.object({ ideaId: z.string().cuid() }).strict();
+export const suggestPollOptionSchema = z.object({ kind: z.enum(["ACTIVITY", "LOCATION"]), value: z.string().trim().min(1).max(120) }).strict();
+export const pollOptionInterestSchema = z.object({ optionId: z.string().cuid(), interested: z.boolean() }).strict();
+export const pollPreferencesSchema = z.object({
+  optionIds: z.array(z.string().cuid()).max(40),
+  slotIds: z.array(z.number().int().min(0)).max(3100).optional(),
+}).strict();
 export const saveTimePollResponseSchema = z.object({
   displayName: z.string().trim().min(1).max(60),
   slotIds: z.array(z.number().int().min(0)).max(3100),
@@ -52,6 +65,11 @@ export const sendPollInvitationsSchema = z.object({
   version: z.number().int().min(0),
   // Omitted keeps the existing closed-roster contract; null opens the link without a cap.
   linkParticipantCount: z.number().int().min(2).max(2147483647).nullable().optional(),
+  arrangement: z.object({
+    title: z.string().trim().min(1).max(120),
+    activityType: z.string().trim().min(1).max(120),
+    location: z.string().trim().max(200),
+  }).strict().optional(),
 }).strict().refine((value) => value.attendeeIds.length > 0 || value.linkParticipantCount !== undefined, { path: ["attendeeIds"], message: "Choose invitees or a participant count for the invitation link." })
   .refine((value) => !value.end || new Date(value.end) > new Date(value.start), { path: ["end"], message: "End time must follow start time." });
 export const respondPollInvitationSchema = z.object({

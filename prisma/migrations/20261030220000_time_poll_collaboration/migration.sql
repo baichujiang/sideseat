@@ -1,0 +1,2 @@
+ALTER TABLE "TimePoll" ADD COLUMN "collaboration" JSONB;
+ALTER TABLE "TimePollActivityIdea" ADD COLUMN "kind" TEXT NOT NULL DEFAULT 'ACTIVITY';
