@@ -21,8 +21,7 @@ async function create(request: APIRequestContext) {
 }
 async function enter(page: Page, name: string) {
   await page.getByLabel("你的名字", { exact: true }).fill(name);
-  await page.getByRole("button", { name: "选择空闲时间", exact: true }).click();
-  await expect(page.getByRole("button", { name: "编辑昵称", exact: true })).toBeVisible();
+  await expect(page.getByTestId("time-poll-grid")).toBeVisible();
 }
 async function save(page: Page, ids: number[]) {
   for (const id of ids) await page.getByTestId(`time-poll-cell-${id}`).click();
@@ -49,11 +48,15 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
     const contexts = await Promise.all([0, 1].map(() => browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })));
     try {
       let a = await contexts[0].newPage(); const b = await contexts[1].newPage();
-      await a.goto(`/time-polls/${poll.token}`); await enter(a, "小林");
+      await a.goto(`/time-polls/${poll.token}`);
+      await expect(a.getByLabel("你的名字", { exact: true })).toBeVisible();
+      await a.getByTestId("time-poll-cell-0").click();
+      await a.reload();
+      await expect(a.getByTestId("time-poll-cell-0")).toHaveAttribute("aria-pressed", "true");
+      await enter(a, "小林"); await save(a, []);
       await expect(a.getByTestId("guest-recovery-panel").locator("summary")).toBeVisible();
       const privateLink = await personalLink(a);
       expect(new URL(privateLink).pathname).toBe(`/time-poll-recovery/${poll.token}`); expect(new URL(privateLink).search).toBe(""); expect(recoveryCredential(privateLink).length > 60).toBe(true);
-      await save(a, [0]);
       const first = await snapshot(contexts[0], path), responseId = first.participants.find((p: { isMe: boolean }) => p.isMe).id;
       expect(first.mySlotIds).toEqual([0, 1]);
       const cookie = (await contexts[0].cookies()).find(c => c.name === "sideseat_poll_access_v2");
