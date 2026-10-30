@@ -1,0 +1,9 @@
+# Web optional invitation capacity — 2026-10-30
+
+Source `5f92bb47b4e25ee794e33490e0dff287ec92aae7`, READY production deployment `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`.
+
+The final-invitation dialog now defaults to allowing link participation without requiring a custom participant limit. It states the existing system maximum of 20 including the organizer and invited friends. The clearly labeled “限制参加人数（可选）” control reveals “最多参加几人（包括你）” only when chosen; the minimum reflects the selected invitees. Existing restricted-link and custom-limit settings are retained when reopening the dialog. Backend and native app behavior, APIs and schema are unchanged; the system maximum remains 20, not unlimited.
+
+Local browser checks exercised default and custom submission, a peer confirmation, guest participation up to a custom limit and the full-capacity notice, closed-link invitations, reopening a closed-link plan, and displaying an existing four-person limit. Local API readback matched the submitted values. Focused ESLint and whitespace checks passed. Two owned local test accounts were deleted and their old cookies returned 401.
+
+The production package preserved 1,434 baseline files, overlaid one web component and added one provenance marker. All 1,436 remote source hashes matched the prepared manifest. The READY candidate returned HTTP 200 on the login page and was promoted without rebuilding; root, www and api point to the same deployment. On the live site, browser checks covered the default option, submitting default and custom limits, closing link participation, and a second account confirming the default invitation. API readback showed 20, 3 and no link limit respectively. Two owned production test accounts were deleted and their old cookies returned 401. No physical iPhone or Safari UI test was performed in this change.

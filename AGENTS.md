@@ -1,5 +1,9 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web optional invitation capacity — 2026-10-30
+
+- Root/www/api point to READY `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`, source `5f92bb47b4e25ee794e33490e0dff287ec92aae7`. Link participation defaults open, without a custom limit; the optional cap is clearly labeled and the existing maximum remains 20. Local and live browser and API checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-optional-invite-capacity.md).
+
 ## Current web timetable label visibility — 2026-10-30
 
 - Root/www/api point to READY `dpl_FPJzY2MwEiSugy7aprXVUziuwsaV`, source `670bdced1cdbf0093d8f43fc4d3d027068891a3b`. Time-label backgrounds prevent grid lines crossing the text; boundary alignment and selection retained. 1,435 source hashes match; local and live browser checks passed. Local owned IDs absent by independent read-only check; production QA accounts deleted. [Release](docs/releases/2026-10-30-web-axis-label-visibility.md).

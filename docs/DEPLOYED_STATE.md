@@ -1,5 +1,9 @@
 # 已部署功能与归档边界
 
+## Web optional invitation capacity — 2026-10-30
+
+Root/www/api point to READY `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`, source `5f92bb47b4e25ee794e33490e0dff287ec92aae7`. Link participation defaults open, with an optional custom cap and an existing system maximum of 20. [Release and scope](releases/2026-10-30-web-optional-invite-capacity.md).
+
 ## Web timetable label visibility — 2026-10-30
 
 Root/www/api point to READY `dpl_FPJzY2MwEiSugy7aprXVUziuwsaV`, source `670bdced1cdbf0093d8f43fc4d3d027068891a3b`. Boundary time labels have a clear background so grid lines do not cross the text. [Release and scope](releases/2026-10-30-web-axis-label-visibility.md).

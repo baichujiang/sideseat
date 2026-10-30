@@ -1,5 +1,7 @@
 # SideSeat
 
+**网页邀请人数更新（2026-10-30）**：默认不额外限制参加人数，系统最多 20 人；可按需选择“限制参加人数（可选）”。[发布记录](docs/releases/2026-10-30-web-optional-invite-capacity.md)。
+
 **网页时间文字更新（2026-10-30）**：时间刻度保持对齐格线，文字周围留白，避免线条穿过数字。[发布记录](docs/releases/2026-10-30-web-axis-label-visibility.md)。
 
 
