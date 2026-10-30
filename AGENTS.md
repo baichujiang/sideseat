@@ -1,5 +1,9 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current shared-plan direct entry — 2026-10-30
+
+- Root/www/api point to READY `dpl_CgvMZYefoGM7TpvQqXTkdPars2W2`. Guests see the timetable and name input together; anonymous selections, switching drafts, invitation replies and recovery were verified. Existing production capacity/backend behavior is preserved. [Release](docs/releases/2026-10-30-web-direct-shared-plan-entry.md).
+
 ## Current shared-plan copy and web invitation time — 2026-10-30
 
 - Root/www/api point to READY `dpl_8THpobYYYsaGDMoPJ3CVZrjkzaSN`. Shared-page copy is concise and state-specific; the organizer dialog retains the complete candidate range instead of a one-hour default. Five frontend overlays preserve the existing production backend/capacity contract. All 1,438 source hashes match; live two-account/guest confirmation, Calendar and activity checks passed and owned QA data was cleaned. [Release](docs/releases/2026-10-30-web-plan-copy.md).
