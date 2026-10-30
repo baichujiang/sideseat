@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web timetable live count — 2026-10-30
+
+- Root/www/api point to READY `dpl_8xgS12q64r9K2r572irpbcCXBxp9`, source `e9db50ce9c5769b321f80d9893777434ad88adb5`. Current viewer’s selection is included immediately without double-counting a saved response. 1,432 source hashes match; local and live two-account checks and local guest checks passed; own accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-live-count.md).
+
+
 ## Current web timetable end boundary — 2026-10-30
 
 - Root/www/api point to READY `dpl_4ErWTW4pWsUqRk6w4PHw8RWwuUCM`, source `4c7b710a42c00420b38c555b64faf5c4e2bd4b9c`. Per-day end boundaries and the meaning of start labels are visible on web and shared timetable. No data or API change. 1,431 source hashes match; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-end-boundary.md).

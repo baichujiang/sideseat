@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web timetable live count — 2026-10-30
+
+Root/www/api point to READY `dpl_8xgS12q64r9K2r572irpbcCXBxp9`, source `e9db50ce9c5769b321f80d9893777434ad88adb5`. Availability counts include the viewer’s current choice before submission. [Release and scope](releases/2026-10-30-web-timetable-live-count.md).
+
+
 ## Web timetable end boundary — 2026-10-30
 
 Root/www/api point to READY `dpl_4ErWTW4pWsUqRk6w4PHw8RWwuUCM`, source `4c7b710a42c00420b38c555b64faf5c4e2bd4b9c`. Web and shared timetable show end times beneath each day. [Release and scope](releases/2026-10-30-web-timetable-end-boundary.md).
