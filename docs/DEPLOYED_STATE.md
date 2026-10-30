@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web modal scroll containment — 2026-10-30
+
+Root/www/api point to READY `dpl_7P6A7Hy3EQQwRhEUEpbnuVuaSQHJ`, source `71ccae5e534204a7cd2ef4407198007a7792eb32`. Web dialogs contain wheel scrolling and the background unlocks on close. [Release and scope](releases/2026-10-30-web-modal-scroll.md).
+
+
 ## Web timetable live count — 2026-10-30
 
 Root/www/api point to READY `dpl_8xgS12q64r9K2r572irpbcCXBxp9`, source `e9db50ce9c5769b321f80d9893777434ad88adb5`. Availability counts include the viewer’s current choice before submission. [Release and scope](releases/2026-10-30-web-timetable-live-count.md).

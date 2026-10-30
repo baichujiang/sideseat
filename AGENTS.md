@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web modal scroll containment — 2026-10-30
+
+- Root/www/api point to READY `dpl_7P6A7Hy3EQQwRhEUEpbnuVuaSQHJ`, source `71ccae5e534204a7cd2ef4407198007a7792eb32`. Web modal background wheel bleed fixed while preserving textarea/dialog and post-close page scrolling. 1,433 source hashes match; local and live in-app browser checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-modal-scroll.md).
+
+
 ## Current web timetable live count — 2026-10-30
 
 - Root/www/api point to READY `dpl_8xgS12q64r9K2r572irpbcCXBxp9`, source `e9db50ce9c5769b321f80d9893777434ad88adb5`. Current viewer’s selection is included immediately without double-counting a saved response. 1,432 source hashes match; local and live two-account checks and local guest checks passed; own accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-live-count.md).
