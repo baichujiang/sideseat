@@ -66,18 +66,18 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={zh ? "大家的时间表，直接选择我的空闲" : "Group timetable: select my free time"}>
     <>
-      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格最多 30 分钟，点选或取消。" : "Each cell is up to 30 minutes. Tap to select or clear."}</p>
+      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "点选时间格，可选中或取消" : "Tap cells to select or clear"}</p>
         <button type="button" aria-label={zh ? "撤销上次修改" : "Undo last change"} data-testid="time-poll-undo" disabled={!undo || disabled || gesture.preview !== null} onClick={() => { if (undo) { onChange(undo); setUndo(null); } }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border disabled:opacity-35"><Undo2 className="h-4 w-4" aria-hidden /></button>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
         <span className="flex items-center gap-1"><Check className={`h-3.5 w-3.5 rounded ${styles.selected}`} aria-hidden />{zh ? "我的空闲" : "My free time"}</span>
         <span className="flex items-center gap-1"><Minus className={`h-3.5 w-3.5 rounded ${styles.partial}`} aria-hidden />{zh ? "部分已选" : "Partially selected"}</span>
-        <span>{zh ? "数字包含朋友和你的选择；提交后朋友可见" : "Numbers include others and your selection; submit to share"}</span>
+        <span>{zh ? "数字为有空人数（含你的选择）" : "Numbers show people available, including you"}</span>
       </div>
     </>
     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-      <details><summary className="cursor-pointer py-2">{zh ? "连续选时和全天选择" : "Select a range or a whole day"}</summary><p className="max-w-sm pb-2 leading-5">{zh ? "长按时间格后拖动，可连续选择。点日期可选当天全部时段。滑动时间表可查看更多。" : "Hold a cell, then drag to select a range. Tap a date to select its whole day. Swipe the timetable to see more."}</p></details>
-      <button type="button" disabled={disabled || gesture.preview !== null} onClick={() => { if (selected.length) apply([]); else onChange([]); }} className="min-h-11 text-sm underline underline-offset-4">{zh ? "这些时间我都没空" : "None of these times work"}</button>
+      <details><summary className="cursor-pointer py-2">{zh ? "批量选择" : "Select multiple times"}</summary><p className="max-w-sm pb-2 leading-5">{zh ? "长按后拖动可连续选择；点日期可全选当天。" : "Hold and drag to select a range; tap a date to select its whole day."}</p></details>
+      <button type="button" disabled={disabled || gesture.preview !== null} onClick={() => { if (selected.length) apply([]); else onChange([]); }} className="min-h-11 text-sm underline underline-offset-4">{zh ? "这些时间都不行" : "None of these times work"}</button>
     </div>
     <div ref={scroll} data-testid="time-poll-grid" className="max-h-[60dvh] overflow-auto rounded-xl border bg-background" tabIndex={0} aria-label={zh ? "可滚动时间表" : "Scrollable timetable"}>
       <div style={{ minWidth: 56 + dates.length * 88 }}>

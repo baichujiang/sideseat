@@ -37,7 +37,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       const idB = (await joined.json()).data.viewerId;
       expect((await guestB.request.put(`${publicPath}/response`, { data: { participantId: idB, displayName: "上午有空的朋友", slotIds: fullDay.slice(0, 16) } })).status()).toBe(200);
       await page.reload(); await page.getByRole("button", { name: "大家的结果", exact: true }).click();
-      await expect(page.getByRole("heading", { name: "大家的时间表", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "选择空闲时间", exact: true })).toBeVisible();
       await expect(page.getByText("人数最多的时间", { exact: true })).toHaveCount(0);
       await expect(page.getByText("所有人都方便的时间", { exact: true })).toHaveCount(0);
       await expect(page.getByText("还没有可推荐的完整时段。", { exact: true })).toHaveCount(0);

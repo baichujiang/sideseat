@@ -60,7 +60,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       await page.screenshot({ path: `${artifacts}/${engineName}-saved-mobile.png`, fullPage: true });
       await finish.click();
       await expect(page.getByText("填写完成", { exact: true })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "大家的时间表", exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "选择空闲时间", exact: true })).toBeVisible();
       await expect(finish).toHaveCount(0);
       await page.getByRole("button", { name: "我的时间", exact: true }).click();
       await expect(page.getByTestId("time-poll-cell-2")).toHaveAttribute("aria-pressed", "true");

@@ -10,8 +10,8 @@ export function InvitationTimetable({ start, end, timeZone, zh, isDraft = false 
   useEffect(() => { if (scroll.current) scroll.current.scrollTop = 0; }, [start, end]);
   const rows = invitationTimetableRows(start, end, timeZone);
   const dates = [...new Set(rows.map(row => row.date))];
-  const heading = isDraft ? (zh ? "时间已定" : "Time already set") : (zh ? "受邀时间表" : "Invited timetable");
-  const timeLabel = isDraft ? (zh ? "已定时段" : "Set time") : (zh ? "受邀时段" : "Invited time");
+  const heading = isDraft ? (zh ? "时间已定" : "Time already set") : (zh ? "活动时间表" : "Activity timetable");
+  const timeLabel = zh ? "活动时段" : "Activity time";
   return <section aria-label={heading} data-testid="plan-invitation-timetable">
     <div ref={scroll} className="max-h-[min(44dvh,360px)] overflow-auto rounded-xl border bg-background" tabIndex={0} aria-label={isDraft ? (zh ? "只读已定时间表，可滚动查看" : "Read-only set time; scroll to view") : (zh ? "只读受邀时间表，可滚动查看" : "Read-only invited timetable; scroll to view")}>
       {dates.map(date => {

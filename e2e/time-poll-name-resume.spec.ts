@@ -77,7 +77,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       expect((await snapshot(contexts[0], path)).viewerId).toBeNull();
       const exposedUrls: string[] = []; a.on("request", r => exposedUrls.push(r.url()));
       await a.goto(new URL(privateLink).pathname + new URL(privateLink).hash);
-      await expect(a.getByText("已恢复你的填写，可以继续修改。", { exact: true })).toBeVisible();
+      await expect(a.getByText("已恢复填写", { exact: true })).toBeVisible();
       expect(new URL(a.url()).hash).toBe("");
       expect(exposedUrls.some(url => url.includes(recoveryCredential(privateLink)))).toBe(false);
       const recovered = await snapshot(contexts[0], path);
@@ -86,7 +86,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
       await save(a, [2]); expect((await snapshot(contexts[1], path)).mySlotIds).toEqual([4, 5]);
       await contexts[0].clearCookies(); await a.close(); a = await contexts[0].newPage();
       await a.goto(new URL(privateLink).pathname + new URL(privateLink).hash);
-      await expect(a.getByText("已恢复你的填写，可以继续修改。", { exact: true })).toBeVisible();
+      await expect(a.getByText("已恢复填写", { exact: true })).toBeVisible();
       expect((await snapshot(contexts[0], path)).viewerId).toBe(first.viewerId);
       const nativeData = (await (await request.get(native, { headers })).json()).data;
       expect(nativeData.participants.filter((p: { isGuest: boolean }) => p.isGuest)).toHaveLength(2);
@@ -145,7 +145,7 @@ test("legacy random credentials upgrade; unsigned cookies cannot claim records; 
     expect((await contexts[2].request.post(`${path}/participant/recovery`, { data: { credential: recoveryCredential(replaced) } })).status()).toBe(401);
     expect((await contexts[2].request.post(`/api/public/time-polls/${other.token}/participant/recovery`, { data: { credential: recoveryCredential(link) } })).status()).toBe(401);
     await page.goto(new URL(link).pathname + new URL(link).hash);
-    await expect(page.getByText("已恢复你的填写，可以继续修改。", { exact: true })).toBeVisible();
+    await expect(page.getByText("已恢复填写", { exact: true })).toBeVisible();
     const restored = await snapshot(contexts[1], path); expect(restored.viewerId).toBe(unverified.id); expect(restored.mySlotIds).toEqual([2, 3]);
     expect(restored.participants.find((p: { isMe: boolean }) => p.isMe).id).toBe(rows[1].id);
     expect(restored.invitations.find((p: { isMe: boolean }) => p.isMe)).toMatchObject({ id: oldInvitation.id, status: "ACCEPTED" });
