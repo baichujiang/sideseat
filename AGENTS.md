@@ -1,5 +1,9 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Shared-plan page simplification — not deployed (2026-10-30)
+
+- Responsive desktop/mobile shared-page simplification was verified locally; Vercel remains paused. Production still points to `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`. Keep this UI release separate from the unshipped unlimited-capacity backend. [Scope and checks](docs/qa/2026-10-30-share-page-simplification-in-progress.md).
+
 ## Unlimited invitations preparation — not deployed (2026-10-30)
 
 - Local implementation and targeted tests exist, but production still enforces 20. Older iOS clients misread a null participant target, and the default iPhone was offline. Do not deploy until compatibility and device release are resolved. [In-progress verification](docs/qa/2026-10-30-unlimited-invitations-in-progress.md).

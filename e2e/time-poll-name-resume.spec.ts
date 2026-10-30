@@ -21,7 +21,7 @@ async function create(request: APIRequestContext) {
 }
 async function enter(page: Page, name: string) {
   await page.getByLabel("你的名字", { exact: true }).fill(name);
-  await page.getByRole("button", { name: "下一步：选择我的空闲", exact: true }).click();
+  await page.getByRole("button", { name: "选择空闲时间", exact: true }).click();
   await expect(page.getByRole("button", { name: "编辑昵称", exact: true })).toBeVisible();
 }
 async function save(page: Page, ids: number[]) {
@@ -50,7 +50,7 @@ for (const [engineName, engine] of [["chromium", chromium], ["webkit", webkit]] 
     try {
       let a = await contexts[0].newPage(); const b = await contexts[1].newPage();
       await a.goto(`/time-polls/${poll.token}`); await enter(a, "小林");
-      await expect(a.getByTestId("guest-recovery-copy")).toBeVisible();
+      await expect(a.getByTestId("guest-recovery-panel").locator("summary")).toBeVisible();
       const privateLink = await personalLink(a);
       expect(new URL(privateLink).pathname).toBe(`/time-poll-recovery/${poll.token}`); expect(new URL(privateLink).search).toBe(""); expect(recoveryCredential(privateLink).length > 60).toBe(true);
       await save(a, [0]);
