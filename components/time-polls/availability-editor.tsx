@@ -20,9 +20,17 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
       lookup: new Map(cells.map((slot) => [slot.date + "|" + slot.row, slot])),
       labels: new Map(longest.map((slot) => [slot.row, slot.label])) };
   }, [pollDates, pollSlots]);
-  const dates = poll.dates.map((date) => ({ date, label: pollDate(date, zh),
-    day: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", month: "short", day: "numeric" }).format(new Date(date + "T12:00:00Z")),
-    weekday: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", weekday: "short" }).format(new Date(date + "T12:00:00Z")), ids: poll.slots.filter((slot) => slot.date === date).map((slot) => slot.id) }));
+  const dates = poll.dates.map((date) => {
+    const slots = poll.slots.filter((slot) => slot.date === date);
+    const last = slots.at(-1);
+    const endParts = last && new Intl.DateTimeFormat("en-CA", { timeZone: poll.timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(last.end));
+    const endDate = endParts && ["year", "month", "day"].map((part) => endParts.find((item) => item.type === part)?.value).join("-");
+    return { date, label: pollDate(date, zh),
+      day: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", month: "short", day: "numeric" }).format(new Date(date + "T12:00:00Z")),
+      weekday: new Intl.DateTimeFormat(zh ? "zh-CN" : "en-GB", { timeZone: "UTC", weekday: "short" }).format(new Date(date + "T12:00:00Z")),
+      ids: slots.map((slot) => slot.id),
+      endLabel: last ? `${endDate !== date ? (zh ? "次日 " : "Next day ") : ""}${pollClock(last.end, poll.timeZone)}` : "—" };
+  });
   const apply = (value: number[]) => {
     const next = [...new Set(value)].sort((a, b) => a - b);
     if (next.length === selected.length && next.every((id) => selected.includes(id))) return;
@@ -55,7 +63,7 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={zh ? "大家的时间表，直接选择我的空闲" : "Group timetable: select my free time"}>
     <>
-      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格 30 分钟。点一下选中，再点一次取消。" : "Each cell is 30 minutes. Tap to select; tap again to clear."}</p>
+      <div className="flex items-center gap-3"><p className="flex-1 text-xs leading-5 text-muted-foreground">{zh ? "每格最多 30 分钟。左侧是开始时间，底部显示结束时间。点一下选中，再点一次取消。" : "Each cell is up to 30 minutes. Times on the left are starts; the end appears below. Tap to select or clear."}</p>
         <button type="button" aria-label={zh ? "撤销上次修改" : "Undo last change"} data-testid="time-poll-undo" disabled={!undo || disabled || gesture.preview !== null} onClick={() => { if (undo) { onChange(undo); setUndo(null); } }} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border disabled:opacity-35"><Undo2 className="h-4 w-4" aria-hidden /></button>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
@@ -99,6 +107,10 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
             })}
           </div>)}
         </div>
+        {rows.length ? <div className="grid bg-background text-xs text-muted-foreground" style={columns}>
+          <div className="sticky left-0 flex min-h-9 items-center justify-center bg-background">{zh ? "结束" : "End"}</div>
+          {dates.map(({ date, endLabel }) => <div key={date} data-testid={`time-poll-end-${date}`} className="flex min-h-9 items-center justify-center border-l px-1 tabular-nums">{endLabel}</div>)}
+        </div> : null}
       </div>
     </div>
 
