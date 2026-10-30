@@ -1,8 +1,8 @@
 # AGENTS.md — Positive-First Development Protocol
 
-## Shared-plan page simplification — not deployed (2026-10-30)
+## Shared-plan page simplification — deployed (2026-10-30)
 
-- Responsive desktop/mobile shared-page simplification was verified locally; Vercel remains paused. Production still points to `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`. Keep this UI release separate from the unshipped unlimited-capacity backend. [Scope and checks](docs/qa/2026-10-30-share-page-simplification-in-progress.md).
+- Vercel resumed; root/www/api point to READY `dpl_Hgsjz93Y96bCmmkdYmmSHw8ubkzS`. Responsive shared-page UI and live guest flows verified; the unshipped unlimited-capacity backend remains excluded. [Release](docs/releases/2026-10-30-web-share-page-simplification.md).
 
 ## Unlimited invitations preparation — not deployed (2026-10-30)
 

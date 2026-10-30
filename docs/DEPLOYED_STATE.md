@@ -1,5 +1,9 @@
 # 已部署功能与归档边界
 
+## Web shared-plan page simplification — 2026-10-30
+
+Root/www/api point to READY `dpl_Hgsjz93Y96bCmmkdYmmSHw8ubkzS`, with UI from `d50ea41b6c4d3a2e22b0964563ea6fffd0f954c2` isolated on the previous production baseline. Desktop/mobile shared pages are streamlined; existing capacity behavior is preserved. [Release and verification](releases/2026-10-30-web-share-page-simplification.md).
+
 ## Web optional invitation capacity — 2026-10-30
 
 Root/www/api point to READY `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`, source `5f92bb47b4e25ee794e33490e0dff287ec92aae7`. Link participation defaults open, with an optional custom cap and an existing system maximum of 20. [Release and scope](releases/2026-10-30-web-optional-invite-capacity.md).
