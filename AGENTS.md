@@ -1,5 +1,18 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Collaborative activity editor — local review only, 2026-10-30
+
+- Source `f9dd9ded` implements the approved compact responsive editor, separate
+  activity/place preferences and organizer-confirmed final content. Actual local
+  browser → API → data → invitation/re-invitation → publication → Calendar passed;
+  34 focused tests and 13 supplemental API checks passed. Visible local preview
+  is3344, with two owned demo accounts and one published demo plan retained.
+- **Not deployed**: production stays on the organizer-copy release below. Two
+  additive schema columns were applied only to loopback15434 and Prisma was
+  regenerated. Preserve production/source differences and unshipped unlimited
+  capacity boundaries; never deploy this whole checkout as a production match.
+  Native260 and user TS startup edits are preserved. [Local delivery](docs/releases/2026-10-30-collaborative-editor-local-preview.md).
+
 ## Current organizer plan copy — 2026-10-30
 
 - Root/www/api point to READY `dpl_Bo5cBswyo7cxv6LGqfwA1MwQbGY3`. Organizer details and share/invitation/edit dialogs remove duplicate explanations and name each action explicitly. Production capacity/backend/shared-entry behavior is preserved; all 1,440 source hashes match. Live two-account sharing, invitation/re-invitation, publication, Calendar, cancellation and QA cleanup passed. [Release](docs/releases/2026-10-30-web-organizer-copy.md).
