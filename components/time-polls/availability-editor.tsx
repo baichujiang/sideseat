@@ -98,8 +98,8 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
         <div ref={gesture.surface} className="grid select-none" style={{ ...columns, WebkitTouchCallout: "none" }} onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove} onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel} onLostPointerCapture={gesture.onLostPointerCapture} onContextMenu={(event) => event.preventDefault()}>
           {rows.map((row, rowIndex) => <div key={row} className="contents">
             <div className="sticky left-0 z-10 h-11 border-b bg-background text-[10px] tabular-nums">
-              <span data-testid={`time-poll-boundary-${rowIndex}`} className="absolute inset-x-0 top-0 -translate-y-1/2 text-center leading-none">{labels.get(row)}</span>
-              {rowIndex === rows.length - 1 && commonEnd ? <span data-testid="time-poll-final-boundary" className="absolute inset-x-0 bottom-0 translate-y-1/2 text-center leading-none">{commonEnd}</span> : null}
+              <span data-testid={`time-poll-boundary-${rowIndex}`} className="absolute inset-x-0 top-0 -translate-y-1/2 text-center leading-none"><span className="bg-background px-1">{labels.get(row)}</span></span>
+              {rowIndex === rows.length - 1 && commonEnd ? <span data-testid="time-poll-final-boundary" className="absolute inset-x-0 bottom-0 translate-y-1/2 text-center leading-none"><span className="bg-background px-1">{commonEnd}</span></span> : null}
             </div>
             {dates.map(({ date, label, endAt, endLabel }) => {
               const slot = lookup.get(date + "|" + row);
