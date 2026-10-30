@@ -593,6 +593,8 @@ function PollWorkspace({
     [showShare, setShowShare] = useState(false),
     [confirm, setConfirm] = useState<"cancel" | "delete" | null>(null),
     [edit, setEdit] = useState(false);
+  const [openInviteLink, setOpenInviteLink] = useState(true),
+    [limitAttendees, setLimitAttendees] = useState(false);
   const contacts = useWebResource<{
     contacts: {
       connectionId: string;
@@ -700,8 +702,8 @@ function PollWorkspace({
       end,
       attendeeIds: invitees,
       version: poll.invitationVersion,
-      ...(form.get("open") === "on"
-        ? { linkParticipantCount: Number(form.get("capacity")) }
+      ...(openInviteLink
+        ? { linkParticipantCount: limitAttendees ? Number(form.get("capacity")) : 20 }
         : {}),
     });
     if (result) setShowFinal(false);
@@ -713,6 +715,10 @@ function PollWorkspace({
       Date.parse(poll.chosenStart) < Date.now());
   const mine = poll.invitations.find((person) => person.isMe);
   const first = poll.slots.find((slot) => Date.parse(slot.start) > Date.now());
+  const minimumAttendees = Math.max(
+    2,
+    1 + invitees.filter((id) => !poll.invitees?.some((person) => person.id === id && person.isMe)).length,
+  );
   return (
     <>
       <PageHeading
@@ -946,6 +952,8 @@ function PollWorkspace({
                       )
                       .map((person) => person.id),
                   );
+                  setOpenInviteLink(poll.phase === "COLLECTING" || poll.planningMode === "FIXED");
+                  setLimitAttendees(poll.planningMode === "FIXED" && (poll.expectedCount ?? 20) < 20);
                   setShowFinal(true);
                 }}
               >
@@ -1135,23 +1143,40 @@ function PollWorkspace({
             ))}
             <label className="sw-check">
               <input
-                name="open"
                 type="checkbox"
-                defaultChecked={
-                  invitees.length < 2 || poll.planningMode === "FIXED"
-                }
+                checked={openInviteLink}
+                onChange={(event) => setOpenInviteLink(event.target.checked)}
               />
-              同时开放邀请链接，朋友可确认加入
+              允许朋友通过链接加入
             </label>
-            <Field label="链接总人数（含发起人）">
-              <input
-                name="capacity"
-                type="number"
-                min={2}
-                max={20}
-                defaultValue={poll.expectedCount ?? 2}
-              />
-            </Field>
+            {openInviteLink ? (
+              <>
+                <p className="sw-muted">默认最多 20 人参加，包括你和已邀请的朋友。</p>
+                <label className="sw-check">
+                  <input
+                    type="checkbox"
+                    checked={limitAttendees}
+                    onChange={(event) => setLimitAttendees(event.target.checked)}
+                  />
+                  限制参加人数（可选）
+                </label>
+                {limitAttendees ? (
+                  <Field
+                    label="最多参加几人（包括你）"
+                    hint={`至少 ${minimumAttendees} 人，包含你和已选中的朋友。`}
+                  >
+                    <input
+                      name="capacity"
+                      type="number"
+                      min={minimumAttendees}
+                      max={20}
+                      defaultValue={Math.max(poll.expectedCount ?? minimumAttendees, minimumAttendees)}
+                      required
+                    />
+                  </Field>
+                ) : null}
+              </>
+            ) : null}
             <ErrorNotice message={error} />
             <div className="sw-form-actions">
               <button
