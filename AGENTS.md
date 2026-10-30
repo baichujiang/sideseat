@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web timetable end boundary — 2026-10-30
+
+- Root/www/api point to READY `dpl_4ErWTW4pWsUqRk6w4PHw8RWwuUCM`, source `4c7b710a42c00420b38c555b64faf5c4e2bd4b9c`. Per-day end boundaries and the meaning of start labels are visible on web and shared timetable. No data or API change. 1,431 source hashes match; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-timetable-end-boundary.md).
+
+
 ## Current web plan sharing production — 2026-10-30
 
 - Root/www/api point to READY `dpl_CMe4xfC4BF3suaQFbfHJAhaFzREx`; source `6ab9c31f04fd27229bda5619582a6197da38acbb`. Accurate duplicate-share feedback and modal error visibility/retry; 1,430 remote source hashes verified. Real two-account copy, share and chat-card flows verified; own accounts cleaned. See [release](docs/releases/2026-10-30-web-plan-share-feedback.md).

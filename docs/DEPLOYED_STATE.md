@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web timetable end boundary — 2026-10-30
+
+Root/www/api point to READY `dpl_4ErWTW4pWsUqRk6w4PHw8RWwuUCM`, source `4c7b710a42c00420b38c555b64faf5c4e2bd4b9c`. Web and shared timetable show end times beneath each day. [Release and scope](releases/2026-10-30-web-timetable-end-boundary.md).
+
+
 ## Web plan sharing — 2026-10-30
 
 Root/www/api point to READY `dpl_CMe4xfC4BF3suaQFbfHJAhaFzREx`, source `6ab9c31f04fd27229bda5619582a6197da38acbb`. Plan copy and contact delivery were verified with two own accounts; duplicate-share feedback and modal errors fixed. [Release and scope](releases/2026-10-30-web-plan-share-feedback.md).
