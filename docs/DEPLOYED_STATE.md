@@ -1,5 +1,10 @@
 # 已部署功能与归档边界
 
+## Web plan sharing — 2026-10-30
+
+Root/www/api point to READY `dpl_CMe4xfC4BF3suaQFbfHJAhaFzREx`, source `6ab9c31f04fd27229bda5619582a6197da38acbb`. Plan copy and contact delivery were verified with two own accounts; duplicate-share feedback and modal errors fixed. [Release and scope](releases/2026-10-30-web-plan-share-feedback.md).
+
+
 ## Web calendar and plans — 2026-10-30
 
 Root/www/api are READY on `dpl_u3vCd6ps1s6JzDwJ7gKTDLqxhtk8`, source `b95e460f50d390d53852076011c446b340e050c5`. Calendar navigation, short-window scrolling, plan draft restoration and invitation response are fixed. Details and verification scope: [release](releases/2026-10-30-web-calendar-plans-interactions.md).

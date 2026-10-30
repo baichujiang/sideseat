@@ -1,5 +1,10 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Current web plan sharing production — 2026-10-30
+
+- Root/www/api point to READY `dpl_CMe4xfC4BF3suaQFbfHJAhaFzREx`; source `6ab9c31f04fd27229bda5619582a6197da38acbb`. Accurate duplicate-share feedback and modal error visibility/retry; 1,430 remote source hashes verified. Real two-account copy, share and chat-card flows verified; own accounts cleaned. See [release](docs/releases/2026-10-30-web-plan-share-feedback.md).
+
+
 ## Current web calendar and plans production — 2026-10-30
 
 - Root/www/api point to READY `dpl_u3vCd6ps1s6JzDwJ7gKTDLqxhtk8`; source `b95e460f50d390d53852076011c446b340e050c5`. Four web interaction fixes, 1,429 source hashes verified, no native/API/schema changes. Local and production two-account plan confirmation and schedule readback passed; own accounts cleaned. See [release](docs/releases/2026-10-30-web-calendar-plans-interactions.md) for scope and limitations.
