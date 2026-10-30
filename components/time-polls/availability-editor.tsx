@@ -59,7 +59,8 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
     },
   });
   const active = new Set(gesture.preview ?? selected);
-  const participantSelections = poll.participants.map((person) => new Set(person.slotIds));
+  const otherSelections = poll.participants.filter((person) => !person.isMe).map((person) => new Set(person.slotIds));
+  const displayedParticipants = otherSelections.length + (poll.participants.some((person) => person.isMe) || active.size > 0 ? 1 : 0);
   const columns = { gridTemplateColumns: `56px repeat(${dates.length}, minmax(88px, 1fr))` };
   return <section className="space-y-3" aria-label={zh ? "大家的时间表，直接选择我的空闲" : "Group timetable: select my free time"}>
     <>
@@ -69,7 +70,7 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
       <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground" aria-label={zh ? "选时图例" : "Availability legend"}>
         <span className="flex items-center gap-1"><Check className={`h-3.5 w-3.5 rounded ${styles.selected}`} aria-hidden />{zh ? "我的空闲" : "My free time"}</span>
         <span className="flex items-center gap-1"><Minus className={`h-3.5 w-3.5 rounded ${styles.partial}`} aria-hidden />{zh ? "部分已选" : "Partially selected"}</span>
-        <span>{zh ? "数字：已提交的有空人数" : "Numbers: submitted availability"}</span>
+        <span>{zh ? "数字：朋友已提交的空闲加上我的当前选择；提交后朋友可见" : "Numbers include others' submissions and your current selection; submit to share it"}</span>
       </div>
     </>
     <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
@@ -97,11 +98,11 @@ export function AvailabilityEditor({ poll, selected, onChange, onEditingChange, 
             {dates.map(({ date, label }) => {
               const slot = lookup.get(date + "|" + row);
               if (!slot) return <div key={date} className="h-11 border-b border-l bg-muted/30" />;
-              const count = participantSelections.filter((ids) => slot.slotIds.every((id) => ids.has(id))).length;
               const all = slot.slotIds.every((id) => active.has(id));
               const partial = !all && slot.slotIds.some((id) => active.has(id));
+              const count = otherSelections.filter((ids) => slot.slotIds.every((id) => ids.has(id))).length + Number(all);
               const name = `${label}, ${slot.label}–${pollClock(slot.end, poll.timeZone)}`;
-              return <button key={date} type="button" data-testid={`time-poll-cell-${slot.id}`} aria-label={`${name}, ${count} ${zh ? "人有空" : "available"}`} aria-pressed={all ? true : partial ? "mixed" : false} disabled={disabled} onClick={(event) => gesture.onClick(slot.slotIds, event.detail === 0)} className={`flex h-11 items-center justify-center gap-1.5 border-b border-l text-sm tabular-nums focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-blue-500 ${all ? styles.mine : partial ? styles.minePartial : "border-border"}`} style={{ backgroundColor: `rgb(13 148 136 / ${count ? 0.14 + 0.42 * count / Math.max(1, participantSelections.length) : 0.04})` }}>
+              return <button key={date} type="button" data-testid={`time-poll-cell-${slot.id}`} aria-label={`${name}, ${count} ${zh ? "人有空" : "available"}`} aria-pressed={all ? true : partial ? "mixed" : false} disabled={disabled} onClick={(event) => gesture.onClick(slot.slotIds, event.detail === 0)} className={`flex h-11 items-center justify-center gap-1.5 border-b border-l text-sm tabular-nums focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-blue-500 ${all ? styles.mine : partial ? styles.minePartial : "border-border"}`} style={{ backgroundColor: `rgb(13 148 136 / ${count ? 0.14 + 0.42 * count / Math.max(1, displayedParticipants) : 0.04})` }}>
                 {all || partial ? <span className={all ? styles.mineMark : styles.partialMark} aria-hidden>{all ? "✓" : "−"}</span> : null}<span aria-hidden>{count}</span>
               </button>;
             })}
