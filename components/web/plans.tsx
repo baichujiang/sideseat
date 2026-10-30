@@ -703,7 +703,7 @@ function PollWorkspace({
       attendeeIds: invitees,
       version: poll.invitationVersion,
       ...(openInviteLink
-        ? { linkParticipantCount: limitAttendees ? Number(form.get("capacity")) : 20 }
+        ? { linkParticipantCount: limitAttendees ? Number(form.get("capacity")) : null }
         : {}),
     });
     if (result) setShowFinal(false);
@@ -715,6 +715,9 @@ function PollWorkspace({
       Date.parse(poll.chosenStart) < Date.now());
   const mine = poll.invitations.find((person) => person.isMe);
   const first = poll.slots.find((slot) => Date.parse(slot.start) > Date.now());
+  const firstDayEnd = first && poll.slots.filter((slot) => slot.date === first.date).at(-1)?.end;
+  const initialStart = poll.chosenStart ?? first?.start;
+  const initialEnd = poll.chosenEnd ?? firstDayEnd;
   const minimumAttendees = Math.max(
     2,
     1 + invitees.filter((id) => !poll.invitees?.some((person) => person.id === id && person.isMe)).length,
@@ -750,7 +753,11 @@ function PollWorkspace({
               <h2 style={{ marginTop: 12 }}>
                 {poll.phase === "COLLECTING"
                   ? "大家的时间表"
-                  : "这次，我们约好了。"}
+                  : poll.phase === "INVITING"
+                    ? "拟定时间，待确认"
+                    : poll.phase === "CONFIRMED"
+                      ? "这次，我们约好了。"
+                      : "计划详情"}
               </h2>
             </div>
             <span className="sw-muted">
@@ -953,7 +960,7 @@ function PollWorkspace({
                       .map((person) => person.id),
                   );
                   setOpenInviteLink(poll.phase === "COLLECTING" || poll.planningMode === "FIXED");
-                  setLimitAttendees(poll.planningMode === "FIXED" && (poll.expectedCount ?? 20) < 20);
+                  setLimitAttendees(poll.planningMode === "FIXED" && poll.expectedCount !== null);
                   setShowFinal(true);
                 }}
               >
@@ -1055,15 +1062,24 @@ function PollWorkspace({
               className="sw-button sw-soft"
               disabled={busy || !contactIds.length}
               onClick={async () => {
-                const result = await action<{
-                  deliveries: { connectionId: string }[];
-                }>("/contacts", "POST", {
-                  connectionIds: contactIds,
-                  version: poll.invitationVersion,
-                });
-                if (result) {
+                setBusy(true);
+                setError("");
+                let sent = 0;
+                let processed = 0;
+                try {
+                  // The API accepts up to 19 contacts per request, not per plan.
+                  for (let offset = 0; offset < contactIds.length; offset += 19) {
+                    const batch = contactIds.slice(offset, offset + 19);
+                    const result = await webRequest<{ deliveries: { connectionId: string }[] }>(
+                      `/api/v1/time-polls/${poll.token}/contacts`, "POST",
+                      { connectionIds: batch, version: poll.invitationVersion },
+                    );
+                    sent += result.deliveries.length;
+                    processed += batch.length;
+                  }
+                  refreshWebData();
+                  reload();
                   setShowShare(false);
-                  const sent = result.deliveries.length;
                   setNotice(
                     sent === 0
                       ? "这些联系人之前已收到该计划，本次没有重复发送。"
@@ -1071,6 +1087,14 @@ function PollWorkspace({
                         ? `已发送给 ${sent} 位联系人，其余联系人之前已收到该计划。`
                         : "已发送到朋友的 SideSeat 聊天和计划中。",
                   );
+                } catch (cause) {
+                  refreshWebData();
+                  reload();
+                  setError(processed
+                    ? `已处理 ${processed} 位联系人，其中 ${sent} 位新收到计划。其余发送失败，可重新尝试：${messageOf(cause)}`
+                    : messageOf(cause));
+                } finally {
+                  setBusy(false);
                 }
               }}
             >
@@ -1095,11 +1119,11 @@ function PollWorkspace({
                 step={900}
                 name="start"
                 required
-                defaultValue={formatInTimeZone(
-                  poll.chosenStart ?? first?.start ?? new Date(),
+                defaultValue={initialStart ? formatInTimeZone(
+                  initialStart,
                   poll.timeZone,
                   "yyyy-MM-dd'T'HH:mm",
-                )}
+                ) : ""}
               />
             </Field>
             <Field label="结束">
@@ -1108,14 +1132,11 @@ function PollWorkspace({
                 step={900}
                 name="end"
                 required
-                defaultValue={formatInTimeZone(
-                  poll.chosenEnd ??
-                    (first
-                      ? new Date(Date.parse(first.start) + 3600000)
-                      : new Date(Date.now() + 3600000)),
+                defaultValue={initialEnd ? formatInTimeZone(
+                  initialEnd,
                   poll.timeZone,
                   "yyyy-MM-dd'T'HH:mm",
-                )}
+                ) : ""}
               />
             </Field>
             <h3 className="sw-section-title">邀请名单</h3>
@@ -1151,7 +1172,7 @@ function PollWorkspace({
             </label>
             {openInviteLink ? (
               <>
-                <p className="sw-muted">默认最多 20 人参加，包括你和已邀请的朋友。</p>
+                <p className="sw-muted">默认不限参加人数。</p>
                 <label className="sw-check">
                   <input
                     type="checkbox"
@@ -1169,7 +1190,6 @@ function PollWorkspace({
                       name="capacity"
                       type="number"
                       min={minimumAttendees}
-                      max={20}
                       defaultValue={Math.max(poll.expectedCount ?? minimumAttendees, minimumAttendees)}
                       required
                     />

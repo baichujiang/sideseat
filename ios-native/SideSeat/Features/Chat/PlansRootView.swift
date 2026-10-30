@@ -371,7 +371,9 @@ struct PlansRootView: View {
         case "COLLECTING": plan.activitySelection?.isOpen == true
             ? String(format: AppLocalization.string("%d activity ideas"), plan.activitySelection?.ideaCount ?? 0)
             : String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
-        case "INVITING": String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget)
+        case "INVITING": plan.hasUnlimitedLink
+            ? String(format: AppLocalization.string("%d people confirmed"), plan.acceptedCount ?? 0)
+            : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget)
         default: nil
         }
         return Button {
@@ -437,9 +439,11 @@ struct PlansRootView: View {
                     Divider()
                     PlanCardProgress(title: phase == "COLLECTING"
                         ? String(format: AppLocalization.string("%d people responded"), plan.respondedCount ?? 0)
+                        : plan.hasUnlimitedLink
+                        ? String(format: AppLocalization.string("%d people confirmed"), plan.acceptedCount ?? 0)
                         : String(format: AppLocalization.string("%d of %d confirmed"), plan.acceptedCount ?? 0, plan.confirmationTarget),
                         confirmed: phase == "INVITING" ? plan.acceptedCount ?? 0 : nil,
-                        target: phase == "INVITING" ? plan.confirmationTarget : nil)
+                        target: phase == "INVITING" && !plan.hasUnlimitedLink ? plan.confirmationTarget : nil)
                 }
                 PlanCardActionFooter(presentation: presentation)
             }

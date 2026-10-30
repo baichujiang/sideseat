@@ -37,6 +37,13 @@ struct PlanGuidanceTests {
         #expect(try item(["phase": "INVITING", "planningMode": "FIXED", "invitedCount": 1, "expectedCount": 5]).confirmationTarget == 5)
         #expect(try item(["phase": "INVITING", "invitedCount": 2, "expectedCount": 5]).confirmationTarget == 2)
     }
+    @Test("Unlimited invitations remain open on the plan overview")
+    func unlimitedOverview() throws {
+        let plan = try item(["phase": "INVITING", "planningMode": "FIXED", "invitedCount": 25,
+                             "expectedCount": NSNull(), "isOwner": false, "isIncluded": false])
+        #expect(plan.hasUnlimitedLink)
+        #expect(plan.nextStep(at: now) == .confirm)
+    }
     @Test("Terminal and elapsed plans do not ask for input")
     func closedPlans() throws {
         for phase in ["CANCELLED", "EXPIRED"] {

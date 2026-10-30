@@ -184,9 +184,8 @@ export async function sendPollInvitations(token: string, userId: string, input: 
     const roster = new Map(selected.map((person) => [identity(person), { userId: person.userId, guestId: person.guestId, displayName: person.displayName }]));
     const owner = await tx.user.findUniqueOrThrow({ where: { id: userId }, select: { nickname: true, username: true } });
     roster.set(`user:${userId}`, { userId, guestId: null, displayName: poll.responses.find((r) => r.userId === userId)?.displayName ?? owner.nickname ?? owner.username });
-    if (roster.size > 20) throw new TimePollError(422, "Invite at most twenty people.");
     if (input.linkParticipantCount !== undefined) {
-      if (input.linkParticipantCount < roster.size) throw new TimePollError(422, "The participant count must include everyone you selected.");
+      if (input.linkParticipantCount !== null && input.linkParticipantCount < roster.size) throw new TimePollError(422, "The participant count must include everyone you selected.");
     } else if (roster.size < 2) throw new TimePollError(422, "Invite at least one other person.");
     const userIds = [...roster.values()].flatMap((person) => person.userId ? [person.userId] : []);
     if (await hasPlanningBlock(tx, userIds)) throw new TimePollError(409, "This participant list is unavailable.");
@@ -224,7 +223,7 @@ export async function respondPollInvitation(token: string, actor: TimePollActor,
     const selected = poll.invitations.filter((i) => i.selected);
     if ((!mine || !mine.selected) && !fixed) throw new TimePollError(403, "You are not included in this invitation.");
     const wantsSeat = input.status === "ACCEPTED";
-    if (fixed && wantsSeat && !mine?.selected && selected.length >= (poll.expectedCount ?? 2)) throw new TimePollError(409, "This plan's participant list is full.");
+    if (fixed && poll.expectedCount !== null && wantsSeat && !mine?.selected && selected.length >= poll.expectedCount) throw new TimePollError(409, "This plan's participant list is full.");
     const userIds = [accountId(actor), ...selected.map((i) => i.userId)].filter((id): id is string => id !== null);
     if (await hasPlanningBlock(tx, userIds)) throw new TimePollError(404, "Plan unavailable.");
     const viewer = typeof actor === "string" ? await tx.user.findUniqueOrThrow({ where: { id: actor }, select: { nickname: true, username: true } }) : null;

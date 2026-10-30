@@ -47,6 +47,21 @@ struct TimePollTests {
         #expect(try !poll(phase: "CONFIRMED", reserved: false).canReplyToInvitation(at: now.addingTimeInterval(3600)))
     }
 
+    @Test("An unlimited link stays open after more than 20 people join")
+    func unlimitedInvitationRemainsOpen() throws {
+        let now = try #require(ISO8601DateFormatter().date(from: "2030-10-16T06:00:00Z"))
+        var object = try JSONSerialization.jsonObject(with: collectingPollData()) as! [String: Any]
+        object["phase"] = "INVITING"; object["planningMode"] = "FIXED"; object["expectedCount"] = NSNull()
+        object["isOwner"] = false
+        object["chosenStart"] = "2030-10-16T07:00:00Z"; object["chosenEnd"] = "2030-10-16T08:00:00Z"
+        object["invitations"] = (0..<25).map { ["id": "person-\($0)", "displayName": "Guest", "status": "ACCEPTED", "selected": true, "isMe": false] as [String: Any] }
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let poll = try decoder.decode(NativeTimePoll.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(poll.hasUnlimitedLink && poll.occupiedCount == 25)
+        #expect(poll.canReplyToInvitation(at: now))
+        #expect(poll.presentation(at: now).nextStep == .confirm)
+    }
+
     @Test("Picker and default components share one day identity and can be removed")
     func candidateDateIdentity() throws {
         var calendar = Calendar(identifier: .gregorian)

@@ -1,5 +1,9 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Unlimited invitations preparation — not deployed (2026-10-30)
+
+- Local implementation and targeted tests exist, but production still enforces 20. Older iOS clients misread a null participant target, and the default iPhone was offline. Do not deploy until compatibility and device release are resolved. [In-progress verification](docs/qa/2026-10-30-unlimited-invitations-in-progress.md).
+
 ## Current web optional invitation capacity — 2026-10-30
 
 - Root/www/api point to READY `dpl_HAeYXJf2hvaWiA2RcyBb3vfPKbcC`, source `5f92bb47b4e25ee794e33490e0dff287ec92aae7`. Link participation defaults open, without a custom limit; the optional cap is clearly labeled and the existing maximum remains 20. Local and live browser and API checks passed; own QA accounts cleaned. [Release](docs/releases/2026-10-30-web-optional-invite-capacity.md).

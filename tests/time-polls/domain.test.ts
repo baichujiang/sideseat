@@ -54,7 +54,9 @@ test("an invitation link needs no availability respondents; closed rosters keep 
   assert.equal(sendPollInvitationsSchema.safeParse(draft).success, false);
   assert.deepEqual(sendPollInvitationsSchema.parse({ ...draft, linkParticipantCount: 2 }).attendeeIds, []);
   assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 1 }).success, false);
-  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 21 }).success, false);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: null }).success, true);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, linkParticipantCount: 21 }).success, true);
+  assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, attendeeIds: Array.from({ length: 25 }, (_, i) => `person-${i}`) }).success, true);
   assert.equal(sendPollInvitationsSchema.safeParse({ ...draft, attendeeIds: ["existing-response"] }).success, true);
 });
 

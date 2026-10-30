@@ -53,8 +53,8 @@ struct PlanInvitationSettingsView: View {
         let ownIDs = Set((currentPoll.participants + currentPoll.invitationCandidates).filter(\.isMe).map(\.id))
         return currentPoll.invitationParticipantIDs(adding: extraInviteeIDs).subtracting(ownIDs).count
     }
-    private var minimumLinkCount: Int { min(20, max(2, selectedFriends + 1)) }
-    private var displayedLinkCount: Int { min(20, max(linkParticipantCount ?? minimumLinkCount, minimumLinkCount)) }
+    private var minimumLinkCount: Int { max(2, selectedFriends + 1) }
+    private var displayedLinkCount: Int { max(linkParticipantCount ?? minimumLinkCount, minimumLinkCount) }
 
     var body: some View {
         NavigationStack {
@@ -82,13 +82,13 @@ struct PlanInvitationSettingsView: View {
                                 Spacer(minLength: SideSeatTheme.spaceSM)
                                 Image(systemName: extraInviteeIDs.contains(person.id) ? "checkmark.circle.fill" : "circle")
                             }.frame(minHeight: 44)
-                        }.disabled(!store.canMutate || selectedFriends >= 19 && !extraInviteeIDs.contains(person.id))
+                        }.disabled(!store.canMutate)
                             .accessibilityIdentifier("unified-plan-extra-person-\(person.id)")
                             .accessibilityValue(extraInviteeIDs.contains(person.id) ? "Selected" : "Not selected")
                     }
                     if currentPoll.planningPhase == "COLLECTING" {
                         Button("Send plan cards to App friends", systemImage: "person.badge.plus") { showsContacts = true }
-                            .disabled(!store.canMutate || selectedFriends >= 19)
+                            .disabled(!store.canMutate)
                             .accessibilityIdentifier("unified-plan-add-contacts")
                     }
                 } header: { Text("Additional invitees") }
@@ -96,9 +96,9 @@ struct PlanInvitationSettingsView: View {
                 Section {
                     if linkParticipantCount != nil || currentPoll.hasFixedTime || selectedFriends == 0 {
                         Stepper(value: Binding(get: { displayedLinkCount },
-                                               set: { linkParticipantCount = $0 }), in: minimumLinkCount...20) {
+                                               set: { linkParticipantCount = $0 }), in: minimumLinkCount...Int(Int32.max)) {
                             Text(String(format: AppLocalization.string("Plan for %d people, including you"), displayedLinkCount))
-                        }.disabled(selectedFriends >= 20).accessibilityIdentifier("unified-plan-link-count")
+                        }.accessibilityIdentifier("unified-plan-link-count")
                         Text("Friends can open this invitation link and confirm the selected time directly. They don't need to fill in availability first.")
                             .font(.footnote).foregroundStyle(.secondary)
                         if !currentPoll.hasFixedTime && selectedFriends > 0 {
@@ -106,13 +106,10 @@ struct PlanInvitationSettingsView: View {
                                 .accessibilityIdentifier("unified-plan-link-off")
                         }
                     } else {
-                        Button("Invite more friends by link") { linkParticipantCount = min(20, max(2, selectedFriends + 2)) }
-                            .disabled(selectedFriends >= 19).accessibilityIdentifier("unified-plan-link-on")
+                        Button("Invite more friends by link") { linkParticipantCount = max(2, selectedFriends + 2) }
+                            .accessibilityIdentifier("unified-plan-link-on")
                     }
                 } header: { Text("Invitation link") }
-                if selectedFriends >= 20 {
-                    Text("Plans support up to 20 people, including you.").foregroundStyle(SideSeatTheme.danger)
-                }
             }
             .navigationTitle("Edit invitation").navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -160,13 +157,17 @@ struct UnifiedPlanConfirmationView: View {
                     Divider()
                     Text("Invitation replies")
                         .font(.headline).fixedSize(horizontal: false, vertical: true)
-                    Text(String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
+                    Text(poll.hasUnlimitedLink
+                         ? String(format: AppLocalization.string("%d people confirmed"), accepted)
+                         : String(format: AppLocalization.string("%d of %d confirmed"), accepted, poll.targetCount))
                         .font(.subheadline.weight(.medium)).fixedSize(horizontal: false, vertical: true)
                         .accessibilityIdentifier("unified-plan-confirmation-count")
-                    ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
-                        .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
+                    if !poll.hasUnlimitedLink {
+                        ProgressView(value: Double(min(accepted, poll.targetCount)), total: Double(max(1, poll.targetCount)))
+                            .tint(SideSeatTheme.utilityAction).accessibilityHidden(true)
+                    }
                     PlanPeopleView(poll: poll, isInline: true)
-                    if poll.planningMode == "FIXED", poll.planningPhase == "INVITING", poll.remainingCount > 0 {
+                    if poll.planningMode == "FIXED", !poll.hasUnlimitedLink, poll.planningPhase == "INVITING", poll.remainingCount > 0 {
                         Text(String(format: AppLocalization.string("%d places still open"), poll.remainingCount))
                             .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }
@@ -252,7 +253,7 @@ struct UnifiedPlanConfirmationView: View {
     }
     private var included: Bool { poll.isOwner || (mine?.selected == true && mine?.status == "ACCEPTED") }
     private var calendarExplanation: String {
-        if poll.planningMode == "FIXED", !poll.isOwner, mine?.selected != true, poll.remainingCount == 0,
+        if poll.planningMode == "FIXED", !poll.hasUnlimitedLink, !poll.isOwner, mine?.selected != true, poll.remainingCount == 0,
            ["INVITING", "CONFIRMED"].contains(poll.planningPhase), (poll.chosenStart ?? .distantPast) > Date() {
             return AppLocalization.string("This plan is full. Contact the organizer.")
         }

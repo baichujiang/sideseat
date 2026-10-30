@@ -665,7 +665,7 @@ struct TimePollDetailView: View {
     private func effectiveLinkCount(_ poll: NativeTimePoll) -> Int? {
         let friends = invitationFriendCount(poll)
         if let count = invitationLinkCount ?? (poll.hasFixedTime ? poll.expectedCount : nil) {
-            return min(20, max(count, friends + 1))
+            return max(count, friends + 1)
         }
         return friends == 0 ? 2 : nil
     }
@@ -686,17 +686,11 @@ struct TimePollDetailView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("unified-plan-activity-required")
             }
-            if friends >= 20 {
-                Text("Plans support up to 20 people, including you.")
-                    .font(.caption).foregroundStyle(SideSeatTheme.danger)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("unified-plan-invitation-limit")
-            }
             PlanActionButton(title: AppLocalization.string(friends == 0 ? "Create invitation link" : "Send invitations"),
                 symbol: "paperplane.fill", kind: .commit, isLoading: sendingInvitations || store.acting,
                 accessibilityID: "unified-plan-send-invitations") {
                 Task { await sendInvitations() }
-            }.disabled(finalRange == nil || sendingInvitations || !store.canMutate || friends >= 20 || (needsActivity && !hasActivity))
+            }.disabled(finalRange == nil || sendingInvitations || !store.canMutate || (needsActivity && !hasActivity))
         }
     }
 
@@ -735,7 +729,7 @@ struct TimePollDetailView: View {
             guard store.error == nil, generation == session.authorizationGeneration else { return }
         }
         guard let current = store.poll, generation == session.authorizationGeneration, current.isOwner,
-              current.invitationVersion == poll.invitationVersion, invitationFriendCount(current) < 20 else { return }
+              current.invitationVersion == poll.invitationVersion else { return }
         await store.mutate("invitations", body: SendPollInvitationsRequest(
             start: ISO8601DateFormatter().string(from: range.start), end: ISO8601DateFormatter().string(from: range.end),
             attendeeIds: invitationIDs(current).sorted(), version: current.invitationVersion ?? 0,

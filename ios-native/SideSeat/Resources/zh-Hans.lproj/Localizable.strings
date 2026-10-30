@@ -2467,6 +2467,7 @@
 "Delete poll" = "删除征集";
 "Delete this poll and all responses?" = "删除这份征集及所有答复？";
 "%d people responded" = "%d 人已填写";
+"%d people confirmed" = "%d 人已确认";
 "No available time yet." = "暂时还没有可参加的时段。";
 "Everyone can attend" = "所有人都能参加";
 "Best available times" = "参加人数最多的时段";

@@ -15,7 +15,7 @@ export const createTimePollSchema = z.object({
   endMinute: z.number().int().min(15).max(1440).multipleOf(15),
   location: z.string().trim().max(200).optional(),
   durationMinutes: z.number().int().min(30).max(480).multipleOf(15).optional(),
-  expectedCount: z.number().int().min(2).max(20).optional(),
+  expectedCount: z.number().int().min(2).max(2147483647).optional(),
   planningMode: z.enum(["COLLECT", "FIXED"]).optional(),
   fixedStart: z.string().datetime().optional(),
   chooseActivityTogether: z.boolean().optional(),
@@ -48,9 +48,10 @@ export type PollWindow = { start: string; end: string; attendeeIds: string[]; co
 export const sendPollInvitationsSchema = z.object({
   start: z.string().datetime(),
   end: z.string().datetime().optional(),
-  attendeeIds: z.array(z.string().min(1).max(100)).max(20),
+  attendeeIds: z.array(z.string().min(1).max(100)),
   version: z.number().int().min(0),
-  linkParticipantCount: z.number().int().min(2).max(20).optional(),
+  // Omitted keeps the existing closed-roster contract; null opens the link without a cap.
+  linkParticipantCount: z.number().int().min(2).max(2147483647).nullable().optional(),
 }).strict().refine((value) => value.attendeeIds.length > 0 || value.linkParticipantCount !== undefined, { path: ["attendeeIds"], message: "Choose invitees or a participant count for the invitation link." })
   .refine((value) => !value.end || new Date(value.end) > new Date(value.start), { path: ["end"], message: "End time must follow start time." });
 export const respondPollInvitationSchema = z.object({

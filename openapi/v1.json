@@ -23101,7 +23101,8 @@
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "For FIXED plans, null means an open link without a participant limit; an integer is the participant limit including the organizer."
           },
           "planningMode": {
             "type": "string",
@@ -23252,7 +23253,8 @@
             "type": [
               "integer",
               "null"
-            ]
+            ],
+            "description": "For FIXED plans, null means an open link without a participant limit; an integer is the participant limit including the organizer."
           },
           "respondedCount": {
             "type": "integer"
@@ -23417,7 +23419,7 @@
           "expectedCount": {
             "type": "integer",
             "minimum": 2,
-            "maximum": 20
+            "maximum": 2147483647
           },
           "planningMode": {
             "type": "string",
@@ -23533,7 +23535,6 @@
           "attendeeIds": {
             "type": "array",
             "minItems": 0,
-            "maxItems": 20,
             "items": {
               "type": "string"
             }
@@ -23548,10 +23549,13 @@
             "description": "Explicit end chosen by the creator; supports half-day/full-day ranges. If omitted, older clients keep the stored duration or 60-minute fallback."
           },
           "linkParticipantCount": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 2,
-            "maximum": 20,
-            "description": "Optional total including the organizer. Generates an open fixed-time invitation on the same plan/link so friends can confirm without an availability response. When omitted, attendeeIds remains a closed roster with at least one other person."
+            "maximum": 2147483647,
+            "description": "Number: open link with a participant limit including the organizer. Null: open link with no participant limit. Omitted: closed roster with at least one other person."
           }
         }
       },

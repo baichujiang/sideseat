@@ -2466,6 +2466,7 @@
 "Delete poll" = "Umfrage löschen";
 "Delete this poll and all responses?" = "Diese Umfrage und alle Antworten löschen?";
 "%d people responded" = "%d Personen haben geantwortet";
+"%d people confirmed" = "%d Personen haben bestätigt";
 "No available time yet." = "Noch keine verfügbare Zeit.";
 "Everyone can attend" = "Alle können teilnehmen";
 "Best available times" = "Zeiten mit den meisten Zusagen";

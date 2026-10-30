@@ -31,8 +31,8 @@ export async function sharePollWithContacts(token: string, userId: string,
     const members = new Set((phase === "COLLECTING" ? [...poll.responses, ...poll.invitations] : poll.invitations.filter(i => i.selected))
       .filter(person => person.userId !== userId).map(person => person.userId ? `user:${person.userId}` : `guest:${person.guestId}`));
     for (const peerId of peers) members.add(`user:${peerId}`);
-    const capacity = phase === "COLLECTING" || poll.planningMode === "FIXED" ? poll.expectedCount ?? 20 : 20;
-    if (members.size + 1 > capacity) throw new TimePollError(409, "This plan's participant list is full. Choose fewer contacts.");
+    const capacity = phase === "COLLECTING" || poll.planningMode === "FIXED" ? poll.expectedCount : null;
+    if (capacity !== null && members.size + 1 > capacity) throw new TimePollError(409, "This plan's participant list is full. Choose fewer contacts.");
     const sent: { connectionId: string; messageId: string }[] = [];
     for (const contact of current) {
       const peer = contact.userAId === userId ? contact.userB : contact.userA;

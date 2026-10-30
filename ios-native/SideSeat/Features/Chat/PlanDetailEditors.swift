@@ -246,6 +246,8 @@ struct PlanPeopleView: View {
                     } trailing: {
                         Text(collecting
                              ? String(format: AppLocalization.string("%d people responded"), poll.summary.participantCount)
+                             : poll.hasUnlimitedLink
+                             ? String(format: AppLocalization.string("%d people confirmed"), poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count)
                              : String(format: AppLocalization.string("%d of %d confirmed"), poll.allInvitations.filter { $0.selected && $0.status == "ACCEPTED" }.count, poll.targetCount))
                             .font(.subheadline).foregroundStyle(SideSeatTheme.textSecondaryStrong)
                     }

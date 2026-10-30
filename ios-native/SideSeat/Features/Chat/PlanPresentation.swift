@@ -80,7 +80,7 @@ struct PlanPresentation: Sendable {
     }
 
     static func manual(phase: String, isOwner: Bool, didRespond: Bool, respondedCount: Int,
-                       myStatus: String?, isIncluded: Bool, fixed: Bool, occupied: Int, target: Int,
+                       myStatus: String?, isIncluded: Bool, fixed: Bool, occupied: Int, target: Int?,
                        start: Date?, end: Date?, now: Date, activity: NativePlanActivity? = nil) -> Self {
         if phase == "COLLECTING", fixed {
             return Self(status: .choosingActivity,
@@ -104,8 +104,8 @@ struct PlanPresentation: Sendable {
         }
         let step: PlanNextStep
         let detail: String.LocalizationValue
-        let openLinkPlace = fixed && !isIncluded && occupied < target
-        let fullForViewer = fixed && !isOwner && !isIncluded && occupied >= target
+        let openLinkPlace = fixed && !isIncluded && (target.map { occupied < $0 } ?? true)
+        let fullForViewer = fixed && !isOwner && !isIncluded && target.map { occupied >= $0 } == true
         switch status {
         case .findingTime:
             if isOwner {
@@ -221,7 +221,7 @@ extension NativeTimePoll {
         return .manual(phase: planningPhase(at: now), isOwner: isOwner, didRespond: didRespond,
                        respondedCount: participants.count, myStatus: mine?.status,
                        isIncluded: isOwner || mine?.selected == true, fixed: planningMode == "FIXED",
-                       occupied: occupiedCount, target: targetCount, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
+                       occupied: occupiedCount, target: hasUnlimitedLink ? nil : targetCount, start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }
 
@@ -230,7 +230,7 @@ extension NativeTimePollList.Item {
         .manual(phase: planningPhase(at: now), isOwner: isOwner == true, didRespond: didRespond == true,
                 respondedCount: respondedCount ?? 0, myStatus: myInvitationStatus,
                 isIncluded: isOwner == true || isIncluded != false, fixed: planningMode == "FIXED",
-                occupied: invitedCount ?? 0, target: confirmationTarget,
+                occupied: invitedCount ?? 0, target: hasUnlimitedLink ? nil : confirmationTarget,
                 start: chosenStart, end: chosenEnd, now: now, activity: activitySelection)
     }
 }

@@ -2467,6 +2467,7 @@
 "Delete poll" = "Delete poll";
 "Delete this poll and all responses?" = "Delete this poll and all responses?";
 "%d people responded" = "%d people responded";
+"%d people confirmed" = "%d people confirmed";
 "No available time yet." = "No available time yet.";
 "Everyone can attend" = "Everyone can attend";
 "Best available times" = "Best available times";
