@@ -1,5 +1,13 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Web password eye controls — local preview only, 2026-10-31
+
+- Source `2c9c4fac` adds independent show/hide controls to web login, signup and
+  account-security passwords. Focused TS/lint, independent review, actual browser
+  toggling/keyboard and390px checks pass. Existing local demo login was restored;
+  no password change or signup submitted. No production/native/schema release.
+  [Verification](docs/releases/2026-10-31-web-password-visibility-preview.md).
+
 ## Collaborative activity editor — local review only, 2026-10-30
 
 - Source `f9dd9ded` implements the approved compact responsive editor, separate
