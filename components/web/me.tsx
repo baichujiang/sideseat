@@ -19,6 +19,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { StudentVerificationForm } from "@/components/forms/student-verification-form";
+import { PasswordField } from "./password-field";
 import { LocaleProvider } from "@/components/i18n/locale-provider";
 import { apiFetch } from "@/lib/auth/api-fetch";
 import {
@@ -539,33 +540,27 @@ function Account() {
           }
         }}
       >
-        <Field label="当前密码">
-          <input
-            name="currentPassword"
-            type="password"
-            autoComplete="current-password"
-            required
-          />
-        </Field>
+        <PasswordField
+          label="当前密码"
+          name="currentPassword"
+          autoComplete="current-password"
+          required
+        />
         <div className="sw-form-row">
-          <Field label="新密码">
-            <input
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-          </Field>
-          <Field label="再次输入新密码">
-            <input
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-            />
-          </Field>
+          <PasswordField
+            label="新密码"
+            name="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <PasswordField
+            label="再次输入新密码"
+            name="confirmPassword"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
         </div>
         <button className="sw-button sw-soft" disabled={busy}>
           <LockKeyhole size={14} />

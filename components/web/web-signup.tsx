@@ -8,6 +8,7 @@ import { messageOf, webRequest } from "@/lib/web/client";
 import { setAccessToken } from "@/lib/auth/client-access-token";
 import { ErrorNotice, Field } from "./ui";
 import { WebBrand } from "./web-brand";
+import { PasswordField } from "./password-field";
 export function WebSignup() {
   const router = useRouter();
   const [busy, setBusy] = useState(false),
@@ -64,15 +65,13 @@ export function WebSignup() {
             required
           />
         </Field>
-        <Field label="密码">
-          <input
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            required
-          />
-        </Field>
+        <PasswordField
+          label="密码"
+          name="password"
+          autoComplete="new-password"
+          minLength={8}
+          required
+        />
         <div className="sw-form-row">
           <Field label="学校">
             <select name="school">

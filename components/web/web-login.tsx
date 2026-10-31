@@ -15,6 +15,7 @@ import { setAccessToken } from "@/lib/auth/client-access-token";
 import { webRequest, messageOf } from "@/lib/web/client";
 import { ErrorNotice, Field } from "./ui";
 import { WebBrand } from "./web-brand";
+import { PasswordField } from "./password-field";
 export function WebLogin({
   returnTo = "/web/together",
 }: {
@@ -99,15 +100,13 @@ export function WebLogin({
                 placeholder="输入手机端使用的账号"
               />
             </Field>
-            <Field label="密码">
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="输入密码"
-              />
-            </Field>
+            <PasswordField
+              label="密码"
+              name="password"
+              autoComplete="current-password"
+              required
+              placeholder="输入密码"
+            />
             <Link
               href="/forgot-password?returnTo=%2Fweb%2Flogin"
               className="sw-forgot"
