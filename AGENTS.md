@@ -1,5 +1,15 @@
 # AGENTS.md — Positive-First Development Protocol
 
+## Login context and eye placement — local preview only, 2026-10-31
+
+- Source `d09173d5` moves password layout into a component CSS Module and fixes
+  the actual Chrome18px eye appearing below the field. Desktop/390px and refreshed
+  original-tab checks show44px controls centered inside the field. Local login now
+  labels its isolated test-account environment and links to official login.
+-3344/loopback15434 is healthy (own QA GET200);401 account rejection differs from
+  database503. No ordinary password read/change, production connection/release or
+  native/schema change. [Verification](docs/releases/2026-10-31-web-login-preview-context.md).
+
 ## Web password eye controls — local preview only, 2026-10-31
 
 - Source `2c9c4fac` adds independent show/hide controls to web login, signup and
