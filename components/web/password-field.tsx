@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import styles from "./password-field.module.css";
 
 type PasswordFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
   label: string;
@@ -22,11 +23,11 @@ export function PasswordField({ label, id, ...props }: PasswordFieldProps) {
   return (
     <div className="sw-field">
       <label htmlFor={inputId}>{label}</label>
-      <div className="sw-password-control">
-        <input {...props} ref={input} id={inputId} type={visible ? "text" : "password"} />
+      <div className={styles.control}>
+        <input {...props} ref={input} className={[styles.input, props.className].filter(Boolean).join(" ")} id={inputId} type={visible ? "text" : "password"} />
         <button
           type="button"
-          className="sw-password-toggle"
+          className={styles.toggle}
           aria-label={`${visible ? "隐藏" : "显示"}${label}`}
           aria-controls={inputId}
           aria-pressed={visible}

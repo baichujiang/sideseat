@@ -17,5 +17,11 @@ export default async function LoginPage({
       : "/web/together";
   const user = await getSessionUser();
   if (user && !user.isGuest) redirect(target as "/web/together");
-  return <WebLogin returnTo={target} />;
+  let localPreview = false;
+  if (process.env.NODE_ENV === "development") {
+    try {
+      localPreview = ["127.0.0.1", "localhost", "[::1]"].includes(new URL(process.env.DATABASE_URL ?? "").hostname);
+    } catch { /* Missing configuration retains the normal login error flow. */ }
+  }
+  return <WebLogin returnTo={target} localPreview={localPreview} />;
 }

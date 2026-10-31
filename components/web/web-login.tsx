@@ -12,14 +12,16 @@ import {
   UsersRound,
 } from "lucide-react";
 import { setAccessToken } from "@/lib/auth/client-access-token";
-import { webRequest, messageOf } from "@/lib/web/client";
+import { webRequest, messageOf, WebApiError } from "@/lib/web/client";
 import { ErrorNotice, Field } from "./ui";
 import { WebBrand } from "./web-brand";
 import { PasswordField } from "./password-field";
 export function WebLogin({
   returnTo = "/web/together",
+  localPreview = false,
 }: {
   returnTo?: string;
+  localPreview?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false),
@@ -40,7 +42,9 @@ export function WebLogin({
       router.replace(returnTo as Route);
       router.refresh();
     } catch (cause) {
-      setError(messageOf(cause));
+      setError(cause instanceof WebApiError && cause.status === 401
+        ? localPreview ? "本地预览账号或密码不匹配。手机端账号请前往正式版登录。" : "账号或密码不匹配，请检查后重试。"
+        : cause instanceof WebApiError && cause.status === 503 ? "登录服务暂时不可用，请稍后重试。" : messageOf(cause));
     } finally {
       setBusy(false);
     }
@@ -87,9 +91,12 @@ export function WebLogin({
         <div>
           <p className="sw-eyebrow">YOUR CAMPUS, CONNECTED</p>
           <h2>欢迎回来。</h2>
-          <p className="sw-subtitle">
+          {localPreview ? <div className="sw-login-preview" role="note">
+            <strong>本地界面预览</strong>
+            <p>这里使用独立测试账号。<a href="https://www.sideseat.de/web/login" target="_blank" rel="noreferrer">手机端账号去正式版登录 ↗</a></p>
+          </div> : <p className="sw-subtitle">
             使用你的 SideSeat 账号，接着上次的故事。
-          </p>
+          </p>}
           <form onSubmit={(event) => void submit(event)}>
             <Field label="用户名或邮箱">
               <input
@@ -97,7 +104,7 @@ export function WebLogin({
                 autoComplete="username"
                 autoCapitalize="none"
                 required
-                placeholder="输入手机端使用的账号"
+                placeholder={localPreview ? "输入本地预览账号" : "输入手机端使用的账号"}
               />
             </Field>
             <PasswordField
@@ -119,16 +126,16 @@ export function WebLogin({
               className="sw-button sw-primary"
               disabled={busy}
             >
-              {busy ? "正在登录…" : "登录 SideSeat"}
+              {busy ? "正在登录…" : localPreview ? "进入预览" : "登录 SideSeat"}
               <ArrowRight size={18} />
             </button>
           </form>
           <p className="sw-auth-switch">
-            第一次来？<Link href="/web/signup">创建账号</Link>
+            第一次来？<Link href="/web/signup">{localPreview ? "创建预览账号" : "创建账号"}</Link>
           </p>
           <p className="sw-login-trust">
             <ShieldCheck size={16} />
-            一个账号，手机与网页共用你的计划和日历。
+            {localPreview ? "这里使用演示数据，正式账号和数据不受影响。" : "一个账号，手机与网页共用你的计划和日历。"}
           </p>
           <div className="sw-login-links">
             <Link href="/privacy">隐私政策</Link>
